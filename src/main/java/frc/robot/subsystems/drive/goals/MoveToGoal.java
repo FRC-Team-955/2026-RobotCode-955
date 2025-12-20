@@ -7,7 +7,6 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.lib.swerve.ModuleLimits;
 import frc.robot.Controller;
 import frc.robot.RobotState;
-import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.DriveGoal;
 import frc.robot.subsystems.drive.DriveRequest;
 import lombok.RequiredArgsConstructor;
@@ -57,6 +56,12 @@ public class MoveToGoal extends DriveGoal {
 
         Pose2d goalPose = poseSupplier.get();
         Logger.recordOutput("Drive/MoveTo/Goal", goalPose);
+
+        double distanceToGoal = currentPose.getTranslation().getDistance(goalPose.getTranslation());
+        Logger.recordOutput("Drive/MoveTo/DistanceToGoalMeters", distanceToGoal);
+
+        double angleToGoalRad = goalPose.getTranslation().minus(currentPose.getTranslation()).getAngle().getRadians();
+        Logger.recordOutput("Drive/MoveTo/AngleToGoalRad", angleToGoalRad);
 
         double linearXVelocityMetersPerSec = moveToLinearX.calculate(
                 currentPose.getX(),
