@@ -10,8 +10,7 @@
       </option>
       <option name="taskNames">
         <list>
-          <option value="generateBuildConstantsSim" />
-          <option value="test" />
+          <option value="testSim" />
         </list>
       </option>
       <option name="vmOptions" />

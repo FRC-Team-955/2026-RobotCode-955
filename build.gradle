@@ -195,12 +195,10 @@ gversion {
     }
 }
 
-// Use the Test IntelliJ configuration - it runs generateBuildConstantsSim before test, just like this testSim task
-// However, unlike testSim, the Test configuration is recognized by IntelliJ's test runner
-/*tasks.register("testSim") {
+tasks.register("testSim") {
     dependsOn tasks.named("generateBuildConstantsSim")
     finalizedBy tasks.named("test")
-}*/
+}
 
 tasks.register("runRealEvent", Exec) {
     commandLine "git", "commit", "-am", "Deploy auto-commit " + LocalDateTime.now().format("yyyy-MM-dd HH:mm:ss")
