@@ -66,6 +66,18 @@ public class DriveConstants {
             driveConfig.moduleLimits().maxTurnVelocityRadPerSec()
     );
 
+    public static final double moveToSlowdownDistanceMeters = calculateSlowdownDistanceMeters(moveToModuleLimits.maxDriveVelocityMetersPerSec(), moveToModuleLimits.maxDriveAccelerationMetersPerSecSquared());
+
+    static double calculateSlowdownDistanceMeters(double maxVelocityMetersPerSec, double maxAccelerationMetersPerSecondSquared) {
+        double assumedMaxAccelerationMetersPerSecondSquared = maxAccelerationMetersPerSecondSquared * 0.5;
+
+        //     v² = v₀² + 2aΔx
+        // Solve for Δx if v² = 0
+        //     Δx = (−v₀²) / 2a
+        // Note that a < 0 because we are slowing down
+        return (-maxVelocityMetersPerSec * maxVelocityMetersPerSec) / (2.0 * -assumedMaxAccelerationMetersPerSecondSquared);
+    }
+
     /**
      * FL, FR, BL, BR
      */

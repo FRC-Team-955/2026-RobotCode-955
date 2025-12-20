@@ -3,6 +3,7 @@ package frc.robot.subsystems.drive.goals;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.lib.swerve.ModuleLimits;
 import frc.robot.Controller;
@@ -63,24 +64,36 @@ public class MoveToGoal extends DriveGoal {
         double angleToGoalRad = goalPose.getTranslation().minus(currentPose.getTranslation()).getAngle().getRadians();
         Logger.recordOutput("Drive/MoveTo/AngleToGoalRad", angleToGoalRad);
 
-        double linearXVelocityMetersPerSec = moveToLinearX.calculate(
-                currentPose.getX(),
-                goalPose.getX()
-        );
-        boolean linearXAtSetpoint = moveToLinearX.atSetpoint();
-        Logger.recordOutput("Drive/MoveTo/LinearXAtSetpoint", linearXAtSetpoint);
-        if (linearXAtSetpoint) {
-            linearXVelocityMetersPerSec = 0.0;
-        }
+        double linearXVelocityMetersPerSec;
+        double linearYVelocityMetersPerSec;
+        Logger.recordOutput("Drive/MoveTo/WithinSlowdownDistance", distanceToGoal < moveToSlowdownDistanceMeters);
+        if (distanceToGoal < moveToSlowdownDistanceMeters || true) {
+            linearXVelocityMetersPerSec = moveToLinearX.calculate(
+                    currentPose.getX(),
+                    goalPose.getX()
+            );
+            boolean linearXAtSetpoint = moveToLinearX.atSetpoint();
+            Logger.recordOutput("Drive/MoveTo/LinearXAtSetpoint", linearXAtSetpoint);
+            if (linearXAtSetpoint) {
+                linearXVelocityMetersPerSec = 0.0;
+            }
 
-        double linearYVelocityMetersPerSec = moveToLinearY.calculate(
-                currentPose.getY(),
-                goalPose.getY()
-        );
-        boolean linearYAtSetpoint = moveToLinearY.atSetpoint();
-        Logger.recordOutput("Drive/MoveTo/LinearYAtSetpoint", linearYAtSetpoint);
-        if (linearYAtSetpoint) {
-            linearYVelocityMetersPerSec = 0.0;
+            linearYVelocityMetersPerSec = moveToLinearY.calculate(
+                    currentPose.getY(),
+                    goalPose.getY()
+            );
+            boolean linearYAtSetpoint = moveToLinearY.atSetpoint();
+            Logger.recordOutput("Drive/MoveTo/LinearYAtSetpoint", linearYAtSetpoint);
+            if (linearYAtSetpoint) {
+                linearYVelocityMetersPerSec = 0.0;
+            }
+        } else {
+            Translation2d linearVelocityMetersPerSec = new Translation2d(
+                    moveToModuleLimits.maxDriveVelocityMetersPerSec(),
+                    goalPose.getTranslation().minus(currentPose.getTranslation()).getAngle()
+            );
+            linearXVelocityMetersPerSec = linearVelocityMetersPerSec.getX();
+            linearYVelocityMetersPerSec = linearVelocityMetersPerSec.getY();
         }
 
         double angularVelocityRadPerSec = moveToAngular.calculate(
