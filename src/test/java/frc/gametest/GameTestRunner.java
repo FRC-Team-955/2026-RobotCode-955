@@ -51,7 +51,7 @@ class GameTestRunner {
     Collection<DynamicTest> createGameTests() {
         String name = System.getenv(environmentVariableName);
         if (System.getenv(environmentVariableName) == null) {
-            return gameTests.keySet().stream().map(s -> dynamicTest(s, () -> runTestInSubprocess(s))).toList();
+            return gameTests.keySet().stream().map(s -> dynamicTest("[Parent] " + s, () -> runTestInSubprocess(s))).toList();
         }
 
         var test = gameTests.get(name);
@@ -61,6 +61,6 @@ class GameTestRunner {
             }));
         }
 
-        return List.of(dynamicTest(name, test::run));
+        return List.of(dynamicTest("[Child] " + name, test::run));
     }
 }
