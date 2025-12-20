@@ -15,6 +15,6 @@ jobs:
       - name: Grant execute permission
         run: chmod +x gradlew
       - name: Build robot code
-        run: ./gradlew buildReal
+        run: ./gradlew buildReal -x test
       - name: Run tests
         run: ./gradlew generateBuildConstantsSim test
