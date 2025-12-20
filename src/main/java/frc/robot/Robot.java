@@ -257,6 +257,7 @@ public class Robot extends LoggedRobot {
         if (BuildConstants.mode == BuildConstants.Mode.REPLAY) return;
 
         DriverStationSim.setAllianceStationId(AllianceStationID.Blue1);
+        DriverStationSim.setEnabled(true);
         DriverStationSim.notifyNewData();
 
         SimulatedArena.getInstance().resetFieldForAuto();
