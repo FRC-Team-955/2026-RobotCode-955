@@ -102,6 +102,12 @@ dependencies {
 test {
     useJUnitPlatform()
     systemProperty 'junit.jupiter.extensions.autodetection.enabled', 'true'
+
+    // Disable test reports to prevent conflicts between parent and child gradle task when running game tests
+    reports {
+        junitXml.required = false
+        html.required = false
+    }
 }
 
 // Simulation configuration (e.g. environment variables).
