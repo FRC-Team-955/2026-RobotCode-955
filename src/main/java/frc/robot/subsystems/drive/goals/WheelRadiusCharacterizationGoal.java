@@ -29,16 +29,16 @@ public class WheelRadiusCharacterizationGoal extends DriveGoal {
     private final SlewRateLimiter omegaLimiter = new SlewRateLimiter(1.0);
     private final double[] startWheelPositions = drive.getWheelRadiusCharacterizationPositions();
 
-    private double lastGyroYawRads = drive.getRawGyroRotation().getRadians();
-    private double accumGyroYawRads = 0.0;
+    private double lastGyroYawRad = drive.getRawGyroRotation().getRadians();
+    private double accumGyroYawRad = 0.0;
 
     @Override
     public DriveRequest getRequest() {
         var omega = omegaLimiter.calculate(omegaDirection.value * DriveTuning.wheelRadiusCharacterizationSpeedRadPerSec.get());
 
         // Get yaw and wheel positions
-        accumGyroYawRads += MathUtil.angleModulus(drive.getRawGyroRotation().getRadians() - lastGyroYawRads);
-        lastGyroYawRads = drive.getRawGyroRotation().getRadians();
+        accumGyroYawRad += MathUtil.angleModulus(drive.getRawGyroRotation().getRadians() - lastGyroYawRad);
+        lastGyroYawRad = drive.getRawGyroRotation().getRadians();
         double averageWheelPosition = 0.0;
         double[] wheelPositions = drive.getWheelRadiusCharacterizationPositions();
         for (int i = 0; i < 4; i++) {
@@ -46,11 +46,11 @@ public class WheelRadiusCharacterizationGoal extends DriveGoal {
         }
         averageWheelPosition /= 4.0;
 
-        double currentEffectiveWheelRadius = (accumGyroYawRads * drivebaseRadiusMeters) / averageWheelPosition;
+        double currentEffectiveWheelRadius = (accumGyroYawRad * drivebaseRadiusMeters) / averageWheelPosition;
         Logger.recordOutput("Drive/WheelRadiusCharacterization/DrivePosition", averageWheelPosition);
-        Logger.recordOutput("Drive/WheelRadiusCharacterization/AccumGyroYawRads", accumGyroYawRads);
+        Logger.recordOutput("Drive/WheelRadiusCharacterization/AccumGyroYawRad", accumGyroYawRad);
         Logger.recordOutput("Drive/WheelRadiusCharacterization/CurrentWheelRadiusInches", Units.metersToInches(currentEffectiveWheelRadius));
-        Logger.recordOutput("Drive/WheelRadiusCharacterization/HasEnoughData", Math.abs(accumGyroYawRads) > Math.PI * 2.0);
+        Logger.recordOutput("Drive/WheelRadiusCharacterization/HasEnoughData", Math.abs(accumGyroYawRad) > Math.PI * 2.0);
 
         return DriveRequest.chassisSpeedsDirect(new ChassisSpeeds(0, 0, omega));
     }
