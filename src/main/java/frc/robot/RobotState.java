@@ -12,7 +12,9 @@ import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.drive.DriveConstants;
+import frc.robot.subsystems.drive.ModuleIOSim;
 import lombok.Getter;
+import org.ironmaple.simulation.SimulatedArena;
 import org.littletonrobotics.junction.AutoLogOutput;
 
 import java.util.Optional;
@@ -82,6 +84,9 @@ public class RobotState {
 
     public void setPose(Pose2d pose) {
         poseEstimator.resetPose(pose);
+        if (BuildConstants.mode == BuildConstants.Mode.SIM) {
+            ModuleIOSim.driveSimulation.setSimulationWorldPose(pose);
+        }
     }
 
     public Command setPose(Supplier<Pose2d> pose) {

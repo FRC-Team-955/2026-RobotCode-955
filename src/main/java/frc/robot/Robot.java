@@ -261,10 +261,6 @@ public class Robot extends LoggedRobot {
 
         SimulatedArena.getInstance().resetFieldForAuto();
         RobotModeTriggers.autonomous().onTrue(Commands.runOnce(SimulatedArena.getInstance()::resetFieldForAuto));
-        RobotModeTriggers.autonomous().onTrue(CommandsExt.eagerSequence(
-                Commands.waitSeconds(0.05),
-                Commands.runOnce(() -> ModuleIOSim.driveSimulation.setSimulationWorldPose(robotContainer.robotState.getPose()))
-        ));
         robotContainer.robotState.setPose(ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose());
     }
 
