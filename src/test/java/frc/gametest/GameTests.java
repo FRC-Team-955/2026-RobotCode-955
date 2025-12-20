@@ -17,33 +17,53 @@ class GameTests {
     static final Map<String, GameTest> gameTests = new HashMap<>();
 
     static {
-        for (int i = 0; i < 12; i++) {
+        for (int branch = 0; branch < 12; branch++) {
             // make a copy for use in the lambda
-            int final_i = i;
+            int branchFinal = branch;
 
-            gameTests.put("Score coral L4 " + i, new GameTest(
-                    new Pose2d(i < 4 || i >= 10 ? 2 : 6, i < 6 ? 2 : 6, new Rotation2d()),
-                    Superstructure.get().autoScoreCoral(
-                            () -> final_i >= 10 ? ReefAlign.ReefZoneSide.LeftFront : (
-                                    final_i >= 8 ? ReefAlign.ReefZoneSide.LeftBack : (
-                                            final_i >= 6 ? ReefAlign.ReefZoneSide.MiddleBack : (
-                                                    final_i >= 4 ? ReefAlign.ReefZoneSide.RightBack : (
-                                                            final_i >= 2 ? ReefAlign.ReefZoneSide.RightFront : ReefAlign.ReefZoneSide.MiddleFront
-                                                    )
-                                            )
+            var startingPose = new Pose2d(branch < 4 || branch >= 10 ? 2 : 6, branch < 6 ? 2 : 6, new Rotation2d());
+            var reefSide = branch >= 10 ? ReefAlign.ReefZoneSide.LeftFront : (
+                    branch >= 8 ? ReefAlign.ReefZoneSide.LeftBack : (
+                            branch >= 6 ? ReefAlign.ReefZoneSide.MiddleBack : (
+                                    branch >= 4 ? ReefAlign.ReefZoneSide.RightBack : (
+                                            branch >= 2 ? ReefAlign.ReefZoneSide.RightFront : ReefAlign.ReefZoneSide.MiddleFront
                                     )
-                            ),
-                            () -> final_i % 2 == 0 ? ReefAlign.LocalReefSide.Left : ReefAlign.LocalReefSide.Right,
-                            () -> OperatorDashboard.CoralScoringLevel.L4,
-                            () -> false
-                    ),
-                    1500,
-                    () -> assertEquals(1,
-                            ReefscapeReefSimulation.getInstance().get().getBranches(DriverStation.Alliance.Blue)
-                                    [final_i] // branch C
-                                    [3] // L4
+                            )
                     )
-            ));
+            );
+            var localSide = branch % 2 == 0 ? ReefAlign.LocalReefSide.Left : ReefAlign.LocalReefSide.Right;
+
+            for (int level = 1; level < 4; level++) {
+                if (level != 3) {
+                    // TODO: everything except L4 is broken
+                    continue;
+                }
+
+                // make a copy for use in the lambda
+                int levelFinal = level;
+
+                var scoringLevel = level == 0 ? OperatorDashboard.CoralScoringLevel.L1 : (
+                        level == 1 ? OperatorDashboard.CoralScoringLevel.L2 : (
+                                level == 2 ? OperatorDashboard.CoralScoringLevel.L3 : OperatorDashboard.CoralScoringLevel.L4
+                        )
+                );
+
+                gameTests.put("Score coral on branch " + branch + " at level L" + (level + 1), new GameTest(
+                        startingPose,
+                        Superstructure.get().autoScoreCoral(
+                                () -> reefSide,
+                                () -> localSide,
+                                () -> scoringLevel,
+                                () -> false
+                        ),
+                        1500,
+                        () -> assertEquals(1,
+                                ReefscapeReefSimulation.getInstance().get().getBranches(DriverStation.Alliance.Blue)
+                                        [branchFinal]
+                                        [levelFinal]
+                        )
+                ));
+            }
         }
     }
 }
