@@ -23,7 +23,6 @@ import static frc.robot.subsystems.drive.DriveTuning.moveToLinearTunable;
 public class MoveToGoal extends DriveGoal {
     private static final RobotState robotState = RobotState.get();
     private static final Controller controller = Controller.get();
-    private static final Drive drive = Drive.get();
 
     private final Supplier<Pose2d> poseSupplier;
     private final boolean mergeJoystickDrive;
@@ -90,8 +89,8 @@ public class MoveToGoal extends DriveGoal {
         }
 
         // Scale linear speed by angular speed so that angular change is prioritized
-        // When going max angular speed, reduce linear to 75%
-        double linearScalar = MathUtil.clamp(1 - angularVelocityRadPerSec / maxAngularVelocityRadPerSec, 0.75, 1);
+        // When going max angular speed, reduce linear to 50%
+        double linearScalar = MathUtil.clamp(1 - angularVelocityRadPerSec / maxAngularVelocityRadPerSec, 0.50, 1);
 
         ChassisSpeeds moveToSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
                 linearXVelocityMetersPerSec * linearScalar,
