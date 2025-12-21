@@ -11,6 +11,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.util.function.BooleanConsumer;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
@@ -27,6 +28,8 @@ import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.Arrays;
+import java.util.function.DoubleSupplier;
+import java.util.function.IntToDoubleFunction;
 import java.util.function.Supplier;
 
 import static frc.lib.HighFrequencySamplingThread.highFrequencyLock;
@@ -86,6 +89,64 @@ public class Drive extends CommandBasedSubsystem {
         HAL.report(FRCNetComm.tResourceType.kResourceType_RobotDrive, FRCNetComm.tInstances.kRobotDriveSwerve_AdvantageKit);
     }
 
+    /** returns if discarded */
+    private boolean processOdometrySample(
+            double sampleTimestamp,
+            IntToDoubleFunction getDrivePositionRadForModuleIndex,
+            IntToDoubleFunction getTurnPositionRadForModuleIndex,
+            boolean hasGyroYawPositionRadForSample,
+            DoubleSupplier getGyroYawPositionRad
+    ) {
+        boolean discardSample = false;
+
+        // Read wheel positions and deltas from each module
+        SwerveModulePosition[] modulePositions = new SwerveModulePosition[modules.length];
+        SwerveModulePosition[] moduleDeltas = new SwerveModulePosition[modules.length];
+        for (int moduleIndex = 0; moduleIndex < modules.length; moduleIndex++) {
+            double positionMeters = getDrivePositionRadForModuleIndex.applyAsDouble(moduleIndex) * driveConfig.wheelRadiusMeters();
+            Rotation2d angle = new Rotation2d(getTurnPositionRadForModuleIndex.applyAsDouble(moduleIndex));
+            var modulePosition = new SwerveModulePosition(positionMeters, angle);
+
+            modulePositions[moduleIndex] = modulePosition;
+            moduleDeltas[moduleIndex] = new SwerveModulePosition(
+                    modulePosition.distanceMeters - lastModulePositions[moduleIndex].distanceMeters,
+                    modulePosition.angle
+            );
+            lastModulePositions[moduleIndex] = modulePosition;
+
+            // We actually don't really care if one of the motors is disconnected, because odometry
+            // can handle one wheel position isn't changing. The issue is when one wheel changes drastically
+            if (Math.abs(moduleDeltas[moduleIndex].distanceMeters) > odometryPositionDeltaDiscardMeters) {
+                discardSample = true;
+            }
+        }
+
+        // Update gyro angle
+        // Sanity check in case gyro is connected but not giving timestamps
+        if (gyroInputs.connected && !disableGyro && hasGyroYawPositionRadForSample) {
+            // Use the real gyro angle
+            rawGyroRotation = new Rotation2d(getGyroYawPositionRad.getAsDouble());
+        } else {
+            // Use the angle delta from the kinematics and module deltas
+            Twist2d twist = robotState.getKinematics().toTwist2d(moduleDeltas);
+            rawGyroRotation = rawGyroRotation.plus(new Rotation2d(twist.dtheta));
+        }
+
+        // Apply update
+        if (discardSample) {
+            // If we need to discard it, apply the update and then revert the pose back to the pose before applying the update
+            // This means that the previous wheel positions stored by odometry will be updated to the new wheel positions,
+            // but the pose won't change
+            Pose2d prevPose = robotState.getPose();
+            robotState.applyOdometryUpdate(sampleTimestamp, rawGyroRotation, modulePositions);
+            robotState.setPose(prevPose);
+            return true; // true for discarded
+        } else {
+            robotState.applyOdometryUpdate(sampleTimestamp, rawGyroRotation, modulePositions);
+            return false; // false for not discarded
+        }
+    }
+
     @Override
     public void periodicBeforeCommands() {
         highFrequencyLock.lock();
@@ -114,101 +175,30 @@ public class Drive extends CommandBasedSubsystem {
             boolean anySampleDiscarded = false;
             for (int sample = 0; sample < sampleTimestamps.length; sample++) {
                 double sampleTimestamp = sampleTimestamps[sample];
-                boolean discardSample = false;
 
-                // Read wheel positions and deltas from each module
-                SwerveModulePosition[] modulePositions = new SwerveModulePosition[modules.length];
-                SwerveModulePosition[] moduleDeltas = new SwerveModulePosition[modules.length];
-                for (int moduleIndex = 0; moduleIndex < modules.length; moduleIndex++) {
-                    double positionMeters = modules[moduleIndex].getOdometryDrivePositionsRad()[sample] * driveConfig.wheelRadiusMeters();
-                    Rotation2d angle = new Rotation2d(modules[moduleIndex].getOdometryTurnPositionsRad()[sample]);
-                    var modulePosition = new SwerveModulePosition(positionMeters, angle);
-
-                    modulePositions[moduleIndex] = modulePosition;
-                    moduleDeltas[moduleIndex] = new SwerveModulePosition(
-                            modulePosition.distanceMeters - lastModulePositions[moduleIndex].distanceMeters,
-                            modulePosition.angle
-                    );
-                    lastModulePositions[moduleIndex] = modulePosition;
-
-                    // We actually don't really care if one of the motors is disconnected, because odometry
-                    // can handle one wheel position isn't changing. The issue is when one wheel changes drastically
-                    if (Math.abs(moduleDeltas[moduleIndex].distanceMeters) > odometryPositionDeltaDiscardMeters) {
-                        discardSample = true;
-                    }
-                }
-
-                // Update gyro angle
-                // Sanity check in case gyro is connected but not giving timestamps
-                if (gyroInputs.connected && !disableGyro && gyroInputs.odometryYawTimestamps.length > sample) {
-                    // Use the real gyro angle
-                    rawGyroRotation = new Rotation2d(gyroInputs.odometryYawPositionsRad[sample]);
-                } else {
-                    // Use the angle delta from the kinematics and module deltas
-                    Twist2d twist = robotState.getKinematics().toTwist2d(moduleDeltas);
-                    rawGyroRotation = rawGyroRotation.plus(new Rotation2d(twist.dtheta));
-                }
-
-                // Apply update
-                if (discardSample) {
+                // make a copy for use in lambdas
+                int finalSample = sample;
+                if (processOdometrySample(
+                        sampleTimestamp,
+                        (moduleIndex) -> modules[moduleIndex].getOdometryDrivePositionsRad()[finalSample],
+                        (moduleIndex) -> modules[moduleIndex].getOdometryTurnPositionsRad()[finalSample],
+                        gyroInputs.odometryYawTimestamps.length > sample,
+                        () -> gyroInputs.odometryYawPositionsRad[finalSample]
+                )) {
+                    // return true = discarded
                     anySampleDiscarded = true;
-                    // If we need to discard it, apply the update and then revert the pose back to the pose before applying the update
-                    // This means that the previous wheel positions stored by odometry will be updated to the new wheel positions,
-                    // but the pose won't change
-                    Pose2d prevPose = robotState.getPose();
-                    robotState.applyOdometryUpdate(sampleTimestamp, rawGyroRotation, modulePositions);
-                    robotState.setPose(prevPose);
-                } else {
-                    robotState.applyOdometryUpdate(sampleTimestamp, rawGyroRotation, modulePositions);
                 }
             }
-            Logger.recordOutput("Drive/SampleDiscarded", anySampleDiscarded);
+            Logger.recordOutput("Drive/AnySampleDiscarded", anySampleDiscarded);
         } else {
-            boolean discardSample = false;
+            boolean discardSample = processOdometrySample(
+                    Timer.getTimestamp(),
+                    (moduleIndex) -> modules[moduleIndex].getDrivePositionRad(),
+                    (moduleIndex) ->  modules[moduleIndex].getTurnAngle().getRadians(),
+                    true,
+                    () -> gyroInputs.yawPositionRad
+            );
 
-            // Read wheel positions and deltas from each module
-            SwerveModulePosition[] modulePositions = new SwerveModulePosition[modules.length];
-            SwerveModulePosition[] moduleDeltas = new SwerveModulePosition[modules.length];
-            for (int moduleIndex = 0; moduleIndex < modules.length; moduleIndex++) {
-                double positionMeters = modules[moduleIndex].getDrivePositionRad() * driveConfig.wheelRadiusMeters();
-                Rotation2d angle = modules[moduleIndex].getTurnAngle();
-                var modulePosition = new SwerveModulePosition(positionMeters, angle);
-
-                modulePositions[moduleIndex] = modulePosition;
-                moduleDeltas[moduleIndex] = new SwerveModulePosition(
-                        modulePosition.distanceMeters - lastModulePositions[moduleIndex].distanceMeters,
-                        modulePosition.angle
-                );
-                lastModulePositions[moduleIndex] = modulePosition;
-
-                // We actually don't really care if one of the motors is disconnected, because odometry
-                // can handle one wheel position isn't changing. The issue is when one wheel changes drastically
-                if (Math.abs(moduleDeltas[moduleIndex].distanceMeters) > odometryPositionDeltaDiscardMeters) {
-                    discardSample = true;
-                }
-            }
-
-            // Update gyro angle
-            if (gyroInputs.connected && !disableGyro) {
-                // Use the real gyro angle
-                rawGyroRotation = new Rotation2d(gyroInputs.yawPositionRad);
-            } else {
-                // Use the angle delta from the kinematics and module deltas
-                Twist2d twist = robotState.getKinematics().toTwist2d(moduleDeltas);
-                rawGyroRotation = rawGyroRotation.plus(new Rotation2d(twist.dtheta));
-            }
-
-            // Apply update
-            if (discardSample) {
-                // If we need to discard it, apply the update and then revert the pose back to the pose before applying the update
-                // This means that the previous wheel positions stored by odometry will be updated to the new wheel positions,
-                // but the pose won't change
-                Pose2d prevPose = robotState.getPose();
-                robotState.applyOdometryUpdate(Timer.getTimestamp(), rawGyroRotation, modulePositions);
-                robotState.setPose(prevPose);
-            } else {
-                robotState.applyOdometryUpdate(Timer.getTimestamp(), rawGyroRotation, modulePositions);
-            }
             Logger.recordOutput("Drive/SampleDiscarded", discardSample);
         }
 
