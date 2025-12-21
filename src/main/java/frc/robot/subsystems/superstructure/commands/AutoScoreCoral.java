@@ -54,7 +54,7 @@ public class AutoScoreCoral extends SuperstructureCommand {
                                 () -> EndEffector.Goal.IDLE,
                                 Funnel.Goal.IDLE
                         ),
-                        Commands.waitUntil(() -> ReefAlign.atFinalAlign(robotState.getPose(), drive.getMeasuredChassisSpeeds(), reefSideSupplier.get(), sideSupplier.get()))
+                        Commands.waitUntil(() -> ReefAlign.atFinalAlign(robotState.getPose(), robotState.getMeasuredChassisSpeeds(), reefSideSupplier.get(), sideSupplier.get()))
                 ),
                 Commands.parallel(
                         superstructure.setGoal(

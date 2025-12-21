@@ -56,6 +56,7 @@ public class Drive extends CommandBasedSubsystem {
     };
     @Getter
     private Rotation2d rawGyroRotation = new Rotation2d();
+    private ChassisSpeeds measuredChassisSpeeds = new ChassisSpeeds();
 
     private final SwerveSetpointGenerator setpointGenerator = new SwerveSetpointGenerator(robotState.getKinematics());
     /** If null, it will be set to the measured ChassisSpeeds and module states when the setpoint generator starts to be used */
@@ -211,6 +212,15 @@ public class Drive extends CommandBasedSubsystem {
             Logger.recordOutput("Drive/SampleDiscarded", discardSample);
         }
 
+        // Chassis speeds
+        measuredChassisSpeeds = robotState.getKinematics().toChassisSpeeds(getMeasuredModuleStates());
+        Logger.recordOutput("Drive/ChassisSpeeds/Measured", measuredChassisSpeeds);
+        ChassisSpeeds measuredChassisSpeedsFieldRelative = ChassisSpeeds.fromRobotRelativeSpeeds(
+                measuredChassisSpeeds,
+                robotState.getRotation() // Field is absolute, don't flip
+        );
+        robotState.setMeasuredChassisSpeeds(measuredChassisSpeedsFieldRelative);
+
         // Apply network inputs
         if (operatorDashboard.coastOverride.hasChanged()) {
             for (var module : modules) {
@@ -260,7 +270,7 @@ public class Drive extends CommandBasedSubsystem {
                 if (prevSetpoint == null) {
                     // Reset to current chassis speeds and module states
                     prevSetpoint = new SwerveSetpoint(
-                            getMeasuredChassisSpeeds(),
+                            measuredChassisSpeeds,
                             getMeasuredModuleStates()
                     );
                 }
@@ -334,18 +344,6 @@ public class Drive extends CommandBasedSubsystem {
 //        robotState.getKinematics().resetHeadings(headings);
 //        closedLoopSetpoint = new ChassisSpeeds();
 //    }
-
-    @AutoLogOutput(key = "Drive/ChassisSpeeds/Measured")
-    public ChassisSpeeds getMeasuredChassisSpeeds() {
-        return robotState.getKinematics().toChassisSpeeds(getMeasuredModuleStates());
-    }
-
-    public ChassisSpeeds getMeasuredChassisSpeedsFieldRelative() {
-        return ChassisSpeeds.fromRobotRelativeSpeeds(
-                robotState.getKinematics().toChassisSpeeds(getMeasuredModuleStates()),
-                robotState.getRotation() // Field is absolute, don't flip
-        );
-    }
 
     /**
      * Returns the module states (turn angles and drive velocities) for all of the modules.

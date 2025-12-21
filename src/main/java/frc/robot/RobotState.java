@@ -5,6 +5,7 @@ import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.numbers.N1;
@@ -14,7 +15,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.drive.DriveConstants;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import lombok.Getter;
-import org.ironmaple.simulation.SimulatedArena;
+import lombok.Setter;
 import org.littletonrobotics.junction.AutoLogOutput;
 
 import java.util.Optional;
@@ -34,6 +35,13 @@ public class RobotState {
             },
             new Pose2d()
     );
+
+    /**
+     * Field relative
+     */
+    @Getter
+    @Setter
+    private ChassisSpeeds measuredChassisSpeeds = new ChassisSpeeds();
 
     private static RobotState instance;
 
