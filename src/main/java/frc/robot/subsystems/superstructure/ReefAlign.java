@@ -9,6 +9,7 @@ import edu.wpi.first.math.util.Units;
 import frc.lib.AllianceBasedPose2d;
 import frc.lib.Util;
 import frc.lib.network.LoggedTunableNumber;
+import frc.robot.RobotState;
 import frc.robot.subsystems.elevator.Elevator;
 import lombok.RequiredArgsConstructor;
 import org.littletonrobotics.junction.Logger;
@@ -17,6 +18,8 @@ import java.util.Arrays;
 import java.util.Comparator;
 
 public class ReefAlign {
+    private static final RobotState robotState = RobotState.get();
+
     private static final double distanceCenterOfReefToBranchMeters = Units.inchesToMeters(6.5);
 
     private static final Transform2d initialAlignStartOffset = new Transform2d(1.5, 0, new Rotation2d());
@@ -56,10 +59,10 @@ public class ReefAlign {
         return distanceMet && rotationMet;
     }
 
-    public static boolean atFinalAlign(Pose2d currentPose, ChassisSpeeds measuredChassisSpeeds, ReefZoneSide reefZoneSide, LocalReefSide localReefSide) {
+    public static boolean atFinalAlign(ReefZoneSide reefZoneSide, LocalReefSide localReefSide) {
         Pose2d finalAlign = getFinalAlignPose(reefZoneSide, localReefSide);
-        boolean positionMet = Util.isAtPoseWithTolerance(currentPose, finalAlign, alignLinearToleranceMeters, alignAngularToleranceRad);
-        boolean velocityMet = Util.isWithinVelocityTolerance(measuredChassisSpeeds, alignLinearToleranceMetersPerSecond, alignAngularToleranceRadPerSecond);
+        boolean positionMet = robotState.isAtPoseWithTolerance(finalAlign, alignLinearToleranceMeters, alignAngularToleranceRad);
+        boolean velocityMet = robotState.isMeasuredChassisSpeedsBelowTolerance(alignLinearToleranceMetersPerSecond, alignAngularToleranceRadPerSecond);
         Logger.recordOutput("Superstructure/ReefAlign/PositionMet", positionMet);
         Logger.recordOutput("Superstructure/ReefAlign/VelocityMet", velocityMet);
         return positionMet && velocityMet;
@@ -77,7 +80,7 @@ public class ReefAlign {
         return reefZoneSide.getAdjustedAprilTagPose().plus(localReefSide.adjust);
     }
 
-    public static Pose2d getAlignPose(Pose2d currentPose, double elevatorPercentage, ReefZoneSide reefZoneSide, LocalReefSide localReefSide) {
+    public static Pose2d getAlignPose(double elevatorPercentage, ReefZoneSide reefZoneSide, LocalReefSide localReefSide) {
         Pose2d finalAlign = getFinalAlignPose(reefZoneSide, localReefSide);
 
         // Start by calculating the initial align
@@ -89,8 +92,8 @@ public class ReefAlign {
         // We also want to use the normal final align rotation if we haven't raised the elevator because
         // it will get stuck otherwise
 //        Rotation2d angleForTransformation = finalAlign.getRotation().interpolate(
-//                currentPose.getTranslation().minus(finalAlign.getTranslation()).getAngle(),
-//                Math.abs(new Transform2d(finalAlign, currentPose).getX()) / initialAlignDistXForFullAngle
+//                robotState.getPose().getTranslation().minus(finalAlign.getTranslation()).getAngle(),
+//                Math.abs(new Transform2d(finalAlign, robotState.getPose()).getX()) / initialAlignDistXForFullAngle
 //        );
 //        Pose2d initialEnd = new Pose2d(
 //                new Pose2d(finalAlign.getTranslation(), angleForTransformation)
@@ -101,7 +104,7 @@ public class ReefAlign {
         Pose2d initialEnd = finalAlign.plus(initialAlignEndOffset);
 
         // Interpolate to initialBase based on y distance (left/right distance)
-        double initialDistY = Math.abs(new Transform2d(initialEnd, currentPose).getY()) - initialAlignDistYOffset;
+        double initialDistY = Math.abs(new Transform2d(initialEnd, robotState.getPose()).getY()) - initialAlignDistYOffset;
         // No clamping needed, Pose2d.interpolate will handle it
         double initialInterp = 1.0 - (initialDistY / initialAlignDistYForStartMeters);
         Pose2d initial = initialStart.interpolate(initialEnd, initialInterp);
@@ -156,7 +159,9 @@ public class ReefAlign {
                 .orElse(ReefZoneSide.LeftFront);
     }
 
-    public static ReefZoneSide determineClosestReefSide(Pose2d currentPose, ChassisSpeeds joystickSetpointFieldRelative) {
+    public static ReefZoneSide determineClosestReefSide(ChassisSpeeds joystickSetpointFieldRelative) {
+        Pose2d currentPose = robotState.getPose();
+
         ReefZoneSide closestSide = closestReefSideToPose(currentPose);
         boolean lookahead = false;
 
@@ -204,23 +209,21 @@ public class ReefAlign {
         return ReefAlign.getFinalAlignPose(reefZoneSide, LocalReefSide.Middle);
     }
 
-    public static boolean descoreCanRaiseElevator(Pose2d currentPose, ReefZoneSide reefZoneSide) {
+    public static boolean descoreCanRaiseElevator(ReefZoneSide reefZoneSide) {
         Pose2d alignPose = getDescoreAlignPose(reefZoneSide);
-        return Util.isAtPoseWithTolerance(
-                currentPose,
+        return robotState.isAtPoseWithTolerance(
                 alignPose,
-                ReefAlign.descoreElevatorRaiseDistanceMeters,
-                ReefAlign.descoreAngularToleranceRad
+                descoreElevatorRaiseDistanceMeters,
+                descoreAngularToleranceRad
         );
     }
 
-    public static boolean descoreIsAligned(Pose2d currentPose, ReefZoneSide reefZoneSide) {
+    public static boolean descoreIsAligned(ReefZoneSide reefZoneSide) {
         Pose2d alignPose = getDescoreAlignPose(reefZoneSide);
-        return Util.isAtPoseWithTolerance(
-                currentPose,
+        return robotState.isAtPoseWithTolerance(
                 alignPose,
-                ReefAlign.descoreLinearToleranceMeters,
-                ReefAlign.descoreAngularToleranceRad
+                descoreLinearToleranceMeters,
+                descoreAngularToleranceRad
         );
     }
 

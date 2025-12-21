@@ -30,7 +30,7 @@ public class AutoScoreCoral extends SuperstructureCommand {
     @Override
     public Command create() {
         DoubleSupplier elevatorPercentageSupplier = () -> elevator.getPositionMeters() / coralScoringLevelSupplier.get().coralScoringElevatorGoal.value.getAsDouble();
-        Supplier<Pose2d> alignPoseSupplier = () -> ReefAlign.getAlignPose(robotState.getPose(), elevatorPercentageSupplier.getAsDouble(), reefSideSupplier.get(), sideSupplier.get());
+        Supplier<Pose2d> alignPoseSupplier = () -> ReefAlign.getAlignPose(elevatorPercentageSupplier.getAsDouble(), reefSideSupplier.get(), sideSupplier.get());
 
         Command initial = Commands.race(
                 // Drive to initial position
@@ -54,7 +54,7 @@ public class AutoScoreCoral extends SuperstructureCommand {
                                 () -> EndEffector.Goal.IDLE,
                                 Funnel.Goal.IDLE
                         ),
-                        Commands.waitUntil(() -> ReefAlign.atFinalAlign(robotState.getPose(), robotState.getMeasuredChassisSpeeds(), reefSideSupplier.get(), sideSupplier.get()))
+                        Commands.waitUntil(() -> ReefAlign.atFinalAlign(reefSideSupplier.get(), sideSupplier.get()))
                 ),
                 Commands.parallel(
                         superstructure.setGoal(

@@ -6,10 +6,13 @@ import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.util.Units;
 import frc.lib.AllianceBasedPose2d;
 import frc.lib.Util;
+import frc.robot.RobotState;
 import lombok.RequiredArgsConstructor;
 import org.littletonrobotics.junction.Logger;
 
 public class StationAlign {
+    private static final RobotState robotState = RobotState.get();
+
     public static final double alignLinearToleranceMeters = 0.05;
     public static final double alignAngularToleranceRad = Units.degreesToRadians(10);
 
@@ -50,9 +53,9 @@ public class StationAlign {
         );
     }
 
-    public static boolean atAlignPose(Pose2d currentPose, Station station) {
+    public static boolean atAlignPose(Station station) {
         Pose2d align = station.getAlignPose();
-        boolean positionMet = Util.isAtPoseWithTolerance(currentPose, align, alignLinearToleranceMeters, alignAngularToleranceRad);
+        boolean positionMet = robotState.isAtPoseWithTolerance(align, alignLinearToleranceMeters, alignAngularToleranceRad);
         Logger.recordOutput("Superstructure/StationAlign/PositionMet", positionMet);
         return positionMet;
     }

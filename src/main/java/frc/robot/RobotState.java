@@ -1,15 +1,18 @@
 package frc.robot;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.drive.DriveConstants;
@@ -105,5 +108,16 @@ public class RobotState {
 
     public Command resetRotation() {
         return setPose(() -> new Pose2d(getTranslation(), new Rotation2d()));
+    }
+
+    public boolean isAtPoseWithTolerance(Pose2d desiredPose, double linearToleranceMeters, double angularToleranceRad) {
+        Transform2d relative = new Transform2d(desiredPose, getPose());
+        return Math.abs(relative.getTranslation().getNorm()) < linearToleranceMeters
+                && Math.abs(MathUtil.angleModulus(relative.getRotation().getRadians())) < angularToleranceRad;
+    }
+
+    public boolean isMeasuredChassisSpeedsBelowTolerance(double linearToleranceMetersPerSec, double angularToleranceRadPerSec) {
+        return Math.hypot(getMeasuredChassisSpeeds().vxMetersPerSecond, getMeasuredChassisSpeeds().vyMetersPerSecond) < linearToleranceMetersPerSec
+                && Math.abs(getMeasuredChassisSpeeds().omegaRadiansPerSecond) < angularToleranceRadPerSec;
     }
 }

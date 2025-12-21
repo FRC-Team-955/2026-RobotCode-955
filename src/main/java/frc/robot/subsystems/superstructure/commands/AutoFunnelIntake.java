@@ -31,7 +31,7 @@ public class AutoFunnelIntake extends SuperstructureCommand {
                                         Funnel.Goal.INTAKE_ALTERNATE
                                 ),
                                 drive.moveTo(station::getAlignPose, false)
-                                        .until(() -> StationAlign.atAlignPose(robotState.getPose(), station))
+                                        .until(() -> StationAlign.atAlignPose(station))
                         ),
                         Commands.parallel(
                                 superstructure.setGoal(

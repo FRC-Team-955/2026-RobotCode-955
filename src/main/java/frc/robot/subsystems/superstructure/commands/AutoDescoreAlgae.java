@@ -34,7 +34,7 @@ public class AutoDescoreAlgae extends SuperstructureCommand {
                                         () -> EndEffector.Goal.IDLE,
                                         Funnel.Goal.IDLE
                                 ),
-                                Commands.waitUntil(() -> ReefAlign.descoreCanRaiseElevator(robotState.getPose(), reefZoneSideSupplier.get()))
+                                Commands.waitUntil(() -> ReefAlign.descoreCanRaiseElevator(reefZoneSideSupplier.get()))
                         ),
                         Commands.parallel(
                                 superstructure.setGoal(
@@ -43,7 +43,7 @@ public class AutoDescoreAlgae extends SuperstructureCommand {
                                         () -> EndEffector.Goal.DESCORE_ALGAE,
                                         Funnel.Goal.IDLE
                                 ),
-                                Commands.waitUntil(() -> ReefAlign.descoreIsAligned(robotState.getPose(), reefZoneSideSupplier.get()))
+                                Commands.waitUntil(() -> ReefAlign.descoreIsAligned(reefZoneSideSupplier.get()))
                         )
                 )
         );
