@@ -77,7 +77,6 @@ public class Superstructure extends CommandBasedSubsystem {
         EJECT,
 
         ZERO_ELEVATOR, // TODO SEE ELEVATOR JOYSTICK CONTROL
-        ;
     }
 
     private Goal goal = Goal.IDLE;

@@ -194,7 +194,7 @@ public class Drive extends CommandBasedSubsystem {
             boolean discardSample = processOdometrySample(
                     Timer.getTimestamp(),
                     (moduleIndex) -> modules[moduleIndex].getDrivePositionRad(),
-                    (moduleIndex) ->  modules[moduleIndex].getTurnAngle().getRadians(),
+                    (moduleIndex) -> modules[moduleIndex].getTurnAngle().getRadians(),
                     true,
                     () -> gyroInputs.yawPositionRad
             );
