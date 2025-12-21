@@ -48,13 +48,10 @@ public record GameTest(
 
         // Let things settle before enabling
         Thread.sleep(500);
-        // Reset field and add trigger to run command once teleop starts
+        // Reset field
         SimulatedArena.getInstance().clearGamePieces();
-        RobotModeTriggers.teleop().onTrue(command);
-        // Enable in teleop
-        DriverStationSim.setAutonomous(false);
-        DriverStationSim.setEnabled(true);
-        DriverStationSim.notifyNewData();
+        // Robot is already enabled by simulationInit, start the command
+        command.schedule();
 
         Thread.sleep(timeLimitMillis);
 
