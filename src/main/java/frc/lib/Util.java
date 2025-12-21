@@ -12,6 +12,8 @@ import frc.robot.BuildConstants;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.function.Function;
@@ -37,7 +39,7 @@ public class Util {
                 : pose2d;
     }
 
-    private static final ArrayList<String> loggedErrors = new ArrayList<>();
+    private static final Set<String> loggedErrors = new HashSet<>();
 
     public static void error(String msg) {
         if (BuildConstants.mode == BuildConstants.Mode.SIM) {
