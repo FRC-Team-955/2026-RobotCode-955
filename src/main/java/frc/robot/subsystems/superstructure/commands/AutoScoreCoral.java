@@ -43,7 +43,7 @@ public class AutoScoreCoral extends SuperstructureCommand {
                                 Funnel.Goal.IDLE
                         )
                 ),
-                Commands.waitUntil(() -> ReefAlign.canRaiseElevator(robotState.getPose(), reefSideSupplier.get(), sideSupplier.get()))
+                Commands.waitUntil(() -> ReefAlign.canRaiseElevator(reefSideSupplier.get(), sideSupplier.get()))
         );
 
         Command waitFinalAndElevator = CommandsExt.eagerSequence(

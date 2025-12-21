@@ -43,9 +43,9 @@ public class ReefAlign {
     public static final double alignLinearToleranceMetersPerSecond = 0.02;
     public static final double alignAngularToleranceRadPerSecond = Units.degreesToRadians(8);
 
-    public static boolean canRaiseElevator(Pose2d currentPose, ReefZoneSide reefZoneSide, LocalReefSide localReefSide) {
+    public static boolean canRaiseElevator(ReefZoneSide reefZoneSide, LocalReefSide localReefSide) {
         Pose2d finalAlign = getFinalAlignPose(reefZoneSide, localReefSide);
-        Transform2d relative = new Transform2d(finalAlign, currentPose);
+        Transform2d relative = new Transform2d(finalAlign, robotState.getPose());
 
         boolean distanceMet = relative.getTranslation().getNorm() < elevatorRaiseDistanceMeters
                 && relative.getX() > elevatorStowDistanceXMeters
