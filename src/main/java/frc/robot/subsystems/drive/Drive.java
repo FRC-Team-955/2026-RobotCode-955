@@ -320,12 +320,12 @@ public class Drive extends CommandBasedSubsystem {
         }
     }
 
-    /**
-     * Stops the drive and turns the modules to an X arrangement to resist movement. The modules will
-     * return to their normal orientations the next time a nonzero velocity is requested.
-     */
-    private void stopWithX() {
-        // TODO goal or something
+    // TODO goal or something
+//    /**
+//     * Stops the drive and turns the modules to an X arrangement to resist movement. The modules will
+//     * return to their normal orientations the next time a nonzero velocity is requested.
+//     */
+//    private void stopWithX() {
 //        Rotation2d[] headings = new Rotation2d[modules.length];
 //        for (int i = 0; i < modules.length; i++) {
 //            headings[i] = moduleTranslations[i].getAngle();
@@ -333,7 +333,7 @@ public class Drive extends CommandBasedSubsystem {
 //        // Why does this work? See SwerveDriveKinematics.toModuleStates
 //        robotState.getKinematics().resetHeadings(headings);
 //        closedLoopSetpoint = new ChassisSpeeds();
-    }
+//    }
 
     @AutoLogOutput(key = "Drive/ChassisSpeeds/Measured")
     public ChassisSpeeds getMeasuredChassisSpeeds() {
