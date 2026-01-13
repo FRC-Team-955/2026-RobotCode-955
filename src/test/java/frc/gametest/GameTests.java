@@ -11,8 +11,6 @@ import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeReefSimula
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 class GameTests {
     static final Map<String, GameTest> gameTests = new HashMap<>();
 
@@ -57,11 +55,9 @@ class GameTests {
                                 () -> false
                         ),
                         1500,
-                        () -> assertEquals(1,
-                                ReefscapeReefSimulation.getInstance().get().getBranches(DriverStation.Alliance.Blue)
-                                        [branchFinal]
-                                        [levelFinal]
-                        )
+                        () -> ReefscapeReefSimulation.getInstance().orElseThrow().getBranches(DriverStation.Alliance.Blue)
+                                [branchFinal]
+                                [levelFinal] == 1
                 ));
             }
         }

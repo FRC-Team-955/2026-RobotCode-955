@@ -6,8 +6,8 @@ import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Scanner;
 
 import static frc.gametest.GameTests.gameTests;
@@ -18,49 +18,80 @@ import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 class GameTestRunner {
     static final String environmentVariableName = "GAMETEST";
 
-    private static void runTestInSubprocess(String name) throws IOException, InterruptedException {
-        boolean isWindows = System.getProperty("os.name").startsWith("Windows");
-        var gradleBuilder = new ProcessBuilder(
-                isWindows ? "gradlew.bat" : "./gradlew",
-                "test",
-                "--tests",
-                "frc.gametest.GameTestRunner"
-        );
-        gradleBuilder.environment().put(environmentVariableName, name);
-        var gradle = gradleBuilder.start();
+    private static void runGameTest(String name) throws InterruptedException, IOException {
+        // Clone the current process, but change the main class to this class
+
+        String javaExecutablePath = ProcessHandle.current().info().command().orElseThrow();
+        //System.out.println("Java executable: " + javaExecutablePath);
+
+        ArrayList<String> args = new ArrayList<>();
+        args.add(javaExecutablePath);
+        for (var arg : ProcessHandle.current().info().arguments().orElseThrow()) {
+            if (arg.startsWith("@") || arg.startsWith("-")) {
+                args.add(arg);
+                //System.out.println("Adding argument: " + arg);
+            } else {
+                // Arguments are done - use this class as main
+                args.add("frc.gametest.GameTestRunner");
+                break;
+            }
+        }
+
+        var gameTestBuilder = new ProcessBuilder(args);
+        gameTestBuilder.environment().put(environmentVariableName, name);
+        var gameTest = gameTestBuilder.start();
+        // If we don't do this, child processes won't stop - see https://stackoverflow.com/q/261125
+        Runtime.getRuntime().addShutdownHook(new Thread(gameTest::destroy));
+
+        final StringBuilder output = new StringBuilder();
 
         new Thread(() -> {
-            Scanner out = new Scanner(gradle.getInputStream());
+            Scanner out = new Scanner(gameTest.getInputStream());
             while (out.hasNextLine()) {
-                System.out.println(out.nextLine());
+                // Store in separate var so that we don't lock output variable
+                // nextLine might block - we don't want to block while inside the synchronized block
+                String nextLine = out.nextLine() + '\n';
+                synchronized (output) {
+                    output.append(nextLine);
+                }
             }
         }).start();
         new Thread(() -> {
-            Scanner err = new Scanner(gradle.getErrorStream());
+            Scanner err = new Scanner(gameTest.getErrorStream());
             while (err.hasNextLine()) {
-                System.err.println(err.nextLine());
+                // See above comment for while this is not in the synchronized block
+                String nextLine = err.nextLine() + '\n';
+                synchronized (output) {
+                    output.append(nextLine);
+                }
             }
         }).start();
 
-        if (gradle.waitFor() != 0) {
+        int rc = gameTest.waitFor();
+        System.out.println("\n====================================\nBEGIN OUTPUT FOR GAME TEST: " + name + "\n====================================\n");
+        System.out.println(output);
+        System.out.println("\n====================================\nEND OUTPUT FOR GAME TEST: " + name + "\n====================================\n");
+        if (rc != 0) {
             fail();
         }
     }
 
     @TestFactory
     Collection<DynamicTest> createGameTests() {
+        return gameTests.keySet().stream().map(s -> dynamicTest(s, () -> runGameTest(s))).toList();
+    }
+
+    public static void main(String[] args) throws NoSuchFieldException, InterruptedException, IllegalAccessException {
         String name = System.getenv(environmentVariableName);
         if (System.getenv(environmentVariableName) == null) {
-            return gameTests.keySet().stream().map(s -> dynamicTest("[Parent] " + s, () -> runTestInSubprocess(s))).toList();
+            throw new RuntimeException("No game test specified");
         }
 
         var test = gameTests.get(name);
         if (test == null) {
-            return List.of(dynamicTest(name, () -> {
-                throw new RuntimeException("Unknown game test: " + name);
-            }));
+            throw new RuntimeException("Unknown game test: " + name);
         }
 
-        return List.of(dynamicTest("[Child] " + name, test::run));
+        test.run();
     }
 }

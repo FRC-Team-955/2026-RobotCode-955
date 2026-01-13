@@ -136,12 +136,6 @@ dependencies {
 }
 
 test {
-    // Disable test reports to prevent conflicts between parent and child gradle task when running game tests
-    reports {
-        junitXml.required = false
-        html.required = false
-    }
-
     // https://stackoverflow.com/a/36130467
     testLogging {
         afterSuite { desc, result ->
