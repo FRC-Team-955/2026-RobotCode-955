@@ -10,7 +10,7 @@
       </option>
       <option name="taskNames">
         <list>
-          <option value="testSim" />
+          <option value="test" />
         </list>
       </option>
       <option name="vmOptions" />
