@@ -1,11 +1,15 @@
 package frc.gametest;
 
+import edu.wpi.first.wpilibj.RobotBase;
+import frc.lib.LoggedTracer;
+import frc.robot.Robot;
+import frc.robot.RobotState;
+import org.ironmaple.simulation.SimulatedArena;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
-import org.junit.jupiter.api.parallel.Execution;
-import org.junit.jupiter.api.parallel.ExecutionMode;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Scanner;
@@ -92,6 +96,47 @@ class GameTestRunner {
             throw new RuntimeException("Unknown game test: " + name);
         }
 
-        test.run();
+        // Set robot state
+        RobotState.get().setPose(test.startingPose());
+
+        // Start robot
+        Thread robotRunner = new Thread(() -> {
+            RobotBase.startRobot(() -> {
+                Robot robot = new Robot();
+
+                // force running as fast as possible
+                robot.setUseTiming(false);
+
+                return robot;
+            });
+        });
+        robotRunner.start();
+
+        System.out.println("Waiting for startup to complete");
+        // robotPeriodic runs LoggedTracer.reset() every loop
+        // that means that once looping starts, startTime will be changed from -1 to the current time
+        // use reflection to avoid changing startTime to public
+        Field startTime = LoggedTracer.class.getDeclaredField("startTime");
+        startTime.setAccessible(true);
+        while ((double) startTime.get(null) == -1.0) {
+        }
+        System.out.println("Startup completion detected");
+
+        // Let things settle before enabling
+        Thread.sleep(500);
+        // Reset field
+        SimulatedArena.getInstance().clearGamePieces();
+        // Robot is already enabled by simulationInit, start the command
+        test.command().schedule();
+
+        Thread.sleep(test.timeLimitMillis());
+
+        if (!test.assertion().getAsBoolean()) {
+            System.out.println("Assertion failed");
+            System.exit(1);
+        } else {
+            System.out.println("Assertion succeeded");
+            System.exit(0);
+        }
     }
 }
