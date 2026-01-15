@@ -300,8 +300,10 @@ public class Drive extends CommandBasedSubsystem {
                 for (int i = 0; i < modules.length; i++) {
                     // Optimize velocity setpoint
                     var currentAngle = modules[i].getTurnAngle();
-                    setpointStates[i].cosineScale(currentAngle);
                     setpointStates[i].optimize(currentAngle);
+                    // Note that cosine scaling MUST come AFTER angle optimization
+                    // because cosine scaling should be based on the final angle setpoint
+                    setpointStates[i].cosineScale(currentAngle);
                     modules[i].runSetpoint(setpointStates[i]);
                 }
 
