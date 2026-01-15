@@ -104,8 +104,8 @@ public class Controller implements Periodic {
             linearVelocity = linearVelocity.rotateBy(Rotation2d.k180deg);
         }
         setpointFieldRelative = new ChassisSpeeds(
-                linearVelocity.getX() * driveConfig.moduleLimits().maxDriveVelocityMetersPerSec(),
-                linearVelocity.getY() * driveConfig.moduleLimits().maxDriveVelocityMetersPerSec(),
+                linearVelocity.getX() * driveConfig.maxVelocityMetersPerSec(),
+                linearVelocity.getY() * driveConfig.maxVelocityMetersPerSec(),
                 omegaMagnitude * joystickMaxAngularSpeedRadPerSec
         );
     }

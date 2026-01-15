@@ -3,7 +3,6 @@ package frc.robot.subsystems.drive;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import frc.lib.PIDF;
-import frc.lib.swerve.ModuleLimits;
 import frc.robot.BuildConstants;
 
 public class DriveConstants {
@@ -16,10 +15,10 @@ public class DriveConstants {
             0.02,
             0.1,
             Units.degreesToRadians(2),
-            Units.degreesToRadians(10)
+            Units.degreesToRadians(10),
+            15
     );
 
-    static final boolean useSetpointGenerator = true;
     public static final boolean disableDriving = false;
     public static final boolean disableGyro = false;
     static final boolean useHighFrequencyOdometry = true;
@@ -38,11 +37,7 @@ public class DriveConstants {
                 Units.inchesToMeters(35),
                 PIDF.ofPD(3.5, 0),
                 PIDF.ofPD(3, 0),
-                new ModuleLimits(
-                        4.58,
-                        20,
-                        20
-                )
+                4.58
         );
         case SIM -> new DriveConfig(
                 Units.inchesToMeters(2),
@@ -52,19 +47,9 @@ public class DriveConstants {
                 Units.inchesToMeters(35),
                 PIDF.ofPD(3.5, 0),
                 PIDF.ofPD(3, 0),
-                new ModuleLimits(
-                        3.83,
-                        25,
-                        20
-                )
+                3.83
         );
     };
-
-    public static final ModuleLimits moveToModuleLimits = new ModuleLimits(
-            driveConfig.moduleLimits().maxDriveVelocityMetersPerSec(),
-            driveConfig.moduleLimits().maxDriveAccelerationMetersPerSecSquared() * 0.75,
-            driveConfig.moduleLimits().maxTurnVelocityRadPerSec()
-    );
 
     /**
      * FL, FR, BL, BR
@@ -79,7 +64,7 @@ public class DriveConstants {
     public static final double drivebaseRadiusMeters = Math.hypot(driveConfig.trackWidthMeters / 2.0, driveConfig.trackLengthMeters / 2.0);
 
     /** Maximum angular velocity of the whole drivetrain if all drive motors/wheels are going at full speed. */
-    public static final double maxAngularVelocityRadPerSec = driveConfig.moduleLimits().maxDriveVelocityMetersPerSec() / drivebaseRadiusMeters;
+    public static final double maxAngularVelocityRadPerSec = driveConfig.maxVelocityMetersPerSec() / drivebaseRadiusMeters;
 
     public static final double joystickMaxAngularSpeedRadPerSec = Math.min(Units.degreesToRadians(315), maxAngularVelocityRadPerSec);
     public static final double joystickDriveDeadband = 0.1;
@@ -148,7 +133,8 @@ public class DriveConstants {
             double linearPositionToleranceMeters,
             double linearVelocityToleranceMetersPerSec,
             double angularPositionToleranceRad,
-            double angularVelocityToleranceRadPerSec
+            double angularVelocityToleranceRadPerSec,
+            double maxAccelerationMetersPerSec // Maximum acceleration of the robot during move to
     ) {
     }
 
@@ -160,7 +146,7 @@ public class DriveConstants {
             double bumperLengthMeters,
             PIDF choreoFeedbackXY,
             PIDF choreoFeedbackOmega,
-            ModuleLimits moduleLimits // See ModuleLimits for docs on each value
+            double maxVelocityMetersPerSec // Maximum velocity of the robot
     ) {
     }
 

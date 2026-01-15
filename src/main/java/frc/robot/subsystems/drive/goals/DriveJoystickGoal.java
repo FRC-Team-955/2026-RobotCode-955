@@ -29,14 +29,14 @@ public class DriveJoystickGoal extends DriveGoal {
 
             if (controller.shouldAssist(robotState.getPose(), assistPose)) {
                 Logger.recordOutput("Drive/Assist/Running", true);
-                return DriveRequest.chassisSpeedsOptimized(getAssisted(assistPose));
+                return DriveRequest.chassisSpeeds(getAssisted(assistPose));
             }
         } else {
             Logger.recordOutput("Drive/Assist/Present", false);
         }
 
         Logger.recordOutput("Drive/Assist/Running", false);
-        return DriveRequest.chassisSpeedsOptimized(controller.getDriveSetpointRobotRelative(robotState.getRotation()));
+        return DriveRequest.chassisSpeeds(controller.getDriveSetpointRobotRelative(robotState.getRotation()));
     }
 
     private static ChassisSpeeds getAssisted(Pose2d assistPose) {

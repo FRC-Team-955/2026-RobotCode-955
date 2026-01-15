@@ -52,6 +52,6 @@ public class WheelRadiusCharacterizationGoal extends DriveGoal {
         Logger.recordOutput("Drive/WheelRadiusCharacterization/CurrentWheelRadiusInches", Units.metersToInches(currentEffectiveWheelRadius));
         Logger.recordOutput("Drive/WheelRadiusCharacterization/HasEnoughData", Math.abs(accumGyroYawRad) > Math.PI * 2.0);
 
-        return DriveRequest.chassisSpeedsDirect(new ChassisSpeeds(0, 0, omega));
+        return DriveRequest.chassisSpeeds(new ChassisSpeeds(0, 0, omega));
     }
 }

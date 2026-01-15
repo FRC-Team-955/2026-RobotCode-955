@@ -4,7 +4,6 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import frc.lib.swerve.ModuleLimits;
 import frc.robot.Controller;
 import frc.robot.RobotState;
 import frc.robot.subsystems.drive.DriveGoal;
@@ -14,7 +13,8 @@ import org.littletonrobotics.junction.Logger;
 
 import java.util.function.Supplier;
 
-import static frc.robot.subsystems.drive.DriveConstants.*;
+import static frc.robot.subsystems.drive.DriveConstants.maxAngularVelocityRadPerSec;
+import static frc.robot.subsystems.drive.DriveConstants.moveToConfig;
 import static frc.robot.subsystems.drive.DriveTuning.moveToAngularTunable;
 import static frc.robot.subsystems.drive.DriveTuning.moveToLinearTunable;
 
@@ -107,14 +107,9 @@ public class MoveToGoal extends DriveGoal {
         Logger.recordOutput("Drive/MoveTo/MergeJoystickDrive", mergeJoystickDrive);
         if (mergeJoystickDrive) {
             ChassisSpeeds joystickDriveSpeeds = controller.getDriveSetpointRobotRelative(robotState.getRotation());
-            return DriveRequest.chassisSpeedsOptimized(moveToSpeeds.plus(joystickDriveSpeeds.times(0.3)));
+            return DriveRequest.chassisSpeeds(moveToSpeeds.plus(joystickDriveSpeeds.times(0.3)));
         } else {
-            return DriveRequest.chassisSpeedsOptimized(moveToSpeeds);
+            return DriveRequest.chassisSpeeds(moveToSpeeds);
         }
-    }
-
-    @Override
-    public ModuleLimits getModuleLimits() {
-        return moveToModuleLimits;
     }
 }
