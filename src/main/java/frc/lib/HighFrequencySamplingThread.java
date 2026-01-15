@@ -162,6 +162,7 @@ public class HighFrequencySamplingThread extends Thread {
         return queue;
     }
 
+    @SuppressWarnings("BusyWait")
     @Override
     public void run() {
         while (true) {
