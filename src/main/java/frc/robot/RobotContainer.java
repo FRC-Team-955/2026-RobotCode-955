@@ -1,5 +1,8 @@
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
@@ -165,6 +168,20 @@ public class RobotContainer {
                 .and(manualDescoring)
                 .and(canDescore)
                 .onTrue(superstructure.descoreAlgaeManual(operatorDashboard::getSelectedReefZoneSide));
+
+        if (BuildConstants.mode == BuildConstants.Mode.SIM) {
+            var ref = new Object() {
+                Pose2d setpoint;
+            };
+            controller.a().toggleOnTrue(CommandsExt.eagerSequence(
+                    Commands.runOnce(() -> ref.setpoint = new Pose2d(
+                            robotState.getPose().getX() + 1,
+                            robotState.getPose().getY() + 1,
+                            robotState.getPose().getRotation().plus(Rotation2d.kPi)
+                    )),
+                    drive.moveTo(() -> ref.setpoint, false)
+            ));
+        }
 
         // TODO manual elevator see elevator and superstructure and stuff
 //        operatorDashboard.operatorKeypad.getOverride4()
