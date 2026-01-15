@@ -3,6 +3,8 @@ package frc.robot.subsystems.drive.goals;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.robot.Controller;
 import frc.robot.RobotState;
@@ -26,12 +28,7 @@ public class MoveToGoal extends DriveGoal {
     private final Supplier<Pose2d> poseSupplier;
     private final boolean mergeJoystickDrive;
 
-    private final PIDController moveToLinearX = moveToLinearTunable.getOrOriginal()
-            .toPID(
-                    moveToConfig.linearPositionToleranceMeters(),
-                    moveToConfig.linearVelocityToleranceMetersPerSec()
-            );
-    private final PIDController moveToLinearY = moveToLinearTunable.getOrOriginal()
+    private final PIDController moveToLinear = moveToLinearTunable.getOrOriginal()
             .toPID(
                     moveToConfig.linearPositionToleranceMeters(),
                     moveToConfig.linearVelocityToleranceMetersPerSec()
@@ -44,10 +41,7 @@ public class MoveToGoal extends DriveGoal {
 
     @Override
     public DriveRequest getRequest() {
-        moveToLinearTunable.ifChanged(gains -> {
-            gains.applyPID(moveToLinearX);
-            gains.applyPID(moveToLinearY);
-        });
+        moveToLinearTunable.ifChanged(gains -> gains.applyPID(moveToLinear));
         moveToAngularTunable.ifChanged(gains -> gains.applyPID(moveToAngular));
 
         //////////////////////////////////////////////////////////////////////
@@ -60,27 +54,14 @@ public class MoveToGoal extends DriveGoal {
         double distanceToGoal = currentPose.getTranslation().getDistance(goalPose.getTranslation());
         Logger.recordOutput("Drive/MoveTo/DistanceToGoalMeters", distanceToGoal);
 
-        double angleToGoalRad = goalPose.getTranslation().minus(currentPose.getTranslation()).getAngle().getRadians();
-        Logger.recordOutput("Drive/MoveTo/AngleToGoalRad", angleToGoalRad);
-
-        double linearXVelocityMetersPerSec = moveToLinearX.calculate(
-                currentPose.getX(),
-                goalPose.getX()
+        double linearVelocityMetersPerSec = moveToLinear.calculate(
+                distanceToGoal,
+                0.0
         );
-        boolean linearXAtSetpoint = moveToLinearX.atSetpoint();
-        Logger.recordOutput("Drive/MoveTo/LinearXAtSetpoint", linearXAtSetpoint);
-        if (linearXAtSetpoint) {
-            linearXVelocityMetersPerSec = 0.0;
-        }
-
-        double linearYVelocityMetersPerSec = moveToLinearY.calculate(
-                currentPose.getY(),
-                goalPose.getY()
-        );
-        boolean linearYAtSetpoint = moveToLinearY.atSetpoint();
-        Logger.recordOutput("Drive/MoveTo/LinearYAtSetpoint", linearYAtSetpoint);
-        if (linearYAtSetpoint) {
-            linearYVelocityMetersPerSec = 0.0;
+        boolean linearAtSetpoint = moveToLinear.atSetpoint();
+        Logger.recordOutput("Drive/MoveTo/LinearAtSetpoint", linearAtSetpoint);
+        if (linearAtSetpoint) {
+            linearVelocityMetersPerSec = 0.0;
         }
 
         double angularVelocityRadPerSec = moveToAngular.calculate(
@@ -97,9 +78,11 @@ public class MoveToGoal extends DriveGoal {
         // When going max angular speed, reduce linear to 50%
         double linearScalar = MathUtil.clamp(1 - angularVelocityRadPerSec / maxAngularVelocityRadPerSec, 0.50, 1);
 
+        Rotation2d angleToGoalRad = currentPose.getTranslation().minus(goalPose.getTranslation()).getAngle();
+        Translation2d linearXYVelocityMetersPerSec = new Translation2d(linearVelocityMetersPerSec, angleToGoalRad);
         ChassisSpeeds moveToSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
-                linearXVelocityMetersPerSec * linearScalar,
-                linearYVelocityMetersPerSec * linearScalar,
+                linearXYVelocityMetersPerSec.getX() * linearScalar,
+                linearXYVelocityMetersPerSec.getY() * linearScalar,
                 angularVelocityRadPerSec,
                 currentPose.getRotation() // Move to is absolute, don't flip
         );
