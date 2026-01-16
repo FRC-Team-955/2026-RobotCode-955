@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.lib.PIDF;
 import frc.lib.Util;
 import frc.lib.subsystem.CommandBasedSubsystem;
 import frc.robot.OperatorDashboard;
@@ -31,10 +32,11 @@ import java.util.function.Supplier;
 
 import static frc.lib.HighFrequencySamplingThread.highFrequencyLock;
 import static frc.robot.subsystems.drive.DriveConstants.*;
-import static frc.robot.subsystems.drive.DriveTuning.moduleDriveGainsTunable;
-import static frc.robot.subsystems.drive.DriveTuning.moduleTurnGainsTunable;
 
 public class Drive extends CommandBasedSubsystem {
+    private static final PIDF.Tunable moduleDriveGainsTunable = moduleConfig.driveGains().tunable("Drive/ModuleDrive");
+    private static final PIDF.Tunable moduleTurnGainsTunable = moduleConfig.turnGains().tunable("Drive/ModuleTurn");
+
     private final RobotState robotState = RobotState.get();
     private final OperatorDashboard operatorDashboard = OperatorDashboard.get();
 

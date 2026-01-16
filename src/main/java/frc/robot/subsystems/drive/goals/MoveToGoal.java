@@ -6,6 +6,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import frc.lib.PIDF;
 import frc.robot.Controller;
 import frc.robot.RobotState;
 import frc.robot.subsystems.drive.DriveGoal;
@@ -22,6 +23,9 @@ import static frc.robot.subsystems.drive.DriveTuning.moveToLinearTunable;
 
 @RequiredArgsConstructor
 public class MoveToGoal extends DriveGoal {
+    private static final PIDF.Tunable moveToLinearTunable = moveToConfig.linear().tunable("Drive/MoveTo/Linear");
+    private static final PIDF.Tunable moveToAngularTunable = moveToConfig.angular().tunable("Drive/MoveTo/Angular");
+
     private static final RobotState robotState = RobotState.get();
     private static final Controller controller = Controller.get();
 
