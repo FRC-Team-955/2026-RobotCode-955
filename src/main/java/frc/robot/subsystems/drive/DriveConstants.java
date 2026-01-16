@@ -25,28 +25,16 @@ public class DriveConstants {
 
     static final double odometryPositionDeltaDiscardMeters = Units.inchesToMeters(8);
 
-    public static final DriveConfig driveConfig = switch (BuildConstants.mode) {
-        case REAL, REPLAY -> new DriveConfig(
-                Units.inchesToMeters(1.935948620917915),
-                Units.inchesToMeters(22.75),
-                Units.inchesToMeters(22.75),
-                Units.inchesToMeters(35),
-                Units.inchesToMeters(35),
-                PIDF.ofPD(3.5, 0),
-                PIDF.ofPD(3, 0),
-                4.58
-        );
-        case SIM -> new DriveConfig(
-                Units.inchesToMeters(2),
-                Units.inchesToMeters(22.75),
-                Units.inchesToMeters(22.75),
-                Units.inchesToMeters(35),
-                Units.inchesToMeters(35),
-                PIDF.ofPD(3.5, 0),
-                PIDF.ofPD(3, 0),
-                3.83
-        );
-    };
+    public static final DriveConfig driveConfig = new DriveConfig(
+            Units.inchesToMeters(1.935948620917915),
+            Units.inchesToMeters(22.75),
+            Units.inchesToMeters(22.75),
+            Units.inchesToMeters(35),
+            Units.inchesToMeters(35),
+            PIDF.ofPD(3.5, 0),
+            PIDF.ofPD(3, 0),
+            4.58
+    );
 
     /**
      * FL, FR, BL, BR
