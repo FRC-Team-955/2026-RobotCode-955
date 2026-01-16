@@ -315,6 +315,14 @@ public class Drive extends CommandBasedSubsystem {
         return Arrays.stream(modules).mapToDouble(Module::getDrivePositionRad).toArray();
     }
 
+    public double[] getSlipCurrentCharacterizationVelocities() {
+        return Arrays.stream(modules).mapToDouble(Module::getDriveVelocityRadPerSec).toArray();
+    }
+
+    public double[] getSlipCurrentCharacterizationCurrents() {
+        return Arrays.stream(modules).mapToDouble(Module::getDriveCurrentAmps).toArray();
+    }
+
     public Command followTrajectory(Trajectory<SwerveSample> trajectory) {
         return startIdle(() -> goal = new FollowTrajectoryGoal(trajectory));
     }
@@ -341,5 +349,9 @@ public class Drive extends CommandBasedSubsystem {
 
     public Command wheelRadiusCharacterization(WheelRadiusCharacterizationGoal.Direction direction) {
         return startIdle(() -> goal = new WheelRadiusCharacterizationGoal(direction));
+    }
+
+    public Command slipCurrentCharacterization() {
+        return startIdle(() -> goal = new SlipCurrentCharacterizationGoal());
     }
 }

@@ -99,6 +99,7 @@ public class RobotContainer {
         characterizationChooser.addOption("Drive 4 m/s Characterization", drive.runRobotRelative(() -> new ChassisSpeeds(4.0, 0.0, 0.0)));
         characterizationChooser.addOption("Drive Full Speed Characterization", drive.fullSpeedCharacterization());
         characterizationChooser.addOption("Drive Wheel Radius Characterization", drive.wheelRadiusCharacterization(WheelRadiusCharacterizationGoal.Direction.CLOCKWISE));
+        characterizationChooser.addOption("Drive Slip Current Characterization", drive.slipCurrentCharacterization());
     }
 
     private void setDefaultCommands() {
