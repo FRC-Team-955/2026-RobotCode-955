@@ -26,6 +26,7 @@ import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.function.DoubleSupplier;
 import java.util.function.IntToDoubleFunction;
 import java.util.function.Supplier;
@@ -324,6 +325,10 @@ public class Drive extends CommandBasedSubsystem {
 
     public Command driveJoystick() {
         return startIdle(() -> goal = new DriveJoystickGoal());
+    }
+
+    public Command driveJoystickWithAssist(Supplier<Optional<Pose2d>> assistPoseSupplier) {
+        return startIdle(() -> goal = new DriveJoystickWithAssistGoal(assistPoseSupplier));
     }
 
     public Command runRobotRelative(Supplier<ChassisSpeeds> chassisSpeedsSupplier) {
