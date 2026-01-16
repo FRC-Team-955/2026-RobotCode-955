@@ -29,12 +29,12 @@ public class Controller implements Periodic {
     private final Alert controllerDisconnectedAlert = new Alert("Driver controller is not connected!", Alert.AlertType.kError);
 
     // Intermediates - used in assist calculations
-    private Rotation2d linearDirection = new Rotation2d();
-    private double linearMagnitude = 0.0;
+    private Rotation2d driveLinearDirection = new Rotation2d();
+    private double driveLinearMagnitude = 0.0;
 
     // Results - used for drive/assist calculations
     @Getter
-    private ChassisSpeeds setpointFieldRelative = new ChassisSpeeds();
+    private ChassisSpeeds driveSetpointFieldRelative = new ChassisSpeeds();
 
     private static Controller instance;
 
@@ -60,6 +60,10 @@ public class Controller implements Periodic {
     public void periodicBeforeCommands() {
         controllerDisconnectedAlert.set(!controller.isConnected());
 
+        updateDriveSetpoint();
+    }
+
+    private void updateDriveSetpoint() {
         // https://docs.wpilib.org/en/stable/docs/software/basic-programming/coordinate-system.html
         // forward on joystick is negative y - we want positive x for forward
         double x = -controller.getLeftY();
@@ -68,42 +72,42 @@ public class Controller implements Periodic {
         // right on joystick is positive x - we want negative x for right (CCW is positive)
         double omega = -controller.getRightX();
 
-        Logger.recordOutput("JoystickDrive/Suppliers/X", x);
-        Logger.recordOutput("JoystickDrive/Suppliers/Y", y);
-        Logger.recordOutput("JoystickDrive/Suppliers/Omega", omega);
+        Logger.recordOutput("Controller/Drive/Suppliers/X", x);
+        Logger.recordOutput("Controller/Drive/Suppliers/Y", y);
+        Logger.recordOutput("Controller/Drive/Suppliers/Omega", omega);
 
-        linearMagnitude = MathUtil.clamp(MathUtil.applyDeadband(Math.hypot(x, y), joystickDriveDeadband), -1, 1);
-        linearMagnitude = linearMagnitude * linearMagnitude;
+        driveLinearMagnitude = MathUtil.clamp(MathUtil.applyDeadband(Math.hypot(x, y), joystickDriveDeadband), -1, 1);
+        driveLinearMagnitude = driveLinearMagnitude * driveLinearMagnitude;
 
         double omegaMagnitude = MathUtil.applyDeadband(omega, joystickDriveDeadband);
         omegaMagnitude = Math.copySign(omegaMagnitude * omegaMagnitude, omegaMagnitude);
 
         // Scale linear magnitude by omega - when going full omega, want half linear
-        linearMagnitude *= MathUtil.clamp(1.0 - Math.abs(omegaMagnitude / 2.0), 0.5, 1.0);
+        driveLinearMagnitude *= MathUtil.clamp(1.0 - Math.abs(omegaMagnitude / 2.0), 0.5, 1.0);
 
         // If x and y are both 0, Rotation2d will not be happy
         // Intermediates - used in assist calculations
         Translation2d linearVelocity;
         if (x != 0 || y != 0) {
-            linearDirection = new Rotation2d(x, y);
-            linearVelocity = new Pose2d(new Translation2d(), linearDirection)
-                    .transformBy(new Transform2d(linearMagnitude, 0.0, new Rotation2d()))
+            driveLinearDirection = new Rotation2d(x, y);
+            linearVelocity = new Pose2d(new Translation2d(), driveLinearDirection)
+                    .transformBy(new Transform2d(driveLinearMagnitude, 0.0, new Rotation2d()))
                     .getTranslation();
         } else {
             // Linear magnitude should be 0 anyways
-            linearDirection = new Rotation2d();
+            driveLinearDirection = new Rotation2d();
             linearVelocity = new Translation2d();
         }
 
-        Logger.recordOutput("JoystickDrive/LinearMagnitude", linearMagnitude);
-        Logger.recordOutput("JoystickDrive/LinearDirection", linearDirection);
-        Logger.recordOutput("JoystickDrive/LinearVelocity", linearVelocity);
-        Logger.recordOutput("JoystickDrive/OmegaMagnitude", omegaMagnitude);
+        Logger.recordOutput("Controller/Drive/LinearMagnitude", driveLinearMagnitude);
+        Logger.recordOutput("Controller/Drive/LinearDirection", driveLinearDirection);
+        Logger.recordOutput("Controller/Drive/LinearVelocity", linearVelocity);
+        Logger.recordOutput("Controller/Drive/OmegaMagnitude", omegaMagnitude);
 
         if (Util.shouldFlip()) {
             linearVelocity = linearVelocity.rotateBy(Rotation2d.k180deg);
         }
-        setpointFieldRelative = new ChassisSpeeds(
+        driveSetpointFieldRelative = new ChassisSpeeds(
                 linearVelocity.getX() * driveConfig.maxVelocityMetersPerSec(),
                 linearVelocity.getY() * driveConfig.maxVelocityMetersPerSec(),
                 omegaMagnitude * joystickMaxAngularSpeedRadPerSec
@@ -111,47 +115,47 @@ public class Controller implements Periodic {
     }
 
     public boolean shouldAssist(Pose2d currentPose, Pose2d assistPose) {
-        Logger.recordOutput("JoystickDrive/Assist/Pose", assistPose);
+        Logger.recordOutput("Controller/Drive/Assist/Pose", assistPose);
 
         // Get the translation between robot and assist
         Translation2d robotToAssist = assistPose.getTranslation().minus(currentPose.getTranslation());
         // Calculate direction from robot to assist
         Rotation2d robotToAssistDirection = robotToAssist.getAngle();
-        Logger.recordOutput("JoystickDrive/Assist/RobotToAssistDirection", robotToAssistDirection);
+        Logger.recordOutput("Controller/Drive/Assist/RobotToAssistDirection", robotToAssistDirection);
 
         // Flip joystick direction to match robot to assist direction
         // Joystick direction is relative to alliance wall and needs to be flipped on red alliance to match origin
-        Rotation2d joystickLinearDirectionFlipped = Util.flipIfNeeded(linearDirection);
-        Logger.recordOutput("JoystickDrive/Assist/FlippedJoystickLinearDirection", joystickLinearDirectionFlipped);
+        Rotation2d joystickLinearDirectionFlipped = Util.flipIfNeeded(driveLinearDirection);
+        Logger.recordOutput("Controller/Drive/Assist/FlippedJoystickLinearDirection", joystickLinearDirectionFlipped);
 
         // Get difference between joystick direction and assist direction
         Rotation2d directionDiff = robotToAssistDirection.minus(joystickLinearDirectionFlipped);
-        Logger.recordOutput("JoystickDrive/Assist/DirectionDifference", directionDiff);
+        Logger.recordOutput("Controller/Drive/Assist/DirectionDifference", directionDiff);
 
         // Get distance to assist pose
         double distanceToAssist = currentPose.getTranslation().getDistance(assistPose.getTranslation());
-        Logger.recordOutput("JoystickDrive/Assist/DistanceToAssist", distanceToAssist);
+        Logger.recordOutput("Controller/Drive/Assist/DistanceToAssist", distanceToAssist);
 
         // If we are:
         if (
             // - moving linearly in some way (if we are only rotating, don't assist)
-                linearMagnitude != 0.0 &&
+                driveLinearMagnitude != 0.0 &&
                         // - going towards the assist pose based on threshold
                         Math.abs(directionDiff.getRadians()) < assistDirectionToleranceRad &&
                         // - close enough to assist pose
                         distanceToAssist < assistMaximumDistanceMeters
         ) {
             // then use automatic control.
-            Logger.recordOutput("JoystickDrive/Assist/Running", true);
+            Logger.recordOutput("Controller/Drive/Assist/Running", true);
             return true;
         } else {
-            Logger.recordOutput("JoystickDrive/Assist/Running", false);
+            Logger.recordOutput("Controller/Drive/Assist/Running", false);
             return false;
         }
     }
 
     public ChassisSpeeds getDriveSetpointRobotRelative(Rotation2d robotAngle) {
-        return ChassisSpeeds.fromFieldRelativeSpeeds(setpointFieldRelative, robotAngle);
+        return ChassisSpeeds.fromFieldRelativeSpeeds(driveSetpointFieldRelative, robotAngle);
     }
 
     public Command rumble(double value, double timeSeconds) {
