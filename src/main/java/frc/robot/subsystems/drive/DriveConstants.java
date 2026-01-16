@@ -33,6 +33,7 @@ public class DriveConstants {
             Units.inchesToMeters(35),
             PIDF.ofPD(3.5, 0),
             PIDF.ofPD(3, 0),
+            PIDF.ofP(4.5),
             4.58
     );
 
@@ -131,6 +132,7 @@ public class DriveConstants {
             double bumperLengthMeters,
             PIDF choreoFeedbackXY,
             PIDF choreoFeedbackOmega,
+            PIDF headingOverrideGains,
             double maxVelocityMetersPerSec // Maximum velocity of the robot
     ) {
     }
