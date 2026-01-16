@@ -67,31 +67,37 @@ public class MoveToGoal extends DriveGoal {
         double distanceToGoal = currentPose.getTranslation().getDistance(goalPose.getTranslation());
         Logger.recordOutput("Drive/MoveTo/DistanceToGoalMeters", distanceToGoal);
 
-        double linearVelocityMetersPerSec = moveToLinear.calculate(
-                distanceToGoal,
-                0.0
-        );
-        Logger.recordOutput("Drive/MoveTo/LinearSetpointUnlimited", linearVelocityMetersPerSec);
+        double linearVelocityMetersPerSec;
+        {
+            linearVelocityMetersPerSec = moveToLinear.calculate(
+                    distanceToGoal,
+                    0.0
+            );
+            Logger.recordOutput("Drive/MoveTo/LinearSetpointUnlimited", linearVelocityMetersPerSec);
 
-        linearVelocityMetersPerSec = moveToLinearAccelerationLimiter.calculate(linearVelocityMetersPerSec);
-        Logger.recordOutput("Drive/MoveTo/LinearSetpoint", linearVelocityMetersPerSec);
+            linearVelocityMetersPerSec = moveToLinearAccelerationLimiter.calculate(linearVelocityMetersPerSec);
+            Logger.recordOutput("Drive/MoveTo/LinearSetpoint", linearVelocityMetersPerSec);
 
-        boolean linearAtSetpoint = moveToLinear.atSetpoint();
-        Logger.recordOutput("Drive/MoveTo/LinearAtSetpoint", linearAtSetpoint);
-        if (linearAtSetpoint) {
-            linearVelocityMetersPerSec = 0.0;
+            boolean linearAtSetpoint = moveToLinear.atSetpoint();
+            Logger.recordOutput("Drive/MoveTo/LinearAtSetpoint", linearAtSetpoint);
+            if (linearAtSetpoint) {
+                linearVelocityMetersPerSec = 0.0;
+            }
         }
 
-        double angularVelocityRadPerSec = moveToAngular.calculate(
-                MathUtil.angleModulus(currentPose.getRotation().getRadians()),
-                MathUtil.angleModulus(goalPose.getRotation().getRadians())
-        );
-        Logger.recordOutput("Drive/MoveTo/AngularSetpoint", angularVelocityRadPerSec);
+        double angularVelocityRadPerSec;
+        {
+            angularVelocityRadPerSec = moveToAngular.calculate(
+                    MathUtil.angleModulus(currentPose.getRotation().getRadians()),
+                    MathUtil.angleModulus(goalPose.getRotation().getRadians())
+            );
+            Logger.recordOutput("Drive/MoveTo/AngularSetpoint", angularVelocityRadPerSec);
 
-        boolean angularAtSetpoint = moveToAngular.atSetpoint();
-        Logger.recordOutput("Drive/MoveTo/AngularAtSetpoint", angularAtSetpoint);
-        if (angularAtSetpoint) {
-            angularVelocityRadPerSec = 0.0;
+            boolean angularAtSetpoint = moveToAngular.atSetpoint();
+            Logger.recordOutput("Drive/MoveTo/AngularAtSetpoint", angularAtSetpoint);
+            if (angularAtSetpoint) {
+                angularVelocityRadPerSec = 0.0;
+            }
         }
 
         // Scale linear speed by angular speed so that angular change is prioritized
