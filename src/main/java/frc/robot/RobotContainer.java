@@ -13,6 +13,7 @@ import frc.robot.subsystems.apriltagvision.AprilTagVision;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.goals.WheelRadiusCharacterizationGoal;
 import frc.robot.subsystems.gamepiecevision.GamePieceVision;
+import frc.robot.subsystems.superintake.Superintake;
 import frc.robot.subsystems.superstructure.Superstructure;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -39,6 +40,7 @@ public class RobotContainer {
     public final AprilTagVision aprilTagVision = AprilTagVision.get();
     public final GamePieceVision gamePieceVision = GamePieceVision.get();
     public final Superstructure superstructure = Superstructure.get();
+    public final Superintake superintake = Superintake.get();
 
     public RobotContainer() {
         addAutos();
@@ -58,6 +60,7 @@ public class RobotContainer {
                 // We need to require the superstructure during characterization so that the default command doesn't get run
                 Commands.deferredProxy(() -> CommandsExt.eagerSequence(
                         superstructure.cancel(),
+                        superintake.cancel(),
                         characterizationChooser.get()
                 ))
         );
@@ -78,6 +81,7 @@ public class RobotContainer {
     private void setDefaultCommands() {
         drive.setDefaultCommand(drive.driveJoystick());
         superstructure.setDefaultCommand(superstructure.cancel());
+        superintake.setDefaultCommand(superintake.cancel());
     }
 
     /**
@@ -92,7 +96,10 @@ public class RobotContainer {
 
         controller.y().onTrue(robotState.resetRotation());
 
-        controller.leftBumper().onTrue(superstructure.cancel());
+        controller.leftBumper().onTrue(Commands.parallel(
+                superstructure.cancel(),
+                superintake.cancel()
+        ));
 
         // NOTE: if you are binding a trigger to a command returned by a subsystem, you must wrap it in CommandsExt.eagerSequence(superstructure.cancel(), <your command>)
         // You must do this because if you don't, superstructure's default command will cancel your command
