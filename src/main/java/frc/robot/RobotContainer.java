@@ -39,6 +39,7 @@ public class RobotContainer {
     public final OperatorDashboard operatorDashboard = OperatorDashboard.get();
     public final Controller controller = Controller.get();
     public final CANLogger canLogger = CANLogger.get();
+    public final RobotMechanism robotMechanism = RobotMechanism.get();
 
     /* Subsystems */
     // Note: order does matter

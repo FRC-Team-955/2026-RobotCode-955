@@ -1,6 +1,5 @@
 package frc.robot.subsystems.funnel;
 
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
@@ -71,7 +70,6 @@ public class Funnel implements Periodic {
         motorDisconnectedAlert.set(!inputs.connected);
 
         // Update mechanism
-        robotMechanism.funnel.beltLigament.setAngle(Units.radiansToDegrees(-inputs.positionRad));
 
         // Apply network inputs
         if (operatorDashboard.coastOverride.hasChanged()) {

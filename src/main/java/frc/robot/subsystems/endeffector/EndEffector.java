@@ -1,7 +1,6 @@
 package frc.robot.subsystems.endeffector;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
@@ -88,9 +87,6 @@ public class EndEffector implements Periodic {
         motorDisconnectedAlert.set(!inputs.connected);
 
         // Update mechanism
-        robotMechanism.endEffector.ligament.setAngle(180 - Units.radiansToDegrees(getAngleRad()));
-        // top rollers are reversed relative to motor
-        robotMechanism.endEffector.topRollersLigament.setAngle(Units.radiansToDegrees(-inputs.positionRad));
 
         // Apply network inputs
         if (operatorDashboard.coastOverride.hasChanged()) {

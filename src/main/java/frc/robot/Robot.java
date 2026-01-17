@@ -135,7 +135,10 @@ public class Robot extends LoggedRobot {
                 robotContainer.funnel,
 
                 // Misc
-                robotContainer.canLogger
+                robotContainer.canLogger,
+
+                // Update the mechanism last
+                robotContainer.robotMechanism
         );
     }
 

@@ -36,6 +36,7 @@ public class DriveConstants {
                 Units.inchesToMeters(22.75),
                 Units.inchesToMeters(35),
                 Units.inchesToMeters(35),
+                Units.inchesToMeters(-0.247776),
                 PIDF.ofPD(3.5, 0),
                 PIDF.ofPD(3, 0),
                 new ModuleLimits(
@@ -50,6 +51,7 @@ public class DriveConstants {
                 Units.inchesToMeters(22.75),
                 Units.inchesToMeters(35),
                 Units.inchesToMeters(35),
+                Units.inchesToMeters(-0.247776),
                 PIDF.ofPD(3.5, 0),
                 PIDF.ofPD(3, 0),
                 new ModuleLimits(
@@ -158,6 +160,7 @@ public class DriveConstants {
             double trackLengthMeters,
             double bumperWidthMeters,
             double bumperLengthMeters,
+            double bottomOfFrameToCenterOfWheelsMeters,
             PIDF choreoFeedbackXY,
             PIDF choreoFeedbackOmega,
             ModuleLimits moduleLimits // See ModuleLimits for docs on each value

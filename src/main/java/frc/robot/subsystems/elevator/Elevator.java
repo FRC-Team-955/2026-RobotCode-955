@@ -2,7 +2,6 @@ package frc.robot.subsystems.elevator;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
@@ -21,7 +20,6 @@ import org.littletonrobotics.junction.Logger;
 
 import java.util.function.DoubleSupplier;
 
-import static frc.robot.RobotMechanism.middleOfRobot;
 import static frc.robot.subsystems.elevator.ElevatorConstants.*;
 import static frc.robot.subsystems.elevator.ElevatorTuning.*;
 
@@ -146,16 +144,6 @@ public class Elevator implements Periodic {
         emergencyStoppedAlert.set(emergencyStopped);
         Logger.recordOutput("Elevator/EmergencyStop", emergencyStopped);
 
-        // Update mechanisms
-        robotMechanism.elevator.stage1Root.setPosition(middleOfRobot - Units.inchesToMeters(7) + 0.04, Units.inchesToMeters(2.85) + getPositionMeters() / 3);
-        robotMechanism.elevator.stage2Root.setPosition(middleOfRobot - Units.inchesToMeters(7) + 0.02, Units.inchesToMeters(3.85) + getPositionMeters() / 3 * 2);
-        robotMechanism.elevator.stage3Root.setPosition(middleOfRobot - Units.inchesToMeters(7), Units.inchesToMeters(4.85) + getPositionMeters());
-
-        var endEffectorX = middleOfRobot - Units.inchesToMeters(11);
-        var endEffectorY = Units.inchesToMeters(7) + getPositionMeters();
-        robotMechanism.endEffector.root.setPosition(endEffectorX, endEffectorY);
-        robotMechanism.endEffector.topRollersRoot.setPosition(endEffectorX - Units.inchesToMeters(3), endEffectorY + Units.inchesToMeters(10));
-
         // Apply network inputs
         if (operatorDashboard.coastOverride.hasChanged()) {
             io.setBrakeMode(!operatorDashboard.coastOverride.get());
@@ -175,7 +163,6 @@ public class Elevator implements Periodic {
                     maxAccelerationMetersPerSecondSquaredTunable.get()
             ));
             hardstopSlowdownMeters = calculateHardstopSlowdownMeters(maxVelocityMetersPerSecondTunable.get());
-            robotMechanism.elevator.updateHardstopSlowdownPosition();
         }
     }
 
