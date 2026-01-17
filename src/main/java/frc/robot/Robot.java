@@ -126,11 +126,12 @@ public class Robot extends LoggedRobot {
                 robotContainer.gamePieceVision,
                 // Operator dashboard before super*
                 robotContainer.operatorDashboard,
-                // Subsystems depend on goals issued by superstructure and superintake
+                // Subsystems depend on superstructure and superintake
                 robotContainer.superstructure,
                 robotContainer.superintake,
 
                 // Subsystems - the order of these doesn't matter
+                robotContainer.intakeRollers,
 
                 // Misc
                 robotContainer.canLogger,

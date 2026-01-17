@@ -14,6 +14,7 @@ import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.goals.WheelRadiusCharacterizationGoal;
 import frc.robot.subsystems.gamepiecevision.GamePieceVision;
 import frc.robot.subsystems.superintake.Superintake;
+import frc.robot.subsystems.superintake.intakerollers.IntakeRollers;
 import frc.robot.subsystems.superstructure.Superstructure;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -39,6 +40,9 @@ public class RobotContainer {
     public final Drive drive = Drive.get();
     public final AprilTagVision aprilTagVision = AprilTagVision.get();
     public final GamePieceVision gamePieceVision = GamePieceVision.get();
+
+    public final IntakeRollers intakeRollers = IntakeRollers.get();
+
     public final Superstructure superstructure = Superstructure.get();
     public final Superintake superintake = Superintake.get();
 
