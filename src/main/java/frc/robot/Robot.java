@@ -130,9 +130,6 @@ public class Robot extends LoggedRobot {
                 robotContainer.operatorDashboard,
 
                 // Subsystems - the order of these doesn't matter
-                robotContainer.elevator,
-                robotContainer.endEffector,
-                robotContainer.funnel,
 
                 // Misc
                 robotContainer.canLogger,
