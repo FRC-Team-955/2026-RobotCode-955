@@ -52,7 +52,7 @@ def make_shot(v0, vr, vt):
     v = np.sqrt(vx**2 + vy**2 + vz**2)
     phi = np.asin(vz / v)
     theta = np.atan2(vy, vx)
-    print(f"\tafter compensate: phi = {rad_to_deg(phi)}, theta = {rad_to_deg(theta)}")
+    print(f"\tafter compensate: v = {v}, phi = {rad_to_deg(phi)}, theta = {rad_to_deg(theta)}")
 
     # For simulation purposes, convert back to 3d velocity vector
     vz = v * np.sin(phi)
