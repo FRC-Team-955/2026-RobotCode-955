@@ -15,7 +15,7 @@ import static frc.robot.subsystems.drive.DriveConstants.drivebaseRadiusMeters;
 
 @RequiredArgsConstructor
 public class WheelRadiusCharacterizationGoal extends DriveGoal {
-    private static final LoggedTunableNumber speedRadPerSec = new LoggedTunableNumber("Drive/WheelRadiusCharacterization/SpeedRadPerSecond", 1.0);
+    private static final LoggedTunableNumber speedRadPerSec = new LoggedTunableNumber("Drive/WheelRadiusCharacterization/SpeedRadPerSec", 1.0);
 
     private static final Drive drive = Drive.get();
 
