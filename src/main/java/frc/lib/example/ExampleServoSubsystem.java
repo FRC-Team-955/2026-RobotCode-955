@@ -90,7 +90,7 @@ public class ExampleServoSubsystem implements Periodic {
         if (DriverStation.isDisabled()) {
             io.setRequest(RequestType.VoltageVolts, 0);
         } else {
-            // See the shiftedState and goalState variables for why we effectively calculate two profiles
+            // See the comments above the lookaheadState and goalState variables for why we effectively calculate two profiles
 
             double setpointRad = goal.setpointRad.getAsDouble();
             Logger.recordOutput("ExampleServoSubsystem/OriginalSetpointRad", setpointRad);
