@@ -13,6 +13,6 @@ public class VelocityRobotRelativeGoal extends DriveGoal {
 
     @Override
     public DriveRequest getRequest() {
-        return DriveRequest.chassisSpeedsOptimized(chassisSpeedsSupplier.get());
+        return DriveRequest.chassisSpeeds(chassisSpeedsSupplier.get());
     }
 }

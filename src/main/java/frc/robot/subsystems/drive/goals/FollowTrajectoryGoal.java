@@ -40,7 +40,7 @@ public class FollowTrajectoryGoal extends DriveGoal {
             var currentPose = robotState.getPose();
 
             Logger.recordOutput("Drive/TrajectorySetpoint", sample.getPose());
-            return DriveRequest.chassisSpeedsDirect(ChassisSpeeds.fromFieldRelativeSpeeds(
+            return DriveRequest.chassisSpeeds(ChassisSpeeds.fromFieldRelativeSpeeds(
                     sample.vx + choreoFeedbackX.calculate(currentPose.getX(), sample.x),
                     sample.vy + choreoFeedbackY.calculate(currentPose.getY(), sample.y),
                     sample.omega + choreoFeedbackOmega.calculate(currentPose.getRotation().getRadians(), sample.heading),

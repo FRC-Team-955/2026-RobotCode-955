@@ -128,6 +128,10 @@ public class Module {
         return inputs.driveVelocityRadPerSec * driveConfig.wheelRadiusMeters();
     }
 
+    public double getDriveCurrentAmps() {
+        return inputs.driveCurrentAmps;
+    }
+
     /**
      * Returns the module position (turn angle and drive position).
      */

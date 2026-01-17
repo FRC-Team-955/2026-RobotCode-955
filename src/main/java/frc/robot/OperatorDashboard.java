@@ -101,7 +101,7 @@ public class OperatorDashboard implements Periodic {
                 // We only want to do closest side if the timeout is done (so if we can use overrides)
                 manualReefSide.set(false);
                 if (!ignoreClosestReefSideChanges) {
-                    selectedReefZoneSide = ReefAlign.determineClosestReefSide(controller.getSetpointFieldRelative());
+                    selectedReefZoneSide = ReefAlign.determineClosestReefSide(controller.getDriveSetpointFieldRelative());
                 }
             }
             updateToggles(reefZoneSides, selectedReefZoneSide);
@@ -128,7 +128,7 @@ public class OperatorDashboard implements Periodic {
                 handleEnumToggles(reefZoneSides, selectedReefZoneSide, selectNew -> selectedReefZoneSide = selectNew);
             } else {
                 if (!ignoreClosestReefSideChanges) {
-                    selectedReefZoneSide = ReefAlign.determineClosestReefSide(controller.getSetpointFieldRelative());
+                    selectedReefZoneSide = ReefAlign.determineClosestReefSide(controller.getDriveSetpointFieldRelative());
                 }
                 updateToggles(reefZoneSides, selectedReefZoneSide);
             }
