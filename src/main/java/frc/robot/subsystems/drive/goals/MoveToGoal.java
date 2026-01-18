@@ -39,7 +39,7 @@ public class MoveToGoal extends DriveGoal {
                     moveToConfig.linearPositionToleranceMeters(),
                     moveToConfig.linearVelocityToleranceMetersPerSec()
             );
-    private final SlewRateLimiter2d moveToLinearAccelerationLimiter = new SlewRateLimiter2d(maxAccelerationMetersPerSecSquared.get());
+    private final SlewRateLimiter2d moveToLinearAccelerationLimiter = new SlewRateLimiter2d(maxAccelerationMetersPerSecSquared.get(), robotState.getMeasuredChassisSpeeds());
 
     private final PIDController moveToAngular = moveToAngularTunable.getOrOriginal()
             .toPIDWrapRadians(

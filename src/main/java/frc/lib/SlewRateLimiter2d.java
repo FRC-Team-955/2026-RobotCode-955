@@ -35,6 +35,7 @@ package frc.lib;
 import edu.wpi.first.math.MathSharedStore;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
 /**
  * A class that limits the rate of change of an input value. Useful for implementing voltage,
@@ -78,6 +79,10 @@ public class SlewRateLimiter2d {
         this(rateLimit, -rateLimit, new Translation2d());
     }
 
+    public SlewRateLimiter2d(double rateLimit, ChassisSpeeds initialValue) {
+        this(rateLimit, -rateLimit, new Translation2d(initialValue.vxMetersPerSecond, initialValue.vyMetersPerSecond));
+    }
+
     /**
      * Filters the input to limit its slew rate.
      *
@@ -95,7 +100,9 @@ public class SlewRateLimiter2d {
                         m_negativeRateLimit * elapsedTime,
                         m_positiveRateLimit * elapsedTime
                 );
-        Translation2d realChange = new Translation2d(norm, wantedChange.getAngle());
+        Translation2d realChange = norm == 0.0 // if 0, then Rotation2d will throw a warning
+                ? new Translation2d()
+                : new Translation2d(norm, wantedChange.getAngle());
         m_prevVal = m_prevVal.plus(realChange);
 
         m_prevTime = currentTime;
