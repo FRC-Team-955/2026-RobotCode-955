@@ -17,8 +17,8 @@ import org.littletonrobotics.junction.Logger;
 import static frc.robot.subsystems.drive.DriveTuning.headingOverrideGainsTunable;
 
 @RequiredArgsConstructor
-public class DriveJoystickWithHeadingOverrideGoal extends DriveGoal {
-    private static final LoggedTunableNumber maxAccelerationMetersPerSecSquared = new LoggedTunableNumber("Drive/DriveJoystickWithHeadingOverride/MaxAccelerationMetersPerSecSquared", 5);
+public class DriveJoystickWithAimingGoal extends DriveGoal {
+    private static final LoggedTunableNumber maxAccelerationMetersPerSecSquared = new LoggedTunableNumber("Drive/DriveJoystickWithAiming/MaxAccelerationMetersPerSecSquared", 5);
 
     private static final RobotState robotState = RobotState.get();
     private static final Controller controller = Controller.get();
@@ -47,7 +47,7 @@ public class DriveJoystickWithHeadingOverrideGoal extends DriveGoal {
         }
         Translation2d linearVelocity = new Translation2d(linearMagnitude, linearDirection);
         linearVelocity = linearAccelerationLimiter.calculate(linearVelocity);
-        Logger.recordOutput("Drive/DriveJoystickWithHeadingOverride/LinearMagnitudeLimited", linearVelocity.getNorm());
+        Logger.recordOutput("Drive/DriveJoystickWithAiming/LinearMagnitudeLimited", linearVelocity.getNorm());
 
         return DriveRequest.chassisSpeeds(ChassisSpeeds.fromFieldRelativeSpeeds(
                 linearVelocity.getX(),

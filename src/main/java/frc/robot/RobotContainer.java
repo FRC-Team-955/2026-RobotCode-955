@@ -108,7 +108,7 @@ public class RobotContainer {
                 superstructure.cancel(),
                 superintake.cancel()
         ));
-        controller.b().toggleOnTrue(drive.driveJoystickWithHeadingOverride());
+        controller.b().toggleOnTrue(drive.driveJoystickWithAiming());
         controller.leftTrigger().whileTrue(Commands.repeatingSequence(
                 Commands.runOnce(() -> {
                     if (!shootingKinematics.isValidShootingParameters()) return;
