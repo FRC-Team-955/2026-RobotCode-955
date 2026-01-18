@@ -22,7 +22,6 @@ import java.util.function.DoubleSupplier;
 import static frc.robot.subsystems.superstructure.flywheel.FlywheelConstants.*;
 
 public class Flywheel implements Periodic {
-    private static final PIDF.Tunable positionGainsTunable = positionGains.tunable("Flywheel/Position");
     private static final PIDF.Tunable velocityGainsTunable = velocityGains.tunable("Flywheel/Velocity");
     private static final LoggedTunableNumber runAtVoltage = new LoggedTunableNumber("Flywheel/Goal/RunAtVoltage", 3.0);
 
@@ -35,8 +34,7 @@ public class Flywheel implements Periodic {
     public enum Goal {
         IDLE(() -> 0, RequestType.VoltageVolts),
         RUN_AT_VOLTAGE(runAtVoltage::get, RequestType.VoltageVolts),
-        RUN_AT_CERTAIN_SPEED(() -> 20, RequestType.VelocityRadPerSec),
-        RUN_TO_CERTAIN_POSITION(() -> 3, RequestType.PositionRad),
+        RUN_AT_CERTAIN_SPEED(() -> 20, RequestType.VelocityRadPerSec)
         ;
 
         /** Should be constant for every loop cycle */
@@ -76,7 +74,6 @@ public class Flywheel implements Periodic {
             io.setBrakeMode(!operatorDashboard.coastOverride.get());
         }
 
-        positionGainsTunable.ifChanged(io::setPositionPIDF);
         velocityGainsTunable.ifChanged(io::setVelocityPIDF);
     }
 

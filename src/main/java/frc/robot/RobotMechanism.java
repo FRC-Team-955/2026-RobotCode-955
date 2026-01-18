@@ -6,6 +6,7 @@ import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import frc.lib.subsystem.Periodic;
+import frc.robot.subsystems.superstructure.flywheel.Flywheel;
 import org.littletonrobotics.junction.Logger;
 
 import static frc.robot.subsystems.drive.DriveConstants.driveConfig;
@@ -34,6 +35,7 @@ public class RobotMechanism implements Periodic {
     );
 
     private static final RobotState robotState = RobotState.get();
+    private static final Flywheel flywheel = Flywheel.get();
 
     private static RobotMechanism instance;
 
@@ -57,12 +59,17 @@ public class RobotMechanism implements Periodic {
                         new Rotation3d()
                 ));
 
+        Transform3d flywheelTransform = flywheelsInitial.plus(new Transform3d(
+                new Translation3d(),
+                new Rotation3d(0.0, flywheel.getPositionRad(), 0.0)
+        ));
+
         Logger.recordOutput("RobotMechanism/Pose", robotPose);
         Logger.recordOutput(
                 "RobotMechanism/Components",
                 intakeRollerInitial,
                 indexerInitial,
-                flywheelsInitial,
+                flywheelTransform,
                 intakePivotInitial,
                 hoodInitial
         );
