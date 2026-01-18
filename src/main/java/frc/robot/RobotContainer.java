@@ -114,11 +114,11 @@ public class RobotContainer {
                     if (!shootingKinematics.isValidShootingParameters()) return;
                     SimulatedArena.getInstance().addGamePieceProjectile(new ReefscapeAlgaeOnFly(
                             ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose().getTranslation(),
-                            ShootingKinematics.ballExitTransform.getTranslation().toTranslation2d(),
+                            ShootingKinematics.fuelExitTransform.getTranslation().toTranslation2d(),
                             ModuleIOSim.driveSimulation.getDriveTrainSimulatedChassisSpeedsFieldRelative(),
                             //Rotation2d.fromRadians(shootingKinematics.getShootingParameters().headingRad()),
                             ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose().getRotation(),
-                            Units.Meters.of(ShootingKinematics.ballExitTransform.getTranslation().getZ()),
+                            Units.Meters.of(ShootingKinematics.fuelExitTransform.getTranslation().getZ()),
                             Units.MetersPerSecond.of(shootingKinematics.getShootingParameters().velocityMetersPerSec()),
                             Units.Radians.of(shootingKinematics.getShootingParameters().hoodAngleRad())
                     ).disableBecomesGamePieceOnFieldAfterTouchGround());

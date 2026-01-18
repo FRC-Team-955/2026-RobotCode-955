@@ -14,7 +14,7 @@ import org.littletonrobotics.junction.Logger;
 public class ShootingKinematics implements Periodic {
     private static final LoggedTunableNumber robotVelocityScalar = new LoggedTunableNumber("ShootingKinematics/RobotVelocityScalar", 1.2);
 
-    public static final Transform3d ballExitTransform = new Transform3d(
+    public static final Transform3d fuelExitTransform = new Transform3d(
             new Translation3d(Units.inchesToMeters(-4.0), Units.inchesToMeters(-9.0), Units.inchesToMeters(15.0)),
             new Rotation3d()
     );
@@ -63,14 +63,14 @@ public class ShootingKinematics implements Periodic {
 
     private boolean updateShootingParameters() {
         Pose3d robotPose = new Pose3d(robotState.getPose());
-        Pose3d ballExitPose = robotPose.transformBy(ballExitTransform);
-        Logger.recordOutput("ShootingKinematics/BallExitPose", ballExitPose);
+        Pose3d fuelExitPose = robotPose.transformBy(fuelExitTransform);
+        Logger.recordOutput("ShootingKinematics/fuelExitPose", fuelExitPose);
 
         Pose3d hubPose = new Pose3d(Util.flipIfNeeded(hubTranslation), new Rotation3d());
-        Transform3d ballExitToHub = new Transform3d(ballExitPose, hubPose);
+        Transform3d fuelExitToHub = new Transform3d(fuelExitPose, hubPose);
 
-        double xyDist = ballExitToHub.getTranslation().toTranslation2d().getNorm();
-        double zDist = ballExitToHub.getTranslation().getZ();
+        double xyDist = fuelExitToHub.getTranslation().toTranslation2d().getNorm();
+        double zDist = fuelExitToHub.getTranslation().getZ();
         double v0 = distanceToVelocity.get(xyDist);
         Logger.recordOutput("ShootingKinematics/XYDist", xyDist);
         Logger.recordOutput("ShootingKinematics/Stationary/Velocity", v0);
@@ -125,7 +125,7 @@ public class ShootingKinematics implements Periodic {
         // 4. Now calculate phi, theta, and shooting magnitude from 3d shooting vector
         double v = Math.sqrt(vx * vx + vy * vy + vz * vz);
         double phi = Math.asin(vz / v);
-        // TODO: account for robot to ball exit offset
+        // TODO: account for robot to fuel exit offset
         double theta = Math.atan2(vy, vx);
         Logger.recordOutput("ShootingKinematics/Velocity", v);
         Logger.recordOutput("ShootingKinematics/Phi", phi);
