@@ -18,7 +18,7 @@ public class ShootingKinematics implements Periodic {
             new Translation3d(Units.inchesToMeters(-4.0), Units.inchesToMeters(-9.0), Units.inchesToMeters(15.0)),
             new Rotation3d()
     );
-    private static final Translation3d hubTranslation = new Translation3d(4.6256194, 4.0346376, 1.8288);
+    private static final Translation3d blueHubTranslation = new Translation3d(4.6256194, 4.0346376, 1.8288);
     private static final InterpolatingDoubleTreeMap distanceToVelocity = new InterpolatingDoubleTreeMap();
 
     static {
@@ -66,7 +66,8 @@ public class ShootingKinematics implements Periodic {
         Pose3d fuelExitPose = robotPose.transformBy(fuelExitTransform);
         Logger.recordOutput("ShootingKinematics/fuelExitPose", fuelExitPose);
 
-        Pose3d hubPose = new Pose3d(Util.flipIfNeeded(hubTranslation), new Rotation3d());
+        Translation3d hubTranslation = Util.flipIfNeeded(blueHubTranslation);
+        Pose3d hubPose = new Pose3d(hubTranslation, new Rotation3d());
         Transform3d fuelExitToHub = new Transform3d(fuelExitPose, hubPose);
 
         double xyDist = fuelExitToHub.getTranslation().toTranslation2d().getNorm();
@@ -104,13 +105,16 @@ public class ShootingKinematics implements Periodic {
         double vz = v0 * Math.sin(phi_stationary);
 
         // 2. Next, rotate shooting vector into field coordinates
-        Rotation2d robotToHub = hubPose.getTranslation().toTranslation2d()
-                .minus(robotPose.getTranslation().toTranslation2d())
+        // Note that using fuel exit pose instead of robot pose automatically takes care
+        // of compensating for theta difference when looking from center of robot and from
+        // fuel exit point
+        Rotation2d fuelExitToHubAngle = hubPose.getTranslation().toTranslation2d()
+                .minus(fuelExitPose.getTranslation().toTranslation2d())
                 .getAngle();
         // We could use Translation2d to rotate it, but since vy = 0, it's simple enough
         // to just use trig
-        double vy = vx * robotToHub.getSin();
-        vx = vx * robotToHub.getCos();
+        double vy = vx * fuelExitToHubAngle.getSin();
+        vx = vx * fuelExitToHubAngle.getCos();
 
         // 3. Now subtract robot velocity from stationary shooting velocity to get final
         // shooting vector
