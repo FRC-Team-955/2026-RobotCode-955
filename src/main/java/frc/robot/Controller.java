@@ -90,6 +90,9 @@ public class Controller implements Periodic {
         Translation2d linearVelocity;
         if (x != 0 || y != 0) {
             driveLinearDirection = new Rotation2d(x, y);
+            if (Util.shouldFlip()) {
+                driveLinearDirection = driveLinearDirection.plus(Rotation2d.k180deg);
+            }
             linearVelocity = new Pose2d(new Translation2d(), driveLinearDirection)
                     .transformBy(new Transform2d(driveLinearMagnitude, 0.0, new Rotation2d()))
                     .getTranslation();
@@ -104,9 +107,6 @@ public class Controller implements Periodic {
         Logger.recordOutput("Controller/Drive/LinearVelocity", linearVelocity);
         Logger.recordOutput("Controller/Drive/OmegaMagnitude", omegaMagnitude);
 
-        if (Util.shouldFlip()) {
-            linearVelocity = linearVelocity.rotateBy(Rotation2d.k180deg);
-        }
         driveSetpointFieldRelative = new ChassisSpeeds(
                 linearVelocity.getX() * driveConfig.maxVelocityMetersPerSec(),
                 linearVelocity.getY() * driveConfig.maxVelocityMetersPerSec(),
