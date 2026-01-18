@@ -93,9 +93,7 @@ public class Controller implements Periodic {
             if (Util.shouldFlip()) {
                 driveLinearDirection = driveLinearDirection.plus(Rotation2d.k180deg);
             }
-            linearVelocity = new Pose2d(new Translation2d(), driveLinearDirection)
-                    .transformBy(new Transform2d(driveLinearMagnitude, 0.0, new Rotation2d()))
-                    .getTranslation();
+            linearVelocity = new Translation2d(driveLinearMagnitude, driveLinearDirection);
         } else {
             // Linear magnitude should be 0 anyways
             driveLinearDirection = new Rotation2d();
