@@ -110,16 +110,19 @@ public class RobotContainer {
         ));
         controller.b().toggleOnTrue(drive.driveJoystickWithHeadingOverride());
         controller.leftTrigger().whileTrue(Commands.repeatingSequence(
-                Commands.runOnce(() -> SimulatedArena.getInstance().addGamePieceProjectile(new ReefscapeAlgaeOnFly(
-                        ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose().getTranslation(),
-                        ShootingKinematics.ballExitTransform.getTranslation().toTranslation2d(),
-                        ModuleIOSim.driveSimulation.getDriveTrainSimulatedChassisSpeedsFieldRelative(),
-                        //Rotation2d.fromRadians(shootingKinematics.getShootingParameters().headingRad()),
-                        ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose().getRotation(),
-                        Units.Meters.of(ShootingKinematics.ballExitTransform.getTranslation().getZ()),
-                        Units.MetersPerSecond.of(shootingKinematics.getShootingParameters().velocityMetersPerSec()),
-                        Units.Radians.of(shootingKinematics.getShootingParameters().hoodAngleRad())
-                ).disableBecomesGamePieceOnFieldAfterTouchGround())),
+                Commands.runOnce(() -> {
+                    if (!shootingKinematics.isValidShootingParameters()) return;
+                    SimulatedArena.getInstance().addGamePieceProjectile(new ReefscapeAlgaeOnFly(
+                            ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose().getTranslation(),
+                            ShootingKinematics.ballExitTransform.getTranslation().toTranslation2d(),
+                            ModuleIOSim.driveSimulation.getDriveTrainSimulatedChassisSpeedsFieldRelative(),
+                            //Rotation2d.fromRadians(shootingKinematics.getShootingParameters().headingRad()),
+                            ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose().getRotation(),
+                            Units.Meters.of(ShootingKinematics.ballExitTransform.getTranslation().getZ()),
+                            Units.MetersPerSecond.of(shootingKinematics.getShootingParameters().velocityMetersPerSec()),
+                            Units.Radians.of(shootingKinematics.getShootingParameters().hoodAngleRad())
+                    ).disableBecomesGamePieceOnFieldAfterTouchGround());
+                }),
                 Commands.waitSeconds(0.1)
         ));
 

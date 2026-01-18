@@ -4,6 +4,7 @@ import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.Alert;
 import frc.lib.Util;
 import frc.lib.network.LoggedTunableNumber;
 import frc.lib.subsystem.Periodic;
@@ -31,6 +32,10 @@ public class ShootingKinematics implements Periodic {
 
     @Getter
     private ShootingParameters shootingParameters = null;
+    @Getter
+    private boolean validShootingParameters = false;
+
+    private final Alert noValidShootingParametersAlert = new Alert("Could not find valid shooting parameters.", Alert.AlertType.kInfo);
 
     private static ShootingKinematics instance;
 
@@ -52,6 +57,11 @@ public class ShootingKinematics implements Periodic {
 
     @Override
     public void periodicBeforeCommands() {
+        validShootingParameters = updateShootingParameters();
+        noValidShootingParametersAlert.set(!validShootingParameters);
+    }
+
+    private boolean updateShootingParameters() {
         Pose3d robotPose = new Pose3d(robotState.getPose());
         Pose3d ballExitPose = robotPose.transformBy(ballExitTransform);
         Logger.recordOutput("ShootingKinematics/BallExitPose", ballExitPose);
@@ -70,14 +80,13 @@ public class ShootingKinematics implements Periodic {
         final double g = 10.4; //9.81;
         double discriminant = Math.pow(v0, 4) - g * (g * xyDist * xyDist + 2 * zDist * v0 * v0);
         if (discriminant < 0) {
-            Util.error("ShootingKinematics: Discriminant is negative");
-            shootingParameters = null;
-            return;
+            return false;
         }
         double phi_1 = Math.atan((v0 * v0 + Math.sqrt(discriminant)) / (g * xyDist));
         double phi_2 = Math.atan((v0 * v0 - Math.sqrt(discriminant)) / (g * xyDist));
 
-        // Find largest and valid phi (largest guarantees we have a path that will fall down into the hub instead of going straight at the hub)
+        // Find largest and valid phi (largest guarantees we have a path that will fall
+        // down into the hub instead of going straight at the hub)
         double phi_stationary;
         if (isValidHoodAngle(phi_1) && (phi_1 > phi_2 || !isValidHoodAngle(phi_2))) {
             phi_stationary = phi_1;
@@ -88,9 +97,7 @@ public class ShootingKinematics implements Periodic {
             Logger.recordOutput("ShootingKinematics/Stationary/Phi", phi_2);
             Logger.recordOutput("ShootingKinematics/Stationary/PhiAlternative", phi_1);
         } else {
-            Util.error("ShootingKinematics: No valid phi found");
-            shootingParameters = null;
-            return;
+            return false;
         }
 
         double vx = v0 * Math.cos(phi_stationary);
@@ -100,11 +107,13 @@ public class ShootingKinematics implements Periodic {
         Rotation2d robotToHub = hubPose.getTranslation().toTranslation2d()
                 .minus(robotPose.getTranslation().toTranslation2d())
                 .getAngle();
-        // We could use Translation2d to rotate it, but since vy = 0, it's simple enough to just use trig
+        // We could use Translation2d to rotate it, but since vy = 0, it's simple enough
+        // to just use trig
         double vy = vx * robotToHub.getSin();
         vx = vx * robotToHub.getCos();
 
-        // 3. Now subtract robot velocity from stationary shooting velocity to get final shooting vector
+        // 3. Now subtract robot velocity from stationary shooting velocity to get final
+        // shooting vector
         ChassisSpeeds robotSpeeds = robotState.getMeasuredChassisSpeeds().times(robotVelocityScalar.get());
         vx -= robotSpeeds.vxMetersPerSecond;
         vy -= robotSpeeds.vyMetersPerSecond;
@@ -123,6 +132,7 @@ public class ShootingKinematics implements Periodic {
         Logger.recordOutput("ShootingKinematics/Theta", theta);
 
         shootingParameters = new ShootingParameters(v, phi, theta);
+        return true;
     }
 
     public record ShootingParameters(double velocityMetersPerSec, double hoodAngleRad, double headingRad) {}
