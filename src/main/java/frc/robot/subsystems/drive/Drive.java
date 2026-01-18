@@ -15,10 +15,9 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.lib.PIDF;
 import frc.lib.Util;
 import frc.lib.subsystem.CommandBasedSubsystem;
-import frc.lib.swerve.SwerveSetpoint;
-import frc.lib.swerve.SwerveSetpointGenerator;
 import frc.robot.OperatorDashboard;
 import frc.robot.RobotState;
 import frc.robot.subsystems.drive.goals.*;
@@ -27,16 +26,18 @@ import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.function.DoubleSupplier;
 import java.util.function.IntToDoubleFunction;
 import java.util.function.Supplier;
 
 import static frc.lib.HighFrequencySamplingThread.highFrequencyLock;
 import static frc.robot.subsystems.drive.DriveConstants.*;
-import static frc.robot.subsystems.drive.DriveTuning.moduleDriveGainsTunable;
-import static frc.robot.subsystems.drive.DriveTuning.moduleTurnGainsTunable;
 
 public class Drive extends CommandBasedSubsystem {
+    private static final PIDF.Tunable moduleDriveGainsTunable = moduleConfig.driveGains().tunable("Drive/ModuleDrive");
+    private static final PIDF.Tunable moduleTurnGainsTunable = moduleConfig.turnGains().tunable("Drive/ModuleTurn");
+
     private final RobotState robotState = RobotState.get();
     private final OperatorDashboard operatorDashboard = OperatorDashboard.get();
 
@@ -58,11 +59,6 @@ public class Drive extends CommandBasedSubsystem {
     };
     @Getter
     private Rotation2d rawGyroRotation = new Rotation2d();
-    private ChassisSpeeds measuredChassisSpeeds = new ChassisSpeeds();
-
-    private final SwerveSetpointGenerator setpointGenerator = new SwerveSetpointGenerator(robotState.getKinematics());
-    /** If null, it will be set to the measured ChassisSpeeds and module states when the setpoint generator starts to be used */
-    private SwerveSetpoint prevSetpoint = null;
 
     private final Alert gyroDisconnectedAlert = new Alert("Disconnected gyro, using kinematics as fallback.", Alert.AlertType.kError);
 
@@ -202,7 +198,7 @@ public class Drive extends CommandBasedSubsystem {
         }
 
         // Chassis speeds
-        measuredChassisSpeeds = robotState.getKinematics().toChassisSpeeds(getMeasuredModuleStates());
+        ChassisSpeeds measuredChassisSpeeds = robotState.getKinematics().toChassisSpeeds(getMeasuredModuleStates());
         Logger.recordOutput("Drive/ChassisSpeeds/Measured", measuredChassisSpeeds);
         ChassisSpeeds measuredChassisSpeedsFieldRelative = ChassisSpeeds.fromRobotRelativeSpeeds(
                 measuredChassisSpeeds,
@@ -238,79 +234,37 @@ public class Drive extends CommandBasedSubsystem {
 
         // Stop moving when idle or disabled
         if (request.type() == DriveRequest.Type.STOP || DriverStation.isDisabled()) {
-            prevSetpoint = null;
-
             for (var module : modules) {
                 module.stop();
             }
         }
         // Closed loop control
-        else if (request.type() == DriveRequest.Type.CHASSIS_SPEEDS_DIRECT || request.type() == DriveRequest.Type.CHASSIS_SPEEDS_OPTIMIZED) {
-            if (useSetpointGenerator && !disableDriving && request.type() == DriveRequest.Type.CHASSIS_SPEEDS_OPTIMIZED) {
-                Logger.recordOutput("Drive/SetpointGenerator", true);
+        else if (request.type() == DriveRequest.Type.CHASSIS_SPEEDS) {
+            // Calculate module setpoints
+            ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(request.value(), 0.02);
+            SwerveModuleState[] setpointStates = robotState.getKinematics().toSwerveModuleStates(discreteSpeeds);
+            SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, driveConfig.maxVelocityMetersPerSec());
 
-                Logger.recordOutput(
-                        "Drive/ModuleStates/Setpoints",
-                        // DON'T DO ANYTHING WITH THIS. SETPOINT GENERATOR SHOULD NOT GET A DISCRETIZED SETPOINT
-                        // Only for logging
-                        robotState.getKinematics().toSwerveModuleStates(ChassisSpeeds.discretize(request.value(), 0.02))
-                );
+            Logger.recordOutput("Drive/ModuleStates/Setpoints", setpointStates);
 
-                if (prevSetpoint == null) {
-                    // Reset to current chassis speeds and module states
-                    prevSetpoint = new SwerveSetpoint(
-                            measuredChassisSpeeds,
-                            getMeasuredModuleStates()
-                    );
-                }
+            // Send setpoints to modules
+            for (int i = 0; i < modules.length; i++) {
+                var currentAngle = modules[i].getTurnAngle();
 
-                prevSetpoint = setpointGenerator.generateSetpoint(
-                        goal.getModuleLimits(),
-                        prevSetpoint,
-                        request.value(), // THIS SHOULD NOT BE DISCRETIZED
-                        0.02
-                );
-                var setpointStates = prevSetpoint.moduleStates();
+                // Optimize angle to reduce azimuth/steering/turn rotation
+                setpointStates[i].optimize(currentAngle);
 
-                // Send setpoints to modules
-                for (int i = 0; i < modules.length; i++) {
-                    // Optimize velocity setpoint
-                    var currentAngle = modules[i].getTurnAngle();
-                    setpointStates[i].cosineScale(currentAngle);
-                    // Setpoint generator already optimizes the setpoints
-                    modules[i].runSetpoint(setpointStates[i]);
-                }
+                // Note that cosine scaling MUST come AFTER angle optimization
+                // because cosine scaling should be based on the final angle setpoint
+                setpointStates[i].cosineScale(currentAngle);
 
-                // Log setpoint states
-                Logger.recordOutput("Drive/ModuleStates/SetpointsOptimized", setpointStates);
-                Logger.recordOutput("Drive/ChassisSpeeds/SetpointOptimized", prevSetpoint.chassisSpeeds());
-            } else {
-                Logger.recordOutput("Drive/SetpointGenerator", false);
-                prevSetpoint = null;
-
-                // Calculate module setpoints
-                ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(request.value(), 0.02);
-                SwerveModuleState[] setpointStates = robotState.getKinematics().toSwerveModuleStates(discreteSpeeds);
-                SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, driveConfig.moduleLimits().maxDriveVelocityMetersPerSec());
-
-                Logger.recordOutput("Drive/ModuleStates/Setpoints", setpointStates);
-
-                // Send setpoints to modules
-                for (int i = 0; i < modules.length; i++) {
-                    // Optimize velocity setpoint
-                    var currentAngle = modules[i].getTurnAngle();
-                    setpointStates[i].cosineScale(currentAngle);
-                    setpointStates[i].optimize(currentAngle);
-                    modules[i].runSetpoint(setpointStates[i]);
-                }
-
-                // Log setpoint states
-                Logger.recordOutput("Drive/ModuleStates/SetpointsOptimized", setpointStates);
-                Logger.recordOutput("Drive/ChassisSpeeds/SetpointOptimized", robotState.getKinematics().toChassisSpeeds(setpointStates));
+                modules[i].runSetpoint(setpointStates[i]);
             }
-        } else if (request.type() == DriveRequest.Type.CHARACTERIZATION) {
-            prevSetpoint = null;
 
+            // Log setpoint states
+            Logger.recordOutput("Drive/ModuleStates/SetpointsOptimized", setpointStates);
+            Logger.recordOutput("Drive/ChassisSpeeds/SetpointOptimized", robotState.getKinematics().toChassisSpeeds(setpointStates));
+        } else if (request.type() == DriveRequest.Type.CHARACTERIZATION) {
             for (var module : modules) {
                 module.runCharacterization(request.value().vxMetersPerSecond);
             }
@@ -361,6 +315,14 @@ public class Drive extends CommandBasedSubsystem {
         return Arrays.stream(modules).mapToDouble(Module::getDrivePositionRad).toArray();
     }
 
+    public double[] getSlipCurrentCharacterizationVelocities() {
+        return Arrays.stream(modules).mapToDouble(Module::getDriveVelocityRadPerSec).toArray();
+    }
+
+    public double[] getSlipCurrentCharacterizationCurrents() {
+        return Arrays.stream(modules).mapToDouble(Module::getDriveCurrentAmps).toArray();
+    }
+
     public Command followTrajectory(Trajectory<SwerveSample> trajectory) {
         return startIdle(() -> goal = new FollowTrajectoryGoal(trajectory));
     }
@@ -373,6 +335,10 @@ public class Drive extends CommandBasedSubsystem {
         return startIdle(() -> goal = new DriveJoystickGoal());
     }
 
+    public Command driveJoystickWithAssist(Supplier<Optional<Pose2d>> assistPoseSupplier) {
+        return startIdle(() -> goal = new DriveJoystickWithAssistGoal(assistPoseSupplier));
+    }
+
     public Command runRobotRelative(Supplier<ChassisSpeeds> chassisSpeedsSupplier) {
         return startIdle(() -> goal = new VelocityRobotRelativeGoal(chassisSpeedsSupplier));
     }
@@ -383,5 +349,9 @@ public class Drive extends CommandBasedSubsystem {
 
     public Command wheelRadiusCharacterization(WheelRadiusCharacterizationGoal.Direction direction) {
         return startIdle(() -> goal = new WheelRadiusCharacterizationGoal(direction));
+    }
+
+    public Command slipCurrentCharacterization() {
+        return startIdle(() -> goal = new SlipCurrentCharacterizationGoal());
     }
 }
