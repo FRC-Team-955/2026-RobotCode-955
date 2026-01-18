@@ -7,6 +7,7 @@ import frc.robot.RobotState;
 import frc.robot.subsystems.apriltagvision.AprilTagVision;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.gamepiecevision.GamePieceVision;
+import frc.robot.subsystems.superintake.intakerollers.IntakeRollers;
 
 public abstract class SuperintakeCommand {
     protected final RobotState robotState = RobotState.get();
@@ -18,6 +19,7 @@ public abstract class SuperintakeCommand {
     protected final GamePieceVision gamePieceVision = GamePieceVision.get();
 
     protected final Superintake superintake = Superintake.get();
+    protected final IntakeRollers intakeRollers = IntakeRollers.get();
 
     public abstract Command create();
 

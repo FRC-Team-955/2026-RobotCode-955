@@ -6,14 +6,19 @@ import frc.lib.subsystem.CommandBasedSubsystem;
 import frc.robot.OperatorDashboard;
 import frc.robot.RobotState;
 import frc.robot.subsystems.apriltagvision.AprilTagVision;
+import frc.robot.subsystems.superintake.intakerollers.IntakeRollers;
 import lombok.RequiredArgsConstructor;
 import org.littletonrobotics.junction.Logger;
+
+import java.util.function.Supplier;
 
 public class Superintake extends CommandBasedSubsystem {
     private final RobotState robotState = RobotState.get();
     private final OperatorDashboard operatorDashboard = OperatorDashboard.get();
 
     private final AprilTagVision aprilTagVision = AprilTagVision.get();
+
+    private final IntakeRollers intakeRollers = IntakeRollers.get();
 
     @RequiredArgsConstructor
     public enum Goal {
@@ -22,9 +27,10 @@ public class Superintake extends CommandBasedSubsystem {
 
     private Goal goal = Goal.IDLE;
 
-    public Command setGoal(Goal superintakeGoal) {
+    public Command setGoal(Goal superintakeGoal, Supplier<IntakeRollers.Goal> intakeRollersGoal) {
         return runOnce(() -> {
             goal = superintakeGoal;
+            intakeRollers.setGoal(intakeRollersGoal.get());
         });
     }
 
@@ -54,7 +60,8 @@ public class Superintake extends CommandBasedSubsystem {
     public Command cancel() {
         return CommandsExt.eagerSequence(
                 setGoal(
-                        Goal.IDLE
+                        Goal.IDLE,
+                        () -> IntakeRollers.Goal.IDLE
                 ),
                 aprilTagVision.setTagIdFilter(new int[0])
         ).ignoringDisable(true);
