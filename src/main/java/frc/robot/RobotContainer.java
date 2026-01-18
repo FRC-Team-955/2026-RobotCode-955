@@ -3,6 +3,7 @@ package frc.robot;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
@@ -13,10 +14,13 @@ import frc.lib.CANLogger;
 import frc.lib.commands.CommandsExt;
 import frc.robot.subsystems.apriltagvision.AprilTagVision;
 import frc.robot.subsystems.drive.Drive;
+import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.goals.WheelRadiusCharacterizationGoal;
 import frc.robot.subsystems.gamepiecevision.GamePieceVision;
 import frc.robot.subsystems.superintake.Superintake;
 import frc.robot.subsystems.superstructure.Superstructure;
+import org.ironmaple.simulation.SimulatedArena;
+import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeAlgaeOnFly;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -35,6 +39,7 @@ public class RobotContainer {
     public final Controller controller = Controller.get();
     public final CANLogger canLogger = CANLogger.get();
     public final RobotMechanism robotMechanism = RobotMechanism.get();
+    public final ShootingKinematics shootingKinematics = ShootingKinematics.get();
 
     /* Subsystems */
     // Note: order does matter
@@ -102,6 +107,19 @@ public class RobotContainer {
         controller.leftBumper().onTrue(Commands.parallel(
                 superstructure.cancel(),
                 superintake.cancel()
+        ));
+        controller.leftTrigger().whileTrue(Commands.repeatingSequence(
+                Commands.runOnce(() -> SimulatedArena.getInstance().addGamePieceProjectile(new ReefscapeAlgaeOnFly(
+                        ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose().getTranslation(),
+                        ShootingKinematics.ballExitTransform.getTranslation().toTranslation2d(),
+                        ModuleIOSim.driveSimulation.getDriveTrainSimulatedChassisSpeedsFieldRelative(),
+                        Rotation2d.fromRadians(shootingKinematics.getShootingParameters().headingRad()),
+//                    ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose().getRotation(),
+                        Units.Meters.of(ShootingKinematics.ballExitTransform.getTranslation().getZ()),
+                        Units.MetersPerSecond.of(shootingKinematics.getShootingParameters().velocityMetersPerSec()),
+                        Units.Radians.of(shootingKinematics.getShootingParameters().hoodAngleRad())
+                ).disableBecomesGamePieceOnFieldAfterTouchGround())),
+                Commands.waitSeconds(0.1)
         ));
 
         if (BuildConstants.mode == BuildConstants.Mode.SIM) {

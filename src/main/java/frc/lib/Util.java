@@ -3,6 +3,7 @@ package frc.lib;
 import choreo.util.ChoreoAllianceFlipUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -34,6 +35,12 @@ public class Util {
         return shouldFlip()
                 ? ChoreoAllianceFlipUtil.flip(pose2d)
                 : pose2d;
+    }
+
+    public static Translation3d flipIfNeeded(Translation3d translation3d) {
+        return shouldFlip()
+                ? ChoreoAllianceFlipUtil.flip(translation3d)
+                : translation3d;
     }
 
     private static final Set<String> loggedErrors = new HashSet<>();
