@@ -13,10 +13,11 @@ public abstract class SuperintakeCommand {
     protected final OperatorDashboard operatorDashboard = OperatorDashboard.get();
     protected final Controller controller = Controller.get();
 
-    protected final Superintake superintake = Superintake.get();
     protected final AprilTagVision aprilTagVision = AprilTagVision.get();
     protected final Drive drive = Drive.get();
     protected final GamePieceVision gamePieceVision = GamePieceVision.get();
+
+    protected final Superintake superintake = Superintake.get();
 
     public abstract Command create();
 
