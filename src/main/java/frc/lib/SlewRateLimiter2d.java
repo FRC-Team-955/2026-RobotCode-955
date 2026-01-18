@@ -41,7 +41,7 @@ import edu.wpi.first.math.geometry.Translation2d;
  * setpoint, and/or output ramps. A slew-rate limit is most appropriate when the quantity being
  * controlled is a velocity or a voltage; when controlling a position, consider using a {@link
  * edu.wpi.first.math.trajectory.TrapezoidProfile} instead.
- *
+ * <p>
  * Now with support for TWO DIMENSIONS!!!! Ensures that the norm/magnitude of change does not
  * exceed given rate limit.
  */
@@ -56,10 +56,10 @@ public class SlewRateLimiter2d {
      * value.
      *
      * @param positiveRateLimit The rate-of-change limit in the positive direction, in units per
-     *     second. This is expected to be positive.
+     *                          second. This is expected to be positive.
      * @param negativeRateLimit The rate-of-change limit in the negative direction, in units per
-     *     second. This is expected to be negative.
-     * @param initialValue The initial value of the input.
+     *                          second. This is expected to be negative.
+     * @param initialValue      The initial value of the input.
      */
     public SlewRateLimiter2d(double positiveRateLimit, double negativeRateLimit, Translation2d initialValue) {
         m_positiveRateLimit = positiveRateLimit;
@@ -82,6 +82,7 @@ public class SlewRateLimiter2d {
      * Filters the input to limit its slew rate.
      *
      * @param input The input value whose slew rate is to be limited.
+     *
      * @return The filtered value, which will not change faster than the slew rate.
      */
     public Translation2d calculate(Translation2d input) {
@@ -124,9 +125,9 @@ public class SlewRateLimiter2d {
      * Sets the rate-of-change limit to the given positive and negative rate limits.
      *
      * @param positiveRateLimit The rate-of-change limit in the positive direction, in units per
-     *     second. This is expected to be positive.
+     *                          second. This is expected to be positive.
      * @param negativeRateLimit The rate-of-change limit in the negative direction, in units per
-     *     second. This is expected to be negative.
+     *                          second. This is expected to be negative.
      */
     public void setLimit(double positiveRateLimit, double negativeRateLimit) {
         m_positiveRateLimit = positiveRateLimit;
@@ -138,7 +139,7 @@ public class SlewRateLimiter2d {
      * -rateLimit.
      *
      * @param rateLimit The rate-of-change limit in both directions, in units per second. This is
-     *     expected to be positive.
+     *                  expected to be positive.
      */
     public void setLimit(double rateLimit) {
         m_positiveRateLimit = rateLimit;

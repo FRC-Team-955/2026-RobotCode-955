@@ -52,10 +52,10 @@ public class SlewRateLimiter {
      * value.
      *
      * @param positiveRateLimit The rate-of-change limit in the positive direction, in units per
-     *     second. This is expected to be positive.
+     *                          second. This is expected to be positive.
      * @param negativeRateLimit The rate-of-change limit in the negative direction, in units per
-     *     second. This is expected to be negative.
-     * @param initialValue The initial value of the input.
+     *                          second. This is expected to be negative.
+     * @param initialValue      The initial value of the input.
      */
     public SlewRateLimiter(double positiveRateLimit, double negativeRateLimit, double initialValue) {
         m_positiveRateLimit = positiveRateLimit;
@@ -78,6 +78,7 @@ public class SlewRateLimiter {
      * Filters the input to limit its slew rate.
      *
      * @param input The input value whose slew rate is to be limited.
+     *
      * @return The filtered value, which will not change faster than the slew rate.
      */
     public double calculate(double input) {
@@ -115,9 +116,9 @@ public class SlewRateLimiter {
      * Sets the rate-of-change limit to the given positive and negative rate limits.
      *
      * @param positiveRateLimit The rate-of-change limit in the positive direction, in units per
-     *     second. This is expected to be positive.
+     *                          second. This is expected to be positive.
      * @param negativeRateLimit The rate-of-change limit in the negative direction, in units per
-     *     second. This is expected to be negative.
+     *                          second. This is expected to be negative.
      */
     public void setLimit(double positiveRateLimit, double negativeRateLimit) {
         m_positiveRateLimit = positiveRateLimit;
@@ -129,7 +130,7 @@ public class SlewRateLimiter {
      * -rateLimit.
      *
      * @param rateLimit The rate-of-change limit in both directions, in units per second. This is
-     *     expected to be positive.
+     *                  expected to be positive.
      */
     public void setLimit(double rateLimit) {
         m_positiveRateLimit = rateLimit;
