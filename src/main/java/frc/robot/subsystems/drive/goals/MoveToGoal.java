@@ -2,12 +2,12 @@ package frc.robot.subsystems.drive.goals;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.lib.PIDF;
+import frc.lib.SlewRateLimiter2d;
 import frc.lib.network.LoggedTunableNumber;
 import frc.robot.Controller;
 import frc.robot.RobotState;
@@ -39,7 +39,7 @@ public class MoveToGoal extends DriveGoal {
                     moveToConfig.linearPositionToleranceMeters(),
                     moveToConfig.linearVelocityToleranceMetersPerSec()
             );
-    private SlewRateLimiter moveToLinearAccelerationLimiter = new SlewRateLimiter(maxAccelerationMetersPerSecSquared.get());
+    private final SlewRateLimiter2d moveToLinearAccelerationLimiter = new SlewRateLimiter2d(maxAccelerationMetersPerSecSquared.get());
 
     private final PIDController moveToAngular = moveToAngularTunable.getOrOriginal()
             .toPIDWrapRadians(
@@ -52,9 +52,7 @@ public class MoveToGoal extends DriveGoal {
         moveToLinearTunable.ifChanged(gains -> gains.applyPID(moveToLinear));
         moveToAngularTunable.ifChanged(gains -> gains.applyPID(moveToAngular));
         if (maxAccelerationMetersPerSecSquared.hasChanged()) {
-            double lastVal = moveToLinearAccelerationLimiter.lastValue();
-            moveToLinearAccelerationLimiter = new SlewRateLimiter(maxAccelerationMetersPerSecSquared.get());
-            moveToLinearAccelerationLimiter.reset(lastVal);
+            moveToLinearAccelerationLimiter.setLimit(maxAccelerationMetersPerSecSquared.get());
         }
 
         //////////////////////////////////////////////////////////////////////
@@ -74,9 +72,6 @@ public class MoveToGoal extends DriveGoal {
                     0.0
             );
             Logger.recordOutput("Drive/MoveTo/LinearSetpointUnlimited", linearVelocityMetersPerSec);
-
-            linearVelocityMetersPerSec = moveToLinearAccelerationLimiter.calculate(linearVelocityMetersPerSec);
-            Logger.recordOutput("Drive/MoveTo/LinearSetpoint", linearVelocityMetersPerSec);
 
             boolean linearAtSetpoint = moveToLinear.atSetpoint();
             Logger.recordOutput("Drive/MoveTo/LinearAtSetpoint", linearAtSetpoint);
@@ -106,6 +101,9 @@ public class MoveToGoal extends DriveGoal {
 
         Rotation2d angleToGoalRad = currentPose.getTranslation().minus(goalPose.getTranslation()).getAngle();
         Translation2d linearXYVelocityMetersPerSec = new Translation2d(linearVelocityMetersPerSec, angleToGoalRad);
+        linearXYVelocityMetersPerSec = moveToLinearAccelerationLimiter.calculate(linearXYVelocityMetersPerSec);
+        Logger.recordOutput("Drive/MoveTo/LinearSetpoint", linearXYVelocityMetersPerSec.getNorm());
+
         ChassisSpeeds moveToSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
                 linearXYVelocityMetersPerSec.getX() * linearScalar,
                 linearXYVelocityMetersPerSec.getY() * linearScalar,
