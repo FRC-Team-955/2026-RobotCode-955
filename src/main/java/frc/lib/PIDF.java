@@ -31,6 +31,10 @@ import java.util.function.Consumer;
  * </ul>
  */
 public record PIDF(double kP, double kI, double kD, double kS, double kV, double kA, double kG) {
+    public static PIDF zero() {
+        return new PIDF(0, 0, 0, 0, 0, 0, 0);
+    }
+
     public static PIDF ofP(double kP) {
         return new PIDF(kP, 0, 0, 0, 0, 0, 0);
     }

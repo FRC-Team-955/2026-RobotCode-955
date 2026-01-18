@@ -12,7 +12,7 @@ public class GamePieceVisionIOSim extends GamePieceVisionIO {
     public void updateInputs(GamePieceVisionIOInputs inputs) {
         inputs.connected = true;
         inputs.ledsOn = ledsOn;
-        inputs.visible = ledsOn && SuperstructureIOSim.gamePieceVisible;
+        inputs.visible = ledsOn && false;
     }
 
     @Override
