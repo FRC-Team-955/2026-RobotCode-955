@@ -1,8 +1,11 @@
 package frc.robot;
 
+import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
 import frc.lib.Util;
@@ -62,7 +65,8 @@ public class ShootingKinematics implements Periodic {
     }
 
     private boolean updateShootingParameters() {
-        Pose3d robotPose = new Pose3d(robotState.getPose());
+        Pose2d robotPose2d = robotState.getPose();
+        Pose3d robotPose = new Pose3d(robotPose2d);
         Pose3d fuelExitPose = robotPose.transformBy(fuelExitTransform);
         Logger.recordOutput("ShootingKinematics/fuelExitPose", fuelExitPose);
 
@@ -122,11 +126,23 @@ public class ShootingKinematics implements Periodic {
         vx -= robotSpeeds.vxMetersPerSecond;
         vy -= robotSpeeds.vyMetersPerSecond;
 
+        // 4. Account for drivebase angular velocity
+        Vector<N3> fuelExitFieldRelative = new Translation3d(
+                fuelExitTransform.getTranslation().toTranslation2d()
+                        .rotateBy(robotPose2d.getRotation())
+        ).toVector();
+        Vector<N3> angularVelocityVector = VecBuilder.fill(0.0, 0.0, robotSpeeds.omegaRadiansPerSecond);
+        // ω⃗ × e⃗, where ω⃗ is angular velocity vector and e⃗ is exit vector
+        Vector<N3> linearVelocityDueToAngularVelocity = Vector.cross(angularVelocityVector, fuelExitFieldRelative);
+        vx -= linearVelocityDueToAngularVelocity.get(0);
+        vy -= linearVelocityDueToAngularVelocity.get(1);
+
+        // 5. Log final shooting vector
         Logger.recordOutput("ShootingKinematics/Velocity/X", vx);
         Logger.recordOutput("ShootingKinematics/Velocity/Y", vy);
         Logger.recordOutput("ShootingKinematics/Velocity/Z", vz);
 
-        // 4. Now calculate phi, theta, and shooting magnitude from 3d shooting vector
+        // 6. Now calculate phi, theta, and shooting magnitude from 3d shooting vector
         double v = Math.sqrt(vx * vx + vy * vy + vz * vz);
         double phi = Math.asin(vz / v);
         // TODO: account for robot to fuel exit offset
