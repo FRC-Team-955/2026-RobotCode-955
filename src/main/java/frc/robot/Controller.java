@@ -29,7 +29,9 @@ public class Controller implements Periodic {
     private final Alert controllerDisconnectedAlert = new Alert("Driver controller is not connected!", Alert.AlertType.kError);
 
     // Intermediates - used in assist calculations
+    @Getter
     private Rotation2d driveLinearDirection = new Rotation2d();
+    @Getter
     private double driveLinearMagnitude = 0.0;
 
     // Results - used for drive/assist calculations
@@ -85,6 +87,10 @@ public class Controller implements Periodic {
         // Scale linear magnitude by omega - when going full omega, want half linear
         driveLinearMagnitude *= MathUtil.clamp(1.0 - Math.abs(omegaMagnitude / 2.0), 0.5, 1.0);
 
+        // Turn magnitudes into velocities
+        driveLinearMagnitude *= driveConfig.maxVelocityMetersPerSec();
+        omegaMagnitude *= joystickMaxAngularSpeedRadPerSec;
+
         // If x and y are both 0, Rotation2d will not be happy
         // Intermediates - used in assist calculations
         Translation2d linearVelocity;
@@ -106,9 +112,9 @@ public class Controller implements Periodic {
         Logger.recordOutput("Controller/Drive/OmegaMagnitude", omegaMagnitude);
 
         driveSetpointFieldRelative = new ChassisSpeeds(
-                linearVelocity.getX() * driveConfig.maxVelocityMetersPerSec(),
-                linearVelocity.getY() * driveConfig.maxVelocityMetersPerSec(),
-                omegaMagnitude * joystickMaxAngularSpeedRadPerSec
+                linearVelocity.getX(),
+                linearVelocity.getY(),
+                omegaMagnitude
         );
     }
 
