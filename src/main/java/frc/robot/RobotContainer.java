@@ -1,5 +1,7 @@
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
@@ -80,6 +82,7 @@ public class RobotContainer {
         characterizationChooser.addOption("Drive 4 m/s Characterization", drive.runRobotRelative(() -> new ChassisSpeeds(4.0, 0.0, 0.0)));
         characterizationChooser.addOption("Drive Full Speed Characterization", drive.fullSpeedCharacterization());
         characterizationChooser.addOption("Drive Wheel Radius Characterization", drive.wheelRadiusCharacterization(WheelRadiusCharacterizationGoal.Direction.CLOCKWISE));
+        characterizationChooser.addOption("Drive Slip Current Characterization", drive.slipCurrentCharacterization());
     }
 
     private void setDefaultCommands() {
@@ -104,6 +107,20 @@ public class RobotContainer {
                 superstructure.cancel(),
                 superintake.cancel()
         ));
+
+        if (BuildConstants.mode == BuildConstants.Mode.SIM) {
+            var ref = new Object() {
+                Pose2d setpoint;
+            };
+            controller.a().toggleOnTrue(CommandsExt.eagerSequence(
+                    Commands.runOnce(() -> ref.setpoint = new Pose2d(
+                            robotState.getPose().getX() + 1,
+                            robotState.getPose().getY() + 1,
+                            robotState.getPose().getRotation().plus(Rotation2d.kPi)
+                    )),
+                    drive.moveTo(() -> ref.setpoint, false)
+            ));
+        }
 
         // NOTE: if you are binding a trigger to a command returned by a subsystem, you must wrap it in CommandsExt.eagerSequence(superstructure.cancel(), <your command>)
         // You must do this because if you don't, superstructure's default command will cancel your command

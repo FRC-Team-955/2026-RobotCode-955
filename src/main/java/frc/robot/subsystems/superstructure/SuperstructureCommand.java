@@ -13,10 +13,11 @@ public abstract class SuperstructureCommand {
     protected final OperatorDashboard operatorDashboard = OperatorDashboard.get();
     protected final Controller controller = Controller.get();
 
-    protected final Superstructure superstructure = Superstructure.get();
     protected final AprilTagVision aprilTagVision = AprilTagVision.get();
     protected final Drive drive = Drive.get();
     protected final GamePieceVision gamePieceVision = GamePieceVision.get();
+
+    protected final Superstructure superstructure = Superstructure.get();
 
     public abstract Command create();
 
