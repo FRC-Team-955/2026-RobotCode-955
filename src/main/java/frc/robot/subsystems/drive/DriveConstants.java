@@ -36,7 +36,7 @@ public class DriveConstants {
             Units.inchesToMeters(-0.247776),
             PIDF.ofPD(3.5, 0),
             PIDF.ofPD(3, 0),
-            PIDF.ofP(4.5),
+            PIDF.ofP(6),
             4.58
     );
 

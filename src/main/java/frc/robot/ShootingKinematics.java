@@ -11,7 +11,7 @@ import lombok.Getter;
 import org.littletonrobotics.junction.Logger;
 
 public class ShootingKinematics implements Periodic {
-    private static final LoggedTunableNumber robotVelocityScalar = new LoggedTunableNumber("ShootingKinematics/RobotVelocityScalar", 1.1);
+    private static final LoggedTunableNumber robotVelocityScalar = new LoggedTunableNumber("ShootingKinematics/RobotVelocityScalar", 1.2);
 
     public static final Transform3d ballExitTransform = new Transform3d(
             new Translation3d(Units.inchesToMeters(-4.0), Units.inchesToMeters(-9.0), Units.inchesToMeters(15.0)),
@@ -67,7 +67,7 @@ public class ShootingKinematics implements Periodic {
 
         // 1. Compute stationary shooting velocity
         // maple-sim uses 11 m/s² for gravity
-        final double g = 11;//9.81;
+        final double g = 10.4; //9.81;
         double discriminant = Math.pow(v0, 4) - g * (g * xyDist * xyDist + 2 * zDist * v0 * v0);
         if (discriminant < 0) {
             Util.error("ShootingKinematics: Discriminant is negative");
@@ -116,6 +116,7 @@ public class ShootingKinematics implements Periodic {
         // 4. Now calculate phi, theta, and shooting magnitude from 3d shooting vector
         double v = Math.sqrt(vx * vx + vy * vy + vz * vz);
         double phi = Math.asin(vz / v);
+        // TODO: account for robot to ball exit offset
         double theta = Math.atan2(vy, vx);
         Logger.recordOutput("ShootingKinematics/Velocity", v);
         Logger.recordOutput("ShootingKinematics/Phi", phi);

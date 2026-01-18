@@ -339,6 +339,10 @@ public class Drive extends CommandBasedSubsystem {
         return startIdle(() -> goal = new DriveJoystickWithAssistGoal(assistPoseSupplier));
     }
 
+    public Command driveJoystickWithHeadingOverride() {
+        return startIdle(() -> goal = new DriveJoystickWithHeadingOverrideGoal());
+    }
+
     public Command runRobotRelative(Supplier<ChassisSpeeds> chassisSpeedsSupplier) {
         return startIdle(() -> goal = new VelocityRobotRelativeGoal(chassisSpeedsSupplier));
     }

@@ -13,16 +13,16 @@ import lombok.RequiredArgsConstructor;
 import org.littletonrobotics.junction.Logger;
 
 import static frc.robot.subsystems.drive.DriveConstants.driveConfig;
+import static frc.robot.subsystems.drive.DriveTuning.headingOverrideGainsTunable;
 
 @RequiredArgsConstructor
 public class DriveJoystickGoal extends DriveGoal {
-    private static final PIDF.Tunable headingOverrideGainsTunable = driveConfig.headingOverrideGains().tunable("Drive/HeadingOverride");
     private static final LoggedTunableNumber headingOverrideSetpointResetTime = new LoggedTunableNumber("Drive/DriveJoystick/HeadingOverrideSetpointResetTimeSeconds", 0.25);
 
     private static final RobotState robotState = RobotState.get();
     private static final Controller controller = Controller.get();
 
-    private final PIDController headingOverride = driveConfig.headingOverrideGains().toPIDWrapRadians();
+    private final PIDController headingOverride = headingOverrideGainsTunable.getOrOriginal().toPIDWrapRadians();
     private final Timer headingOverrideSetpointResetTimer = new Timer();
     private boolean shouldRunHeadingOverride = false;
 
