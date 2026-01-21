@@ -17,4 +17,4 @@ jobs:
       - name: Build robot code
         run: ./gradlew buildReal -x test
       - name: Run tests
-        run: ./gradlew testSim
+        run: ./gradlew test
