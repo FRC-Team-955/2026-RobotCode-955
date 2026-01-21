@@ -35,9 +35,11 @@ public class IntakePivot implements Periodic {
     private final MotorIO io = createIO();
     private final MotorIOInputsAutoLogged inputs = new MotorIOInputsAutoLogged();
 
+
+    // Timer.getTimestamp() % 4.0 > 2.0 ? 0.0 : Units.degreesToRadians(deploySetpointDegrees.get())
     @RequiredArgsConstructor
     public enum Goal {
-        STOW(() -> Timer.getTimestamp() % 4.0 > 2.0 ? 0.0 : Units.degreesToRadians(deploySetpointDegrees.get())),
+        STOW(() -> 0),
         DEPLOY(() -> Units.degreesToRadians(deploySetpointDegrees.get())),
         ;
 
