@@ -19,6 +19,7 @@ import org.littletonrobotics.junction.Logger;
 
 import java.util.function.DoubleSupplier;
 
+import static edu.wpi.first.wpilibj2.command.Commands.runOnce;
 import static frc.robot.subsystems.superstructure.indexer.IndexerConstants.*;
 
 public class Indexer implements Periodic {
@@ -43,7 +44,7 @@ public class Indexer implements Periodic {
         private final DoubleSupplier value;
         private final RequestType type;
     }
-    
+
     @Getter
     private Goal goal = Goal.IDLE;
 
@@ -114,5 +115,11 @@ public class Indexer implements Periodic {
 
     public Command waitUntilAtGoal() {
         return Commands.waitUntil(this::atGoal);
+    }
+
+    public Command setGoal(Goal indexerGoal) {
+        return runOnce(() -> {
+            goal = indexerGoal;
+        });
     }
 }
