@@ -69,4 +69,10 @@ public class Superstructure extends CommandBasedSubsystem {
                 aprilTagVision.setTagIdFilter(new int[0])
         ).ignoringDisable(true);
     }
+
+    public Command runFlywheel() {
+        return flywheel.setGoal(
+                    Flywheel.Goal.RUN_AT_CERTAIN_SPEED
+        );
+    }
 }
