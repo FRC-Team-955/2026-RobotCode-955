@@ -24,6 +24,7 @@ import static frc.robot.subsystems.superstructure.flywheel.FlywheelConstants.*;
 public class Flywheel implements Periodic {
     private static final PIDF.Tunable velocityGainsTunable = velocityGains.tunable("Flywheel/Velocity");
     private static final LoggedTunableNumber runAtVoltage = new LoggedTunableNumber("Flywheel/Goal/RunAtVoltage", 3.0);
+    private static final LoggedTunableNumber runAtSpeed = new LoggedTunableNumber("Flywheel/Goal/RunAtSpeed", 20.0);
 
     private final OperatorDashboard operatorDashboard = OperatorDashboard.get();
 
@@ -34,7 +35,7 @@ public class Flywheel implements Periodic {
     public enum Goal {
         IDLE(() -> 0, RequestType.VoltageVolts),
         RUN_AT_VOLTAGE(runAtVoltage::get, RequestType.VoltageVolts),
-        RUN_AT_CERTAIN_SPEED(() -> 20, RequestType.VelocityRadPerSec)
+        RUN_AT_CERTAIN_SPEED(runAtSpeed::get, RequestType.VelocityRadPerSec)
         ;
 
         /** Should be constant for every loop cycle */
