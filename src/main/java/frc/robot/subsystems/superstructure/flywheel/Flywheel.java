@@ -11,6 +11,7 @@ import frc.lib.motor.RequestType;
 import frc.lib.network.LoggedTunableNumber;
 import frc.lib.subsystem.Periodic;
 import frc.robot.OperatorDashboard;
+import frc.robot.subsystems.superstructure.Superstructure;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -19,6 +20,7 @@ import org.littletonrobotics.junction.Logger;
 
 import java.util.function.DoubleSupplier;
 
+import static edu.wpi.first.wpilibj2.command.Commands.runOnce;
 import static frc.robot.subsystems.superstructure.flywheel.FlywheelConstants.*;
 
 public class Flywheel implements Periodic {
@@ -43,7 +45,6 @@ public class Flywheel implements Periodic {
         private final RequestType type;
     }
 
-    @Setter
     @Getter
     private Goal goal = Goal.IDLE;
 
@@ -113,5 +114,11 @@ public class Flywheel implements Periodic {
 
     public Command waitUntilAtGoal() {
         return Commands.waitUntil(this::atGoal);
+    }
+
+    public Command setGoal(Goal flywheelGoal) {
+        return runOnce(() -> {
+            goal = flywheelGoal;
+        });
     }
 }
