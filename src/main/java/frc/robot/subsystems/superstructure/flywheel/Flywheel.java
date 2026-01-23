@@ -95,10 +95,7 @@ public class Flywheel implements Periodic {
             io.setRequest(goal.type, value);
         }
     }
-
-    /**
-     * Intended to be plugged into component rotation in RobotMechanism
-     */
+    
     public double getPositionRad() {
         return inputs.positionRad;
     }
