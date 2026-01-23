@@ -8,7 +8,7 @@ import com.revrobotics.spark.config.ClosedLoopConfig;
 import edu.wpi.first.math.controller.*;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import frc.lib.network.LoggedTunableNumber;
-import frc.robot.Constants;
+import frc.robot.BuildConstants;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 
@@ -265,7 +265,7 @@ public record PIDF(double kP, double kI, double kD, double kS, double kV, double
             private final LoggedTunableNumber tunableMaxAcceleration;
 
             private Tunable(String name) {
-                if (Constants.tuningMode) {
+                if (BuildConstants.tuningMode) {
                     outer = new PIDF.Tunable(name);
                     tunableMaxVelocity = new LoggedTunableNumber(name + "/MaxVelocity", constraints.maxVelocity);
                     tunableMaxAcceleration = new LoggedTunableNumber(name + "/MaxAcceleration", constraints.maxAcceleration);
@@ -281,7 +281,7 @@ public record PIDF(double kP, double kI, double kD, double kS, double kV, double
                     Consumer<PIDF> setNewGains,
                     Consumer<TrapezoidProfile.Constraints> setNewConstraints
             ) {
-                if (Constants.tuningMode) {
+                if (BuildConstants.tuningMode) {
                     outer.ifChanged(setNewGains);
                     if (tunableMaxVelocity.hasChanged()
                             || tunableMaxAcceleration.hasChanged()
@@ -294,7 +294,7 @@ public record PIDF(double kP, double kI, double kD, double kS, double kV, double
 
             @SuppressWarnings("DataFlowIssue") // tunable numbers are guaranteed not to be null if tuning mode is true
             public TrapezoidProfile.Constraints getConstraints() {
-                if (Constants.tuningMode) {
+                if (BuildConstants.tuningMode) {
                     return new TrapezoidProfile.Constraints(tunableMaxVelocity.get(), tunableMaxAcceleration.get());
                 } else {
                     return constraints;
@@ -319,7 +319,7 @@ public record PIDF(double kP, double kI, double kD, double kS, double kV, double
         private final LoggedTunableNumber tunablekG;
 
         private Tunable(String name) {
-            if (Constants.tuningMode) {
+            if (BuildConstants.tuningMode) {
                 this.name = name;
                 tunablekP = new LoggedTunableNumber(name + "/kP", kP);
                 tunablekI = new LoggedTunableNumber(name + "/kI", kI);
@@ -342,7 +342,7 @@ public record PIDF(double kP, double kI, double kD, double kS, double kV, double
 
         @SuppressWarnings("DataFlowIssue") // tunable numbers are guaranteed not to be null if tuning mode is true
         public PIDF getOrOriginal() {
-            if (Constants.tuningMode) {
+            if (BuildConstants.tuningMode) {
                 return PIDF.ofPIDSVAG(
                         tunablekP.get(),
                         tunablekI.get(),
@@ -359,7 +359,7 @@ public record PIDF(double kP, double kI, double kD, double kS, double kV, double
 
         @SuppressWarnings("DataFlowIssue") // tunable numbers are guaranteed not to be null if tuning mode is true
         public void ifChanged(Consumer<PIDF> setNewGains) {
-            if (Constants.tuningMode) {
+            if (BuildConstants.tuningMode) {
                 if (tunablekP.hasChanged()
                         || tunablekI.hasChanged()
                         || tunablekD.hasChanged()

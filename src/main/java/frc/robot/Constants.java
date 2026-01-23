@@ -21,8 +21,6 @@ import com.ctre.phoenix6.CANBus;
  * (log replay from a file).
  */
 public final class Constants {
-    public static final boolean tuningMode = false;
-
     public static final class Simulation {
         /**
          * If true, replay will run as fast as your computer can go and log to a log file instead of
