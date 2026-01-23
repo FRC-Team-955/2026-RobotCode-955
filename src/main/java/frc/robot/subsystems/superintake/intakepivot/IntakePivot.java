@@ -34,7 +34,6 @@ public class IntakePivot implements Periodic {
     private final MotorIOInputsAutoLogged inputs = new MotorIOInputsAutoLogged();
 
 
-    // Timer.getTimestamp() % 4.0 > 2.0 ? 0.0 : Units.degreesToRadians(deploySetpointDegrees.get())
     @RequiredArgsConstructor
     public enum Goal {
         STOW(() -> 0),
@@ -114,9 +113,6 @@ public class IntakePivot implements Periodic {
         }
     }
 
-    /**
-     * Intended to be plugged into component rotation in RobotMechanism
-     */
     public double getPositionRad() {
         return inputs.positionRad;
     }
