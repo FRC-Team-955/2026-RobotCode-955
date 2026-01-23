@@ -67,16 +67,4 @@ public class Superstructure extends CommandBasedSubsystem {
             }
         }
     }
-
-    public Command runIndexer() {
-        return indexer.setGoal(
-                Indexer.Goal.FEED
-        );
-    }
-
-    public Command runFlywheel() {
-        return flywheel.setGoal(
-                Flywheel.Goal.SHOOT_HUB_MANUAL
-        );
-    }
 }

@@ -12,6 +12,7 @@ import frc.lib.subsystem.Periodic;
 import frc.robot.OperatorDashboard;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -42,6 +43,7 @@ public class Indexer implements Periodic {
         private final RequestType type;
     }
 
+    @Setter
     @Getter
     private Goal goal = Goal.IDLE;
 
@@ -112,11 +114,5 @@ public class Indexer implements Periodic {
 
     public Command waitUntilAtGoal() {
         return Commands.waitUntil(this::atGoal);
-    }
-
-    public Command setGoal(Goal indexerGoal) {
-        return runOnce(() -> {
-            goal = indexerGoal;
-        });
     }
 }
