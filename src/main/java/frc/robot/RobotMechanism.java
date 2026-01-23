@@ -8,6 +8,7 @@ import edu.wpi.first.math.util.Units;
 import frc.lib.subsystem.Periodic;
 import frc.robot.subsystems.superintake.intakerollers.IntakeRollers;
 import frc.robot.subsystems.superintake.intakepivot.IntakePivot;
+import frc.robot.subsystems.superstructure.indexer.Indexer;
 import org.littletonrobotics.junction.Logger;
 
 import static frc.robot.subsystems.drive.DriveConstants.driveConfig;
@@ -38,6 +39,7 @@ public class RobotMechanism implements Periodic {
     private static final RobotState robotState = RobotState.get();
     private static final IntakeRollers intakeRollers = IntakeRollers.get();
     private static final IntakePivot intakePivot = IntakePivot.get();
+    private static final Indexer indexer = Indexer.get();
 
     private static RobotMechanism instance;
 
@@ -71,11 +73,16 @@ public class RobotMechanism implements Periodic {
                 new Rotation3d(0.0, -intakePivot.getPositionRad(), 0.0)
         ));
 
+        Transform3d indexerTransform = indexerInitial.plus(new Transform3d(
+                new Translation3d(),
+                new Rotation3d(0.0, indexer.getPositionRad(), 0.0)
+        ));
+
         Logger.recordOutput("RobotMechanism/Pose", robotPose);
         Logger.recordOutput(
                 "RobotMechanism/Components",
                 intakeRollersTransform,
-                indexerInitial,
+                indexerTransform,
                 flywheelsInitial,
                 intakePivotTransform,
                 hoodInitial

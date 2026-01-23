@@ -19,6 +19,7 @@ import frc.robot.subsystems.superintake.Superintake;
 import frc.robot.subsystems.superintake.intakerollers.IntakeRollers;
 import frc.robot.subsystems.superintake.intakepivot.IntakePivot;
 import frc.robot.subsystems.superstructure.Superstructure;
+import frc.robot.subsystems.superstructure.indexer.Indexer;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -48,6 +49,7 @@ public class RobotContainer {
     public final IntakePivot intakePivot = IntakePivot.get();
 
     public final Superstructure superstructure = Superstructure.get();
+    public final Indexer indexer = Indexer.get();
 
     public RobotContainer() {
         addAutos();

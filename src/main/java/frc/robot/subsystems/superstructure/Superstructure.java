@@ -6,6 +6,7 @@ import frc.lib.subsystem.CommandBasedSubsystem;
 import frc.robot.OperatorDashboard;
 import frc.robot.RobotState;
 import frc.robot.subsystems.apriltagvision.AprilTagVision;
+import frc.robot.subsystems.superstructure.indexer.Indexer;
 import lombok.RequiredArgsConstructor;
 import org.littletonrobotics.junction.Logger;
 
@@ -16,6 +17,7 @@ public class Superstructure extends CommandBasedSubsystem {
     private final OperatorDashboard operatorDashboard = OperatorDashboard.get();
 
     private final AprilTagVision aprilTagVision = AprilTagVision.get();
+    private final Indexer indexer = Indexer.get();
 
     private final SuperstructureIO io = createIO();
     private final SuperstructureIOInputsAutoLogged inputs = new SuperstructureIOInputsAutoLogged();
@@ -67,5 +69,11 @@ public class Superstructure extends CommandBasedSubsystem {
                 setGoal(Goal.IDLE),
                 aprilTagVision.setTagIdFilter(new int[0])
         ).ignoringDisable(true);
+    }
+
+    public Command runIndexer() {
+        return indexer.setGoal(
+                Indexer.Goal.RUN_AT_VOLTAGE
+        );
     }
 }
