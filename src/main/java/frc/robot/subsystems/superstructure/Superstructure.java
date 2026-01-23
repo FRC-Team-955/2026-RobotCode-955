@@ -27,6 +27,11 @@ public class Superstructure extends CommandBasedSubsystem {
     @RequiredArgsConstructor
     public enum Goal {
         IDLE,
+        SHOOT_AND_PASS_AUTOMATIC,
+        SHOOT_HUB_MANUAL,
+        SHOOT_TOWER_MANUAL,
+        PASS_MANUAL,
+        EJECT,
     }
 
     private Goal goal = Goal.IDLE;

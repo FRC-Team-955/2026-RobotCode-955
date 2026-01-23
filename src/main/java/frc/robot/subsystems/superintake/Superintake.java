@@ -23,6 +23,8 @@ public class Superintake extends CommandBasedSubsystem {
     @RequiredArgsConstructor
     public enum Goal {
         IDLE,
+        INTAKE,
+        EJECT,
     }
 
     private Goal goal = Goal.IDLE;
