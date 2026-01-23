@@ -1,9 +1,6 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.Alert;
-import edu.wpi.first.wpilibj.GenericHID;
-import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.Util;
 import frc.lib.network.LoggedNetworkBooleanExt;
 import frc.lib.subsystem.Periodic;
@@ -26,9 +23,6 @@ public class OperatorDashboard implements Periodic {
     @SuppressWarnings("FieldCanBeLocal")
     private final Alert constantSetAlert = new Alert("Constants are set.", Alert.AlertType.kInfo);
 
-    public final OperatorKeypad operatorKeypad = new OperatorKeypad();
-    private final Alert operatorKeypadDisconnectedAlert = new Alert("Operator keypad is not connected!", Alert.AlertType.kError);
-
     private static OperatorDashboard instance;
 
     public static OperatorDashboard get() {
@@ -48,20 +42,6 @@ public class OperatorDashboard implements Periodic {
 
     @Override
     public void periodicBeforeCommands() {
-        if (operatorKeypad.isConnected()) {
-            operatorKeypadDisconnectedAlert.set(false);
-            operatorKeypad.update();
-
-            if (operatorKeypad.canUseManualReefZoneSide) {
-            } else if (operatorKeypad.canUseOverrides) {
-            }
-
-            if (operatorKeypad.canUseOverrides) {
-            }
-        } else {
-            operatorKeypadDisconnectedAlert.set(true);
-        }
-
         // Note - we only handle alerts for general overrides.
         // So subsystem toggles are handled in their respective subsystems
         coastOverrideAlert.set(coastOverride.get());
@@ -118,86 +98,5 @@ public class OperatorDashboard implements Periodic {
 
     private static <E extends Enum<E>> EnumMap<E, LoggedNetworkBooleanExt> generateTogglesForEnum(String name, E[] enumValues, Class<E> enumClass) {
         return Util.createEnumMap(enumClass, enumValues, (side) -> new LoggedNetworkBooleanExt(prefix + name + "/" + side.name(), false));
-    }
-
-    public static class OperatorKeypad {
-        private final GenericHID hid = new GenericHID(1);
-
-        private boolean canUseManualReefZoneSide = false;
-        private boolean canUseOverrides = true;
-
-        private boolean lastManualReefSide = false;
-        private final Timer sinceManualReefSideChanged = new Timer();
-
-        private void update() {
-            // It takes a bit of time for the buttons to switch whenever
-            // use manual reef side is changed, since we have to use the
-            // same buttons for reef side and overrides. To ensure that
-            // we don't process something unwanted (such as enabling an
-            // override we do not want), we don't want to allow either
-            // reef side or overrides to be read for 0.5 seconds after
-            // use manual reef side is changed.
-            boolean manualReefSide = getManualReefSide();
-            if (lastManualReefSide != manualReefSide) {
-                // We have a change and haven't dealt with it, start the timer
-                sinceManualReefSideChanged.restart();
-                // Don't allow anything to change while waiting
-                canUseManualReefZoneSide = false;
-                canUseOverrides = false;
-                // If manual reef side is switched while we are waiting,
-                // we want to restart the timer again
-                lastManualReefSide = manualReefSide;
-            }
-            if (sinceManualReefSideChanged.isRunning() && sinceManualReefSideChanged.hasElapsed(0.2)) {
-                // If it's been long enough, stop the timer and allow
-                // either overrides or manual reef zone side to be used
-                sinceManualReefSideChanged.stop();
-                // At this point, both of them should be false, so we only need
-                // to change one of them to true
-                if (manualReefSide) {
-                    canUseManualReefZoneSide = true;
-                } else {
-                    canUseOverrides = true;
-                }
-            }
-        }
-
-        private boolean isConnected() {
-            return hid.isConnected();
-        }
-
-        private boolean getOverride1() {
-            // Override 1 is a toggle
-            return hid.getRawButton(1);
-        }
-
-        private boolean getOverride2() {
-            // Override 2 is a toggle
-            return hid.getRawButton(2);
-        }
-
-        private boolean getOverride3() {
-            // Override 3 is a toggle
-            return hid.getRawButton(3);
-        }
-
-        public Trigger getOverride4() {
-            // Override 4 is a simple button; will be disabled upon release
-            return new Trigger(() -> canUseOverrides && hid.getRawButton(4));
-        }
-
-        private boolean getOverride5() {
-            // Override 5 is a toggle
-            return hid.getRawButton(5);
-        }
-
-        public Trigger getOverride6() {
-            // Override 6 is a simple button; will be disabled upon release
-            return new Trigger(() -> canUseOverrides && hid.getRawButton(6));
-        }
-
-        private boolean getManualReefSide() {
-            return hid.getRawButton(13);
-        }
     }
 }
