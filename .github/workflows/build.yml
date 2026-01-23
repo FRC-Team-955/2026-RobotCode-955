@@ -2,19 +2,38 @@ name: Build
 
 on:
   push:
+    # Prevent workflow from running on PR commits twice
+    # This means that the workflow won't run until a PR
+    # is made, but that's fine
+    branches:
+      - main
   pull_request:
 
 jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-    container: wpilib/roborio-cross-ubuntu:2024-22.04
+    container: wpilib/roborio-cross-ubuntu:2025-22.04
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
       - name: Grant execute permission
         run: chmod +x gradlew
+
       - name: Build robot code
         run: ./gradlew buildReal -x test
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    container: wpilib/ubuntu-base:22.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Grant execute permission
+        run: chmod +x gradlew
+
       - name: Run tests
-        run: ./gradlew testSim
+        run: ./gradlew test
