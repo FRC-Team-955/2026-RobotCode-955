@@ -60,7 +60,7 @@ public class OperatorDashboard implements Periodic {
     }
 
     private OperatorDashboard() {
-        if (Constants.tuningMode || DriveConstants.disableDriving || DriveConstants.disableGyro) {
+        if (BuildConstants.tuningMode || DriveConstants.disableDriving || DriveConstants.disableGyro) {
             constantSetAlert.set(true);
         }
     }
