@@ -3,7 +3,6 @@ package frc.robot.subsystems.drive;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import frc.lib.PIDF;
-import frc.lib.swerve.ModuleLimits;
 import frc.robot.BuildConstants;
 
 public class DriveConstants {
@@ -16,54 +15,28 @@ public class DriveConstants {
             0.02,
             0.1,
             Units.degreesToRadians(2),
-            Units.degreesToRadians(10)
+            Units.degreesToRadians(10),
+            15
     );
 
-    static final boolean useSetpointGenerator = true;
     public static final boolean disableDriving = false;
     public static final boolean disableGyro = false;
     static final boolean useHighFrequencyOdometry = true;
 
     static final double odometryPositionDeltaDiscardMeters = Units.inchesToMeters(8);
 
-    // Slow to 30% speed during driver control
-    public static final double constraintScalarWhenElevatorAtMaxHeightDriver = 0.3;
-
-    public static final DriveConfig driveConfig = switch (BuildConstants.mode) {
-        case REAL, REPLAY -> new DriveConfig(
-                Units.inchesToMeters(1.935948620917915),
-                Units.inchesToMeters(22.75),
-                Units.inchesToMeters(22.75),
-                Units.inchesToMeters(35),
-                Units.inchesToMeters(35),
-                PIDF.ofPD(3.5, 0),
-                PIDF.ofPD(3, 0),
-                new ModuleLimits(
-                        4.58,
-                        20,
-                        20
-                )
-        );
-        case SIM -> new DriveConfig(
-                Units.inchesToMeters(2),
-                Units.inchesToMeters(22.75),
-                Units.inchesToMeters(22.75),
-                Units.inchesToMeters(35),
-                Units.inchesToMeters(35),
-                PIDF.ofPD(3.5, 0),
-                PIDF.ofPD(3, 0),
-                new ModuleLimits(
-                        3.83,
-                        25,
-                        20
-                )
-        );
-    };
-
-    public static final ModuleLimits moveToModuleLimits = new ModuleLimits(
-            driveConfig.moduleLimits().maxDriveVelocityMetersPerSec(),
-            driveConfig.moduleLimits().maxDriveAccelerationMetersPerSecSquared() * 0.75,
-            driveConfig.moduleLimits().maxTurnVelocityRadPerSec()
+    public static final DriveConfig driveConfig = new DriveConfig(
+            // TO TUNE WHEEL RADIUS: Place robot on carpet and use wheel radius characterization auto.
+            // Output will be in console in AdvantageScope.
+            Units.inchesToMeters(1.935948620917915),
+            Units.inchesToMeters(22.75),
+            Units.inchesToMeters(22.75),
+            Units.inchesToMeters(35),
+            Units.inchesToMeters(35),
+            PIDF.ofPD(3.5, 0),
+            PIDF.ofPD(3, 0),
+            PIDF.ofP(4.5),
+            4.58
     );
 
     /**
@@ -79,12 +52,17 @@ public class DriveConstants {
     public static final double drivebaseRadiusMeters = Math.hypot(driveConfig.trackWidthMeters / 2.0, driveConfig.trackLengthMeters / 2.0);
 
     /** Maximum angular velocity of the whole drivetrain if all drive motors/wheels are going at full speed. */
-    public static final double maxAngularVelocityRadPerSec = driveConfig.moduleLimits().maxDriveVelocityMetersPerSec() / drivebaseRadiusMeters;
+    public static final double maxAngularVelocityRadPerSec = driveConfig.maxVelocityMetersPerSec() / drivebaseRadiusMeters;
 
     public static final double joystickMaxAngularSpeedRadPerSec = Math.min(Units.degreesToRadians(315), maxAngularVelocityRadPerSec);
     public static final double joystickDriveDeadband = 0.1;
 
     static final ModuleConfig moduleConfig = switch (BuildConstants.mode) {
+        // TO TUNE DRIVE GAINS: Use go forward at 1 m/s characterization auto and tune until you get 1 m/s.
+        // After that, move to 2 m/s and make sure you get 2 m/s, and do the same thing for 3 m/s and 4 m/s.
+        // TO TUNE TURN GAINS: Put robot on ground. Disable driving with the constant. Tune the PID with teleop.
+        // TO TUNE DRIVE CURRENT LIMIT: Put the robot against a wall while having it on carpet and run the slip
+        // current characterization auto. Output will be in console in AdvantageScope.
         case REAL, REPLAY -> new ModuleConfig(
                 PIDF.ofPDSVA(
                         0.0, 0.0,
@@ -114,11 +92,20 @@ public class DriveConstants {
 
     static ModuleIO[] createModuleIO() {
         return switch (BuildConstants.mode) {
-            // To calibrate the absolute encoder offsets, point the modules straight (such that forward
-            // motion on the drive motor will propel the robot forward) and copy the reported values from the
-            // absolute encoders using AdvantageScope. These values are logged under "/Inputs/Drive/ModuleX/TurnAbsolutePositionRad"
+            // TO CALIBRATE ABSOLUTE ENCODER OFFSETS:
+            // 1. Put robot on robot cart
+            // 2. Turn on coast override
+            // 3. Open inputs in AdvantageScope. For each module (go in FL, FR, BL, BR order),
+            // turn it forward and move the wheel so that the robot would be propelled forward
+            // (the wheel itself will be moving backwards). If the drive position is getting
+            // more NEGATIVE, rotate the wheel 180° and make sure that it is getting more
+            // POSITIVE when you move the wheel as previously mentioned.
+            // 4. Use a long aluminum tube to press up against the sides of the wheels and ensure
+            // that they are pointing perfectly straight.
+            // 5. For each module, copy the value in "/Inputs/Drive/Module<INDEX>/TurnAbsolutePositionRad"
+            // to the absolute encoder offset parameter in the IO layer constructor.
+            // Module order: FL, FR, BL, BR
             case REAL -> new ModuleIO[]{
-                    // FL, FR, BL, BR
                     new ModuleIOTalonFXSparkMaxCANcoder(1, 1, 5, 1.577),
                     new ModuleIOTalonFXSparkMaxCANcoder(2, 2, 6, 1.770),
                     new ModuleIOTalonFXSparkMaxCANcoder(3, 3, 7, 3.105),
@@ -148,7 +135,8 @@ public class DriveConstants {
             double linearPositionToleranceMeters,
             double linearVelocityToleranceMetersPerSec,
             double angularPositionToleranceRad,
-            double angularVelocityToleranceRadPerSec
+            double angularVelocityToleranceRadPerSec,
+            double maxAccelerationMetersPerSec // Maximum acceleration of the robot during move to
     ) {
     }
 
@@ -160,7 +148,8 @@ public class DriveConstants {
             double bumperLengthMeters,
             PIDF choreoFeedbackXY,
             PIDF choreoFeedbackOmega,
-            ModuleLimits moduleLimits // See ModuleLimits for docs on each value
+            PIDF headingOverrideGains,
+            double maxVelocityMetersPerSec // Maximum velocity of the robot
     ) {
     }
 

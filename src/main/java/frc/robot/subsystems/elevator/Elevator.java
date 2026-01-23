@@ -315,18 +315,6 @@ public class Elevator implements Periodic {
         }
     }
 
-    public double getDriveConstraintScalar() {
-        double elevatorSetpoint = goal.value != null
-                ? goal.value.getAsDouble()
-                : 0;
-        double elevatorPosition = Math.max(getPositionMeters(), elevatorSetpoint);
-        return MathUtil.interpolate(
-                1,
-                DriveConstants.constraintScalarWhenElevatorAtMaxHeightDriver,
-                elevatorPosition / maxHeightMeters
-        );
-    }
-
     public Command zeroCoral() {
         throw new RuntimeException("TODO");
 //        return CommandsExt.eagerSequence(
