@@ -19,6 +19,7 @@ import static frc.robot.subsystems.superintake.intakerollers.IntakeRollersConsta
 
 public class IntakeRollers implements Periodic {
     private static final LoggedTunableNumber intakeVoltage = new LoggedTunableNumber("Superintake/IntakeRollers/Goal/IntakeVoltage", 12.0);
+    private static final LoggedTunableNumber ejectVoltage = new LoggedTunableNumber("Superintake/IntakeRollers/Goal/EjectVoltage", -12.0);
 
     private final OperatorDashboard operatorDashboard = OperatorDashboard.get();
 
@@ -29,6 +30,7 @@ public class IntakeRollers implements Periodic {
     public enum Goal {
         IDLE(() -> 0.0, RequestType.VoltageVolts),
         INTAKE(intakeVoltage::get, RequestType.VoltageVolts),
+        EJECT(ejectVoltage::get, RequestType.VoltageVolts),
         ;
 
         /** Should be constant for every loop cycle */

@@ -1,5 +1,6 @@
 package frc.robot.subsystems.superstructure.flywheel;
 
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -23,8 +24,10 @@ import static frc.robot.subsystems.superstructure.flywheel.FlywheelConstants.*;
 
 public class Flywheel implements Periodic {
     private static final PIDF.Tunable velocityGainsTunable = velocityGains.tunable("Superstructure/Flywheel/Velocity");
-    private static final LoggedTunableNumber runAtVoltage = new LoggedTunableNumber("Superstructure/Flywheel/Goal/RunAtVoltage", 3.0);
-    private static final LoggedTunableNumber runAtSpeed = new LoggedTunableNumber("Superstructure/Flywheel/Goal/RunAtSpeed", 20.0);
+    private static final LoggedTunableNumber shootHubManualMetersPerSec = new LoggedTunableNumber("Superstructure/Flywheel/Goal/ShootHubManualMetersPerSec", 5.0);
+    private static final LoggedTunableNumber shootTowerManualMetersPerSec = new LoggedTunableNumber("Superstructure/Flywheel/Goal/ShootTowerManualMetersPerSec", 5.0);
+    private static final LoggedTunableNumber passManualMetersPerSec = new LoggedTunableNumber("Superstructure/Flywheel/Goal/PassManualMetersPerSec", 5.0);
+    private static final LoggedTunableNumber ejectRPM = new LoggedTunableNumber("Superstructure/Flywheel/Goal/EjectRPM", -300);
 
     private final OperatorDashboard operatorDashboard = OperatorDashboard.get();
 
@@ -34,8 +37,11 @@ public class Flywheel implements Periodic {
     @RequiredArgsConstructor
     public enum Goal {
         IDLE(() -> 0, RequestType.VoltageVolts),
-        RUN_AT_VOLTAGE(runAtVoltage::get, RequestType.VoltageVolts),
-        RUN_AT_CERTAIN_SPEED(runAtSpeed::get, RequestType.VelocityRadPerSec),
+        SHOOT_AND_PASS_AUTOMATIC(() -> shootHubManualMetersPerSec.get() / flywheelRadiusMeters, RequestType.VelocityRadPerSec),
+        SHOOT_HUB_MANUAL(() -> shootHubManualMetersPerSec.get() / flywheelRadiusMeters, RequestType.VelocityRadPerSec),
+        SHOOT_TOWER_MANUAL(() -> shootTowerManualMetersPerSec.get() / flywheelRadiusMeters, RequestType.VelocityRadPerSec),
+        PASS_MANUAL(() -> passManualMetersPerSec.get() / flywheelRadiusMeters, RequestType.VelocityRadPerSec),
+        EJECT(() -> Units.rotationsPerMinuteToRadiansPerSecond(ejectRPM.get()), RequestType.VelocityRadPerSec),
         ;
 
         /** Should be constant for every loop cycle */

@@ -1,6 +1,7 @@
 package frc.robot.subsystems.superstructure.flywheel;
 
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.util.Units;
 import frc.lib.PIDF;
 import frc.lib.motor.MotorIO;
 import frc.lib.motor.MotorIOSim;
@@ -9,6 +10,8 @@ import frc.lib.motor.RequestTolerances;
 import frc.robot.BuildConstants;
 
 public class FlywheelConstants {
+    static final double flywheelRadiusMeters = Units.inchesToMeters(2.0);
+
     static final RequestTolerances tolerances = RequestTolerances.defaults();
 
     static final double gearRatio = 5;

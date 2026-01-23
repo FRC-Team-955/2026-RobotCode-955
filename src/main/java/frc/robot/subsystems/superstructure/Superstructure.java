@@ -70,13 +70,13 @@ public class Superstructure extends CommandBasedSubsystem {
 
     public Command runIndexer() {
         return indexer.setGoal(
-                Indexer.Goal.RUN_AT_VOLTAGE
+                Indexer.Goal.FEED
         );
     }
 
     public Command runFlywheel() {
         return flywheel.setGoal(
-                Flywheel.Goal.RUN_AT_CERTAIN_SPEED
+                Flywheel.Goal.SHOOT_HUB_MANUAL
         );
     }
 }

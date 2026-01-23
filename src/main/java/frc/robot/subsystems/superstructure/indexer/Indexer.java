@@ -24,7 +24,8 @@ import static frc.robot.subsystems.superstructure.indexer.IndexerConstants.toler
 public class Indexer implements Periodic {
     //    private static final PIDF.Tunable positionGainsTunable = positionGains.tunable("Indexer/Position");
 //    private static final PIDF.Tunable velocityGainsTunable = velocityGains.tunable("Indexer/Velocity");
-    private static final LoggedTunableNumber runAtVoltage = new LoggedTunableNumber("Superstructure/Indexer/Goal/RunAtVoltage", 3.0);
+    private static final LoggedTunableNumber feedVoltage = new LoggedTunableNumber("Superstructure/Indexer/Goal/FeedVoltage", 3.0);
+    private static final LoggedTunableNumber ejectVoltage = new LoggedTunableNumber("Superstructure/Indexer/Goal/EjectVoltage", -3.0);
 
     private final OperatorDashboard operatorDashboard = OperatorDashboard.get();
 
@@ -34,9 +35,8 @@ public class Indexer implements Periodic {
     @RequiredArgsConstructor
     public enum Goal {
         IDLE(() -> 0, RequestType.VoltageVolts),
-        RUN_AT_VOLTAGE(runAtVoltage::get, RequestType.VoltageVolts),
-//        RUN_AT_CERTAIN_SPEED(() -> 20, RequestType.VelocityRadPerSec),
-//        RUN_TO_CERTAIN_POSITION(() -> 3, RequestType.PositionRad),
+        FEED(feedVoltage::get, RequestType.VoltageVolts),
+        EJECT(ejectVoltage::get, RequestType.VoltageVolts),
         ;
 
         /** Should be constant for every loop cycle */

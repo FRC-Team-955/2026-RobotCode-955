@@ -25,8 +25,8 @@ import static frc.robot.subsystems.superintake.intakepivot.IntakePivotConstants.
 
 public class IntakePivot implements Periodic {
     private static final PIDF.Tunable gainsTunable = gains.tunable("Superintake/IntakePivot/Gains");
-    private static final LoggedTunableNumber deploySetpointDegrees = new LoggedTunableNumber("Superintake/IntakePivot/Goal/Deploy", -45.0);
     private static final LoggedTunableNumber profileLookaheadTimeSec = new LoggedTunableNumber("Superintake/IntakePivot/ProfileLookaheadTimeSec", 0.15);
+    private static final LoggedTunableNumber deploySetpointDegrees = new LoggedTunableNumber("Superintake/IntakePivot/Goal/DeployDegrees", -45.0);
 
     private final OperatorDashboard operatorDashboard = OperatorDashboard.get();
 
