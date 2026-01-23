@@ -54,6 +54,7 @@ public class Superintake extends CommandBasedSubsystem {
         switch (goal) {
             case IDLE -> {
                 intakeRollers.setGoal(IntakeRollers.Goal.IDLE);
+                intakePivot.setGoal(IntakePivot.Goal.STOW);
             }
         }
     }

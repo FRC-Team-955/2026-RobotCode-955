@@ -63,7 +63,8 @@ public class Superstructure extends CommandBasedSubsystem {
 
         switch (goal) {
             case IDLE -> {
-
+                flywheel.setGoal(Flywheel.Goal.IDLE);
+                indexer.setGoal(Indexer.Goal.IDLE);
             }
         }
     }
