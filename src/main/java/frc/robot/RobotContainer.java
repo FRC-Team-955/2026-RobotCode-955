@@ -88,8 +88,8 @@ public class RobotContainer {
 
     private void setDefaultCommands() {
         drive.setDefaultCommand(drive.driveJoystick());
-        superstructure.setDefaultCommand(superstructure.cancel());
         superintake.setDefaultCommand(superintake.cancel());
+        superstructure.setDefaultCommand(superstructure.cancel());
     }
 
     /**
