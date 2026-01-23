@@ -4,6 +4,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.subsystem.CommandBasedSubsystem;
 import frc.robot.OperatorDashboard;
 import frc.robot.RobotState;
+import frc.robot.subsystems.apriltagvision.AprilTagVision;
+import frc.robot.subsystems.superstructure.hood.Hood;
 import frc.robot.subsystems.superstructure.flywheel.Flywheel;
 import frc.robot.subsystems.superstructure.indexer.Indexer;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +19,8 @@ public class Superstructure extends CommandBasedSubsystem {
 
     public final Indexer indexer = Indexer.get();
     public final Flywheel flywheel = Flywheel.get();
+
+    public final Hood hood = Hood.get();
 
     private final SuperstructureIO io = createIO();
     private final SuperstructureIOInputsAutoLogged inputs = new SuperstructureIOInputsAutoLogged();
