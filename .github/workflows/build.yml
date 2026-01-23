@@ -8,13 +8,26 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-    container: wpilib/roborio-cross-ubuntu:2024-22.04
+    container: wpilib/roborio-cross-ubuntu:2026-22.04-py314
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
       - name: Grant execute permission
         run: chmod +x gradlew
+
       - name: Build robot code
         run: ./gradlew buildReal -x test
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Grant execute permission
+        run: chmod +x gradlew
+
       - name: Run tests
         run: ./gradlew test
