@@ -32,7 +32,6 @@ public class IntakePivotConstants {
                     gains,
                     PIDF.zero()
             );
-            // NOTE: if you are doing an arm, consider making a custom sim class like this: https://github.com/FRC-Team-955/2025-RobotCode-955/blob/f8c49295fb474156c657fc3c8da3a28d8b3a7430/src/main/java/frc/robot/subsystems/intakepivot/IntakePivotIOSim.java
             case SIM -> new MotorIOArmSim(
                     DCMotor.getNEO(1),
                     gearRatio,
