@@ -131,7 +131,7 @@ public class Robot extends LoggedRobot {
                 robotContainer.superintake,
 
                 // Subsystems - the order of these doesn't matter
-
+                robotContainer.hood,
                 // Misc
                 robotContainer.canLogger,
 
