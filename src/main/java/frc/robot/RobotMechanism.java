@@ -63,7 +63,6 @@ public class RobotMechanism implements Periodic {
                         new Rotation3d()
                 ));
 
-      
         Transform3d intakeRollersTransform = intakeRollersInitial.plus(new Transform3d(
                 new Translation3d(),
                 new Rotation3d(0.0, superintake.intakeRollers.getPositionRad(), 0.0)
@@ -83,7 +82,7 @@ public class RobotMechanism implements Periodic {
                 new Translation3d(),
                 new Rotation3d(0.0, superstructure.flywheel.getPositionRad(), 0.0)
         ));
-      
+
         Transform3d hoodTransform = hoodInitial.plus(new Transform3d(
                 new Translation3d(),
                 new Rotation3d(0.0, -superstructure.hood.getPositionRad(), 0.0)
