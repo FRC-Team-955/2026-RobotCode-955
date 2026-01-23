@@ -27,10 +27,8 @@ public class Superstructure extends CommandBasedSubsystem {
 
     private Goal goal = Goal.IDLE;
 
-    public Command setGoal(Goal superstructureGoal) {
-        return runOnce(() -> {
-            goal = superstructureGoal;
-        });
+    public Command setGoal(Goal goal) {
+        return startIdle(() -> this.goal = goal);
     }
 
     private static Superstructure instance;
@@ -56,13 +54,17 @@ public class Superstructure extends CommandBasedSubsystem {
     @Override
     public void periodicAfterCommands() {
         Logger.recordOutput("Superstructure/Goal", goal);
+
+        switch (goal) {
+            case IDLE -> {
+
+            }
+        }
     }
 
     public Command cancel() {
         return CommandsExt.eagerSequence(
-                setGoal(
-                        Goal.IDLE
-                ),
+                setGoal(Goal.IDLE),
                 aprilTagVision.setTagIdFilter(new int[0])
         ).ignoringDisable(true);
     }
