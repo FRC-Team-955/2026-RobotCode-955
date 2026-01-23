@@ -39,8 +39,6 @@ public class RobotMechanism implements Periodic {
     private static final Superintake superintake = Superintake.get();
     private static final Superstructure superstructure = Superstructure.get();
 
-    private static final Superstructure superstructure = Superstructure.get();
-
     private static RobotMechanism instance;
 
     public static RobotMechanism get() {
