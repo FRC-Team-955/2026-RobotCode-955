@@ -2,7 +2,6 @@ package frc.robot;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
@@ -12,18 +11,11 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.CANLogger;
 import frc.lib.commands.CommandsExt;
-import frc.robot.autos.BargeSideAuto;
-import frc.robot.autos.CenterAuto;
-import frc.robot.autos.ProcessorSideAuto;
-import frc.robot.autos.ProcessorSideFriendlyAuto;
 import frc.robot.subsystems.apriltagvision.AprilTagVision;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.goals.WheelRadiusCharacterizationGoal;
-import frc.robot.subsystems.elevator.Elevator;
-import frc.robot.subsystems.endeffector.EndEffector;
-import frc.robot.subsystems.funnel.Funnel;
 import frc.robot.subsystems.gamepiecevision.GamePieceVision;
-import frc.robot.subsystems.superstructure.ReefAlign;
+import frc.robot.subsystems.superintake.Superintake;
 import frc.robot.subsystems.superstructure.Superstructure;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -42,16 +34,15 @@ public class RobotContainer {
     public final OperatorDashboard operatorDashboard = OperatorDashboard.get();
     public final Controller controller = Controller.get();
     public final CANLogger canLogger = CANLogger.get();
+    public final RobotMechanism robotMechanism = RobotMechanism.get();
 
     /* Subsystems */
     // Note: order does matter
-    public final Elevator elevator = Elevator.get();
-    public final EndEffector endEffector = EndEffector.get();
-    public final Funnel funnel = Funnel.get();
     public final Drive drive = Drive.get();
     public final AprilTagVision aprilTagVision = AprilTagVision.get();
     public final GamePieceVision gamePieceVision = GamePieceVision.get();
     public final Superstructure superstructure = Superstructure.get();
+    public final Superintake superintake = Superintake.get();
 
     public RobotContainer() {
         addAutos();
@@ -65,25 +56,13 @@ public class RobotContainer {
 
     private void addAutos() {
         autoChooser.addOption("None", Commands.none());
-        autoChooser.addOption("Leave", drive.runRobotRelative(() -> new ChassisSpeeds(-0.5, 0, 0)).withTimeout(5));
-
-        autoChooser.addOption("Barge Side - Normal", BargeSideAuto.get(BargeSideAuto.Type.Normal));
-        autoChooser.addOption("Barge Side - Avoid Middle Front", BargeSideAuto.get(BargeSideAuto.Type.AvoidMiddleFront));
-        autoChooser.addOption("Barge Side - Avoid Middle Front And Adjacent", BargeSideAuto.get(BargeSideAuto.Type.AvoidMiddleFrontAndAdjacent));
-
-        autoChooser.addOption("Processor Side - Normal", ProcessorSideAuto.get(ProcessorSideAuto.Type.Normal));
-        autoChooser.addOption("Processor Side - Avoid Middle Front", ProcessorSideAuto.get(ProcessorSideAuto.Type.AvoidMiddleFront));
-        autoChooser.addOption("Processor Side - Avoid Middle Front And Adjacent", ProcessorSideAuto.get(ProcessorSideAuto.Type.AvoidMiddleFrontAndAdjacent));
-
-        autoChooser.addOption("Processor Side - Friendly", ProcessorSideFriendlyAuto.get());
-        autoChooser.addOption("Center", CenterAuto.get(CenterAuto.Type.Normal));
-        autoChooser.addOption("Center - Descore", CenterAuto.get(CenterAuto.Type.Descore));
 
         autoChooser.addOption(
                 "Characterization",
                 // We need to require the superstructure during characterization so that the default command doesn't get run
                 Commands.deferredProxy(() -> CommandsExt.eagerSequence(
                         superstructure.cancel(),
+                        superintake.cancel(),
                         characterizationChooser.get()
                 ))
         );
@@ -105,6 +84,7 @@ public class RobotContainer {
     private void setDefaultCommands() {
         drive.setDefaultCommand(drive.driveJoystick());
         superstructure.setDefaultCommand(superstructure.cancel());
+        superintake.setDefaultCommand(superintake.cancel());
     }
 
     /**
@@ -119,56 +99,10 @@ public class RobotContainer {
 
         controller.y().onTrue(robotState.resetRotation());
 
-        controller.leftBumper().onTrue(superstructure.cancel());
-
-        controller.x().whileTrue(superstructure.eject());
-
-        controller.a().onTrue(superstructure.home());
-
-        Trigger canFunnelIntake = new Trigger(superstructure::isEndEffectorTriggered)
-                .negate()
-                .or(operatorDashboard.ignoreEndEffectorBeamBreak::get);
-        controller.rightTrigger()
-                .and(canFunnelIntake)
-                .whileTrue(superstructure.funnelIntake());
-
-        // Use manual scoring if override enabled or when scoring L1
-        Trigger manualScoring = new Trigger(() -> operatorDashboard.manualScoring.get() || operatorDashboard.getSelectedCoralScoringLevel() == OperatorDashboard.CoralScoringLevel.L1);
-        Trigger canScore = new Trigger(superstructure::isEndEffectorTriggered)
-                .or(operatorDashboard.ignoreEndEffectorBeamBreak::get);
-        Trigger canAutoScore = new Trigger(() -> ReefAlign.isAlignable(robotState.getPose(), operatorDashboard.getSelectedReefZoneSide()));
-        controller.leftTrigger()
-                .and(manualScoring.negate())
-                .and(canScore)
-                .and(canAutoScore)
-                .onTrue(superstructure.autoScoreCoral(
-                        operatorDashboard::getSelectedReefZoneSide,
-                        operatorDashboard::getSelectedLocalReefSide,
-                        operatorDashboard::getSelectedCoralScoringLevel,
-                        controller.leftTrigger()
-                ));
-        controller.leftTrigger()
-                .and(manualScoring)
-                .and(canScore)
-                .onTrue(superstructure.scoreCoralManual(
-                        controller.leftTrigger(),
-                        operatorDashboard::getSelectedCoralScoringLevel
-                ));
-
-        Trigger manualDescoring = new Trigger(operatorDashboard.manualScoring::get);
-        Trigger canDescore = new Trigger(superstructure::isEndEffectorTriggered)
-                .negate()
-                .or(operatorDashboard.ignoreEndEffectorBeamBreak::get);
-        Trigger canAutoDescore = new Trigger(() -> ReefAlign.isAlignable(robotState.getPose(), operatorDashboard.getSelectedReefZoneSide()));
-        controller.rightBumper()
-                .and(manualDescoring.negate())
-                .and(canDescore)
-                .and(canAutoDescore)
-                .onTrue(superstructure.autoDescoreAlgae(operatorDashboard::getSelectedReefZoneSide, controller.rightBumper()));
-        controller.rightBumper()
-                .and(manualDescoring)
-                .and(canDescore)
-                .onTrue(superstructure.descoreAlgaeManual(operatorDashboard::getSelectedReefZoneSide));
+        controller.leftBumper().onTrue(Commands.parallel(
+                superstructure.cancel(),
+                superintake.cancel()
+        ));
 
         if (BuildConstants.mode == BuildConstants.Mode.SIM) {
             var ref = new Object() {
@@ -183,28 +117,6 @@ public class RobotContainer {
                     drive.moveTo(() -> ref.setpoint, false)
             ));
         }
-
-        // TODO manual elevator see elevator and superstructure and stuff
-//        operatorDashboard.operatorKeypad.getOverride4()
-//                .or(operatorDashboard.zeroElevator::get)
-//                .and(() -> !operatorDashboard.manualElevator.get())
-//                .toggleOnTrue(Commands.parallel(
-//                        superstructure.zeroElevator(),
-//                        // Turn off the toggle instantly so it's like a button
-//                        Commands.runOnce(() -> operatorDashboard.zeroElevator.set(false))
-//                ).ignoringDisable(true));
-//        operatorDashboard.operatorKeypad.getOverride6()
-//                .and(() -> !operatorDashboard.manualElevator.get())
-//                .onTrue(Commands.runOnce(() -> operatorDashboard.useRealElevatorState.set(true)));
-//
-//        operatorDashboard.operatorKeypad.getOverride4()
-//                .or(operatorDashboard.manualElevatorUp::get)
-//                .and(operatorDashboard.manualElevator::get)
-//                .whileTrue(elevator.setManualVoltage(0.5));
-//        operatorDashboard.operatorKeypad.getOverride6()
-//                .or(operatorDashboard.manualElevatorDown::get)
-//                .and(operatorDashboard.manualElevator::get)
-//                .whileTrue(elevator.setManualVoltage(-0.5));
 
         // NOTE: if you are binding a trigger to a command returned by a subsystem, you must wrap it in CommandsExt.eagerSequence(superstructure.cancel(), <your command>)
         // You must do this because if you don't, superstructure's default command will cancel your command
