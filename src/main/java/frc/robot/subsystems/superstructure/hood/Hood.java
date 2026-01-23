@@ -24,9 +24,9 @@ import java.util.function.DoubleSupplier;
 import static frc.robot.subsystems.superstructure.hood.HoodConstants.*;
 
 public class Hood implements Periodic {
-    private static final PIDF.Tunable gainsTunable = gains.tunable("Hood/Gains");
-    private static final LoggedTunableNumber deploySetpointDegrees = new LoggedTunableNumber("Hood/Goal/Deploy", -45.0);
-    private static final LoggedTunableNumber profileLookaheadTimeSec = new LoggedTunableNumber("Hood/ProfileLookaheadTimeSec", 0.15);
+    private static final PIDF.Tunable gainsTunable = gains.tunable("Superstructure/Hood/Gains");
+    private static final LoggedTunableNumber deploySetpointDegrees = new LoggedTunableNumber("Superstructure/Hood/Goal/Deploy", -45.0);
+    private static final LoggedTunableNumber profileLookaheadTimeSec = new LoggedTunableNumber("Superstructure/Hood/ProfileLookaheadTimeSec", 0.15);
 
     private final OperatorDashboard operatorDashboard = OperatorDashboard.get();
 
@@ -72,7 +72,7 @@ public class Hood implements Periodic {
     @Override
     public void periodicBeforeCommands() {
         io.updateInputs(inputs);
-        Logger.processInputs("Inputs/Hood", inputs);
+        Logger.processInputs("Inputs/Superstructure/Hood", inputs);
 
         motorDisconnectedAlert.set(!inputs.connected);
 
@@ -86,14 +86,14 @@ public class Hood implements Periodic {
 
     @Override
     public void periodicAfterCommands() {
-        Logger.recordOutput("Hood/Goal", goal);
+        Logger.recordOutput("Superstructure/Hood/Goal", goal);
         if (DriverStation.isDisabled()) {
             io.setRequest(RequestType.VoltageVolts, 0);
         } else {
             // See the comments above the lookaheadState and goalState variables for why we effectively calculate two profiles
 
             double setpointRad = goal.setpointRad.getAsDouble();
-            Logger.recordOutput("Hood/OriginalSetpointRad", setpointRad);
+            Logger.recordOutput("Superstructure/Hood/OriginalSetpointRad", setpointRad);
             TrapezoidProfile.State wantedState = new TrapezoidProfile.State(setpointRad, 0.0);
 
             if (lastSetpointRad == null || setpointRad != lastSetpointRad) {
@@ -103,10 +103,10 @@ public class Hood implements Periodic {
             lastSetpointRad = setpointRad;
 
             goalState = profile.calculate(0.02, goalState, wantedState);
-            Logger.recordOutput("Hood/ProfileSetpointRad", goalState.position);
+            Logger.recordOutput("Superstructure/Hood/ProfileSetpointRad", goalState.position);
 
             lookaheadState = profile.calculate(0.02, lookaheadState, wantedState);
-            Logger.recordOutput("Hood/LookaheadSetpointRad", lookaheadState.position);
+            Logger.recordOutput("Superstructure/Hood/LookaheadSetpointRad", lookaheadState.position);
 
             io.setRequest(RequestType.PositionRad, lookaheadState.position);
         }
@@ -119,7 +119,7 @@ public class Hood implements Periodic {
         return inputs.positionRad;
     }
 
-    @AutoLogOutput(key = "Hood/AtGoal")
+    @AutoLogOutput(key = "Superstructure/Hood/AtGoal")
     public boolean atGoal() {
         double value = goal.setpointRad.getAsDouble();
         return Math.abs(inputs.positionRad - value) <= tolerances.positionToleranceRad();
