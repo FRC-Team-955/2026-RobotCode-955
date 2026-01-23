@@ -17,7 +17,6 @@ import frc.robot.subsystems.drive.goals.WheelRadiusCharacterizationGoal;
 import frc.robot.subsystems.gamepiecevision.GamePieceVision;
 import frc.robot.subsystems.superintake.Superintake;
 import frc.robot.subsystems.superstructure.Superstructure;
-import frc.robot.subsystems.superstructure.hood.Hood;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -44,7 +43,6 @@ public class RobotContainer {
 
     public final Superintake superintake = Superintake.get();
     public final Superstructure superstructure = Superstructure.get();
-    public final Hood hood = Hood.get();
 
     public RobotContainer() {
         addAutos();
