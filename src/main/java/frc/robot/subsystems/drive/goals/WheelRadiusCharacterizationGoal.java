@@ -4,10 +4,10 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
+import frc.lib.network.LoggedTunableNumber;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.DriveGoal;
 import frc.robot.subsystems.drive.DriveRequest;
-import frc.robot.subsystems.drive.DriveTuning;
 import lombok.RequiredArgsConstructor;
 import org.littletonrobotics.junction.Logger;
 
@@ -15,6 +15,8 @@ import static frc.robot.subsystems.drive.DriveConstants.drivebaseRadiusMeters;
 
 @RequiredArgsConstructor
 public class WheelRadiusCharacterizationGoal extends DriveGoal {
+    private static final LoggedTunableNumber speedRadPerSec = new LoggedTunableNumber("Drive/WheelRadiusCharacterization/SpeedRadPerSec", 1.0);
+
     private static final Drive drive = Drive.get();
 
     @RequiredArgsConstructor
@@ -34,7 +36,7 @@ public class WheelRadiusCharacterizationGoal extends DriveGoal {
 
     @Override
     public DriveRequest getRequest() {
-        var omega = omegaLimiter.calculate(omegaDirection.value * DriveTuning.wheelRadiusCharacterizationSpeedRadPerSec.get());
+        var omega = omegaLimiter.calculate(omegaDirection.value * speedRadPerSec.get());
 
         // Get yaw and wheel positions
         accumGyroYawRad += MathUtil.angleModulus(drive.getRawGyroRotation().getRadians() - lastGyroYawRad);
@@ -52,6 +54,6 @@ public class WheelRadiusCharacterizationGoal extends DriveGoal {
         Logger.recordOutput("Drive/WheelRadiusCharacterization/CurrentWheelRadiusInches", Units.metersToInches(currentEffectiveWheelRadius));
         Logger.recordOutput("Drive/WheelRadiusCharacterization/HasEnoughData", Math.abs(accumGyroYawRad) > Math.PI * 2.0);
 
-        return DriveRequest.chassisSpeedsDirect(new ChassisSpeeds(0, 0, omega));
+        return DriveRequest.chassisSpeeds(new ChassisSpeeds(0, 0, omega));
     }
 }

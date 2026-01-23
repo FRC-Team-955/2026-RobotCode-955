@@ -1,5 +1,7 @@
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
@@ -36,12 +38,12 @@ public class RobotContainer {
     public final RobotMechanism robotMechanism = RobotMechanism.get();
 
     /* Subsystems */
-    // Note: order does matter
     public final Drive drive = Drive.get();
     public final AprilTagVision aprilTagVision = AprilTagVision.get();
     public final GamePieceVision gamePieceVision = GamePieceVision.get();
-    public final Superstructure superstructure = Superstructure.get();
+
     public final Superintake superintake = Superintake.get();
+    public final Superstructure superstructure = Superstructure.get();
     public final Hood hood = Hood.get();
 
     public RobotContainer() {
@@ -57,33 +59,23 @@ public class RobotContainer {
     private void addAutos() {
         autoChooser.addOption("None", Commands.none());
 
-        autoChooser.addOption(
-                "Characterization",
-                // We need to require the superstructure during characterization so that the default command doesn't get run
-                Commands.deferredProxy(() -> CommandsExt.eagerSequence(
-                        superstructure.cancel(),
-                        superintake.cancel(),
-                        characterizationChooser.get()
-                ))
-        );
+        autoChooser.addOption("Characterization", Commands.deferredProxy(characterizationChooser::get));
     }
 
     private void addCharacterizations() {
-        ////////////////////// DRIVE //////////////////////
-
-        // TODO
         characterizationChooser.addOption("Drive 1 m/s Characterization", drive.runRobotRelative(() -> new ChassisSpeeds(1.0, 0.0, 0.0)));
         characterizationChooser.addOption("Drive 2 m/s Characterization", drive.runRobotRelative(() -> new ChassisSpeeds(2.0, 0.0, 0.0)));
         characterizationChooser.addOption("Drive 3 m/s Characterization", drive.runRobotRelative(() -> new ChassisSpeeds(3.0, 0.0, 0.0)));
         characterizationChooser.addOption("Drive 4 m/s Characterization", drive.runRobotRelative(() -> new ChassisSpeeds(4.0, 0.0, 0.0)));
         characterizationChooser.addOption("Drive Full Speed Characterization", drive.fullSpeedCharacterization());
         characterizationChooser.addOption("Drive Wheel Radius Characterization", drive.wheelRadiusCharacterization(WheelRadiusCharacterizationGoal.Direction.CLOCKWISE));
+        characterizationChooser.addOption("Drive Slip Current Characterization", drive.slipCurrentCharacterization());
     }
 
     private void setDefaultCommands() {
         drive.setDefaultCommand(drive.driveJoystick());
-        superstructure.setDefaultCommand(superstructure.cancel());
-        superintake.setDefaultCommand(superintake.cancel());
+        superintake.setDefaultCommand(superintake.setGoal(Superintake.Goal.IDLE).ignoringDisable(true));
+        superstructure.setDefaultCommand(superstructure.setGoal(Superstructure.Goal.IDLE).ignoringDisable(true));
     }
 
     /**
@@ -93,18 +85,26 @@ public class RobotContainer {
      * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
      */
     private void configureBindings() {
-        // NOTE: if you are binding a trigger to a command returned by a subsystem, you must wrap it in CommandsExt.eagerSequence(superstructure.cancel(), <your command>)
-        // You must do this because if you don't, superstructure's default command will cancel your command
-
         controller.y().onTrue(robotState.resetRotation());
 
         controller.leftBumper().onTrue(Commands.parallel(
-                superstructure.cancel(),
-                superintake.cancel()
+                superintake.setGoal(Superintake.Goal.IDLE),
+                superstructure.setGoal(Superstructure.Goal.IDLE)
         ));
 
-        // NOTE: if you are binding a trigger to a command returned by a subsystem, you must wrap it in CommandsExt.eagerSequence(superstructure.cancel(), <your command>)
-        // You must do this because if you don't, superstructure's default command will cancel your command
+        if (BuildConstants.mode == BuildConstants.Mode.SIM) {
+            var ref = new Object() {
+                Pose2d setpoint;
+            };
+            controller.a().toggleOnTrue(CommandsExt.eagerSequence(
+                    Commands.runOnce(() -> ref.setpoint = new Pose2d(
+                            robotState.getPose().getX() + 1,
+                            robotState.getPose().getY() + 1,
+                            robotState.getPose().getRotation().plus(Rotation2d.kPi)
+                    )),
+                    drive.moveTo(() -> ref.setpoint, false)
+            ));
+        }
     }
 
     /**

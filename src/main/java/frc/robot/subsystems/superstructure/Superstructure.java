@@ -1,12 +1,13 @@
 package frc.robot.subsystems.superstructure;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.lib.commands.CommandsExt;
 import frc.lib.subsystem.CommandBasedSubsystem;
 import frc.robot.OperatorDashboard;
 import frc.robot.RobotState;
 import frc.robot.subsystems.apriltagvision.AprilTagVision;
 import frc.robot.subsystems.superstructure.hood.Hood;
+import frc.robot.subsystems.superstructure.flywheel.Flywheel;
+import frc.robot.subsystems.superstructure.indexer.Indexer;
 import lombok.RequiredArgsConstructor;
 import org.littletonrobotics.junction.Logger;
 
@@ -16,7 +17,8 @@ public class Superstructure extends CommandBasedSubsystem {
     private final RobotState robotState = RobotState.get();
     private final OperatorDashboard operatorDashboard = OperatorDashboard.get();
 
-    private final AprilTagVision aprilTagVision = AprilTagVision.get();
+    public final Indexer indexer = Indexer.get();
+    public final Flywheel flywheel = Flywheel.get();
 
     public final Hood hood = Hood.get();
 
@@ -26,14 +28,17 @@ public class Superstructure extends CommandBasedSubsystem {
     @RequiredArgsConstructor
     public enum Goal {
         IDLE,
+        SHOOT_AND_PASS_AUTOMATIC,
+        SHOOT_HUB_MANUAL,
+        SHOOT_TOWER_MANUAL,
+        PASS_MANUAL,
+        EJECT,
     }
 
     private Goal goal = Goal.IDLE;
 
-    public Command setGoal(Goal superstructureGoal) {
-        return runOnce(() -> {
-            goal = superstructureGoal;
-        });
+    public Command setGoal(Goal goal) {
+        return startIdle(() -> this.goal = goal);
     }
 
     private static Superstructure instance;
@@ -59,14 +64,12 @@ public class Superstructure extends CommandBasedSubsystem {
     @Override
     public void periodicAfterCommands() {
         Logger.recordOutput("Superstructure/Goal", goal);
-    }
 
-    public Command cancel() {
-        return CommandsExt.eagerSequence(
-                setGoal(
-                        Goal.IDLE
-                ),
-                aprilTagVision.setTagIdFilter(new int[0])
-        ).ignoringDisable(true);
+        switch (goal) {
+            case IDLE -> {
+                flywheel.setGoal(Flywheel.Goal.IDLE);
+                indexer.setGoal(Indexer.Goal.IDLE);
+            }
+        }
     }
 }
