@@ -6,6 +6,7 @@ import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import frc.lib.subsystem.Periodic;
+import frc.robot.subsystems.superstructure.Superstructure;
 import org.littletonrobotics.junction.Logger;
 
 import static frc.robot.subsystems.drive.DriveConstants.driveConfig;
@@ -35,6 +36,8 @@ public class RobotMechanism implements Periodic {
 
     private static final RobotState robotState = RobotState.get();
 
+    private static final Superstructure superstructure = Superstructure.get();
+
     private static RobotMechanism instance;
 
     public static RobotMechanism get() {
@@ -56,6 +59,11 @@ public class RobotMechanism implements Periodic {
                         new Translation3d(0.0, 0.0, driveConfig.bottomOfFrameToCenterOfWheelsMeters() + driveConfig.wheelRadiusMeters()),
                         new Rotation3d()
                 ));
+
+        Transform3d hoodTransform = hoodInitial.plus(new Transform3d(
+                new Translation3d(),
+                new Rotation3d(0.0, superstructure.hood.getPositionRad(), 0.0)
+        ));
 
         Logger.recordOutput("RobotMechanism/Pose", robotPose);
         Logger.recordOutput(

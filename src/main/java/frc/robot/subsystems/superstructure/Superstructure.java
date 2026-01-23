@@ -6,6 +6,7 @@ import frc.lib.subsystem.CommandBasedSubsystem;
 import frc.robot.OperatorDashboard;
 import frc.robot.RobotState;
 import frc.robot.subsystems.apriltagvision.AprilTagVision;
+import frc.robot.subsystems.superstructure.hood.Hood;
 import lombok.RequiredArgsConstructor;
 import org.littletonrobotics.junction.Logger;
 
@@ -16,6 +17,8 @@ public class Superstructure extends CommandBasedSubsystem {
     private final OperatorDashboard operatorDashboard = OperatorDashboard.get();
 
     private final AprilTagVision aprilTagVision = AprilTagVision.get();
+
+    public final Hood hood = Hood.get();
 
     private final SuperstructureIO io = createIO();
     private final SuperstructureIOInputsAutoLogged inputs = new SuperstructureIOInputsAutoLogged();
