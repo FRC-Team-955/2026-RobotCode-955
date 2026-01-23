@@ -4,7 +4,6 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.PIDF;
@@ -22,7 +21,6 @@ import org.littletonrobotics.junction.Logger;
 
 import java.util.function.DoubleSupplier;
 
-import static edu.wpi.first.wpilibj2.command.Commands.runOnce;
 import static frc.robot.subsystems.superintake.intakepivot.IntakePivotConstants.*;
 
 public class IntakePivot implements Periodic {

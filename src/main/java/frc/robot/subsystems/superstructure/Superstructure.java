@@ -1,14 +1,11 @@
 package frc.robot.subsystems.superstructure;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
-import frc.lib.commands.CommandsExt;
 import frc.lib.subsystem.CommandBasedSubsystem;
 import frc.robot.OperatorDashboard;
 import frc.robot.RobotState;
-import frc.robot.subsystems.apriltagvision.AprilTagVision;
-import frc.robot.subsystems.superstructure.indexer.Indexer;
 import frc.robot.subsystems.superstructure.flywheel.Flywheel;
+import frc.robot.subsystems.superstructure.indexer.Indexer;
 import lombok.RequiredArgsConstructor;
 import org.littletonrobotics.junction.Logger;
 
@@ -79,7 +76,7 @@ public class Superstructure extends CommandBasedSubsystem {
 
     public Command runFlywheel() {
         return flywheel.setGoal(
-                    Flywheel.Goal.RUN_AT_CERTAIN_SPEED
+                Flywheel.Goal.RUN_AT_CERTAIN_SPEED
         );
     }
 }

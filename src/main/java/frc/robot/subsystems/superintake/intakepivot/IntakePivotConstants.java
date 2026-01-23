@@ -4,7 +4,10 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import frc.lib.PIDF;
-import frc.lib.motor.*;
+import frc.lib.motor.MotorIO;
+import frc.lib.motor.MotorIOArmSim;
+import frc.lib.motor.MotorIOSparkMax;
+import frc.lib.motor.RequestTolerances;
 import frc.robot.BuildConstants;
 
 public class IntakePivotConstants {

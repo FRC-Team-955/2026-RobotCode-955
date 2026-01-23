@@ -1,17 +1,13 @@
 package frc.robot.subsystems.superintake;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.lib.commands.CommandsExt;
 import frc.lib.subsystem.CommandBasedSubsystem;
 import frc.robot.OperatorDashboard;
 import frc.robot.RobotState;
-import frc.robot.subsystems.apriltagvision.AprilTagVision;
-import frc.robot.subsystems.superintake.intakerollers.IntakeRollers;
 import frc.robot.subsystems.superintake.intakepivot.IntakePivot;
+import frc.robot.subsystems.superintake.intakerollers.IntakeRollers;
 import lombok.RequiredArgsConstructor;
 import org.littletonrobotics.junction.Logger;
-
-import java.util.function.Supplier;
 
 public class Superintake extends CommandBasedSubsystem {
     private final RobotState robotState = RobotState.get();

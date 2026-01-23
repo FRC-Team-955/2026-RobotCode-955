@@ -7,11 +7,7 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import frc.lib.subsystem.Periodic;
 import frc.robot.subsystems.superintake.Superintake;
-import frc.robot.subsystems.superintake.intakerollers.IntakeRollers;
-import frc.robot.subsystems.superintake.intakepivot.IntakePivot;
 import frc.robot.subsystems.superstructure.Superstructure;
-import frc.robot.subsystems.superstructure.indexer.Indexer;
-import frc.robot.subsystems.superstructure.flywheel.Flywheel;
 import org.littletonrobotics.junction.Logger;
 
 import static frc.robot.subsystems.drive.DriveConstants.driveConfig;

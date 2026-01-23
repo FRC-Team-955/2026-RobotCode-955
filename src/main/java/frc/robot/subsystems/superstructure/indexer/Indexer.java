@@ -4,7 +4,6 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import frc.lib.PIDF;
 import frc.lib.motor.MotorIO;
 import frc.lib.motor.MotorIOInputsAutoLogged;
 import frc.lib.motor.RequestType;
@@ -13,17 +12,17 @@ import frc.lib.subsystem.Periodic;
 import frc.robot.OperatorDashboard;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.function.DoubleSupplier;
 
 import static edu.wpi.first.wpilibj2.command.Commands.runOnce;
-import static frc.robot.subsystems.superstructure.indexer.IndexerConstants.*;
+import static frc.robot.subsystems.superstructure.indexer.IndexerConstants.createIO;
+import static frc.robot.subsystems.superstructure.indexer.IndexerConstants.tolerances;
 
 public class Indexer implements Periodic {
-//    private static final PIDF.Tunable positionGainsTunable = positionGains.tunable("Indexer/Position");
+    //    private static final PIDF.Tunable positionGainsTunable = positionGains.tunable("Indexer/Position");
 //    private static final PIDF.Tunable velocityGainsTunable = velocityGains.tunable("Indexer/Velocity");
     private static final LoggedTunableNumber runAtVoltage = new LoggedTunableNumber("Superstructure/Indexer/Goal/RunAtVoltage", 3.0);
 

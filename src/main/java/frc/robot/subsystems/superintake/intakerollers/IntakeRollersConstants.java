@@ -5,7 +5,6 @@ import frc.lib.PIDF;
 import frc.lib.motor.MotorIO;
 import frc.lib.motor.MotorIOSim;
 import frc.lib.motor.MotorIOSparkMax;
-import frc.lib.motor.RequestTolerances;
 import frc.robot.BuildConstants;
 
 public class IntakeRollersConstants {

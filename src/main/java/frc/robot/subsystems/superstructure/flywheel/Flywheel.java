@@ -11,10 +11,8 @@ import frc.lib.motor.RequestType;
 import frc.lib.network.LoggedTunableNumber;
 import frc.lib.subsystem.Periodic;
 import frc.robot.OperatorDashboard;
-import frc.robot.subsystems.superstructure.Superstructure;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -37,7 +35,7 @@ public class Flywheel implements Periodic {
     public enum Goal {
         IDLE(() -> 0, RequestType.VoltageVolts),
         RUN_AT_VOLTAGE(runAtVoltage::get, RequestType.VoltageVolts),
-        RUN_AT_CERTAIN_SPEED(runAtSpeed::get, RequestType.VelocityRadPerSec)
+        RUN_AT_CERTAIN_SPEED(runAtSpeed::get, RequestType.VelocityRadPerSec),
         ;
 
         /** Should be constant for every loop cycle */
