@@ -7,6 +7,7 @@ import frc.robot.OperatorDashboard;
 import frc.robot.RobotState;
 import frc.robot.subsystems.apriltagvision.AprilTagVision;
 import frc.robot.subsystems.superintake.intakerollers.IntakeRollers;
+import frc.robot.subsystems.superintake.intakepivot.IntakePivot;
 import lombok.RequiredArgsConstructor;
 import org.littletonrobotics.junction.Logger;
 
@@ -19,6 +20,7 @@ public class Superintake extends CommandBasedSubsystem {
     private final AprilTagVision aprilTagVision = AprilTagVision.get();
 
     private final IntakeRollers intakeRollers = IntakeRollers.get();
+    private final IntakePivot intakePivot = IntakePivot.get();
 
     @RequiredArgsConstructor
     public enum Goal {
