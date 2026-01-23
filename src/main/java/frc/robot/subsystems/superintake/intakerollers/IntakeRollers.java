@@ -18,7 +18,7 @@ import java.util.function.DoubleSupplier;
 import static frc.robot.subsystems.superintake.intakerollers.IntakeRollersConstants.createIO;
 
 public class IntakeRollers implements Periodic {
-    private static final LoggedTunableNumber intakeVoltage = new LoggedTunableNumber("IntakeRollers/Goal/IntakeVoltage", 12.0);
+    private static final LoggedTunableNumber intakeVoltage = new LoggedTunableNumber("Superintake/IntakeRollers/Goal/IntakeVoltage", 12.0);
 
     private final OperatorDashboard operatorDashboard = OperatorDashboard.get();
 
@@ -59,7 +59,7 @@ public class IntakeRollers implements Periodic {
     @Override
     public void periodicBeforeCommands() {
         io.updateInputs(inputs);
-        Logger.processInputs("Inputs/IntakeRollers", inputs);
+        Logger.processInputs("Inputs/Superintake/IntakeRollers", inputs);
 
         motorDisconnectedAlert.set(!inputs.connected);
 
@@ -71,13 +71,13 @@ public class IntakeRollers implements Periodic {
 
     @Override
     public void periodicAfterCommands() {
-        Logger.recordOutput("IntakeRollers/Goal", goal);
+        Logger.recordOutput("Superintake/IntakeRollers/Goal", goal);
         if (DriverStation.isDisabled()) {
             io.setRequest(RequestType.VoltageVolts, 0);
         } else {
-            Logger.recordOutput("IntakeRollers/RequestType", goal.type);
+            Logger.recordOutput("Superintake/IntakeRollers/RequestType", goal.type);
             double value = goal.value.getAsDouble();
-            Logger.recordOutput("IntakeRollers/RequestValue", value);
+            Logger.recordOutput("Superintake/IntakeRollers/RequestValue", value);
             io.setRequest(goal.type, value);
         }
     }

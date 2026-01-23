@@ -46,12 +46,7 @@ public class RobotContainer {
     public final GamePieceVision gamePieceVision = GamePieceVision.get();
 
     public final Superintake superintake = Superintake.get();
-    public final IntakeRollers intakeRollers = IntakeRollers.get();
-    public final IntakePivot intakePivot = IntakePivot.get();
-
     public final Superstructure superstructure = Superstructure.get();
-    public final Indexer indexer = Indexer.get();
-    public final Flywheel flywheel = Flywheel.get();
 
     public RobotContainer() {
         addAutos();

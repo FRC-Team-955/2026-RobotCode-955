@@ -16,11 +16,10 @@ import java.util.function.Supplier;
 public class Superintake extends CommandBasedSubsystem {
     private final RobotState robotState = RobotState.get();
     private final OperatorDashboard operatorDashboard = OperatorDashboard.get();
-
     private final AprilTagVision aprilTagVision = AprilTagVision.get();
 
-    private final IntakeRollers intakeRollers = IntakeRollers.get();
-    private final IntakePivot intakePivot = IntakePivot.get();
+    public final IntakeRollers intakeRollers = IntakeRollers.get();
+    public final IntakePivot intakePivot = IntakePivot.get();
 
     @RequiredArgsConstructor
     public enum Goal {

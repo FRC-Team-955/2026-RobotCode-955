@@ -24,9 +24,9 @@ import static edu.wpi.first.wpilibj2.command.Commands.runOnce;
 import static frc.robot.subsystems.superstructure.flywheel.FlywheelConstants.*;
 
 public class Flywheel implements Periodic {
-    private static final PIDF.Tunable velocityGainsTunable = velocityGains.tunable("Flywheel/Velocity");
-    private static final LoggedTunableNumber runAtVoltage = new LoggedTunableNumber("Flywheel/Goal/RunAtVoltage", 3.0);
-    private static final LoggedTunableNumber runAtSpeed = new LoggedTunableNumber("Flywheel/Goal/RunAtSpeed", 20.0);
+    private static final PIDF.Tunable velocityGainsTunable = velocityGains.tunable("Superstructure/Flywheel/Velocity");
+    private static final LoggedTunableNumber runAtVoltage = new LoggedTunableNumber("Superstructure/Flywheel/Goal/RunAtVoltage", 3.0);
+    private static final LoggedTunableNumber runAtSpeed = new LoggedTunableNumber("Superstructure/Flywheel/Goal/RunAtSpeed", 20.0);
 
     private final OperatorDashboard operatorDashboard = OperatorDashboard.get();
 
@@ -67,7 +67,7 @@ public class Flywheel implements Periodic {
     @Override
     public void periodicBeforeCommands() {
         io.updateInputs(inputs);
-        Logger.processInputs("Inputs/Flywheel", inputs);
+        Logger.processInputs("Inputs/Superstructure/Flywheel", inputs);
 
         motorDisconnectedAlert.set(!inputs.connected);
 
@@ -81,13 +81,13 @@ public class Flywheel implements Periodic {
 
     @Override
     public void periodicAfterCommands() {
-        Logger.recordOutput("Flywheel/Goal", goal);
+        Logger.recordOutput("Superstructure/Flywheel/Goal", goal);
         if (DriverStation.isDisabled()) {
             io.setRequest(RequestType.VoltageVolts, 0);
         } else {
-            Logger.recordOutput("Flywheel/RequestType", goal.type);
+            Logger.recordOutput("Superstructure/Flywheel/RequestType", goal.type);
             double value = goal.value.getAsDouble();
-            Logger.recordOutput("Flywheel/RequestValue", value);
+            Logger.recordOutput("Superstructure/Flywheel/RequestValue", value);
             io.setRequest(goal.type, value);
         }
     }
@@ -99,7 +99,7 @@ public class Flywheel implements Periodic {
         return inputs.positionRad;
     }
 
-    @AutoLogOutput(key = "Flywheel/AtGoal")
+    @AutoLogOutput(key = "Superstructure/Flywheel/AtGoal")
     public boolean atGoal() {
         double value = goal.value.getAsDouble();
         return switch (goal.type) {

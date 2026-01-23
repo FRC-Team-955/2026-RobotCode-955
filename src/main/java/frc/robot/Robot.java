@@ -131,10 +131,10 @@ public class Robot extends LoggedRobot {
                 robotContainer.superstructure,
 
                 // Subsystems - the order of these doesn't matter
-                robotContainer.intakeRollers,
-                robotContainer.intakePivot,
-                robotContainer.indexer,
-                robotContainer.flywheel,
+                robotContainer.superintake.intakeRollers,
+                robotContainer.superintake.intakePivot,
+                robotContainer.superstructure.indexer,
+                robotContainer.superstructure.flywheel,
 
                 // Misc
                 robotContainer.canLogger,

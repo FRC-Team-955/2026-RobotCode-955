@@ -26,9 +26,9 @@ import static edu.wpi.first.wpilibj2.command.Commands.runOnce;
 import static frc.robot.subsystems.superintake.intakepivot.IntakePivotConstants.*;
 
 public class IntakePivot implements Periodic {
-    private static final PIDF.Tunable gainsTunable = gains.tunable("IntakePivot/Gains");
-    private static final LoggedTunableNumber deploySetpointDegrees = new LoggedTunableNumber("IntakePivot/Goal/Deploy", -45.0);
-    private static final LoggedTunableNumber profileLookaheadTimeSec = new LoggedTunableNumber("IntakePivot/ProfileLookaheadTimeSec", 0.15);
+    private static final PIDF.Tunable gainsTunable = gains.tunable("Superintake/IntakePivot/Gains");
+    private static final LoggedTunableNumber deploySetpointDegrees = new LoggedTunableNumber("Superintake/IntakePivot/Goal/Deploy", -45.0);
+    private static final LoggedTunableNumber profileLookaheadTimeSec = new LoggedTunableNumber("Superintake/IntakePivot/ProfileLookaheadTimeSec", 0.15);
 
     private final OperatorDashboard operatorDashboard = OperatorDashboard.get();
 
@@ -76,7 +76,7 @@ public class IntakePivot implements Periodic {
     @Override
     public void periodicBeforeCommands() {
         io.updateInputs(inputs);
-        Logger.processInputs("Inputs/IntakePivot", inputs);
+        Logger.processInputs("Inputs/Superintake/IntakePivot", inputs);
 
         motorDisconnectedAlert.set(!inputs.connected);
 
@@ -90,14 +90,14 @@ public class IntakePivot implements Periodic {
 
     @Override
     public void periodicAfterCommands() {
-        Logger.recordOutput("IntakePivot/Goal", goal);
+        Logger.recordOutput("Superintake/IntakePivot/Goal", goal);
         if (DriverStation.isDisabled()) {
             io.setRequest(RequestType.VoltageVolts, 0);
         } else {
             // See the comments above the lookaheadState and goalState variables for why we effectively calculate two profiles
 
             double setpointRad = goal.setpointRad.getAsDouble();
-            Logger.recordOutput("IntakePivot/OriginalSetpointRad", setpointRad);
+            Logger.recordOutput("Superintake/IntakePivot/OriginalSetpointRad", setpointRad);
             TrapezoidProfile.State wantedState = new TrapezoidProfile.State(setpointRad, 0.0);
 
             if (lastSetpointRad == null || setpointRad != lastSetpointRad) {
@@ -107,10 +107,10 @@ public class IntakePivot implements Periodic {
             lastSetpointRad = setpointRad;
 
             goalState = profile.calculate(0.02, goalState, wantedState);
-            Logger.recordOutput("IntakePivot/ProfileSetpointRad", goalState.position);
+            Logger.recordOutput("Superintake/IntakePivot/ProfileSetpointRad", goalState.position);
 
             lookaheadState = profile.calculate(0.02, lookaheadState, wantedState);
-            Logger.recordOutput("IntakePivot/LookaheadSetpointRad", lookaheadState.position);
+            Logger.recordOutput("Superintake/IntakePivot/LookaheadSetpointRad", lookaheadState.position);
 
             io.setRequest(RequestType.PositionRad, lookaheadState.position);
         }
@@ -123,7 +123,7 @@ public class IntakePivot implements Periodic {
         return inputs.positionRad;
     }
 
-    @AutoLogOutput(key = "IntakePivot/AtGoal")
+    @AutoLogOutput(key = "Superintake/IntakePivot/AtGoal")
     public boolean atGoal() {
         double value = goal.setpointRad.getAsDouble();
         return Math.abs(inputs.positionRad - value) <= tolerances.positionToleranceRad();

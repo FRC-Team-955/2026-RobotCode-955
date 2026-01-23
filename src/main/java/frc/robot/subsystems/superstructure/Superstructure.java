@@ -17,10 +17,10 @@ import static frc.robot.subsystems.superstructure.SuperstructureConstants.create
 public class Superstructure extends CommandBasedSubsystem {
     private final RobotState robotState = RobotState.get();
     private final OperatorDashboard operatorDashboard = OperatorDashboard.get();
-
     private final AprilTagVision aprilTagVision = AprilTagVision.get();
-    private final Indexer indexer = Indexer.get();
-    private final Flywheel flywheel = Flywheel.get();
+
+    public final Indexer indexer = Indexer.get();
+    public final Flywheel flywheel = Flywheel.get();
 
     private final SuperstructureIO io = createIO();
     private final SuperstructureIOInputsAutoLogged inputs = new SuperstructureIOInputsAutoLogged();

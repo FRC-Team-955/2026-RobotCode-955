@@ -25,7 +25,7 @@ import static frc.robot.subsystems.superstructure.indexer.IndexerConstants.*;
 public class Indexer implements Periodic {
 //    private static final PIDF.Tunable positionGainsTunable = positionGains.tunable("Indexer/Position");
 //    private static final PIDF.Tunable velocityGainsTunable = velocityGains.tunable("Indexer/Velocity");
-    private static final LoggedTunableNumber runAtVoltage = new LoggedTunableNumber("Indexer/Goal/RunAtVoltage", 3.0);
+    private static final LoggedTunableNumber runAtVoltage = new LoggedTunableNumber("Superstructure/Indexer/Goal/RunAtVoltage", 3.0);
 
     private final OperatorDashboard operatorDashboard = OperatorDashboard.get();
 
@@ -67,7 +67,7 @@ public class Indexer implements Periodic {
     @Override
     public void periodicBeforeCommands() {
         io.updateInputs(inputs);
-        Logger.processInputs("Inputs/Indexer", inputs);
+        Logger.processInputs("Inputs/Superstructure/Indexer", inputs);
 
         motorDisconnectedAlert.set(!inputs.connected);
 
@@ -82,13 +82,13 @@ public class Indexer implements Periodic {
 
     @Override
     public void periodicAfterCommands() {
-        Logger.recordOutput("Indexer/Goal", goal);
+        Logger.recordOutput("Superstructure/Indexer/Goal", goal);
         if (DriverStation.isDisabled()) {
             io.setRequest(RequestType.VoltageVolts, 0);
         } else {
-            Logger.recordOutput("Indexer/RequestType", goal.type);
+            Logger.recordOutput("Superstructure/Indexer/RequestType", goal.type);
             double value = goal.value.getAsDouble();
-            Logger.recordOutput("Indexer/RequestValue", value);
+            Logger.recordOutput("Superstructure/Indexer/RequestValue", value);
             io.setRequest(goal.type, value);
         }
     }
@@ -100,7 +100,7 @@ public class Indexer implements Periodic {
         return inputs.positionRad;
     }
 
-    @AutoLogOutput(key = "Indexer/AtGoal")
+    @AutoLogOutput(key = "Superstructure/Indexer/AtGoal")
     public boolean atGoal() {
         double value = goal.value.getAsDouble();
         return switch (goal.type) {
