@@ -21,7 +21,7 @@ import org.littletonrobotics.junction.Logger;
 
 import java.util.function.DoubleSupplier;
 
-import static frc.lib.example.HoodConstants.*;
+import static frc.robot.subsystems.superstructure.hood.HoodConstants.*;
 
 public class Hood implements Periodic {
     private static final PIDF.Tunable gainsTunable = gains.tunable("Hood/Gains");

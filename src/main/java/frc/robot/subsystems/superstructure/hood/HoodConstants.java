@@ -17,7 +17,7 @@ public class HoodConstants {
     static final double gearRatio = 120;
     static final PIDF gains = switch (BuildConstants.mode) {
         case REAL, REPLAY -> PIDF.zero();
-        case SIM -> PIDF.zero();
+        case SIM -> PIDF.ofPDSV(18.9, 0.0, 0.0, 0.0);
     };
 
     static MotorIO createIO() {
