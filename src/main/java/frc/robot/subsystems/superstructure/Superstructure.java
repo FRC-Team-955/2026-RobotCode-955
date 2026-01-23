@@ -19,7 +19,6 @@ public class Superstructure extends CommandBasedSubsystem {
 
     public final Indexer indexer = Indexer.get();
     public final Flywheel flywheel = Flywheel.get();
-
     public final Hood hood = Hood.get();
 
     private final SuperstructureIO io = createIO();
@@ -67,6 +66,7 @@ public class Superstructure extends CommandBasedSubsystem {
 
         switch (goal) {
             case IDLE -> {
+                hood.setGoal(Hood.Goal.STOW);
                 flywheel.setGoal(Flywheel.Goal.IDLE);
                 indexer.setGoal(Indexer.Goal.IDLE);
             }
