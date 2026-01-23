@@ -6,10 +6,8 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.Util;
 import frc.lib.network.LoggedNetworkBooleanExt;
-import frc.lib.network.LoggedNetworkNumberExt;
 import frc.lib.subsystem.Periodic;
 import frc.robot.subsystems.drive.DriveConstants;
-import lombok.Setter;
 
 import java.util.EnumMap;
 import java.util.function.Consumer;
@@ -21,21 +19,7 @@ public class OperatorDashboard implements Periodic {
     private static final String prefix = "/OperatorDashboard/";
 
     public final LoggedNetworkBooleanExt coastOverride = new LoggedNetworkBooleanExt(prefix + "CoastOverride", false);
-    public final LoggedNetworkBooleanExt coralStuckInRobotMode = new LoggedNetworkBooleanExt(prefix + "CoralStuckInRobotMode", false);
-    public final LoggedNetworkBooleanExt manualScoring = new LoggedNetworkBooleanExt(prefix + "ManualScoring", false);
-    public final LoggedNetworkBooleanExt ignoreEndEffectorBeamBreak = new LoggedNetworkBooleanExt(prefix + "IgnoreEndEffectorBeamBreak", false);
     public final LoggedNetworkBooleanExt autoChosen = new LoggedNetworkBooleanExt(prefix + "AutoChosen", false);
-    public final LoggedNetworkBooleanExt manualReefSide = new LoggedNetworkBooleanExt(prefix + "ManualReefSide", false);
-    public final LoggedNetworkBooleanExt forceGamePieceLEDs = new LoggedNetworkBooleanExt(prefix + "ForceGamePieceLEDs", false);
-
-    public final LoggedNetworkBooleanExt elevatorEStop = new LoggedNetworkBooleanExt(prefix + "ElevatorEStop", false);
-    public final LoggedNetworkBooleanExt useRealElevatorState = new LoggedNetworkBooleanExt(prefix + "UseRealElevatorState", false);
-    public final LoggedNetworkBooleanExt zeroElevator = new LoggedNetworkBooleanExt(prefix + "ZeroElevator", false);
-    public final LoggedNetworkNumberExt elevatorOffsetMeters = new LoggedNetworkNumberExt(prefix + "ElevatorOffsetMeters", 0);
-    // TODO
-//    public final LoggedNetworkBooleanExt manualElevator = new LoggedNetworkBooleanExt(prefix + "ManualElevator", false);
-//    public final LoggedNetworkBooleanExt manualElevatorUp = new LoggedNetworkBooleanExt(prefix + "ManualElevatorUp", false);
-//    public final LoggedNetworkBooleanExt manualElevatorDown = new LoggedNetworkBooleanExt(prefix + "ManualElevatorDown", false);
 
     private final Alert coastOverrideAlert = new Alert("Coast override is enabled.", Alert.AlertType.kWarning);
     private final Alert autoNotChosenAlert = new Alert("Auto is not chosen!", Alert.AlertType.kError);
@@ -44,9 +28,6 @@ public class OperatorDashboard implements Periodic {
 
     public final OperatorKeypad operatorKeypad = new OperatorKeypad();
     private final Alert operatorKeypadDisconnectedAlert = new Alert("Operator keypad is not connected!", Alert.AlertType.kError);
-
-    @Setter
-    private boolean ignoreClosestReefSideChanges = false;
 
     private static OperatorDashboard instance;
 
