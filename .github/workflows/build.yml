@@ -2,6 +2,11 @@ name: Build
 
 on:
   push:
+    # Prevent workflow from running on PR commits twice
+    # This means that the workflow won't run until a PR
+    # is made, but that's fine
+    branches:
+      - main
   pull_request:
 
 jobs:
