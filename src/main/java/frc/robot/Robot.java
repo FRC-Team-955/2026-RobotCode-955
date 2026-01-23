@@ -134,6 +134,7 @@ public class Robot extends LoggedRobot {
                 robotContainer.intakeRollers,
                 robotContainer.intakePivot,
                 robotContainer.indexer,
+                robotContainer.flywheel,
 
                 // Misc
                 robotContainer.canLogger,
