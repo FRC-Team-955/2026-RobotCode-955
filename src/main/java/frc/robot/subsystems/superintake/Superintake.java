@@ -16,7 +16,6 @@ import java.util.function.Supplier;
 public class Superintake extends CommandBasedSubsystem {
     private final RobotState robotState = RobotState.get();
     private final OperatorDashboard operatorDashboard = OperatorDashboard.get();
-    private final AprilTagVision aprilTagVision = AprilTagVision.get();
 
     public final IntakeRollers intakeRollers = IntakeRollers.get();
     public final IntakePivot intakePivot = IntakePivot.get();
@@ -59,12 +58,5 @@ public class Superintake extends CommandBasedSubsystem {
                 intakeRollers.setGoal(IntakeRollers.Goal.IDLE);
             }
         }
-    }
-
-    public Command cancel() {
-        return CommandsExt.eagerSequence(
-                setGoal(Goal.IDLE),
-                aprilTagVision.setTagIdFilter(new int[0])
-        ).ignoringDisable(true);
     }
 }

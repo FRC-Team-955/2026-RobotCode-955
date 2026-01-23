@@ -16,11 +16,7 @@ import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.goals.WheelRadiusCharacterizationGoal;
 import frc.robot.subsystems.gamepiecevision.GamePieceVision;
 import frc.robot.subsystems.superintake.Superintake;
-import frc.robot.subsystems.superintake.intakerollers.IntakeRollers;
-import frc.robot.subsystems.superintake.intakepivot.IntakePivot;
 import frc.robot.subsystems.superstructure.Superstructure;
-import frc.robot.subsystems.superstructure.indexer.Indexer;
-import frc.robot.subsystems.superstructure.flywheel.Flywheel;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -61,21 +57,10 @@ public class RobotContainer {
     private void addAutos() {
         autoChooser.addOption("None", Commands.none());
 
-        autoChooser.addOption(
-                "Characterization",
-                // We need to require the superstructure during characterization so that the default command doesn't get run
-                Commands.deferredProxy(() -> CommandsExt.eagerSequence(
-                        superstructure.cancel(),
-                        superintake.cancel(),
-                        characterizationChooser.get()
-                ))
-        );
+        autoChooser.addOption("Characterization", Commands.deferredProxy(characterizationChooser::get));
     }
 
     private void addCharacterizations() {
-        ////////////////////// DRIVE //////////////////////
-
-        // TODO
         characterizationChooser.addOption("Drive 1 m/s Characterization", drive.runRobotRelative(() -> new ChassisSpeeds(1.0, 0.0, 0.0)));
         characterizationChooser.addOption("Drive 2 m/s Characterization", drive.runRobotRelative(() -> new ChassisSpeeds(2.0, 0.0, 0.0)));
         characterizationChooser.addOption("Drive 3 m/s Characterization", drive.runRobotRelative(() -> new ChassisSpeeds(3.0, 0.0, 0.0)));
@@ -87,8 +72,8 @@ public class RobotContainer {
 
     private void setDefaultCommands() {
         drive.setDefaultCommand(drive.driveJoystick());
-        superintake.setDefaultCommand(superintake.cancel());
-        superstructure.setDefaultCommand(superstructure.cancel());
+        superintake.setDefaultCommand(superintake.setGoal(Superintake.Goal.IDLE).ignoringDisable(true));
+        superstructure.setDefaultCommand(superstructure.setGoal(Superstructure.Goal.IDLE).ignoringDisable(true));
     }
 
     /**
@@ -104,8 +89,8 @@ public class RobotContainer {
         controller.y().onTrue(robotState.resetRotation());
 
         controller.leftBumper().onTrue(Commands.parallel(
-                superstructure.cancel(),
-                superintake.cancel()
+                superintake.setGoal(Superintake.Goal.IDLE),
+                superstructure.setGoal(Superstructure.Goal.IDLE)
         ));
 
         if (BuildConstants.mode == BuildConstants.Mode.SIM) {

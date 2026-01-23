@@ -17,7 +17,6 @@ import static frc.robot.subsystems.superstructure.SuperstructureConstants.create
 public class Superstructure extends CommandBasedSubsystem {
     private final RobotState robotState = RobotState.get();
     private final OperatorDashboard operatorDashboard = OperatorDashboard.get();
-    private final AprilTagVision aprilTagVision = AprilTagVision.get();
 
     public final Indexer indexer = Indexer.get();
     public final Flywheel flywheel = Flywheel.get();
@@ -65,13 +64,6 @@ public class Superstructure extends CommandBasedSubsystem {
 
             }
         }
-    }
-
-    public Command cancel() {
-        return CommandsExt.eagerSequence(
-                setGoal(Goal.IDLE),
-                aprilTagVision.setTagIdFilter(new int[0])
-        ).ignoringDisable(true);
     }
 
     public Command runIndexer() {
