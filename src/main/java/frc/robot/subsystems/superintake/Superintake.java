@@ -27,11 +27,8 @@ public class Superintake extends CommandBasedSubsystem {
 
     private Goal goal = Goal.IDLE;
 
-    public Command setGoal(Goal superintakeGoal, Supplier<IntakeRollers.Goal> intakeRollersGoal) {
-        return runOnce(() -> {
-            goal = superintakeGoal;
-            intakeRollers.setGoal(intakeRollersGoal.get());
-        });
+    public Command setGoal(Goal goal) {
+        return startIdle(() -> this.goal = goal);
     }
 
     private static Superintake instance;
@@ -55,14 +52,17 @@ public class Superintake extends CommandBasedSubsystem {
     @Override
     public void periodicAfterCommands() {
         Logger.recordOutput("Superintake/Goal", goal);
+
+        switch (goal) {
+            case IDLE -> {
+                intakeRollers.setGoal(IntakeRollers.Goal.IDLE);
+            }
+        }
     }
 
     public Command cancel() {
         return CommandsExt.eagerSequence(
-                setGoal(
-                        Goal.IDLE,
-                        () -> IntakeRollers.Goal.IDLE
-                ),
+                setGoal(Goal.IDLE),
                 aprilTagVision.setTagIdFilter(new int[0])
         ).ignoringDisable(true);
     }
