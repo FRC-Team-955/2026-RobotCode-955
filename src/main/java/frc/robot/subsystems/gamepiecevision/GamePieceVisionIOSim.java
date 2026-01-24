@@ -1,7 +1,5 @@
 package frc.robot.subsystems.gamepiecevision;
 
-import frc.robot.subsystems.superstructure.SuperstructureIOSim;
-
 public class GamePieceVisionIOSim extends GamePieceVisionIO {
     private boolean ledsOn = false;
 
@@ -12,7 +10,7 @@ public class GamePieceVisionIOSim extends GamePieceVisionIO {
     public void updateInputs(GamePieceVisionIOInputs inputs) {
         inputs.connected = true;
         inputs.ledsOn = ledsOn;
-        inputs.visible = ledsOn && false;
+        inputs.visible = false;
     }
 
     @Override

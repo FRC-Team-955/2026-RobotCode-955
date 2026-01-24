@@ -1,11 +1,11 @@
 package frc.robot.subsystems.superintake;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.lib.commands.CommandsExt;
 import frc.lib.subsystem.CommandBasedSubsystem;
 import frc.robot.OperatorDashboard;
 import frc.robot.RobotState;
-import frc.robot.subsystems.apriltagvision.AprilTagVision;
+import frc.robot.subsystems.superintake.intakepivot.IntakePivot;
+import frc.robot.subsystems.superintake.intakerollers.IntakeRollers;
 import lombok.RequiredArgsConstructor;
 import org.littletonrobotics.junction.Logger;
 
@@ -13,19 +13,20 @@ public class Superintake extends CommandBasedSubsystem {
     private final RobotState robotState = RobotState.get();
     private final OperatorDashboard operatorDashboard = OperatorDashboard.get();
 
-    private final AprilTagVision aprilTagVision = AprilTagVision.get();
+    public final IntakePivot intakePivot = IntakePivot.get();
+    public final IntakeRollers intakeRollers = IntakeRollers.get();
 
     @RequiredArgsConstructor
     public enum Goal {
         IDLE,
+        INTAKE,
+        EJECT,
     }
 
     private Goal goal = Goal.IDLE;
 
-    public Command setGoal(Goal superintakeGoal) {
-        return runOnce(() -> {
-            goal = superintakeGoal;
-        });
+    public Command setGoal(Goal goal) {
+        return startIdle(() -> this.goal = goal);
     }
 
     private static Superintake instance;
@@ -49,14 +50,20 @@ public class Superintake extends CommandBasedSubsystem {
     @Override
     public void periodicAfterCommands() {
         Logger.recordOutput("Superintake/Goal", goal);
-    }
 
-    public Command cancel() {
-        return CommandsExt.eagerSequence(
-                setGoal(
-                        Goal.IDLE
-                ),
-                aprilTagVision.setTagIdFilter(new int[0])
-        ).ignoringDisable(true);
+        switch (goal) {
+            case IDLE -> {
+                intakePivot.setGoal(IntakePivot.Goal.STOW);
+                intakeRollers.setGoal(IntakeRollers.Goal.IDLE);
+            }
+            case INTAKE -> {
+                intakePivot.setGoal(IntakePivot.Goal.DEPLOY);
+                intakeRollers.setGoal(IntakeRollers.Goal.INTAKE);
+            }
+            case EJECT -> {
+                intakePivot.setGoal(IntakePivot.Goal.DEPLOY);
+                intakeRollers.setGoal(IntakeRollers.Goal.EJECT);
+            }
+        }
     }
 }
