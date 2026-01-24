@@ -93,7 +93,7 @@ public class RobotContainer {
         controller.leftTrigger()
                 .and(shouldAutoAim)
                 .whileTrue(Commands.parallel(
-                        // TODO: drive aim
+                        drive.driveJoystickWithAiming(),
                         superstructure.setGoal(Superstructure.Goal.SHOOT)
                 ));
         controller.leftTrigger()
@@ -103,7 +103,6 @@ public class RobotContainer {
         controller.rightTrigger()
                 .whileTrue(superintake.setGoal(Superintake.Goal.INTAKE));
 
-        controller.b().toggleOnTrue(drive.driveJoystickWithAiming());
         controller.leftTrigger().whileTrue(Commands.repeatingSequence(
                 Commands.runOnce(() -> {
                     if (!shootingKinematics.isValidShootingParameters()) return;
