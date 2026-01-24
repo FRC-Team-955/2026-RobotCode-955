@@ -18,6 +18,7 @@ import static frc.robot.subsystems.drive.DriveTuning.headingOverrideGainsTunable
 
 @RequiredArgsConstructor
 public class DriveJoystickWithAimingGoal extends DriveGoal {
+    private static final LoggedTunableNumber maxVelocityMetersPerSec = new LoggedTunableNumber("Drive/DriveJoystickWithAiming/MaxVelocityMetersPerSec", 2);
     private static final LoggedTunableNumber maxAccelerationMetersPerSecSquared = new LoggedTunableNumber("Drive/DriveJoystickWithAiming/MaxAccelerationMetersPerSecSquared", 5);
 
     private static final RobotState robotState = RobotState.get();
@@ -45,6 +46,10 @@ public class DriveJoystickWithAimingGoal extends DriveGoal {
         } else {
             lastLinearDirection = linearDirection;
         }
+
+        // Use our own max velocity
+        linearMagnitude *= maxVelocityMetersPerSec.get();
+
         Translation2d linearVelocity = new Translation2d(linearMagnitude, linearDirection);
         linearVelocity = linearAccelerationLimiter.calculate(linearVelocity);
         Logger.recordOutput("Drive/DriveJoystickWithAiming/LinearMagnitudeLimited", linearVelocity.getNorm());
