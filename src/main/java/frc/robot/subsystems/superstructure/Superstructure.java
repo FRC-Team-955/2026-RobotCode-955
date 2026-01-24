@@ -7,6 +7,7 @@ import frc.robot.RobotState;
 import frc.robot.subsystems.superstructure.flywheel.Flywheel;
 import frc.robot.subsystems.superstructure.hood.Hood;
 import frc.robot.subsystems.superstructure.indexer.Indexer;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.littletonrobotics.junction.Logger;
 
@@ -33,6 +34,7 @@ public class Superstructure extends CommandBasedSubsystem {
         EJECT,
     }
 
+    @Getter
     private Goal goal = Goal.IDLE;
 
     public Command setGoal(Goal goal) {
