@@ -18,7 +18,6 @@ import org.littletonrobotics.junction.Logger;
 
 import java.util.function.DoubleSupplier;
 
-import static edu.wpi.first.wpilibj2.command.Commands.runOnce;
 import static frc.robot.subsystems.superstructure.indexer.IndexerConstants.createIO;
 import static frc.robot.subsystems.superstructure.indexer.IndexerConstants.tolerances;
 
