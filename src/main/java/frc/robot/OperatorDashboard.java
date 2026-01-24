@@ -5,11 +5,19 @@ import frc.lib.Util;
 import frc.lib.network.LoggedNetworkBooleanExt;
 import frc.lib.subsystem.Periodic;
 import frc.robot.subsystems.drive.DriveConstants;
+import lombok.Getter;
 
 import java.util.EnumMap;
 import java.util.function.Consumer;
 
 public class OperatorDashboard implements Periodic {
+    public enum ScoringMode {
+        ShootAndPassAutomatic,
+        ShootHubManual,
+        ShootTowerManual,
+        PassManual,
+    }
+
     private final RobotState robotState = RobotState.get();
     private final Controller controller = Controller.get();
 
@@ -17,6 +25,10 @@ public class OperatorDashboard implements Periodic {
 
     public final LoggedNetworkBooleanExt coastOverride = new LoggedNetworkBooleanExt(prefix + "CoastOverride", false);
     public final LoggedNetworkBooleanExt autoChosen = new LoggedNetworkBooleanExt(prefix + "AutoChosen", false);
+
+    @Getter
+    private ScoringMode selectedScoringMode = ScoringMode.ShootAndPassAutomatic;
+    private final EnumMap<ScoringMode, LoggedNetworkBooleanExt> scoringModeToggles = generateTogglesForEnum("ScoringMode", ScoringMode.values(), ScoringMode.class);
 
     private final Alert coastOverrideAlert = new Alert("Coast override is enabled.", Alert.AlertType.kWarning);
     private final Alert autoNotChosenAlert = new Alert("Auto is not chosen!", Alert.AlertType.kError);
@@ -42,25 +54,12 @@ public class OperatorDashboard implements Periodic {
 
     @Override
     public void periodicBeforeCommands() {
+        handleEnumToggles(scoringModeToggles, selectedScoringMode, selectNew -> selectedScoringMode = selectNew);
+
         // Note - we only handle alerts for general overrides.
         // So subsystem toggles are handled in their respective subsystems
         coastOverrideAlert.set(coastOverride.get());
         autoNotChosenAlert.set(!autoChosen.get());
-    }
-
-    private static <E extends Enum<E>> void updateToggles(
-            EnumMap<E, LoggedNetworkBooleanExt> map,
-            E currentlySelected
-    ) {
-        LoggedNetworkBooleanExt toggle = map.get(currentlySelected);
-        // Set the corresponding toggle to true
-        toggle.set(true);
-        // Set the rest to false
-        for (var entry1 : map.entrySet()) {
-            if (entry1.getKey() != currentlySelected) {
-                entry1.getValue().set(false);
-            }
-        }
     }
 
     private static <E extends Enum<E>> void handleEnumToggles(

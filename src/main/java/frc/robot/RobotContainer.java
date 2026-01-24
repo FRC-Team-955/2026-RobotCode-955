@@ -1,7 +1,5 @@
 package frc.robot;
 
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
@@ -10,7 +8,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.CANLogger;
-import frc.lib.commands.CommandsExt;
 import frc.robot.subsystems.apriltagvision.AprilTagVision;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.goals.WheelRadiusCharacterizationGoal;
@@ -90,19 +87,27 @@ public class RobotContainer {
                 superstructure.setGoal(Superstructure.Goal.IDLE)
         ));
 
-        if (BuildConstants.mode == BuildConstants.Mode.SIM) {
-            var ref = new Object() {
-                Pose2d setpoint;
-            };
-            controller.a().toggleOnTrue(CommandsExt.eagerSequence(
-                    Commands.runOnce(() -> ref.setpoint = new Pose2d(
-                            robotState.getPose().getX() + 1,
-                            robotState.getPose().getY() + 1,
-                            robotState.getPose().getRotation().plus(Rotation2d.kPi)
-                    )),
-                    drive.moveTo(() -> ref.setpoint, false)
-            ));
-        }
+        controller.leftTrigger()
+                .and(() -> operatorDashboard.getSelectedScoringMode() == OperatorDashboard.ScoringMode.ShootAndPassAutomatic)
+                .whileTrue(Commands.parallel(
+                        // TODO: drive aim
+                        superstructure.setGoal(Superstructure.Goal.SHOOT_AND_PASS_AUTOMATIC)
+                ));
+        controller.leftTrigger()
+                .and(() -> operatorDashboard.getSelectedScoringMode() == OperatorDashboard.ScoringMode.ShootHubManual)
+                .whileTrue(Commands.parallel(
+                        superstructure.setGoal(Superstructure.Goal.SHOOT_HUB_MANUAL)
+                ));
+        controller.leftTrigger()
+                .and(() -> operatorDashboard.getSelectedScoringMode() == OperatorDashboard.ScoringMode.ShootTowerManual)
+                .whileTrue(Commands.parallel(
+                        superstructure.setGoal(Superstructure.Goal.SHOOT_TOWER_MANUAL)
+                ));
+        controller.leftTrigger()
+                .and(() -> operatorDashboard.getSelectedScoringMode() == OperatorDashboard.ScoringMode.PassManual)
+                .whileTrue(Commands.parallel(
+                        superstructure.setGoal(Superstructure.Goal.PASS_MANUAL)
+                ));
     }
 
     /**
