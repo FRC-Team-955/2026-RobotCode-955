@@ -13,6 +13,7 @@ import frc.lib.motor.RequestType;
 import frc.lib.network.LoggedTunableNumber;
 import frc.lib.subsystem.Periodic;
 import frc.robot.OperatorDashboard;
+import frc.robot.ShootingKinematics;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -33,6 +34,7 @@ public class Hood implements Periodic {
     private static final LoggedTunableNumber ejectSetpointDegrees = new LoggedTunableNumber("Superstructure/Hood/Goal/EjectDegrees", -45.0);
 
     private final OperatorDashboard operatorDashboard = OperatorDashboard.get();
+    private static final ShootingKinematics shootingKinematics = ShootingKinematics.get();
 
     private final MotorIO io = createIO();
     private final MotorIOInputsAutoLogged inputs = new MotorIOInputsAutoLogged();
@@ -40,7 +42,7 @@ public class Hood implements Periodic {
     @RequiredArgsConstructor
     public enum Goal {
         STOW(() -> Units.degreesToRadians(stowSetpointDegrees.get())),
-        SHOOT_AND_PASS_AUTOMATIC(() -> 0.0),
+        SHOOT_AND_PASS_AUTOMATIC(() -> shootingKinematics.getShootingParameters().hoodAngleRad()),
         SHOOT_HUB_MANUAL(() -> Units.degreesToRadians(shootHubManualSetpointDegrees.get())),
         SHOOT_TOWER_MANUAL(() -> Units.degreesToRadians(shootTowerManualSetpointDegrees.get())),
         PASS_MANUAL(() -> Units.degreesToRadians(passManualSetpointDegrees.get())),

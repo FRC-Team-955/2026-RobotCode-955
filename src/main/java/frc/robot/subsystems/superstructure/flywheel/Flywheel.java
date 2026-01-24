@@ -12,6 +12,7 @@ import frc.lib.motor.RequestType;
 import frc.lib.network.LoggedTunableNumber;
 import frc.lib.subsystem.Periodic;
 import frc.robot.OperatorDashboard;
+import frc.robot.ShootingKinematics;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -30,6 +31,7 @@ public class Flywheel implements Periodic {
     private static final LoggedTunableNumber ejectRPM = new LoggedTunableNumber("Superstructure/Flywheel/Goal/EjectRPM", -300);
 
     private final OperatorDashboard operatorDashboard = OperatorDashboard.get();
+    private static final ShootingKinematics shootingKinematics = ShootingKinematics.get();
 
     private final MotorIO io = createIO();
     private final MotorIOInputsAutoLogged inputs = new MotorIOInputsAutoLogged();
@@ -37,7 +39,7 @@ public class Flywheel implements Periodic {
     @RequiredArgsConstructor
     public enum Goal {
         IDLE(() -> 0, RequestType.VoltageVolts),
-        SHOOT_AND_PASS_AUTOMATIC(() -> shootHubManualMetersPerSec.get() / flywheelRadiusMeters, RequestType.VelocityRadPerSec),
+        SHOOT_AND_PASS_AUTOMATIC(() -> shootingKinematics.getShootingParameters().velocityMetersPerSec() / flywheelRadiusMeters, RequestType.VelocityRadPerSec),
         SHOOT_HUB_MANUAL(() -> shootHubManualMetersPerSec.get() / flywheelRadiusMeters, RequestType.VelocityRadPerSec),
         SHOOT_TOWER_MANUAL(() -> shootTowerManualMetersPerSec.get() / flywheelRadiusMeters, RequestType.VelocityRadPerSec),
         PASS_MANUAL(() -> passManualMetersPerSec.get() / flywheelRadiusMeters, RequestType.VelocityRadPerSec),
