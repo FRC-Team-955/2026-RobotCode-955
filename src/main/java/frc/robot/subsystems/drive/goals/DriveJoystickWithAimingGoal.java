@@ -21,7 +21,7 @@ import static frc.robot.subsystems.drive.DriveTuning.headingOverrideGainsTunable
 public class DriveJoystickWithAimingGoal extends DriveGoal {
     private static final LoggedTunableNumber maxVelocityMetersPerSec = new LoggedTunableNumber("Drive/DriveJoystickWithAiming/MaxVelocityMetersPerSec", 2);
     private static final LoggedTunableNumber maxLinearAccelerationMetersPerSecSquared = new LoggedTunableNumber("Drive/DriveJoystickWithAiming/MaxLinearAccelerationMetersPerSecSquared", 5);
-    private static final LoggedTunableNumber maxAngularAccelerationRadPerSecSquared = new LoggedTunableNumber("Drive/DriveJoystickWithAiming/MaxAngularAccelerationRadPerSecSquared", 5);
+    private static final LoggedTunableNumber maxAngularAccelerationRadPerSecSquared = new LoggedTunableNumber("Drive/DriveJoystickWithAiming/MaxAngularAccelerationRadPerSecSquared", 15);
 
     private static final RobotState robotState = RobotState.get();
     private static final Controller controller = Controller.get();
