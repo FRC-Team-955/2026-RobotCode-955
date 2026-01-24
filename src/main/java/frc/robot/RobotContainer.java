@@ -1,6 +1,7 @@
 package frc.robot;
 
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
@@ -10,11 +11,14 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.CANLogger;
 import frc.robot.subsystems.apriltagvision.AprilTagVision;
 import frc.robot.subsystems.drive.Drive;
+import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.goals.WheelRadiusCharacterizationGoal;
 import frc.robot.subsystems.gamepiecevision.GamePieceVision;
 import frc.robot.subsystems.leds.LEDs;
 import frc.robot.subsystems.superintake.Superintake;
 import frc.robot.subsystems.superstructure.Superstructure;
+import org.ironmaple.simulation.SimulatedArena;
+import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeAlgaeOnFly;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -33,6 +37,7 @@ public class RobotContainer {
     public final Controller controller = Controller.get();
     public final CANLogger canLogger = CANLogger.get();
     public final RobotMechanism robotMechanism = RobotMechanism.get();
+    public final ShootingKinematics shootingKinematics = ShootingKinematics.get();
 
     /* Subsystems */
     public final Drive drive = Drive.get();
@@ -97,6 +102,24 @@ public class RobotContainer {
 
         controller.rightTrigger()
                 .whileTrue(superintake.setGoal(Superintake.Goal.INTAKE));
+
+        controller.b().toggleOnTrue(drive.driveJoystickWithAiming());
+        controller.leftTrigger().whileTrue(Commands.repeatingSequence(
+                Commands.runOnce(() -> {
+                    if (!shootingKinematics.isValidShootingParameters()) return;
+                    SimulatedArena.getInstance().addGamePieceProjectile(new ReefscapeAlgaeOnFly(
+                            ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose().getTranslation(),
+                            ShootingKinematics.fuelExitTransform.getTranslation().toTranslation2d(),
+                            ModuleIOSim.driveSimulation.getDriveTrainSimulatedChassisSpeedsFieldRelative(),
+                            //Rotation2d.fromRadians(shootingKinematics.getShootingParameters().headingRad()),
+                            ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose().getRotation(),
+                            Units.Meters.of(ShootingKinematics.fuelExitTransform.getTranslation().getZ()),
+                            Units.MetersPerSecond.of(shootingKinematics.getShootingParameters().velocityMetersPerSec()),
+                            Units.Radians.of(shootingKinematics.getShootingParameters().hoodAngleRad())
+                    ).disableBecomesGamePieceOnFieldAfterTouchGround());
+                }),
+                Commands.waitSeconds(0.1)
+        ));
     }
 
     /**

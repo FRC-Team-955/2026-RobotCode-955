@@ -36,7 +36,7 @@ public class DriveConstants {
             Units.inchesToMeters(-0.247776),
             PIDF.ofPD(3.5, 0),
             PIDF.ofPD(3, 0),
-            PIDF.ofP(4.5),
+            PIDF.ofP(6),
             4.58
     );
 
@@ -55,7 +55,7 @@ public class DriveConstants {
     /** Maximum angular velocity of the whole drivetrain if all drive motors/wheels are going at full speed. */
     public static final double maxAngularVelocityRadPerSec = driveConfig.maxVelocityMetersPerSec() / drivebaseRadiusMeters;
 
-    public static final double joystickMaxAngularSpeedRadPerSec = Math.min(Units.degreesToRadians(315), maxAngularVelocityRadPerSec);
+    public static final double joystickMaxAngularSpeedRadPerSec = Math.min(Units.degreesToRadians(500), maxAngularVelocityRadPerSec);
     public static final double joystickDriveDeadband = 0.05;
 
     static final ModuleConfig moduleConfig = switch (BuildConstants.mode) {
@@ -137,7 +137,7 @@ public class DriveConstants {
             double linearVelocityToleranceMetersPerSec,
             double angularPositionToleranceRad,
             double angularVelocityToleranceRadPerSec,
-            double maxAccelerationMetersPerSec // Maximum acceleration of the robot during move to
+            double maxAccelerationMetersPerSecSquared // Maximum acceleration of the robot during move to
     ) {
     }
 
