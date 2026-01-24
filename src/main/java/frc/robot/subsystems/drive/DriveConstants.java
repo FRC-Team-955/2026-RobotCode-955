@@ -29,10 +29,10 @@ public class DriveConstants {
             // TO TUNE WHEEL RADIUS: Place robot on carpet and use wheel radius characterization auto.
             // Output will be in console in AdvantageScope.
             Units.inchesToMeters(1.935948620917915),
-            Units.inchesToMeters(22.75),
-            Units.inchesToMeters(22.75),
-            Units.inchesToMeters(35),
-            Units.inchesToMeters(35),
+            Units.inchesToMeters(19.25),
+            Units.inchesToMeters(24.25),
+            Units.inchesToMeters(36.5),
+            Units.inchesToMeters(31.5),
             Units.inchesToMeters(-0.247776),
             PIDF.ofPD(3.5, 0),
             PIDF.ofPD(3, 0),
