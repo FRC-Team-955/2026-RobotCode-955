@@ -2,6 +2,7 @@ package frc.robot.subsystems.drive.goals;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Timer;
 import frc.lib.PIDF;
 import frc.lib.network.LoggedTunableNumber;
@@ -18,6 +19,7 @@ import static frc.robot.subsystems.drive.DriveConstants.driveConfig;
 public class DriveJoystickGoal extends DriveGoal {
     private static final PIDF.Tunable headingOverrideGainsTunable = driveConfig.headingOverrideGains().tunable("Drive/HeadingOverride");
     private static final LoggedTunableNumber headingOverrideSetpointResetTime = new LoggedTunableNumber("Drive/DriveJoystick/HeadingOverrideSetpointResetTimeSeconds", 0.25);
+    private static final LoggedTunableNumber headingOverrideThresholdDegrees = new LoggedTunableNumber("Drive/DriveJoystick/HeadingOverrideThresholdDegrees", 5.0);
 
     private static final RobotState robotState = RobotState.get();
     private static final Controller controller = Controller.get();
@@ -50,13 +52,21 @@ public class DriveJoystickGoal extends DriveGoal {
             }
 
             if (shouldRunHeadingOverride) {
-                joystickSetpoint = new ChassisSpeeds(
-                        joystickSetpoint.vxMetersPerSecond,
-                        joystickSetpoint.vyMetersPerSecond,
-                        headingOverride.calculate(robotState.getRotation().getRadians())
-                );
+                // Stop heading override if we rotate too much on our own
+                if (Math.abs(robotState.getRotation().getRadians() - headingOverride.getSetpoint()) > Units.degreesToRadians(headingOverrideThresholdDegrees.get())) {
+                    headingOverride.setSetpoint(robotState.getRotation().getRadians());
+                    headingOverrideSetpointResetTimer.stop();
+                    shouldRunHeadingOverride = false;
+                } else {
+                    joystickSetpoint = new ChassisSpeeds(
+                            joystickSetpoint.vxMetersPerSecond,
+                            joystickSetpoint.vyMetersPerSecond,
+                            headingOverride.calculate(robotState.getRotation().getRadians())
+                    );
+                }
             }
         } else {
+            headingOverride.setSetpoint(robotState.getRotation().getRadians());
             headingOverrideSetpointResetTimer.stop();
             shouldRunHeadingOverride = false;
         }
