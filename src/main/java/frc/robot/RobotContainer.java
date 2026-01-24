@@ -92,6 +92,9 @@ public class RobotContainer {
         controller.leftTrigger()
                 .and(shouldAutoAim.negate())
                 .whileTrue(superstructure.setGoal(Superstructure.Goal.SHOOT));
+
+        controller.rightTrigger()
+                .whileTrue(superintake.setGoal(Superintake.Goal.INTAKE));
     }
 
     /**
