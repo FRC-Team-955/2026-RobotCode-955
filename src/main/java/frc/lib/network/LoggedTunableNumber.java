@@ -1,6 +1,6 @@
 package frc.lib.network;
 
-import frc.robot.Constants;
+import frc.robot.BuildConstants;
 
 public class LoggedTunableNumber {
     private final LoggedNetworkNumberExt inner;
@@ -8,7 +8,7 @@ public class LoggedTunableNumber {
 
     public LoggedTunableNumber(String key, double defaultValue) {
         this.defaultValue = defaultValue;
-        if (Constants.tuningMode) {
+        if (BuildConstants.tuningMode) {
             inner = new LoggedNetworkNumberExt(key, defaultValue);
         } else {
             inner = null;
@@ -17,7 +17,7 @@ public class LoggedTunableNumber {
 
     @SuppressWarnings("DataFlowIssue") // inner is guaranteed not to be null if tuning mode is true
     public boolean hasChanged() {
-        if (Constants.tuningMode) {
+        if (BuildConstants.tuningMode) {
             return inner.hasChanged();
         } else {
             return false;
@@ -49,7 +49,7 @@ public class LoggedTunableNumber {
     /** Returns the current value. */
     @SuppressWarnings("DataFlowIssue") // inner is guaranteed not to be null if tuning mode is true
     public double get() {
-        if (Constants.tuningMode) {
+        if (BuildConstants.tuningMode) {
             return inner.get();
         } else {
             return defaultValue;

@@ -1,11 +1,11 @@
-import frc.robot.Constants;
+import frc.robot.BuildConstants;
 import frc.robot.subsystems.drive.DriveConstants;
 
 import javax.swing.*;
 
 class DeployAlerts {
     public static void main(String[] args) {
-        if (Constants.tuningMode)
+        if (BuildConstants.tuningMode)
             confirmDeploy("Tuning mode is enabled.");
 
         if (DriveConstants.disableDriving)
