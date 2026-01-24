@@ -74,6 +74,10 @@ public class SlewRateLimiter {
         this(rateLimit, -rateLimit, 0);
     }
 
+    public SlewRateLimiter(double rateLimit, double initialValue) {
+        this(rateLimit, -rateLimit, initialValue);
+    }
+
     /**
      * Filters the input to limit its slew rate.
      *
