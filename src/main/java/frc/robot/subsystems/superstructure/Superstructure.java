@@ -69,6 +69,31 @@ public class Superstructure extends CommandBasedSubsystem {
                 hood.setGoal(Hood.Goal.STOW);
                 indexer.setGoal(Indexer.Goal.IDLE);
             }
+            case SHOOT_AND_PASS_AUTOMATIC -> {
+                flywheel.setGoal(Flywheel.Goal.SHOOT_AND_PASS_AUTOMATIC);
+                hood.setGoal(Hood.Goal.SHOOT_AND_PASS_AUTOMATIC);
+                indexer.setGoal(Indexer.Goal.FEED);
+            }
+            case SHOOT_HUB_MANUAL -> {
+                flywheel.setGoal(Flywheel.Goal.SHOOT_HUB_MANUAL);
+                hood.setGoal(Hood.Goal.SHOOT_HUB_MANUAL);
+                indexer.setGoal(Indexer.Goal.FEED);
+            }
+            case SHOOT_TOWER_MANUAL -> {
+                flywheel.setGoal(Flywheel.Goal.SHOOT_TOWER_MANUAL);
+                hood.setGoal(Hood.Goal.SHOOT_TOWER_MANUAL);
+                indexer.setGoal(Indexer.Goal.FEED);
+            }
+            case PASS_MANUAL -> {
+                flywheel.setGoal(Flywheel.Goal.PASS_MANUAL);
+                hood.setGoal(Hood.Goal.PASS_MANUAL);
+                indexer.setGoal(Indexer.Goal.FEED);
+            }
+            case EJECT -> {
+                flywheel.setGoal(Flywheel.Goal.EJECT);
+                hood.setGoal(Hood.Goal.EJECT);
+                indexer.setGoal(Indexer.Goal.EJECT);
+            }
         }
     }
 }
