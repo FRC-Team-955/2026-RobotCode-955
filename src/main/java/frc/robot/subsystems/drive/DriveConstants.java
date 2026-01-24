@@ -147,7 +147,8 @@ public class DriveConstants {
             double trackLengthMeters,
             double bumperWidthMeters,
             double bumperLengthMeters,
-            double bottomOfFrameToCenterOfWheelsMeters,
+            // Measured from bottom of frame rails (2x1s) to center of swerve wheels
+            double bottomOfFrameRailsToCenterOfWheelsMeters,
             PIDF choreoFeedbackXY,
             PIDF choreoFeedbackOmega,
             PIDF headingOverrideGains,
