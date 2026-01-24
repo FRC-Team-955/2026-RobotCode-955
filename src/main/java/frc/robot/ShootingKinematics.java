@@ -145,7 +145,6 @@ public class ShootingKinematics implements Periodic {
         // 6. Now calculate phi, theta, and shooting magnitude from 3d shooting vector
         double v = Math.sqrt(vx * vx + vy * vy + vz * vz);
         double phi = Math.asin(vz / v);
-        // TODO: account for robot to fuel exit offset
         double theta = Math.atan2(vy, vx);
         Logger.recordOutput("ShootingKinematics/Velocity", v);
         Logger.recordOutput("ShootingKinematics/Phi", phi);
