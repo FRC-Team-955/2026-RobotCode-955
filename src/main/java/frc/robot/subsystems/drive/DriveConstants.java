@@ -56,7 +56,7 @@ public class DriveConstants {
     public static final double maxAngularVelocityRadPerSec = driveConfig.maxVelocityMetersPerSec() / drivebaseRadiusMeters;
 
     public static final double joystickMaxAngularSpeedRadPerSec = Math.min(Units.degreesToRadians(315), maxAngularVelocityRadPerSec);
-    public static final double joystickDriveDeadband = 0.1;
+    public static final double joystickDriveDeadband = 0.05;
 
     static final ModuleConfig moduleConfig = switch (BuildConstants.mode) {
         // TO TUNE DRIVE GAINS: Use go forward at 1 m/s characterization auto and tune until you get 1 m/s.
