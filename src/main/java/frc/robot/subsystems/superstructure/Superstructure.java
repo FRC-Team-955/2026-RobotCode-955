@@ -7,8 +7,11 @@ import frc.robot.RobotState;
 import frc.robot.subsystems.superstructure.flywheel.Flywheel;
 import frc.robot.subsystems.superstructure.hood.Hood;
 import frc.robot.subsystems.superstructure.indexer.Indexer;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.littletonrobotics.junction.Logger;
+
+import java.util.function.Supplier;
 
 import static frc.robot.subsystems.superstructure.SuperstructureConstants.createIO;
 
@@ -26,17 +29,20 @@ public class Superstructure extends CommandBasedSubsystem {
     @RequiredArgsConstructor
     public enum Goal {
         IDLE,
-        SHOOT_AND_PASS_AUTOMATIC,
-        SHOOT_HUB_MANUAL,
-        SHOOT_TOWER_MANUAL,
-        PASS_MANUAL,
+        SPINUP,
+        SHOOT,
         EJECT,
     }
 
+    @Getter
     private Goal goal = Goal.IDLE;
 
     public Command setGoal(Goal goal) {
         return startIdle(() -> this.goal = goal);
+    }
+
+    public Command setGoal(Supplier<Goal> goal) {
+        return run(() -> this.goal = goal.get());
     }
 
     private static Superstructure instance;
@@ -69,25 +75,29 @@ public class Superstructure extends CommandBasedSubsystem {
                 hood.setGoal(Hood.Goal.STOW);
                 indexer.setGoal(Indexer.Goal.IDLE);
             }
-            case SHOOT_AND_PASS_AUTOMATIC -> {
-                flywheel.setGoal(Flywheel.Goal.SHOOT_AND_PASS_AUTOMATIC);
-                hood.setGoal(Hood.Goal.SHOOT_AND_PASS_AUTOMATIC);
-                indexer.setGoal(Indexer.Goal.FEED);
-            }
-            case SHOOT_HUB_MANUAL -> {
-                flywheel.setGoal(Flywheel.Goal.SHOOT_HUB_MANUAL);
-                hood.setGoal(Hood.Goal.SHOOT_HUB_MANUAL);
-                indexer.setGoal(Indexer.Goal.FEED);
-            }
-            case SHOOT_TOWER_MANUAL -> {
-                flywheel.setGoal(Flywheel.Goal.SHOOT_TOWER_MANUAL);
-                hood.setGoal(Hood.Goal.SHOOT_TOWER_MANUAL);
-                indexer.setGoal(Indexer.Goal.FEED);
-            }
-            case PASS_MANUAL -> {
-                flywheel.setGoal(Flywheel.Goal.PASS_MANUAL);
-                hood.setGoal(Hood.Goal.PASS_MANUAL);
-                indexer.setGoal(Indexer.Goal.FEED);
+            case SPINUP, SHOOT -> {
+                switch (operatorDashboard.getSelectedScoringMode()) {
+                    case ShootAndPassAutomatic -> {
+                        flywheel.setGoal(Flywheel.Goal.SHOOT_AND_PASS_AUTOMATIC);
+                        hood.setGoal(Hood.Goal.SHOOT_AND_PASS_AUTOMATIC);
+                    }
+                    case ShootHubManual -> {
+                        flywheel.setGoal(Flywheel.Goal.SHOOT_HUB_MANUAL);
+                        hood.setGoal(Hood.Goal.SHOOT_HUB_MANUAL);
+                    }
+                    case ShootTowerManual -> {
+                        flywheel.setGoal(Flywheel.Goal.SHOOT_TOWER_MANUAL);
+                        hood.setGoal(Hood.Goal.SHOOT_TOWER_MANUAL);
+                    }
+                    case PassManual -> {
+                        flywheel.setGoal(Flywheel.Goal.PASS_MANUAL);
+                        hood.setGoal(Hood.Goal.PASS_MANUAL);
+                    }
+                }
+                switch (goal) {
+                    case SPINUP -> indexer.setGoal(Indexer.Goal.IDLE);
+                    case SHOOT -> indexer.setGoal(Indexer.Goal.FEED);
+                }
             }
             case EJECT -> {
                 flywheel.setGoal(Flywheel.Goal.EJECT);

@@ -6,6 +6,7 @@ import frc.robot.OperatorDashboard;
 import frc.robot.RobotState;
 import frc.robot.subsystems.superintake.intakepivot.IntakePivot;
 import frc.robot.subsystems.superintake.intakerollers.IntakeRollers;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.littletonrobotics.junction.Logger;
 
@@ -23,6 +24,7 @@ public class Superintake extends CommandBasedSubsystem {
         EJECT,
     }
 
+    @Getter
     private Goal goal = Goal.IDLE;
 
     public Command setGoal(Goal goal) {
