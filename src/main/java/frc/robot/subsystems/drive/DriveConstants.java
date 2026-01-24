@@ -55,7 +55,7 @@ public class DriveConstants {
     /** Maximum angular velocity of the whole drivetrain if all drive motors/wheels are going at full speed. */
     public static final double maxAngularVelocityRadPerSec = driveConfig.maxVelocityMetersPerSec() / drivebaseRadiusMeters;
 
-    public static final double joystickMaxAngularSpeedRadPerSec = Math.min(Units.degreesToRadians(315), maxAngularVelocityRadPerSec);
+    public static final double joystickMaxAngularSpeedRadPerSec = Math.min(Units.degreesToRadians(500), maxAngularVelocityRadPerSec);
     public static final double joystickDriveDeadband = 0.1;
 
     static final ModuleConfig moduleConfig = switch (BuildConstants.mode) {
