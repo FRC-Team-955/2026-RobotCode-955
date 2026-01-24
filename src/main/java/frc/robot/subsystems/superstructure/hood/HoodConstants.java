@@ -1,16 +1,15 @@
-package frc.robot.subsystems.superintake.intakepivot;
+package frc.robot.subsystems.superstructure.hood;
 
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.math.util.Units;
 import frc.lib.PIDF;
 import frc.lib.motor.MotorIO;
-import frc.lib.motor.MotorIOArmSim;
+import frc.lib.motor.MotorIOSim;
 import frc.lib.motor.MotorIOSparkMax;
 import frc.lib.motor.RequestTolerances;
 import frc.robot.BuildConstants;
 
-public class IntakePivotConstants {
+public class HoodConstants {
     static final RequestTolerances tolerances = RequestTolerances.defaults();
 
     static final TrapezoidProfile.Constraints constraints = new TrapezoidProfile.Constraints(1, 3);
@@ -18,7 +17,7 @@ public class IntakePivotConstants {
     static final double gearRatio = 120;
     static final PIDF gains = switch (BuildConstants.mode) {
         case REAL, REPLAY -> PIDF.zero();
-        case SIM -> PIDF.ofPDSG(20.0, 0.0, 0.0, 2.65);
+        case SIM -> PIDF.ofPDSV(18.9, 0.0, 0.0, 0.0);
     };
 
     static MotorIO createIO() {
@@ -32,17 +31,12 @@ public class IntakePivotConstants {
                     gains,
                     PIDF.zero()
             );
-            case SIM -> new MotorIOArmSim(
-                    DCMotor.getNEO(1),
+            case SIM -> new MotorIOSim(
                     gearRatio,
-                    1.4,
-                    0.3,
-                    Units.degreesToRadians(-90),
-                    Units.degreesToRadians(90),
-                    true,
-                    Units.degreesToRadians(80),
-                    0.001,
-                    gains
+                    0.01,
+                    DCMotor.getNEO(1),
+                    gains,
+                    PIDF.zero()
             );
             case REPLAY -> new MotorIO();
         };

@@ -14,6 +14,7 @@ import frc.lib.subsystem.Periodic;
 import frc.robot.OperatorDashboard;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -49,6 +50,7 @@ public class Flywheel implements Periodic {
         private final RequestType type;
     }
 
+    @Setter
     @Getter
     private Goal goal = Goal.IDLE;
 
@@ -95,10 +97,7 @@ public class Flywheel implements Periodic {
             io.setRequest(goal.type, value);
         }
     }
-
-    /**
-     * Intended to be plugged into component rotation in RobotMechanism
-     */
+    
     public double getPositionRad() {
         return inputs.positionRad;
     }
@@ -118,11 +117,5 @@ public class Flywheel implements Periodic {
 
     public Command waitUntilAtGoal() {
         return Commands.waitUntil(this::atGoal);
-    }
-
-    public Command setGoal(Goal flywheelGoal) {
-        return runOnce(() -> {
-            goal = flywheelGoal;
-        });
     }
 }

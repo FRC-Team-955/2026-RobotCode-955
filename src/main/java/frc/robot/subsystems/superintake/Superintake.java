@@ -13,8 +13,8 @@ public class Superintake extends CommandBasedSubsystem {
     private final RobotState robotState = RobotState.get();
     private final OperatorDashboard operatorDashboard = OperatorDashboard.get();
 
-    public final IntakeRollers intakeRollers = IntakeRollers.get();
     public final IntakePivot intakePivot = IntakePivot.get();
+    public final IntakeRollers intakeRollers = IntakeRollers.get();
 
     @RequiredArgsConstructor
     public enum Goal {
@@ -53,7 +53,16 @@ public class Superintake extends CommandBasedSubsystem {
 
         switch (goal) {
             case IDLE -> {
+                intakePivot.setGoal(IntakePivot.Goal.STOW);
                 intakeRollers.setGoal(IntakeRollers.Goal.IDLE);
+            }
+            case INTAKE -> {
+                intakePivot.setGoal(IntakePivot.Goal.DEPLOY);
+                intakeRollers.setGoal(IntakeRollers.Goal.INTAKE);
+            }
+            case EJECT -> {
+                intakePivot.setGoal(IntakePivot.Goal.DEPLOY);
+                intakeRollers.setGoal(IntakeRollers.Goal.EJECT);
             }
         }
     }

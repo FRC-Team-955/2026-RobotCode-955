@@ -1,4 +1,4 @@
-package frc.robot.subsystems.superintake.intakepivot;
+package frc.robot.subsystems.superstructure.hood;
 
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
@@ -21,23 +21,30 @@ import org.littletonrobotics.junction.Logger;
 
 import java.util.function.DoubleSupplier;
 
-import static frc.robot.subsystems.superintake.intakepivot.IntakePivotConstants.*;
+import static frc.robot.subsystems.superstructure.hood.HoodConstants.*;
 
-public class IntakePivot implements Periodic {
-    private static final PIDF.Tunable gainsTunable = gains.tunable("Superintake/IntakePivot/Gains");
-    private static final LoggedTunableNumber profileLookaheadTimeSec = new LoggedTunableNumber("Superintake/IntakePivot/ProfileLookaheadTimeSec", 0.15);
-    private static final LoggedTunableNumber deploySetpointDegrees = new LoggedTunableNumber("Superintake/IntakePivot/Goal/DeployDegrees", -45.0);
+public class Hood implements Periodic {
+    private static final PIDF.Tunable gainsTunable = gains.tunable("Superstructure/Hood/Gains");
+    private static final LoggedTunableNumber profileLookaheadTimeSec = new LoggedTunableNumber("Superstructure/Hood/ProfileLookaheadTimeSec", 0.15);
+    private static final LoggedTunableNumber stowSetpointDegrees = new LoggedTunableNumber("Superstructure/Hood/Goal/StowDegrees", -45.0);
+    private static final LoggedTunableNumber shootHubManualSetpointDegrees = new LoggedTunableNumber("Superstructure/Hood/Goal/ShootHubManualDegrees", -45.0);
+    private static final LoggedTunableNumber shootTowerManualSetpointDegrees = new LoggedTunableNumber("Superstructure/Hood/Goal/ShootTowerManualDegrees", -45.0);
+    private static final LoggedTunableNumber passManualSetpointDegrees = new LoggedTunableNumber("Superstructure/Hood/Goal/PassManualDegrees", -45.0);
+    private static final LoggedTunableNumber ejectSetpointDegrees = new LoggedTunableNumber("Superstructure/Hood/Goal/EjectDegrees", -45.0);
 
     private final OperatorDashboard operatorDashboard = OperatorDashboard.get();
 
     private final MotorIO io = createIO();
     private final MotorIOInputsAutoLogged inputs = new MotorIOInputsAutoLogged();
 
-
     @RequiredArgsConstructor
     public enum Goal {
-        STOW(() -> 0),
-        DEPLOY(() -> Units.degreesToRadians(deploySetpointDegrees.get())),
+        STOW(() -> Units.degreesToRadians(stowSetpointDegrees.get())),
+        SHOOT_AND_PASS_AUTOMATIC(() -> 0.0),
+        SHOOT_HUB_MANUAL(() -> Units.degreesToRadians(shootHubManualSetpointDegrees.get())),
+        SHOOT_TOWER_MANUAL(() -> Units.degreesToRadians(shootTowerManualSetpointDegrees.get())),
+        PASS_MANUAL(() -> Units.degreesToRadians(passManualSetpointDegrees.get())),
+        EJECT(() -> Units.degreesToRadians(ejectSetpointDegrees.get())),
         ;
 
         private final DoubleSupplier setpointRad;
@@ -54,26 +61,26 @@ public class IntakePivot implements Periodic {
     private TrapezoidProfile.State goalState = new TrapezoidProfile.State();
     private TrapezoidProfile.State lookaheadState = new TrapezoidProfile.State();
 
-    private final Alert motorDisconnectedAlert = new Alert("IntakePivot motor is disconnected.", Alert.AlertType.kError);
+    private final Alert motorDisconnectedAlert = new Alert("Hood motor is disconnected.", Alert.AlertType.kError);
 
-    private static IntakePivot instance;
+    private static Hood instance;
 
-    public static IntakePivot get() {
+    public static Hood get() {
         if (instance == null)
-            synchronized (IntakePivot.class) {
-                instance = new IntakePivot();
+            synchronized (Hood.class) {
+                instance = new Hood();
             }
 
         return instance;
     }
 
-    private IntakePivot() {
+    private Hood() {
     }
 
     @Override
     public void periodicBeforeCommands() {
         io.updateInputs(inputs);
-        Logger.processInputs("Inputs/Superintake/IntakePivot", inputs);
+        Logger.processInputs("Inputs/Superstructure/Hood", inputs);
 
         motorDisconnectedAlert.set(!inputs.connected);
 
@@ -87,14 +94,14 @@ public class IntakePivot implements Periodic {
 
     @Override
     public void periodicAfterCommands() {
-        Logger.recordOutput("Superintake/IntakePivot/Goal", goal);
+        Logger.recordOutput("Superstructure/Hood/Goal", goal);
         if (DriverStation.isDisabled()) {
             io.setRequest(RequestType.VoltageVolts, 0);
         } else {
             // See the comments above the lookaheadState and goalState variables for why we effectively calculate two profiles
 
             double setpointRad = goal.setpointRad.getAsDouble();
-            Logger.recordOutput("Superintake/IntakePivot/OriginalSetpointRad", setpointRad);
+            Logger.recordOutput("Superstructure/Hood/OriginalSetpointRad", setpointRad);
             TrapezoidProfile.State wantedState = new TrapezoidProfile.State(setpointRad, 0.0);
 
             if (lastSetpointRad == null || setpointRad != lastSetpointRad) {
@@ -104,20 +111,23 @@ public class IntakePivot implements Periodic {
             lastSetpointRad = setpointRad;
 
             goalState = profile.calculate(0.02, goalState, wantedState);
-            Logger.recordOutput("Superintake/IntakePivot/ProfileSetpointRad", goalState.position);
+            Logger.recordOutput("Superstructure/Hood/ProfileSetpointRad", goalState.position);
 
             lookaheadState = profile.calculate(0.02, lookaheadState, wantedState);
-            Logger.recordOutput("Superintake/IntakePivot/LookaheadSetpointRad", lookaheadState.position);
+            Logger.recordOutput("Superstructure/Hood/LookaheadSetpointRad", lookaheadState.position);
 
             io.setRequest(RequestType.PositionRad, lookaheadState.position);
         }
     }
 
+    /**
+     * Intended to be plugged into component rotation in RobotMechanism
+     */
     public double getPositionRad() {
         return inputs.positionRad;
     }
 
-    @AutoLogOutput(key = "Superintake/IntakePivot/AtGoal")
+    @AutoLogOutput(key = "Superstructure/Hood/AtGoal")
     public boolean atGoal() {
         double value = goal.setpointRad.getAsDouble();
         return Math.abs(inputs.positionRad - value) <= tolerances.positionToleranceRad();

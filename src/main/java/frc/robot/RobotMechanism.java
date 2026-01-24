@@ -81,6 +81,11 @@ public class RobotMechanism implements Periodic {
                 new Rotation3d(0.0, superstructure.flywheel.getPositionRad(), 0.0)
         ));
 
+        Transform3d hoodTransform = hoodInitial.plus(new Transform3d(
+                new Translation3d(),
+                new Rotation3d(0.0, -superstructure.hood.getPositionRad(), 0.0)
+        ));
+
         Logger.recordOutput("RobotMechanism/Pose", robotPose);
         Logger.recordOutput(
                 "RobotMechanism/Components",
@@ -88,7 +93,7 @@ public class RobotMechanism implements Periodic {
                 indexerTransform,
                 flywheelTransform,
                 intakePivotTransform,
-                hoodInitial
+                hoodTransform
         );
     }
 }

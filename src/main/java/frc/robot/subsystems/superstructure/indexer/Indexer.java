@@ -12,6 +12,7 @@ import frc.lib.subsystem.Periodic;
 import frc.robot.OperatorDashboard;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -22,8 +23,6 @@ import static frc.robot.subsystems.superstructure.indexer.IndexerConstants.creat
 import static frc.robot.subsystems.superstructure.indexer.IndexerConstants.tolerances;
 
 public class Indexer implements Periodic {
-    //    private static final PIDF.Tunable positionGainsTunable = positionGains.tunable("Indexer/Position");
-//    private static final PIDF.Tunable velocityGainsTunable = velocityGains.tunable("Indexer/Velocity");
     private static final LoggedTunableNumber feedVoltage = new LoggedTunableNumber("Superstructure/Indexer/Goal/FeedVoltage", 3.0);
     private static final LoggedTunableNumber ejectVoltage = new LoggedTunableNumber("Superstructure/Indexer/Goal/EjectVoltage", -3.0);
 
@@ -44,6 +43,7 @@ public class Indexer implements Periodic {
         private final RequestType type;
     }
 
+    @Setter
     @Getter
     private Goal goal = Goal.IDLE;
 
@@ -114,11 +114,5 @@ public class Indexer implements Periodic {
 
     public Command waitUntilAtGoal() {
         return Commands.waitUntil(this::atGoal);
-    }
-
-    public Command setGoal(Goal indexerGoal) {
-        return runOnce(() -> {
-            goal = indexerGoal;
-        });
     }
 }

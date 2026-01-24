@@ -5,6 +5,7 @@ import frc.lib.subsystem.CommandBasedSubsystem;
 import frc.robot.OperatorDashboard;
 import frc.robot.RobotState;
 import frc.robot.subsystems.superstructure.flywheel.Flywheel;
+import frc.robot.subsystems.superstructure.hood.Hood;
 import frc.robot.subsystems.superstructure.indexer.Indexer;
 import lombok.RequiredArgsConstructor;
 import org.littletonrobotics.junction.Logger;
@@ -15,8 +16,9 @@ public class Superstructure extends CommandBasedSubsystem {
     private final RobotState robotState = RobotState.get();
     private final OperatorDashboard operatorDashboard = OperatorDashboard.get();
 
-    public final Indexer indexer = Indexer.get();
     public final Flywheel flywheel = Flywheel.get();
+    public final Hood hood = Hood.get();
+    public final Indexer indexer = Indexer.get();
 
     private final SuperstructureIO io = createIO();
     private final SuperstructureIOInputsAutoLogged inputs = new SuperstructureIOInputsAutoLogged();
@@ -63,20 +65,35 @@ public class Superstructure extends CommandBasedSubsystem {
 
         switch (goal) {
             case IDLE -> {
-
+                flywheel.setGoal(Flywheel.Goal.IDLE);
+                hood.setGoal(Hood.Goal.STOW);
+                indexer.setGoal(Indexer.Goal.IDLE);
+            }
+            case SHOOT_AND_PASS_AUTOMATIC -> {
+                flywheel.setGoal(Flywheel.Goal.SHOOT_AND_PASS_AUTOMATIC);
+                hood.setGoal(Hood.Goal.SHOOT_AND_PASS_AUTOMATIC);
+                indexer.setGoal(Indexer.Goal.FEED);
+            }
+            case SHOOT_HUB_MANUAL -> {
+                flywheel.setGoal(Flywheel.Goal.SHOOT_HUB_MANUAL);
+                hood.setGoal(Hood.Goal.SHOOT_HUB_MANUAL);
+                indexer.setGoal(Indexer.Goal.FEED);
+            }
+            case SHOOT_TOWER_MANUAL -> {
+                flywheel.setGoal(Flywheel.Goal.SHOOT_TOWER_MANUAL);
+                hood.setGoal(Hood.Goal.SHOOT_TOWER_MANUAL);
+                indexer.setGoal(Indexer.Goal.FEED);
+            }
+            case PASS_MANUAL -> {
+                flywheel.setGoal(Flywheel.Goal.PASS_MANUAL);
+                hood.setGoal(Hood.Goal.PASS_MANUAL);
+                indexer.setGoal(Indexer.Goal.FEED);
+            }
+            case EJECT -> {
+                flywheel.setGoal(Flywheel.Goal.EJECT);
+                hood.setGoal(Hood.Goal.EJECT);
+                indexer.setGoal(Indexer.Goal.EJECT);
             }
         }
-    }
-
-    public Command runIndexer() {
-        return indexer.setGoal(
-                Indexer.Goal.FEED
-        );
-    }
-
-    public Command runFlywheel() {
-        return flywheel.setGoal(
-                Flywheel.Goal.SHOOT_HUB_MANUAL
-        );
     }
 }
