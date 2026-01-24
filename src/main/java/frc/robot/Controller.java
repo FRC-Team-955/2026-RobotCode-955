@@ -3,7 +3,6 @@ package frc.robot;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Alert;
@@ -87,10 +86,6 @@ public class Controller implements Periodic {
         // Scale linear magnitude by omega - when going full omega, want half linear
         driveLinearMagnitude *= MathUtil.clamp(1.0 - Math.abs(omegaMagnitude / 2.0), 0.5, 1.0);
 
-        // Turn magnitudes into velocities
-        driveLinearMagnitude *= driveConfig.maxVelocityMetersPerSec();
-        omegaMagnitude *= joystickMaxAngularSpeedRadPerSec;
-
         // If x and y are both 0, Rotation2d will not be happy
         // Intermediates - used in assist calculations
         Translation2d linearVelocity;
@@ -112,9 +107,9 @@ public class Controller implements Periodic {
         Logger.recordOutput("Controller/Drive/OmegaMagnitude", omegaMagnitude);
 
         driveSetpointFieldRelative = new ChassisSpeeds(
-                linearVelocity.getX(),
-                linearVelocity.getY(),
-                omegaMagnitude
+                linearVelocity.getX() * driveConfig.maxVelocityMetersPerSec(),
+                linearVelocity.getY() * driveConfig.maxVelocityMetersPerSec(),
+                omegaMagnitude * joystickMaxAngularSpeedRadPerSec
         );
     }
 
