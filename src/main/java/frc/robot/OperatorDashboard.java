@@ -6,6 +6,7 @@ import frc.lib.network.LoggedNetworkBooleanExt;
 import frc.lib.subsystem.Periodic;
 import frc.robot.subsystems.drive.DriveConstants;
 import lombok.Getter;
+import org.littletonrobotics.junction.Logger;
 
 import java.util.EnumMap;
 import java.util.function.Consumer;
@@ -55,6 +56,7 @@ public class OperatorDashboard implements Periodic {
     @Override
     public void periodicBeforeCommands() {
         handleEnumToggles(scoringModeToggles, selectedScoringMode, selectNew -> selectedScoringMode = selectNew);
+        Logger.recordOutput("OperatorDashboard/SelectedScoringMode", selectedScoringMode);
 
         // Note - we only handle alerts for general overrides.
         // So subsystem toggles are handled in their respective subsystems

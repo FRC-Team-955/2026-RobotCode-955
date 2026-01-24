@@ -70,7 +70,7 @@ public class RobotContainer {
     private void setDefaultCommands() {
         drive.setDefaultCommand(drive.driveJoystick());
         superintake.setDefaultCommand(superintake.setGoal(Superintake.Goal.IDLE).ignoringDisable(true));
-        superstructure.setDefaultCommand(superstructure.setGoal(Superstructure.Goal.IDLE).ignoringDisable(true));
+        superstructure.setDefaultCommand(superstructure.setGoal(() -> DriverStation.isEnabled() ? Superstructure.Goal.SPINUP : Superstructure.Goal.IDLE).ignoringDisable(true));
     }
 
     /**
@@ -82,32 +82,16 @@ public class RobotContainer {
     private void configureBindings() {
         controller.y().onTrue(robotState.resetRotation());
 
-        controller.leftBumper().onTrue(Commands.parallel(
-                superintake.setGoal(Superintake.Goal.IDLE),
-                superstructure.setGoal(Superstructure.Goal.IDLE)
-        ));
-
+        var shouldAutoAim = new Trigger(() -> operatorDashboard.getSelectedScoringMode() == OperatorDashboard.ScoringMode.ShootAndPassAutomatic);
         controller.leftTrigger()
-                .and(() -> operatorDashboard.getSelectedScoringMode() == OperatorDashboard.ScoringMode.ShootAndPassAutomatic)
+                .and(shouldAutoAim)
                 .whileTrue(Commands.parallel(
                         // TODO: drive aim
-                        superstructure.setGoal(Superstructure.Goal.SHOOT_AND_PASS_AUTOMATIC)
+                        superstructure.setGoal(Superstructure.Goal.SHOOT)
                 ));
         controller.leftTrigger()
-                .and(() -> operatorDashboard.getSelectedScoringMode() == OperatorDashboard.ScoringMode.ShootHubManual)
-                .whileTrue(Commands.parallel(
-                        superstructure.setGoal(Superstructure.Goal.SHOOT_HUB_MANUAL)
-                ));
-        controller.leftTrigger()
-                .and(() -> operatorDashboard.getSelectedScoringMode() == OperatorDashboard.ScoringMode.ShootTowerManual)
-                .whileTrue(Commands.parallel(
-                        superstructure.setGoal(Superstructure.Goal.SHOOT_TOWER_MANUAL)
-                ));
-        controller.leftTrigger()
-                .and(() -> operatorDashboard.getSelectedScoringMode() == OperatorDashboard.ScoringMode.PassManual)
-                .whileTrue(Commands.parallel(
-                        superstructure.setGoal(Superstructure.Goal.PASS_MANUAL)
-                ));
+                .and(shouldAutoAim.negate())
+                .whileTrue(superstructure.setGoal(Superstructure.Goal.SHOOT));
     }
 
     /**
