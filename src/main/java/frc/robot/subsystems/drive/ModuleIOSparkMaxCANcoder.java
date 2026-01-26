@@ -14,22 +14,23 @@
 package frc.robot.subsystems.drive;
 
 import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.revrobotics.RelativeEncoder;
+import com.revrobotics.spark.*;
 import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.SparkBase;
 import com.revrobotics.spark.SparkBase.ControlType;
-import com.revrobotics.spark.SparkBase.PersistMode;
-import com.revrobotics.spark.SparkBase.ResetMode;
+import com.revrobotics.PersistMode;
+import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkClosedLoopController.ArbFFUnits;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
-import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.MathUtil;
@@ -46,6 +47,7 @@ import frc.robot.Constants;
 import java.util.Queue;
 import java.util.function.DoubleSupplier;
 
+import static frc.robot.Constants.CANivore.canivore;
 import static frc.robot.subsystems.drive.DriveConstants.moduleConfig;
 
 /**
@@ -88,7 +90,7 @@ public class ModuleIOSparkMaxCANcoder extends ModuleIO {
     ) {
         driveSpark = new SparkMax(driveCanID, MotorType.kBrushless);
         turnSpark = new SparkMax(turnCanID, MotorType.kBrushless);
-        cancoder = new CANcoder(cancoderCanID, Constants.CANivore.busName);
+        cancoder = new CANcoder(cancoderCanID, canivore);
         driveEncoder = driveSpark.getEncoder();
         turnEncoder = turnSpark.getEncoder();
         driveController = driveSpark.getClosedLoopController();
@@ -238,8 +240,8 @@ public class ModuleIOSparkMaxCANcoder extends ModuleIO {
         newGains.applySparkWithoutFeedforward(newConfig.closedLoop, ClosedLoopSlot.kSlot0);
         SparkUtil.tryUntilOkAsync(5, () -> driveSpark.configure(
                 newConfig,
-                SparkBase.ResetMode.kNoResetSafeParameters,
-                SparkBase.PersistMode.kPersistParameters
+                ResetMode.kNoResetSafeParameters,
+                PersistMode.kPersistParameters
         ));
     }
 
@@ -250,8 +252,8 @@ public class ModuleIOSparkMaxCANcoder extends ModuleIO {
         newGains.applySparkWithoutFeedforward(newConfig.closedLoop, ClosedLoopSlot.kSlot0);
         SparkUtil.tryUntilOkAsync(5, () -> turnSpark.configure(
                 newConfig,
-                SparkBase.ResetMode.kNoResetSafeParameters,
-                SparkBase.PersistMode.kPersistParameters
+                ResetMode.kNoResetSafeParameters,
+                PersistMode.kPersistParameters
         ));
     }
 
@@ -288,7 +290,7 @@ public class ModuleIOSparkMaxCANcoder extends ModuleIO {
     @Override
     public void setDriveClosedLoop(double velocityRadPerSec) {
         var ffVolts = driveFF.calculate(velocityRadPerSec);
-        driveController.setReference(
+        driveController.setSetpoint(
                 velocityRadPerSec,
                 ControlType.kVelocity,
                 ClosedLoopSlot.kSlot0,
@@ -300,6 +302,6 @@ public class ModuleIOSparkMaxCANcoder extends ModuleIO {
     @Override
     public void setTurnClosedLoop(double positionRad) {
         double setpoint = MathUtil.inputModulus(positionRad, 0.0, 2 * Math.PI);
-        turnController.setReference(setpoint, ControlType.kPosition);
+        turnController.setSetpoint(setpoint, ControlType.kPosition);
     }
 }
