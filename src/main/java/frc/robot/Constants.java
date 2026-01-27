@@ -30,9 +30,9 @@ public final class Constants {
     }
 
     public static final class CANivore {
-        public static final String busName = "*"; // the canivore is called electrical_problem, but using * is better because it will select any canivore it sees
+        public static final CANBus canivore = new CANBus("*"); // the canivore is called electrical_problem, but using * is better because it will select any canivore it sees
         public static final boolean isCANFD = switch (BuildConstants.mode) {
-            case REAL -> new CANBus(busName).isNetworkFD();
+            case REAL -> canivore.isNetworkFD();
             case SIM, REPLAY -> false;
         };
     }

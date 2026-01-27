@@ -9,10 +9,11 @@ import frc.robot.BuildConstants;
 import frc.robot.Constants;
 import org.littletonrobotics.junction.Logger;
 
+import static frc.robot.Constants.CANivore.canivore;
+
 public class CANLogger implements Periodic {
     private final Timer roboRIOCANErrorTimer = new Timer();
     private final Timer canivoreErrorTimer = new Timer();
-    private final CANBus canivore = new CANBus(Constants.CANivore.busName);
 
     private final Alert roboRIOCANErrorAlert = new Alert("roboRIO CAN errors detected.", Alert.AlertType.kError);
     private final Alert canivoreErrorAlert = new Alert("CANivore errors detected.", Alert.AlertType.kError);
