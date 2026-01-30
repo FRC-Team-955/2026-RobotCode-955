@@ -6,7 +6,7 @@ import frc.robot.OperatorDashboard;
 import frc.robot.RobotState;
 import frc.robot.subsystems.superstructure.flywheel.Flywheel;
 import frc.robot.subsystems.superstructure.hood.Hood;
-import frc.robot.subsystems.superstructure.indexer.Indexer;
+import frc.robot.subsystems.superstructure.spindexer.Spindexer;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.littletonrobotics.junction.Logger;
@@ -21,7 +21,7 @@ public class Superstructure extends CommandBasedSubsystem {
 
     public final Flywheel flywheel = Flywheel.get();
     public final Hood hood = Hood.get();
-    public final Indexer indexer = Indexer.get();
+    public final Spindexer spindexer = Spindexer.get();
 
     private final SuperstructureIO io = createIO();
     private final SuperstructureIOInputsAutoLogged inputs = new SuperstructureIOInputsAutoLogged();
@@ -73,7 +73,7 @@ public class Superstructure extends CommandBasedSubsystem {
             case IDLE -> {
                 flywheel.setGoal(Flywheel.Goal.IDLE);
                 hood.setGoal(Hood.Goal.STOW);
-                indexer.setGoal(Indexer.Goal.IDLE);
+                spindexer.setGoal(Spindexer.Goal.IDLE);
             }
             case SPINUP, SHOOT -> {
                 switch (operatorDashboard.getSelectedScoringMode()) {
@@ -95,14 +95,14 @@ public class Superstructure extends CommandBasedSubsystem {
                     }
                 }
                 switch (goal) {
-                    case SPINUP -> indexer.setGoal(Indexer.Goal.IDLE);
-                    case SHOOT -> indexer.setGoal(Indexer.Goal.FEED);
+                    case SPINUP -> spindexer.setGoal(Spindexer.Goal.IDLE);
+                    case SHOOT -> spindexer.setGoal(Spindexer.Goal.FEED);
                 }
             }
             case EJECT -> {
                 flywheel.setGoal(Flywheel.Goal.EJECT);
                 hood.setGoal(Hood.Goal.EJECT);
-                indexer.setGoal(Indexer.Goal.EJECT);
+                spindexer.setGoal(Spindexer.Goal.EJECT);
             }
         }
     }
