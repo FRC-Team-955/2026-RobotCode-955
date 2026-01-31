@@ -4,6 +4,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.subsystem.CommandBasedSubsystem;
 import frc.robot.OperatorDashboard;
 import frc.robot.RobotState;
+import frc.robot.subsystems.superstructure.feeder.Feeder;
 import frc.robot.subsystems.superstructure.flywheel.Flywheel;
 import frc.robot.subsystems.superstructure.hood.Hood;
 import frc.robot.subsystems.superstructure.indexer.Indexer;
@@ -22,6 +23,7 @@ public class Superstructure extends CommandBasedSubsystem {
     public final Flywheel flywheel = Flywheel.get();
     public final Hood hood = Hood.get();
     public final Indexer indexer = Indexer.get();
+    public final Feeder feeder = Feeder.get();
 
     private final SuperstructureIO io = createIO();
     private final SuperstructureIOInputsAutoLogged inputs = new SuperstructureIOInputsAutoLogged();
@@ -74,6 +76,7 @@ public class Superstructure extends CommandBasedSubsystem {
                 flywheel.setGoal(Flywheel.Goal.IDLE);
                 hood.setGoal(Hood.Goal.STOW);
                 indexer.setGoal(Indexer.Goal.IDLE);
+                feeder.setGoal(Feeder.Goal.IDLE);
             }
             case SPINUP, SHOOT -> {
                 switch (operatorDashboard.getSelectedScoringMode()) {
@@ -95,14 +98,21 @@ public class Superstructure extends CommandBasedSubsystem {
                     }
                 }
                 switch (goal) {
-                    case SPINUP -> indexer.setGoal(Indexer.Goal.IDLE);
-                    case SHOOT -> indexer.setGoal(Indexer.Goal.FEED);
+                    case SPINUP -> {
+                        feeder.setGoal(Feeder.Goal.IDLE);
+                        indexer.setGoal(Indexer.Goal.IDLE);
+                    }
+                    case SHOOT -> {
+                        feeder.setGoal(Feeder.Goal.FEED);
+                        indexer.setGoal(Indexer.Goal.FEED);
+                    }
                 }
             }
             case EJECT -> {
                 flywheel.setGoal(Flywheel.Goal.EJECT);
                 hood.setGoal(Hood.Goal.EJECT);
                 indexer.setGoal(Indexer.Goal.EJECT);
+                feeder.setGoal(Feeder.Goal.EJECT);
             }
         }
     }
