@@ -1,4 +1,4 @@
-package frc.robot.subsystems.superstructure.indexer;
+package frc.robot.subsystems.superstructure.spindexer;
 
 import edu.wpi.first.math.system.plant.DCMotor;
 import frc.lib.PIDF;
@@ -8,7 +8,7 @@ import frc.lib.motor.MotorIOSparkMax;
 import frc.lib.motor.RequestTolerances;
 import frc.robot.BuildConstants;
 
-public class IndexerConstants {
+public class SpindexerConstants {
     static final RequestTolerances tolerances = RequestTolerances.defaults();
 
     static final double gearRatio = 5;
