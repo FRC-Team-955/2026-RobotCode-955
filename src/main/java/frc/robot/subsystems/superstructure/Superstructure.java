@@ -4,6 +4,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.subsystem.CommandBasedSubsystem;
 import frc.robot.OperatorDashboard;
 import frc.robot.RobotState;
+import frc.robot.subsystems.superstructure.feeder.Feeder;
 import frc.robot.subsystems.superstructure.flywheel.Flywheel;
 import frc.robot.subsystems.superstructure.hood.Hood;
 import frc.robot.subsystems.superstructure.spindexer.Spindexer;
@@ -21,6 +22,7 @@ public class Superstructure extends CommandBasedSubsystem {
 
     public final Flywheel flywheel = Flywheel.get();
     public final Hood hood = Hood.get();
+    public final Feeder feeder = Feeder.get();
     public final Spindexer spindexer = Spindexer.get();
 
     private final SuperstructureIO io = createIO();
@@ -73,6 +75,7 @@ public class Superstructure extends CommandBasedSubsystem {
             case IDLE -> {
                 flywheel.setGoal(Flywheel.Goal.IDLE);
                 hood.setGoal(Hood.Goal.STOW);
+                feeder.setGoal(Feeder.Goal.IDLE);
                 spindexer.setGoal(Spindexer.Goal.IDLE);
             }
             case SPINUP, SHOOT -> {
@@ -95,13 +98,20 @@ public class Superstructure extends CommandBasedSubsystem {
                     }
                 }
                 switch (goal) {
-                    case SPINUP -> spindexer.setGoal(Spindexer.Goal.IDLE);
-                    case SHOOT -> spindexer.setGoal(Spindexer.Goal.FEED);
+                    case SPINUP -> {
+                        feeder.setGoal(Feeder.Goal.IDLE);
+                        spindexer.setGoal(Spindexer.Goal.IDLE);
+                    }
+                    case SHOOT -> {
+                        feeder.setGoal(Feeder.Goal.FEED);
+                        spindexer.setGoal(Spindexer.Goal.FEED);
+                    }
                 }
             }
             case EJECT -> {
                 flywheel.setGoal(Flywheel.Goal.EJECT);
                 hood.setGoal(Hood.Goal.EJECT);
+                feeder.setGoal(Feeder.Goal.EJECT);
                 spindexer.setGoal(Spindexer.Goal.EJECT);
             }
         }
