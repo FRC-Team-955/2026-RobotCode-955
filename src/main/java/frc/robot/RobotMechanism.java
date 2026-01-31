@@ -5,6 +5,7 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.Unit;
 import frc.lib.subsystem.Periodic;
 import frc.robot.subsystems.superintake.Superintake;
 import frc.robot.subsystems.superstructure.Superstructure;
@@ -22,6 +23,11 @@ public class RobotMechanism implements Periodic {
             new Translation3d(0.0, 0.0, Units.inchesToMeters(6.0)),
             new Rotation3d(0.0, 0.0, Units.degreesToRadians(90.0))
     );
+    private static final Transform3d feederIntial = new Transform3d(
+            new Translation3d(Units.inchesToMeters(-3.0), Units.inchesToMeters(-9.0), Units.inchesToMeters(5.0)),
+            new Rotation3d(0.0, 0.0, Units.degreesToRadians(0))
+    );
+
     private static final Transform3d flywheelsInitial = new Transform3d(
             new Translation3d(Units.inchesToMeters(-5.0), Units.inchesToMeters(-9.0), Units.inchesToMeters(10.0)),
             new Rotation3d(0.0, 0.0, 0.0)
@@ -76,6 +82,11 @@ public class RobotMechanism implements Periodic {
                 new Rotation3d(0.0, superstructure.indexer.getPositionRad(), 0.0)
         ));
 
+        Transform3d feederTransform = feederIntial.plus(new Transform3d(
+                new Translation3d(),
+                new Rotation3d(0.0, superstructure.feeder.getPositionRad(), 0.0)
+        ));
+
         Transform3d flywheelTransform = flywheelsInitial.plus(new Transform3d(
                 new Translation3d(),
                 new Rotation3d(0.0, superstructure.flywheel.getPositionRad(), 0.0)
@@ -92,6 +103,7 @@ public class RobotMechanism implements Periodic {
                 intakeRollersTransform,
                 indexerTransform,
                 flywheelTransform,
+                feederTransform,
                 intakePivotTransform,
                 hoodTransform
         );
