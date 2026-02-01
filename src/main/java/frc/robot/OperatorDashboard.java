@@ -1,5 +1,6 @@
 package frc.robot;
 
+import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.units.measure.Power;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.PowerDistribution;
@@ -13,6 +14,7 @@ import org.littletonrobotics.junction.Logger;
 
 import java.util.EnumMap;
 import java.util.function.Consumer;
+
 
 public class OperatorDashboard implements Periodic {
     public enum ScoringMode {
@@ -29,7 +31,8 @@ public class OperatorDashboard implements Periodic {
 
     public final LoggedNetworkBooleanExt coastOverride = new LoggedNetworkBooleanExt(prefix + "CoastOverride", false);
     public final LoggedNetworkBooleanExt autoChosen = new LoggedNetworkBooleanExt(prefix + "AutoChosen", false);
-    public final boolean batteryVoltage = RobotController.getBatteryVoltage() < 12.0;
+    private final Debouncer lowBatteryDebouncer = new Debouncer(3.0, Debouncer.DebounceType.kRising);
+    public final boolean batteryVoltage = lowBatteryDebouncer.calculate(RobotController.getBatteryVoltage() <= 12.0);
 
     @Getter
     private ScoringMode selectedScoringMode = ScoringMode.ShootAndPassAutomatic;
