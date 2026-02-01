@@ -2,15 +2,21 @@ package frc.robot.subsystems.leds;
 
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.wpilibj.*;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import frc.lib.subsystem.Periodic;
+import frc.robot.subsystems.apriltagvision.AprilTagVision;
+import frc.robot.subsystems.apriltagvision.AprilTagVisionConstants;
+import frc.robot.subsystems.gamepiecevision.GamePieceVision;
 import frc.robot.subsystems.superintake.Superintake;
 import frc.robot.subsystems.superstructure.Superstructure;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.mechanism.LoggedMechanism2d;
 import org.littletonrobotics.junction.mechanism.LoggedMechanismLigament2d;
 import org.littletonrobotics.junction.mechanism.LoggedMechanismRoot2d;
+
+import java.util.Map;
 
 import static frc.robot.subsystems.leds.LEDConstants.*;
 
@@ -75,9 +81,12 @@ public class LEDs implements Periodic {
     @Override
     public void periodicAfterCommands() {
         boolean lowBattery = lowBatteryDebouncer.calculate(RobotController.getBatteryVoltage() <= lowBatteryThresholdVolts);
+        boolean cameraError = AprilTagVision.get().cameraStatus() || GamePieceVision.get().cameraStatus();
 
         if (lowBattery) {
             LEDPatterns.lowBattery.applyTo(buffer);
+        } else if (cameraError) {
+            LEDPatterns.visionDisconnected.applyTo(buffer);
         } else if (DriverStation.isDisabled()) {
             LEDPatterns.autoReady.applyTo(buffer);
         } else if (DriverStation.isEnabled()) {
