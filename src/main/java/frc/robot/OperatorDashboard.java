@@ -1,6 +1,9 @@
 package frc.robot;
 
+import edu.wpi.first.units.measure.Power;
 import edu.wpi.first.wpilibj.Alert;
+import edu.wpi.first.wpilibj.PowerDistribution;
+import edu.wpi.first.wpilibj.RobotController;
 import frc.lib.Util;
 import frc.lib.network.LoggedNetworkBooleanExt;
 import frc.lib.subsystem.Periodic;
@@ -26,6 +29,7 @@ public class OperatorDashboard implements Periodic {
 
     public final LoggedNetworkBooleanExt coastOverride = new LoggedNetworkBooleanExt(prefix + "CoastOverride", false);
     public final LoggedNetworkBooleanExt autoChosen = new LoggedNetworkBooleanExt(prefix + "AutoChosen", false);
+    public final boolean batteryVoltage = RobotController.getBatteryVoltage() < 12.0;
 
     @Getter
     private ScoringMode selectedScoringMode = ScoringMode.ShootAndPassAutomatic;
@@ -35,6 +39,7 @@ public class OperatorDashboard implements Periodic {
     private final Alert autoNotChosenAlert = new Alert("Auto is not chosen!", Alert.AlertType.kError);
     @SuppressWarnings("FieldCanBeLocal")
     private final Alert constantSetAlert = new Alert("Constants are set.", Alert.AlertType.kInfo);
+    private final Alert batteryVoltageAlert = new Alert("Battery is below 12 Volts!", Alert.AlertType.kError);
 
     private static OperatorDashboard instance;
 
@@ -62,6 +67,7 @@ public class OperatorDashboard implements Periodic {
         // So subsystem toggles are handled in their respective subsystems
         coastOverrideAlert.set(coastOverride.get());
         autoNotChosenAlert.set(!autoChosen.get());
+        batteryVoltageAlert.set(batteryVoltage);
     }
 
     private static <E extends Enum<E>> void handleEnumToggles(
