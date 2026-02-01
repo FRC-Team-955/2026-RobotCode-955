@@ -32,7 +32,7 @@ public class OperatorDashboard implements Periodic {
     public final LoggedNetworkBooleanExt coastOverride = new LoggedNetworkBooleanExt(prefix + "CoastOverride", false);
     public final LoggedNetworkBooleanExt autoChosen = new LoggedNetworkBooleanExt(prefix + "AutoChosen", false);
     private final Debouncer lowBatteryDebouncer = new Debouncer(3.0, Debouncer.DebounceType.kRising);
-    public final boolean batteryVoltage = lowBatteryDebouncer.calculate(RobotController.getBatteryVoltage() <= 12.0);
+    public static boolean batteryVoltage;
 
     @Getter
     private ScoringMode selectedScoringMode = ScoringMode.ShootAndPassAutomatic;
@@ -65,6 +65,7 @@ public class OperatorDashboard implements Periodic {
     public void periodicBeforeCommands() {
         handleEnumToggles(scoringModeToggles, selectedScoringMode, selectNew -> selectedScoringMode = selectNew);
         Logger.recordOutput("OperatorDashboard/SelectedScoringMode", selectedScoringMode);
+        batteryVoltage = lowBatteryDebouncer.calculate(RobotController.getBatteryVoltage() <= 12.0);
 
         // Note - we only handle alerts for general overrides.
         // So subsystem toggles are handled in their respective subsystems
