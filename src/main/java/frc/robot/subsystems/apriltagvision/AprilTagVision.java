@@ -305,6 +305,14 @@ public class AprilTagVision implements Periodic {
         );
     }
 
+    public boolean cameraStatus() {
+        for (Map.Entry<Camera, CameraData> cam : cameras.entrySet()) {
+            CameraData data = cam.getValue();
+            return !data.inputs.connected;
+        }
+        return false;
+    }
+
     private record SingleTagPoseObservation(
             double timestamp,
             double ambiguity,
