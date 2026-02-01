@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import frc.lib.subsystem.Periodic;
+import frc.robot.OperatorDashboard;
 import frc.robot.subsystems.apriltagvision.AprilTagVision;
 import frc.robot.subsystems.apriltagvision.AprilTagVisionConstants;
 import frc.robot.subsystems.gamepiecevision.GamePieceVision;
@@ -29,9 +30,7 @@ public class LEDs implements Periodic {
     private final AddressableLEDBuffer buffer = new AddressableLEDBuffer(length);
     private final AddressableLEDBufferView firstHalfView = new AddressableLEDBufferView(buffer, 0, length / 2 - 1);
     private final AddressableLEDBufferView secondHalfView = new AddressableLEDBufferView(buffer, length / 2, length - 1);
-
-    private final Debouncer lowBatteryDebouncer = new Debouncer(3.0, Debouncer.DebounceType.kRising);
-
+    
     private final LoggedMechanism2d mechanism = new LoggedMechanism2d(1.5, 2.1, new Color8Bit(Color.kBlack));
     private final LoggedMechanismLigament2d[] ligaments = new LoggedMechanismLigament2d[length];
 
@@ -80,7 +79,7 @@ public class LEDs implements Periodic {
 
     @Override
     public void periodicAfterCommands() {
-        boolean lowBattery = lowBatteryDebouncer.calculate(RobotController.getBatteryVoltage() <= lowBatteryThresholdVolts);
+        boolean lowBattery = OperatorDashboard.get().batteryVoltage;
         boolean cameraError = AprilTagVision.get().cameraStatus() || GamePieceVision.get().cameraStatus();
 
         if (lowBattery) {
