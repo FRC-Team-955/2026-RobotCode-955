@@ -1,14 +1,11 @@
 package frc.robot.subsystems.leds;
 
-import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.wpilibj.*;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import frc.lib.subsystem.Periodic;
 import frc.robot.OperatorDashboard;
 import frc.robot.subsystems.apriltagvision.AprilTagVision;
-import frc.robot.subsystems.apriltagvision.AprilTagVisionConstants;
 import frc.robot.subsystems.gamepiecevision.GamePieceVision;
 import frc.robot.subsystems.superintake.Superintake;
 import frc.robot.subsystems.superstructure.Superstructure;
@@ -16,8 +13,6 @@ import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.mechanism.LoggedMechanism2d;
 import org.littletonrobotics.junction.mechanism.LoggedMechanismLigament2d;
 import org.littletonrobotics.junction.mechanism.LoggedMechanismRoot2d;
-
-import java.util.Map;
 
 import static frc.robot.subsystems.leds.LEDConstants.*;
 
@@ -30,7 +25,7 @@ public class LEDs implements Periodic {
     private final AddressableLEDBuffer buffer = new AddressableLEDBuffer(length);
     private final AddressableLEDBufferView firstHalfView = new AddressableLEDBufferView(buffer, 0, length / 2 - 1);
     private final AddressableLEDBufferView secondHalfView = new AddressableLEDBufferView(buffer, length / 2, length - 1);
-    
+
     private final LoggedMechanism2d mechanism = new LoggedMechanism2d(1.5, 2.1, new Color8Bit(Color.kBlack));
     private final LoggedMechanismLigament2d[] ligaments = new LoggedMechanismLigament2d[length];
 
@@ -80,7 +75,7 @@ public class LEDs implements Periodic {
     @Override
     public void periodicAfterCommands() {
         boolean lowBattery = OperatorDashboard.get().batteryVoltage;
-        boolean cameraError = AprilTagVision.get().cameraStatus() || GamePieceVision.get().cameraStatus();
+        boolean cameraError = AprilTagVision.get().anyCamerasDisconnected() || GamePieceVision.get().anyCamerasDisconnected();
 
         if (lowBattery) {
             LEDPatterns.lowBattery.applyTo(buffer);

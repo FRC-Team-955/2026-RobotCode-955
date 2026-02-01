@@ -305,7 +305,7 @@ public class AprilTagVision implements Periodic {
         );
     }
 
-    public boolean cameraStatus() {
+    public boolean anyCamerasDisconnected() {
         for (Map.Entry<Camera, CameraData> cam : cameras.entrySet()) {
             CameraData data = cam.getValue();
             return !data.inputs.connected;
