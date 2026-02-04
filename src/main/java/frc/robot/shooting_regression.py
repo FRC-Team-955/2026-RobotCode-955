@@ -3,6 +3,8 @@ import numpy as np
 
 fig, ax = plt.subplots(subplot_kw=dict(projection="3d"))
 
+# All length quantities are in meters
+
 hubx = 2
 hubz = 72 * 2.54 / 100
 ax.scatter(hubx, 0, hubz, c="red", label="Hub")
@@ -10,7 +12,14 @@ ax.scatter(hubx, 0, hubz, c="red", label="Hub")
 dt = 0.02
 t_final = 2
 t = np.linspace(0, t_final, round(t_final / dt))
+
 g = 9.81
+fuel_mass = 0.2150028  # kg - note, this is the average weight according to the range in the game manual
+fuel_radius = (15 / 100) / 2
+# Drag force coefficients - https://en.wikipedia.org/wiki/Drag_equation
+ρ = 1.2041  # air, kg/m³, https://en.wikipedia.org/wiki/Density_of_air#Dry_air
+A = np.pi * fuel_radius ** 2
+c_d = 0.47  # https://en.wikipedia.org/wiki/Drag_coefficient#/media/File:14ilf1l.svg
 
 def deg_to_rad(deg):
     return deg / 180.0 * np.pi
@@ -41,13 +50,11 @@ def calculate_trajectory_iterative(vel, hood_angle, robot_heading):
     x = np.zeros_like(t)
     y = np.zeros_like(t)
     z = np.zeros_like(t)
+    i_end = None
+    past_hub_on_upwards_arc = False
 
     for i in range(len(t)):
-        # Get last velocity and position
-        lvx = vx
-        lvy = vy
-        lvz = vz
-
+        # Get last position, velocity, acceleration
         if i > 0:
             lx = x[i - 1]
             ly = y[i - 1]
@@ -55,16 +62,56 @@ def calculate_trajectory_iterative(vel, hood_angle, robot_heading):
         else:
             lx = ly = lz = 0
 
+        lvx = vx
+        lvy = vy
+        lvz = vz
+
+        if i > 0:
+            lax = ax
+            lay = ay
+            laz = az
+        else:
+            lax = lay = laz = 0
+
+        # Calculate forces
+        f = [0, 0, 0]
+
+        ## Weight
+        f[2] += fuel_mass * -g
+
+        ## Drag https://en.wikipedia.org/wiki/Drag_equation
+        ### Get current velocity as unit vector and magnitude
+        lv_unit = [lvx, lvy, lvz] / np.max([lvx, lvy, lvz])
+        lv = np.sqrt(lvx ** 2 + lvy ** 2 + lvz ** 2)
+        fd = ρ * lv ** 2 * c_d * A / 2
+        ### Drag is opposite of current velocity unit vector
+        f += -fd * lv_unit
+
+        # Calculate acceleration
+        ax = f[0] / fuel_mass
+        ay = f[1] / fuel_mass
+        az = f[2] / fuel_mass
+
         # Integrate acceleration
-        vx -= 0.1 * vx * dt
-        vz += -g * dt
+        vx += (lax + ax) / 2 * dt
+        vy += (lay + ay) / 2 * dt
+        vz += (laz + az) / 2 * dt
 
         # Integrate velocity
         x[i] = lx + (lvx + vx) / 2 * dt
         y[i] = ly + (lvy + vy) / 2 * dt
         z[i] = lz + (lvz + vz) / 2 * dt
 
-    return x, y, z
+        if z[i] > hubz:
+            past_hub_on_upwards_arc = True
+        elif z[i] < hubz and past_hub_on_upwards_arc:
+            i_end = i + 1
+            break
+
+    if i_end is not None:
+        return x[:i_end], y[:i_end], z[:i_end]
+    else:
+        return x, y, z
 
 v0 = 9
 vr = 0
@@ -111,7 +158,7 @@ print(
 ax.plot(*calculate_trajectory_kinematics(v, hood_angle, robot_heading), label="Kinematics")
 ax.plot(*calculate_trajectory_iterative(v, hood_angle, robot_heading), label="Iterative")
 
-ax.set(xlim=[0, hubx + 0.5], ylim=[-1, 1], zlim=[0, hubz + 0.5], xlabel="X", ylabel="Y", zlabel="Z")
+ax.set(xlim=[0, hubx + 0.5], ylim=[-1, 1], zlim=[0, hubz + 2], xlabel="X", ylabel="Y", zlabel="Z")
 ax.legend()
 
 plt.show()
