@@ -9,14 +9,17 @@ hubx = 2
 hubz = 72 * 2.54 / 100
 ax.scatter(hubx, 0, hubz, c="red", label="Hub")
 
-dt = 0.02
+dt = 0.005
 t_final = 2
 t = np.linspace(0, t_final, round(t_final / dt))
 
 g = 9.81
 fuel_mass = 0.2150028  # kg - note, this is the average weight according to the range in the game manual
 fuel_radius = (15 / 100) / 2
-# Drag force coefficients - https://en.wikipedia.org/wiki/Drag_equation
+# Drag force and magnus effect coefficients. See:
+# - https://en.wikipedia.org/wiki/Drag_equation
+# - https://www.physics.usyd.edu.au/~cross/TRAJECTORIES/42.%20Ball%20Trajectories.pdf
+# - https://www.chiefdelphi.com/t/paper-ballistic-trajectory-with-air-friction-drag-and-magnus/123764
 ρ = 1.2041  # air, kg/m³, https://en.wikipedia.org/wiki/Density_of_air#Dry_air
 A = np.pi * fuel_radius ** 2
 c_d = 0.47  # https://en.wikipedia.org/wiki/Drag_coefficient#/media/File:14ilf1l.svg
@@ -35,6 +38,20 @@ def polar_velocity_to_components(vel, pitch, yaw):
 
     return vx, vy, vz
 
+def cross(a, b):
+    # https://en.wikipedia.org/wiki/Cross_product#Coordinate_notation
+    return [
+        a[1] * b[2] - a[2] * b[1],
+        a[2] * b[0] - a[0] * b[2],
+        a[0] * b[1] - a[1] * b[0]
+    ]
+
+def norm(v):
+    return np.sqrt(v[0] ** 2 + v[1] ** 2 + v[2] ** 2)
+
+def normalize(v):
+    return v / norm(v)
+
 def calculate_trajectory_kinematics(vel, hood_angle, robot_heading):
     vx, vy, vz = polar_velocity_to_components(vel, hood_angle, robot_heading)
 
@@ -44,7 +61,7 @@ def calculate_trajectory_kinematics(vel, hood_angle, robot_heading):
         vz * t + -g * t ** 2 / 2
     )
 
-def calculate_trajectory_iterative(vel, hood_angle, robot_heading):
+def calculate_trajectory_iterative(vel, hood_angle, robot_heading, apply_magnus_effect):
     vx, vy, vz = polar_velocity_to_components(vel, hood_angle, robot_heading)
 
     x = np.zeros_like(t)
@@ -79,13 +96,30 @@ def calculate_trajectory_iterative(vel, hood_angle, robot_heading):
         ## Weight
         f[2] += fuel_mass * -g
 
-        ## Drag https://en.wikipedia.org/wiki/Drag_equation
+        ## Drag. See: https://en.wikipedia.org/wiki/Drag_equation
         ### Get current velocity as unit vector and magnitude
-        lv_unit = [lvx, lvy, lvz] / np.max([lvx, lvy, lvz])
+        lv_unit = normalize([lvx, lvy, lvz])
         lv = np.sqrt(lvx ** 2 + lvy ** 2 + lvz ** 2)
         fd = ρ * lv ** 2 * c_d * A / 2
         ### Drag is opposite of current velocity unit vector
-        f += -fd * lv_unit
+        fd = -fd * lv_unit
+        f += fd
+
+        ## Magnus effect. See:
+        ## - https://www.physics.usyd.edu.au/~cross/TRAJECTORIES/42.%20Ball%20Trajectories.pdf
+        ## - https://www.chiefdelphi.com/t/paper-ballistic-trajectory-with-air-friction-drag-and-magnus/123764
+        ### TODO: calculate angular velocity based on initial velocity
+        ### TODO: angular velocity drag
+        ω = 100  # rad/s
+        c_l = 1 / (2 + (lv / (fuel_radius * ω)))
+        fm = ρ * lv ** 2 * c_l * A / 2
+        ### Magnus effect is perpendicular to axis of rotation and drag/motion.
+        axis_of_rotation = [-lvy, lvx, 0]  # Rotation motion by 90° CCW
+        fm = fm * normalize(cross(lv_unit, axis_of_rotation))
+        if apply_magnus_effect:
+            f += fm
+            # print(fm)
+            # print(normalize(cross(lv_unit, axis_of_rotation)))
 
         # Calculate acceleration
         ax = f[0] / fuel_mass
@@ -156,7 +190,8 @@ print(
     f"\tafter compensate: v = {v}, hood_angle = {rad_to_deg(hood_angle)}, robot_heading = {rad_to_deg(robot_heading)}")
 
 ax.plot(*calculate_trajectory_kinematics(v, hood_angle, robot_heading), label="Kinematics")
-ax.plot(*calculate_trajectory_iterative(v, hood_angle, robot_heading), label="Iterative")
+ax.plot(*calculate_trajectory_iterative(v, hood_angle, robot_heading, False), label="Iterative (w/o magnus effect)")
+ax.plot(*calculate_trajectory_iterative(v, hood_angle, robot_heading, True), label="Iterative (w/ magnus effect)")
 
 ax.set(xlim=[0, hubx + 0.5], ylim=[-1, 1], zlim=[0, hubz + 2], xlabel="X", ylabel="Y", zlabel="Z")
 ax.legend()
