@@ -227,12 +227,18 @@ def optimize_shot(distance, robot_tangential_vel):
         x_dist = abs(x[-1] - hubx)
 
         # Find max Z
-        max_z = -1
-        for some_z in z:
-            if some_z > max_z:
-                max_z = some_z
-        # Target a certain max z based on distance
-        max_z = abs(max_z - hubx / 2)
+        # If we are too close, who cares
+        if hubx >= 2:
+            max_z = -1
+            for some_z in z:
+                if some_z > max_z:
+                    max_z = some_z
+            # Target a certain max z based on distance
+            max_z = abs(max_z - (1 / 2) * hubx)
+            # Reduce significance
+            max_z /= 2
+        else:
+            max_z = 0
 
         # Find i where x is closest to edge
         closest_i = len(x) - 1
@@ -243,6 +249,8 @@ def optimize_shot(distance, robot_tangential_vel):
         if z[closest_i] < hub_edgez:
             # If we are below the edge, bad
             z_dist = abs(z[closest_i] - hub_edgez)
+            # Increase significance
+            z_dist *= 2
         else:
             z_dist = 0
 
