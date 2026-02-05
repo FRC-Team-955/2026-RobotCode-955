@@ -1,7 +1,9 @@
 DEBUG_SHOT = True
-DEBUG_RANGE = True
 DEBUG_SHOT_DISTANCE = 2
 DEBUG_SHOT_ROBOT_TANGENTIAL_VELOCITY = 0
+DEBUG_RANGE = True
+DEBUG_SHOT_DISTANCE_RANGE = 3
+DEBUG_SHOT_ROBOT_TANGENTIAL_VELOCITY_RANGE = 5
 
 MAGNUS_EFFECT_ENABLED = False
 
@@ -62,8 +64,9 @@ def norm(v):
 def normalize(v):
     return v / norm(v)
 
-def calculate_trajectory_kinematics(vel, hood_angle):
+def calculate_trajectory_kinematics(vel, hood_angle, robot_tangential_velocity):
     vx, vy, vz = polar_velocity_to_components(vel, hood_angle)
+    vx += robot_tangential_velocity
 
     res = (
         vx * t,
@@ -82,8 +85,9 @@ def calculate_trajectory_kinematics(vel, hood_angle):
 
     return res
 
-def calculate_trajectory_iterative(vel, hood_angle):
+def calculate_trajectory_iterative(vel, hood_angle, robot_tangential_velocity):
     vx, vy, vz = polar_velocity_to_components(vel, hood_angle)
+    vx += robot_tangential_velocity
 
     x = np.zeros_like(t)
     y = np.zeros_like(t)
@@ -217,7 +221,7 @@ def optimize_shot(distance, robot_tangential_vel):
     v_initial, hood_angle_initial = calculate_shooting_params_kinematics(distance, robot_tangential_vel)
 
     def cost_fun(x):
-        x, y, z = calculate_trajectory_iterative(x[0], x[1])
+        x, y, z = calculate_trajectory_iterative(x[0], x[1], robot_tangential_vel)
 
         # Minimize X distance to hub
         x_dist = abs(x[-1] - hubx)
@@ -253,20 +257,20 @@ def optimize_shot(distance, robot_tangential_vel):
     if DEBUG_SHOT:
         print(res)
         v_final, hood_angle_final = res.x
-        # ax.plot(*calculate_trajectory_kinematics(v_initial, hood_angle_initial), label="Simple Kinematics (Initial)")
-        # ax.plot(*calculate_trajectory_kinematics(v_final, hood_angle_final), label="Simple Kinematics (Final)")
-        # ax.plot(*calculate_trajectory_iterative(v_initial, hood_angle_initial), label="Iterative Simulation (Initial)")
+        # ax.plot(*calculate_trajectory_kinematics(v_initial, hood_angle_initial, robot_tangential_vel), label="Simple Kinematics (Initial)")
+        # ax.plot(*calculate_trajectory_kinematics(v_final, hood_angle_final, robot_tangential_vel), label="Simple Kinematics (Final)")
+        # ax.plot(*calculate_trajectory_iterative(v_initial, hood_angle_initial, robot_tangential_vel), label="Iterative Simulation (Initial)")
         ax.plot(
-            *calculate_trajectory_iterative(v_final, hood_angle_final),
+            *calculate_trajectory_iterative(v_final, hood_angle_final, robot_tangential_vel),
             label="Iterative Simulation (Final)" if not DEBUG_RANGE else None
         )
 
 if DEBUG_SHOT:
     if DEBUG_RANGE:
         optimize_shot(DEBUG_SHOT_DISTANCE, DEBUG_SHOT_ROBOT_TANGENTIAL_VELOCITY)
-        for i in range(3):
-            for j in range(5):
-                optimize_shot(DEBUG_SHOT_DISTANCE + i, j)
+        for i in range(DEBUG_SHOT_DISTANCE_RANGE):
+            for j in range(DEBUG_SHOT_ROBOT_TANGENTIAL_VELOCITY_RANGE):
+                optimize_shot(DEBUG_SHOT_DISTANCE + i, j - (DEBUG_SHOT_ROBOT_TANGENTIAL_VELOCITY_RANGE / 2))
     else:
         optimize_shot(DEBUG_SHOT_DISTANCE, DEBUG_SHOT_ROBOT_TANGENTIAL_VELOCITY)
 
