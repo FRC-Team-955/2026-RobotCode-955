@@ -1,21 +1,31 @@
+DEBUG_SHOT = True
+DEBUG_RANGE = True
+DEBUG_SHOT_DISTANCE = 2
+DEBUG_SHOT_ROBOT_TANGENTIAL_VELOCITY = 0
+
+MAGNUS_EFFECT_ENABLED = False
+
 import matplotlib.pyplot as plt
 import numpy as np
+from scipy.optimize import minimize
 
 fig, ax = plt.subplots(subplot_kw=dict(projection="3d"))
 
 # All length quantities are in meters
 
-hubx = 2
+fuel_mass = 0.2150028  # kg - note, this is the average weight according to the range in the game manual
+fuel_radius = (15 / 100) / 2
+
 hubz = 72 * 2.54 / 100
-ax.scatter(hubx, 0, hubz, c="red", label="Hub")
+# Add some clearance to the top of the hub edge (15.5 + clearance)
+hub_edgez = hubz + (15.5 + 5) * 2.54 / 100 + fuel_radius
+hub_edgex_offset = -24 * 2.54 / 100
 
 dt = 0.005
 t_final = 2
 t = np.linspace(0, t_final, round(t_final / dt))
 
 g = 9.81
-fuel_mass = 0.2150028  # kg - note, this is the average weight according to the range in the game manual
-fuel_radius = (15 / 100) / 2
 # Drag force and magnus effect coefficients. See:
 # - https://en.wikipedia.org/wiki/Drag_equation
 # - https://www.physics.usyd.edu.au/~cross/TRAJECTORIES/42.%20Ball%20Trajectories.pdf
@@ -30,7 +40,7 @@ def deg_to_rad(deg):
 def rad_to_deg(rad):
     return rad / np.pi * 180.0
 
-def polar_velocity_to_components(vel, pitch, yaw):
+def polar_velocity_to_components(vel, pitch, yaw=0.0):
     vz = vel * np.sin(pitch)
     vxy_hypot = vel * np.cos(pitch)
     vx = vxy_hypot * np.cos(yaw)
@@ -52,22 +62,32 @@ def norm(v):
 def normalize(v):
     return v / norm(v)
 
-def calculate_trajectory_kinematics(vel, hood_angle, robot_heading):
-    vx, vy, vz = polar_velocity_to_components(vel, hood_angle, robot_heading)
+def calculate_trajectory_kinematics(vel, hood_angle):
+    vx, vy, vz = polar_velocity_to_components(vel, hood_angle)
 
-    return (
-        vx * t + vr * t,
-        vy * t + vt * t,
+    res = (
+        vx * t,
+        vy * t,
         vz * t + (1 / 2) * -g * t ** 2
     )
 
-def calculate_trajectory_iterative(vel, hood_angle, robot_heading, apply_magnus_effect):
-    vx, vy, vz = polar_velocity_to_components(vel, hood_angle, robot_heading)
+    # Only return trajectory until we go into the hub, if possible
+    past_hub_on_upwards_arc = False
+    for i in range(len(t)):
+        if res[2][i] > hubz:
+            past_hub_on_upwards_arc = True
+        elif res[2][i] < hubz and past_hub_on_upwards_arc:
+            i_end = i + 1
+            return res[0][:i_end], res[1][:i_end], res[2][:i_end]
+
+    return res
+
+def calculate_trajectory_iterative(vel, hood_angle):
+    vx, vy, vz = polar_velocity_to_components(vel, hood_angle)
 
     x = np.zeros_like(t)
     y = np.zeros_like(t)
     z = np.zeros_like(t)
-    i_end = None
     past_hub_on_upwards_arc = False
 
     for i in range(len(t)):
@@ -117,7 +137,7 @@ def calculate_trajectory_iterative(vel, hood_angle, robot_heading, apply_magnus_
         if C_L > C_D:
             C_L = C_D
         fm = (1 / 2) * ρ * A * fuel_radius * C_L * lv_mag * cross(ω, lv)
-        if apply_magnus_effect:
+        if MAGNUS_EFFECT_ENABLED:
             f += fm
             # print(fm)
             # print(normalize(cross(lv_unit, axis_of_rotation)))
@@ -137,64 +157,120 @@ def calculate_trajectory_iterative(vel, hood_angle, robot_heading, apply_magnus_
         y[i] = ly + (lvy + vy) / 2 * dt
         z[i] = lz + (lvz + vz) / 2 * dt
 
+        # Only return trajectory until we go into the hub, if possible
         if z[i] > hubz:
             past_hub_on_upwards_arc = True
         elif z[i] < hubz and past_hub_on_upwards_arc:
             i_end = i + 1
-            break
+            return x[:i_end], y[:i_end], z[:i_end]
 
-    if i_end is not None:
-        return x[:i_end], y[:i_end], z[:i_end]
+    return x, y, z
+
+def calculate_shooting_params_kinematics(distance, robot_tangential_vel):
+    # https://www.desmos.com/calculator/9npcb4woqc
+    v0 = 0.0742955 * distance ** 2 + 0.185739 * distance + 6.16695
+    vt = robot_tangential_vel
+
+    # print(f"v0 = {v0}, vt = {vt}")
+
+    # First compute stationary shooting velocity
+    discriminant = v0 ** 4 - g * (g * distance ** 2 + 2 * hubz * v0 ** 2)
+    if discriminant < 0:
+        print("\tDiscriminant is negative")
+        exit(1)
+    phi_1 = np.atan((v0 ** 2 + np.sqrt(discriminant)) / (g * distance))
+    phi_2 = np.atan((v0 ** 2 - np.sqrt(discriminant)) / (g * distance))
+
+    def is_valid_phi(phi):
+        return deg_to_rad(15) < phi < deg_to_rad(90)
+
+    if is_valid_phi(phi_1) and (phi_1 > phi_2 or not is_valid_phi(phi_2)):
+        hood_angle = phi_1
+    elif is_valid_phi(phi_2):
+        hood_angle = phi_2
     else:
-        return x, y, z
+        print("\tNo phi found")
+        exit(1)
 
-v0 = 9
-vr = 0
-vt = 0
+    # print(f"\tphi_1 = {rad_to_deg(phi_1)}, phi_2 = {rad_to_deg(phi_2)}, hood_angle = {rad_to_deg(hood_angle)}")
 
-print(f"v0 = {v0}, vr = {vr}, vt = {vt}")
+    vx = v0 * np.cos(hood_angle)
+    vy = 0
+    vz = v0 * np.sin(hood_angle)
 
-# First compute stationary shooting velocity
-discriminant = v0 ** 4 - g * (g * hubx ** 2 + 2 * hubz * v0 ** 2)
-if discriminant < 0:
-    print("\tDiscriminant is negative")
-    exit(1)
-phi_1 = np.atan((v0 ** 2 + np.sqrt(discriminant)) / (g * hubx))
-phi_2 = np.atan((v0 ** 2 - np.sqrt(discriminant)) / (g * hubx))
+    # Now subtract robot velocity from stationary shooting velocity
+    vy -= vt
 
-def is_valid_phi(phi):
-    return deg_to_rad(15) < phi < deg_to_rad(90)
+    # Now calculate hood_angle and shooting magnitude from 3d shooting vector
+    v = np.sqrt(vx ** 2 + vy ** 2 + vz ** 2)
+    hood_angle = np.asin(vz / v)
+    # print(f"\tafter compensate: v = {v}, hood_angle = {rad_to_deg(hood_angle)}")
 
-if is_valid_phi(phi_1) and (phi_1 > phi_2 or not is_valid_phi(phi_2)):
-    hood_angle = phi_1
-elif is_valid_phi(phi_2):
-    hood_angle = phi_2
-else:
-    print("\tNo phi found")
-    exit(1)
+    return v, hood_angle
 
-print(f"\tphi_1 = {rad_to_deg(phi_1)}, phi_2 = {rad_to_deg(phi_2)}, hood_angle = {rad_to_deg(hood_angle)}")
+def optimize_shot(distance, robot_tangential_vel):
+    hubx = distance
+    hub_edgex = hubx + hub_edgex_offset
+    ax.scatter(hubx, 0, hubz, c="red")
+    ax.scatter(hub_edgex, 0, hub_edgez, c="red")
 
-vx = v0 * np.cos(hood_angle)
-vy = 0
-vz = v0 * np.sin(hood_angle)
+    v_initial, hood_angle_initial = calculate_shooting_params_kinematics(distance, robot_tangential_vel)
 
-# Now subtract robot velocity from stationary shooting velocity
-vx -= vr
-vy -= vt
+    def cost_fun(x):
+        x, y, z = calculate_trajectory_iterative(x[0], x[1])
 
-# Now calculate hood_angle, robot_heading, and shooting magnitude from 3d shooting vector
-v = np.sqrt(vx ** 2 + vy ** 2 + vz ** 2)
-hood_angle = np.asin(vz / v)
-robot_heading = np.atan2(vy, vx)
-print(
-    f"\tafter compensate: v = {v}, hood_angle = {rad_to_deg(hood_angle)}, robot_heading = {rad_to_deg(robot_heading)}")
+        # Minimize X distance to hub
+        x_dist = abs(x[-1] - hubx)
 
-ax.plot(*calculate_trajectory_kinematics(v, hood_angle, robot_heading), label="Kinematics")
-ax.plot(*calculate_trajectory_iterative(v, hood_angle, robot_heading, False), label="Iterative (w/o magnus effect)")
-# ax.plot(*calculate_trajectory_iterative(v, hood_angle, robot_heading, True), label="Iterative (w/ magnus effect)")
+        # Minimize Z distance to hub edge
+        ## Find i where x is closest to edge
+        closest_i = len(x) - 1
+        for i in range(len(x)):
+            if abs(x[i] - hub_edgex) < abs(x[closest_i] - hub_edgex):
+                closest_i = i
+        ## Get Z distance when X is at the edge
+        if z[closest_i] < hub_edgez:
+            z_dist = abs(z[closest_i] - hub_edgez)
+        else:
+            # If we are above the edge, who cares
+            z_dist = 0
 
-ax.set(xlim=[0, hubx + 0.5], ylim=[-1, 1], zlim=[0, hubz + 2], xlabel="X", ylabel="Y", zlabel="Z")
-ax.legend()
+        # Z dist is more important so multiply by 2
+        return x_dist + z_dist * 2
 
-plt.show()
+    res = minimize(
+        cost_fun,
+        np.array([v_initial, hood_angle_initial]),
+        method="Nelder-Mead"
+    )
+
+    if not res.success:
+        print(f"Optimization failed.")
+        print(f"\tdistance = {distance}, robot_tangential_vel = {robot_tangential_vel}")
+        print(f"\tres = {res}")
+        exit(1)
+
+    if DEBUG_SHOT:
+        print(res)
+        v_final, hood_angle_final = res.x
+        # ax.plot(*calculate_trajectory_kinematics(v_initial, hood_angle_initial), label="Simple Kinematics (Initial)")
+        # ax.plot(*calculate_trajectory_kinematics(v_final, hood_angle_final), label="Simple Kinematics (Final)")
+        # ax.plot(*calculate_trajectory_iterative(v_initial, hood_angle_initial), label="Iterative Simulation (Initial)")
+        ax.plot(
+            *calculate_trajectory_iterative(v_final, hood_angle_final),
+            label="Iterative Simulation (Final)" if not DEBUG_RANGE else None
+        )
+
+if DEBUG_SHOT:
+    if DEBUG_RANGE:
+        optimize_shot(DEBUG_SHOT_DISTANCE, DEBUG_SHOT_ROBOT_TANGENTIAL_VELOCITY)
+        for i in range(3):
+            for j in range(5):
+                optimize_shot(DEBUG_SHOT_DISTANCE + i, j)
+    else:
+        optimize_shot(DEBUG_SHOT_DISTANCE, DEBUG_SHOT_ROBOT_TANGENTIAL_VELOCITY)
+
+    ax.set(ylim=[-2, 2], zlim=[0, hubz + 2], xlabel="X (m)", ylabel="Y (m)", zlabel="Z (m)")
+    ax.legend()
+
+    plt.show()
