@@ -223,29 +223,35 @@ def optimize_shot(distance, robot_tangential_vel):
     def cost_fun(x):
         x, y, z = calculate_trajectory_iterative(x[0], x[1], robot_tangential_vel)
 
-        # Minimize X distance to hub
+        # Find X distance to hub
         x_dist = abs(x[-1] - hubx)
 
-        # Minimize Z distance to hub edge
-        ## Find i where x is closest to edge
+        # Find max Z
+        max_z = -1
+        for some_z in z:
+            if some_z > max_z:
+                max_z = some_z
+        # Target a certain max z based on distance
+        max_z = abs(max_z - hubx / 2)
+
+        # Find i where x is closest to edge
         closest_i = len(x) - 1
         for i in range(len(x)):
             if abs(x[i] - hub_edgex) < abs(x[closest_i] - hub_edgex):
                 closest_i = i
-        ## Get Z distance when X is at the edge
+        # Get Z distance when X is at the edge
         if z[closest_i] < hub_edgez:
+            # If we are below the edge, bad
             z_dist = abs(z[closest_i] - hub_edgez)
         else:
-            # If we are above the edge, who cares
             z_dist = 0
 
-        # Z dist is more important so multiply by 2
-        return x_dist + z_dist * 2
+        return x_dist + max_z + z_dist
 
     res = minimize(
         cost_fun,
         np.array([v_initial, hood_angle_initial]),
-        method="Nelder-Mead"
+        method="Nelder-Mead",
     )
 
     if not res.success:
