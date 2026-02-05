@@ -22,7 +22,7 @@ fuel_radius = (15 / 100) / 2
 # - https://www.chiefdelphi.com/t/paper-ballistic-trajectory-with-air-friction-drag-and-magnus/123764
 ρ = 1.2041  # air, kg/m³, https://en.wikipedia.org/wiki/Density_of_air#Dry_air
 A = np.pi * fuel_radius ** 2
-c_d = 0.47  # https://en.wikipedia.org/wiki/Drag_coefficient#/media/File:14ilf1l.svg
+C_D = 0.47  # https://en.wikipedia.org/wiki/Drag_coefficient#/media/File:14ilf1l.svg
 
 def deg_to_rad(deg):
     return deg / 180.0 * np.pi
@@ -40,11 +40,11 @@ def polar_velocity_to_components(vel, pitch, yaw):
 
 def cross(a, b):
     # https://en.wikipedia.org/wiki/Cross_product#Coordinate_notation
-    return [
+    return np.array([
         a[1] * b[2] - a[2] * b[1],
         a[2] * b[0] - a[0] * b[2],
         a[0] * b[1] - a[1] * b[0]
-    ]
+    ])
 
 def norm(v):
     return np.sqrt(v[0] ** 2 + v[1] ** 2 + v[2] ** 2)
@@ -58,7 +58,7 @@ def calculate_trajectory_kinematics(vel, hood_angle, robot_heading):
     return (
         vx * t + vr * t,
         vy * t + vt * t,
-        vz * t + -g * t ** 2 / 2
+        vz * t + (1 / 2) * -g * t ** 2
     )
 
 def calculate_trajectory_iterative(vel, hood_angle, robot_heading, apply_magnus_effect):
@@ -83,6 +83,10 @@ def calculate_trajectory_iterative(vel, hood_angle, robot_heading, apply_magnus_
         lvy = vy
         lvz = vz
 
+        lv = np.array([lvx, lvy, lvz])
+        lv_unit = normalize(lv)
+        lv_mag = np.sqrt(lvx ** 2 + lvy ** 2 + lvz ** 2)
+
         if i > 0:
             lax = ax
             lay = ay
@@ -91,16 +95,14 @@ def calculate_trajectory_iterative(vel, hood_angle, robot_heading, apply_magnus_
             lax = lay = laz = 0
 
         # Calculate forces
-        f = [0, 0, 0]
+        f = np.array([0.0, 0.0, 0.0])
 
         ## Weight
         f[2] += fuel_mass * -g
 
         ## Drag. See: https://en.wikipedia.org/wiki/Drag_equation
         ### Get current velocity as unit vector and magnitude
-        lv_unit = normalize([lvx, lvy, lvz])
-        lv = np.sqrt(lvx ** 2 + lvy ** 2 + lvz ** 2)
-        fd = ρ * lv ** 2 * c_d * A / 2
+        fd = (1 / 2) * ρ * lv_mag ** 2 * C_D * A
         ### Drag is opposite of current velocity unit vector
         fd = -fd * lv_unit
         f += fd
@@ -110,12 +112,11 @@ def calculate_trajectory_iterative(vel, hood_angle, robot_heading, apply_magnus_
         ## - https://www.chiefdelphi.com/t/paper-ballistic-trajectory-with-air-friction-drag-and-magnus/123764
         ### TODO: calculate angular velocity based on initial velocity
         ### TODO: angular velocity drag
-        ω = 100  # rad/s
-        c_l = 1 / (2 + (lv / (fuel_radius * ω)))
-        fm = ρ * lv ** 2 * c_l * A / 2
-        ### Magnus effect is perpendicular to axis of rotation and drag/motion.
-        axis_of_rotation = [-lvy, lvx, 0]  # Rotation motion by 90° CCW
-        fm = fm * normalize(cross(lv_unit, axis_of_rotation))
+        ω = 10 * normalize(np.array([-lv[1], lv[0], 0]))  # Rotation axis is motion direction rotated by 90° CCW
+        C_L = 1 / (2 + (lv_mag / (lv_mag + 1)))
+        if C_L > C_D:
+            C_L = C_D
+        fm = (1 / 2) * ρ * A * fuel_radius * C_L * lv_mag * cross(ω, lv)
         if apply_magnus_effect:
             f += fm
             # print(fm)
@@ -191,7 +192,7 @@ print(
 
 ax.plot(*calculate_trajectory_kinematics(v, hood_angle, robot_heading), label="Kinematics")
 ax.plot(*calculate_trajectory_iterative(v, hood_angle, robot_heading, False), label="Iterative (w/o magnus effect)")
-ax.plot(*calculate_trajectory_iterative(v, hood_angle, robot_heading, True), label="Iterative (w/ magnus effect)")
+# ax.plot(*calculate_trajectory_iterative(v, hood_angle, robot_heading, True), label="Iterative (w/ magnus effect)")
 
 ax.set(xlim=[0, hubx + 0.5], ylim=[-1, 1], zlim=[0, hubz + 2], xlabel="X", ylabel="Y", zlabel="Z")
 ax.legend()
