@@ -225,6 +225,8 @@ def optimize_shot(distance, robot_radial_vel):
 
         # Find X distance to hub
         x_dist = abs(x[-1] - hubx)
+        if x_dist < fuel_radius:
+            x_dist = 0
 
         # Find max Z
         # If we are too close, who cares
