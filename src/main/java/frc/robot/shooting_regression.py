@@ -7,7 +7,7 @@ DEBUG_SHOT_ROBOT_RADIAL_VELOCITY_RANGE = 5
 
 MAGNUS_EFFECT_ENABLED = False
 
-from threading import Thread, Lock
+from multiprocessing import Pool
 from time import time
 
 import matplotlib.pyplot as plt
@@ -265,13 +265,14 @@ def optimize_shot(distance, robot_radial_vel):
         cost_fun,
         np.array([v_initial, hood_angle_initial]),
         method="Nelder-Mead",
+        options={"maxiter": 800}
     )
 
     if not res.success:
         print(f"Optimization failed.")
         print(f"\tdistance = {distance}, robot_radial_vel = {robot_radial_vel}")
         print(f"\tres = {res}")
-        exit(1)
+        return None, None
 
     v_final, hood_angle_final = res.x
 
@@ -305,7 +306,7 @@ else:
     # distance_stop = 1
     # distance_step = 0.1
     # distances = np.linspace(distance_start, distance_stop, np.ceil((distance_stop - distance_start) / distance_step))
-    distances = np.linspace(0.5, 1, 70)
+    distances = np.linspace(0.5, 7, 70)
 
     # velocity_start = -5
     # velocity_stop = 5
@@ -324,36 +325,35 @@ else:
             shots[i_shot][0][0] = distance
             shots[i_shot][0][1] = velocity
 
-    assert len(shots) % 4 == 0
-    i_per_thread = round(len(shots) / 4)
-
-    shots_modification_lock = Lock()
-    counter = 0
+    workers = 4
+    assert len(shots) % workers == 0
+    i_per_worker = round(len(shots) / workers)
 
     def shot_compute_worker(i_shot_initial):
-        global shots_modification_lock, counter
-        for i_shot in range(i_shot_initial, i_shot_initial + i_per_thread):
+        counter = 0
+        print(f"{i_shot_initial} starting")
+        start_time_worker = time()
+        for i_shot in range(i_per_worker):
+            i_shot += i_shot_initial
             distance, velocity = shots[i_shot][0]
             v, hood_angle = optimize_shot(distance, velocity)
-            with shots_modification_lock:
-                shots[i_shot][1][0] = v
-                shots[i_shot][1][1] = hood_angle
-                counter += 1
-                print(f"{counter}/{len(shots)} ({i_shot})")
+            counter += 1
+            if v is None and hood_angle is None:
+                print(f"[{i_shot_initial}] {counter}/{i_per_worker} FAILED ({i_shot})")
+                continue
+            shots[i_shot][1][0] = v
+            shots[i_shot][1][1] = hood_angle
+            print(f"[{i_shot_initial}] {counter}/{i_per_worker} ({i_shot})")
+        end_time_worker = time()
+        print(f"{i_shot_initial} done, took {end_time_worker - start_time_worker} seconds")
+        return shots[i_shot_initial:i_shot_initial + i_per_worker]
 
-    threads = []
-    for i in range(4):
-        threads.append(Thread(target=shot_compute_worker, args=(i * i_per_thread,)))
-
-    start_time = time()
-
-    # Start each thread
-    for thread in threads:
-        thread.start()
-
-    # Wait for all threads to finish
-    for thread in threads:
-        thread.join()
-
-    end_time = time()
-    print(f"Took {end_time - start_time} seconds")
+    if __name__ == "__main__":
+        start_time = time()
+        with Pool(workers) as p:
+            i_shot_initials = map(lambda i: i * i_per_worker, range(workers))
+            print(p.map(shot_compute_worker, i_shot_initials))
+            # for group, i_shot_initial in zip(p.map(shot_compute_worker, i_shot_initials), i_shot_initials):
+            #     print(group, i_shot_initial)
+        end_time = time()
+        print(f"Took {end_time - start_time} seconds")
