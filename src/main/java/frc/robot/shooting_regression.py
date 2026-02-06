@@ -1,4 +1,4 @@
-DEBUG_SHOT = True
+DEBUG_SHOT = False
 DEBUG_SHOT_DISTANCE = 1
 DEBUG_SHOT_ROBOT_RADIAL_VELOCITY = 0
 DEBUG_RANGE = True
@@ -6,6 +6,9 @@ DEBUG_SHOT_DISTANCE_RANGE = 6
 DEBUG_SHOT_ROBOT_RADIAL_VELOCITY_RANGE = 5
 
 MAGNUS_EFFECT_ENABLED = False
+
+from threading import Thread, Lock
+from time import time
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -270,6 +273,8 @@ def optimize_shot(distance, robot_radial_vel):
         print(f"\tres = {res}")
         exit(1)
 
+    v_final, hood_angle_final = res.x
+
     if DEBUG_SHOT:
         print(res)
         # ax.plot(*calculate_trajectory_kinematics(v_initial, hood_angle_initial, robot_radial_vel), label="Simple Kinematics (Initial)")
@@ -279,6 +284,8 @@ def optimize_shot(distance, robot_radial_vel):
             *calculate_trajectory_iterative(v_final, hood_angle_final, robot_radial_vel),
             label="Iterative Simulation (Final)" if not DEBUG_RANGE else None
         )
+
+    return v_final, hood_angle_final
 
 if DEBUG_SHOT:
     if DEBUG_RANGE:
@@ -293,3 +300,60 @@ if DEBUG_SHOT:
     ax.legend()
 
     plt.show()
+else:
+    # distance_start = 0.5
+    # distance_stop = 1
+    # distance_step = 0.1
+    # distances = np.linspace(distance_start, distance_stop, np.ceil((distance_stop - distance_start) / distance_step))
+    distances = np.linspace(0.5, 1, 70)
+
+    # velocity_start = -5
+    # velocity_stop = 5
+    # velocity_step = 0.1
+    # velocities = np.linspace(velocity_start, velocity_stop, np.ceil((velocity_stop - velocity_start) / velocity_step))
+    velocities = np.linspace(-5, 5, 20)
+
+    # For each distance/velocity combination, 2 inputs and outputs
+    shots = np.zeros((len(distances) * len(velocities), 2, 2))
+
+    for i_distance in range(len(distances)):
+        distance = distances[i_distance]
+        for i_velocity in range(len(velocities)):
+            velocity = velocities[i_velocity]
+            i_shot = i_distance * len(velocities) + i_velocity
+            shots[i_shot][0][0] = distance
+            shots[i_shot][0][1] = velocity
+
+    assert len(shots) % 4 == 0
+    i_per_thread = round(len(shots) / 4)
+
+    shots_modification_lock = Lock()
+    counter = 0
+
+    def shot_compute_worker(i_shot_initial):
+        global shots_modification_lock, counter
+        for i_shot in range(i_shot_initial, i_shot_initial + i_per_thread):
+            distance, velocity = shots[i_shot][0]
+            v, hood_angle = optimize_shot(distance, velocity)
+            with shots_modification_lock:
+                shots[i_shot][1][0] = v
+                shots[i_shot][1][1] = hood_angle
+                counter += 1
+                print(f"{counter}/{len(shots)} ({i_shot})")
+
+    threads = []
+    for i in range(4):
+        threads.append(Thread(target=shot_compute_worker, args=(i * i_per_thread,)))
+
+    start_time = time()
+
+    # Start each thread
+    for thread in threads:
+        thread.start()
+
+    # Wait for all threads to finish
+    for thread in threads:
+        thread.join()
+
+    end_time = time()
+    print(f"Took {end_time - start_time} seconds")
