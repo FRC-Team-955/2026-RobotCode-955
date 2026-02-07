@@ -28,15 +28,15 @@ public class DriveConstants {
     public static final DriveConfig driveConfig = new DriveConfig(
             // TO TUNE WHEEL RADIUS: Place robot on carpet and use wheel radius characterization auto.
             // Output will be in console in AdvantageScope.
-            Units.inchesToMeters(1.935948620917915),
-            Units.inchesToMeters(19.25),
-            Units.inchesToMeters(24.25),
-            Units.inchesToMeters(36.5),
-            Units.inchesToMeters(31.5),
+            Units.inchesToMeters(2.0833),
+            Units.inchesToMeters(22.75),
+            Units.inchesToMeters(22.75),
+            Units.inchesToMeters(28),
+            Units.inchesToMeters(28),
             Units.inchesToMeters(-0.247776),
             PIDF.ofPD(3.5, 0),
             PIDF.ofPD(3, 0),
-            PIDF.ofP(6),
+            PIDF.ofP(10),
             4.58
     );
 
@@ -66,16 +66,16 @@ public class DriveConstants {
         // current characterization auto. Output will be in console in AdvantageScope.
         case REAL, REPLAY -> new ModuleConfig(
                 PIDF.ofPDSVA(
-                        0.0, 0.0,
-                        0.19, 0.125, 0.005
+                        0.01, 0.0,
+                        0.1, 0.13, 0.0
                 ),
-                PIDF.ofPD(5, 0.04),
+                PIDF.ofPD(6.0, 0.04),
                 Mk4iGearRatios.L2,
                 Mk4iGearRatios.TURN,
                 true,
                 false,
                 false,
-                120,
+                60,
                 60
         );
         case SIM -> new ModuleConfig(
@@ -107,10 +107,10 @@ public class DriveConstants {
             // to the absolute encoder offset parameter in the IO layer constructor.
             // Module order: FL, FR, BL, BR
             case REAL -> new ModuleIO[]{
-                    new ModuleIOTalonFXSparkMaxCANcoder(1, 1, 5, 1.577),
-                    new ModuleIOTalonFXSparkMaxCANcoder(2, 2, 6, 1.770),
-                    new ModuleIOTalonFXSparkMaxCANcoder(3, 3, 7, 3.105),
-                    new ModuleIOTalonFXSparkMaxCANcoder(4, 4, 8, -2.817),
+                    new ModuleIOSparkMaxCANcoder(7, 8, 10, -2.675),
+                    new ModuleIOSparkMaxCANcoder(5, 6, 9, -2.295),
+                    new ModuleIOSparkMaxCANcoder(1, 2, 12, 0.268),
+                    new ModuleIOSparkMaxCANcoder(3, 4, 11, 0.825),
             };
             case SIM -> new ModuleIO[]{
                     new ModuleIOSim(0),
@@ -124,7 +124,7 @@ public class DriveConstants {
 
     static GyroIO createGyroIO() {
         return switch (BuildConstants.mode) {
-            case REAL -> new GyroIOPigeon2(9);
+            case REAL -> new GyroIOPigeon2(13);
             case SIM -> new GyroIOSim();
             case REPLAY -> new GyroIO();
         };
