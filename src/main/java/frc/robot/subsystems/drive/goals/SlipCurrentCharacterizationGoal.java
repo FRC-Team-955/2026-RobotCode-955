@@ -27,7 +27,7 @@ public class SlipCurrentCharacterizationGoal extends DriveGoal {
             double[] velocities = drive.getSlipCurrentCharacterizationVelocities();
             double[] currents = drive.getSlipCurrentCharacterizationCurrents();
 
-            if (lastCurrents[0] != 0) {
+            if (timer.hasElapsed(0.5)) {
                 double total = 0.0;
                 done = true;
                 for (int i = 0; i < 4; i++) {
@@ -55,7 +55,7 @@ public class SlipCurrentCharacterizationGoal extends DriveGoal {
             lastCurrents = currents;
         }
 
-        // Increase voltage at 0.5 V/s
-        return DriveRequest.characterization(timer.get() * 0.5);
+        // Increase voltage at 0.1 V/s
+        return DriveRequest.characterization(timer.get() * 0.1);
     }
 }
