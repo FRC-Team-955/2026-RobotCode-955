@@ -14,14 +14,10 @@ public class FlywheelConstants {
 
     static final RequestTolerances tolerances = RequestTolerances.defaults();
 
-    static final double gearRatio = 5;
-    static final PIDF positionGains = switch (BuildConstants.mode) {
-        case REAL, REPLAY -> PIDF.zero();
-        case SIM -> PIDF.zero();
-    };
+    static final double gearRatio = 1;
     static final PIDF velocityGains = switch (BuildConstants.mode) {
         case REAL, REPLAY -> PIDF.zero();
-        case SIM -> PIDF.zero();
+        case SIM -> PIDF.ofSV(0.0, 0.02);
     };
 
     static MotorIO createIO() {
@@ -32,14 +28,14 @@ public class FlywheelConstants {
                     true,
                     40,
                     gearRatio,
-                    positionGains,
+                    PIDF.zero(),
                     velocityGains
             );
             case SIM -> new MotorIOSim(
                     gearRatio,
                     0.01,
-                    DCMotor.getNEO(1),
-                    positionGains,
+                    DCMotor.getKrakenX60(2),
+                    PIDF.zero(),
                     velocityGains
             );
             case REPLAY -> new MotorIO();

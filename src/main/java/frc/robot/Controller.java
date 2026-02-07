@@ -3,7 +3,6 @@ package frc.robot;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Alert;
@@ -29,7 +28,9 @@ public class Controller implements Periodic {
     private final Alert controllerDisconnectedAlert = new Alert("Driver controller is not connected!", Alert.AlertType.kError);
 
     // Intermediates - used in assist calculations
+    @Getter
     private Rotation2d driveLinearDirection = new Rotation2d();
+    @Getter
     private double driveLinearMagnitude = 0.0;
 
     // Results - used for drive/assist calculations
@@ -90,9 +91,10 @@ public class Controller implements Periodic {
         Translation2d linearVelocity;
         if (x != 0 || y != 0) {
             driveLinearDirection = new Rotation2d(x, y);
-            linearVelocity = new Pose2d(new Translation2d(), driveLinearDirection)
-                    .transformBy(new Transform2d(driveLinearMagnitude, 0.0, new Rotation2d()))
-                    .getTranslation();
+            if (Util.shouldFlip()) {
+                driveLinearDirection = driveLinearDirection.plus(Rotation2d.k180deg);
+            }
+            linearVelocity = new Translation2d(driveLinearMagnitude, driveLinearDirection);
         } else {
             // Linear magnitude should be 0 anyways
             driveLinearDirection = new Rotation2d();
@@ -104,9 +106,6 @@ public class Controller implements Periodic {
         Logger.recordOutput("Controller/Drive/LinearVelocity", linearVelocity);
         Logger.recordOutput("Controller/Drive/OmegaMagnitude", omegaMagnitude);
 
-        if (Util.shouldFlip()) {
-            linearVelocity = linearVelocity.rotateBy(Rotation2d.k180deg);
-        }
         driveSetpointFieldRelative = new ChassisSpeeds(
                 linearVelocity.getX() * driveConfig.maxVelocityMetersPerSec(),
                 linearVelocity.getY() * driveConfig.maxVelocityMetersPerSec(),
