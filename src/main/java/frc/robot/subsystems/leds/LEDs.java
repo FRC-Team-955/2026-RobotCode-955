@@ -5,8 +5,6 @@ import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import frc.lib.subsystem.Periodic;
-import frc.robot.subsystems.superintake.Superintake;
-import frc.robot.subsystems.superstructure.Superstructure;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.mechanism.LoggedMechanism2d;
 import org.littletonrobotics.junction.mechanism.LoggedMechanismLigament2d;
@@ -15,9 +13,6 @@ import org.littletonrobotics.junction.mechanism.LoggedMechanismRoot2d;
 import static frc.robot.subsystems.leds.LEDConstants.*;
 
 public class LEDs implements Periodic {
-    private final Superintake superintake = Superintake.get();
-    private final Superstructure superstructure = Superstructure.get();
-
     private final LEDsIO io = createIO();
 
     private final AddressableLEDBuffer buffer = new AddressableLEDBuffer(length);
@@ -87,28 +82,7 @@ public class LEDs implements Periodic {
             if (endgame) {
                 LEDPatterns.endgame.applyTo(buffer);
             } else {
-                LEDPattern superintakePattern = switch (superintake.getGoal()) {
-                    case IDLE -> null;
-                    case INTAKE -> LEDPatterns.intaking;
-                    case EJECT -> LEDPatterns.eject;
-                };
-
-                LEDPattern superstructurePattern = switch (superstructure.getGoal()) {
-                    case IDLE, SPINUP -> null;
-                    case SHOOT -> LEDPatterns.shooting;
-                    case EJECT -> LEDPatterns.eject;
-                };
-
-                if (superintakePattern != null && superstructurePattern != null) {
-                    superintakePattern.applyTo(firstHalfView);
-                    superstructurePattern.applyTo(secondHalfView);
-                } else if (superintakePattern != null) {
-                    superintakePattern.applyTo(buffer);
-                } else if (superstructurePattern != null) {
-                    superstructurePattern.applyTo(buffer);
-                } else {
-                    LEDPatterns.idle.applyTo(buffer);
-                }
+                LEDPatterns.idle.applyTo(buffer);
             }
         }
 

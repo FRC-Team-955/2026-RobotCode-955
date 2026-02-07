@@ -126,23 +126,8 @@ public class Robot extends LoggedRobot {
                 robotContainer.controller,
                 // Vision depends on drive
                 robotContainer.drive,
-                // The rest of the subsystems require vision
-                robotContainer.aprilTagVision,
-                robotContainer.gamePieceVision,
-                // Subsystems depend on shooting, shooting depends on vision
-                robotContainer.shootingKinematics,
                 // Operator dashboard before super*
                 robotContainer.operatorDashboard,
-                // Subsystems depend on goals issued by superintake and superstructure
-                robotContainer.superintake,
-                robotContainer.superstructure,
-
-                // Subsystems - the order of these doesn't matter
-                robotContainer.superintake.intakeRollers,
-                robotContainer.superintake.intakePivot,
-                robotContainer.superstructure.indexer,
-                robotContainer.superstructure.flywheel,
-                robotContainer.superstructure.hood,
 
                 // Misc
                 robotContainer.canLogger,
