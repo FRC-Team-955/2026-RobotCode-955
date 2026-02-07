@@ -73,7 +73,7 @@ public class LEDPatterns {
     public static final LEDPattern autoNotChosen = LEDPattern.solid(Color.kBlue).blink(Seconds.of(1));
     public static final LEDPattern badAutoPlacement = LEDPattern.solid(Color.kYellow).blink(Seconds.of(0.5));
     public static final LEDPattern visionDisconnected = LEDPattern.solid(Color.kRed).blink(Seconds.of(0.5));
-    public static final LEDPattern autoReady = wave(new Color(255, 0, 128), Color.kRed, 0.5);
+    public static final LEDPattern autoReady = wave(new Color(255, 0, 128), Color.kRed, 2.0);
 
     // Enabled
     public static final LEDPattern endgame = LEDPattern.solid(Color.kPurple).blink(Seconds.of(0.5));
