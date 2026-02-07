@@ -14,11 +14,15 @@
 package frc.robot;
 
 import edu.wpi.first.hal.AllianceStationID;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.simulation.DriverStationSim;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -27,6 +31,7 @@ import frc.lib.LoggedTracer;
 import frc.lib.subsystem.Periodic;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.leds.LEDs;
+import org.dyn4j.geometry.Rotation;
 import org.ironmaple.simulation.SimulatedArena;
 import org.littletonrobotics.junction.AutoLogOutputManager;
 import org.littletonrobotics.junction.LogFileUtil;
@@ -280,11 +285,46 @@ public class Robot extends LoggedRobot {
         RobotModeTriggers.autonomous().onTrue(Commands.runOnce(SimulatedArena.getInstance()::resetFieldForAuto));
         robotContainer.robotState.setPose(ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose());
     }
+    boolean isHittingBumppre = false;
 
+    boolean isHittingBump2 = false;
+    
     @Override
     public void simulationPeriodic() {
         // In case of replay, don't do sim
         if (BuildConstants.mode == BuildConstants.Mode.REPLAY) return;
+
+        boolean isHittingBump = ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose().getX() >= 4.57
+                && ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose().getY() >= 2.0 ||
+                ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose().getX() >= 4.57
+                        && ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose().getY() <= 6;
+
+        boolean isHittingBumpother = ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose().getX() <= 12.0
+                && ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose().getY() <= 6.0 ||
+                ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose().getX() <= 12.0
+                && ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose().getY() >= 2.0;
+
+        if (isHittingBump != isHittingBumppre || isHittingBump2 != isHittingBumpother ) {
+            double randomX = ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose().getX()  - .5 + Math.random();
+            double randomY = ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose().getY()  - .5 + Math.random();
+            Rotation2d randomAngle = Rotation2d.fromDegrees(Math.random() * 180d);
+            Pose2d teleportTarget = new Pose2d(randomX, randomY, randomAngle);
+            ModuleIOSim.driveSimulation.setSimulationWorldPose(teleportTarget);
+            System.out.println("Robot hit the Bump and 'slipped' to " + teleportTarget);
+        }
+        isHittingBumppre = isHittingBump;
+        isHittingBump2 = isHittingBumpother;
+
+
+        /*double randomX = Math.random() * 14.0 + 1.0;w
+        double randomY = Math.random() * 6.0 + 1.0;
+        Rotation2d randomAngle = Rotation2d.fromDegrees(Math.random() * 360);
+        Pose2d teleportTarget = new Pose2d(randomX, randomY, randomAngle);
+
+        if (ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose().getX() > 0
+                && ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose().getY() > 10)
+        {ModuleIOSim.driveSimulation.setSimulationWorldPose(teleportTarget);
+        }*/
 
         SimulatedArena.getInstance().simulationPeriodic();
 
