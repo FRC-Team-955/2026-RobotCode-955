@@ -9,7 +9,6 @@ import frc.lib.network.LoggedTunableNumber;
 import frc.lib.wpilib.SlewRateLimiter;
 import frc.robot.Controller;
 import frc.robot.RobotState;
-import frc.robot.ShootingKinematics;
 import frc.robot.subsystems.drive.DriveGoal;
 import frc.robot.subsystems.drive.DriveRequest;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +24,6 @@ public class DriveJoystickWithAimingGoal extends DriveGoal {
 
     private static final RobotState robotState = RobotState.get();
     private static final Controller controller = Controller.get();
-    private static final ShootingKinematics shootingKinematics = ShootingKinematics.get();
 
     private final SlewRateLimiter2d linearAccelerationLimiter = new SlewRateLimiter2d(maxLinearAccelerationMetersPerSecSquared.get(), robotState.getMeasuredChassisSpeeds());
     private final SlewRateLimiter angularAccelerationLimiter = new SlewRateLimiter(maxAngularAccelerationRadPerSecSquared.get(), robotState.getMeasuredChassisSpeeds().omegaRadiansPerSecond);
@@ -60,9 +58,10 @@ public class DriveJoystickWithAimingGoal extends DriveGoal {
         linearVelocity = linearAccelerationLimiter.calculate(linearVelocity);
         Logger.recordOutput("Drive/DriveJoystickWithAiming/LinearMagnitudeLimited", linearVelocity.getNorm());
 
-        double angularVelocity = headingOverride.calculate(robotState.getRotation().getRadians(), shootingKinematics.getShootingParameters().headingRad());
-        angularVelocity = angularAccelerationLimiter.calculate(angularVelocity);
-        Logger.recordOutput("Drive/DriveJoystickWithAiming/AngularVelocityLimited", angularVelocity);
+//        double angularVelocity = headingOverride.calculate(robotState.getRotation().getRadians(), shootingKinematics.getShootingParameters().headingRad());
+//        angularVelocity = angularAccelerationLimiter.calculate(angularVelocity);
+//        Logger.recordOutput("Drive/DriveJoystickWithAiming/AngularVelocityLimited", angularVelocity);
+        double angularVelocity = 0.0;
 
         return DriveRequest.chassisSpeeds(ChassisSpeeds.fromFieldRelativeSpeeds(
                 linearVelocity.getX(),
