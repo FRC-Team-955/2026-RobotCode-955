@@ -43,6 +43,10 @@ public class GamePieceVision implements Periodic {
         disconnectedAlert.set(!inputs.connected);
     }
 
+    public boolean anyCamerasDisconnected() {
+        return !inputs.connected;
+    }
+
     public boolean visibleNotDebounced() {
         return inputs.connected && inputs.visible;
     }
