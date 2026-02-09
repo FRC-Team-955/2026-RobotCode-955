@@ -2,12 +2,12 @@
   "hubs": [
     {
       "x": 0,
-      "y": 33,
-      "width": 1280,
-      "height": 799,
+      "y": 39,
+      "width": 1800,
+      "height": 1130,
       "state": {
         "sidebar": {
-          "width": 399,
+          "width": 300,
           "expanded": [
             "/RealOutputs/Vision/Camera1",
             "/RealOutputs/Vision/Camera0",
@@ -312,10 +312,49 @@
               "controlsHeight": 0
             },
             {
+              "type": 1,
+              "title": "Alerts",
+              "controller": {
+                "leftSources": [],
+                "rightSources": [],
+                "discreteSources": [
+                  {
+                    "type": "alerts",
+                    "logKey": "/RealOutputs/Alerts",
+                    "logType": "Alerts",
+                    "visible": true,
+                    "options": {}
+                  },
+                  {
+                    "type": "alerts",
+                    "logKey": "/RealOutputs/PhotonAlerts",
+                    "logType": "Alerts",
+                    "visible": true,
+                    "options": {}
+                  }
+                ],
+                "leftLockedRange": null,
+                "rightLockedRange": null,
+                "leftUnitConversion": {
+                  "autoTarget": null,
+                  "preset": null
+                },
+                "rightUnitConversion": {
+                  "autoTarget": null,
+                  "preset": null
+                },
+                "leftFilter": 0,
+                "rightFilter": 0
+              },
+              "controllerUUID": "k9pqbahhb2zjooic3iqnw6i4jh66uha9",
+              "renderer": null,
+              "controlsHeight": 200
+            },
+            {
               "type": 5,
               "title": "Console",
               "controller": "/RealOutputs/Console",
-              "controllerUUID": "wez3g10ig34v8wd8letzhorjvh2wuozk",
+              "controllerUUID": "57t060uvt1wdc8k9dg44hoacl23m4za5",
               "renderer": {
                 "highlight": false
               },
