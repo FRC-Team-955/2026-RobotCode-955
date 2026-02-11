@@ -19,7 +19,7 @@ public class LEDs implements Periodic {
     private final AddressableLEDBufferView firstHalfView = new AddressableLEDBufferView(buffer, 0, length / 2 - 1);
     private final AddressableLEDBufferView secondHalfView = new AddressableLEDBufferView(buffer, length / 2, length - 1);
 
-    private final Debouncer lowBatteryDebouncer = new Debouncer(3.0, Debouncer.DebounceType.kRising);
+    private final Debouncer lowBatteryDebouncer = new Debouncer(10.0, Debouncer.DebounceType.kRising);
 
     private final LoggedMechanism2d mechanism = new LoggedMechanism2d(1.5, 2.1, new Color8Bit(Color.kBlack));
     private final LoggedMechanismLigament2d[] ligaments = new LoggedMechanismLigament2d[length];
