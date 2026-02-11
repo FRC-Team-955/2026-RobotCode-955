@@ -59,7 +59,7 @@ public class DriveJoystickGoal extends DriveGoal {
                     joystickSetpoint = new ChassisSpeeds(
                             joystickSetpoint.vxMetersPerSecond,
                             joystickSetpoint.vyMetersPerSecond,
-                            headingOverride.calculate(robotState.getRotation().getRadians())
+                            headingOverride.calculate(robotState.getRotation().getRadians()) * controller.getDriveLinearMagnitude()
                     );
                 }
             }
