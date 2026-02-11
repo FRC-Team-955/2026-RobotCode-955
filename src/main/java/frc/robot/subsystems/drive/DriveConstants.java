@@ -28,15 +28,15 @@ public class DriveConstants {
     public static final DriveConfig driveConfig = new DriveConfig(
             // TO TUNE WHEEL RADIUS: Place robot on carpet and use wheel radius characterization auto.
             // Output will be in console in AdvantageScope.
-            Units.inchesToMeters(2.0833),
-            Units.inchesToMeters(22.75),
-            Units.inchesToMeters(22.75),
+            Units.inchesToMeters(1.872),
+            Units.inchesToMeters(20.75),
+            Units.inchesToMeters(20.75),
             Units.inchesToMeters(28),
             Units.inchesToMeters(28),
             Units.inchesToMeters(-0.247776),
             PIDF.ofPD(3.5, 0),
             PIDF.ofPD(3, 0),
-            PIDF.ofP(10),
+            PIDF.ofP(15),
             4.58
     );
 
@@ -75,7 +75,7 @@ public class DriveConstants {
                 true,
                 false,
                 false,
-                60,
+                30,
                 60
         );
         case SIM -> new ModuleConfig(
