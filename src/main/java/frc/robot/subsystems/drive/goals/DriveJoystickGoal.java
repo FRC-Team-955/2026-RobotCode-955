@@ -17,7 +17,7 @@ import static frc.robot.subsystems.drive.DriveTuning.headingOverrideGainsTunable
 @RequiredArgsConstructor
 public class DriveJoystickGoal extends DriveGoal {
     private static final LoggedTunableNumber headingOverrideSetpointResetTime = new LoggedTunableNumber("Drive/DriveJoystick/HeadingOverrideSetpointResetTimeSeconds", 0.25);
-    private static final LoggedTunableNumber headingOverrideThresholdDegrees = new LoggedTunableNumber("Drive/DriveJoystick/HeadingOverrideThresholdDegrees", 15.0);
+    private static final LoggedTunableNumber headingOverrideThresholdDegrees = new LoggedTunableNumber("Drive/DriveJoystick/HeadingOverrideThresholdDegrees", 30.0);
 
     private static final RobotState robotState = RobotState.get();
     private static final Controller controller = Controller.get();
