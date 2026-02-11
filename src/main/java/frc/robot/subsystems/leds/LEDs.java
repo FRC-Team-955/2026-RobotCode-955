@@ -24,6 +24,8 @@ public class LEDs implements Periodic {
     private final LoggedMechanism2d mechanism = new LoggedMechanism2d(1.5, 2.1, new Color8Bit(Color.kBlack));
     private final LoggedMechanismLigament2d[] ligaments = new LoggedMechanismLigament2d[length];
 
+    public static boolean alert = false;
+
     private static LEDs instance;
 
     public static LEDs get() {
@@ -81,6 +83,8 @@ public class LEDs implements Periodic {
                     DriverStation.getMatchTime() < endgameUpperThresholdSeconds;
             if (endgame) {
                 LEDPatterns.endgame.applyTo(buffer);
+            } else if (alert) {
+                LEDPatterns.intaking.applyTo(buffer);
             } else {
                 LEDPatterns.idle.applyTo(buffer);
             }
