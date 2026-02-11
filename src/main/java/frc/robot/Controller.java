@@ -9,10 +9,9 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.Util;
-import frc.lib.controller.CommandSteamInputController;
 import frc.lib.subsystem.Periodic;
 import lombok.Getter;
 import org.littletonrobotics.junction.Logger;
@@ -24,7 +23,8 @@ public class Controller implements Periodic {
 
     }
 
-    private final CommandXboxController controller;
+    //    private final CommandXboxController controller;
+    private final CommandPS5Controller controller;
     private final Alert controllerDisconnectedAlert = new Alert("Driver controller is not connected!", Alert.AlertType.kError);
 
     // Intermediates - used in assist calculations
@@ -49,12 +49,13 @@ public class Controller implements Periodic {
     }
 
     private Controller() {
-        if (BuildConstants.mode == BuildConstants.Mode.SIM && System.getProperty("os.name").contains("Mac OS X")) {
-            controller = new CommandSteamInputController(0);
-//            controller = new CommandNintendoSwitchProController(0);
-        } else {
-            controller = new CommandXboxController(0);
-        }
+        controller = new CommandPS5Controller(0);
+//        if (BuildConstants.mode == BuildConstants.Mode.SIM && System.getProperty("os.name").contains("Mac OS X")) {
+//            controller = new CommandSteamInputController(0);
+////            controller = new CommandNintendoSwitchProController(0);
+//        } else {
+//        controller = new CommandXboxController(0);
+//        }
     }
 
     @Override
@@ -164,61 +165,64 @@ public class Controller implements Periodic {
         ).withTimeout(timeSeconds);
     }
 
-    public Trigger a() {
-        return controller.a();
-    }
+//    public Trigger a() {
+//        return controller.a();
+//    }
 
-    public Trigger b() {
-        return controller.b();
-    }
+//    public Trigger b() {
+//        return controller.b();
+//    }
 
-    public Trigger x() {
-        return controller.x();
-    }
+//    public Trigger x() {
+//        return controller.x();
+//    }
 
     public Trigger y() {
-        return controller.y();
+        return controller.triangle();
     }
+//    public Trigger y() {
+//        return controller.y();
+//    }
 
-    public Trigger leftBumper() {
-        return controller.leftBumper();
-    }
-
-    public Trigger rightBumper() {
-        return controller.rightBumper();
-    }
-
-    public Trigger back() {
-        return controller.back();
-    }
-
-    public Trigger start() {
-        return controller.start();
-    }
-
-    public Trigger leftStick() {
-        return controller.leftStick();
-    }
-
-    public Trigger rightStick() {
-        return controller.rightStick();
-    }
-
-    /**
-     * Constructs a Trigger instance around the axis value of the left trigger. The returned trigger
-     * will be true when the axis value is greater than 0.5.
-     */
-    public Trigger leftTrigger() {
-        return controller.leftTrigger();
-    }
-
-    /**
-     * Constructs a Trigger instance around the axis value of the right trigger. The returned trigger
-     * will be true when the axis value is greater than 0.5.
-     */
-    public Trigger rightTrigger() {
-        return controller.rightTrigger();
-    }
+//    public Trigger leftBumper() {
+//        return controller.leftBumper();
+//    }
+//
+//    public Trigger rightBumper() {
+//        return controller.rightBumper();
+//    }
+//
+//    public Trigger back() {
+//        return controller.back();
+//    }
+//
+//    public Trigger start() {
+//        return controller.start();
+//    }
+//
+//    public Trigger leftStick() {
+//        return controller.leftStick();
+//    }
+//
+//    public Trigger rightStick() {
+//        return controller.rightStick();
+//    }
+//
+//    /**
+//     * Constructs a Trigger instance around the axis value of the left trigger. The returned trigger
+//     * will be true when the axis value is greater than 0.5.
+//     */
+//    public Trigger leftTrigger() {
+//        return controller.leftTrigger();
+//    }
+//
+//    /**
+//     * Constructs a Trigger instance around the axis value of the right trigger. The returned trigger
+//     * will be true when the axis value is greater than 0.5.
+//     */
+//    public Trigger rightTrigger() {
+//        return controller.rightTrigger();
+//    }
 
     /**
      * Get the X axis value of left side of the controller. Right is positive.
@@ -252,15 +256,15 @@ public class Controller implements Periodic {
      * Get the left trigger axis value of the controller. Note that this axis is bound to the
      * range of [0, 1] as opposed to the usual [-1, 1].
      */
-    public double getLeftTriggerAxis() {
-        return controller.getLeftTriggerAxis();
-    }
-
-    /**
-     * Get the right trigger axis value of the controller. Note that this axis is bound to the
-     * range of [0, 1] as opposed to the usual [-1, 1].
-     */
-    public double getRightTriggerAxis() {
-        return controller.getRightTriggerAxis();
-    }
+//    public double getLeftTriggerAxis() {
+//        return controller.getLeftTriggerAxis();
+//    }
+//
+//    /**
+//     * Get the right trigger axis value of the controller. Note that this axis is bound to the
+//     * range of [0, 1] as opposed to the usual [-1, 1].
+//     */
+//    public double getRightTriggerAxis() {
+//        return controller.getRightTriggerAxis();
+//    }
 }
