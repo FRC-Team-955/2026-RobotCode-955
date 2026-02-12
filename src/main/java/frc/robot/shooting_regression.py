@@ -269,7 +269,7 @@ def optimize_shot(distance, robot_radial_vel):
         options={"maxiter": 800}
     )
 
-    if not res.success:
+    if not res.success or cost_fun(res.x) > 0.1:
         print(f"Optimization failed.")
         print(f"\tdistance = {distance}, robot_radial_vel = {robot_radial_vel}")
         print(f"\tres = {res}")
