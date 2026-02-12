@@ -371,3 +371,4 @@ else:
 
         end_time = time()
         print(f"Took {end_time - start_time} seconds")
+        print(f"Of {len(distance_velocity_pairs)} shots, {len(all_shots)} succeeded.")
