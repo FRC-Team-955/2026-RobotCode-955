@@ -338,7 +338,7 @@ else:
         start_dist = 0.5
         stop_dist = 7
         max_vel = 4.5
-        for distance in np.linspace(0.5, 7, 70):
+        for distance in np.linspace(start_dist, stop_dist, 70):
             max_vel_away_from_hub = -max_vel
             max_vel_towards_hub = min(max_vel, 1 + 2 * distance)
             for velocity in np.linspace(max_vel_away_from_hub, max_vel_towards_hub, 20):
