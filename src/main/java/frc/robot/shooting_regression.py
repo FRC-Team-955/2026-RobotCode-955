@@ -1,3 +1,11 @@
+from math import floor
+from multiprocessing import Pool
+from time import time
+
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy.optimize import minimize
+
 DEBUG_SHOT = False
 DEBUG_SHOT_DISTANCE = 1
 DEBUG_SHOT_ROBOT_RADIAL_VELOCITY = 0
@@ -6,13 +14,6 @@ DEBUG_SHOT_DISTANCE_RANGE = 6
 DEBUG_SHOT_ROBOT_RADIAL_VELOCITY_RANGE = 5
 
 MAGNUS_EFFECT_ENABLED = False
-
-from multiprocessing import Pool
-from time import time
-
-import matplotlib.pyplot as plt
-import numpy as np
-from scipy.optimize import minimize
 
 fig, ax = plt.subplots(subplot_kw=dict(projection="3d"))
 
@@ -302,58 +303,72 @@ if DEBUG_SHOT:
 
     plt.show()
 else:
-    # distance_start = 0.5
-    # distance_stop = 1
-    # distance_step = 0.1
-    # distances = np.linspace(distance_start, distance_stop, np.ceil((distance_stop - distance_start) / distance_step))
-    distances = np.linspace(0.5, 7, 70)
+    def shot_compute_worker(x):
+        worker_index, worker_distance_velocity_pairs = x
 
-    # velocity_start = -5
-    # velocity_stop = 5
-    # velocity_step = 0.1
-    # velocities = np.linspace(velocity_start, velocity_stop, np.ceil((velocity_stop - velocity_start) / velocity_step))
-    velocities = np.linspace(-5, 5, 20)
-
-    # For each distance/velocity combination, 2 inputs and outputs
-    shots = np.zeros((len(distances) * len(velocities), 2, 2))
-
-    for i_distance in range(len(distances)):
-        distance = distances[i_distance]
-        for i_velocity in range(len(velocities)):
-            velocity = velocities[i_velocity]
-            i_shot = i_distance * len(velocities) + i_velocity
-            shots[i_shot][0][0] = distance
-            shots[i_shot][0][1] = velocity
-
-    workers = 4
-    assert len(shots) % workers == 0
-    i_per_worker = round(len(shots) / workers)
-
-    def shot_compute_worker(i_shot_initial):
+        shots = []
         counter = 0
-        print(f"{i_shot_initial} starting")
+
+        print(f"[{worker_index}] Starting")
         start_time_worker = time()
-        for i_shot in range(i_per_worker):
-            i_shot += i_shot_initial
-            distance, velocity = shots[i_shot][0]
-            v, hood_angle = optimize_shot(distance, velocity)
+
+        for distance, velocity in worker_distance_velocity_pairs:
             counter += 1
+            progress_count = f"{counter}/{len(worker_distance_velocity_pairs)}"
+            progress_percent = round(float(counter) / float(len(worker_distance_velocity_pairs)) * 100)
+
+            v, hood_angle = optimize_shot(distance, velocity)
             if v is None and hood_angle is None:
-                print(f"[{i_shot_initial}] {counter}/{i_per_worker} FAILED ({i_shot})")
+                print(
+                    f"[{worker_index}] {progress_count} FAILED (distance = {distance}, velocity = {velocity})")
                 continue
-            shots[i_shot][1][0] = v
-            shots[i_shot][1][1] = hood_angle
-            print(f"[{i_shot_initial}] {counter}/{i_per_worker} ({i_shot})")
+            shots.append(((distance, velocity), {v, hood_angle}))
+            print(f"[{worker_index}] {progress_count}\t{progress_percent}%")
+
         end_time_worker = time()
-        print(f"{i_shot_initial} done, took {end_time_worker - start_time_worker} seconds")
-        return shots[i_shot_initial:i_shot_initial + i_per_worker]
+        print(f"[{worker_index}] Done, took {end_time_worker - start_time_worker} seconds")
+
+        return shots
+
+        # counter = 0
 
     if __name__ == "__main__":
+        distance_velocity_pairs = []
+
+        start_dist = 0.5
+        stop_dist = 7
+        max_vel = 4.5
+        max_vel_per_distance = 4
+        for distance in np.linspace(0.5, 7, 70):
+            max_vel_away_from_hub = -max_vel
+            max_vel_towards_hub = min(max_vel, distance * max_vel_per_distance)
+            for velocity in np.linspace(max_vel_away_from_hub, max_vel_towards_hub, 20):
+                distance_velocity_pairs.append((distance, velocity))
+
+        all_shots = []
+        workers = 8
+        min_per_worker = floor(len(distance_velocity_pairs) / workers)
+
+        print(
+            f"Computing {len(distance_velocity_pairs)} distance velocity pairs,"
+            f"with a minimum of {min_per_worker} per worker"
+        )
+
+        def get_distance_velocity_pairs_for_worker(worker_index):
+            start_index = worker_index * min_per_worker
+            if worker_index == workers - 1:
+                end_index = len(distance_velocity_pairs)
+            else:
+                end_index = start_index + min_per_worker
+            print(f"Worker {worker_index} will do indices {start_index} to {end_index - 1}")
+            return worker_index, distance_velocity_pairs[start_index:end_index]
+
         start_time = time()
+
         with Pool(workers) as p:
-            i_shot_initials = map(lambda i: i * i_per_worker, range(workers))
-            print(p.map(shot_compute_worker, i_shot_initials))
-            # for group, i_shot_initial in zip(p.map(shot_compute_worker, i_shot_initials), i_shot_initials):
-            #     print(group, i_shot_initial)
+            args = map(get_distance_velocity_pairs_for_worker, range(workers))
+            for computed_shots in p.map(shot_compute_worker, args):
+                all_shots += computed_shots
+
         end_time = time()
         print(f"Took {end_time - start_time} seconds")
