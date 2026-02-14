@@ -50,7 +50,7 @@ public class AprilTagVisionConstants {
                 new Transform3d(
                         Units.inchesToMeters(-6.625), Units.inchesToMeters(-9.125), Units.inchesToMeters(27.25),
                         // Rotation order matters
-                        new Rotation3d(0.0, Units.degreesToRadians(45), 0.0)
+                        new Rotation3d(0.0, Units.degreesToRadians(-45), 0.0)
                                 .rotateBy(new Rotation3d(0.0, 0.0, Units.degreesToRadians(30)))
                 ),
                 (cam) -> switch (BuildConstants.mode) {
@@ -69,7 +69,7 @@ public class AprilTagVisionConstants {
                         // Rotation order matters
                         new Rotation3d(Units.degreesToRadians(20), 0.0, 0.0)
                                 // 35 pitch without elevator slant
-                                .rotateBy(new Rotation3d(0.0, Units.degreesToRadians(30), 0.0))
+                                .rotateBy(new Rotation3d(0.0, Units.degreesToRadians(-30), 0.0))
                                 .rotateBy(new Rotation3d(0.0, 0.0, Units.degreesToRadians(-153.5)))
                 ),
                 (cam) -> switch (BuildConstants.mode) {
