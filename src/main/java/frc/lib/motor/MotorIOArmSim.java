@@ -29,7 +29,7 @@ public class MotorIOArmSim extends MotorIO {
             PIDF gains
     ) {
         armSim = new SingleJointedArmSim(
-                motor.withReduction(gearRatio),
+                motor,
                 gearRatio,
                 jKgMetersSquared,
                 armLength,
