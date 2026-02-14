@@ -41,10 +41,6 @@ public class GamePieceVision implements Periodic {
         Logger.processInputs("Inputs/GamePieceVision", inputs);
         // Update disconnected alert
         disconnectedAlert.set(!inputs.connected);
-
-        if (operatorDashboard.forceGamePieceLEDs.hasChanged()) {
-            io.setLEDs(operatorDashboard.forceGamePieceLEDs.get());
-        }
     }
 
     public boolean visibleNotDebounced() {

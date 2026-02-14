@@ -15,6 +15,7 @@ package frc.robot;
 
 import edu.wpi.first.hal.AllianceStationID;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.simulation.DriverStationSim;
@@ -25,6 +26,7 @@ import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import frc.lib.LoggedTracer;
 import frc.lib.subsystem.Periodic;
 import frc.robot.subsystems.drive.ModuleIOSim;
+import frc.robot.subsystems.leds.LEDs;
 import org.ironmaple.simulation.SimulatedArena;
 import org.littletonrobotics.junction.AutoLogOutputManager;
 import org.littletonrobotics.junction.LogFileUtil;
@@ -51,6 +53,9 @@ public class Robot extends LoggedRobot {
     private static List<Periodic> periodics;
 
     public Robot() {
+        @SuppressWarnings("resource")
+        Notifier ledsStartupNotifier = LEDs.get().createAndStartStartupNotifier();
+
         AutoLogOutputManager.addPackage("frc");
 
         Logger.recordMetadata("* ProjectName", BuildInfo.MAVEN_NAME);
@@ -124,20 +129,31 @@ public class Robot extends LoggedRobot {
                 // The rest of the subsystems require vision
                 robotContainer.aprilTagVision,
                 robotContainer.gamePieceVision,
+                // Subsystems depend on shooting, shooting depends on vision
+                robotContainer.shootingKinematics,
                 // Operator dashboard before super*
                 robotContainer.operatorDashboard,
-                // Subsystems depend on goals issued by superstructure and superintake
-                robotContainer.superstructure,
+                // Subsystems depend on goals issued by superintake and superstructure
                 robotContainer.superintake,
+                robotContainer.superstructure,
 
                 // Subsystems - the order of these doesn't matter
+                robotContainer.superintake.intakeRollers,
+                robotContainer.superintake.intakePivot,
+                robotContainer.superstructure.spindexer,
+                robotContainer.superstructure.flywheel,
+                robotContainer.superstructure.hood,
+                robotContainer.superstructure.feeder,
 
                 // Misc
                 robotContainer.canLogger,
 
-                // Update the mechanism last
-                robotContainer.robotMechanism
+                // Update the mechanism and LEDs last
+                robotContainer.robotMechanism,
+                robotContainer.leds
         );
+
+        ledsStartupNotifier.stop();
     }
 
     private void logConstantClass(Class<?> clazz, String parentName) {
