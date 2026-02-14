@@ -5,12 +5,9 @@ import frc.lib.PIDF;
 import frc.lib.motor.MotorIO;
 import frc.lib.motor.MotorIOSim;
 import frc.lib.motor.MotorIOSparkMax;
-import frc.lib.motor.RequestTolerances;
 import frc.robot.BuildConstants;
 
 public class SpindexerConstants {
-    static final RequestTolerances tolerances = RequestTolerances.defaults();
-
     static final double gearRatio = 5;
     static final PIDF positionGains = switch (BuildConstants.mode) {
         case REAL, REPLAY -> PIDF.zero();
