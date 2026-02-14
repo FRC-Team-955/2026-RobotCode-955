@@ -32,11 +32,13 @@ import static frc.robot.subsystems.apriltagvision.AprilTagVisionConstants.*;
 public class AprilTagVision implements Periodic {
     private final RobotState robotState = RobotState.get();
 
-    private final EnumMap<Camera, CameraData> cameras = Util.createEnumMap(Camera.class, Camera.values(), (cam) -> new CameraData(
-            new AprilTagVisionIOInputsAutoLogged(),
-            cam.createIO(),
-            new Alert("AprilTag vision camera " + cam.name() + " is disconnected.", AlertType.kError)
-    ));
+    private final EnumMap<Camera, CameraData> cameras = Util.createEnumMap(Camera.class,
+            Camera.values(), (cam) ->
+                    new CameraData(
+                            new AprilTagVisionIOInputsAutoLogged(),
+                            cam.createIO(),
+                            new Alert("AprilTag vision camera " + cam.name() + " is disconnected.", AlertType.kError)
+                    ));
 
     private int[] tagIdFilter = {};
 
@@ -44,16 +46,17 @@ public class AprilTagVision implements Periodic {
     public Command setTagIdFilter(int[] tagIds) {
         return Commands.runOnce(() -> tagIdFilter = tagIds);
     }
+
     private final double tagToRobotX = 0.5;
     private final double tagToRobotY = 0.0;
     private final double tagToRobotZ = -0.38;
     private final double tagToRobotYaw = 180.0;
-    private  double  tagToCamQuatW;
-    private  double  tagToCamQuatX;
-    private  double
+    private double tagToCamQuatW;
+    private double tagToCamQuatX;
+    private double
             tagToCamQuatY;
     private Rotation3d rotXYZ;
-    private  double    tagToCamQuatZ;
+    private double tagToCamQuatZ;
     private double tagToCamTransX;
     private double tagToCamTransY;
     private double tagToCamTransZ;
@@ -121,32 +124,29 @@ public class AprilTagVision implements Periodic {
             //  robotToCam.clear();
             //rotXYZ.clear();
             for (var observation : data.inputs.bestTargetObservations) {
-                if (observation.tagID() == 18) {
 
 
-                    tagToCamQuatY = observation.cameraToTarget().inverse().getRotation().getQuaternion().getY();
-                    tagToCamQuatW = observation.cameraToTarget().inverse().getRotation().getQuaternion().getW();
-                    tagToCamQuatZ = observation.cameraToTarget().inverse().getRotation().getQuaternion().getZ();
-                    tagToCamQuatX = observation.cameraToTarget().inverse().getRotation().getQuaternion().getX();
-                    tagToCamTransX = observation.cameraToTarget().inverse().getTranslation().getX();
-                    tagToCamTransY = observation.cameraToTarget().inverse().getTranslation().getY();
-                    tagToCamTransZ = observation.cameraToTarget().inverse().getTranslation().getZ();
+                tagToCamQuatY = observation.cameraToTarget().inverse().getRotation().getQuaternion().getY();
+                tagToCamQuatW = observation.cameraToTarget().inverse().getRotation().getQuaternion().getW();
+                tagToCamQuatZ = observation.cameraToTarget().inverse().getRotation().getQuaternion().getZ();
+                tagToCamQuatX = observation.cameraToTarget().inverse().getRotation().getQuaternion().getX();
+                tagToCamTransX = observation.cameraToTarget().inverse().getTranslation().getX();
+                tagToCamTransY = observation.cameraToTarget().inverse().getTranslation().getY();
+                tagToCamTransZ = observation.cameraToTarget().inverse().getTranslation().getZ();
 
-                    tagToRobot = new Transform3d(new Translation3d(tagToRobotX, tagToRobotY, tagToRobotZ)
-                            , new Rotation3d(0, 0, Units.degreesToRadians(tagToRobotYaw)));
-                    tagToCam = new Transform3d(new Translation3d(tagToCamTransX, tagToCamTransY, tagToCamTransZ)
-                            , new Rotation3d(new Quaternion(tagToCamQuatW, tagToCamQuatX, tagToCamQuatY, tagToCamQuatZ)));
-                    robotToCam = tagToRobot.inverse().plus(tagToCam);
-                    rotXYZ = new Rotation3d(robotToCam.getRotation().getX(),
-                            robotToCam.getRotation().getY(),robotToCam.getRotation().getZ());
-                    Logger.recordOutput("AprilTagVision/" + cam.getKey() + "robotToCam", robotToCam);
-                    Logger.recordOutput("AprilTagVision/" + cam.getKey() + "robotToCam/Rotation/X", Units.radiansToDegrees(rotXYZ.getX()));
-                    Logger.recordOutput("AprilTagVision/" + cam.getKey() + "robotToCam/Rotation/Y", Units.radiansToDegrees(rotXYZ.getY()));
-                    Logger.recordOutput("AprilTagVision/" + cam.getKey() + "robotToCam/Rotation/Z", Units.radiansToDegrees(rotXYZ.getZ()));
+                tagToRobot = new Transform3d(new Translation3d(tagToRobotX, tagToRobotY, tagToRobotZ)
+                        , new Rotation3d(0, 0, Units.degreesToRadians(tagToRobotYaw)));
+                tagToCam = new Transform3d(new Translation3d(tagToCamTransX, tagToCamTransY, tagToCamTransZ)
+                        , new Rotation3d(new Quaternion(tagToCamQuatW, tagToCamQuatX, tagToCamQuatY, tagToCamQuatZ)));
+                robotToCam = tagToRobot.inverse().plus(tagToCam);
+                rotXYZ = new Rotation3d(robotToCam.getRotation().getX(),
+                        robotToCam.getRotation().getY(), robotToCam.getRotation().getZ());
+                Logger.recordOutput("AprilTagVision/" + cam.getKey() + "robotToCam", robotToCam);
+                Logger.recordOutput("AprilTagVision/" + cam.getKey() + "robotToCam/Rotation/X", Units.radiansToDegrees(rotXYZ.getX()));
+                Logger.recordOutput("AprilTagVision/" + cam.getKey() + "robotToCam/Rotation/Y", Units.radiansToDegrees(rotXYZ.getY()));
+                Logger.recordOutput("AprilTagVision/" + cam.getKey() + "robotToCam/Rotation/Z", Units.radiansToDegrees(rotXYZ.getZ()));
 
 
-
-                }
                 Optional<Pose3d> tagPoseOptional = aprilTagLayout.getTagPose(observation.tagID());
 
                 if (tagPoseOptional.isEmpty()) {
@@ -238,9 +238,12 @@ public class AprilTagVision implements Periodic {
                 // If trig is present, distance to tag is small enough, and isn't too different from
                 // 3d solve, use trig
                 if (observation.poseEstimateTrigPresent() &&
-                        observation.tagDistance() < distanceFromTagForTrigMeters &&
-                        poseEstimate3dSolve2d.getTranslation().getDistance(observation.poseEstimateTrig().getTranslation()) < trig3dSolveMaxDiffMeters &&
-                        Math.abs(poseEstimate3dSolve2d.getRotation().minus(observation.poseEstimateTrig().getRotation()).getRadians()) < trig3dSolveMaxDiffRad
+                        observation.tagDistance() <
+                                distanceFromTagForTrigMeters &&
+                        poseEstimate3dSolve2d.getTranslation()
+                                .getDistance(observation.poseEstimateTrig().getTranslation()) < trig3dSolveMaxDiffMeters &&
+                        Math.abs(poseEstimate3dSolve2d.getRotation()
+                                .minus(observation.poseEstimateTrig().getRotation()).getRadians()) < trig3dSolveMaxDiffRad
                 ) {
                     genericPoseObservations.add(new GenericPoseObservation(
                             observation.timestamp(),

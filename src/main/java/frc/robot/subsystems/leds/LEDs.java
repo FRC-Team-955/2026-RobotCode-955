@@ -94,12 +94,18 @@ public class LEDs implements Periodic {
                     case IDLE -> null;
                     case INTAKE -> LEDPatterns.intaking;
                     case EJECT -> LEDPatterns.eject;
+                    case AUTO_INTAKE_INTAKING -> null;
+                    case AUTO_INTAKE_SEARCHING_FOR_STALE -> null;
+
+                    case AUTO_INTAKE_SEARCHING -> null;
+
                 };
 
                 LEDPattern superstructurePattern = switch (superstructure.getGoal()) {
                     case IDLE, SPINUP -> null;
                     case SHOOT -> LEDPatterns.shooting;
                     case EJECT -> LEDPatterns.eject;
+
                 };
 
                 if (superintakePattern != null && superstructurePattern != null) {

@@ -64,11 +64,19 @@ public class DriveJoystickWithAimingGoal extends DriveGoal {
         angularVelocity = angularAccelerationLimiter.calculate(angularVelocity);
         Logger.recordOutput("Drive/DriveJoystickWithAiming/AngularVelocityLimited", angularVelocity);
 
-        return DriveRequest.chassisSpeeds(ChassisSpeeds.fromFieldRelativeSpeeds(
-                linearVelocity.getX(),
-                linearVelocity.getY(),
-                angularVelocity,
-                robotState.getRotation()
-        ));
+        if (
+                linearVelocity.getX() == 0 &&
+                        linearVelocity.getY() == 0 &&
+                        (angularVelocity <= 0.05 || angularVelocity >= -0.05)
+        ) {
+            return DriveRequest.stopWithX();
+        } else {
+            return DriveRequest.chassisSpeeds(ChassisSpeeds.fromFieldRelativeSpeeds(
+                    linearVelocity.getX(),
+                    linearVelocity.getY(),
+                    angularVelocity,
+                    robotState.getRotation()
+            ));
+        }
     }
 }

@@ -2,6 +2,7 @@ package frc.robot.subsystems.drive.goals;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import frc.lib.PIDF;
 import frc.robot.Controller;
 import frc.robot.RobotState;
 import frc.robot.subsystems.drive.DriveGoal;
@@ -24,6 +25,7 @@ public class DriveJoystickWithAssistGoal extends DriveGoal {
         var optionalAssistPose = assistPoseSupplier.get();
         if (optionalAssistPose.isPresent()) {
             // Mark assist pose as present
+
             Logger.recordOutput("Drive/Assist/Present", true);
             Pose2d assistPose = optionalAssistPose.get();
 
@@ -41,10 +43,10 @@ public class DriveJoystickWithAssistGoal extends DriveGoal {
 
     private static ChassisSpeeds getAssisted(Pose2d assistPose) {
         var currentPose = robotState.getPose();
-
-        double assistX = 0;
-        double assistY = 0;
-        double assistOmega = 0;
+        PIDF hehe = PIDF.ofPD(4.5, 0.05);
+//        double assistX = 0;
+//        //   double assistY = 0;
+//        double assistOmega = 0;
         // TODO: need to reset the PIDs when assist starts
         // TODO: log setpoint
 //        double assistX = moveToLinearX.calculate(
@@ -53,11 +55,11 @@ public class DriveJoystickWithAssistGoal extends DriveGoal {
 //        ) + moveToLinearX.getSetpoint().velocity;
 //        assistX *= linearMagnitude; // Limit to the driver's overall linear speed
 //
-//        double assistY = moveToLinearY.calculate(
-//                currentPose.getY(),
-//                assistPose.getY()
-//        ) + moveToLinearY.getSetpoint().velocity;
-//        assistY *= linearMagnitude; // Limit to the driver's overall linear speed
+        double assistY = hehe.toPID().calculate(
+                currentPose.getY(),
+                assistPose.getY()
+        );
+        assistY *= controller.getDriveLinearMagnitude(); // Limit to the driver's overall linear speed
 //
 //        double assistOmega = moveToAngular.calculate(
 //                currentPose.getRotation().getRadians(),
@@ -68,9 +70,9 @@ public class DriveJoystickWithAssistGoal extends DriveGoal {
 //        assistOmega *= Math.max(omegaMagnitude, linearMagnitude);
 
         return ChassisSpeeds.fromFieldRelativeSpeeds(
-                        assistX,
+                        0.0,
                         assistY,
-                        assistOmega,
+                        0.0,
                         currentPose.getRotation() // Move to is absolute, don't flip
                 )
                 .times(0.75)

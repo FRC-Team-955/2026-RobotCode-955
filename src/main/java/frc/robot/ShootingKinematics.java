@@ -34,7 +34,7 @@ public class ShootingKinematics implements Periodic {
     private static final RobotState robotState = RobotState.get();
 
     @Getter
-    private ShootingParameters shootingParameters = null;
+    private ShootingParameters shootingParameters = new ShootingParameters(0,0,0);
     @Getter
     private boolean validShootingParameters = false;
 
