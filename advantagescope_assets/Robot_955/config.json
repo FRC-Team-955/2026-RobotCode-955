@@ -1,6 +1,6 @@
 {
 	"name": "955",
-  "disableSimplification": true,
+	"disableSimplification": true,
 	"rotations": [{ "axis": "x", "degrees": 90 }],
 	"position": [0, 0, 0],
 	"cameras": [],
@@ -17,10 +17,10 @@
 			"zeroedRotations": [],
 			"zeroedPositions": []
 		},
-    {
-      "zeroedRotations": [],
-      "zeroedPositions": []
-    },
+		{
+		  "zeroedRotations": [],
+		  "zeroedPositions": []
+		},
 		{
 			"zeroedRotations": [{ "axis": "x", "degrees": 90 }],
 			"zeroedPositions": []
