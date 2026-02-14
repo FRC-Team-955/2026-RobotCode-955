@@ -50,10 +50,11 @@ public class Superstructure extends CommandBasedSubsystem {
     private static Superstructure instance;
 
     public static Superstructure get() {
-        if (instance == null)
-            synchronized (Superstructure.class) {
+        synchronized (Superstructure.class) {
+            if (instance == null) {
                 instance = new Superstructure();
             }
+        }
 
         return instance;
     }

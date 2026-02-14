@@ -69,10 +69,11 @@ public class AprilTagVision implements Periodic {
 
 
     public static AprilTagVision get() {
-        if (instance == null)
-            synchronized (AprilTagVision.class) {
+        synchronized (AprilTagVision.class) {
+            if (instance == null) {
                 instance = new AprilTagVision();
             }
+        }
 
         return instance;
     }

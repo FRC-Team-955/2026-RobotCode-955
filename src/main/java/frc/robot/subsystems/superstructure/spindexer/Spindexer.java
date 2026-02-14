@@ -47,10 +47,11 @@ public class Spindexer implements Periodic {
     private static Spindexer instance;
 
     public static Spindexer get() {
-        if (instance == null)
-            synchronized (Spindexer.class) {
+        synchronized (Spindexer.class) {
+            if (instance == null) {
                 instance = new Spindexer();
             }
+        }
 
         return instance;
     }

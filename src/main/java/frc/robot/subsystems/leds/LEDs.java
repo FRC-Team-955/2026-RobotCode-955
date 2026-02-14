@@ -32,10 +32,11 @@ public class LEDs implements Periodic {
     private static LEDs instance;
 
     public static LEDs get() {
-        if (instance == null)
-            synchronized (LEDs.class) {
+        synchronized (LEDs.class) {
+            if (instance == null) {
                 instance = new LEDs();
             }
+        }
 
         return instance;
     }

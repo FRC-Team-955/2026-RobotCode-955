@@ -58,10 +58,11 @@ public class ExampleServoSubsystem implements Periodic {
     private static ExampleServoSubsystem instance;
 
     public static ExampleServoSubsystem get() {
-        if (instance == null)
-            synchronized (ExampleServoSubsystem.class) {
+        synchronized (ExampleServoSubsystem.class) {
+            if (instance == null) {
                 instance = new ExampleServoSubsystem();
             }
+        }
 
         return instance;
     }

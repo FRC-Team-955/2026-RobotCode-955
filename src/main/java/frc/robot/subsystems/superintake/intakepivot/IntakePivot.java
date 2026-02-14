@@ -59,10 +59,11 @@ public class IntakePivot implements Periodic {
     private static IntakePivot instance;
 
     public static IntakePivot get() {
-        if (instance == null)
-            synchronized (IntakePivot.class) {
+        synchronized (IntakePivot.class) {
+            if (instance == null) {
                 instance = new IntakePivot();
             }
+        }
 
         return instance;
     }

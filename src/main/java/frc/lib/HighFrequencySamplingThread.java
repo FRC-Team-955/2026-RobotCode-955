@@ -56,12 +56,15 @@ public class HighFrequencySamplingThread extends Thread {
 
     private final List<Queue<Double>> timestampQueues = new ArrayList<>();
 
-    private static HighFrequencySamplingThread instance = null;
+    private static HighFrequencySamplingThread instance;
 
     public static HighFrequencySamplingThread get() {
-        if (instance == null) {
-            instance = new HighFrequencySamplingThread();
+        synchronized (HighFrequencySamplingThread.class) {
+            if (instance == null) {
+                instance = new HighFrequencySamplingThread();
+            }
         }
+
         return instance;
     }
 

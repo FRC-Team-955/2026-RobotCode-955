@@ -68,10 +68,11 @@ public class Hood implements Periodic {
     private static Hood instance;
 
     public static Hood get() {
-        if (instance == null)
-            synchronized (Hood.class) {
+        synchronized (Hood.class) {
+            if (instance == null) {
                 instance = new Hood();
             }
+        }
 
         return instance;
     }

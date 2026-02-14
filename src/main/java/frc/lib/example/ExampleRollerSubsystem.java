@@ -53,10 +53,11 @@ public class ExampleRollerSubsystem implements Periodic {
     private static ExampleRollerSubsystem instance;
 
     public static ExampleRollerSubsystem get() {
-        if (instance == null)
-            synchronized (ExampleRollerSubsystem.class) {
+        synchronized (ExampleRollerSubsystem.class) {
+            if (instance == null) {
                 instance = new ExampleRollerSubsystem();
             }
+        }
 
         return instance;
     }

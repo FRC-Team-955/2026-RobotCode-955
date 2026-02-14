@@ -35,10 +35,11 @@ public class GamePieceVision implements Periodic {
     private static GamePieceVision instance;
 
     public static GamePieceVision get() {
-        if (instance == null)
-            synchronized (GamePieceVision.class) {
+        synchronized (GamePieceVision.class) {
+            if (instance == null) {
                 instance = new GamePieceVision();
             }
+        }
 
         return instance;
     }

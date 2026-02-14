@@ -47,10 +47,11 @@ public class OperatorDashboard implements Periodic {
     private static OperatorDashboard instance;
 
     public static OperatorDashboard get() {
-        if (instance == null)
-            synchronized (OperatorDashboard.class) {
+        synchronized (OperatorDashboard.class) {
+            if (instance == null) {
                 instance = new OperatorDashboard();
             }
+        }
 
         return instance;
     }

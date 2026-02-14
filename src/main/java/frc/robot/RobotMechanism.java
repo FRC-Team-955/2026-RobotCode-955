@@ -46,10 +46,11 @@ public class RobotMechanism implements Periodic {
     private static RobotMechanism instance;
 
     public static RobotMechanism get() {
-        if (instance == null)
-            synchronized (RobotMechanism.class) {
+        synchronized (RobotMechanism.class) {
+            if (instance == null) {
                 instance = new RobotMechanism();
             }
+        }
 
         return instance;
     }

@@ -60,10 +60,11 @@ public class Flywheel implements Periodic {
     private static Flywheel instance;
 
     public static Flywheel get() {
-        if (instance == null)
-            synchronized (Flywheel.class) {
+        synchronized (Flywheel.class) {
+            if (instance == null) {
                 instance = new Flywheel();
             }
+        }
 
         return instance;
     }

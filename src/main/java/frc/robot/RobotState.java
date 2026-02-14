@@ -48,10 +48,11 @@ public class RobotState {
     private static RobotState instance;
 
     public static RobotState get() {
-        if (instance == null)
-            synchronized (RobotState.class) {
+        synchronized (RobotState.class) {
+            if (instance == null) {
                 instance = new RobotState();
             }
+        }
 
         return instance;
     }

@@ -47,10 +47,11 @@ public class Feeder implements Periodic {
     private static Feeder instance;
 
     public static Feeder get() {
-        if (instance == null)
-            synchronized (Feeder.class) {
+        synchronized (Feeder.class) {
+            if (instance == null) {
                 instance = new Feeder();
             }
+        }
 
         return instance;
     }

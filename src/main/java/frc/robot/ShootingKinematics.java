@@ -43,10 +43,11 @@ public class ShootingKinematics implements Periodic {
     private static ShootingKinematics instance;
 
     public static ShootingKinematics get() {
-        if (instance == null)
-            synchronized (ShootingKinematics.class) {
+        synchronized (ShootingKinematics.class) {
+            if (instance == null) {
                 instance = new ShootingKinematics();
             }
+        }
 
         return instance;
     }

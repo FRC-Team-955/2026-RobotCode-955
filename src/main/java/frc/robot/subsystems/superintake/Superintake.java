@@ -53,10 +53,11 @@ public class Superintake extends CommandBasedSubsystem {
     private static Superintake instance;
 
     public static Superintake get() {
-        if (instance == null)
-            synchronized (Superintake.class) {
+        synchronized (Superintake.class) {
+            if (instance == null) {
                 instance = new Superintake();
             }
+        }
 
         return instance;
     }
