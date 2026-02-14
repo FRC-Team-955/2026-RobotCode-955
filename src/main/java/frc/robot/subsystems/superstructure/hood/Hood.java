@@ -120,9 +120,6 @@ public class Hood implements Periodic {
         }
     }
 
-    /**
-     * Intended to be plugged into component rotation in RobotMechanism
-     */
     public double getPositionRad() {
         return inputs.positionRad;
     }

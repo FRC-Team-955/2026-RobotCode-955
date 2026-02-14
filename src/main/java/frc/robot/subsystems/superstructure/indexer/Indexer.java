@@ -2,8 +2,6 @@ package frc.robot.subsystems.superstructure.indexer;
 
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.motor.MotorIO;
 import frc.lib.motor.MotorIOInputsAutoLogged;
 import frc.lib.motor.RequestType;
@@ -13,14 +11,11 @@ import frc.robot.OperatorDashboard;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.function.DoubleSupplier;
 
-import static edu.wpi.first.wpilibj2.command.Commands.runOnce;
 import static frc.robot.subsystems.superstructure.indexer.IndexerConstants.createIO;
-import static frc.robot.subsystems.superstructure.indexer.IndexerConstants.tolerances;
 
 public class Indexer implements Periodic {
     private static final LoggedTunableNumber feedVoltage = new LoggedTunableNumber("Superstructure/Indexer/Goal/FeedVoltage", 3.0);
@@ -74,9 +69,6 @@ public class Indexer implements Periodic {
         if (operatorDashboard.coastOverride.hasChanged()) {
             io.setBrakeMode(!operatorDashboard.coastOverride.get());
         }
-
-//        positionGainsTunable.ifChanged(io::setPositionPIDF);
-//        velocityGainsTunable.ifChanged(io::setVelocityPIDF);
     }
 
     @Override
@@ -92,27 +84,7 @@ public class Indexer implements Periodic {
         }
     }
 
-    /**
-     * Intended to be plugged into component rotation in RobotMechanism
-     */
     public double getPositionRad() {
         return inputs.positionRad;
-    }
-
-    @AutoLogOutput(key = "Superstructure/Indexer/AtGoal")
-    public boolean atGoal() {
-        double value = goal.value.getAsDouble();
-        return switch (goal.type) {
-            case PositionRad -> Math.abs(inputs.positionRad - value) <= tolerances.positionToleranceRad();
-
-            case VelocityRadPerSec ->
-                    Math.abs(inputs.velocityRadPerSec - value) <= tolerances.velocityToleranceRadPerSec();
-
-            case VoltageVolts -> Math.abs(inputs.appliedVolts - value) <= tolerances.voltageToleranceVolts();
-        };
-    }
-
-    public Command waitUntilAtGoal() {
-        return Commands.waitUntil(this::atGoal);
     }
 }
