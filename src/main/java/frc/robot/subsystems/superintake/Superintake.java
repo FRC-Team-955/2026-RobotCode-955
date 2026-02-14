@@ -39,8 +39,6 @@ public class Superintake extends CommandBasedSubsystem {
         AUTO_INTAKE_SEARCHING,
         AUTO_INTAKE_SEARCHING_FOR_STALE,
         AUTO_INTAKE_INTAKING,
-
-
     }
 
     @Getter
