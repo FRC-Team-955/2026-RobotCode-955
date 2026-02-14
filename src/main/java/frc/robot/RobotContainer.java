@@ -37,12 +37,12 @@ public class RobotContainer {
     public final RobotMechanism robotMechanism = RobotMechanism.get();
 
     /* Subsystems */
-    // Note: order does matter
     public final Drive drive = Drive.get();
     public final AprilTagVision aprilTagVision = AprilTagVision.get();
     public final GamePieceVision gamePieceVision = GamePieceVision.get();
-    public final Superstructure superstructure = Superstructure.get();
+
     public final Superintake superintake = Superintake.get();
+    public final Superstructure superstructure = Superstructure.get();
 
     public RobotContainer() {
         addAutos();
@@ -57,21 +57,10 @@ public class RobotContainer {
     private void addAutos() {
         autoChooser.addOption("None", Commands.none());
 
-        autoChooser.addOption(
-                "Characterization",
-                // We need to require the superstructure during characterization so that the default command doesn't get run
-                Commands.deferredProxy(() -> CommandsExt.eagerSequence(
-                        superstructure.cancel(),
-                        superintake.cancel(),
-                        characterizationChooser.get()
-                ))
-        );
+        autoChooser.addOption("Characterization", Commands.deferredProxy(characterizationChooser::get));
     }
 
     private void addCharacterizations() {
-        ////////////////////// DRIVE //////////////////////
-
-        // TODO
         characterizationChooser.addOption("Drive 1 m/s Characterization", drive.runRobotRelative(() -> new ChassisSpeeds(1.0, 0.0, 0.0)));
         characterizationChooser.addOption("Drive 2 m/s Characterization", drive.runRobotRelative(() -> new ChassisSpeeds(2.0, 0.0, 0.0)));
         characterizationChooser.addOption("Drive 3 m/s Characterization", drive.runRobotRelative(() -> new ChassisSpeeds(3.0, 0.0, 0.0)));
@@ -83,8 +72,8 @@ public class RobotContainer {
 
     private void setDefaultCommands() {
         drive.setDefaultCommand(drive.driveJoystick());
-        superstructure.setDefaultCommand(superstructure.cancel());
-        superintake.setDefaultCommand(superintake.cancel());
+        superintake.setDefaultCommand(superintake.setGoal(Superintake.Goal.IDLE).ignoringDisable(true));
+        superstructure.setDefaultCommand(superstructure.setGoal(Superstructure.Goal.IDLE).ignoringDisable(true));
     }
 
     /**
@@ -94,14 +83,11 @@ public class RobotContainer {
      * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
      */
     private void configureBindings() {
-        // NOTE: if you are binding a trigger to a command returned by a subsystem, you must wrap it in CommandsExt.eagerSequence(superstructure.cancel(), <your command>)
-        // You must do this because if you don't, superstructure's default command will cancel your command
-
         controller.y().onTrue(robotState.resetRotation());
 
         controller.leftBumper().onTrue(Commands.parallel(
-                superstructure.cancel(),
-                superintake.cancel()
+                superintake.setGoal(Superintake.Goal.IDLE),
+                superstructure.setGoal(Superstructure.Goal.IDLE)
         ));
 
         if (BuildConstants.mode == BuildConstants.Mode.SIM) {
@@ -117,9 +103,6 @@ public class RobotContainer {
                     drive.moveTo(() -> ref.setpoint, false)
             ));
         }
-
-        // NOTE: if you are binding a trigger to a command returned by a subsystem, you must wrap it in CommandsExt.eagerSequence(superstructure.cancel(), <your command>)
-        // You must do this because if you don't, superstructure's default command will cancel your command
     }
 
     /**
