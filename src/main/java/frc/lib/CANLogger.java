@@ -1,15 +1,13 @@
 package frc.lib;
 
-import com.ctre.phoenix6.CANBus;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Timer;
 import frc.lib.subsystem.Periodic;
 import frc.robot.BuildConstants;
-import frc.robot.Constants;
 import org.littletonrobotics.junction.Logger;
 
-import static frc.robot.Constants.CANivore.canivore;
+import static frc.robot.Constants.canivoreBus;
 
 public class CANLogger implements Periodic {
     private final Timer roboRIOCANErrorTimer = new Timer();
@@ -43,7 +41,7 @@ public class CANLogger implements Periodic {
 
         // Check and log CANivore status
         if (BuildConstants.mode == BuildConstants.Mode.REAL) {
-            var canivoreStatus = canivore.getStatus();
+            var canivoreStatus = canivoreBus.getStatus();
             Logger.recordOutput("CANivore/Status", canivoreStatus.Status.getName());
             Logger.recordOutput("CANivore/Utilization", canivoreStatus.BusUtilization);
             Logger.recordOutput("CANivore/OffCount", canivoreStatus.BusOffCount);

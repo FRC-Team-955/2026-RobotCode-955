@@ -14,7 +14,6 @@
 package frc.robot.subsystems.drive;
 
 import com.ctre.phoenix6.BaseStatusSignal;
-import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.Slot0Configs;
@@ -23,7 +22,6 @@ import com.ctre.phoenix6.controls.*;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.signals.*;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import edu.wpi.first.math.filter.Debouncer;
@@ -31,13 +29,12 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.*;
 import frc.lib.HighFrequencySamplingThread;
 import frc.lib.PIDF;
-import frc.robot.Constants;
 
 import java.util.Queue;
 
 import static frc.lib.PhoenixUtil.tryUntilOk;
 import static frc.lib.PhoenixUtil.tryUntilOkAsync;
-import static frc.robot.Constants.CANivore.canivore;
+import static frc.robot.Constants.canivoreBus;
 import static frc.robot.subsystems.drive.DriveConstants.moduleConfig;
 
 /**
@@ -103,9 +100,9 @@ public class ModuleIOTalonFXCANcoder extends ModuleIO {
             int cancoderCanID,
             double absoluteEncoderOffsetRad
     ) {
-        driveTalon = new TalonFX(driveCanID, canivore);
-        turnTalon = new TalonFX(turnCanID, canivore);
-        cancoder = new CANcoder(cancoderCanID, canivore);
+        driveTalon = new TalonFX(driveCanID, canivoreBus);
+        turnTalon = new TalonFX(turnCanID, canivoreBus);
+        cancoder = new CANcoder(cancoderCanID, canivoreBus);
 
         // Configure drive motor
         driveConfig = new TalonFXConfiguration();

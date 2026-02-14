@@ -14,19 +14,17 @@
 package frc.robot.subsystems.drive;
 
 import com.ctre.phoenix6.BaseStatusSignal;
-import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
-import com.revrobotics.RelativeEncoder;
-import com.revrobotics.spark.*;
-import com.revrobotics.spark.ClosedLoopSlot;
-import com.revrobotics.spark.SparkBase;
-import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.PersistMode;
+import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
+import com.revrobotics.spark.ClosedLoopSlot;
+import com.revrobotics.spark.FeedbackSensor;
+import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkClosedLoopController.ArbFFUnits;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
@@ -42,12 +40,11 @@ import frc.lib.HighFrequencySamplingThread;
 import frc.lib.PIDF;
 import frc.lib.PhoenixUtil;
 import frc.lib.SparkUtil;
-import frc.robot.Constants;
 
 import java.util.Queue;
 import java.util.function.DoubleSupplier;
 
-import static frc.robot.Constants.CANivore.canivore;
+import static frc.robot.Constants.canivoreBus;
 import static frc.robot.subsystems.drive.DriveConstants.moduleConfig;
 
 /**
@@ -90,7 +87,7 @@ public class ModuleIOSparkMaxCANcoder extends ModuleIO {
     ) {
         driveSpark = new SparkMax(driveCanID, MotorType.kBrushless);
         turnSpark = new SparkMax(turnCanID, MotorType.kBrushless);
-        cancoder = new CANcoder(cancoderCanID, canivore);
+        cancoder = new CANcoder(cancoderCanID, canivoreBus);
         driveEncoder = driveSpark.getEncoder();
         turnEncoder = turnSpark.getEncoder();
         driveController = driveSpark.getClosedLoopController();
