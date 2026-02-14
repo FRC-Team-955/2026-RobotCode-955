@@ -63,13 +63,12 @@ public class OperatorDashboard implements Periodic {
     public void periodicBeforeCommands() {
         handleEnumToggles(scoringModeToggles, selectedScoringMode, selectNew -> selectedScoringMode = selectNew);
         Logger.recordOutput("OperatorDashboard/SelectedScoringMode", selectedScoringMode);
-        batteryVoltageAlertOn = lowBatteryDebouncer.calculate(RobotController.getBatteryVoltage() <= 12.0);
 
         // Note - we only handle alerts for general overrides.
         // So subsystem toggles are handled in their respective subsystems
         coastOverrideAlert.set(coastOverride.get());
         autoNotChosenAlert.set(!autoChosen.get());
-        batteryVoltageAlert.set(batteryVoltageAlertOn);
+        batteryVoltageAlert.set(lowBatteryDebouncer.calculate(RobotController.getBatteryVoltage() <= 12.0));
     }
 
     private static <E extends Enum<E>> void handleEnumToggles(
