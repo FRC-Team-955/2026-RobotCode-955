@@ -4,7 +4,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.wpilibj.Timer;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import org.ironmaple.simulation.SimulatedArena;
 import org.photonvision.estimation.TargetModel;
@@ -13,18 +12,12 @@ import org.photonvision.simulation.SimCameraProperties;
 import org.photonvision.simulation.VisionSystemSim;
 import org.photonvision.simulation.VisionTargetSim;
 
-import java.util.LinkedList;
-import java.util.List;
 import java.util.function.Supplier;
 
-import static frc.robot.subsystems.apriltagvision.AprilTagVisionConstants.aprilTagLayout;
-import static frc.robot.subsystems.apriltagvision.AprilTagVisionIOPhotonVisionSim.visionSim;
-import static frc.robot.subsystems.gamepiecevision.GamePieceVisionConstants.*;
+import static frc.robot.subsystems.gamepiecevision.GamePieceVisionConstants.fuelMeters;
 
 public class GamePieceVisionIOPhotonVisionSim extends GamePieceVisionIOPhotonVision {
     public static VisionSystemSim visionSim;
-
-
 
 
     private static final Supplier<Pose2d> poseSupplier = ModuleIOSim.driveSimulation::getSimulatedDriveTrainPose;
@@ -62,7 +55,6 @@ public class GamePieceVisionIOPhotonVisionSim extends GamePieceVisionIOPhotonVis
 
             visionSim.addVisionTargets(visionTarget);
         }
-
 
 
         visionSim.update(poseSupplier.get());

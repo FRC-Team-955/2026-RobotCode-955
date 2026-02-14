@@ -27,7 +27,6 @@ import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.ironmaple.simulation.drivesims.SwerveModuleSimulation;
 import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
 import org.ironmaple.simulation.motorsims.SimulatedMotorController;
-import org.littletonrobotics.junction.Logger;
 
 import java.util.Arrays;
 
@@ -42,15 +41,15 @@ import static frc.robot.subsystems.drive.DriveConstants.moduleConfig;
  */
 public class ModuleIOSim extends ModuleIO {
 
-    private static Pose3d tagPose = new Pose3d(); // tag at origin
+    private static final Pose3d tagPose = new Pose3d(); // tag at origin
 
-    private static Pose3d tagFieldPose = aprilTagLayout.getTagPose(18).orElseThrow();
-    private static Transform3d robotFromTag = new Transform3d(
-            new Translation3d(new Translation2d(0.5,0.0)),
-            new Rotation3d(0.0,0.0, Units.degreesToRadians(180))
+    private static final Pose3d tagFieldPose = aprilTagLayout.getTagPose(18).orElseThrow();
+    private static final Transform3d robotFromTag = new Transform3d(
+            new Translation3d(new Translation2d(0.5, 0.0)),
+            new Rotation3d(0.0, 0.0, Units.degreesToRadians(180))
     );
-   // 3, 3, new Rotation2d()
-    private static Pose2d robotFieldPose = tagFieldPose.transformBy(robotFromTag).toPose2d();
+    // 3, 3, new Rotation2d()
+    private static final Pose2d robotFieldPose = tagFieldPose.transformBy(robotFromTag).toPose2d();
 
     public static final SwerveDriveSimulation driveSimulation = new SwerveDriveSimulation(
             // Specify Configuration

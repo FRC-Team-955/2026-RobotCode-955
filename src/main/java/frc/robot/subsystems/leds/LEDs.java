@@ -17,6 +17,7 @@ import org.littletonrobotics.junction.mechanism.LoggedMechanismRoot2d;
 import static frc.robot.subsystems.leds.LEDConstants.*;
 
 public class LEDs implements Periodic {
+    private final OperatorDashboard operatorDashboard = OperatorDashboard.get();
     private final Superintake superintake = Superintake.get();
     private final Superstructure superstructure = Superstructure.get();
 
@@ -75,7 +76,7 @@ public class LEDs implements Periodic {
 
     @Override
     public void periodicAfterCommands() {
-        boolean lowBattery = OperatorDashboard.get().batteryVoltage;
+        boolean lowBattery = operatorDashboard.isBatteryVoltageAlertActive();
         boolean cameraError = AprilTagVision.get().anyCamerasDisconnected() || GamePieceVision.get().anyCamerasDisconnected();
 
         if (lowBattery) {

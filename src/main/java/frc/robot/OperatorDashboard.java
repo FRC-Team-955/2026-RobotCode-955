@@ -1,9 +1,7 @@
 package frc.robot;
 
 import edu.wpi.first.math.filter.Debouncer;
-import edu.wpi.first.units.measure.Power;
 import edu.wpi.first.wpilibj.Alert;
-import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.RobotController;
 import frc.lib.Util;
 import frc.lib.network.LoggedNetworkBooleanExt;
@@ -32,7 +30,6 @@ public class OperatorDashboard implements Periodic {
     public final LoggedNetworkBooleanExt coastOverride = new LoggedNetworkBooleanExt(prefix + "CoastOverride", false);
     public final LoggedNetworkBooleanExt autoChosen = new LoggedNetworkBooleanExt(prefix + "AutoChosen", false);
     private final Debouncer lowBatteryDebouncer = new Debouncer(3.0, Debouncer.DebounceType.kRising);
-    public static boolean batteryVoltage;
 
     @Getter
     private ScoringMode selectedScoringMode = ScoringMode.ShootAndPassAutomatic;
@@ -66,13 +63,13 @@ public class OperatorDashboard implements Periodic {
     public void periodicBeforeCommands() {
         handleEnumToggles(scoringModeToggles, selectedScoringMode, selectNew -> selectedScoringMode = selectNew);
         Logger.recordOutput("OperatorDashboard/SelectedScoringMode", selectedScoringMode);
-        batteryVoltage = lowBatteryDebouncer.calculate(RobotController.getBatteryVoltage() <= 12.0);
+        batteryVoltageAlertOn = lowBatteryDebouncer.calculate(RobotController.getBatteryVoltage() <= 12.0);
 
         // Note - we only handle alerts for general overrides.
         // So subsystem toggles are handled in their respective subsystems
         coastOverrideAlert.set(coastOverride.get());
         autoNotChosenAlert.set(!autoChosen.get());
-        batteryVoltageAlert.set(batteryVoltage);
+        batteryVoltageAlert.set(batteryVoltageAlertOn);
     }
 
     private static <E extends Enum<E>> void handleEnumToggles(
@@ -110,5 +107,9 @@ public class OperatorDashboard implements Periodic {
 
     private static <E extends Enum<E>> EnumMap<E, LoggedNetworkBooleanExt> generateTogglesForEnum(String name, E[] enumValues, Class<E> enumClass) {
         return Util.createEnumMap(enumClass, enumValues, (side) -> new LoggedNetworkBooleanExt(prefix + name + "/" + side.name(), false));
+    }
+
+    public boolean isBatteryVoltageAlertActive() {
+        return batteryVoltageAlert.get();
     }
 }

@@ -22,6 +22,7 @@ public record DriveRequest(Type type, ChassisSpeeds value) {
     public static DriveRequest stop() {
         return new DriveRequest(Type.STOP, new ChassisSpeeds());
     }
+
     public static DriveRequest stopWithX() {
         return new DriveRequest(Type.STOP_WITH_X, new ChassisSpeeds());
     }
