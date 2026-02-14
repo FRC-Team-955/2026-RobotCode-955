@@ -1,46 +1,41 @@
-// Copyright 2021-2025 FRC 6328
-// http://github.com/Mechanical-Advantage
-//
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// version 3 as published by the Free Software Foundation or
-// available in the root directory of this project.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU General Public License for more details.
-
-package frc.robot.subsystems.apriltagvision;
+package frc.robot.subsystems.gamepiecevision;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.wpilibj.Timer;
 import frc.robot.subsystems.drive.ModuleIOSim;
+import org.ironmaple.simulation.SimulatedArena;
+import org.photonvision.estimation.TargetModel;
 import org.photonvision.simulation.PhotonCameraSim;
 import org.photonvision.simulation.SimCameraProperties;
 import org.photonvision.simulation.VisionSystemSim;
+import org.photonvision.simulation.VisionTargetSim;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.function.Supplier;
 
 import static frc.robot.subsystems.apriltagvision.AprilTagVisionConstants.aprilTagLayout;
+import static frc.robot.subsystems.apriltagvision.AprilTagVisionIOPhotonVisionSim.visionSim;
+import static frc.robot.subsystems.gamepiecevision.GamePieceVisionConstants.*;
 
-/**
- * IO implementation for physics sim using PhotonVision simulator.
- */
-public class AprilTagVisionIOPhotonVisionSim extends AprilTagVisionIOPhotonVision {
+public class GamePieceVisionIOPhotonVisionSim extends GamePieceVisionIOPhotonVision {
     public static VisionSystemSim visionSim;
+
+
+
 
     private static final Supplier<Pose2d> poseSupplier = ModuleIOSim.driveSimulation::getSimulatedDriveTrainPose;
     private final PhotonCameraSim cameraSim;
 
-    public AprilTagVisionIOPhotonVisionSim(String name, Transform3d robotToCamera) {
+
+    public GamePieceVisionIOPhotonVisionSim(String name, Transform3d robotToCamera) {
         super(name);
 
-        // Initialize vision sim
         if (visionSim == null) {
             visionSim = new VisionSystemSim("main");
-            visionSim.addAprilTags(aprilTagLayout);
         }
 
         // Add sim camera
@@ -55,8 +50,21 @@ public class AprilTagVisionIOPhotonVisionSim extends AprilTagVisionIOPhotonVisio
     }
 
     @Override
-    public void updateInputs(AprilTagVisionIOInputs inputs) {
-        // TODO: fix multiple update in one cycle
+    public void updateInputs(GamePieceVisionIOInputs inputs) {
+
+        Pose3d[] fuelPoses = SimulatedArena.getInstance().getGamePiecesArrayByType("Coral");
+        TargetModel targetModel = new TargetModel(fuelMeters);
+        visionSim.clearVisionTargets();
+        for (Pose3d fuelPose : fuelPoses) {
+
+
+            VisionTargetSim visionTarget = new VisionTargetSim(fuelPose, targetModel);
+
+            visionSim.addVisionTargets(visionTarget);
+        }
+
+
+
         visionSim.update(poseSupplier.get());
         super.updateInputs(inputs);
     }
