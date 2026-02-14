@@ -28,7 +28,6 @@ public class Superintake extends CommandBasedSubsystem {
     private final Drive drive = Drive.get();
 
     public final IntakePivot intakePivot = IntakePivot.get();
-
     public final IntakeRollers intakeRollers = IntakeRollers.get();
 
     @RequiredArgsConstructor
