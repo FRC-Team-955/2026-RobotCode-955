@@ -1,4 +1,4 @@
-package frc.robot.subsystems.superstructure.indexer;
+package frc.robot.subsystems.superstructure.feeder;
 
 import edu.wpi.first.math.system.plant.DCMotor;
 import frc.lib.PIDF;
@@ -7,7 +7,7 @@ import frc.lib.motor.MotorIOSim;
 import frc.lib.motor.MotorIOSparkMax;
 import frc.robot.BuildConstants;
 
-public class IndexerConstants {
+public class FeederConstants {
     static final double gearRatio = 5;
     static final PIDF positionGains = switch (BuildConstants.mode) {
         case REAL, REPLAY -> PIDF.zero();

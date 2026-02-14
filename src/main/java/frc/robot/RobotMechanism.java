@@ -18,13 +18,17 @@ public class RobotMechanism implements Periodic {
             new Translation3d(Units.inchesToMeters(14.0), 0.0, Units.inchesToMeters(4.0)),
             new Rotation3d()
     );
-    private static final Transform3d indexerInitial = new Transform3d(
+    private static final Transform3d spindexerInitial = new Transform3d(
             new Translation3d(0.0, 0.0, Units.inchesToMeters(6.0)),
             new Rotation3d(0.0, 0.0, Units.degreesToRadians(90.0))
     );
     private static final Transform3d flywheelsInitial = new Transform3d(
             new Translation3d(Units.inchesToMeters(-5.0), Units.inchesToMeters(-9.0), Units.inchesToMeters(10.0)),
             new Rotation3d(0.0, 0.0, 0.0)
+    );
+    private static final Transform3d feederInitial = new Transform3d(
+            new Translation3d(Units.inchesToMeters(-3.0), Units.inchesToMeters(-9.0), Units.inchesToMeters(5.0)),
+            new Rotation3d(0.0, 0.0, Units.degreesToRadians(0))
     );
     private static final Transform3d intakePivotInitial = new Transform3d(
             new Translation3d(Units.inchesToMeters(12.0), 0.0, Units.inchesToMeters(4.0)),
@@ -71,9 +75,14 @@ public class RobotMechanism implements Periodic {
                 new Rotation3d(0.0, -superintake.intakePivot.getPositionRad(), 0.0)
         ));
 
-        Transform3d indexerTransform = indexerInitial.plus(new Transform3d(
+        Transform3d spindexerTransform = spindexerInitial.plus(new Transform3d(
                 new Translation3d(),
-                new Rotation3d(0.0, superstructure.indexer.getPositionRad(), 0.0)
+                new Rotation3d(0.0, superstructure.spindexer.getPositionRad(), 0.0)
+        ));
+
+        Transform3d feederTransform = feederInitial.plus(new Transform3d(
+                new Translation3d(),
+                new Rotation3d(0.0, superstructure.feeder.getPositionRad(), 0.0)
         ));
 
         Transform3d flywheelTransform = flywheelsInitial.plus(new Transform3d(
@@ -90,8 +99,9 @@ public class RobotMechanism implements Periodic {
         Logger.recordOutput(
                 "RobotMechanism/Components",
                 intakeRollersTransform,
-                indexerTransform,
+                spindexerTransform,
                 flywheelTransform,
+                feederTransform,
                 intakePivotTransform,
                 hoodTransform
         );

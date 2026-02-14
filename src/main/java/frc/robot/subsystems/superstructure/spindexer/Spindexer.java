@@ -1,4 +1,4 @@
-package frc.robot.subsystems.superstructure.indexer;
+package frc.robot.subsystems.superstructure.spindexer;
 
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -15,11 +15,11 @@ import org.littletonrobotics.junction.Logger;
 
 import java.util.function.DoubleSupplier;
 
-import static frc.robot.subsystems.superstructure.indexer.IndexerConstants.createIO;
+import static frc.robot.subsystems.superstructure.spindexer.SpindexerConstants.createIO;
 
-public class Indexer implements Periodic {
-    private static final LoggedTunableNumber feedVoltage = new LoggedTunableNumber("Superstructure/Indexer/Goal/FeedVoltage", 3.0);
-    private static final LoggedTunableNumber ejectVoltage = new LoggedTunableNumber("Superstructure/Indexer/Goal/EjectVoltage", -3.0);
+public class Spindexer implements Periodic {
+    private static final LoggedTunableNumber feedVoltage = new LoggedTunableNumber("Superstructure/Spindexer/Goal/FeedVoltage", 3.0);
+    private static final LoggedTunableNumber ejectVoltage = new LoggedTunableNumber("Superstructure/Spindexer/Goal/EjectVoltage", -3.0);
 
     private final OperatorDashboard operatorDashboard = OperatorDashboard.get();
 
@@ -42,26 +42,26 @@ public class Indexer implements Periodic {
     @Getter
     private Goal goal = Goal.IDLE;
 
-    private final Alert motorDisconnectedAlert = new Alert("Indexer motor is disconnected.", Alert.AlertType.kError);
+    private final Alert motorDisconnectedAlert = new Alert("Spindexer motor is disconnected.", Alert.AlertType.kError);
 
-    private static Indexer instance;
+    private static Spindexer instance;
 
-    public static Indexer get() {
+    public static Spindexer get() {
         if (instance == null)
-            synchronized (Indexer.class) {
-                instance = new Indexer();
+            synchronized (Spindexer.class) {
+                instance = new Spindexer();
             }
 
         return instance;
     }
 
-    private Indexer() {
+    private Spindexer() {
     }
 
     @Override
     public void periodicBeforeCommands() {
         io.updateInputs(inputs);
-        Logger.processInputs("Inputs/Superstructure/Indexer", inputs);
+        Logger.processInputs("Inputs/Superstructure/Spindexer", inputs);
 
         motorDisconnectedAlert.set(!inputs.connected);
 
@@ -73,13 +73,13 @@ public class Indexer implements Periodic {
 
     @Override
     public void periodicAfterCommands() {
-        Logger.recordOutput("Superstructure/Indexer/Goal", goal);
+        Logger.recordOutput("Superstructure/Spindexer/Goal", goal);
         if (DriverStation.isDisabled()) {
             io.setRequest(RequestType.VoltageVolts, 0);
         } else {
-            Logger.recordOutput("Superstructure/Indexer/RequestType", goal.type);
+            Logger.recordOutput("Superstructure/Spindexer/RequestType", goal.type);
             double value = goal.value.getAsDouble();
-            Logger.recordOutput("Superstructure/Indexer/RequestValue", value);
+            Logger.recordOutput("Superstructure/Spindexer/RequestValue", value);
             io.setRequest(goal.type, value);
         }
     }
