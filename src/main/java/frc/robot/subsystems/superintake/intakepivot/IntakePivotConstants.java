@@ -14,7 +14,7 @@ public class IntakePivotConstants {
 
     static final TrapezoidProfile.Constraints constraints = new TrapezoidProfile.Constraints(1, 3);
 
-    static final double gearRatio = 120;
+    static final double gearRatio = 150;
     static final PIDF gains = switch (BuildConstants.mode) {
         case REAL, REPLAY -> PIDF.zero();
         case SIM -> PIDF.ofPDSG(20.0, 0.0, 0.0, 2.65);
@@ -34,12 +34,12 @@ public class IntakePivotConstants {
             case SIM -> new MotorIOArmSim(
                     DCMotor.getNEO(1),
                     gearRatio,
-                    1.4,
-                    0.3,
+                    0.0768892879,
+                    Units.inchesToMeters(10),
                     Units.degreesToRadians(-90),
-                    Units.degreesToRadians(90),
+                    Units.degreesToRadians(0),
                     true,
-                    Units.degreesToRadians(80),
+                    Units.degreesToRadians(0),
                     0.001,
                     gains
             );
