@@ -1,25 +1,36 @@
 package frc.robot.subsystems.gamepiecevision;
 
-import edu.wpi.first.math.filter.Debouncer;
+import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.wpilibj.Alert;
-import edu.wpi.first.wpilibj2.command.Command;
-import frc.lib.commands.CommandsExt;
+import edu.wpi.first.wpilibj.Timer;
+import frc.lib.Util;
 import frc.lib.subsystem.Periodic;
-import frc.robot.OperatorDashboard;
-import org.littletonrobotics.junction.AutoLogOutput;
+import frc.robot.RobotState;
+import lombok.Getter;
 import org.littletonrobotics.junction.Logger;
 
-import static frc.robot.subsystems.gamepiecevision.GamePieceVisionConstants.createIO;
+import java.util.*;
+
+import static frc.robot.subsystems.gamepiecevision.GamePieceVisionConstants.*;
 
 public class GamePieceVision implements Periodic {
-    private final OperatorDashboard operatorDashboard = OperatorDashboard.get();
+    private final RobotState robotState = RobotState.get();
 
-    private final GamePieceVisionIO io = createIO();
-    private final GamePieceVisionIOInputsAutoLogged inputs = new GamePieceVisionIOInputsAutoLogged();
 
-    private final Alert disconnectedAlert = new Alert("Game piece vision is disconnected.", Alert.AlertType.kError);
+    private final EnumMap<Camera, CameraData> cameras =
+            Util.createEnumMap(Camera.class,
+                    Camera.values(), (cam) -> new CameraData(
+                            new GamePieceVisionIOInputsAutoLogged(),
+                            cam.createIO(),
+                            new Alert("Game piece vision camera " + cam.name() + " is disconnected.", Alert.AlertType.kError)
+                    ));
 
-    private final Debouncer visibleDebouncer = new Debouncer(0.03);
+
+    private final Map<Pose3d, Double> coralPoseToLastSeen = new HashMap<>();
+    @Getter
+    private List<Pose3d> freshCoral = List.of();
+    @Getter
+    private List<Pose3d> staleCoral = List.of();
 
     private static GamePieceVision instance;
 
@@ -37,26 +48,115 @@ public class GamePieceVision implements Periodic {
 
     @Override
     public void periodicBeforeCommands() {
-        io.updateInputs(inputs);
-        Logger.processInputs("Inputs/GamePieceVision", inputs);
-        // Update disconnected alert
-        disconnectedAlert.set(!inputs.connected);
+        for (Map.Entry<Camera, CameraData> cam : cameras.entrySet()) {
+            Camera metadata = cam.getKey();
+            CameraData data = cam.getValue();
+            data.io.updateInputs(data.inputs);
+            Logger.processInputs("Inputs/GamePieceVision/" + metadata.name(), data.inputs);
+            // Update disconnected alert
+            data.disconnectedAlert.set(!data.inputs.connected);
+        }
+        Map<Pose3d, Double> newlySeenCoral = new HashMap<>();
+        List<Translation2d> targetPoints = new LinkedList<>();
+
+        for (Map.Entry<Camera, CameraData> cam : cameras.entrySet()) {
+            Camera metadata = cam.getKey();
+            CameraData data = cam.getValue();
+
+
+            // Process observations
+            for (var observation : data.inputs.targetObservations) {
+                var robotPose2d = robotState.getPoseAtTimestamp(observation.timestampSeconds());
+                if (robotPose2d.isEmpty()) {
+                    continue;
+                }
+                var robotPose = new Pose3d(robotPose2d.get());
+                Translation2d targetYawPitch = new Translation2d(observation.yawRad(), observation.pitchRad());
+                targetPoints.add(targetYawPitch);
+                // Account for roll of camera
+                // TODO: fix roll compensation - this doesn't fully work
+                targetYawPitch = targetYawPitch.rotateBy(Rotation2d.fromRadians(-metadata.robotToCamera.getRotation().getX()));
+                double targetYaw = targetYawPitch.getX();
+                double targetPitch = targetYawPitch.getY();
+
+                // First, calculate position of target in camera space
+                double camToTargetZ = -metadata.robotToCamera.getZ() + coralHeightMeters / 2.0;
+                // Account for pitch of camera
+                double camToTargetX = camToTargetZ / Math.tan(targetPitch - metadata.robotToCamera.getRotation().getY());
+                double camToTargetY = camToTargetX * Math.tan(-targetYaw);
+
+                Translation2d camToTargetXY = new Translation2d(camToTargetX, camToTargetY)
+                        // Account for yaw of camera
+                        // Note that we do this BEFORE translating to robot coordinates
+                        .rotateBy(Rotation2d.fromRadians(metadata.robotToCamera.getRotation().getZ()));
+                // Next, translate x and y to robot coordinates
+                Translation2d robotToTargetXY = metadata.robotToCamera.getTranslation().toTranslation2d().plus(camToTargetXY);
+                double robotToTargetZ = metadata.robotToCamera.getZ() + camToTargetZ;
+
+                Translation3d robotToTarget = new Translation3d(robotToTargetXY.getX(), robotToTargetXY.getY(), robotToTargetZ);
+
+                // TODO: kalman filter or PoseEstimator for stability?
+                newlySeenCoral.put(
+                        robotPose.transformBy(new Transform3d(robotToTarget, new Rotation3d())),
+                        observation.timestampSeconds());
+            }
+
+
+            // Handle newly seen coral
+            for (var pose : newlySeenCoral.keySet()) {
+                // Remove old coral within distance to be counted as the same piece of coral
+                coralPoseToLastSeen.keySet()
+                        .removeIf(otherPose -> pose.getTranslation().getDistance(otherPose.getTranslation()) < minDistanceForSameCoralMeters);
+            }
+            coralPoseToLastSeen.putAll(newlySeenCoral);
+
+            // Remove expired coral
+            coralPoseToLastSeen.values().removeIf(lastSeen -> Timer.getTimestamp() - lastSeen > staleExpireTimeSeconds);
+
+            // Generate fresh/stale arrays
+            freshCoral = new LinkedList<>();
+            staleCoral = new LinkedList<>();
+            for (var entry : coralPoseToLastSeen.entrySet()) {
+                Pose3d pose = entry.getKey();
+                double lastSeen = entry.getValue();
+
+                if (Timer.getTimestamp() - lastSeen < freshExpireTimeSeconds) {
+                    freshCoral.add(pose);
+                } else {
+                    staleCoral.add(pose);
+                }
+            }
+        }
+        // Log results
+        Logger.recordOutput("GamePieceVision/TargetPoints", targetPoints.toArray(Translation2d[]::new));
+        Logger.recordOutput("GamePieceVision/FreshCoral", freshCoral.toArray(Pose3d[]::new));
+        Logger.recordOutput("GamePieceVision/StaleCoral", staleCoral.toArray(Pose3d[]::new));
     }
 
-    public boolean visibleNotDebounced() {
-        return inputs.connected && inputs.visible;
-    }
+    @Override
+    public void periodicAfterCommands() {
 
-    @AutoLogOutput(key = "GamePieceVision/VisibleDebounced")
-    public boolean visibleDebounced() {
-        return inputs.connected && visibleDebouncer.calculate(inputs.visible);
-    }
-
-    public Command waitForGamePiece() {
-        return CommandsExt.startEndWaitUntil(
-                () -> io.setLEDs(true),
-                () -> io.setLEDs(false),
-                this::visibleDebounced
+        var robotPose = new Pose3d(robotState.getPose());
+        Logger.recordOutput(
+                "GamePieceVision/CameraPoses",
+                Arrays.stream(Camera.values())
+                        .map(cam -> robotPose.transformBy(cam.robotToCamera))
+                        .toArray(Pose3d[]::new)
         );
+    }
+
+    public boolean anyCamerasDisconnected() {
+        for (Map.Entry<Camera, CameraData> cam : cameras.entrySet()) {
+            CameraData data = cam.getValue();
+            return !data.inputs.connected;
+        }
+        return false;
+    }
+
+    private record CameraData(
+            GamePieceVisionIOInputsAutoLogged inputs,
+            GamePieceVisionIO io,
+            Alert disconnectedAlert
+    ) {
     }
 }
