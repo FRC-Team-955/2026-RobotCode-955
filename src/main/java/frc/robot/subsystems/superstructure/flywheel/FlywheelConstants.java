@@ -6,13 +6,11 @@ import frc.lib.PIDF;
 import frc.lib.motor.MotorIO;
 import frc.lib.motor.MotorIOSim;
 import frc.lib.motor.MotorIOSparkMax;
-import frc.lib.motor.RequestTolerances;
 import frc.robot.BuildConstants;
 
 public class FlywheelConstants {
     static final double flywheelRadiusMeters = Units.inchesToMeters(2.0);
-
-    static final RequestTolerances tolerances = RequestTolerances.defaults();
+    static final double velocityToleranceRadPerSec = Units.rotationsPerMinuteToRadiansPerSecond(100);
 
     static final double gearRatio = 1;
     static final PIDF velocityGains = switch (BuildConstants.mode) {

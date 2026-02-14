@@ -7,11 +7,10 @@ import frc.lib.PIDF;
 import frc.lib.motor.MotorIO;
 import frc.lib.motor.MotorIOArmSim;
 import frc.lib.motor.MotorIOSparkMax;
-import frc.lib.motor.RequestTolerances;
 import frc.robot.BuildConstants;
 
 public class IntakePivotConstants {
-    static final RequestTolerances tolerances = RequestTolerances.defaults();
+    static final double positionToleranceRad = Units.degreesToRadians(10);
 
     static final TrapezoidProfile.Constraints constraints = new TrapezoidProfile.Constraints(1, 3);
 
