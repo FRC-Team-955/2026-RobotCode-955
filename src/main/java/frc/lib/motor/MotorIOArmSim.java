@@ -8,10 +8,6 @@ import frc.lib.PIDF;
 import frc.lib.Util;
 
 public class MotorIOArmSim extends MotorIO {
-    private static final double voltageLimit = 12.0;
-    private static final double currentLimitAmps = 40.0;
-    private final DCMotor motor;
-
     private final SingleJointedArmSim armSim;
     private PIDController pid;
     private ArmFeedforward ff;
@@ -20,10 +16,20 @@ public class MotorIOArmSim extends MotorIO {
     private boolean closedLoop = true;
 
     // If using physical values, JKgMetersSquared is the moment of inertia J of the flywheel
-    public MotorIOArmSim(DCMotor motor, double gearRatio, double jKgMetersSquared, double armLength, double minAngleRads, double maxAngleRads, boolean simulateGravity, double startingAngleRads, double measurementStdDevs, PIDF gains) {
-        this.motor = motor.withReduction(gearRatio);
+    public MotorIOArmSim(
+            DCMotor motor,
+            double gearRatio,
+            double jKgMetersSquared,
+            double armLength,
+            double minAngleRads,
+            double maxAngleRads,
+            boolean simulateGravity,
+            double startingAngleRads,
+            double measurementStdDevs,
+            PIDF gains
+    ) {
         armSim = new SingleJointedArmSim(
-                motor,
+                motor.withReduction(gearRatio),
                 gearRatio,
                 jKgMetersSquared,
                 armLength,

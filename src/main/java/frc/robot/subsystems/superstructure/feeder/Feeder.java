@@ -11,6 +11,7 @@ import frc.robot.OperatorDashboard;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.function.DoubleSupplier;
@@ -84,9 +85,6 @@ public class Feeder implements Periodic {
         }
     }
 
-    /**
-     * Intended to be plugged into component rotation in RobotMechanism
-     */
     public double getPositionRad() {
         return inputs.positionRad;
     }
