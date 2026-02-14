@@ -240,12 +240,17 @@ public class Drive extends CommandBasedSubsystem {
         }
         // Closed loop control
         else if (request.type() == DriveRequest.Type.CHASSIS_SPEEDS) {
-            // Calculate module setpoints
-            ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(request.value(), 0.02);
+            ChassisSpeeds rawSpeeds = request.value();
+            Logger.recordOutput("Drive/ModuleStates/Setpoints", robotState.getKinematics().toSwerveModuleStates(rawSpeeds));
+
+            // Discretize - use larger dt than actual to reduce translational skew when rotating and translating at the same time
+            // See https://www.chiefdelphi.com/t/whitepaper-swerve-drive-skew-and-second-order-kinematics/416964/5
+            // and https://github.com/frc1678/C2024-Public/blob/main/src/main/java/com/team1678/frc2024/subsystems/Drive.java#L406
+            ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(rawSpeeds, 0.02 * 6.0);
+
+            // Convert to module states and desaturate
             SwerveModuleState[] setpointStates = robotState.getKinematics().toSwerveModuleStates(discreteSpeeds);
             SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, driveConfig.maxVelocityMetersPerSec());
-
-            Logger.recordOutput("Drive/ModuleStates/Setpoints", setpointStates);
 
             // Send setpoints to modules
             for (int i = 0; i < modules.length; i++) {
@@ -337,6 +342,10 @@ public class Drive extends CommandBasedSubsystem {
 
     public Command driveJoystickWithAssist(Supplier<Optional<Pose2d>> assistPoseSupplier) {
         return startIdle(() -> goal = new DriveJoystickWithAssistGoal(assistPoseSupplier));
+    }
+
+    public Command driveJoystickWithAiming() {
+        return startIdle(() -> goal = new DriveJoystickWithAimingGoal());
     }
 
     public Command runRobotRelative(Supplier<ChassisSpeeds> chassisSpeedsSupplier) {

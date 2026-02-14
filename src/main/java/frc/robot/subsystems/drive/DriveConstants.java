@@ -29,14 +29,14 @@ public class DriveConstants {
             // TO TUNE WHEEL RADIUS: Place robot on carpet and use wheel radius characterization auto.
             // Output will be in console in AdvantageScope.
             Units.inchesToMeters(1.935948620917915),
-            Units.inchesToMeters(22.75),
-            Units.inchesToMeters(22.75),
-            Units.inchesToMeters(35),
-            Units.inchesToMeters(35),
+            Units.inchesToMeters(19.25),
+            Units.inchesToMeters(24.25),
+            Units.inchesToMeters(36.5),
+            Units.inchesToMeters(31.5),
             Units.inchesToMeters(-0.247776),
             PIDF.ofPD(3.5, 0),
             PIDF.ofPD(3, 0),
-            PIDF.ofP(4.5),
+            PIDF.ofP(6),
             4.58
     );
 
@@ -55,8 +55,8 @@ public class DriveConstants {
     /** Maximum angular velocity of the whole drivetrain if all drive motors/wheels are going at full speed. */
     public static final double maxAngularVelocityRadPerSec = driveConfig.maxVelocityMetersPerSec() / drivebaseRadiusMeters;
 
-    public static final double joystickMaxAngularSpeedRadPerSec = Math.min(Units.degreesToRadians(315), maxAngularVelocityRadPerSec);
-    public static final double joystickDriveDeadband = 0.1;
+    public static final double joystickMaxAngularSpeedRadPerSec = Math.min(Units.degreesToRadians(500), maxAngularVelocityRadPerSec);
+    public static final double joystickDriveDeadband = 0.05;
 
     static final ModuleConfig moduleConfig = switch (BuildConstants.mode) {
         // TO TUNE DRIVE GAINS: Use go forward at 1 m/s characterization auto and tune until you get 1 m/s.
@@ -86,7 +86,7 @@ public class DriveConstants {
                 true,
                 false,
                 false,
-                120,
+                77,
                 60
         );
     };
@@ -137,7 +137,7 @@ public class DriveConstants {
             double linearVelocityToleranceMetersPerSec,
             double angularPositionToleranceRad,
             double angularVelocityToleranceRadPerSec,
-            double maxAccelerationMetersPerSec // Maximum acceleration of the robot during move to
+            double maxAccelerationMetersPerSecSquared // Maximum acceleration of the robot during move to
     ) {
     }
 
@@ -147,7 +147,8 @@ public class DriveConstants {
             double trackLengthMeters,
             double bumperWidthMeters,
             double bumperLengthMeters,
-            double bottomOfFrameToCenterOfWheelsMeters,
+            // Measured from bottom of frame rails (2x1s) to center of swerve wheels
+            double bottomOfFrameRailsToCenterOfWheelsMeters,
             PIDF choreoFeedbackXY,
             PIDF choreoFeedbackOmega,
             PIDF headingOverrideGains,

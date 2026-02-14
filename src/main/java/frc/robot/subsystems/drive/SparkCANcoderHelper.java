@@ -20,7 +20,7 @@ public class SparkCANcoderHelper {
             int cancoderCanID
     ) {
         // Reset turn spark
-        // Not the prettiest but doing it now is better than in updateInputs
+        // Not the prettiest but doing it now (in the IO constructor) is better than in updateInputs
         try {
             // Wait for cancoder status signal to use new offset
             // TODO: do this better
