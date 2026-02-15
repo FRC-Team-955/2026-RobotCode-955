@@ -12,6 +12,7 @@ import frc.lib.motor.MotorIOInputsAutoLogged;
 import frc.lib.motor.RequestType;
 import frc.lib.network.LoggedTunableNumber;
 import frc.lib.subsystem.Periodic;
+import frc.robot.Constants;
 import frc.robot.OperatorDashboard;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -104,10 +105,10 @@ public class IntakePivot implements Periodic {
             }
             lastSetpointRad = setpointRad;
 
-            goalState = profile.calculate(0.02, goalState, wantedState);
+            goalState = profile.calculate(Constants.loopPeriod, goalState, wantedState);
             Logger.recordOutput("Superintake/IntakePivot/ProfileSetpointRad", goalState.position);
 
-            lookaheadState = profile.calculate(0.02, lookaheadState, wantedState);
+            lookaheadState = profile.calculate(Constants.loopPeriod, lookaheadState, wantedState);
             Logger.recordOutput("Superintake/IntakePivot/LookaheadSetpointRad", lookaheadState.position);
 
             io.setRequest(RequestType.PositionRad, lookaheadState.position);

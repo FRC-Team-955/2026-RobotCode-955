@@ -6,6 +6,7 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import frc.lib.PIDF;
 import frc.lib.Util;
+import frc.robot.Constants;
 
 public class MotorIOArmSim extends MotorIO {
     private final SingleJointedArmSim armSim;
@@ -53,7 +54,7 @@ public class MotorIOArmSim extends MotorIO {
 
         armSim.setInputVoltage(appliedVolts);
 
-        armSim.update(0.02);
+        armSim.update(Constants.loopPeriod);
 
         inputs.connected = true;
         inputs.positionRad = armSim.getAngleRads();

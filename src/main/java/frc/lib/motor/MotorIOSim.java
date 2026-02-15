@@ -6,6 +6,7 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import frc.lib.PIDF;
+import frc.robot.Constants;
 
 public class MotorIOSim extends MotorIO {
     private final DCMotorSim motorSim;
@@ -57,7 +58,7 @@ public class MotorIOSim extends MotorIO {
 
         motorSim.setInputVoltage(appliedVolts);
 
-        motorSim.update(0.02);
+        motorSim.update(Constants.loopPeriod);
 
         inputs.connected = true;
         inputs.positionRad = motorSim.getAngularPositionRad();

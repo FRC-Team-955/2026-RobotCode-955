@@ -4,6 +4,7 @@ import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import frc.lib.subsystem.Periodic;
+import frc.robot.Constants;
 import frc.robot.OperatorDashboard;
 import frc.robot.subsystems.apriltagvision.AprilTagVision;
 import frc.robot.subsystems.gamepiecevision.GamePieceVision;
@@ -70,7 +71,7 @@ public class LEDs implements Periodic {
         };
         callback.run(); // run it once, before the notifier starts
         Notifier notifier = new Notifier(callback);
-        notifier.startPeriodic(0.02);
+        notifier.startPeriodic(Constants.loopPeriod);
         return notifier;
     }
 

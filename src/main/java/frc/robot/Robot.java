@@ -55,6 +55,8 @@ public class Robot extends LoggedRobot {
     private static List<Periodic> periodics;
 
     public Robot() {
+        super(Constants.loopPeriod);
+
         @SuppressWarnings("resource")
         Notifier ledsStartupNotifier = LEDs.get().createAndStartStartupNotifier();
 

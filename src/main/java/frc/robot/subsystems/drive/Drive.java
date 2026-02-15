@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.PIDF;
 import frc.lib.Util;
 import frc.lib.subsystem.CommandBasedSubsystem;
+import frc.robot.Constants;
 import frc.robot.OperatorDashboard;
 import frc.robot.RobotState;
 import frc.robot.subsystems.drive.goals.*;
@@ -247,7 +248,7 @@ public class Drive extends CommandBasedSubsystem {
             // Discretize - use larger dt than actual to reduce translational skew when rotating and translating at the same time
             // See https://www.chiefdelphi.com/t/whitepaper-swerve-drive-skew-and-second-order-kinematics/416964/5
             // and https://github.com/frc1678/C2024-Public/blob/main/src/main/java/com/team1678/frc2024/subsystems/Drive.java#L406
-            ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(rawSpeeds, 0.02 * 6.0);
+            ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(rawSpeeds, Constants.loopPeriod * 6.0);
 
             // Convert to module states and desaturate
             SwerveModuleState[] setpointStates = robotState.getKinematics().toSwerveModuleStates(discreteSpeeds);
