@@ -4,8 +4,10 @@ import choreo.trajectory.SwerveSample;
 import choreo.trajectory.Trajectory;
 import edu.wpi.first.hal.FRCNetComm;
 import edu.wpi.first.hal.HAL;
+import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -44,6 +46,12 @@ public class Drive extends CommandBasedSubsystem {
 
     private final GyroIO gyroIO = createGyroIO();
     private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
+
+    private final AccelerometerIO accelerometerIO = createAccelerometerIO();
+    private final AccelerometerIOInputsAutoLogged accelerometerInputs = new AccelerometerIOInputsAutoLogged();
+
+    private final LinearFilter accelerationXFilter = LinearFilter.movingAverage(4);
+    private final LinearFilter accelerationYFilter = LinearFilter.movingAverage(4);
 
     @Getter
     private DriveGoal goal = new IdleGoal();
@@ -158,6 +166,10 @@ public class Drive extends CommandBasedSubsystem {
 
         highFrequencyLock.unlock();
 
+        // The accelerometer has no high-frequency inputs, no need to update while in lock
+        accelerometerIO.updateInputs(accelerometerInputs);
+        Logger.processInputs("Inputs/Drive/Accelerometer", accelerometerInputs);
+
         for (var module : modules) {
             module.periodicBeforeCommands();
         }
@@ -207,6 +219,14 @@ public class Drive extends CommandBasedSubsystem {
                 robotState.getRotation() // Field is absolute, don't flip
         );
         robotState.setMeasuredChassisSpeeds(measuredChassisSpeedsFieldRelative);
+
+        // Update filtered acceleration
+        Translation2d filteredAccelerationMetersPerSecPerSec = new Translation2d(
+                accelerationXFilter.calculate(accelerometerInputs.accelerationXMetersPerSecPerSec),
+                accelerationYFilter.calculate(accelerometerInputs.accelerationYMetersPerSecPerSec)
+        ).rotateBy(robotState.getRotation());
+        robotState.setFilteredAccelerationMetersPerSecPerSec(filteredAccelerationMetersPerSecPerSec);
+        Logger.recordOutput("Drive/FilteredAccelerationMetersPerSecPerSec", filteredAccelerationMetersPerSecPerSec);
 
         // Apply network inputs
         if (operatorDashboard.coastOverride.hasChanged()) {

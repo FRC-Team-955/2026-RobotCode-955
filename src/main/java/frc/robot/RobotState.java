@@ -45,6 +45,12 @@ public class RobotState implements Periodic {
     @Setter
     private ChassisSpeeds measuredChassisSpeeds = new ChassisSpeeds();
 
+    /**
+     * Field relative
+     */
+    @Setter
+    private Translation2d filteredAccelerationMetersPerSecPerSec = new Translation2d();
+
     // The missile knows where it is at all times. It knows this because it
     // knows where it isn't. By subtracting where it is from where it isn't,
     // or where it isn't from where it is (whichever is greater), it obtains
@@ -87,7 +93,7 @@ public class RobotState implements Periodic {
     @Override
     public void periodicBeforeCommands() {
         // Increase uncertainty if we are moving
-        final double chassisSpeedsLinearFactor = 0.08;
+        final double chassisSpeedsLinearFactor = 0.06;
         poseUncertaintyLinearXMeters += Constants.loopPeriod * chassisSpeedsLinearFactor * Math.abs(measuredChassisSpeeds.vxMetersPerSecond);
         poseUncertaintyLinearYMeters += Constants.loopPeriod * chassisSpeedsLinearFactor * Math.abs(measuredChassisSpeeds.vyMetersPerSecond);
         // Gyro is generally pretty trustworthy
@@ -97,7 +103,12 @@ public class RobotState implements Periodic {
         // Increase uncertainty if we went over the bump
 
         // Increase uncertainty if there is a large impact
+        final double accelerationFactor = 0.001;
+        // No abs needed because we are squaring acceleration
+        poseUncertaintyLinearXMeters += Constants.loopPeriod * accelerationFactor * filteredAccelerationMetersPerSecPerSec.getX() * filteredAccelerationMetersPerSecPerSec.getX();
+        poseUncertaintyLinearYMeters += Constants.loopPeriod * accelerationFactor * filteredAccelerationMetersPerSecPerSec.getY() * filteredAccelerationMetersPerSecPerSec.getY();
 
+        // Prevent uncertainty from going negative
         if (poseUncertaintyLinearXMeters < 0.0) poseUncertaintyLinearXMeters = 0.0;
         if (poseUncertaintyLinearYMeters < 0.0) poseUncertaintyLinearYMeters = 0.0;
         if (poseUncertaintyAngularRad < 0.0) poseUncertaintyAngularRad = 0.0;

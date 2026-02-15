@@ -130,6 +130,14 @@ public class DriveConstants {
         };
     }
 
+    static AccelerometerIO createAccelerometerIO() {
+        return switch (BuildConstants.mode) {
+            case REAL -> new AccelerometerIOroboRIO();
+            case SIM -> new AccelerometerIOSim();
+            case REPLAY -> new AccelerometerIO();
+        };
+    }
+
     public record MoveToConfig(
             PIDF linear,
             PIDF angular,
