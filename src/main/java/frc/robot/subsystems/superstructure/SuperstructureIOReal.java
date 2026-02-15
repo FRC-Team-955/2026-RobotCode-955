@@ -25,6 +25,7 @@ public class SuperstructureIOReal extends SuperstructureIO {
     private final Debouncer canrangeConnectedDebouncer = new Debouncer(0.5);
 
     public SuperstructureIOReal() {
+        // https://v6.docs.ctr-electronics.com/en/stable/docs/application-notes/tuning-canrange.html
         var canrangeConfig = new CANrangeConfiguration();
         canrangeConfig.FovParams.FOVRangeX = 8.0;
         canrangeConfig.FovParams.FOVRangeY = 8.0;
