@@ -2,6 +2,7 @@ package frc.robot.subsystems.superstructure.feeder;
 
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
+import frc.lib.Util;
 import frc.lib.motor.MotorIO;
 import frc.lib.motor.MotorIOInputsAutoLogged;
 import frc.lib.motor.RequestType;
@@ -21,7 +22,7 @@ public class Feeder implements Periodic {
     private static final LoggedTunableNumber feedVoltage = new LoggedTunableNumber("Superstructure/Feeder/Goal/FeedVoltage", 3.0);
     private static final LoggedTunableNumber ejectVoltage = new LoggedTunableNumber("Superstructure/Feeder/Goal/EjectVoltage", -3.0);
 
-    private final OperatorDashboard operatorDashboard = OperatorDashboard.get();
+    private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
 
     private final MotorIO io = createIO();
     private final MotorIOInputsAutoLogged inputs = new MotorIOInputsAutoLogged();
@@ -46,17 +47,18 @@ public class Feeder implements Periodic {
 
     private static Feeder instance;
 
-    public static Feeder get() {
-        synchronized (Feeder.class) {
-            if (instance == null) {
-                instance = new Feeder();
-            }
+    public static synchronized Feeder get() {
+        if (instance == null) {
+            instance = new Feeder();
         }
 
         return instance;
     }
 
     private Feeder() {
+        if (instance != null) {
+            Util.error("Duplicate Feeder created");
+        }
     }
 
     @Override

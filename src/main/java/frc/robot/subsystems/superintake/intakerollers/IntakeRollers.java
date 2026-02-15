@@ -2,6 +2,7 @@ package frc.robot.subsystems.superintake.intakerollers;
 
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
+import frc.lib.Util;
 import frc.lib.motor.MotorIO;
 import frc.lib.motor.MotorIOInputsAutoLogged;
 import frc.lib.motor.RequestType;
@@ -21,7 +22,7 @@ public class IntakeRollers implements Periodic {
     private static final LoggedTunableNumber intakeVoltage = new LoggedTunableNumber("Superintake/IntakeRollers/Goal/IntakeVoltage", 12.0);
     private static final LoggedTunableNumber ejectVoltage = new LoggedTunableNumber("Superintake/IntakeRollers/Goal/EjectVoltage", -12.0);
 
-    private final OperatorDashboard operatorDashboard = OperatorDashboard.get();
+    private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
 
     private final MotorIO io = createIO();
     private final MotorIOInputsAutoLogged inputs = new MotorIOInputsAutoLogged();
@@ -46,17 +47,18 @@ public class IntakeRollers implements Periodic {
 
     private static IntakeRollers instance;
 
-    public static IntakeRollers get() {
-        synchronized (IntakeRollers.class) {
-            if (instance == null) {
-                instance = new IntakeRollers();
-            }
+    public static synchronized IntakeRollers get() {
+        if (instance == null) {
+            instance = new IntakeRollers();
         }
 
         return instance;
     }
 
     private IntakeRollers() {
+        if (instance != null) {
+            Util.error("Duplicate IntakeRollers created");
+        }
     }
 
     @Override

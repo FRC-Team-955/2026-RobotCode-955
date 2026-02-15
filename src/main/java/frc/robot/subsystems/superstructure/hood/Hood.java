@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.PIDF;
+import frc.lib.Util;
 import frc.lib.motor.MotorIO;
 import frc.lib.motor.MotorIOInputsAutoLogged;
 import frc.lib.motor.RequestType;
@@ -34,7 +35,7 @@ public class Hood implements Periodic {
     private static final LoggedTunableNumber passManualSetpointDegrees = new LoggedTunableNumber("Superstructure/Hood/Goal/PassManualDegrees", -45.0);
     private static final LoggedTunableNumber ejectSetpointDegrees = new LoggedTunableNumber("Superstructure/Hood/Goal/EjectDegrees", -45.0);
 
-    private final OperatorDashboard operatorDashboard = OperatorDashboard.get();
+    private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
     private static final ShootingKinematics shootingKinematics = ShootingKinematics.get();
 
     private final MotorIO io = createIO();
@@ -68,17 +69,18 @@ public class Hood implements Periodic {
 
     private static Hood instance;
 
-    public static Hood get() {
-        synchronized (Hood.class) {
-            if (instance == null) {
-                instance = new Hood();
-            }
+    public static synchronized Hood get() {
+        if (instance == null) {
+            instance = new Hood();
         }
 
         return instance;
     }
 
     private Hood() {
+        if (instance != null) {
+            Util.error("Duplicate Hood created");
+        }
     }
 
     @Override

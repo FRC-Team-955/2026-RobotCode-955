@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.PIDF;
+import frc.lib.Util;
 import frc.lib.motor.MotorIO;
 import frc.lib.motor.MotorIOInputsAutoLogged;
 import frc.lib.motor.RequestType;
@@ -30,7 +31,7 @@ public class Flywheel implements Periodic {
     private static final LoggedTunableNumber passManualMetersPerSec = new LoggedTunableNumber("Superstructure/Flywheel/Goal/PassManualMetersPerSec", 5.0);
     private static final LoggedTunableNumber ejectRPM = new LoggedTunableNumber("Superstructure/Flywheel/Goal/EjectRPM", -300);
 
-    private final OperatorDashboard operatorDashboard = OperatorDashboard.get();
+    private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
     private static final ShootingKinematics shootingKinematics = ShootingKinematics.get();
 
     private final MotorIO io = createIO();
@@ -59,17 +60,18 @@ public class Flywheel implements Periodic {
 
     private static Flywheel instance;
 
-    public static Flywheel get() {
-        synchronized (Flywheel.class) {
-            if (instance == null) {
-                instance = new Flywheel();
-            }
+    public static synchronized Flywheel get() {
+        if (instance == null) {
+            instance = new Flywheel();
         }
 
         return instance;
     }
 
     private Flywheel() {
+        if (instance != null) {
+            Util.error("Duplicate Flywheel created");
+        }
     }
 
     @Override
@@ -104,8 +106,8 @@ public class Flywheel implements Periodic {
         return inputs.positionRad;
     }
 
-    public double getVelocityRadPerSec() {
-        return inputs.velocityRadPerSec;
+    public double getVelocityMetersPerSec() {
+        return inputs.velocityRadPerSec * FlywheelConstants.flywheelRadiusMeters;
     }
 
     @AutoLogOutput(key = "Superstructure/Flywheel/AtGoal")

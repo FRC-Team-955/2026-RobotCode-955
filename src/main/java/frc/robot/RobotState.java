@@ -13,6 +13,7 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.lib.Util;
 import frc.lib.subsystem.Periodic;
 import frc.robot.subsystems.drive.DriveConstants;
 import frc.robot.subsystems.drive.ModuleIOSim;
@@ -81,17 +82,18 @@ public class RobotState implements Periodic {
 
     private static RobotState instance;
 
-    public static RobotState get() {
-        synchronized (RobotState.class) {
-            if (instance == null) {
-                instance = new RobotState();
-            }
+    public static synchronized RobotState get() {
+        if (instance == null) {
+            instance = new RobotState();
         }
 
         return instance;
     }
 
     private RobotState() {
+        if (instance != null) {
+            Util.error("Duplicate RobotState created");
+        }
     }
 
     @Override

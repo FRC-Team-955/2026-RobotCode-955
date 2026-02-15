@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.AllianceFlipUtil;
+import frc.lib.Util;
 import frc.lib.controller.CommandSteamInputController;
 import frc.lib.subsystem.Periodic;
 import lombok.Getter;
@@ -39,17 +40,19 @@ public class Controller implements Periodic {
 
     private static Controller instance;
 
-    public static Controller get() {
-        synchronized (Controller.class) {
-            if (instance == null) {
-                instance = new Controller();
-            }
+    public static synchronized Controller get() {
+        if (instance == null) {
+            instance = new Controller();
         }
 
         return instance;
     }
 
     private Controller() {
+        if (instance != null) {
+            Util.error("Duplicate Controller created");
+        }
+
         if (BuildConstants.mode == BuildConstants.Mode.SIM && System.getProperty("os.name").contains("Mac OS X")) {
             controller = new CommandSteamInputController(0);
 //            controller = new CommandNintendoSwitchProController(0);

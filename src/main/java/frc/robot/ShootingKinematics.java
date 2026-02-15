@@ -9,6 +9,7 @@ import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
 import frc.lib.AllianceFlipUtil;
+import frc.lib.Util;
 import frc.lib.network.LoggedTunableNumber;
 import frc.lib.subsystem.Periodic;
 import lombok.Getter;
@@ -44,17 +45,18 @@ public class ShootingKinematics implements Periodic {
 
     private static ShootingKinematics instance;
 
-    public static ShootingKinematics get() {
-        synchronized (ShootingKinematics.class) {
-            if (instance == null) {
-                instance = new ShootingKinematics();
-            }
+    public static synchronized ShootingKinematics get() {
+        if (instance == null) {
+            instance = new ShootingKinematics();
         }
 
         return instance;
     }
 
     private ShootingKinematics() {
+        if (instance != null) {
+            Util.error("Duplicate ShootingKinematics created");
+        }
     }
 
     private boolean isValidHoodAngle(double hoodAngleRad) {

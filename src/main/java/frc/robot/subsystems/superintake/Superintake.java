@@ -7,6 +7,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.lib.Util;
 import frc.lib.subsystem.CommandBasedSubsystem;
 import frc.robot.OperatorDashboard;
 import frc.robot.RobotState;
@@ -22,11 +23,13 @@ import org.littletonrobotics.junction.Logger;
 import java.util.function.Supplier;
 
 public class Superintake extends CommandBasedSubsystem {
-    private final RobotState robotState = RobotState.get();
-    private final OperatorDashboard operatorDashboard = OperatorDashboard.get();
-    private final GamePieceVision gamePieceVision = GamePieceVision.get();
-    private final Drive drive = Drive.get();
+    private static final RobotState robotState = RobotState.get();
+    private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
+    private static final GamePieceVision gamePieceVision = GamePieceVision.get();
+    private static final Drive drive = Drive.get();
 
+    // because these subsystems are instantiated by Superintake, instead of RobotContainer,
+    // the variables shouldn't be static. Other singleton variables should be static, though
     public final IntakePivot intakePivot = IntakePivot.get();
     public final IntakeRollers intakeRollers = IntakeRollers.get();
 
@@ -49,17 +52,18 @@ public class Superintake extends CommandBasedSubsystem {
 
     private static Superintake instance;
 
-    public static Superintake get() {
-        synchronized (Superintake.class) {
-            if (instance == null) {
-                instance = new Superintake();
-            }
+    public static synchronized Superintake get() {
+        if (instance == null) {
+            instance = new Superintake();
         }
 
         return instance;
     }
 
     private Superintake() {
+        if (instance != null) {
+            Util.error("Duplicate Superintake created");
+        }
     }
 
     @Override

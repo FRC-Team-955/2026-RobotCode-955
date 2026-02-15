@@ -30,7 +30,7 @@ import static frc.robot.FieldConstants.aprilTagLayout;
 import static frc.robot.subsystems.apriltagvision.AprilTagVisionConstants.*;
 
 public class AprilTagVision implements Periodic {
-    private final RobotState robotState = RobotState.get();
+    private static final RobotState robotState = RobotState.get();
 
     private final EnumMap<Camera, CameraData> cameras = Util.createEnumMap(Camera.class,
             Camera.values(), (cam) ->
@@ -67,18 +67,18 @@ public class AprilTagVision implements Periodic {
     private Transform3d tagToRobot;
     private static AprilTagVision instance;
 
-
-    public static AprilTagVision get() {
-        synchronized (AprilTagVision.class) {
-            if (instance == null) {
-                instance = new AprilTagVision();
-            }
+    public static synchronized AprilTagVision get() {
+        if (instance == null) {
+            instance = new AprilTagVision();
         }
 
         return instance;
     }
 
     private AprilTagVision() {
+        if (instance != null) {
+            Util.error("Duplicate AprilTagVision created");
+        }
     }
 
     @Override

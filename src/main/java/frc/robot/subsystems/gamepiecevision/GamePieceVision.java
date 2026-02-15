@@ -14,8 +14,7 @@ import java.util.*;
 import static frc.robot.subsystems.gamepiecevision.GamePieceVisionConstants.*;
 
 public class GamePieceVision implements Periodic {
-    private final RobotState robotState = RobotState.get();
-
+    private static final RobotState robotState = RobotState.get();
 
     private final EnumMap<Camera, CameraData> cameras =
             Util.createEnumMap(Camera.class,
@@ -25,7 +24,6 @@ public class GamePieceVision implements Periodic {
                             new Alert("Game piece vision camera " + cam.name() + " is disconnected.", Alert.AlertType.kError)
                     ));
 
-
     private final Map<Pose3d, Double> coralPoseToLastSeen = new HashMap<>();
     @Getter
     private List<Pose3d> freshCoral = List.of();
@@ -34,17 +32,18 @@ public class GamePieceVision implements Periodic {
 
     private static GamePieceVision instance;
 
-    public static GamePieceVision get() {
-        synchronized (GamePieceVision.class) {
-            if (instance == null) {
-                instance = new GamePieceVision();
-            }
+    public static synchronized GamePieceVision get() {
+        if (instance == null) {
+            instance = new GamePieceVision();
         }
 
         return instance;
     }
 
     private GamePieceVision() {
+        if (instance != null) {
+            Util.error("Duplicate GamePieceVision created");
+        }
     }
 
     @Override

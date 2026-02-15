@@ -5,6 +5,7 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
+import frc.lib.Util;
 import frc.lib.subsystem.Periodic;
 import frc.robot.subsystems.superintake.Superintake;
 import frc.robot.subsystems.superstructure.Superstructure;
@@ -45,17 +46,18 @@ public class RobotMechanism implements Periodic {
 
     private static RobotMechanism instance;
 
-    public static RobotMechanism get() {
-        synchronized (RobotMechanism.class) {
-            if (instance == null) {
-                instance = new RobotMechanism();
-            }
+    public static synchronized RobotMechanism get() {
+        if (instance == null) {
+            instance = new RobotMechanism();
         }
 
         return instance;
     }
 
     private RobotMechanism() {
+        if (instance != null) {
+            Util.error("Duplicate RobotMechanism created");
+        }
     }
 
     @Override

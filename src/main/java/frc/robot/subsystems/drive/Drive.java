@@ -41,8 +41,8 @@ public class Drive extends CommandBasedSubsystem {
     private static final PIDF.Tunable moduleDriveGainsTunable = moduleConfig.driveGains().tunable("Drive/ModuleDrive");
     private static final PIDF.Tunable moduleTurnGainsTunable = moduleConfig.turnGains().tunable("Drive/ModuleTurn");
 
-    private final RobotState robotState = RobotState.get();
-    private final OperatorDashboard operatorDashboard = OperatorDashboard.get();
+    private static final RobotState robotState = RobotState.get();
+    private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
 
     private final GyroIO gyroIO = createGyroIO();
     private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
@@ -73,17 +73,19 @@ public class Drive extends CommandBasedSubsystem {
 
     private static Drive instance;
 
-    public static Drive get() {
-        synchronized (Drive.class) {
-            if (instance == null) {
-                instance = new Drive();
-            }
+    public static synchronized Drive get() {
+        if (instance == null) {
+            instance = new Drive();
         }
 
         return instance;
     }
 
     private Drive() {
+        if (instance != null) {
+            Util.error("Duplicate Drive created");
+        }
+
         var moduleIO = createModuleIO();
         // Array is currently four nulls, so length works just fine
         for (int i = 0; i < modules.length; i++) {

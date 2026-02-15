@@ -58,17 +58,19 @@ public class HighFrequencySamplingThread extends Thread {
 
     private static HighFrequencySamplingThread instance;
 
-    public static HighFrequencySamplingThread get() {
-        synchronized (HighFrequencySamplingThread.class) {
-            if (instance == null) {
-                instance = new HighFrequencySamplingThread();
-            }
+    public static synchronized HighFrequencySamplingThread get() {
+        if (instance == null) {
+            instance = new HighFrequencySamplingThread();
         }
 
         return instance;
     }
 
     private HighFrequencySamplingThread() {
+        if (instance != null) {
+            Util.error("Duplicate HighFrequencySamplingThread created");
+        }
+
         setName("HighFrequencySamplingThread");
         setDaemon(true);
         super.start();

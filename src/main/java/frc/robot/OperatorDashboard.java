@@ -22,8 +22,8 @@ public class OperatorDashboard implements Periodic {
         PassManual,
     }
 
-    private final RobotState robotState = RobotState.get();
-    private final Controller controller = Controller.get();
+    private static final RobotState robotState = RobotState.get();
+    private static final Controller controller = Controller.get();
 
     private static final String prefix = "/OperatorDashboard/";
 
@@ -43,17 +43,19 @@ public class OperatorDashboard implements Periodic {
 
     private static OperatorDashboard instance;
 
-    public static OperatorDashboard get() {
-        synchronized (OperatorDashboard.class) {
-            if (instance == null) {
-                instance = new OperatorDashboard();
-            }
+    public static synchronized OperatorDashboard get() {
+        if (instance == null) {
+            instance = new OperatorDashboard();
         }
 
         return instance;
     }
 
     private OperatorDashboard() {
+        if (instance != null) {
+            Util.error("Duplicate OperatorDashboard created");
+        }
+
         if (BuildConstants.tuningMode || DriveConstants.disableDriving || DriveConstants.disableGyro) {
             constantSetAlert.set(true);
         }

@@ -4,7 +4,6 @@ import com.ctre.phoenix6.signals.MeasurementHealthValue;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Timer;
-import frc.robot.RobotState;
 import frc.robot.ShootingKinematics;
 import frc.robot.subsystems.drive.DriveConstants;
 import frc.robot.subsystems.drive.ModuleIOSim;
@@ -25,14 +24,12 @@ public class SuperstructureIOSim extends SuperstructureIO {
     private static final double shootingBallsPerSec = 10.0;
     private static final double ballShootDelay = 1.0 / shootingBallsPerSec;
 
-    private final RobotState robotState = RobotState.get();
-
-    private final IntakePivot intakePivot = IntakePivot.get();
-    private final IntakeRollers intakeRollers = IntakeRollers.get();
-    private final Feeder feeder = Feeder.get();
-    private final Flywheel flywheel = Flywheel.get();
-    private final Hood hood = Hood.get();
-    private final Spindexer spindexer = Spindexer.get();
+    private static final IntakePivot intakePivot = IntakePivot.get();
+    private static final IntakeRollers intakeRollers = IntakeRollers.get();
+    private static final Feeder feeder = Feeder.get();
+    private static final Flywheel flywheel = Flywheel.get();
+    private static final Hood hood = Hood.get();
+    private static final Spindexer spindexer = Spindexer.get();
 
     private final IntakeSimulation intakeSimulation = IntakeSimulation.OverTheBumperIntake(
             "Fuel",

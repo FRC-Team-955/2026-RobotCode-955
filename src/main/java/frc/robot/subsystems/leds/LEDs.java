@@ -3,6 +3,7 @@ package frc.robot.subsystems.leds;
 import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
+import frc.lib.Util;
 import frc.lib.subsystem.Periodic;
 import frc.robot.Constants;
 import frc.robot.OperatorDashboard;
@@ -18,9 +19,9 @@ import org.littletonrobotics.junction.mechanism.LoggedMechanismRoot2d;
 import static frc.robot.subsystems.leds.LEDConstants.*;
 
 public class LEDs implements Periodic {
-    private final OperatorDashboard operatorDashboard = OperatorDashboard.get();
-    private final Superintake superintake = Superintake.get();
-    private final Superstructure superstructure = Superstructure.get();
+    private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
+    private static final Superintake superintake = Superintake.get();
+    private static final Superstructure superstructure = Superstructure.get();
 
     // See createAndStartStartupNotifier for why this is static
     private static final LEDsIO io = createIO();
@@ -34,17 +35,19 @@ public class LEDs implements Periodic {
 
     private static LEDs instance;
 
-    public static LEDs get() {
-        synchronized (LEDs.class) {
-            if (instance == null) {
-                instance = new LEDs();
-            }
+    public static synchronized LEDs get() {
+        if (instance == null) {
+            instance = new LEDs();
         }
 
         return instance;
     }
 
     private LEDs() {
+        if (instance != null) {
+            Util.error("Duplicate LEDs created");
+        }
+
         double bottomY = 0.5;
         double middleOfRobot = 1.5 / 2.0;
         for (int index = 0; index < length; index++) {

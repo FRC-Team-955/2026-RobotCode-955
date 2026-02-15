@@ -18,17 +18,18 @@ public class CANLogger implements Periodic {
 
     private static CANLogger instance;
 
-    public static CANLogger get() {
-        synchronized (CANLogger.class) {
-            if (instance == null) {
-                instance = new CANLogger();
-            }
+    public static synchronized CANLogger get() {
+        if (instance == null) {
+            instance = new CANLogger();
         }
 
         return instance;
     }
 
     private CANLogger() {
+        if (instance != null) {
+            Util.error("Duplicate CANLogger created");
+        }
     }
 
     @Override
