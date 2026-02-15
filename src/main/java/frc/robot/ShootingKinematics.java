@@ -12,11 +12,16 @@ import frc.lib.AllianceFlipUtil;
 import frc.lib.Util;
 import frc.lib.network.LoggedTunableNumber;
 import frc.lib.subsystem.Periodic;
+import frc.robot.subsystems.superstructure.flywheel.Flywheel;
+import frc.robot.subsystems.superstructure.hood.Hood;
 import lombok.Getter;
 import org.littletonrobotics.junction.Logger;
 
 public class ShootingKinematics implements Periodic {
     private static final LoggedTunableNumber robotVelocityScalar = new LoggedTunableNumber("ShootingKinematics/RobotVelocityScalar", 1.2);
+    private static final LoggedTunableNumber headingToleranceDeg = new LoggedTunableNumber("ShootingKinematics/HeadingToleranceDegrees", 5.0);
+    private static final LoggedTunableNumber velocityToleranceMetersPerSec = new LoggedTunableNumber("ShootingKinematics/VelocityToleranceMetersPerSec", 0.1);
+    private static final LoggedTunableNumber hoodToleranceDeg = new LoggedTunableNumber("ShootingKinematics/HoodToleranceDegrees", 1.0);
 
     public static final Translation3d fuelExitTranslation = new Translation3d(
             Units.inchesToMeters(-4.0),
@@ -24,7 +29,6 @@ public class ShootingKinematics implements Periodic {
             Units.inchesToMeters(15.0)
     );
     public static final Rotation2d fuelExitRotation = Rotation2d.k180deg;
-    private static final Translation3d blueHubTranslation = new Translation3d(4.6256194, 4.0346376, 1.8288);
     private static final InterpolatingDoubleTreeMap distanceToVelocity = new InterpolatingDoubleTreeMap();
 
     static {
@@ -35,11 +39,15 @@ public class ShootingKinematics implements Periodic {
     }
 
     private static final RobotState robotState = RobotState.get();
+    private static final Flywheel flywheel = Flywheel.get();
+    private static final Hood hood = Hood.get();
 
     @Getter
     private ShootingParameters shootingParameters = new ShootingParameters(0, 0, 0);
     @Getter
     private boolean validShootingParameters = false;
+    @Getter
+    private boolean shootingParametersMet = false;
 
     private final Alert noValidShootingParametersAlert = new Alert("Could not find valid shooting parameters.", Alert.AlertType.kInfo);
 
@@ -66,7 +74,15 @@ public class ShootingKinematics implements Periodic {
     @Override
     public void periodicBeforeCommands() {
         validShootingParameters = updateShootingParameters();
+        Logger.recordOutput("ShootingKinematics/ShootingParameters", shootingParameters);
+        Logger.recordOutput("ShootingKinematics/ValidShootingParameters", validShootingParameters);
         noValidShootingParametersAlert.set(!validShootingParameters);
+
+        shootingParametersMet =
+                Math.abs(robotState.getPose().getRotation().getRadians() - shootingParameters.headingRad()) <= Units.degreesToRadians(headingToleranceDeg.get()) &&
+                        Math.abs(flywheel.getVelocityMetersPerSec() - shootingParameters.velocityMetersPerSec()) <= velocityToleranceMetersPerSec.get() &&
+                        Math.abs(hood.getPositionRad() - shootingParameters.hoodAngleRad()) <= Units.degreesToRadians(hoodToleranceDeg.get());
+        Logger.recordOutput("ShootingKinematics/ShootingParametersMet", shootingParametersMet);
     }
 
     private boolean updateShootingParameters() {
@@ -85,7 +101,7 @@ public class ShootingKinematics implements Periodic {
         );
         Logger.recordOutput("ShootingKinematics/FuelExitPose", fuelExitPose);
 
-        Translation3d hubTranslation = AllianceFlipUtil.apply(blueHubTranslation);
+        Translation3d hubTranslation = AllianceFlipUtil.apply(FieldConstants.Hub.topCenterPoint);
         Pose3d hubPose = new Pose3d(hubTranslation, new Rotation3d());
         Transform3d fuelExitToHub = new Transform3d(fuelExitPose, hubPose);
 

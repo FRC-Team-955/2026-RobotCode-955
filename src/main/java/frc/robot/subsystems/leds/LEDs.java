@@ -7,6 +7,7 @@ import frc.lib.Util;
 import frc.lib.subsystem.Periodic;
 import frc.robot.Constants;
 import frc.robot.OperatorDashboard;
+import frc.robot.ShootingKinematics;
 import frc.robot.subsystems.apriltagvision.AprilTagVision;
 import frc.robot.subsystems.gamepiecevision.GamePieceVision;
 import frc.robot.subsystems.superintake.Superintake;
@@ -22,6 +23,7 @@ public class LEDs implements Periodic {
     private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
     private static final Superintake superintake = Superintake.get();
     private static final Superstructure superstructure = Superstructure.get();
+    private static final ShootingKinematics shootingKinematics = ShootingKinematics.get();
 
     // See createAndStartStartupNotifier for why this is static
     private static final LEDsIO io = createIO();
@@ -115,9 +117,11 @@ public class LEDs implements Periodic {
 
                 LEDPattern superstructurePattern = switch (superstructure.getGoal()) {
                     case IDLE, SPINUP -> null;
-                    case SHOOT -> LEDPatterns.shooting;
+                    case SHOOT -> shootingKinematics.isValidShootingParameters() &&
+                            shootingKinematics.isShootingParametersMet()
+                            ? LEDPatterns.shooting
+                            : LEDPatterns.aiming;
                     case EJECT -> LEDPatterns.eject;
-
                 };
 
                 if (superintakePattern != null && superstructurePattern != null) {
