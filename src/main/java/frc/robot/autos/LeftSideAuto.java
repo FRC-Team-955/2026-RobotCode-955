@@ -31,7 +31,10 @@ public final class LeftSideAuto {
             new Pose2d(2.2049708366394043, 4.7645263671875, Rotation2d.fromRadians(-Math.PI))
     );
 
-    public static Command build(Drive drive, RobotState robotState) {
+    private static final Drive drive = Drive.get();
+    private static final RobotState robotState = RobotState.get();
+
+    public static Command build() {
         List<Pose2d> poses = waypoints.stream()
                 .map(AllianceFlipUtil::apply)
                 .toList();

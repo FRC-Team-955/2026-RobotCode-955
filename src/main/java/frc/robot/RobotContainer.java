@@ -61,7 +61,7 @@ public class RobotContainer {
 
     private void addAutos() {
         autoChooser.addOption("None", Commands.none());
-        autoChooser.addOption("LeftSideAuto", LeftSideAuto.build(drive, robotState));
+        autoChooser.addOption("LeftSideAuto", LeftSideAuto.build());
 
         autoChooser.addOption("Characterization", Commands.deferredProxy(characterizationChooser::get));
     }
