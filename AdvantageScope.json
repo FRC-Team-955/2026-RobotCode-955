@@ -1,313 +1,33 @@
 {
   "hubs": [
     {
-      "x": 0,
-      "y": 39,
-      "width": 1800,
-      "height": 1130,
+      "x": 402,
+      "y": 175,
+      "width": 2093,
+      "height": 1211,
       "state": {
         "sidebar": {
           "width": 300,
           "expanded": [
-            "/RealOutputs/Vision/Camera1",
-            "/RealOutputs/Vision/Camera0",
-            "/RealOutputs/RobotState/Pose",
-            "/RealOutputs/Drive/MoveToSetpoint",
-            "/RealOutputs/Drive/Assist/RobotToAssistDirection",
-            "/RealOutputs/Drive/Assist/Pose",
-            "/RealOutputs/Drive/Assist/JoystickDirectionFlipped",
-            "/RealOutputs/Drive/Assist/JoystickDirection",
-            "/RealOutputs/Drive/Assist/DirectionDifference",
-            "/Vision",
-            "/Vision/Gamepiece0",
-            "/Vision/Gamepiece0/LatestTargetObservation",
-            "/RealOutputs/Vision/Gampiece0",
-            "/RealOutputs/Drive/Assist/JoystickLinearDirection",
-            "/RealOutputs/Drive/Assist/JoystickLinearDirectionFlipped",
-            "/RealOutputs/Assist",
-            "/RealOutputs/Drive/JoystickDrive/LinearDirection",
-            "/RealOutputs/Drive/Assist/FlippedJoystickLinearDirection",
-            "/RealOutputs/Drive/Assist/PID",
-            "/RealOutputs/Drive/JoystickDrive/Suppliers",
-            "/RealOutputs/Drive/JoystickDrive/LinearVelocity",
-            "/RealOutputs/Vision/Gamepiece0",
-            "/RealOutputs/Vision/Summary/ClosestGamepiece",
-            "/RealOutputs/Vision/Gamepiece0/ClosestPose",
-            "/RealOutputs/Vision/Summary/ClosestGamepiece/Pose",
-            "/RealOutputs/Vision/Gamepiece0/ClosestPose/translation",
-            "/RealOutputs/Vision/Summary/ClosestGamepiece/Pose/translation",
-            "/RealOutputs/Drive/ModuleStates/Setpoints/0",
-            "/RealOutputs/Drive/ModuleStates/Setpoints/0/angle",
-            "/RealOutputs/Drive/ModuleStates/Setpoints",
-            "/RealOutputs/Drive/ChassisSpeeds/Setpoint",
-            "/RealOutputs/Drive/ModuleStates/SetpointsOptimized",
-            "/RealOutputs/Drive/ModuleStates/SetpointsOptimized/0",
-            "/RealOutputs/Drive/ModuleStates/SetpointsOptimized/0/angle",
-            "/RealOutputs/Drive/ChassisSpeeds/Measured",
-            "/RealOutputs/Elevator/Setpoint",
-            "/RealOutputs/Elevator/Measurement",
-            "/RealOutputs/Elevator/Constraints",
-            "/RealOutputs/Elevator/Profile",
-            "/RealOutputs/Elevator/Profile/Setpoint",
-            "/RealOutputs/RobotState/Mechanism/elevator",
-            "/RealOutputs/RobotState/Mechanism/elevator/stage1",
-            "/RealOutputs/Alerts/warnings",
-            "/RealOutputs/Alerts/infos",
-            "/RealOutputs/Alerts/errors",
-            "/RealOutputs/FieldSimulation/CoralInRobot",
-            "/RealOutputs/FieldSimulation/CoralInRobot/0",
-            "/RealOutputs/FieldSimulation/CoralInRobot/0/translation",
-            "/RealOutputs/Indexer",
-            "/RealOutputs/Indexer/Rollers",
-            "/RealOutputs/CoralIntake",
-            "/RealOutputs/CoralIntake/Rollers",
-            "/RealOutputs/CoralIntake/Pivot",
-            "/RealOutputs/EndEffector/Rollers",
-            "/RealOutputs/Vision/Summary/TagPoses",
-            "/Tuning/Elevator/Gains",
-            "/RealOutputs/Vision/Summary/TagPoses/0",
-            "/Inputs/Vision/Camera1",
-            "/Inputs/Vision/Camera0",
-            "/Inputs/Vision/Camera0/TagIds",
-            "/Inputs/Vision/Camera1/TagIds",
-            "/RealOutputs/Vision/Summary/RobotPosesAccepted",
-            "/RealOutputs/Vision/Summary/RobotPosesRejected",
-            "/RealOutputs/Drive/ModuleStates/Measured",
-            "/RealOutputs/Drive/ModuleStates/Measured/0/angle",
-            "/Tuning/Elevator/Goal",
-            "/Tuning/EndEffector/Goal",
-            "/RealOutputs/Choreo Alerts/warnings",
-            "/RealOutputs/Choreo Alerts/infos",
-            "/RealOutputs/Choreo Alerts/errors",
-            "/RealOutputs/Drive/ModuleStates/Measured/1/angle",
-            "/RealOutputs/Drive/ModuleStates/Setpoints/1/angle",
-            "/RealOutputs/Drive/ModuleStates/Setpoints/3/angle",
-            "/RealOutputs/Drive/ModuleStates/Setpoints/2/angle",
-            "/RealOutputs/Drive/ModuleStates/Measured/3/angle",
-            "/RealOutputs/Drive/ModuleStates/Measured/2/angle",
-            "/SystemStats/CANBus",
-            "/RealOutputs/Drive/RadiusCharacterization",
-            "/RealOutputs/Drive/WheelRadiusCharacterization",
-            "/Tuning/EndEffector/Velocity",
-            "/RealOutputs/EndEffector/Rollers/Position",
-            "/RealOutputs/EndEffector/Rollers/Velocity",
-            "/RealOutputs/Drive/Assist",
-            "/Tuning/Superstructure",
-            "/Inputs/Superstructure/HighFrequencyEndEffectorBeamBreakTriggered",
-            "/Inputs/Superstructure/HighFrequencyTimestamps",
-            "/Tuning/OperatorDashboard/CoralScoringLevels",
-            "/RealOutputs/Drive/Module0",
-            "/RadioStatus/Status",
-            "/RadioStatus/Status/networkStatus6",
-            "/Tuning/Drive/MoveToOmega",
-            "/Tuning/Drive/MoveToXY",
-            "/Tuning/OperatorDashboard/ReefZoneSides",
-            "/Tuning/OperatorDashboard/LocalReefSides",
-            "/RealOutputs/RobotState/Mechanism/LED10",
-            "/RealOutputs/RobotState/Mechanism/LED10/LED10",
-            "/RealOutputs/RobotState/Mechanism/LED12",
-            "/RealOutputs/RobotState/Mechanism/LED12/LED12",
-            "/RealOutputs/Superstructure",
-            "/RealOutputs/Superstructrue",
-            "/RealOutputs/Superstructrue/align",
-            "/RealOutputs/Superstructrue/align/translation",
-            "/RealOutputs/RobotState/Pose/rotation",
-            "/RealOutputs/Drive/MoveTo/Setpoint/translation",
-            "/RealOutputs/Drive/MoveTo/Goal/translation",
-            "/RealOutputs/RobotState/Pose/translation",
-            "/Inputs/Funnel/Belt",
-            "/RealOutputs/Funnel/Belt",
-            "/Tuning/Funnel/Belt",
-            "/Tuning/Funnel/Belt/Velocity",
-            "/Tuning/Funnel/Belt/Goal",
-            "/ReplayOutputs",
-            "/ReplayOutputs/RobotState",
-            "/Inputs/Vision/Camera0/PoseObservations",
-            "/Inputs/Vision/Camera1/PoseObservations",
-            "/Inputs/Vision/Camera1/PoseObservations/0",
-            "/Inputs/Vision/Camera0/PoseObservations/0",
-            "/Inputs/Vision/AprilTag",
-            "/Inputs/Vision/Gamepiece",
-            "/Inputs/Vision/Gamepiece/Limelight",
-            "/RealOutputs/Vision",
-            "/Inputs/Vision/AprilTag/StationCam/PoseObservations",
-            "/Inputs/Vision/AprilTag/StationCam/LatestAprilTagTargetObservation",
-            "/Inputs/Vision/AprilTag/StationCam/LatestAprilTagTargetObservation/tx",
-            "/Inputs/Vision/AprilTag/StationCam/TagIds",
-            "/RealOutputs/Drive/MoveTo/Setpoint/rotation",
-            "/RealOutputs/Vision/AprilTag",
-            "/RealOutputs/Vision/AprilTag/StationCam",
-            "/RealOutputs/Vision/AprilTag/StationCam/RobotPoses",
-            "/ReplayOutputs/Vision",
-            "/ReplayOutputs/Vision/Summary",
-            "/ReplayOutputs/Vision/Summary/RobotPosesAccepted",
-            "/ReplayOutputs/Vision/Summary/RobotPosesRejected",
-            "/RealOutputs/Superstructure/CoralInFunnel",
-            "/RealOutputs/Superstructure/CoralInEndEffector",
-            "/RealOutputs/JoystickDrive/Suppliers",
-            "/RealOutputs/Superstructure/ClosestSide",
-            "/RealOutputs/Superstructure/ClosestSide/RobotSpeedsToRight",
-            "/RealOutputs/Superstructure/ClosestSide/RightToCurrent",
-            "/RealOutputs/Superstructure/ClosestSide/RobotToRight",
-            "/RealOutputs/Superstructure/ClosestSide/RobotToLeft",
-            "/RealOutputs/Superstructure/ClosestSide/JoystickAngle",
-            "/Inputs/Vision/AprilTag/StationCam/AprilTagObservations",
-            "/Inputs/Vision/AprilTag/StationCam/PoseObservations/0",
-            "/Inputs/Vision/AprilTag/StationCam/AprilTagObservations/0",
-            "/Inputs/Vision/AprilTag/StationCam/AprilTagObservations/0/ty",
-            "/Inputs/Vision/AprilTag/StationCam/AprilTagObservations/0/tx",
-            "/Inputs/Vision/AprilTag/StationCam/PoseObservations/0/bestTarget",
-            "/Inputs/Vision/AprilTag/StationCam/PoseObservations/0/bestTarget/cameraToTarget",
-            "/Inputs/Vision/AprilTag/ReefCam",
-            "/Inputs/Vision/AprilTag/ReefCam/PoseObservations",
-            "/Inputs/Vision/AprilTag/ReefCam/AprilTagObservations",
-            "/Inputs/Vision/AprilTag/ReefCam/AprilTagObservations/1",
-            "/Inputs/Vision/AprilTag/ReefCam/AprilTagObservations/0",
-            "/Inputs/Vision/AprilTag/ReefCam/PoseObservations/0/fieldToCamera",
-            "/Inputs/Vision/AprilTag/ReefCam/PoseObservations/0/bestTarget",
-            "/Inputs/Vision/AprilTag/ReefCam/PoseObservations/0",
-            "/Inputs/Vision/AprilTag/ReefCam/PoseObservations/0/bestTarget/cameraToTarget",
-            "/RealOutputs/Vision/AprilTag/StationCam/GenericPoseObservations",
-            "/RealOutputs/Vision/AprilTag/StationCam/GenericPoseObservations/0",
-            "/RealOutputs/Vision/AprilTag/ReefCam",
-            "/RealOutputs/Vision/AprilTag/StationCam/GenericPoseObservations/0/poseEstimate/translation",
-            "/Inputs/Vision/AprilTag/ReefCam/MultiTagObservations",
-            "/Inputs/Vision/AprilTag/ReefCam/BestTargetObservations",
-            "/RealOutputs/Vision/AprilTag/ReefCam/GenericPoseObservations",
-            "/RealOutputs/Vision/AprilTag/ReefCam/GenericPoseObservations/0",
-            "/RealOutputs/Vision/AprilTag/ReefCam/GenericPoseObservations/1",
-            "/RealOutputs/Vision/AprilTag/ReefCam/GenericPoseObservations/0/poseEstimate",
-            "/RealOutputs/AprilTagVision/Summary",
-            "/Inputs/GamePieceVision",
-            "/RealOutputs/AprilTagVision/StationCam/RobotPoses",
-            "/RealOutputs/AprilTagVision/StationCam/GenericPoseObservations",
-            "/RealOutputs/AprilTagVision/StationCam/GenericPoseObservations/0",
-            "/photonvision",
-            "/RealOutputs/Superstructure/StationAlign",
-            "/RealOutputs/Superstructure/ReefAlign",
-            "/RealOutputs/Drive/MoveTo/DirectionOfTravel",
-            "/RealOutputs/Drive/MoveTo/Constraints",
-            "/ReplayOutputs/Drive",
-            "/Inputs/Drive/Module0",
-            "/RealOutputs/Drive/ModuleStates/Measured/0",
-            "/Inputs/Superstructure",
-            "/Inputs/EndEffector",
-            "/Inputs/EndEffector/Rollers",
-            "/RealOutputs/Drive/ChassisSpeeds/SetpointOptimized",
-            "/Tuning/ReefAlign",
-            "/RealOutputs/RobotState",
-            "/Tuning/EndEffector/Position",
-            "/RealOutputs/Drive/MoveTo",
-            "/NetworkInputs/Tuning/OperatorDashboard",
-            "/RealOutputs/Drive/MoveTo/Goal",
-            "/RealOutputs/Drive/MoveTo/Goal/rotation",
-            "/RealOutputs/GamePieceVision",
-            "/Inputs/Elevator",
-            "/Tuning/OperatorDashboard",
-            "/Tuning/Elevator",
-            "/Inputs/Drive/Gyro",
-            "/Inputs/AprilTagVision/ReefCam",
-            "/RealOutputs/EndEffector",
-            "/RealOutputs/AprilTagVision/StationCam/GenericPoseObservations/1",
-            "/RealOutputs/AprilTagVision/StationCam/GenericPoseObservations/3",
-            "/RealOutputs/AprilTagVision/StationCam/GenericPoseObservations/2",
-            "/RealOutputs/AprilTagVision/ReefCam/GenericPoseObservations",
-            "/RealOutputs/AprilTagVision/ReefCam/GenericPoseObservations/3",
-            "/RealOutputs/AprilTagVision/ReefCam/GenericPoseObservations/2",
-            "/RealOutputs/AprilTagVision/ReefCam/GenericPoseObservations/1",
-            "/RealOutputs/AprilTagVision/ReefCam/GenericPoseObservations/0",
-            "/RealOutputs/AprilTagVision/ReefCam/RobotPosesRejected",
-            "/RealOutputs/Vision/18",
-            "/RealOutputs/Vision/19",
-            "/Tuning/Drive/ModuleTurn",
-            "/Tuning/Drive/ModuleDrive",
-            "/RealOutputs/Drive/ChassisSpeeds",
-            "/Inputs/IntakePivot",
-            "/Tuning/IntakePivot",
-            "/Tuning/IntakePivot/Gains",
-            "/RealOutputs/IntakePivot",
-            "/RealOutputs",
-            "/RealOutputs/Elevator",
-            "/Inputs/GamePieceVision/TargetObservations",
-            "/RealOutputs/a",
-            "/RealOutputs/a/translation",
-            "/RealOutputs/b",
-            "/Inputs/GamePieceVision/TargetObservations/0",
-            "/Inputs/GamePieceVision/TargetObservations/0/tx",
-            "/Inputs/GamePieceVision/TargetObservations/1/ty",
-            "/Inputs/GamePieceVision/TargetObservations/1/tx",
-            "/Inputs/GamePieceVision/TargetObservations/2/tx",
-            "/Inputs/GamePieceVision/TargetObservations/2/ty",
-            "/Inputs/GamePieceVision/TargetObservations/0/ty",
-            "/Inputs/GamePieceVision/TargetObservations/0/yaw",
-            "/Inputs/GamePieceVision/TargetObservations/0/pitch",
-            "/RealOutputs/GamePieceVision/TargetPoints",
-            "/RealOutputs/GamePieceVision/TargetPoints/0",
-            "/limelight/imu",
-            "/limelight/hw",
-            "/limelight/crosshairs",
-            "/limelight/rawdetections",
-            "/limelight/rawtargets",
-            "/Inputs/GamePieceVision/TargetObservations/1",
-            "/Inputs/Drive/Module3",
-            "/Inputs/Drive/Module2",
-            "/Inputs/Drive/Module1",
-            "/RealOutputs/Superstructure/AutoIntakeCoral",
-            "/Shuffleboard",
-            "/LiveWindow",
-            "/FMSInfo",
-            "/Shuffleboard/.recording",
-            "/RealOutputs/AprilTagVision",
-            "/RealOutputs/Drive/DriveJoystick",
-            "/Tuning/Drive/HeadingOverride",
-            "/Tuning/Drive/DriveJoystick",
-            "/NetworkInputs/Tuning",
-            "/RealOutputs/RobotMechanism",
-            "/RealOutputs/IntakeRollers",
-            "/Inputs",
-            "/Inputs/IntakeRollers",
-            "/RealOutputs/ShootingKinematics",
-            "/RealOutputs/ShootingKinematics/Velocity",
-            "/RealOutputs/FieldSimulation",
-            "/RealOutputs/ShootingKinematics/Stationary",
-            "/Tuning/ShootingKinematics",
-            "/RealOutputs/Alerts",
-            "/RealOutputs/Controller/Drive",
-            "/RealOutputs/Drive/DriveJoystickWithHeadingOverride",
-            "/Tuning/Drive/DriveJoystickWithHeadingOverride",
-            "/RealOutputs/ShootingKinematics/test",
-            "/Tuning/Drive/DriveJoystickWithAiming",
-            "/RealOutputs/ShootingKinematics/Test",
-            "/RealOutputs/ShootingKinematics/OmegaLinearVelocity",
-            "/Tuning",
             "/Tuning/Drive",
-            "/Tuning/OperatorDashboard/ScoringMode",
-            "/RealOutputs/Drive/RequestValue",
-            "/RealOutputs/Controller",
+            "/Tuning/Drive/DriveJoystickWithAiming",
+            "/Inputs/Superintake/IntakePivot",
+            "/Inputs/Superintake/IntakeRollers",
             "/RealOutputs/Superstructure/Indexer",
-            "/RealOutputs/Superstructure/Hood",
-            "/RealOutputs/Superstructure/Flywheel",
-            "/RealOutputs/Superintake",
-            "/RealOutputs/Superintake/IntakePivot",
-            "/RealOutputs/Superintake/IntakeRollers",
-            "/DriverStation",
-            "/Inputs/Superstructure/Flywheel",
-            "/Tuning/Superstructure/Flywheel",
-            "/Tuning/Superstructure/Flywheel/Velocity",
             "/Inputs/Superstructure/Indexer",
-            "/Inputs/Superstructure/Hood",
-            "/RealOutputs/LEDs",
-            "/RealOutputs/Drive"
+            "/RealOutputs/Drive/ChassisSpeeds",
+            "/RealOutputs/Drive/ModuleStates",
+            "/RealOutputs/RobotState"
           ]
         },
         "tabs": {
-          "selected": 2,
+          "selected": 10,
           "tabs": [
             {
               "type": 0,
               "title": "",
               "controller": null,
-              "controllerUUID": "qj0x19otgfx9ie54wbjacqwujjml12hu",
+              "controllerUUID": "3oytym58n7ljqr754rgeiy870d5xwub0",
               "renderer": "",
               "controlsHeight": 0
             },
@@ -361,6 +81,515 @@
               "controlsHeight": 0
             },
             {
+              "type": 1,
+              "title": "Goals",
+              "controller": {
+                "leftSources": [],
+                "rightSources": [],
+                "discreteSources": [
+                  {
+                    "type": "stripes",
+                    "logKey": "/RealOutputs/Superintake/Goal",
+                    "logType": "String",
+                    "visible": true,
+                    "options": {
+                      "color": "#2b66a2"
+                    }
+                  },
+                  {
+                    "type": "stripes",
+                    "logKey": "/RealOutputs/Superstructure/Goal",
+                    "logType": "String",
+                    "visible": true,
+                    "options": {
+                      "color": "#e5b31b"
+                    }
+                  }
+                ],
+                "leftLockedRange": null,
+                "rightLockedRange": null,
+                "leftUnitConversion": {
+                  "autoTarget": null,
+                  "preset": null
+                },
+                "rightUnitConversion": {
+                  "autoTarget": null,
+                  "preset": null
+                },
+                "leftFilter": 0,
+                "rightFilter": 0
+              },
+              "controllerUUID": "kkrmcruob7g6wh16r0umk4ohvmjmjubl",
+              "renderer": null,
+              "controlsHeight": 200
+            },
+            {
+              "type": 1,
+              "title": "Intake Pivot",
+              "controller": {
+                "leftSources": [
+                  {
+                    "type": "stepped",
+                    "logKey": "/Inputs/Superintake/IntakePivot/PositionRad",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#e5b31b",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "stepped",
+                    "logKey": "/RealOutputs/Superintake/IntakePivot/LookaheadSetpointRad",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#e48b32",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "stepped",
+                    "logKey": "/RealOutputs/Superintake/IntakePivot/OriginalSetpointRad",
+                    "logType": "Number",
+                    "visible": false,
+                    "options": {
+                      "color": "#c0b487",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "stepped",
+                    "logKey": "/RealOutputs/Superintake/IntakePivot/ProfileSetpointRad",
+                    "logType": "Number",
+                    "visible": false,
+                    "options": {
+                      "color": "#858584",
+                      "size": "normal"
+                    }
+                  }
+                ],
+                "rightSources": [
+                  {
+                    "type": "stepped",
+                    "logKey": "/Inputs/Superintake/IntakePivot/AppliedVolts",
+                    "logType": "Number",
+                    "visible": false,
+                    "options": {
+                      "color": "#af2437",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "stepped",
+                    "logKey": "/Inputs/Superintake/IntakePivot/CurrentAmps",
+                    "logType": "Number",
+                    "visible": false,
+                    "options": {
+                      "color": "#80588e",
+                      "size": "normal"
+                    }
+                  }
+                ],
+                "discreteSources": [
+                  {
+                    "type": "stripes",
+                    "logKey": "/RealOutputs/Superintake/IntakePivot/Goal",
+                    "logType": "String",
+                    "visible": true,
+                    "options": {
+                      "color": "#2b66a2"
+                    }
+                  }
+                ],
+                "leftLockedRange": null,
+                "rightLockedRange": null,
+                "leftUnitConversion": {
+                  "autoTarget": null,
+                  "preset": null
+                },
+                "rightUnitConversion": {
+                  "autoTarget": null,
+                  "preset": null
+                },
+                "leftFilter": 0,
+                "rightFilter": 0
+              },
+              "controllerUUID": "ud0ghbsvu8ytx8jn6uxmtxbko2azb1f7",
+              "renderer": null,
+              "controlsHeight": 200
+            },
+            {
+              "type": 1,
+              "title": "Intake Rollers",
+              "controller": {
+                "leftSources": [
+                  {
+                    "type": "stepped",
+                    "logKey": "/Inputs/Superintake/IntakeRollers/AppliedVolts",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#e5b31b",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "stepped",
+                    "logKey": "/RealOutputs/Superintake/IntakeRollers/RequestValue",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#80588e",
+                      "size": "normal"
+                    }
+                  }
+                ],
+                "rightSources": [
+                  {
+                    "type": "stepped",
+                    "logKey": "/Inputs/Superintake/IntakeRollers/CurrentAmps",
+                    "logType": "Number",
+                    "visible": false,
+                    "options": {
+                      "color": "#af2437",
+                      "size": "normal"
+                    }
+                  }
+                ],
+                "discreteSources": [
+                  {
+                    "type": "stripes",
+                    "logKey": "/RealOutputs/Superintake/IntakeRollers/Goal",
+                    "logType": "String",
+                    "visible": true,
+                    "options": {
+                      "color": "#2b66a2"
+                    }
+                  }
+                ],
+                "leftLockedRange": null,
+                "rightLockedRange": null,
+                "leftUnitConversion": {
+                  "autoTarget": null,
+                  "preset": null
+                },
+                "rightUnitConversion": {
+                  "autoTarget": null,
+                  "preset": null
+                },
+                "leftFilter": 0,
+                "rightFilter": 0
+              },
+              "controllerUUID": "uxafh57fpan9drluof99yimjjafcgijq",
+              "renderer": null,
+              "controlsHeight": 200
+            },
+            {
+              "type": 1,
+              "title": "Flywheel",
+              "controller": {
+                "leftSources": [
+                  {
+                    "type": "stepped",
+                    "logKey": "/Inputs/Superstructure/Flywheel/VelocityRadPerSec",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#af2437",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "stepped",
+                    "logKey": "/RealOutputs/Superstructure/Flywheel/RequestValue",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#e5b31b",
+                      "size": "normal"
+                    }
+                  }
+                ],
+                "rightSources": [
+                  {
+                    "type": "stepped",
+                    "logKey": "/Inputs/Superstructure/Flywheel/AppliedVolts",
+                    "logType": "Number",
+                    "visible": false,
+                    "options": {
+                      "color": "#80588e",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "stepped",
+                    "logKey": "/Inputs/Superstructure/Flywheel/CurrentAmps",
+                    "logType": "Number",
+                    "visible": false,
+                    "options": {
+                      "color": "#e48b32",
+                      "size": "normal"
+                    }
+                  }
+                ],
+                "discreteSources": [
+                  {
+                    "type": "stripes",
+                    "logKey": "/RealOutputs/Superstructure/Flywheel/Goal",
+                    "logType": "String",
+                    "visible": true,
+                    "options": {
+                      "color": "#2b66a2"
+                    }
+                  }
+                ],
+                "leftLockedRange": null,
+                "rightLockedRange": null,
+                "leftUnitConversion": {
+                  "autoTarget": null,
+                  "preset": null
+                },
+                "rightUnitConversion": {
+                  "autoTarget": null,
+                  "preset": null
+                },
+                "leftFilter": 0,
+                "rightFilter": 0
+              },
+              "controllerUUID": "bfuxfdyb62pobrsu58mub46fyry0rt2v",
+              "renderer": null,
+              "controlsHeight": 200
+            },
+            {
+              "type": 1,
+              "title": "Hood",
+              "controller": {
+                "leftSources": [
+                  {
+                    "type": "stepped",
+                    "logKey": "/Inputs/Superstructure/Hood/PositionRad",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#af2437",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "stepped",
+                    "logKey": "/RealOutputs/Superstructure/Hood/LookaheadSetpointRad",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#e48b32",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "stepped",
+                    "logKey": "/RealOutputs/Superstructure/Hood/OriginalSetpointRad",
+                    "logType": "Number",
+                    "visible": false,
+                    "options": {
+                      "color": "#c0b487",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "stepped",
+                    "logKey": "/RealOutputs/Superstructure/Hood/ProfileSetpointRad",
+                    "logType": "Number",
+                    "visible": false,
+                    "options": {
+                      "color": "#858584",
+                      "size": "normal"
+                    }
+                  }
+                ],
+                "rightSources": [
+                  {
+                    "type": "stepped",
+                    "logKey": "/Inputs/Superstructure/Hood/AppliedVolts",
+                    "logType": "Number",
+                    "visible": false,
+                    "options": {
+                      "color": "#2b66a2",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "stepped",
+                    "logKey": "/Inputs/Superstructure/Hood/CurrentAmps",
+                    "logType": "Number",
+                    "visible": false,
+                    "options": {
+                      "color": "#e5b31b",
+                      "size": "normal"
+                    }
+                  }
+                ],
+                "discreteSources": [
+                  {
+                    "type": "stripes",
+                    "logKey": "/RealOutputs/Superstructure/Hood/Goal",
+                    "logType": "String",
+                    "visible": true,
+                    "options": {
+                      "color": "#80588e"
+                    }
+                  }
+                ],
+                "leftLockedRange": null,
+                "rightLockedRange": null,
+                "leftUnitConversion": {
+                  "autoTarget": null,
+                  "preset": null
+                },
+                "rightUnitConversion": {
+                  "autoTarget": null,
+                  "preset": null
+                },
+                "leftFilter": 0,
+                "rightFilter": 0
+              },
+              "controllerUUID": "wc93ni6qerukdg346dpglya0ewuk8jhj",
+              "renderer": null,
+              "controlsHeight": 200
+            },
+            {
+              "type": 1,
+              "title": "Spindexer",
+              "controller": {
+                "leftSources": [
+                  {
+                    "type": "stepped",
+                    "logKey": "/Inputs/Superstructure/Spindexer/AppliedVolts",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#e48b32",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "stepped",
+                    "logKey": "/RealOutputs/Superstructure/Spindexer/RequestValue",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#c0b487",
+                      "size": "normal"
+                    }
+                  }
+                ],
+                "rightSources": [
+                  {
+                    "type": "stepped",
+                    "logKey": "/Inputs/Superstructure/Spindexer/CurrentAmps",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#2b66a2",
+                      "size": "normal"
+                    }
+                  }
+                ],
+                "discreteSources": [
+                  {
+                    "type": "stripes",
+                    "logKey": "/RealOutputs/Superstructure/Goal",
+                    "logType": "String",
+                    "visible": true,
+                    "options": {
+                      "color": "#e5b31b"
+                    }
+                  }
+                ],
+                "leftLockedRange": null,
+                "rightLockedRange": null,
+                "leftUnitConversion": {
+                  "autoTarget": null,
+                  "preset": null
+                },
+                "rightUnitConversion": {
+                  "autoTarget": null,
+                  "preset": null
+                },
+                "leftFilter": 0,
+                "rightFilter": 0
+              },
+              "controllerUUID": "vs6ibrigkci5l33znh2baz0y25yh6zo0",
+              "renderer": null,
+              "controlsHeight": 200
+            },
+            {
+              "type": 1,
+              "title": "Feeder",
+              "controller": {
+                "leftSources": [
+                  {
+                    "type": "stepped",
+                    "logKey": "/Inputs/Superstructure/Feeder/AppliedVolts",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#2b66a2",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "stepped",
+                    "logKey": "/RealOutputs/Superstructure/Feeder/RequestValue",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#e5b31b",
+                      "size": "normal"
+                    }
+                  }
+                ],
+                "rightSources": [
+                  {
+                    "type": "stepped",
+                    "logKey": "/Inputs/Superstructure/Feeder/CurrentAmps",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#af2437",
+                      "size": "normal"
+                    }
+                  }
+                ],
+                "discreteSources": [
+                  {
+                    "type": "stripes",
+                    "logKey": "/RealOutputs/Superstructure/Feeder/Goal",
+                    "logType": "String",
+                    "visible": true,
+                    "options": {
+                      "color": "#80588e"
+                    }
+                  }
+                ],
+                "leftLockedRange": null,
+                "rightLockedRange": null,
+                "leftUnitConversion": {
+                  "autoTarget": null,
+                  "preset": null
+                },
+                "rightUnitConversion": {
+                  "autoTarget": null,
+                  "preset": null
+                },
+                "leftFilter": 0,
+                "rightFilter": 0
+              },
+              "controllerUUID": "x1ruoupwjfjq3gilxsf4hmzw6j5f2l5w",
+              "renderer": null,
+              "controlsHeight": 200
+            },
+            {
               "type": 3,
               "title": "3D Field",
               "controller": {
@@ -371,7 +600,7 @@
                     "logType": "Pose3d",
                     "visible": true,
                     "options": {
-                      "model": "955 Ken"
+                      "model": "955"
                     }
                   },
                   {
@@ -380,36 +609,6 @@
                     "logType": "Transform3d[]",
                     "visible": true,
                     "options": {}
-                  },
-                  {
-                    "type": "swerveStates",
-                    "logKey": "/RealOutputs/Drive/ModuleStates/Measured",
-                    "logType": "SwerveModuleState[]",
-                    "visible": true,
-                    "options": {
-                      "color": "#ff0000",
-                      "arrangement": "0,1,2,3"
-                    }
-                  },
-                  {
-                    "type": "swerveStates",
-                    "logKey": "/RealOutputs/Drive/ModuleStates/Setpoints",
-                    "logType": "SwerveModuleState[]",
-                    "visible": true,
-                    "options": {
-                      "color": "#00ff00",
-                      "arrangement": "0,1,2,3"
-                    }
-                  },
-                  {
-                    "type": "swerveStates",
-                    "logKey": "/RealOutputs/Drive/ModuleStates/SetpointsOptimized",
-                    "logType": "SwerveModuleState[]",
-                    "visible": true,
-                    "options": {
-                      "color": "#0000ff",
-                      "arrangement": "0,1,2,3"
-                    }
                   },
                   {
                     "type": "mechanism",
@@ -421,8 +620,38 @@
                     }
                   },
                   {
+                    "type": "vision",
+                    "logKey": "/RealOutputs/GamePieceVision/FreshCoral",
+                    "logType": "Pose3d[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#ffff00",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "vision",
+                    "logKey": "/RealOutputs/GamePieceVision/StaleCoral",
+                    "logType": "Pose3d[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#ffff00",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "vision",
+                    "logKey": "/RealOutputs/AprilTagVision/Summary/TagPoses",
+                    "logType": "Pose3d[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#00ff00",
+                      "size": "normal"
+                    }
+                  },
+                  {
                     "type": "gamePiece",
-                    "logKey": "/RealOutputs/FieldSimulation/Algae",
+                    "logKey": "/RealOutputs/FieldSimulation/Fuel",
                     "logType": "Pose3d[]",
                     "visible": true,
                     "options": {
@@ -430,42 +659,124 @@
                     }
                   },
                   {
+                    "type": "axes",
+                    "logKey": "/RealOutputs/GamePieceVision/CameraPoses",
+                    "logType": "Pose3d[]",
+                    "visible": true,
+                    "options": {}
+                  },
+                  {
+                    "type": "axes",
+                    "logKey": "/RealOutputs/AprilTagVision/CameraPoses",
+                    "logType": "Pose3d[]",
+                    "visible": true,
+                    "options": {}
+                  },
+                  {
                     "type": "ghost",
-                    "logKey": "/RealOutputs/FieldSimulation/RobotPosition",
-                    "logType": "Pose2d",
+                    "logKey": "/RealOutputs/RobotState/PoseUncertaintyRange",
+                    "logType": "Pose2d[]",
                     "visible": true,
                     "options": {
-                      "model": "955 Ken",
-                      "color": "#00ff00"
+                      "model": "955",
+                      "color": "#ff0000"
                     }
                   }
                 ],
                 "game": "FRC:2026 Field"
               },
-              "controllerUUID": "7m79p1sb9ejtj22ca5m080wv2ifgscwc",
+              "controllerUUID": "s46b4iq5fum17hzyjpr5ytclvp8lnbdm",
               "renderer": {
                 "cameraIndex": -1,
                 "orbitFov": 90,
                 "cameraPosition": [
-                  -6.007272592613287,
-                  5.188530567173247,
-                  0.46632246416566153
+                  -6.994757888583944,
+                  5.008132796582545,
+                  2.1308356904737495
                 ],
                 "cameraTarget": [
-                  -6.0072679030783185,
-                  0.49999399808232486,
-                  0.466322512676728
+                  -5.598184757519526,
+                  0.3412948654667284,
+                  1.7022346149017349
                 ]
               },
+              "controlsHeight": 430
+            },
+            {
+              "type": 9,
+              "title": "Swerve",
+              "controller": {
+                "sources": [
+                  {
+                    "type": "chassisSpeeds",
+                    "logKey": "/RealOutputs/Drive/ChassisSpeeds/Measured",
+                    "logType": "ChassisSpeeds",
+                    "visible": true,
+                    "options": {
+                      "color": "#ff00ff"
+                    }
+                  },
+                  {
+                    "type": "chassisSpeeds",
+                    "logKey": "/RealOutputs/Drive/ChassisSpeeds/SetpointOptimized",
+                    "logType": "ChassisSpeeds",
+                    "visible": true,
+                    "options": {
+                      "color": "#ff8c00"
+                    }
+                  },
+                  {
+                    "type": "states",
+                    "logKey": "/RealOutputs/Drive/ModuleStates/Measured",
+                    "logType": "SwerveModuleState[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#ff0000",
+                      "arrangement": "0,1,2,3"
+                    }
+                  },
+                  {
+                    "type": "states",
+                    "logKey": "/RealOutputs/Drive/ModuleStates/SetpointsOptimized",
+                    "logType": "SwerveModuleState[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#0000ff",
+                      "arrangement": "0,1,2,3"
+                    }
+                  },
+                  {
+                    "type": "states",
+                    "logKey": "/RealOutputs/Drive/ModuleStates/Setpoints",
+                    "logType": "SwerveModuleState[]",
+                    "visible": false,
+                    "options": {
+                      "color": "#00ff00",
+                      "arrangement": "0,1,2,3"
+                    }
+                  }
+                ],
+                "maxSpeed": 5,
+                "sizeX": 0.65,
+                "sizeY": 0.65,
+                "orientation": 1
+              },
+              "controllerUUID": "wweh6ys0ze3722lmpi39xwf5s28zhjwt",
+              "renderer": null,
               "controlsHeight": 200
             },
             {
-              "type": 12,
-              "title": "Metadata",
-              "controller": null,
-              "controllerUUID": "433u2iugocruwp3ixxnf8mirkqilke6s",
+              "type": 2,
+              "title": "2D Field",
+              "controller": {
+                "sources": [],
+                "field": "FRC:2026 Field",
+                "orientation": 0,
+                "size": "large"
+              },
+              "controllerUUID": "wd7v4ikyzz6yaamjknjfkk97r0fyz082",
               "renderer": null,
-              "controlsHeight": 0
+              "controlsHeight": 200
             }
           ]
         }
