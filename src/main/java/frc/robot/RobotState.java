@@ -103,6 +103,7 @@ public class RobotState implements Periodic {
         if (poseUncertaintyAngularRad < 0.0) poseUncertaintyAngularRad = 0.0;
 
         // Log uncertainty range
+        // The Periodic execution order defined in Robot ensures that AprilTagVision will have already reduced uncertainty if there were any vision measurements
         Translation2d t = getTranslation();
         Rotation2d r = getRotation();
         Logger.recordOutput(
