@@ -16,9 +16,9 @@ package frc.robot.subsystems.drive;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
-import edu.wpi.first.math.geometry.*;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Timer;
 import frc.lib.PIDF;
 import org.ironmaple.simulation.SimulatedArena;
@@ -31,7 +31,6 @@ import org.ironmaple.simulation.motorsims.SimulatedMotorController;
 import java.util.Arrays;
 
 import static edu.wpi.first.units.Units.*;
-import static frc.robot.subsystems.apriltagvision.AprilTagVisionConstants.aprilTagLayout;
 import static frc.robot.subsystems.drive.DriveConstants.driveConfig;
 import static frc.robot.subsystems.drive.DriveConstants.moduleConfig;
 
@@ -40,17 +39,6 @@ import static frc.robot.subsystems.drive.DriveConstants.moduleConfig;
  * constants from Phoenix. Simulation is always based on voltage control.
  */
 public class ModuleIOSim extends ModuleIO {
-
-    private static final Pose3d tagPose = new Pose3d(); // tag at origin
-
-    private static final Pose3d tagFieldPose = aprilTagLayout.getTagPose(18).orElseThrow();
-    private static final Transform3d robotFromTag = new Transform3d(
-            new Translation3d(new Translation2d(0.5, 0.0)),
-            new Rotation3d(0.0, 0.0, Units.degreesToRadians(180))
-    );
-    // 3, 3, new Rotation2d()
-    private static final Pose2d robotFieldPose = tagFieldPose.transformBy(robotFromTag).toPose2d();
-
     public static final SwerveDriveSimulation driveSimulation = new SwerveDriveSimulation(
             // Specify Configuration
             DriveTrainSimulationConfig.Default()
@@ -69,8 +57,7 @@ public class ModuleIOSim extends ModuleIO {
                     .withBumperSize(Meters.of(driveConfig.bumperLengthMeters()), Meters.of(driveConfig.bumperWidthMeters()))
                     .withRobotMass(Pounds.of(125)),
             // Specify starting pose
-            robotFieldPose
-
+            new Pose2d(1, 1, new Rotation2d())
     );
 
     static {
