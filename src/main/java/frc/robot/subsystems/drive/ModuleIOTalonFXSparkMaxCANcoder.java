@@ -26,6 +26,7 @@ import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.MagnetHealthValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
@@ -95,6 +96,7 @@ public class ModuleIOTalonFXSparkMaxCANcoder extends ModuleIO {
 
     // Inputs from turn motor
     private final StatusSignal<Angle> turnAbsolutePosition;
+    private final StatusSignal<MagnetHealthValue> turnAbsoluteEncoderMagnetHealth;
     private final Queue<Double> turnPositionQueue;
 
     // Connection debouncers
@@ -186,6 +188,7 @@ public class ModuleIOTalonFXSparkMaxCANcoder extends ModuleIO {
 
         // Create turn status signals
         turnAbsolutePosition = cancoder.getAbsolutePosition();
+        turnAbsoluteEncoderMagnetHealth = cancoder.getMagnetHealth();
         turnPositionQueue = HighFrequencySamplingThread.get().registerSparkSignal(turnSpark, turnEncoder::getPosition);
 
         // Configure periodic frames
@@ -196,7 +199,8 @@ public class ModuleIOTalonFXSparkMaxCANcoder extends ModuleIO {
                 driveAppliedVolts,
                 driveCurrentAmps,
                 driveTemperatureCelsius,
-                turnAbsolutePosition
+                turnAbsolutePosition,
+                turnAbsoluteEncoderMagnetHealth
         );
         ParentDevice.optimizeBusUtilizationForAll(driveTalon, cancoder);
 
@@ -232,8 +236,9 @@ public class ModuleIOTalonFXSparkMaxCANcoder extends ModuleIO {
         inputs.turnConnected = turnConnectedDebounce.calculate(!SparkUtil.sparkStickyFault);
 
         // Update absolute encoder
-        var turnEncoderStatus = BaseStatusSignal.refreshAll(turnAbsolutePosition);
+        var turnEncoderStatus = BaseStatusSignal.refreshAll(turnAbsolutePosition, turnAbsoluteEncoderMagnetHealth);
         inputs.turnAbsoluteEncoderConnected = turnEncoderConnectedDebounce.calculate(turnEncoderStatus.isOK());
+        inputs.turnAbsoluteEncoderMagnetHealth = turnAbsoluteEncoderMagnetHealth.getValue();
         inputs.turnAbsolutePositionRad = Units.rotationsToRadians(turnAbsolutePosition.getValueAsDouble());
 
         // Update odometry inputs

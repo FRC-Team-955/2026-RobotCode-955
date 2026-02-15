@@ -82,6 +82,7 @@ public class ModuleIOTalonFXCANcoder extends ModuleIO {
 
     // Inputs from turn motor
     private final StatusSignal<Angle> turnAbsolutePosition;
+    private final StatusSignal<MagnetHealthValue> turnAbsoluteEncoderMagnetHealth;
     private final StatusSignal<Angle> turnPosition;
     private final Queue<Double> turnPositionQueue;
     private final StatusSignal<AngularVelocity> turnVelocity;
@@ -164,6 +165,7 @@ public class ModuleIOTalonFXCANcoder extends ModuleIO {
 
         // Create turn status signals
         turnAbsolutePosition = cancoder.getAbsolutePosition();
+        turnAbsoluteEncoderMagnetHealth = cancoder.getMagnetHealth();
         turnPosition = turnTalon.getPosition();
         turnPositionQueue = HighFrequencySamplingThread.get().registerPhoenixSignal(turnTalon.getPosition());
         turnVelocity = turnTalon.getVelocity();
@@ -180,6 +182,7 @@ public class ModuleIOTalonFXCANcoder extends ModuleIO {
                 driveCurrentAmps,
                 driveTemperatureCelsius,
                 turnAbsolutePosition,
+                turnAbsoluteEncoderMagnetHealth,
                 turnVelocity,
                 turnAppliedVolts,
                 turnCurrentAmps,
@@ -193,7 +196,7 @@ public class ModuleIOTalonFXCANcoder extends ModuleIO {
         // Refresh all signals
         var driveStatus = BaseStatusSignal.refreshAll(drivePosition, driveVelocity, driveAppliedVolts, driveCurrentAmps, driveTemperatureCelsius);
         var turnStatus = BaseStatusSignal.refreshAll(turnPosition, turnVelocity, turnAppliedVolts, turnCurrentAmps, turnTemperatureCelsius);
-        var turnEncoderStatus = BaseStatusSignal.refreshAll(turnAbsolutePosition);
+        var turnEncoderStatus = BaseStatusSignal.refreshAll(turnAbsolutePosition, turnAbsoluteEncoderMagnetHealth);
 
         // Update drive inputs
         inputs.driveConnected = driveConnectedDebounce.calculate(driveStatus.isOK());
@@ -206,6 +209,7 @@ public class ModuleIOTalonFXCANcoder extends ModuleIO {
         // Update turn inputs
         inputs.turnConnected = turnConnectedDebounce.calculate(turnStatus.isOK());
         inputs.turnAbsoluteEncoderConnected = turnEncoderConnectedDebounce.calculate(turnEncoderStatus.isOK());
+        inputs.turnAbsoluteEncoderMagnetHealth = turnAbsoluteEncoderMagnetHealth.getValue();
         inputs.turnAbsolutePositionRad = Units.rotationsToRadians(turnAbsolutePosition.getValueAsDouble());
         inputs.turnPositionRad = Units.rotationsToRadians(turnPosition.getValueAsDouble());
         inputs.turnVelocityRadPerSec = Units.rotationsToRadians(turnVelocity.getValueAsDouble());

@@ -18,6 +18,7 @@ import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.ParentDevice;
+import com.ctre.phoenix6.signals.MagnetHealthValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
@@ -71,6 +72,7 @@ public class ModuleIOSparkMaxCANcoder extends ModuleIO {
     private final Queue<Double> turnPositionQueue;
 
     private final StatusSignal<Angle> turnAbsolutePosition;
+    private final StatusSignal<MagnetHealthValue> turnAbsoluteEncoderMagnetHealth;
 
     // Connection debouncers
     private final Debouncer driveConnectedDebounce = new Debouncer(0.5);
@@ -170,8 +172,9 @@ public class ModuleIOSparkMaxCANcoder extends ModuleIO {
         PhoenixUtil.tryUntilOk(5, () -> cancoder.getConfigurator().apply(cancoderConfig));
 
         turnAbsolutePosition = cancoder.getAbsolutePosition();
+        turnAbsoluteEncoderMagnetHealth = cancoder.getMagnetHealth();
 
-        BaseStatusSignal.setUpdateFrequencyForAll(50.0, turnAbsolutePosition);
+        BaseStatusSignal.setUpdateFrequencyForAll(50.0, turnAbsolutePosition, turnAbsoluteEncoderMagnetHealth);
         ParentDevice.optimizeBusUtilizationForAll(cancoder);
 
         SparkCANcoderHelper.resetTurnSpark(turnEncoder, turnAbsolutePosition, cancoderCanID);
@@ -215,8 +218,9 @@ public class ModuleIOSparkMaxCANcoder extends ModuleIO {
         inputs.turnConnected = turnConnectedDebounce.calculate(!SparkUtil.sparkStickyFault);
 
         // Turn cancoder
-        var turnEncoderStatus = BaseStatusSignal.refreshAll(turnAbsolutePosition);
+        var turnEncoderStatus = BaseStatusSignal.refreshAll(turnAbsolutePosition, turnAbsoluteEncoderMagnetHealth);
         inputs.turnAbsoluteEncoderConnected = turnEncoderConnectedDebounce.calculate(turnEncoderStatus.isOK());
+        inputs.turnAbsoluteEncoderMagnetHealth = turnAbsoluteEncoderMagnetHealth.getValue();
         inputs.turnAbsolutePositionRad = Units.rotationsToRadians(turnAbsolutePosition.getValueAsDouble());
 
         // Update odometry inputs

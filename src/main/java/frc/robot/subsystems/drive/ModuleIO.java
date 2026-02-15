@@ -13,6 +13,7 @@
 
 package frc.robot.subsystems.drive;
 
+import com.ctre.phoenix6.signals.MagnetHealthValue;
 import frc.lib.PIDF;
 import org.littletonrobotics.junction.AutoLog;
 
@@ -34,6 +35,7 @@ public class ModuleIO {
         public double turnTemperatureCelsius = 0.0;
 
         public boolean turnAbsoluteEncoderConnected = false;
+        public MagnetHealthValue turnAbsoluteEncoderMagnetHealth = MagnetHealthValue.Magnet_Invalid;
         public double turnAbsolutePositionRad = 0.0;
 
         public double[] odometryTimestamps = new double[]{};
