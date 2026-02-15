@@ -6,7 +6,6 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.lib.SlewRateLimiter2d;
 import frc.lib.network.LoggedTunableNumber;
-import frc.lib.wpilib.SlewRateLimiter;
 import frc.robot.Controller;
 import frc.robot.RobotState;
 import frc.robot.ShootingKinematics;
@@ -22,14 +21,12 @@ import static frc.robot.subsystems.drive.DriveTuning.headingOverrideGainsTunable
 public class DriveJoystickWithAimingGoal extends DriveGoal {
     private static final LoggedTunableNumber maxVelocityMetersPerSec = new LoggedTunableNumber("Drive/DriveJoystickWithAiming/MaxVelocityMetersPerSec", 2);
     private static final LoggedTunableNumber maxLinearAccelerationMetersPerSecPerSec = new LoggedTunableNumber("Drive/DriveJoystickWithAiming/MaxLinearAccelerationMetersPerSecPerSec", 5);
-    private static final LoggedTunableNumber maxAngularAccelerationRadPerSecPerSec = new LoggedTunableNumber("Drive/DriveJoystickWithAiming/MaxAngularAccelerationRadPerSecPerSec", 15);
 
     private static final RobotState robotState = RobotState.get();
     private static final Controller controller = Controller.get();
     private static final ShootingKinematics shootingKinematics = ShootingKinematics.get();
 
     private final SlewRateLimiter2d linearAccelerationLimiter = new SlewRateLimiter2d(maxLinearAccelerationMetersPerSecPerSec.get(), robotState.getMeasuredChassisSpeeds());
-    private final SlewRateLimiter angularAccelerationLimiter = new SlewRateLimiter(maxAngularAccelerationRadPerSecPerSec.get(), robotState.getMeasuredChassisSpeeds().omegaRadiansPerSecond);
     private final PIDController headingOverride = headingOverrideGainsTunable.getOrOriginal().toPIDWrapRadians();
 
     private Rotation2d lastLinearDirection = new Rotation2d();
@@ -39,9 +36,6 @@ public class DriveJoystickWithAimingGoal extends DriveGoal {
         headingOverrideGainsTunable.ifChanged(gains -> gains.applyPID(headingOverride));
         if (maxLinearAccelerationMetersPerSecPerSec.hasChanged()) {
             linearAccelerationLimiter.setLimit(maxLinearAccelerationMetersPerSecPerSec.get());
-        }
-        if (maxAngularAccelerationRadPerSecPerSec.hasChanged()) {
-            angularAccelerationLimiter.setLimit(maxAngularAccelerationRadPerSecPerSec.get());
         }
 
         //////////////////////////////////////////////////////////////////////
@@ -62,8 +56,6 @@ public class DriveJoystickWithAimingGoal extends DriveGoal {
         Logger.recordOutput("Drive/DriveJoystickWithAiming/LinearMagnitudeLimited", linearVelocity.getNorm());
 
         double angularVelocity = headingOverride.calculate(robotState.getRotation().getRadians(), shootingKinematics.getShootingParameters().headingRad());
-        angularVelocity = angularAccelerationLimiter.calculate(angularVelocity);
-        Logger.recordOutput("Drive/DriveJoystickWithAiming/AngularVelocityLimited", angularVelocity);
 
         if (linearMagnitude == 0.0 && Math.abs(angularVelocity) <= DriveConstants.joystickDriveDeadband) {
             return DriveRequest.stopWithX();
