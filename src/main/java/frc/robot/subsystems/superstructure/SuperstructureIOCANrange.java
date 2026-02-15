@@ -12,7 +12,7 @@ import edu.wpi.first.units.measure.Time;
 import frc.lib.PhoenixUtil;
 import frc.robot.Constants;
 
-public class SuperstructureIOReal extends SuperstructureIO {
+public class SuperstructureIOCANrange extends SuperstructureIO {
     private final CANrange canrange = new CANrange(-1, Constants.canivoreBus);
 
     private final StatusSignal<Distance> distance;
@@ -24,7 +24,7 @@ public class SuperstructureIOReal extends SuperstructureIO {
 
     private final Debouncer canrangeConnectedDebouncer = new Debouncer(0.5);
 
-    public SuperstructureIOReal() {
+    public SuperstructureIOCANrange() {
         // https://v6.docs.ctr-electronics.com/en/stable/docs/application-notes/tuning-canrange.html
         var canrangeConfig = new CANrangeConfiguration();
         canrangeConfig.FovParams.FOVRangeX = 8.0;

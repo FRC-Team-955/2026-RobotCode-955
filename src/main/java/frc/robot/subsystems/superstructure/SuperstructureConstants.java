@@ -7,7 +7,7 @@ public class SuperstructureConstants {
 
     static SuperstructureIO createIO() {
         return switch (BuildConstants.mode) {
-            case REAL -> new SuperstructureIOReal();
+            case REAL -> new SuperstructureIOCANrange();
             case SIM -> new SuperstructureIOSim();
             case REPLAY -> new SuperstructureIO();
         };
