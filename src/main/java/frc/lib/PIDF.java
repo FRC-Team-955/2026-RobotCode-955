@@ -19,14 +19,14 @@ import java.util.function.Consumer;
  * <ul>
  *     <li><code>kP</code>: volts / (rad [per sec] of error)</li>
  *     <li><code>kI</code>: volts / (rad [per sec] of accumulated error)</li>
- *     <li><code>kD</code>: volts / (rad per sec [squared] of derivative error)</li>
+ *     <li><code>kD</code>: volts / (rad per sec [per sec] of derivative error)</li>
  *     <ul>
  *         <li>position control derivative is velocity</li>
  *         <li>velocity control derivative is acceleration</li>
  *     </ul>
  *     <li><code>kS</code>: volts</li>
  *     <li><code>kV</code>: volts / (rad per sec)</li>
- *     <li><code>kA</code>: volts / (rad per sec squared)</li>
+ *     <li><code>kA</code>: volts / (rad per sec per sec)</li>
  *     <li><code>kG</code>: volts</li>
  * </ul>
  */

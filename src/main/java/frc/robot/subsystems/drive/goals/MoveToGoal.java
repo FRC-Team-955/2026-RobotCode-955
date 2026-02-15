@@ -26,7 +26,7 @@ public class MoveToGoal extends DriveGoal {
     private static final PIDF.Tunable moveToLinearTunable = moveToConfig.linear().tunable("Drive/MoveTo/Linear");
     private static final PIDF.Tunable moveToAngularTunable = moveToConfig.angular().tunable("Drive/MoveTo/Angular");
 
-    private static final LoggedTunableNumber maxAccelerationMetersPerSecSquared = new LoggedTunableNumber("Drive/MoveTo/MaxAccelerationMetersPerSecSquared", moveToConfig.maxAccelerationMetersPerSecSquared());
+    private static final LoggedTunableNumber maxAccelerationMetersPerSecPerSec = new LoggedTunableNumber("Drive/MoveTo/MaxAccelerationMetersPerSecPerSec", moveToConfig.maxAccelerationMetersPerSecPerSec());
 
     private static final RobotState robotState = RobotState.get();
     private static final Controller controller = Controller.get();
@@ -39,7 +39,7 @@ public class MoveToGoal extends DriveGoal {
                     moveToConfig.linearPositionToleranceMeters(),
                     moveToConfig.linearVelocityToleranceMetersPerSec()
             );
-    private final SlewRateLimiter2d moveToLinearAccelerationLimiter = new SlewRateLimiter2d(maxAccelerationMetersPerSecSquared.get(), robotState.getMeasuredChassisSpeeds());
+    private final SlewRateLimiter2d moveToLinearAccelerationLimiter = new SlewRateLimiter2d(maxAccelerationMetersPerSecPerSec.get(), robotState.getMeasuredChassisSpeeds());
 
     private final PIDController moveToAngular = moveToAngularTunable.getOrOriginal()
             .toPIDWrapRadians(
@@ -51,8 +51,8 @@ public class MoveToGoal extends DriveGoal {
     public DriveRequest getRequest() {
         moveToLinearTunable.ifChanged(gains -> gains.applyPID(moveToLinear));
         moveToAngularTunable.ifChanged(gains -> gains.applyPID(moveToAngular));
-        if (maxAccelerationMetersPerSecSquared.hasChanged()) {
-            moveToLinearAccelerationLimiter.setLimit(maxAccelerationMetersPerSecSquared.get());
+        if (maxAccelerationMetersPerSecPerSec.hasChanged()) {
+            moveToLinearAccelerationLimiter.setLimit(maxAccelerationMetersPerSecPerSec.get());
         }
 
         //////////////////////////////////////////////////////////////////////

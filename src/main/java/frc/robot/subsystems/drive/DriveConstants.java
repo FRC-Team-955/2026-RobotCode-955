@@ -137,7 +137,7 @@ public class DriveConstants {
             double linearVelocityToleranceMetersPerSec,
             double angularPositionToleranceRad,
             double angularVelocityToleranceRadPerSec,
-            double maxAccelerationMetersPerSecSquared // Maximum acceleration of the robot during move to
+            double maxAccelerationMetersPerSecPerSec // Maximum acceleration of the robot during move to
     ) {
     }
 
