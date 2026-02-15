@@ -8,7 +8,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
-import frc.lib.Util;
+import frc.lib.AllianceFlipUtil;
 import frc.lib.network.LoggedTunableNumber;
 import frc.lib.subsystem.Periodic;
 import lombok.Getter;
@@ -83,7 +83,7 @@ public class ShootingKinematics implements Periodic {
         );
         Logger.recordOutput("ShootingKinematics/FuelExitPose", fuelExitPose);
 
-        Translation3d hubTranslation = Util.flipIfNeeded(blueHubTranslation);
+        Translation3d hubTranslation = AllianceFlipUtil.apply(blueHubTranslation);
         Pose3d hubPose = new Pose3d(hubTranslation, new Rotation3d());
         Transform3d fuelExitToHub = new Transform3d(fuelExitPose, hubPose);
 

@@ -11,7 +11,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.lib.Util;
+import frc.lib.AllianceFlipUtil;
 import frc.lib.controller.CommandSteamInputController;
 import frc.lib.subsystem.Periodic;
 import lombok.Getter;
@@ -92,7 +92,7 @@ public class Controller implements Periodic {
         Translation2d linearVelocity;
         if (x != 0 || y != 0) {
             driveLinearDirection = new Rotation2d(x, y);
-            if (Util.shouldFlip()) {
+            if (AllianceFlipUtil.shouldFlip()) {
                 driveLinearDirection = driveLinearDirection.plus(Rotation2d.k180deg);
             }
             linearVelocity = new Translation2d(driveLinearMagnitude, driveLinearDirection);
@@ -125,7 +125,7 @@ public class Controller implements Periodic {
 
         // Flip joystick direction to match robot to assist direction
         // Joystick direction is relative to alliance wall and needs to be flipped on red alliance to match origin
-        Rotation2d joystickLinearDirectionFlipped = Util.flipIfNeeded(driveLinearDirection);
+        Rotation2d joystickLinearDirectionFlipped = AllianceFlipUtil.apply(driveLinearDirection);
         Logger.recordOutput("Controller/Drive/Assist/FlippedJoystickLinearDirection", joystickLinearDirectionFlipped);
 
         // Get difference between joystick direction and assist direction

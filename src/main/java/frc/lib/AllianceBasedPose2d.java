@@ -2,7 +2,7 @@ package frc.lib;
 
 import edu.wpi.first.math.geometry.Pose2d;
 
-import static frc.lib.Util.shouldFlip;
+import static frc.lib.AllianceFlipUtil.shouldFlip;
 
 public class AllianceBasedPose2d {
     private final Pose2d blue;

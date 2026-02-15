@@ -1,9 +1,5 @@
 package frc.lib;
 
-import choreo.util.ChoreoAllianceFlipUtil;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -20,28 +16,6 @@ public class Util {
     private static final double epsilon = 1E-6;
 
     public static final Executor asyncExecutor = Executors.newFixedThreadPool(4);
-
-    public static boolean shouldFlip() {
-        return DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == DriverStation.Alliance.Red;
-    }
-
-    public static Rotation2d flipIfNeeded(Rotation2d rotation2d) {
-        return shouldFlip()
-                ? rotation2d.plus(Rotation2d.kPi)
-                : rotation2d;
-    }
-
-    public static Pose2d flipIfNeeded(Pose2d pose2d) {
-        return shouldFlip()
-                ? ChoreoAllianceFlipUtil.flip(pose2d)
-                : pose2d;
-    }
-
-    public static Translation3d flipIfNeeded(Translation3d translation3d) {
-        return shouldFlip()
-                ? ChoreoAllianceFlipUtil.flip(translation3d)
-                : translation3d;
-    }
 
     private static final Set<String> loggedErrors = new HashSet<>();
 

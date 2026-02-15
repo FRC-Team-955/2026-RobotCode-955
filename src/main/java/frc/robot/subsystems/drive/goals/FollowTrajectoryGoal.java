@@ -5,6 +5,7 @@ import choreo.trajectory.Trajectory;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Timer;
+import frc.lib.AllianceFlipUtil;
 import frc.lib.Util;
 import frc.robot.RobotState;
 import frc.robot.subsystems.drive.DriveGoal;
@@ -33,7 +34,7 @@ public class FollowTrajectoryGoal extends DriveGoal {
 
         Logger.recordOutput("Drive/Trajectory", trajectory.getPoses());
 
-        var sampleOpt = trajectory.sampleAt(timer.get(), Util.shouldFlip());
+        var sampleOpt = trajectory.sampleAt(timer.get(), AllianceFlipUtil.shouldFlip());
         if (sampleOpt.isPresent()) {
             SwerveSample sample = sampleOpt.get();
 
