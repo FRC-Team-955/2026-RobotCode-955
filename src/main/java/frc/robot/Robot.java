@@ -58,7 +58,7 @@ public class Robot extends LoggedRobot {
         super(Constants.loopPeriod);
 
         @SuppressWarnings("resource")
-        Notifier ledsStartupNotifier = LEDs.get().createAndStartStartupNotifier();
+        Notifier ledsStartupNotifier = LEDs.createAndStartStartupNotifier();
 
         AutoLogOutputManager.addPackage("frc");
 

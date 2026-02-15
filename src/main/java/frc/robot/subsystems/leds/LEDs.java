@@ -22,7 +22,8 @@ public class LEDs implements Periodic {
     private final Superintake superintake = Superintake.get();
     private final Superstructure superstructure = Superstructure.get();
 
-    private final LEDsIO io = createIO();
+    // See createAndStartStartupNotifier for why this is static
+    private static final LEDsIO io = createIO();
 
     private final AddressableLEDBuffer buffer = new AddressableLEDBuffer(length);
     private final AddressableLEDBufferView firstHalfView = new AddressableLEDBufferView(buffer, 0, length / 2 - 1);
@@ -63,8 +64,13 @@ public class LEDs implements Periodic {
         }
     }
 
-    public Notifier createAndStartStartupNotifier() {
+    /**
+     * If we don't make this static, LEDs will need to be instantiated, which means that
+     * Superintake, Superstructure, etc etc needs to be instantiated as well.
+     */
+    public static Notifier createAndStartStartupNotifier() {
         LEDPattern pattern = LEDPatterns.startup();
+        AddressableLEDBuffer buffer = new AddressableLEDBuffer(length);
         Runnable callback = () -> {
             pattern.applyTo(buffer);
             io.setData(buffer);
