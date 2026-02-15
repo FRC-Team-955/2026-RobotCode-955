@@ -23,7 +23,7 @@ import org.photonvision.simulation.VisionSystemSim;
 
 import java.util.function.Supplier;
 
-import static frc.robot.subsystems.apriltagvision.AprilTagVisionConstants.aprilTagLayout;
+import static frc.robot.FieldConstants.aprilTagLayout;
 
 /**
  * IO implementation for physics sim using PhotonVision simulator.

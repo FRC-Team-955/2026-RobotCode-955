@@ -13,8 +13,6 @@
 
 package frc.robot.subsystems.apriltagvision;
 
-import edu.wpi.first.apriltag.AprilTagFieldLayout;
-import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.util.Units;
@@ -24,9 +22,6 @@ import lombok.RequiredArgsConstructor;
 import java.util.function.Function;
 
 public class AprilTagVisionConstants {
-    // AprilTag layout
-    public static final AprilTagFieldLayout aprilTagLayout = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
-
     // Basic filtering thresholds
     static final double maxAmbiguity = 0.3;
     static final double maxZError = 0.2;

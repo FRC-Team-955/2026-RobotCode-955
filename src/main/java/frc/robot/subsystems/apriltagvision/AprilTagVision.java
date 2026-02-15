@@ -26,6 +26,7 @@ import org.littletonrobotics.junction.Logger;
 
 import java.util.*;
 
+import static frc.robot.FieldConstants.aprilTagLayout;
 import static frc.robot.subsystems.apriltagvision.AprilTagVisionConstants.*;
 
 public class AprilTagVision implements Periodic {
