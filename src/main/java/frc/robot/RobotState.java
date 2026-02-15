@@ -91,7 +91,7 @@ public class RobotState implements Periodic {
         poseUncertaintyLinearXMeters += Constants.loopPeriod * chassisSpeedsLinearFactor * Math.abs(measuredChassisSpeeds.vxMetersPerSecond);
         poseUncertaintyLinearYMeters += Constants.loopPeriod * chassisSpeedsLinearFactor * Math.abs(measuredChassisSpeeds.vyMetersPerSecond);
         // Gyro is generally pretty trustworthy
-        final double chassisSpeedsAngularFactor = 0.002;
+        final double chassisSpeedsAngularFactor = 0.0005;
         poseUncertaintyAngularRad += Constants.loopPeriod * chassisSpeedsAngularFactor * Math.abs(measuredChassisSpeeds.omegaRadiansPerSecond);
 
         // Increase uncertainty if we went over the bump
@@ -139,7 +139,7 @@ public class RobotState implements Periodic {
         poseUncertaintyLinearXMeters -= poseUncertaintyLinearXMeters * stdDevLinearFactor / linearStdDev;
         poseUncertaintyLinearYMeters -= poseUncertaintyLinearYMeters * stdDevLinearFactor / linearStdDev;
         // Gyro is generally pretty trustworthy
-        poseUncertaintyAngularRad -= 0.0002 / angularStdDev;
+        poseUncertaintyAngularRad -= 0.0005 / angularStdDev;
     }
 
     public Optional<Pose2d> getPoseAtTimestamp(double timestampSeconds) {
