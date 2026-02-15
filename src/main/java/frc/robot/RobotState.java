@@ -133,9 +133,10 @@ public class RobotState implements Periodic {
         poseEstimator.addVisionMeasurement(visionRobotPoseMeters, timestampSeconds, VecBuilder.fill(linearStdDev, linearStdDev, angularStdDev));
 
         // Decrease uncertainty based on std devs
-        double stdDevLinearDecrease = 0.015 / linearStdDev;
-        poseUncertaintyLinearXMeters -= stdDevLinearDecrease;
-        poseUncertaintyLinearYMeters -= stdDevLinearDecrease;
+        final double stdDevLinearFactor = 0.1;
+        // Make X and Y converge at roughly the same rate by making decrease proportional to uncertainty
+        poseUncertaintyLinearXMeters -= poseUncertaintyLinearXMeters * stdDevLinearFactor / linearStdDev;
+        poseUncertaintyLinearYMeters -= poseUncertaintyLinearYMeters * stdDevLinearFactor / linearStdDev;
         // Gyro is generally pretty trustworthy
         poseUncertaintyAngularRad -= 0.0002 / angularStdDev;
     }
