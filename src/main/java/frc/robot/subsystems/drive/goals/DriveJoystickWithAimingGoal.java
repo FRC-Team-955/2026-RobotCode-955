@@ -10,6 +10,7 @@ import frc.lib.wpilib.SlewRateLimiter;
 import frc.robot.Controller;
 import frc.robot.RobotState;
 import frc.robot.ShootingKinematics;
+import frc.robot.subsystems.drive.DriveConstants;
 import frc.robot.subsystems.drive.DriveGoal;
 import frc.robot.subsystems.drive.DriveRequest;
 import lombok.RequiredArgsConstructor;
@@ -64,11 +65,15 @@ public class DriveJoystickWithAimingGoal extends DriveGoal {
         angularVelocity = angularAccelerationLimiter.calculate(angularVelocity);
         Logger.recordOutput("Drive/DriveJoystickWithAiming/AngularVelocityLimited", angularVelocity);
 
-        return DriveRequest.chassisSpeeds(ChassisSpeeds.fromFieldRelativeSpeeds(
-                linearVelocity.getX(),
-                linearVelocity.getY(),
-                angularVelocity,
-                robotState.getRotation()
-        ));
+        if (linearMagnitude == 0.0 && Math.abs(angularVelocity) <= DriveConstants.joystickDriveDeadband) {
+            return DriveRequest.stopWithX();
+        } else {
+            return DriveRequest.chassisSpeeds(ChassisSpeeds.fromFieldRelativeSpeeds(
+                    linearVelocity.getX(),
+                    linearVelocity.getY(),
+                    angularVelocity,
+                    robotState.getRotation()
+            ));
+        }
     }
 }

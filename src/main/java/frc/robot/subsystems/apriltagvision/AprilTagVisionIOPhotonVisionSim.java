@@ -29,7 +29,7 @@ import static frc.robot.subsystems.apriltagvision.AprilTagVisionConstants.aprilT
  * IO implementation for physics sim using PhotonVision simulator.
  */
 public class AprilTagVisionIOPhotonVisionSim extends AprilTagVisionIOPhotonVision {
-    private static VisionSystemSim visionSim;
+    public static VisionSystemSim visionSim;
 
     private static final Supplier<Pose2d> poseSupplier = ModuleIOSim.driveSimulation::getSimulatedDriveTrainPose;
     private final PhotonCameraSim cameraSim;
@@ -46,7 +46,7 @@ public class AprilTagVisionIOPhotonVisionSim extends AprilTagVisionIOPhotonVisio
         // Add sim camera
         var cameraProperties = new SimCameraProperties();
         cameraProperties.setCalibration(1600, 1200, Rotation2d.fromDegrees(95.5));
-        cameraProperties.setCalibError(5, 3);
+        cameraProperties.setCalibError(0, 0);
         cameraProperties.setFPS(25);
         cameraProperties.setAvgLatencyMs(45);
         cameraProperties.setLatencyStdDevMs(10);
@@ -56,6 +56,7 @@ public class AprilTagVisionIOPhotonVisionSim extends AprilTagVisionIOPhotonVisio
 
     @Override
     public void updateInputs(AprilTagVisionIOInputs inputs) {
+        // TODO: fix multiple update in one cycle
         visionSim.update(poseSupplier.get());
         super.updateInputs(inputs);
     }

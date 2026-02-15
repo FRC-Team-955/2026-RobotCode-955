@@ -40,10 +40,11 @@ public class Controller implements Periodic {
     private static Controller instance;
 
     public static Controller get() {
-        if (instance == null)
-            synchronized (Controller.class) {
+        synchronized (Controller.class) {
+            if (instance == null) {
                 instance = new Controller();
             }
+        }
 
         return instance;
     }

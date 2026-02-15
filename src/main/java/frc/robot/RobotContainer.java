@@ -1,7 +1,7 @@
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
@@ -9,17 +9,17 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.CANLogger;
+import frc.lib.commands.CommandsExt;
 import frc.robot.subsystems.apriltagvision.AprilTagVision;
 import frc.robot.subsystems.drive.Drive;
-import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.goals.WheelRadiusCharacterizationGoal;
 import frc.robot.subsystems.gamepiecevision.GamePieceVision;
 import frc.robot.subsystems.leds.LEDs;
 import frc.robot.subsystems.superintake.Superintake;
 import frc.robot.subsystems.superstructure.Superstructure;
-import org.ironmaple.simulation.SimulatedArena;
-import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeAlgaeOnFly;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
+
+import java.util.Optional;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -88,6 +88,7 @@ public class RobotContainer {
      */
     private void configureBindings() {
         controller.y().onTrue(robotState.resetRotation());
+        controller.x().onTrue(superintake.autoIntakeCoral().alongWith(superintake.setGoal(Superintake.Goal.IDLE)));
 
         var shouldAutoAim = new Trigger(() -> operatorDashboard.getSelectedScoringMode() == OperatorDashboard.ScoringMode.ShootAndPassAutomatic);
         controller.leftTrigger()
@@ -100,22 +101,39 @@ public class RobotContainer {
                 .and(shouldAutoAim.negate())
                 .whileTrue(superstructure.setGoal(Superstructure.Goal.SHOOT));
 
+
         controller.rightTrigger()
-                .whileTrue(superintake.setGoal(Superintake.Goal.INTAKE));
+                .whileTrue(superintake.setGoal(Superintake.Goal.INTAKE).alongWith(
+                        drive.driveJoystickWithAssist(() -> {
+                                    Pose2d robotPose = robotState.getPose();
+                                    Pose2d closestCoral = null;
+                                    double closestDist = Double.MAX_VALUE;
+
+                                    for (var coral : gamePieceVision.getFreshCoral()) {
+                                        Pose2d coralPose = coral.toPose2d();
+                                        double dist = coralPose.getTranslation().getDistance(robotPose.getTranslation());
+
+                                        if (dist < closestDist) {
+                                            closestDist = dist;
+                                            closestCoral = coralPose;
+                                        }
+                                    }
+
+                                    return Optional.ofNullable(closestCoral);
+                                }
+
+                        )));
+
+        controller.a()
+                .onTrue(CommandsExt.eagerSequence(
+                        superstructure.setGoal(Superstructure.Goal.IDLE),
+                        superintake.setGoal(Superintake.Goal.IDLE)
+                ).ignoringDisable(true));
 
         controller.leftTrigger().whileTrue(Commands.repeatingSequence(
                 Commands.runOnce(() -> {
-                    if (!shootingKinematics.isValidShootingParameters()) return;
-                    SimulatedArena.getInstance().addGamePieceProjectile(new ReefscapeAlgaeOnFly(
-                            ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose().getTranslation(),
-                            ShootingKinematics.fuelExitTransform.getTranslation().toTranslation2d(),
-                            ModuleIOSim.driveSimulation.getDriveTrainSimulatedChassisSpeedsFieldRelative(),
-                            //Rotation2d.fromRadians(shootingKinematics.getShootingParameters().headingRad()),
-                            ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose().getRotation(),
-                            Units.Meters.of(ShootingKinematics.fuelExitTransform.getTranslation().getZ()),
-                            Units.MetersPerSecond.of(shootingKinematics.getShootingParameters().velocityMetersPerSec()),
-                            Units.Radians.of(shootingKinematics.getShootingParameters().hoodAngleRad())
-                    ).disableBecomesGamePieceOnFieldAfterTouchGround());
+                    if (!shootingKinematics.isValidShootingParameters()) {
+                    }
                 }),
                 Commands.waitSeconds(0.1)
         ));

@@ -29,12 +29,12 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.*;
 import frc.lib.HighFrequencySamplingThread;
 import frc.lib.PIDF;
-import frc.robot.Constants;
 
 import java.util.Queue;
 
 import static frc.lib.PhoenixUtil.tryUntilOk;
 import static frc.lib.PhoenixUtil.tryUntilOkAsync;
+import static frc.robot.Constants.canivoreBus;
 import static frc.robot.subsystems.drive.DriveConstants.moduleConfig;
 
 /**
@@ -100,9 +100,9 @@ public class ModuleIOTalonFXCANcoder extends ModuleIO {
             int cancoderCanID,
             double absoluteEncoderOffsetRad
     ) {
-        driveTalon = new TalonFX(driveCanID, Constants.CANivore.busName);
-        turnTalon = new TalonFX(turnCanID, Constants.CANivore.busName);
-        cancoder = new CANcoder(cancoderCanID, Constants.CANivore.busName);
+        driveTalon = new TalonFX(driveCanID, canivoreBus);
+        turnTalon = new TalonFX(turnCanID, canivoreBus);
+        cancoder = new CANcoder(cancoderCanID, canivoreBus);
 
         // Configure drive motor
         driveConfig = new TalonFXConfiguration();

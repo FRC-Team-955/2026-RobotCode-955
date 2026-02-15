@@ -53,10 +53,11 @@ public class ExampleRollerSubsystem implements Periodic {
     private static ExampleRollerSubsystem instance;
 
     public static ExampleRollerSubsystem get() {
-        if (instance == null)
-            synchronized (ExampleRollerSubsystem.class) {
+        synchronized (ExampleRollerSubsystem.class) {
+            if (instance == null) {
                 instance = new ExampleRollerSubsystem();
             }
+        }
 
         return instance;
     }
@@ -104,12 +105,9 @@ public class ExampleRollerSubsystem implements Periodic {
     public boolean atGoal() {
         double value = goal.value.getAsDouble();
         return switch (goal.type) {
-            case PositionRad -> Math.abs(inputs.positionRad - value) <= tolerances.positionToleranceRad();
+            case VelocityRadPerSec -> Math.abs(inputs.velocityRadPerSec - value) <= velocityToleranceRadPerSec;
 
-            case VelocityRadPerSec ->
-                    Math.abs(inputs.velocityRadPerSec - value) <= tolerances.velocityToleranceRadPerSec();
-
-            case VoltageVolts -> Math.abs(inputs.appliedVolts - value) <= tolerances.voltageToleranceVolts();
+            case PositionRad, VoltageVolts -> false;
         };
     }
 

@@ -65,10 +65,11 @@ public class Drive extends CommandBasedSubsystem {
     private static Drive instance;
 
     public static Drive get() {
-        if (instance == null)
-            synchronized (Drive.class) {
+        synchronized (Drive.class) {
+            if (instance == null) {
                 instance = new Drive();
             }
+        }
 
         return instance;
     }
@@ -273,6 +274,17 @@ public class Drive extends CommandBasedSubsystem {
             for (var module : modules) {
                 module.runCharacterization(request.value().vxMetersPerSecond);
             }
+        } else if (request.type() == DriveRequest.Type.STOP_WITH_X) {
+            Rotation2d[] headings = new Rotation2d[modules.length];
+            for (int i = 0; i < modules.length; i++) {
+                headings[i] = moduleTranslations[i].getAngle();
+                modules[i].runSetpoint(new SwerveModuleState(0.0, headings[i]));
+            }
+            // Why does this work? See SwerveDriveKinematics.toModuleStates
+            robotState.getKinematics().resetHeadings(headings);
+            //closedLoopSetpoint = new ChassisSpeeds();
+
+
         } else {
             Util.error("Unknown request type: " + request.type());
         }
@@ -283,15 +295,7 @@ public class Drive extends CommandBasedSubsystem {
 //     * Stops the drive and turns the modules to an X arrangement to resist movement. The modules will
 //     * return to their normal orientations the next time a nonzero velocity is requested.
 //     */
-//    private void stopWithX() {
-//        Rotation2d[] headings = new Rotation2d[modules.length];
-//        for (int i = 0; i < modules.length; i++) {
-//            headings[i] = moduleTranslations[i].getAngle();
-//        }
-//        // Why does this work? See SwerveDriveKinematics.toModuleStates
-//        robotState.getKinematics().resetHeadings(headings);
-//        closedLoopSetpoint = new ChassisSpeeds();
-//    }
+
 
     /**
      * Returns the module states (turn angles and drive velocities) for all of the modules.
@@ -354,6 +358,10 @@ public class Drive extends CommandBasedSubsystem {
 
     public Command fullSpeedCharacterization() {
         return startIdle(() -> goal = new FullSpeedCharacterizationGoal());
+    }
+
+    public Command idle() {
+        return run(() -> goal.getRequest());
     }
 
     public Command wheelRadiusCharacterization(WheelRadiusCharacterizationGoal.Direction direction) {

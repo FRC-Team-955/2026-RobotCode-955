@@ -22,16 +22,17 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import frc.lib.HighFrequencySamplingThread;
-import frc.robot.Constants;
 
 import java.util.Queue;
 
 import static frc.lib.PhoenixUtil.tryUntilOk;
+import static frc.robot.Constants.canivoreBus;
 
 /**
  * IO implementation for Pigeon 2.
  */
 public class GyroIOPigeon2 extends GyroIO {
+
     private final Pigeon2 pigeon;
     private final StatusSignal<Angle> yaw;
     private final Queue<Double> yawPositionQueue;
@@ -39,7 +40,7 @@ public class GyroIOPigeon2 extends GyroIO {
     private final StatusSignal<AngularVelocity> yawVelocity;
 
     public GyroIOPigeon2(int canID) {
-        pigeon = new Pigeon2(canID, Constants.CANivore.busName);
+        pigeon = new Pigeon2(canID, canivoreBus);
         yaw = pigeon.getYaw();
         yawVelocity = pigeon.getAngularVelocityZWorld();
 

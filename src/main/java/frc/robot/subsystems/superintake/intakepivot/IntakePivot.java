@@ -59,10 +59,11 @@ public class IntakePivot implements Periodic {
     private static IntakePivot instance;
 
     public static IntakePivot get() {
-        if (instance == null)
-            synchronized (IntakePivot.class) {
+        synchronized (IntakePivot.class) {
+            if (instance == null) {
                 instance = new IntakePivot();
             }
+        }
 
         return instance;
     }
@@ -120,7 +121,7 @@ public class IntakePivot implements Periodic {
     @AutoLogOutput(key = "Superintake/IntakePivot/AtGoal")
     public boolean atGoal() {
         double value = goal.setpointRad.getAsDouble();
-        return Math.abs(inputs.positionRad - value) <= tolerances.positionToleranceRad();
+        return Math.abs(inputs.positionRad - value) <= positionToleranceRad;
     }
 
     public Command waitUntilAtGoal() {

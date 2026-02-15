@@ -29,9 +29,10 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
+import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
+import com.revrobotics.ResetMode;
 import com.revrobotics.spark.*;
-import com.revrobotics.spark.config.ClosedLoopConfig;
 import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.MathUtil;
@@ -42,11 +43,11 @@ import frc.lib.HighFrequencySamplingThread;
 import frc.lib.PIDF;
 import frc.lib.PhoenixUtil;
 import frc.lib.SparkUtil;
-import frc.robot.Constants;
 
 import java.util.Queue;
 import java.util.function.DoubleSupplier;
 
+import static frc.robot.Constants.canivoreBus;
 import static frc.robot.subsystems.drive.DriveConstants.moduleConfig;
 
 /**
@@ -107,9 +108,9 @@ public class ModuleIOTalonFXSparkMaxCANcoder extends ModuleIO {
             int cancoderCanID,
             double absoluteEncoderOffsetRad
     ) {
-        driveTalon = new TalonFX(driveCanID, Constants.CANivore.busName);
+        driveTalon = new TalonFX(driveCanID, canivoreBus);
         turnSpark = new SparkMax(turnCanID, SparkLowLevel.MotorType.kBrushless);
-        cancoder = new CANcoder(cancoderCanID, Constants.CANivore.busName);
+        cancoder = new CANcoder(cancoderCanID, canivoreBus);
         turnEncoder = turnSpark.getEncoder();
         turnController = turnSpark.getClosedLoopController();
 
@@ -144,7 +145,7 @@ public class ModuleIOTalonFXSparkMaxCANcoder extends ModuleIO {
                 .uvwAverageDepth(2);
         turnConfig
                 .closedLoop
-                .feedbackSensor(ClosedLoopConfig.FeedbackSensor.kPrimaryEncoder)
+                .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
                 .positionWrappingEnabled(true)
                 .positionWrappingInputRange(0.0, 2 * Math.PI);
         moduleConfig.turnGains().applySparkWithoutFeedforward(turnConfig.closedLoop, ClosedLoopSlot.kSlot0);
@@ -159,8 +160,8 @@ public class ModuleIOTalonFXSparkMaxCANcoder extends ModuleIO {
                 .outputCurrentPeriodMs(20);
         SparkUtil.tryUntilOk(5, () -> turnSpark.configure(
                 turnConfig,
-                SparkBase.ResetMode.kResetSafeParameters,
-                SparkBase.PersistMode.kPersistParameters
+                ResetMode.kResetSafeParameters,
+                PersistMode.kPersistParameters
         ));
 
         // Configure CANCoder
@@ -263,8 +264,8 @@ public class ModuleIOTalonFXSparkMaxCANcoder extends ModuleIO {
         newGains.applySparkWithoutFeedforward(newConfig.closedLoop, ClosedLoopSlot.kSlot0);
         SparkUtil.tryUntilOkAsync(5, () -> turnSpark.configure(
                 newConfig,
-                SparkBase.ResetMode.kNoResetSafeParameters,
-                SparkBase.PersistMode.kPersistParameters
+                ResetMode.kNoResetSafeParameters,
+                PersistMode.kPersistParameters
         ));
     }
 
@@ -279,8 +280,8 @@ public class ModuleIOTalonFXSparkMaxCANcoder extends ModuleIO {
         var newConfig = new SparkMaxConfig().idleMode(enable ? SparkBaseConfig.IdleMode.kBrake : SparkBaseConfig.IdleMode.kCoast);
         SparkUtil.tryUntilOkAsync(5, () -> turnSpark.configure(
                 newConfig,
-                SparkBase.ResetMode.kNoResetSafeParameters,
-                SparkBase.PersistMode.kPersistParameters
+                ResetMode.kNoResetSafeParameters,
+                PersistMode.kPersistParameters
         ));
     }
 
@@ -309,6 +310,6 @@ public class ModuleIOTalonFXSparkMaxCANcoder extends ModuleIO {
     @Override
     public void setTurnClosedLoop(double positionRad) {
         double setpoint = MathUtil.inputModulus(positionRad, 0.0, 2 * Math.PI);
-        turnController.setReference(setpoint, SparkBase.ControlType.kPosition);
+        turnController.setSetpoint(setpoint, SparkBase.ControlType.kPosition);
     }
 }

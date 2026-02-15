@@ -60,10 +60,11 @@ public class Flywheel implements Periodic {
     private static Flywheel instance;
 
     public static Flywheel get() {
-        if (instance == null)
-            synchronized (Flywheel.class) {
+        synchronized (Flywheel.class) {
+            if (instance == null) {
                 instance = new Flywheel();
             }
+        }
 
         return instance;
     }
@@ -103,16 +104,17 @@ public class Flywheel implements Periodic {
         return inputs.positionRad;
     }
 
+    public double getVelocityRadPerSec() {
+        return inputs.velocityRadPerSec;
+    }
+
     @AutoLogOutput(key = "Superstructure/Flywheel/AtGoal")
     public boolean atGoal() {
         double value = goal.value.getAsDouble();
         return switch (goal.type) {
-            case PositionRad -> Math.abs(inputs.positionRad - value) <= tolerances.positionToleranceRad();
+            case VelocityRadPerSec -> Math.abs(inputs.velocityRadPerSec - value) <= velocityToleranceRadPerSec;
 
-            case VelocityRadPerSec ->
-                    Math.abs(inputs.velocityRadPerSec - value) <= tolerances.velocityToleranceRadPerSec();
-
-            case VoltageVolts -> Math.abs(inputs.appliedVolts - value) <= tolerances.voltageToleranceVolts();
+            case PositionRad, VoltageVolts -> false;
         };
     }
 

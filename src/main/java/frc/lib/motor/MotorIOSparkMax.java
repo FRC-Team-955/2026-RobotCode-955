@@ -1,8 +1,9 @@
 package frc.lib.motor;
 
+import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
+import com.revrobotics.ResetMode;
 import com.revrobotics.spark.*;
-import com.revrobotics.spark.config.ClosedLoopConfig;
 import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
@@ -57,7 +58,7 @@ public class MotorIOSparkMax extends MotorIO {
                 .uvwAverageDepth(2);
         config
                 .closedLoop
-                .feedbackSensor(ClosedLoopConfig.FeedbackSensor.kPrimaryEncoder);
+                .feedbackSensor(FeedbackSensor.kPrimaryEncoder);
         positionGains.applySparkWithoutFeedforward(config.closedLoop, ClosedLoopSlot.kSlot0); // position = slot0
         velocityGains.applySparkWithoutFeedforward(config.closedLoop, ClosedLoopSlot.kSlot1); // velocity = slot1
         config
@@ -70,8 +71,8 @@ public class MotorIOSparkMax extends MotorIO {
                 .outputCurrentPeriodMs(20);
         tryUntilOk(5, () -> spark.configure(
                 config,
-                SparkBase.ResetMode.kResetSafeParameters,
-                SparkBase.PersistMode.kPersistParameters
+                ResetMode.kResetSafeParameters,
+                PersistMode.kPersistParameters
         ));
         tryUntilOk(5, () -> encoder.setPosition(0.0));
     }
@@ -98,8 +99,8 @@ public class MotorIOSparkMax extends MotorIO {
         newGains.applySparkWithoutFeedforward(newConfig.closedLoop, ClosedLoopSlot.kSlot0);
         tryUntilOkAsync(5, () -> spark.configure(
                 newConfig,
-                SparkBase.ResetMode.kNoResetSafeParameters,
-                SparkBase.PersistMode.kPersistParameters
+                ResetMode.kNoResetSafeParameters,
+                PersistMode.kPersistParameters
         ));
     }
 
@@ -111,8 +112,8 @@ public class MotorIOSparkMax extends MotorIO {
         newGains.applySparkWithoutFeedforward(newConfig.closedLoop, ClosedLoopSlot.kSlot0);
         tryUntilOkAsync(5, () -> spark.configure(
                 newConfig,
-                SparkBase.ResetMode.kNoResetSafeParameters,
-                SparkBase.PersistMode.kPersistParameters
+                ResetMode.kNoResetSafeParameters,
+                PersistMode.kPersistParameters
         ));
     }
 
@@ -122,8 +123,8 @@ public class MotorIOSparkMax extends MotorIO {
         var newConfig = new SparkMaxConfig().idleMode(enable ? SparkBaseConfig.IdleMode.kBrake : SparkBaseConfig.IdleMode.kCoast);
         tryUntilOkAsync(5, () -> spark.configure(
                 newConfig,
-                SparkBase.ResetMode.kNoResetSafeParameters,
-                SparkBase.PersistMode.kPersistParameters
+                ResetMode.kNoResetSafeParameters,
+                PersistMode.kPersistParameters
         ));
     }
 
@@ -131,14 +132,14 @@ public class MotorIOSparkMax extends MotorIO {
     public void setRequest(RequestType type, double value) {
         switch (type) {
             case VoltageVolts -> spark.setVoltage(value);
-            case PositionRad -> controller.setReference(
+            case PositionRad -> controller.setSetpoint(
                     value,
                     SparkBase.ControlType.kPosition,
                     ClosedLoopSlot.kSlot0 // position = slot0
             );
             case VelocityRadPerSec -> {
                 var ffVolts = velocityFeedforward.calculate(value);
-                controller.setReference(
+                controller.setSetpoint(
                         value,
                         SparkBase.ControlType.kVelocity,
                         ClosedLoopSlot.kSlot1,  // velocity = slot1

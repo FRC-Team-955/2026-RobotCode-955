@@ -1,6 +1,8 @@
 package frc.robot;
 
+import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.wpilibj.Alert;
+import edu.wpi.first.wpilibj.RobotController;
 import frc.lib.Util;
 import frc.lib.network.LoggedNetworkBooleanExt;
 import frc.lib.subsystem.Periodic;
@@ -10,6 +12,7 @@ import org.littletonrobotics.junction.Logger;
 
 import java.util.EnumMap;
 import java.util.function.Consumer;
+
 
 public class OperatorDashboard implements Periodic {
     public enum ScoringMode {
@@ -26,6 +29,7 @@ public class OperatorDashboard implements Periodic {
 
     public final LoggedNetworkBooleanExt coastOverride = new LoggedNetworkBooleanExt(prefix + "CoastOverride", false);
     public final LoggedNetworkBooleanExt autoChosen = new LoggedNetworkBooleanExt(prefix + "AutoChosen", false);
+    private final Debouncer lowBatteryDebouncer = new Debouncer(3.0, Debouncer.DebounceType.kRising);
 
     @Getter
     private ScoringMode selectedScoringMode = ScoringMode.ShootAndPassAutomatic;
@@ -35,14 +39,16 @@ public class OperatorDashboard implements Periodic {
     private final Alert autoNotChosenAlert = new Alert("Auto is not chosen!", Alert.AlertType.kError);
     @SuppressWarnings("FieldCanBeLocal")
     private final Alert constantSetAlert = new Alert("Constants are set.", Alert.AlertType.kInfo);
+    private final Alert batteryVoltageAlert = new Alert("Battery is below 12 Volts!", Alert.AlertType.kError);
 
     private static OperatorDashboard instance;
 
     public static OperatorDashboard get() {
-        if (instance == null)
-            synchronized (OperatorDashboard.class) {
+        synchronized (OperatorDashboard.class) {
+            if (instance == null) {
                 instance = new OperatorDashboard();
             }
+        }
 
         return instance;
     }
@@ -62,6 +68,7 @@ public class OperatorDashboard implements Periodic {
         // So subsystem toggles are handled in their respective subsystems
         coastOverrideAlert.set(coastOverride.get());
         autoNotChosenAlert.set(!autoChosen.get());
+        batteryVoltageAlert.set(lowBatteryDebouncer.calculate(RobotController.getBatteryVoltage() <= 12.0));
     }
 
     private static <E extends Enum<E>> void handleEnumToggles(
@@ -99,5 +106,9 @@ public class OperatorDashboard implements Periodic {
 
     private static <E extends Enum<E>> EnumMap<E, LoggedNetworkBooleanExt> generateTogglesForEnum(String name, E[] enumValues, Class<E> enumClass) {
         return Util.createEnumMap(enumClass, enumValues, (side) -> new LoggedNetworkBooleanExt(prefix + name + "/" + side.name(), false));
+    }
+
+    public boolean isBatteryVoltageAlertActive() {
+        return batteryVoltageAlert.get();
     }
 }

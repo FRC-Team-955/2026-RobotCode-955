@@ -58,10 +58,11 @@ public class ExampleServoSubsystem implements Periodic {
     private static ExampleServoSubsystem instance;
 
     public static ExampleServoSubsystem get() {
-        if (instance == null)
-            synchronized (ExampleServoSubsystem.class) {
+        synchronized (ExampleServoSubsystem.class) {
+            if (instance == null) {
                 instance = new ExampleServoSubsystem();
             }
+        }
 
         return instance;
     }
@@ -122,7 +123,7 @@ public class ExampleServoSubsystem implements Periodic {
     @AutoLogOutput(key = "ExampleServoSubsystem/AtGoal")
     public boolean atGoal() {
         double value = goal.setpointRad.getAsDouble();
-        return Math.abs(inputs.positionRad - value) <= tolerances.positionToleranceRad();
+        return Math.abs(inputs.positionRad - value) <= positionToleranceRad;
     }
 
     public Command waitUntilAtGoal() {

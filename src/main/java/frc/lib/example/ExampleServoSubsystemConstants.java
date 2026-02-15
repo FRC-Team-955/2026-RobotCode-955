@@ -2,15 +2,15 @@ package frc.lib.example;
 
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.util.Units;
 import frc.lib.PIDF;
 import frc.lib.motor.MotorIO;
 import frc.lib.motor.MotorIOSim;
 import frc.lib.motor.MotorIOSparkMax;
-import frc.lib.motor.RequestTolerances;
 import frc.robot.BuildConstants;
 
 public class ExampleServoSubsystemConstants {
-    static final RequestTolerances tolerances = RequestTolerances.defaults();
+    static final double positionToleranceRad = Units.degreesToRadians(10);
 
     static final TrapezoidProfile.Constraints constraints = new TrapezoidProfile.Constraints(1, 3);
 

@@ -20,12 +20,12 @@ def make_shot(v0, vr, vt):
     print(f"v0 = {v0}, vr = {vr}, vt = {vt}")
 
     # First compute stationary shooting velocity
-    discriminant = v0**4 - g * (g * hubx**2 + 2 * hubz * v0**2)
+    discriminant = v0 ** 4 - g * (g * hubx ** 2 + 2 * hubz * v0 ** 2)
     if discriminant < 0:
         print("\tDiscriminant is negative")
         exit(1)
-    phi_1 = np.atan((v0**2 + np.sqrt(discriminant)) / (g * hubx))
-    phi_2 = np.atan((v0**2 - np.sqrt(discriminant)) / (g * hubx))
+    phi_1 = np.atan((v0 ** 2 + np.sqrt(discriminant)) / (g * hubx))
+    phi_2 = np.atan((v0 ** 2 - np.sqrt(discriminant)) / (g * hubx))
 
     def is_valid_phi(phi):
         return phi > deg_to_rad(15) and phi < deg_to_rad(90)
@@ -49,7 +49,7 @@ def make_shot(v0, vr, vt):
     vy -= vt
 
     # Now calculate phi, theta, and shooting magnitude from 3d shooting vector
-    v = np.sqrt(vx**2 + vy**2 + vz**2)
+    v = np.sqrt(vx ** 2 + vy ** 2 + vz ** 2)
     phi = np.asin(vz / v)
     theta = np.atan2(vy, vx)
     print(f"\tafter compensate: v = {v}, phi = {rad_to_deg(phi)}, theta = {rad_to_deg(theta)}")
@@ -60,7 +60,7 @@ def make_shot(v0, vr, vt):
     vx = vxy_hypot * np.cos(theta)
     vy = vxy_hypot * np.sin(theta)
 
-    s = [vx * t + vr * t, vy * t + vt * t, vz * t + -g * t**2 / 2]
+    s = [vx * t + vr * t, vy * t + vt * t, vz * t + -g * t ** 2 / 2]
 
     ax.plot(s[0], s[1], s[2], label=f"$v_0 = {v0}$,\t$v_r = {vr}$,\t$v_t = {vt}$")
 
@@ -75,4 +75,3 @@ ax.set(xlim=[0, hubx + 0.5], ylim=[-1, 1], zlim=[0, hubz + 0.5], xlabel="X", yla
 ax.legend()
 
 plt.show()
-

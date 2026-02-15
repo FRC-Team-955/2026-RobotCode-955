@@ -14,6 +14,8 @@
 package frc.robot;
 
 import edu.wpi.first.hal.AllianceStationID;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
@@ -228,7 +230,7 @@ public class Robot extends LoggedRobot {
         autonomousCommand = robotContainer.getAutonomousCommand();
 
         if (autonomousCommand != null) {
-            autonomousCommand.schedule();
+            CommandScheduler.getInstance().schedule(autonomousCommand);
             autonomousStart = Timer.getTimestamp();
             System.out.println("********** Auto started **********");
         }
@@ -281,21 +283,53 @@ public class Robot extends LoggedRobot {
         robotContainer.robotState.setPose(ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose());
     }
 
+    boolean isHittingBumppre = false;
+
+    boolean isHittingBump2 = false;
+
     @Override
     public void simulationPeriodic() {
         // In case of replay, don't do sim
         if (BuildConstants.mode == BuildConstants.Mode.REPLAY) return;
 
+        boolean isHittingBump = ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose().getX() >= 4.57
+                && ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose().getY() >= 2.0 ||
+                ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose().getX() >= 4.57
+                        && ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose().getY() <= 6;
+
+        boolean isHittingBumpother = ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose().getX() <= 12.0
+                && ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose().getY() <= 6.0 ||
+                ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose().getX() <= 12.0
+                        && ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose().getY() >= 2.0;
+
+        if (isHittingBump != isHittingBumppre || isHittingBump2 != isHittingBumpother) {
+            double randomX = ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose().getX() - .5 + Math.random();
+            double randomY = ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose().getY() - .5 + Math.random();
+            Rotation2d randomAngle = Rotation2d.fromDegrees(Math.random() * 180d);
+            Pose2d teleportTarget = new Pose2d(randomX, randomY, randomAngle);
+            ModuleIOSim.driveSimulation.setSimulationWorldPose(teleportTarget);
+            System.out.println("Robot hit the Bump and 'slipped' to " + teleportTarget);
+        }
+        isHittingBumppre = isHittingBump;
+        isHittingBump2 = isHittingBumpother;
+
+
+        /*double randomX = Math.random() * 14.0 + 1.0;w
+        double randomY = Math.random() * 6.0 + 1.0;
+        Rotation2d randomAngle = Rotation2d.fromDegrees(Math.random() * 360);
+        Pose2d teleportTarget = new Pose2d(randomX, randomY, randomAngle);
+
+        if (ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose().getX() > 0
+                && ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose().getY() > 10)
+        {ModuleIOSim.driveSimulation.setSimulationWorldPose(teleportTarget);
+        }*/
+
         SimulatedArena.getInstance().simulationPeriodic();
 
         Logger.recordOutput("FieldSimulation/RobotPosition", ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose());
         Logger.recordOutput(
-                "FieldSimulation/Algae",
-                SimulatedArena.getInstance().getGamePiecesArrayByType("Algae")
-        );
-        Logger.recordOutput(
-                "FieldSimulation/Coral",
-                SimulatedArena.getInstance().getGamePiecesArrayByType("Coral")
+                "FieldSimulation/Fuel",
+                SimulatedArena.getInstance().getGamePiecesArrayByType("Fuel")
         );
     }
 }

@@ -68,10 +68,11 @@ public class Hood implements Periodic {
     private static Hood instance;
 
     public static Hood get() {
-        if (instance == null)
-            synchronized (Hood.class) {
+        synchronized (Hood.class) {
+            if (instance == null) {
                 instance = new Hood();
             }
+        }
 
         return instance;
     }
@@ -129,7 +130,7 @@ public class Hood implements Periodic {
     @AutoLogOutput(key = "Superstructure/Hood/AtGoal")
     public boolean atGoal() {
         double value = goal.setpointRad.getAsDouble();
-        return Math.abs(inputs.positionRad - value) <= tolerances.positionToleranceRad();
+        return Math.abs(inputs.positionRad - value) <= positionToleranceRad;
     }
 
     public Command waitUntilAtGoal() {

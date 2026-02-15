@@ -47,10 +47,11 @@ public class IntakeRollers implements Periodic {
     private static IntakeRollers instance;
 
     public static IntakeRollers get() {
-        if (instance == null)
-            synchronized (IntakeRollers.class) {
+        synchronized (IntakeRollers.class) {
+            if (instance == null) {
                 instance = new IntakeRollers();
             }
+        }
 
         return instance;
     }
