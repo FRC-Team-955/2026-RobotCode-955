@@ -10,6 +10,7 @@ import frc.lib.wpilib.SlewRateLimiter;
 import frc.robot.Controller;
 import frc.robot.RobotState;
 import frc.robot.ShootingKinematics;
+import frc.robot.subsystems.drive.DriveConstants;
 import frc.robot.subsystems.drive.DriveGoal;
 import frc.robot.subsystems.drive.DriveRequest;
 import lombok.RequiredArgsConstructor;
@@ -67,7 +68,7 @@ public class DriveJoystickWithAimingGoal extends DriveGoal {
         if (
                 linearVelocity.getX() == 0 &&
                         linearVelocity.getY() == 0 &&
-                        (angularVelocity <= 0.05 || angularVelocity >= -0.05)
+                        Math.abs(angularVelocity) <= DriveConstants.joystickDriveDeadband
         ) {
             return DriveRequest.stopWithX();
         } else {
