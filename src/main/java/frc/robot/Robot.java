@@ -133,6 +133,8 @@ public class Robot extends LoggedRobot {
                 // The rest of the subsystems require vision
                 robotContainer.aprilTagVision,
                 robotContainer.gamePieceVision,
+                // Pose stuff - after drive/vision, but before anything else that might use pose
+                robotContainer.robotState,
                 // Subsystems depend on shooting, shooting depends on vision
                 robotContainer.shootingKinematics,
                 // Operator dashboard before super*

@@ -13,7 +13,6 @@
 
 package frc.robot.subsystems.apriltagvision;
 
-import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
@@ -320,7 +319,8 @@ public class AprilTagVision implements Periodic {
                 robotState.addVisionMeasurement(
                         observation.poseEstimate().toPose2d(),
                         observation.timestamp(),
-                        VecBuilder.fill(linearStdDev, linearStdDev, angularStdDev)
+                        linearStdDev,
+                        angularStdDev
                 );
             }
 
