@@ -14,13 +14,15 @@
 package frc.robot.subsystems.drive;
 
 import com.ctre.phoenix6.BaseStatusSignal;
-import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
+import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.hardware.Pigeon2;
+import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Temperature;
 import frc.lib.HighFrequencySamplingThread;
 
 import java.util.Queue;
@@ -32,24 +34,41 @@ import static frc.robot.Constants.canivoreBus;
  * IO implementation for Pigeon 2.
  */
 public class GyroIOPigeon2 extends GyroIO {
-
     private final Pigeon2 pigeon;
+
+    private final StatusSignal<Temperature> temperature;
     private final StatusSignal<Angle> yaw;
-    private final Queue<Double> yawPositionQueue;
+    private final StatusSignal<AngularVelocity> angularVelocityX;
+    private final StatusSignal<AngularVelocity> angularVelocityY;
+    private final StatusSignal<AngularVelocity> angularVelocityZ;
+
     private final Queue<Double> yawTimestampQueue;
-    private final StatusSignal<AngularVelocity> yawVelocity;
+    private final Queue<Double> yawPositionQueue;
+
+    private final Debouncer connectedDebouncer = new Debouncer(0.5);
 
     public GyroIOPigeon2(int canID) {
         pigeon = new Pigeon2(canID, canivoreBus);
-        yaw = pigeon.getYaw();
-        yawVelocity = pigeon.getAngularVelocityZWorld();
 
-        tryUntilOk(5, () -> pigeon.getConfigurator().apply(new Pigeon2Configuration()));
+        var pigeonConfig = new Pigeon2Configuration();
+        tryUntilOk(5, () -> pigeon.getConfigurator().apply(pigeonConfig, 0.25));
         tryUntilOk(5, () -> pigeon.getConfigurator().setYaw(0.0));
-        pigeon.optimizeBusUtilization();
 
-        yaw.setUpdateFrequency(HighFrequencySamplingThread.frequencyHz);
-        yawVelocity.setUpdateFrequency(50.0);
+        temperature = pigeon.getTemperature();
+        yaw = pigeon.getYaw();
+        angularVelocityX = pigeon.getAngularVelocityXWorld();
+        angularVelocityY = pigeon.getAngularVelocityYWorld();
+        angularVelocityZ = pigeon.getAngularVelocityZWorld();
+
+        BaseStatusSignal.setUpdateFrequencyForAll(HighFrequencySamplingThread.frequencyHz, yaw);
+        BaseStatusSignal.setUpdateFrequencyForAll(
+                50.0,
+                temperature,
+                angularVelocityX,
+                angularVelocityY,
+                angularVelocityZ
+        );
+        ParentDevice.optimizeBusUtilizationForAll(pigeon);
 
         yawTimestampQueue = HighFrequencySamplingThread.get().makeTimestampQueue();
         yawPositionQueue = HighFrequencySamplingThread.get().registerPhoenixSignal(pigeon.getYaw());
@@ -57,9 +76,24 @@ public class GyroIOPigeon2 extends GyroIO {
 
     @Override
     public void updateInputs(GyroIOInputs inputs) {
-        inputs.connected = BaseStatusSignal.refreshAll(yaw, yawVelocity).equals(StatusCode.OK);
+        var status = BaseStatusSignal.refreshAll(
+                yaw,
+                temperature,
+                angularVelocityX,
+                angularVelocityY,
+                angularVelocityZ
+        );
+
+        inputs.connected = connectedDebouncer.calculate(status.isOK());
+        inputs.temperatureCelsius = temperature.getValueAsDouble();
+
         inputs.yawPositionRad = Units.degreesToRadians(yaw.getValueAsDouble());
-        inputs.yawVelocityRadPerSec = Units.degreesToRadians(yawVelocity.getValueAsDouble());
+        // getRotation3d uses internal status signals for the quaternion
+        inputs.orientation = pigeon.getRotation3d();
+
+        inputs.angularVelocityXRadPerSec = Units.degreesToRadians(angularVelocityX.getValueAsDouble());
+        inputs.angularVelocityYRadPerSec = Units.degreesToRadians(angularVelocityY.getValueAsDouble());
+        inputs.angularVelocityZRadPerSec = Units.degreesToRadians(angularVelocityZ.getValueAsDouble());
 
         inputs.odometryYawTimestamps =
                 yawTimestampQueue.stream().mapToDouble((Double value) -> value).toArray();

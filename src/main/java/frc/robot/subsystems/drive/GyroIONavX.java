@@ -37,7 +37,7 @@ public class GyroIONavX extends GyroIO {
     public void updateInputs(GyroIOInputs inputs) {
         inputs.connected = navX.isConnected();
         inputs.yawPositionRad = Units.degreesToRadians(-navX.getYaw());
-        inputs.yawVelocityRadPerSec = Units.degreesToRadians(-navX.getRawGyroZ());
+        inputs.angularVelocityZRadPerSec = Units.degreesToRadians(-navX.getRawGyroZ());
         inputs.temperatureCelsius = navX.getTempC();
 
         inputs.odometryYawTimestamps =

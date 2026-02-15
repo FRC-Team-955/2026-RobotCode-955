@@ -17,7 +17,7 @@ public class GyroIOSim extends GyroIO {
     public void updateInputs(GyroIOInputs inputs) {
         inputs.connected = true;
         inputs.yawPositionRad = gyroSimulation.getGyroReading().getRadians();
-        inputs.yawVelocityRadPerSec = gyroSimulation.getMeasuredAngularVelocity().in(RadiansPerSecond);
+        inputs.angularVelocityZRadPerSec = gyroSimulation.getMeasuredAngularVelocity().in(RadiansPerSecond);
 
         inputs.odometryYawTimestamps = ModuleIOSim.getSimulationOdometryTimeStamps();
         inputs.odometryYawPositionsRad = Arrays.stream(gyroSimulation.getCachedGyroReadings())
