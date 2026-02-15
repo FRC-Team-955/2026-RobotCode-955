@@ -10,6 +10,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.subsystem.Periodic;
@@ -75,6 +76,9 @@ public class RobotState implements Periodic {
     private double poseUncertaintyLinearYMeters = 0.0;
     private double poseUncertaintyAngularRad = 0.0;
 
+    private boolean lastInNeutralZone = false;
+    private double lastIncreasedUncertaintyDueToBump = 0.0;
+
     private static RobotState instance;
 
     public static RobotState get() {
@@ -101,6 +105,29 @@ public class RobotState implements Periodic {
         poseUncertaintyAngularRad += Constants.loopPeriod * chassisSpeedsAngularFactor * Math.abs(measuredChassisSpeeds.omegaRadiansPerSecond);
 
         // Increase uncertainty if we went over the bump
+        Translation2d t = getTranslation();
+        boolean inNeutralZone =
+                t.getX() > FieldConstants.LinesVertical.hubCenter &&
+                        t.getX() < FieldConstants.LinesVertical.oppHubCenter;
+        if (
+            // If we exited the neutral zone
+                inNeutralZone != lastInNeutralZone &&
+                        // If we are not going through the trench
+                        t.getY() > FieldConstants.LinesHorizontal.rightTrenchOpenStart &&
+                        t.getY() < FieldConstants.LinesHorizontal.leftTrenchOpenEnd &&
+                        // If it has been a while since we increased uncertainty
+                        Timer.getTimestamp() - lastIncreasedUncertaintyDueToBump > 10.0
+        ) {
+            // We went over the bump
+            lastIncreasedUncertaintyDueToBump = Timer.getTimestamp();
+            final double bumpLinearIncrease = 0.25;
+            poseUncertaintyLinearXMeters += bumpLinearIncrease;
+            poseUncertaintyLinearYMeters += bumpLinearIncrease;
+            // Gyro is pretty trustworthy
+        }
+        lastInNeutralZone = inNeutralZone;
+        Logger.recordOutput("RobotState/InNeutralZone", inNeutralZone);
+        Logger.recordOutput("RobotState/LastIncreasedUncertaintyDueToBump", lastIncreasedUncertaintyDueToBump);
 
         // Increase uncertainty if there is a large impact
         final double accelerationFactor = 0.001;
@@ -115,7 +142,6 @@ public class RobotState implements Periodic {
 
         // Log uncertainty range
         // The Periodic execution order defined in Robot ensures that AprilTagVision will have already reduced uncertainty if there were any vision measurements
-        Translation2d t = getTranslation();
         Rotation2d r = getRotation();
         Logger.recordOutput(
                 "RobotState/PoseUncertaintyRange",
