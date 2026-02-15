@@ -65,10 +65,7 @@ public class DriveJoystickWithAimingGoal extends DriveGoal {
         angularVelocity = angularAccelerationLimiter.calculate(angularVelocity);
         Logger.recordOutput("Drive/DriveJoystickWithAiming/AngularVelocityLimited", angularVelocity);
 
-        if (
-                linearMagnitude == 0.0 &&
-                        Math.abs(angularVelocity) <= DriveConstants.joystickDriveDeadband
-        ) {
+        if (linearMagnitude == 0.0 && Math.abs(angularVelocity) <= DriveConstants.joystickDriveDeadband) {
             return DriveRequest.stopWithX();
         } else {
             return DriveRequest.chassisSpeeds(ChassisSpeeds.fromFieldRelativeSpeeds(
