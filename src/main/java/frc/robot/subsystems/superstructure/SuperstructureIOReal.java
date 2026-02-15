@@ -16,7 +16,7 @@ public class SuperstructureIOReal extends SuperstructureIO {
     private final CANrange canrange = new CANrange(-1, Constants.canivoreBus);
 
     private final StatusSignal<Distance> distance;
-    private final StatusSignal<Distance> distanceStddev;
+    private final StatusSignal<Distance> distanceStdDev;
     private final StatusSignal<Double> signalStrength;
     private final StatusSignal<Double> ambientSignal;
     private final StatusSignal<MeasurementHealthValue> measurementHealth;
@@ -32,7 +32,7 @@ public class SuperstructureIOReal extends SuperstructureIO {
         PhoenixUtil.tryUntilOk(5, () -> canrange.getConfigurator().apply(canrangeConfig, 0.25));
 
         distance = canrange.getDistance();
-        distanceStddev = canrange.getDistanceStdDev();
+        distanceStdDev = canrange.getDistanceStdDev();
         signalStrength = canrange.getSignalStrength();
         ambientSignal = canrange.getAmbientSignal();
         measurementHealth = canrange.getMeasurementHealth();
@@ -41,7 +41,7 @@ public class SuperstructureIOReal extends SuperstructureIO {
         BaseStatusSignal.setUpdateFrequencyForAll(
                 50.0,
                 distance,
-                distanceStddev,
+                distanceStdDev,
                 signalStrength,
                 ambientSignal,
                 measurementHealth,
@@ -54,7 +54,7 @@ public class SuperstructureIOReal extends SuperstructureIO {
     public void updateInputs(SuperstructureIOInputs inputs) {
         var canrangeStatus = BaseStatusSignal.refreshAll(
                 distance,
-                distanceStddev,
+                distanceStdDev,
                 signalStrength,
                 ambientSignal,
                 measurementHealth,
@@ -62,7 +62,7 @@ public class SuperstructureIOReal extends SuperstructureIO {
         );
         inputs.canrangeConnected = canrangeConnectedDebouncer.calculate(canrangeStatus.isOK());
         inputs.canrangeDistanceMeters = distance.getValueAsDouble();
-        inputs.canrangeDistanceStddevMeters = distanceStddev.getValueAsDouble();
+        inputs.canrangeDistanceStdDevMeters = distanceStdDev.getValueAsDouble();
         inputs.canrangeSignalStrength = signalStrength.getValueAsDouble();
         inputs.canrangeAmbientSignal = ambientSignal.getValueAsDouble();
         inputs.canrangeMeasurementHealth = measurementHealth.getValue();

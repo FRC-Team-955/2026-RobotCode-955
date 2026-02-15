@@ -313,8 +313,8 @@ public class AprilTagVision implements Periodic {
 
                 // Calculate standard deviations
                 double stdDevFactor = Math.pow(observation.averageTagDistance(), metadata.distancePower) / observation.tagCount();
-                double linearStdDev = observation.linearStdDevBaseline * stdDevFactor * metadata.stddevMultiplier;
-                double angularStdDev = observation.angularStdDevBaseline * stdDevFactor * metadata.stddevMultiplier;
+                double linearStdDev = observation.linearStdDevBaseline * stdDevFactor * metadata.stdDevMultiplier;
+                double angularStdDev = observation.angularStdDevBaseline * stdDevFactor * metadata.stdDevMultiplier;
 
                 // Send vision observation
                 robotState.addVisionMeasurement(

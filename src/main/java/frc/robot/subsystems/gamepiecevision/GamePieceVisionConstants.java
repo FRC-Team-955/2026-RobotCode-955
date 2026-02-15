@@ -71,7 +71,7 @@ public class GamePieceVisionConstants {
         final Transform3d robotToCamera;
         private final Function<Camera, GamePieceVisionIO> createIO;
         final double distancePower;
-        final double stddevMultiplier;
+        final double stdDevMultiplier;
 
         GamePieceVisionIO createIO() {
             return createIO.apply(this);
