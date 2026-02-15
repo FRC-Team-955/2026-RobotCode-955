@@ -2,7 +2,6 @@ package frc.robot;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
@@ -13,14 +12,11 @@ import frc.lib.CANLogger;
 import frc.lib.commands.CommandsExt;
 import frc.robot.subsystems.apriltagvision.AprilTagVision;
 import frc.robot.subsystems.drive.Drive;
-import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.goals.WheelRadiusCharacterizationGoal;
 import frc.robot.subsystems.gamepiecevision.GamePieceVision;
 import frc.robot.subsystems.leds.LEDs;
 import frc.robot.subsystems.superintake.Superintake;
 import frc.robot.subsystems.superstructure.Superstructure;
-import org.ironmaple.simulation.SimulatedArena;
-import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeAlgaeOnFly;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 import java.util.Optional;
@@ -136,17 +132,8 @@ public class RobotContainer {
 
         controller.leftTrigger().whileTrue(Commands.repeatingSequence(
                 Commands.runOnce(() -> {
-                    if (!shootingKinematics.isValidShootingParameters()) return;
-                    SimulatedArena.getInstance().addGamePieceProjectile(new ReefscapeAlgaeOnFly(
-                            ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose().getTranslation(),
-                            ShootingKinematics.fuelExitTransform.getTranslation().toTranslation2d(),
-                            ModuleIOSim.driveSimulation.getDriveTrainSimulatedChassisSpeedsFieldRelative(),
-                            //Rotation2d.fromRadians(shootingKinematics.getShootingParameters().headingRad()),
-                            ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose().getRotation(),
-                            Units.Meters.of(ShootingKinematics.fuelExitTransform.getTranslation().getZ()),
-                            Units.MetersPerSecond.of(shootingKinematics.getShootingParameters().velocityMetersPerSec()),
-                            Units.Radians.of(shootingKinematics.getShootingParameters().hoodAngleRad())
-                    ).disableBecomesGamePieceOnFieldAfterTouchGround());
+                    if (!shootingKinematics.isValidShootingParameters()) {
+                    }
                 }),
                 Commands.waitSeconds(0.1)
         ));

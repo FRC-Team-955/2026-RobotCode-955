@@ -9,7 +9,7 @@ import frc.lib.motor.MotorIOSparkMax;
 import frc.robot.BuildConstants;
 
 public class FlywheelConstants {
-    static final double flywheelRadiusMeters = Units.inchesToMeters(2.0);
+    public static final double flywheelRadiusMeters = Units.inchesToMeters(2.0);
     static final double velocityToleranceRadPerSec = Units.rotationsPerMinuteToRadiansPerSecond(100);
 
     static final double gearRatio = 1;
