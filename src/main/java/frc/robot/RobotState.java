@@ -120,9 +120,8 @@ public class RobotState implements Periodic {
         ) {
             // We went over the bump
             lastIncreasedUncertaintyDueToBump = Timer.getTimestamp();
-            final double bumpLinearIncrease = 0.25;
-            poseUncertaintyLinearXMeters += bumpLinearIncrease;
-            poseUncertaintyLinearYMeters += bumpLinearIncrease;
+            poseUncertaintyLinearXMeters += 0.25;
+            poseUncertaintyLinearYMeters += 0.1;
             // Gyro is pretty trustworthy
         }
         lastInNeutralZone = inNeutralZone;
