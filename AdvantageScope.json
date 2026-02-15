@@ -1,10 +1,10 @@
 {
   "hubs": [
     {
-      "x": 402,
-      "y": 175,
-      "width": 2093,
-      "height": 1211,
+      "x": 0,
+      "y": 25,
+      "width": 1920,
+      "height": 1055,
       "state": {
         "sidebar": {
           "width": 300,
@@ -17,7 +17,10 @@
             "/Inputs/Superstructure/Indexer",
             "/RealOutputs/Drive/ChassisSpeeds",
             "/RealOutputs/Drive/ModuleStates",
-            "/RealOutputs/RobotState"
+            "/RealOutputs/RobotState",
+            "/RealOutputs",
+            "/RealOutputs/FieldSimulation",
+            "/RealOutputs/Drive"
           ]
         },
         "tabs": {
@@ -621,32 +624,42 @@
                   },
                   {
                     "type": "vision",
-                    "logKey": "/RealOutputs/GamePieceVision/FreshCoral",
-                    "logType": "Pose3d[]",
-                    "visible": true,
-                    "options": {
-                      "color": "#ffff00",
-                      "size": "normal"
-                    }
-                  },
-                  {
-                    "type": "vision",
-                    "logKey": "/RealOutputs/GamePieceVision/StaleCoral",
-                    "logType": "Pose3d[]",
-                    "visible": true,
-                    "options": {
-                      "color": "#ffff00",
-                      "size": "normal"
-                    }
-                  },
-                  {
-                    "type": "vision",
                     "logKey": "/RealOutputs/AprilTagVision/Summary/TagPoses",
                     "logType": "Pose3d[]",
                     "visible": true,
                     "options": {
                       "color": "#00ff00",
                       "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "swerveStates",
+                    "logKey": "/RealOutputs/Drive/ModuleStates/Measured",
+                    "logType": "SwerveModuleState[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#ff0000",
+                      "arrangement": "0,1,2,3"
+                    }
+                  },
+                  {
+                    "type": "swerveStates",
+                    "logKey": "/RealOutputs/Drive/ModuleStates/Setpoints",
+                    "logType": "SwerveModuleState[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#0000ff",
+                      "arrangement": "0,1,2,3"
+                    }
+                  },
+                  {
+                    "type": "swerveStates",
+                    "logKey": "/RealOutputs/Drive/ModuleStates/SetpointsOptimized",
+                    "logType": "SwerveModuleState[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#00ff00",
+                      "arrangement": "0,1,2,3"
                     }
                   },
                   {
@@ -681,6 +694,16 @@
                       "model": "955",
                       "color": "#ff0000"
                     }
+                  },
+                  {
+                    "type": "ghost",
+                    "logKey": "/RealOutputs/FieldSimulation/RobotPosition",
+                    "logType": "Pose2d",
+                    "visible": true,
+                    "options": {
+                      "model": "955",
+                      "color": "#00ff00"
+                    }
                   }
                 ],
                 "game": "FRC:2026 Field"
@@ -690,14 +713,14 @@
                 "cameraIndex": -1,
                 "orbitFov": 90,
                 "cameraPosition": [
-                  -6.994757888583944,
-                  5.008132796582545,
-                  2.1308356904737495
+                  -3.2425843597498103,
+                  6.408450394222257,
+                  1.0410895577210073
                 ],
                 "cameraTarget": [
-                  -5.598184757519526,
-                  0.3412948654667284,
-                  1.7022346149017349
+                  -3.242579132110537,
+                  1.1754131705453668,
+                  1.0410897953472054
                 ]
               },
               "controlsHeight": 430
