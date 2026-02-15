@@ -53,17 +53,16 @@ public class FieldConstants {
      */
     public static class LinesVertical {
         public static final double center = fieldLength / 2.0;
-        public static final double starting =
-                aprilTagLayout.getTagPose(26).orElseThrow().getX();
+        public static final double starting = aprilTagLayout.getTagPose(26).orElseThrow().getX();
         public static final double allianceZone = starting;
-        public static final double hubCenter =
-                aprilTagLayout.getTagPose(26).orElseThrow().getX() + Hub.width / 2.0;
+        /**
+         * Same as center of bump
+         */
+        public static final double hubCenter = aprilTagLayout.getTagPose(18).orElseThrow().getX();
         public static final double neutralZoneNear = center - Units.inchesToMeters(120);
         public static final double neutralZoneFar = center + Units.inchesToMeters(120);
-        public static final double oppHubCenter =
-                aprilTagLayout.getTagPose(4).orElseThrow().getX() + Hub.width / 2.0;
-        public static final double oppAllianceZone =
-                aprilTagLayout.getTagPose(10).orElseThrow().getX();
+        public static final double oppHubCenter = aprilTagLayout.getTagPose(5).orElseThrow().getX();
+        public static final double oppAllianceZone = aprilTagLayout.getTagPose(10).orElseThrow().getX();
     }
 
     /**
@@ -98,16 +97,16 @@ public class FieldConstants {
         public static final double innerHeight = Units.inchesToMeters(56.5);
 
         // Relevant reference points on alliance side
-        public static final Translation3d topCenterPoint =
-                new Translation3d(
-                        aprilTagLayout.getTagPose(26).orElseThrow().getX() + width / 2.0,
-                        fieldWidth / 2.0,
-                        height);
-        public static final Translation3d innerCenterPoint =
-                new Translation3d(
-                        aprilTagLayout.getTagPose(26).orElseThrow().getX() + width / 2.0,
-                        fieldWidth / 2.0,
-                        innerHeight);
+        public static final Translation3d topCenterPoint = new Translation3d(
+                aprilTagLayout.getTagPose(18).orElseThrow().getX(),
+                fieldWidth / 2.0,
+                height
+        );
+        public static final Translation3d innerCenterPoint = new Translation3d(
+                aprilTagLayout.getTagPose(18).orElseThrow().getX(),
+                fieldWidth / 2.0,
+                innerHeight
+        );
 
         public static final Translation2d nearLeftCorner =
                 new Translation2d(topCenterPoint.getX() - width / 2.0, fieldWidth / 2.0 + width / 2.0);
@@ -119,11 +118,11 @@ public class FieldConstants {
                 new Translation2d(topCenterPoint.getX() + width / 2.0, fieldWidth / 2.0 - width / 2.0);
 
         // Relevant reference points on the opposite side
-        public static final Translation3d oppTopCenterPoint =
-                new Translation3d(
-                        aprilTagLayout.getTagPose(4).orElseThrow().getX() + width / 2.0,
-                        fieldWidth / 2.0,
-                        height);
+        public static final Translation3d oppTopCenterPoint = new Translation3d(
+                aprilTagLayout.getTagPose(5).orElseThrow().getX(),
+                fieldWidth / 2.0,
+                height
+        );
         public static final Translation2d oppNearLeftCorner =
                 new Translation2d(oppTopCenterPoint.getX() - width / 2.0, fieldWidth / 2.0 + width / 2.0);
         public static final Translation2d oppNearRightCorner =
@@ -134,14 +133,10 @@ public class FieldConstants {
                 new Translation2d(oppTopCenterPoint.getX() + width / 2.0, fieldWidth / 2.0 - width / 2.0);
 
         // Hub faces
-        public static final Pose2d nearFace =
-                aprilTagLayout.getTagPose(26).orElseThrow().toPose2d();
-        public static final Pose2d farFace =
-                aprilTagLayout.getTagPose(20).orElseThrow().toPose2d();
-        public static final Pose2d rightFace =
-                aprilTagLayout.getTagPose(18).orElseThrow().toPose2d();
-        public static final Pose2d leftFace =
-                aprilTagLayout.getTagPose(21).orElseThrow().toPose2d();
+        public static final Pose2d nearFace = aprilTagLayout.getTagPose(26).orElseThrow().toPose2d();
+        public static final Pose2d farFace = aprilTagLayout.getTagPose(20).orElseThrow().toPose2d();
+        public static final Pose2d rightFace = aprilTagLayout.getTagPose(18).orElseThrow().toPose2d();
+        public static final Pose2d leftFace = aprilTagLayout.getTagPose(21).orElseThrow().toPose2d();
     }
 
     /** Left Bump related constants */
