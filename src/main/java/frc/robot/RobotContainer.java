@@ -1,5 +1,7 @@
 package frc.robot;
 
+import choreo.Choreo;
+import choreo.trajectory.SwerveSample;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -10,6 +12,8 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.CANLogger;
 import frc.lib.commands.CommandsExt;
+import frc.robot.autos.ChoreoTraj;
+import frc.robot.autos.LeftSideAuto;
 import frc.robot.subsystems.apriltagvision.AprilTagVision;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.goals.WheelRadiusCharacterizationGoal;
@@ -60,6 +64,7 @@ public class RobotContainer {
 
     private void addAutos() {
         autoChooser.addOption("None", Commands.none());
+        autoChooser.addOption("HalfCircleLeftSideMoveTo", LeftSideAuto.build(drive, robotState));
 
         autoChooser.addOption("Characterization", Commands.deferredProxy(characterizationChooser::get));
     }
