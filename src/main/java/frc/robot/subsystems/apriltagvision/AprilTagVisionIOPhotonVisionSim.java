@@ -46,7 +46,7 @@ public class AprilTagVisionIOPhotonVisionSim extends AprilTagVisionIOPhotonVisio
         // Add sim camera
         var cameraProperties = new SimCameraProperties();
         cameraProperties.setCalibration(1600, 1200, Rotation2d.fromDegrees(95.5));
-        cameraProperties.setCalibError(0, 0);
+        cameraProperties.setCalibError(5, 3);
         cameraProperties.setFPS(25);
         cameraProperties.setAvgLatencyMs(45);
         cameraProperties.setLatencyStdDevMs(10);

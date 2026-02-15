@@ -356,7 +356,6 @@ public class AprilTagVision implements Periodic {
                         .map(cam -> robotPose.transformBy(cam.robotToCamera))
                         .toArray(Pose3d[]::new)
         );
-        Logger.recordOutput("AprilTagVision/ThePose", aprilTagLayout.getTagPose(18).orElseThrow());
 
     }
 
