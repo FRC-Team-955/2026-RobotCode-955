@@ -17,10 +17,12 @@ import org.littletonrobotics.junction.Logger;
 public class ShootingKinematics implements Periodic {
     private static final LoggedTunableNumber robotVelocityScalar = new LoggedTunableNumber("ShootingKinematics/RobotVelocityScalar", 1.2);
 
-    public static final Transform3d fuelExitTransform = new Transform3d(
-            new Translation3d(Units.inchesToMeters(-4.0), Units.inchesToMeters(-9.0), Units.inchesToMeters(15.0)),
-            new Rotation3d()
+    public static final Translation3d fuelExitTranslation = new Translation3d(
+            Units.inchesToMeters(-4.0),
+            Units.inchesToMeters(-9.0),
+            Units.inchesToMeters(15.0)
     );
+    public static final Rotation2d fuelExitRotation = Rotation2d.k180deg;
     private static final Translation3d blueHubTranslation = new Translation3d(4.6256194, 4.0346376, 1.8288);
     private static final InterpolatingDoubleTreeMap distanceToVelocity = new InterpolatingDoubleTreeMap();
 
@@ -67,9 +69,19 @@ public class ShootingKinematics implements Periodic {
 
     private boolean updateShootingParameters() {
         Pose2d robotPose2d = robotState.getPose();
-        Pose3d robotPose = new Pose3d(robotPose2d);
-        Pose3d fuelExitPose = robotPose.transformBy(fuelExitTransform);
-        Logger.recordOutput("ShootingKinematics/fuelExitPose", fuelExitPose);
+        Pose3d fuelExitPose = new Pose3d(
+                new Pose3d(robotPose2d)
+                        .transformBy(new Transform3d(
+                                fuelExitTranslation,
+                                new Rotation3d()
+                        ))
+                        .getTranslation(),
+                new Rotation3d(
+                        robotPose2d.getRotation()
+                                .plus(fuelExitRotation)
+                )
+        );
+        Logger.recordOutput("ShootingKinematics/FuelExitPose", fuelExitPose);
 
         Translation3d hubTranslation = Util.flipIfNeeded(blueHubTranslation);
         Pose3d hubPose = new Pose3d(hubTranslation, new Rotation3d());
@@ -115,7 +127,8 @@ public class ShootingKinematics implements Periodic {
         // fuel exit point
         Rotation2d fuelExitToHubAngle = hubPose.getTranslation().toTranslation2d()
                 .minus(fuelExitPose.getTranslation().toTranslation2d())
-                .getAngle();
+                .getAngle()
+                .plus(fuelExitRotation);
         // We could use Translation2d to rotate it, but since vy = 0, it's simple enough
         // to just use trig
         double vy = vx * fuelExitToHubAngle.getSin();
@@ -124,12 +137,16 @@ public class ShootingKinematics implements Periodic {
         // 3. Now subtract robot velocity from stationary shooting velocity to get final
         // shooting vector
         ChassisSpeeds robotSpeeds = robotState.getMeasuredChassisSpeeds().times(robotVelocityScalar.get());
-        vx -= robotSpeeds.vxMetersPerSecond;
-        vy -= robotSpeeds.vyMetersPerSecond;
+        Translation2d robotSpeedsRotated = new Translation2d(
+                robotSpeeds.vxMetersPerSecond,
+                robotSpeeds.vyMetersPerSecond
+        ).rotateBy(fuelExitRotation);
+        vx -= robotSpeedsRotated.getX();
+        vy -= robotSpeedsRotated.getY();
 
         // 4. Account for drivebase angular velocity
         Vector<N3> fuelExitFieldRelative = new Translation3d(
-                fuelExitTransform.getTranslation().toTranslation2d()
+                fuelExitTranslation.toTranslation2d()
                         .rotateBy(robotPose2d.getRotation())
         ).toVector();
         Vector<N3> angularVelocityVector = VecBuilder.fill(0.0, 0.0, robotSpeeds.omegaRadiansPerSecond);
