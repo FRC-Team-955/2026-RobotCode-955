@@ -14,7 +14,8 @@ import org.photonvision.simulation.VisionTargetSim;
 
 import java.util.function.Supplier;
 
-import static frc.robot.subsystems.gamepiecevision.GamePieceVisionConstants.fuelMeters;
+import static frc.robot.subsystems.gamepiecevision.GamePieceVisionConstants.diagFOVDeg;
+import static frc.robot.subsystems.gamepiecevision.GamePieceVisionConstants.fuelDiameterMeters;
 
 public class GamePieceVisionIOPhotonVisionSim extends GamePieceVisionIOPhotonVision {
     public static VisionSystemSim visionSim;
@@ -33,9 +34,9 @@ public class GamePieceVisionIOPhotonVisionSim extends GamePieceVisionIOPhotonVis
 
         // Add sim camera
         var cameraProperties = new SimCameraProperties();
-        cameraProperties.setCalibration(1600, 1200, Rotation2d.fromDegrees(95.5));
-        cameraProperties.setCalibError(0, 0);
-        cameraProperties.setFPS(25);
+        cameraProperties.setCalibration(640, 480, Rotation2d.fromDegrees(diagFOVDeg));
+        cameraProperties.setCalibError(5, 3);
+        cameraProperties.setFPS(120);
         cameraProperties.setAvgLatencyMs(45);
         cameraProperties.setLatencyStdDevMs(10);
         cameraSim = new PhotonCameraSim(camera, cameraProperties);
@@ -45,8 +46,8 @@ public class GamePieceVisionIOPhotonVisionSim extends GamePieceVisionIOPhotonVis
     @Override
     public void updateInputs(GamePieceVisionIOInputs inputs) {
 
-        Pose3d[] fuelPoses = SimulatedArena.getInstance().getGamePiecesArrayByType("Coral");
-        TargetModel targetModel = new TargetModel(fuelMeters);
+        Pose3d[] fuelPoses = SimulatedArena.getInstance().getGamePiecesArrayByType("Fuel");
+        TargetModel targetModel = new TargetModel(fuelDiameterMeters);
         visionSim.clearVisionTargets();
         for (Pose3d fuelPose : fuelPoses) {
 

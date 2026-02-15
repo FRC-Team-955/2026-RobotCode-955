@@ -14,7 +14,9 @@ public class GamePieceVisionIO {
             // yaw and pitch are not necessarily rotations, but
             // correspond to a point on a 2d plane
             double yawRad,
-            double pitchRad
+            double pitchRad,
+            double gamePieceWidthInPixels
+
     ) {}
 
     public void updateInputs(GamePieceVisionIOInputs inputs) {

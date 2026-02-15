@@ -76,6 +76,14 @@ public class GamePieceVision implements Periodic {
                 targetPoints.add(targetYawPitch);
                 // Account for roll of camera
                 // TODO: fix roll compensation - this doesn't fully work
+                double theta = observation.gamePieceWidthInPixels() / pixelsToRad;
+                double distance = fuelDiameterMeters / Math.tan(theta);
+                double totalAngle = metadata.robotToCamera.getRotation().getZ() + robotPose.toPose2d().getRotation().getRadians() + observation.yawRad();
+                Translation2d camToGamepiece = new Translation2d(distance, new Rotation2d(totalAngle));
+                Pose3d camPose = robotPose.transformBy(metadata.robotToCamera);
+
+                //    +;;).plus(camToGamepiece))
+                Pose2d gamepiecePose = new Pose2d(camPose.toPose2d().getTranslation().plus(camToGamepiece), new Rotation2d());
                 targetYawPitch = targetYawPitch.rotateBy(Rotation2d.fromRadians(-metadata.robotToCamera.getRotation().getX()));
                 double targetYaw = targetYawPitch.getX();
                 double targetPitch = targetYawPitch.getY();
@@ -98,7 +106,7 @@ public class GamePieceVision implements Periodic {
 
                 // TODO: kalman filter or PoseEstimator for stability?
                 newlySeenCoral.put(
-                        robotPose.transformBy(new Transform3d(robotToTarget, new Rotation3d())),
+                        new Pose3d(gamepiecePose),
                         observation.timestampSeconds());
             }
 

@@ -40,9 +40,13 @@ public class GamePieceVisionConstants {
     // Max difference between 3d solve and trig for trig to be used
     static final double trig3dSolveMaxDiffMeters = 0.2;
     static final double trig3dSolveMaxDiffRad = 0.15;
+    static final double horizontalFOVRad = Math.toRadians(61.37);
+    static final double camWidth = 640;
+    static final double diagFOVDeg = 73.15;
+    static final double pixelsToRad = camWidth / horizontalFOVRad;
     static final double minDistanceForSameCoralMeters = 1;
     static final double staleExpireTimeSeconds = 3;
-    static final double fuelMeters = Units.inchesToMeters(5.91);
+    static final double fuelDiameterMeters = Units.inchesToMeters(5.91);
     static final double coralHeightMeters = Units.inchesToMeters(4.25);
 
     static final double freshExpireTimeSeconds = 0.5;
