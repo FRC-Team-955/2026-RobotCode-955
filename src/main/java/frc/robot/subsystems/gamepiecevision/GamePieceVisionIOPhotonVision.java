@@ -35,6 +35,7 @@ public class GamePieceVisionIOPhotonVision extends GamePieceVisionIO {
 
         List<TargetObservation> targetObservations = new LinkedList<>();
 
+
         for (var result : camera.getAllUnreadResults()) {
             for (var target : result.getTargets()) {
                 var corners = target.getDetectedCorners();

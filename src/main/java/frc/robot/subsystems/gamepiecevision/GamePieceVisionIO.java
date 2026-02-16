@@ -9,6 +9,7 @@ public class GamePieceVisionIO {
         public TargetObservation[] targetObservations = new TargetObservation[0];
     }
 
+
     public record TargetObservation(
             double timestampSeconds,
             // yaw and pitch are not necessarily rotations, but

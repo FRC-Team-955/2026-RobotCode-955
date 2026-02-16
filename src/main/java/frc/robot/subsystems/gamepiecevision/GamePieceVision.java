@@ -78,6 +78,7 @@ public class GamePieceVision implements Periodic {
                 double theta = (observation.gamePieceWidthInPixels()) / pixelsToRad;
                 Logger.recordOutput("GamePieceVision/theta", theta);
 
+
                 double distance = (fuelDiameterMeters) / Math.tan(theta);
                 Logger.recordOutput("GamePieceVision/distanceX", distance);
                 double totalAngle = metadata.robotToCamera.getRotation().getZ() + robotPose.toPose2d().getRotation().getRadians() + observation.yawRad();

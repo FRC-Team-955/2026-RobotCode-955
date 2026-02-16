@@ -32,6 +32,7 @@ public class GamePieceVisionIOPhotonVisionSim extends GamePieceVisionIOPhotonVis
             visionSim = new VisionSystemSim("main");
         }
 
+
         // Add sim camera
         var cameraProperties = new SimCameraProperties();
         cameraProperties.setCalibration(640, 480, Rotation2d.fromRadians(diagFOVRad));
