@@ -2,12 +2,15 @@ package frc.robot.autos;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.AllianceFlipUtil;
 import frc.robot.RobotState;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.DriveConstants;
+import frc.robot.subsystems.superintake.Superintake;
+import frc.robot.subsystems.superstructure.Superstructure;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -33,6 +36,8 @@ public final class LeftSideAuto {
 
     private static final Drive drive = Drive.get();
     private static final RobotState robotState = RobotState.get();
+    private static final Superintake superintake = Superintake.get();
+    private static final Superstructure superstructure = Superstructure.get();
 
     public static Command build() {
         List<Pose2d> poses = waypoints.stream()
@@ -71,6 +76,25 @@ public final class LeftSideAuto {
             }
         }).until(atFinalGoal);
         Command followPath = drive.moveTo(currentGoal::get, false);
-        return Commands.sequence(setInitialPose, Commands.deadline(advanceGoals, followPath));
+
+        Command intakeWhileMoving = Commands.run(() -> {
+            int index = goalIndex.get();
+            if (index >= 1 && index <= 5) {
+                superintake.setGoal(Superintake.Goal.INTAKE).initialize();
+            } else {
+                superintake.setGoal(Superintake.Goal.IDLE).initialize();
+            }
+        }, superintake).until(atFinalGoal);
+
+        Command shootAfterFinalGoal = Commands.parallel(
+                drive.driveJoystickWithAiming(),
+                superstructure.setGoal(Superstructure.Goal.SHOOT)
+        ).onlyWhile(DriverStation::isAutonomousEnabled);
+
+        return Commands.sequence(
+                setInitialPose,
+                Commands.deadline(advanceGoals, followPath, intakeWhileMoving),
+                shootAfterFinalGoal
+        );
     }
 }
