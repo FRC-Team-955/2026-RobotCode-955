@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.CANLogger;
 import frc.lib.commands.CommandsExt;
 import frc.robot.autos.LeftSideAuto;
+import frc.robot.autos.RightSideAuto;
 import frc.robot.subsystems.apriltagvision.AprilTagVision;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.goals.WheelRadiusCharacterizationGoal;
@@ -62,6 +63,7 @@ public class RobotContainer {
     private void addAutos() {
         autoChooser.addOption("None", Commands.none());
         autoChooser.addOption("LeftSideAuto", LeftSideAuto.build());
+        autoChooser.addOption("RightSideAuto", RightSideAuto.build());
 
         autoChooser.addOption("Characterization", Commands.deferredProxy(characterizationChooser::get));
     }
