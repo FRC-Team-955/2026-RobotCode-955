@@ -78,19 +78,37 @@ public class GamePieceVision implements Periodic {
                 double theta = (observation.gamePieceWidthInPixels()) / pixelsToRad;
                 Logger.recordOutput("GamePieceVision/theta", theta);
 
-
-                double distance = (fuelDiameterMeters) / Math.tan(theta);
-                Logger.recordOutput("GamePieceVision/distanceX", distance);
-                double totalAngle = metadata.robotToCamera.getRotation().getZ() + robotPose.toPose2d().getRotation().getRadians() + observation.yawRad();
-                Translation2d camToGamepiece = new Translation2d(distance, new Rotation2d(totalAngle));
-                Pose3d camPose = robotPose.transformBy(metadata.robotToCamera);
-
-                //    +;;).plus(camToGamepiece))
-                Pose2d gamepiecePose = new Pose2d(camPose.toPose2d().getTranslation().plus(camToGamepiece), new Rotation2d());
-
                 targetYawPitch = targetYawPitch.rotateBy(Rotation2d.fromRadians(-metadata.robotToCamera.getRotation().getX()));
                 double targetYaw = targetYawPitch.getX();
                 double targetPitch = targetYawPitch.getY();
+
+                double distance = (fuelDiameterMeters) / Math.tan(theta);
+                double camToGamepieceZ = -metadata.robotToCamera.getZ() + (fuelDiameterMeters / 2 );
+                Logger.recordOutput("GamePieceVision/camToGamepieceZ", camToGamepieceZ);
+                double camToGamepieceX =  Math.sqrt(Math.pow(distance,2) - Math.pow(camToGamepieceZ, 2));
+                Logger.recordOutput("GamePieceVision/camToGamepieceX", camToGamepieceX);
+
+                double camToGamepieceY =  camToGamepieceX * Math.tan(-targetYaw);
+                Logger.recordOutput("GamePieceVision/camToGamepieceY", camToGamepieceY);
+
+                Translation2d camToGamepieceXY = new Translation2d(camToGamepieceX, camToGamepieceY)
+                        // Account for yaw of camera
+                        // Note that we do this BEFORE translating to robot coordinates
+                        .rotateBy(Rotation2d.fromRadians(metadata.robotToCamera.getRotation().getZ()));
+                Translation2d robotToGamepieceXY = metadata.robotToCamera.getTranslation().toTranslation2d().plus(camToGamepieceXY);
+                double robotToGamepieceZ = metadata.robotToCamera.getZ() + camToGamepieceZ;
+                Translation3d robotToGamepiece = new Translation3d(robotToGamepieceXY.getX(), robotToGamepieceXY.getY(), robotToGamepieceZ);
+
+
+                Logger.recordOutput("GamePieceVision/distanceX", distance);
+//                double totalAngle = metadata.robotToCamera.getRotation().getZ() + robotPose.toPose2d().getRotation().getRadians() + observation.yawRad();
+//                Translation2d camToGamepiece = new Translation2d(distance, new Rotation2d(totalAngle));
+//                Pose3d camPose = robotPose.transformBy(metadata.robotToCamera);
+//
+//                //    +;;).plus(camToGamepiece))
+//                Pose2d gamepiecePose = new Pose2d(camPose.toPose2d().getTranslation().plus(camToGamepiece), new Rotation2d());
+
+
 
                 // First, calculate position of target in camera space
                 double camToTargetZ = -metadata.robotToCamera.getZ() + fuelDiameterMeters / 2.0;
@@ -111,7 +129,7 @@ public class GamePieceVision implements Periodic {
 
                 // TODO: kalman filter or PoseEstimator for stability?
                 newlySeenCoral.put(
-                        new Pose3d(gamepiecePose),
+                        robotPose.transformBy(new Transform3d(robotToGamepiece, new Rotation3d())),
                         observation.timestampSeconds());
             }
 // robotPose.transformBy(new Transform3d(robotToTarget, new Rotation3d()))
