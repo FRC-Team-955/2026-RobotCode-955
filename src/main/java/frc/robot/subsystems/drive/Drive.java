@@ -363,6 +363,18 @@ public class Drive extends CommandBasedSubsystem {
         return startIdle(() -> goal = new MoveToGoal(poseSupplier, mergeJoystickDrive));
     }
 
+    public Command moveToWithAiming(Supplier<Pose2d> poseSupplier) {
+        return startIdle(() -> goal = new MoveToWithAimingGoal(poseSupplier));
+    }
+
+    public void setGoalMoveToWithAiming(Supplier<Pose2d> poseSupplier) {
+        goal = new MoveToWithAimingGoal(poseSupplier);
+    }
+
+    public void setGoalMoveTo(Supplier<Pose2d> poseSupplier, boolean mergeJoystickDrive) {
+        goal = new MoveToGoal(poseSupplier, mergeJoystickDrive);
+    }
+
     public Command driveJoystick() {
         return startIdle(() -> goal = new DriveJoystickGoal());
     }
