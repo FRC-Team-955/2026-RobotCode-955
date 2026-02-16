@@ -2,7 +2,7 @@
   "hubs": [
     {
       "x": 0,
-      "y": 25,
+      "y": 30,
       "width": 1920,
       "height": 1055,
       "state": {
@@ -20,7 +20,13 @@
             "/RealOutputs/RobotState",
             "/RealOutputs",
             "/RealOutputs/FieldSimulation",
-            "/RealOutputs/Drive"
+            "/RealOutputs/Drive",
+            "/RealOutputs/GamePieceVision",
+            "/Inputs",
+            "/Inputs/GamePieceVision",
+            "/Inputs/GamePieceVision/GPVCam",
+            "/RealOutputs/GamePieceVision/TargetPoints",
+            "/RealOutputs/GamePieceVision/StaleCoral"
           ]
         },
         "tabs": {
@@ -663,6 +669,26 @@
                     }
                   },
                   {
+                    "type": "vision",
+                    "logKey": "/RealOutputs/GamePieceVision/FreshCoral",
+                    "logType": "Pose3d[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#ffff00",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "vision",
+                    "logKey": "/RealOutputs/GamePieceVision/StaleCoral",
+                    "logType": "Pose3d[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#ff8c00",
+                      "size": "normal"
+                    }
+                  },
+                  {
                     "type": "gamePiece",
                     "logKey": "/RealOutputs/FieldSimulation/Fuel",
                     "logType": "Pose3d[]",
@@ -713,14 +739,14 @@
                 "cameraIndex": -1,
                 "orbitFov": 90,
                 "cameraPosition": [
-                  -3.2425843597498103,
-                  6.408450394222257,
-                  1.0410895577210073
+                  -3.7890200769897278,
+                  4.190147764114718,
+                  1.842740744147416
                 ],
                 "cameraTarget": [
-                  -3.242579132110537,
-                  1.1754131705453668,
-                  1.0410897953472054
+                  -3.789574979111878,
+                  1.2180400339430109,
+                  1.7800053222374266
                 ]
               },
               "controlsHeight": 430
