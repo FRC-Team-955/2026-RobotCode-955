@@ -26,17 +26,13 @@ public final class LeftSideAuto {
 
     private static final List<Pose2d> baseWaypoints = List.of(
             new Pose2d(3.5, 5.5, Rotation2d.fromRadians(-Math.PI)),
-            new Pose2d(4.586890697479248, 5.476860046386719, Rotation2d.fromRadians(-2.356194490192345)),
-            new Pose2d(5.95119047164917, 5.457370281219482, Rotation2d.fromRadians(-1.5707963267948966)),
-            new Pose2d(7.003650665283203, 5.437880039215088, Rotation2d.fromRadians(0.0)),
-            new Pose2d(7.880700588226318, 5.418390274047852, Rotation2d.fromRadians(0.0)),
-            new Pose2d(5.938254356384277, 7.395676612854004, Rotation2d.fromRadians(-1.5707963267948966)),
-            new Pose2d(3.687418222427368, 7.34134578704834, Rotation2d.fromRadians(-1.5707963267948966)),
-            new Pose2d(2.5, 7.3, Rotation2d.fromRadians(-Math.PI))
-//            new Pose2d(2.026456117630005, 6.495341777801514, Rotation2d.fromRadians(-2.356194490192345))
-//            new Pose2d(0.9708915948867798, 6.821325302124023, Rotation2d.fromRadians(-1.5707963267948966)),
-//            new Pose2d(0.6526699066162109, 5.098270893096924, Rotation2d.fromRadians(-1.5707963267948966)),
-//            new Pose2d(2.2049708366394043, 4.7645263671875, Rotation2d.fromRadians(-Math.PI))
+            new Pose2d(4.6, 5.5, Rotation2d.fromRadians(-2.356194490192345)),
+            new Pose2d(6, 5.5, Rotation2d.fromRadians(-1.5707963267948966)),
+            new Pose2d(7, 5.5, Rotation2d.fromRadians(0.0)),
+            new Pose2d(8, 5.5, Rotation2d.fromRadians(0.0)),
+            new Pose2d(6, 7.5, Rotation2d.fromRadians(-1.5707963267948966)),
+            new Pose2d(3.5, 7.5, Rotation2d.fromRadians(-1.5707963267948966)),
+            new Pose2d(2.5, 7.5, Rotation2d.fromRadians(-Math.PI))
     );
 
     private static final int INTERPOLATION_START_INDEX = baseWaypoints.size();
