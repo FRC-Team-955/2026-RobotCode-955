@@ -20,7 +20,7 @@ import org.littletonrobotics.junction.Logger;
 public class ShootingKinematics implements Periodic {
     private static final LoggedTunableNumber robotVelocityScalar = new LoggedTunableNumber("ShootingKinematics/RobotVelocityScalar", 1.2);
     private static final LoggedTunableNumber headingToleranceDeg = new LoggedTunableNumber("ShootingKinematics/HeadingToleranceDegrees", 5.0);
-    private static final LoggedTunableNumber velocityToleranceMetersPerSec = new LoggedTunableNumber("ShootingKinematics/VelocityToleranceMetersPerSec", 0.1);
+    private static final LoggedTunableNumber velocityToleranceMetersPerSec = new LoggedTunableNumber("ShootingKinematics/VelocityToleranceMetersPerSec", 0.5);
     private static final LoggedTunableNumber hoodToleranceDeg = new LoggedTunableNumber("ShootingKinematics/HoodToleranceDegrees", 1.0);
 
     public static final Translation3d fuelExitTranslation = new Translation3d(
