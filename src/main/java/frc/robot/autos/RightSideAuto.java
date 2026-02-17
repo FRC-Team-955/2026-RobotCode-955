@@ -24,14 +24,16 @@ public final class RightSideAuto {
     private RightSideAuto() {}
 
     private static final List<Pose2d> baseWaypoints = List.of(
-            new Pose2d(3.5, 2.5, Rotation2d.fromRadians(-Math.PI)),
-            new Pose2d(4.6, 2.5, Rotation2d.fromRadians(2.356194490192345)),
-            new Pose2d(6.0, 2.5, Rotation2d.fromRadians(1.5707963267948966)),
-            new Pose2d(7.0, 2.5, Rotation2d.fromRadians(0.0)),
-            new Pose2d(8.0, 2.5, Rotation2d.fromRadians(0.0)),
-            new Pose2d(6.0, 0.6, Rotation2d.fromRadians(1.5707963267948966)),
-            new Pose2d(3.5, 0.6, Rotation2d.fromRadians(1.5707963267948966)),
-            new Pose2d(2.5, 0.6, Rotation2d.fromRadians(-Math.PI))
+            new Pose2d(3.5, 2.5, Rotation2d.fromDegrees(90)),
+            new Pose2d(4.2, 2.5, Rotation2d.fromDegrees(45)),
+            new Pose2d(4.6, 2.5, Rotation2d.fromDegrees(0)),
+            new Pose2d(5.0, 2.5, Rotation2d.fromDegrees(-45)),
+            new Pose2d(6.0, 2.5, Rotation2d.fromDegrees(0)),
+            new Pose2d(7.0, 2.5, Rotation2d.fromDegrees(0)),
+            new Pose2d(8.0, 2.5, Rotation2d.fromDegrees(0)),
+            new Pose2d(6.0, 0.6, Rotation2d.fromDegrees(90)),
+            new Pose2d(3.5, 0.6, Rotation2d.fromDegrees(90)),
+            new Pose2d(2.5, 0.6, Rotation2d.fromDegrees(-180))
     );
 
     private static final int INTERPOLATION_START_INDEX = baseWaypoints.size();
@@ -110,7 +112,7 @@ public final class RightSideAuto {
                         .plus(outpostApproachPos.times(t * t));
 
                 Logger.recordOutput("RightSideAuto/InterpPrediction", interpPrediction);
-                currentGoal.set(new Pose2d(interpPrediction, Rotation2d.fromRadians(-Math.PI)));
+                currentGoal.set(new Pose2d(interpPrediction, Rotation2d.fromDegrees(-180)));
 
                 Logger.recordOutput("RightSideAuto/InterpolationT", t);
                 Logger.recordOutput("RightSideAuto/DistanceFromStart", distanceFromStart);
@@ -161,7 +163,7 @@ public final class RightSideAuto {
 
         Command intakeWhileMoving = Commands.run(() -> {
             int index = goalIndex.get();
-            if ((index >= 1 && index <= 5) || index >= INTERPOLATION_START_INDEX) {
+            if ((index >= 1 && index <= 8) || index >= INTERPOLATION_START_INDEX) {
                 superintake.setGoal(Superintake.Goal.INTAKE).initialize();
             } else {
                 superintake.setGoal(Superintake.Goal.IDLE).initialize();
