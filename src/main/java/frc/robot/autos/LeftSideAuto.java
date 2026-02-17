@@ -43,6 +43,10 @@ public final class LeftSideAuto {
     private static final Superintake superintake = Superintake.get();
     private static final Superstructure superstructure = Superstructure.get();
 
+    public static Pose2d getStartingPose() {
+        return AllianceFlipUtil.apply(baseWaypoints.get(0));
+    }
+
     public static Command build() {
         List<Pose2d> poses = baseWaypoints.stream()
                 .map(AllianceFlipUtil::apply)
