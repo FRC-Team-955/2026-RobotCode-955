@@ -10,8 +10,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.CANLogger;
 import frc.lib.commands.CommandsExt;
-import frc.robot.autos.LeftSideAuto;
-import frc.robot.autos.RightSideAuto;
+import frc.robot.autos.AutoManager;
 import frc.robot.subsystems.apriltagvision.AprilTagVision;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.goals.WheelRadiusCharacterizationGoal;
@@ -31,7 +30,6 @@ import java.util.Optional;
  */
 public class RobotContainer {
     // Dashboard inputs
-    private final LoggedDashboardChooser<Command> autoChooser = new LoggedDashboardChooser<>("Auto Choices");
     private final LoggedDashboardChooser<Command> characterizationChooser = new LoggedDashboardChooser<>("Characterization Choices");
 
     public final RobotState robotState = RobotState.get();
@@ -50,8 +48,11 @@ public class RobotContainer {
     public final Superintake superintake = Superintake.get();
     public final Superstructure superstructure = Superstructure.get();
 
+    public final AutoManager autoManager = AutoManager.get();
+
     public RobotContainer() {
-        addAutos();
+        autoManager.addAutos();
+        autoManager.autoChooser.addOption("Characterization", Commands.deferredProxy(characterizationChooser::get));
         addCharacterizations();
         setDefaultCommands();
         configureBindings();
@@ -60,13 +61,6 @@ public class RobotContainer {
                 .onTrue(controller.rumble(0.5, 2.0));
     }
 
-    private void addAutos() {
-        autoChooser.addOption("None", Commands.none());
-        autoChooser.addOption("LeftSideAuto", LeftSideAuto.build());
-        autoChooser.addOption("RightSideAuto", RightSideAuto.build());
-
-        autoChooser.addOption("Characterization", Commands.deferredProxy(characterizationChooser::get));
-    }
 
     private void addCharacterizations() {
         characterizationChooser.addOption("Drive 1 m/s Characterization", drive.runRobotRelative(() -> new ChassisSpeeds(1.0, 0.0, 0.0)));
@@ -149,6 +143,6 @@ public class RobotContainer {
      * @return the command to run in autonomous
      */
     public Command getAutonomousCommand() {
-        return autoChooser.get();
+        return autoManager.getSelectedAuto();
     }
 }
