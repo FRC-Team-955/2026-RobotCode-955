@@ -4,7 +4,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.AllianceFlipUtil;
@@ -63,8 +62,8 @@ public final class RightSideAuto {
         AtomicReference<Pose2d> currentGoal = new AtomicReference<>(poses.get(Math.min(1, poses.size() - 1)));
 
         AtomicReference<Double> interpolationT = new AtomicReference<>(0.0);
-        AtomicReference<Double> interpolationStartTime = new AtomicReference<>(0.0);
-        double interpolationDurationSeconds = 4.0;
+
+        double totalInterpolationDistance = interpolationStartPos.getDistance(outpostApproachPos);
 
         double switchLinearToleranceMeters = 0.5;
         double switchAngularToleranceRad = Math.toRadians(10);
@@ -89,18 +88,12 @@ public final class RightSideAuto {
             onInterpolationLine.set(isOnInterpolationLine);
 
             if (isOnInterpolationLine) {
-                double currentTime = Timer.getFPGATimestamp();
-
-                if (interpolationStartTime.get() == 0.0) {
-                    interpolationStartTime.set(currentTime);
-                }
-
-                double elapsed = currentTime - interpolationStartTime.get();
-                double t = Math.min(elapsed / interpolationDurationSeconds, 1.0);
+                Translation2d currentPos = robotState.getPose().getTranslation();
+                double distanceFromStart = currentPos.getDistance(interpolationStartPos);
+                double t = Math.min(distanceFromStart / totalInterpolationDistance, 1.0);
                 interpolationT.set(t);
 
-                double lineT = t;
-                Translation2d targetOnHubOutpostLine = hubCenter.interpolate(outpostCenter, lineT);
+                Translation2d targetOnHubOutpostLine = hubCenter.interpolate(outpostCenter, t);
                 Logger.recordOutput("RightSideAuto/TargetOnHubOutpostLine", targetOnHubOutpostLine);
                 Translation2d startToOutpost = outpostApproachPos.minus(interpolationStartPos);
                 Translation2d perpendicular = new Translation2d(startToOutpost.getY(), -startToOutpost.getX())
@@ -120,8 +113,7 @@ public final class RightSideAuto {
                 currentGoal.set(new Pose2d(interpPrediction, Rotation2d.fromRadians(-Math.PI)));
 
                 Logger.recordOutput("RightSideAuto/InterpolationT", t);
-                Logger.recordOutput("RightSideAuto/InterpolationElapsed", elapsed);
-                Logger.recordOutput("RightSideAuto/LineT", lineT);
+                Logger.recordOutput("RightSideAuto/DistanceFromStart", distanceFromStart);
             } else {
                 Pose2d goal = currentGoal.get();
                 boolean readyToAdvance = robotState.isAtPoseWithTolerance(
