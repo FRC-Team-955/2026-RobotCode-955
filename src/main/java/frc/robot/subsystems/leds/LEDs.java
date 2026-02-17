@@ -8,6 +8,7 @@ import frc.lib.subsystem.Periodic;
 import frc.robot.Constants;
 import frc.robot.OperatorDashboard;
 import frc.robot.ShootingKinematics;
+import frc.robot.autos.AutoManager;
 import frc.robot.subsystems.apriltagvision.AprilTagVision;
 import frc.robot.subsystems.gamepiecevision.GamePieceVision;
 import frc.robot.subsystems.superintake.Superintake;
@@ -96,7 +97,13 @@ public class LEDs implements Periodic {
         } else if (cameraError) {
             LEDPatterns.visionDisconnected.applyTo(buffer);
         } else if (DriverStation.isDisabled()) {
-            LEDPatterns.autoReady.applyTo(buffer);
+            if (AutoManager.get().isAtAutoStartingPose()) {
+                LEDPatterns.autoReady.applyTo(buffer);
+            } else if (AutoManager.get().getClosestAutoStartingPose().isPresent()) {
+                LEDPatterns.autoPlacementProgress(AutoManager.get()::getPlacementProgress).applyTo(buffer);
+            } else {
+                LEDPatterns.autoReady.applyTo(buffer);
+            }
         } else if (DriverStation.isEnabled()) {
             boolean endgame = DriverStation.isTeleop() &&
                     DriverStation.getMatchTime() > endgameLowerThresholdSeconds &&

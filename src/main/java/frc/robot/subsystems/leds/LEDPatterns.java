@@ -66,6 +66,22 @@ public class LEDPatterns {
         };
     }
 
+    public static LEDPattern autoPlacementProgress(java.util.function.DoubleSupplier progressSupplier) {
+        return (reader, writer) -> {
+            int length = reader.getLength();
+            double progress = progressSupplier.getAsDouble();
+            int litLEDs = (int) Math.round(progress * length);
+
+            for (int i = 0; i < length; i++) {
+                if (i < litLEDs) {
+                    writer.setLED(i, Color.kGreen);
+                } else {
+                    writer.setLED(i, Color.kBlack);
+                }
+            }
+        };
+    }
+
     // All modes
     public static final LEDPattern lowBattery = LEDPattern.solid(Color.kRed).blink(Seconds.of(2.0));
 
@@ -74,7 +90,6 @@ public class LEDPatterns {
     public static final LEDPattern badAutoPlacement = LEDPattern.solid(Color.kYellow).blink(Seconds.of(0.5));
     public static final LEDPattern visionDisconnected = LEDPattern.solid(Color.kRed).blink(Seconds.of(0.5));
     public static final LEDPattern autoReady = wave(new Color(255, 0, 128), Color.kRed, 2.0);
-
     // Enabled
     public static final LEDPattern endgame = LEDPattern.solid(Color.kPurple).blink(Seconds.of(0.5));
     public static final LEDPattern eject = LEDPattern.solid(Color.kRed).blink(Seconds.of(0.1));
