@@ -15,6 +15,7 @@ import frc.lib.network.LoggedTunableNumber;
 import frc.lib.subsystem.Periodic;
 import frc.robot.Constants;
 import frc.robot.OperatorDashboard;
+import frc.robot.RobotState;
 import frc.robot.ShootingKinematics;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -37,6 +38,7 @@ public class Hood implements Periodic {
 
     private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
     private static final ShootingKinematics shootingKinematics = ShootingKinematics.get();
+    private static final RobotState robotState = RobotState.get();
 
     private final MotorIO io = createIO();
     private final MotorIOInputsAutoLogged inputs = new MotorIOInputsAutoLogged();
@@ -106,7 +108,12 @@ public class Hood implements Periodic {
         } else {
             // See the comments above the lookaheadState and goalState variables for why we effectively calculate two profiles
 
-            double setpointRad = goal.setpointRad.getAsDouble();
+            double setpointRad;
+            if (robotState.isInTrench()) {
+                setpointRad = Goal.STOW.setpointRad.getAsDouble();
+            } else {
+                setpointRad = goal.setpointRad.getAsDouble();
+            }
             Logger.recordOutput("Superstructure/Hood/OriginalSetpointRad", setpointRad);
             TrapezoidProfile.State wantedState = new TrapezoidProfile.State(setpointRad, 0.0);
 
