@@ -32,6 +32,8 @@ public class OperatorDashboard implements Periodic {
     public final LoggedNetworkBooleanExt autoChosen = new LoggedNetworkBooleanExt(prefix + "AutoChosen", false);
     private final Debouncer lowBatteryDebouncer = new Debouncer(3.0, Debouncer.DebounceType.kRising);
 
+    private final LoggedNetworkBooleanExt fixedHood = new LoggedNetworkBooleanExt(prefix + "Fixed Hood", false);
+
     @Getter
     private ScoringMode selectedScoringMode = ScoringMode.ShootAndPassAutomatic;
     private final EnumMap<ScoringMode, LoggedNetworkBooleanExt> scoringModeToggles = generateTogglesForEnum("ScoringMode", ScoringMode.values(), ScoringMode.class);
@@ -41,6 +43,7 @@ public class OperatorDashboard implements Periodic {
     @SuppressWarnings("FieldCanBeLocal")
     private final Alert constantSetAlert = new Alert("Constants are set.", Alert.AlertType.kInfo);
     private final Alert batteryVoltageAlert = new Alert("Battery is below 12 Volts!", Alert.AlertType.kError);
+    private final Alert fixedHoodAlert = new Alert("Fixed hood mode is enabled.", Alert.AlertType.kWarning);
 
     private static OperatorDashboard instance;
 
@@ -73,6 +76,7 @@ public class OperatorDashboard implements Periodic {
         autoNotChosenAlert.set(!autoChosen.get());
         AutoManager.get().updateAlert();
         batteryVoltageAlert.set(lowBatteryDebouncer.calculate(RobotController.getBatteryVoltage() <= 12.0));
+        fixedHoodAlert.set(fixedHood.get());
     }
 
     private static <E extends Enum<E>> void handleEnumToggles(
