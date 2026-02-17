@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj.RobotController;
 import frc.lib.Util;
 import frc.lib.network.LoggedNetworkBooleanExt;
 import frc.lib.subsystem.Periodic;
+import frc.robot.autos.AutoManager;
 import frc.robot.subsystems.drive.DriveConstants;
 import lombok.Getter;
 import org.littletonrobotics.junction.Logger;
@@ -70,6 +71,7 @@ public class OperatorDashboard implements Periodic {
         // So subsystem toggles are handled in their respective subsystems
         coastOverrideAlert.set(coastOverride.get());
         autoNotChosenAlert.set(!autoChosen.get());
+        AutoManager.get().updateAlert();
         batteryVoltageAlert.set(lowBatteryDebouncer.calculate(RobotController.getBatteryVoltage() <= 12.0));
     }
 
