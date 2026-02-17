@@ -224,4 +224,13 @@ public class RobotState implements Periodic {
         return Math.hypot(getMeasuredChassisSpeeds().vxMetersPerSecond, getMeasuredChassisSpeeds().vyMetersPerSecond) < linearToleranceMetersPerSec
                 && Math.abs(getMeasuredChassisSpeeds().omegaRadiansPerSecond) < angularToleranceRadPerSec;
     }
+
+    public boolean isInTrench() {
+        Translation2d t = getTranslation();
+        boolean inNeutralZone = t.getX() > FieldConstants.LinesVertical.hubCenter &&
+                t.getX() < FieldConstants.LinesVertical.oppHubCenter;
+        boolean inLeftTrench = t.getY() >= FieldConstants.LinesHorizontal.leftTrenchOpenEnd;
+        boolean inRightTrench = t.getY() <= FieldConstants.LinesHorizontal.rightTrenchOpenStart;
+        return inNeutralZone && (inLeftTrench || inRightTrench);
+    }
 }
