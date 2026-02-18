@@ -25,6 +25,7 @@ public class LEDs implements Periodic {
     private static final Superintake superintake = Superintake.get();
     private static final Superstructure superstructure = Superstructure.get();
     private static final ShootingKinematics shootingKinematics = ShootingKinematics.get();
+    private static final AutoManager autoManager = AutoManager.get();
 
     // See createAndStartStartupNotifier for why this is static
     private static final LEDsIO io = createIO();
@@ -97,10 +98,10 @@ public class LEDs implements Periodic {
         } else if (cameraError) {
             LEDPatterns.visionDisconnected.applyTo(buffer);
         } else if (DriverStation.isDisabled()) {
-            if (AutoManager.get().isAtAutoStartingPose()) {
+            if (autoManager.isAtAutoStartingPose()) {
                 LEDPatterns.autoReady.applyTo(buffer);
-            } else if (AutoManager.get().getClosestAutoStartingPose().isPresent()) {
-                LEDPatterns.autoPlacementProgress(AutoManager.get()::getPlacementProgress).applyTo(buffer);
+            } else if (autoManager.getClosestAutoStartingPose().isPresent()) {
+                LEDPatterns.autoPlacementProgress(autoManager::getPlacementProgress).applyTo(buffer);
             } else {
                 LEDPatterns.autoReady.applyTo(buffer);
             }
