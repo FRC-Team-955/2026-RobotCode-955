@@ -6,14 +6,13 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.lib.Util;
 import frc.robot.RobotState;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 import java.util.Optional;
 
 public class AutoManager {
-    private static AutoManager instance;
-
     private final RobotState robotState = RobotState.get();
     public final LoggedDashboardChooser<Command> autoChooser = new LoggedDashboardChooser<>("Auto Choices");
 
@@ -24,11 +23,20 @@ public class AutoManager {
     public static final double READY_THRESHOLD_RADIANS = Math.toRadians(5);
     public static final double MAX_ROTATION_ERROR_RADIANS = Math.toRadians(180);
 
-    public static AutoManager get() {
+    private static AutoManager instance;
+
+    public static synchronized AutoManager get() {
         if (instance == null) {
             instance = new AutoManager();
         }
+
         return instance;
+    }
+
+    private AutoManager() {
+        if (instance != null) {
+            Util.error("Duplicate AutoManager created");
+        }
     }
 
     public void addAutos() {
@@ -97,7 +105,7 @@ public class AutoManager {
         }
 
         return distance.get() <= READY_THRESHOLD_METERS &&
-               rotationError.get() <= READY_THRESHOLD_RADIANS;
+                rotationError.get() <= READY_THRESHOLD_RADIANS;
     }
 
     public double getPlacementProgress() {
