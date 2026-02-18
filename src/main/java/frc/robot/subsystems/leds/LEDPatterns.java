@@ -5,6 +5,8 @@ import edu.wpi.first.wpilibj.LEDPattern;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.util.Color;
 
+import java.util.function.DoubleSupplier;
+
 import static edu.wpi.first.units.Units.Seconds;
 
 /**
@@ -66,20 +68,8 @@ public class LEDPatterns {
         };
     }
 
-    public static LEDPattern autoPlacementProgress(java.util.function.DoubleSupplier progressSupplier) {
-        return (reader, writer) -> {
-            int length = reader.getLength();
-            double progress = progressSupplier.getAsDouble();
-            int litLEDs = (int) Math.round(progress * length);
-
-            for (int i = 0; i < length; i++) {
-                if (i < litLEDs) {
-                    writer.setLED(i, Color.kGreen);
-                } else {
-                    writer.setLED(i, Color.kBlack);
-                }
-            }
-        };
+    public static LEDPattern autoPlacementProgress(DoubleSupplier progressSupplier) {
+        return LEDPattern.solid(Color.kGreen).mask(LEDPattern.progressMaskLayer(progressSupplier));
     }
 
     // All modes
