@@ -38,6 +38,7 @@ public class RobotContainer {
     public final CANLogger canLogger = CANLogger.get();
     public final RobotMechanism robotMechanism = RobotMechanism.get();
     public final ShootingKinematics shootingKinematics = ShootingKinematics.get();
+    public final AutoManager autoManager = AutoManager.get();
 
     /* Subsystems */
     public final Drive drive = Drive.get();
@@ -48,10 +49,7 @@ public class RobotContainer {
     public final Superintake superintake = Superintake.get();
     public final Superstructure superstructure = Superstructure.get();
 
-    public final AutoManager autoManager = AutoManager.get();
-
     public RobotContainer() {
-        autoManager.addAutos();
         autoManager.autoChooser.addOption("Characterization", Commands.deferredProxy(characterizationChooser::get));
         addCharacterizations();
         setDefaultCommands();

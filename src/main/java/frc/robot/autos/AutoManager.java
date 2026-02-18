@@ -37,9 +37,7 @@ public class AutoManager {
         if (instance != null) {
             Util.error("Duplicate AutoManager created");
         }
-    }
 
-    public void addAutos() {
         autoChooser.addOption("None", Commands.none());
         autoChooser.addOption("LeftSideAuto", LeftSideAuto.build());
         autoChooser.addOption("RightSideAuto", RightSideAuto.build());
