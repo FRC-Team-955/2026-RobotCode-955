@@ -102,20 +102,20 @@ public class RobotContainer {
                 .whileTrue(superintake.setGoal(Superintake.Goal.INTAKE).alongWith(
                         drive.driveJoystickWithAssist(() -> {
                                     Pose2d robotPose = robotState.getPose();
-                                    Pose2d closestCoral = null;
+                                    Pose2d closestFuel = null;
                                     double closestDist = Double.MAX_VALUE;
 
-                                    for (var coral : gamePieceVision.getFreshCoral()) {
-                                        Pose2d coralPose = coral.toPose2d();
-                                        double dist = coralPose.getTranslation().getDistance(robotPose.getTranslation());
+                                    for (var fuel : gamePieceVision.getFreshCoral()) {
+                                        Pose2d fuelPose = fuel.toPose2d();
+                                        double dist = fuelPose.getTranslation().getDistance(robotPose.getTranslation());
 
                                         if (dist < closestDist) {
                                             closestDist = dist;
-                                            closestCoral = coralPose;
+                                            closestFuel = fuelPose;
                                         }
                                     }
 
-                                    return Optional.ofNullable(closestCoral);
+                                    return Optional.ofNullable(closestFuel);
                                 }
 
                         )));
