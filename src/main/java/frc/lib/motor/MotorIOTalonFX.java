@@ -1,7 +1,6 @@
 package frc.lib.motor;
 
 import com.ctre.phoenix6.BaseStatusSignal;
-import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.Slot1Configs;
@@ -9,6 +8,7 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
+import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -17,6 +17,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.*;
 import frc.lib.PIDF;
 import frc.lib.PhoenixUtil;
+import frc.robot.Constants;
 
 public class MotorIOTalonFX extends MotorIO {
     // Hardware objects
@@ -39,7 +40,6 @@ public class MotorIOTalonFX extends MotorIO {
 
     public MotorIOTalonFX(
             int canID,
-            CANBus canBus,
             boolean inverted,
             boolean brakeMode,
             int currentLimitAmps,
@@ -47,7 +47,7 @@ public class MotorIOTalonFX extends MotorIO {
             PIDF positionGains,
             PIDF velocityGains
     ) {
-        talon = new TalonFX(canID, canBus);
+        talon = new TalonFX(canID, Constants.canivoreBus);
 
         config = new TalonFXConfiguration();
         config.MotorOutput.NeutralMode = brakeMode ? NeutralModeValue.Brake : NeutralModeValue.Coast;
@@ -56,10 +56,11 @@ public class MotorIOTalonFX extends MotorIO {
                 : InvertedValue.CounterClockwise_Positive;
         config.CurrentLimits.StatorCurrentLimit = currentLimitAmps;
         config.CurrentLimits.StatorCurrentLimitEnable = true;
+        config.TorqueCurrent.PeakForwardTorqueCurrent = currentLimitAmps;
+        config.TorqueCurrent.PeakReverseTorqueCurrent = -currentLimitAmps;
         config.Feedback.SensorToMechanismRatio = gearRatio;
         config.Slot0 = Slot0Configs.from(positionGains.toPhoenixWithoutFeedforward());
         config.Slot1 = Slot1Configs.from(velocityGains.toPhoenix());
-
         PhoenixUtil.tryUntilOk(5, () -> talon.getConfigurator().apply(config, 0.25));
         PhoenixUtil.tryUntilOk(5, () -> talon.setPosition(0.0, 0.25));
 
@@ -77,19 +78,7 @@ public class MotorIOTalonFX extends MotorIO {
                 currentAmps,
                 temperatureCelsius
         );
-        talon.optimizeBusUtilization();
-    }
-
-    public MotorIOTalonFX(
-            int canID,
-            boolean inverted,
-            boolean brakeMode,
-            int currentLimitAmps,
-            double gearRatio,
-            PIDF positionGains,
-            PIDF velocityGains
-    ) {
-        this(canID, new CANBus(""), inverted, brakeMode, currentLimitAmps, gearRatio, positionGains, velocityGains);
+        ParentDevice.optimizeBusUtilizationForAll(talon);
     }
 
     @Override
@@ -106,31 +95,30 @@ public class MotorIOTalonFX extends MotorIO {
     @Override
     public void setPositionPIDF(PIDF newGains) {
         System.out.println("Setting motor position gains");
-        var slot0 = Slot0Configs.from(newGains.toPhoenixWithoutFeedforward());
-        PhoenixUtil.tryUntilOkAsync(5, () -> talon.getConfigurator().apply(slot0, 0.25));
+        config.Slot0 = Slot0Configs.from(newGains.toPhoenixWithoutFeedforward());
+        PhoenixUtil.tryUntilOkAsync(5, () -> talon.getConfigurator().apply(config, 0.25));
     }
 
     @Override
     public void setVelocityPIDF(PIDF newGains) {
         System.out.println("Setting motor velocity gains");
-        var slot1 = Slot1Configs.from(newGains.toPhoenix());
-        PhoenixUtil.tryUntilOkAsync(5, () -> talon.getConfigurator().apply(slot1, 0.25));
+        config.Slot1 = Slot1Configs.from(newGains.toPhoenix());
+        PhoenixUtil.tryUntilOkAsync(5, () -> talon.getConfigurator().apply(config, 0.25));
     }
 
     @Override
     public void setBrakeMode(boolean enable) {
         System.out.println("Setting motor brake mode to " + enable);
-        var newConfig = new TalonFXConfiguration();
-        newConfig.MotorOutput.NeutralMode = enable ? NeutralModeValue.Brake : NeutralModeValue.Coast;
-        PhoenixUtil.tryUntilOkAsync(5, () -> talon.getConfigurator().apply(newConfig, 0.25));
+        config.MotorOutput.NeutralMode = enable ? NeutralModeValue.Brake : NeutralModeValue.Coast;
+        PhoenixUtil.tryUntilOkAsync(5, () -> talon.getConfigurator().apply(config, 0.25));
     }
 
     @Override
     public void setRequest(RequestType type, double value) {
-        switch (type) {
-            case VoltageVolts -> talon.setControl(voltageRequest.withOutput(value));
-            case PositionRad -> talon.setControl(positionRequest.withPosition(Units.radiansToRotations(value)));
-            case VelocityRadPerSec -> talon.setControl(velocityRequest.withVelocity(Units.radiansToRotations(value)));
-        }
+        talon.setControl(switch (type) {
+            case VoltageVolts -> voltageRequest.withOutput(value);
+            case PositionRad -> positionRequest.withPosition(Units.radiansToRotations(value));
+            case VelocityRadPerSec -> velocityRequest.withVelocity(Units.radiansToRotations(value));
+        });
     }
 }
