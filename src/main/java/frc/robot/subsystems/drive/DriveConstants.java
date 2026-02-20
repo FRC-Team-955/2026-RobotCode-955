@@ -20,6 +20,11 @@ public class DriveConstants {
             15
     );
 
+    public static final LoggedTunablePIDF choreoFeedbackXY = new LoggedTunablePIDF("Drive/ChoreoFeedbackXY").withP(3.5);
+    public static final LoggedTunablePIDF choreoFeedbackOmega = new LoggedTunablePIDF("Drive/ChoreoFeedbackOmega").withP(3);
+    public static final LoggedTunablePIDF headingOverrideGains = new LoggedTunablePIDF("Drive/HeadingOverrideGains").withP(6).withD(1);
+    public static final LoggedTunablePIDF assistYGains = new LoggedTunablePIDF("Drive/AssistY").withP(4.5);
+
     public static final boolean disableDriving = false;
     public static final boolean disableGyro = false;
     static final boolean useHighFrequencyOdometry = true;
@@ -35,10 +40,6 @@ public class DriveConstants {
             Units.inchesToMeters(36.5),
             Units.inchesToMeters(31.5),
             Units.inchesToMeters(-0.247776),
-            new LoggedTunablePIDF("Drive/ChoreoFeedbackXY").withP(3.5),
-            new LoggedTunablePIDF("Drive/ChoreoFeedbackOmega").withP(3),
-            new LoggedTunablePIDF("Drive/HeadingOverrideGains").withP(6).withD(1),
-            new LoggedTunablePIDF("Drive/AssistY").withP(4.5),
             4.58
     );
 
@@ -165,10 +166,6 @@ public class DriveConstants {
             double bumperLengthMeters,
             // Measured from bottom of frame rails (2x1s) to center of swerve wheels
             double bottomOfFrameRailsToCenterOfWheelsMeters,
-            LoggedTunablePIDF choreoFeedbackXY,
-            LoggedTunablePIDF choreoFeedbackOmega,
-            LoggedTunablePIDF headingOverrideGains,
-            LoggedTunablePIDF assistY,
             double maxVelocityMetersPerSec // Maximum velocity of the robot
     ) {
     }

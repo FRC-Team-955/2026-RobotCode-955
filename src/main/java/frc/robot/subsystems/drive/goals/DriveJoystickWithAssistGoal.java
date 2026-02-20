@@ -14,18 +14,22 @@ import org.littletonrobotics.junction.Logger;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import static frc.robot.subsystems.drive.DriveConstants.driveConfig;
+import static frc.robot.subsystems.drive.DriveConstants.assistYGains;
 
 @RequiredArgsConstructor
 public class DriveJoystickWithAssistGoal extends DriveGoal {
     private static final RobotState robotState = RobotState.get();
     private static final Controller controller = Controller.get();
 
-    private final PIDController assistPIDY = driveConfig.assistY().toPID();
+    private final PIDController assistPIDY = assistYGains.toPID();
     private final Supplier<Optional<Pose2d>> assistPoseSupplier;
 
     @Override
     public DriveRequest getRequest() {
+        if (assistYGains.hasChanged()) {
+            assistYGains.applyPID(assistPIDY);
+        }
+
         var optionalAssistPose = assistPoseSupplier.get();
         if (optionalAssistPose.isPresent()) {
             // Mark assist pose as present

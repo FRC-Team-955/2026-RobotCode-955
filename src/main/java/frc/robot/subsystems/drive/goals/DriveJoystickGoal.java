@@ -12,7 +12,7 @@ import frc.robot.subsystems.drive.DriveRequest;
 import lombok.RequiredArgsConstructor;
 import org.littletonrobotics.junction.Logger;
 
-import static frc.robot.subsystems.drive.DriveConstants.driveConfig;
+import static frc.robot.subsystems.drive.DriveConstants.headingOverrideGains;
 
 
 @RequiredArgsConstructor
@@ -23,14 +23,14 @@ public class DriveJoystickGoal extends DriveGoal {
     private static final RobotState robotState = RobotState.get();
     private static final Controller controller = Controller.get();
 
-    private final PIDController headingOverride = driveConfig.headingOverrideGains().toPIDWrapRadians();
+    private final PIDController headingOverride = headingOverrideGains.toPIDWrapRadians();
     private final Timer headingOverrideSetpointResetTimer = new Timer();
     private boolean shouldRunHeadingOverride = false;
 
     @Override
     public DriveRequest getRequest() {
-        if (driveConfig.headingOverrideGains().hasChanged()) {
-            driveConfig.headingOverrideGains().applyPID(headingOverride);
+        if (headingOverrideGains.hasChanged()) {
+            headingOverrideGains.applyPID(headingOverride);
         }
 
         //////////////////////////////////////////////////////////////////////

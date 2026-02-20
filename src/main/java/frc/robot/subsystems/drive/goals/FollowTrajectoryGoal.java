@@ -13,7 +13,8 @@ import frc.robot.subsystems.drive.DriveRequest;
 import lombok.RequiredArgsConstructor;
 import org.littletonrobotics.junction.Logger;
 
-import static frc.robot.subsystems.drive.DriveConstants.driveConfig;
+import static frc.robot.subsystems.drive.DriveConstants.choreoFeedbackOmega;
+import static frc.robot.subsystems.drive.DriveConstants.choreoFeedbackXY;
 
 @RequiredArgsConstructor
 public class FollowTrajectoryGoal extends DriveGoal {
@@ -22,9 +23,9 @@ public class FollowTrajectoryGoal extends DriveGoal {
     private final Trajectory<SwerveSample> trajectory;
 
     private final Timer timer = new Timer();
-    private final PIDController choreoFeedbackX = driveConfig.choreoFeedbackXY().toPID();
-    private final PIDController choreoFeedbackY = driveConfig.choreoFeedbackXY().toPID();
-    private final PIDController choreoFeedbackOmega = driveConfig.choreoFeedbackOmega().toPIDWrapRadians();
+    private final PIDController feedbackX = choreoFeedbackXY.toPID();
+    private final PIDController feedbackY = choreoFeedbackXY.toPID();
+    private final PIDController feedbackOmega = choreoFeedbackOmega.toPIDWrapRadians();
 
     @Override
     public DriveRequest getRequest() {
@@ -42,9 +43,9 @@ public class FollowTrajectoryGoal extends DriveGoal {
 
             Logger.recordOutput("Drive/TrajectorySetpoint", sample.getPose());
             return DriveRequest.chassisSpeeds(ChassisSpeeds.fromFieldRelativeSpeeds(
-                    sample.vx + choreoFeedbackX.calculate(currentPose.getX(), sample.x),
-                    sample.vy + choreoFeedbackY.calculate(currentPose.getY(), sample.y),
-                    sample.omega + choreoFeedbackOmega.calculate(currentPose.getRotation().getRadians(), sample.heading),
+                    sample.vx + feedbackX.calculate(currentPose.getX(), sample.x),
+                    sample.vy + feedbackY.calculate(currentPose.getY(), sample.y),
+                    sample.omega + feedbackOmega.calculate(currentPose.getRotation().getRadians(), sample.heading),
                     currentPose.getRotation() // Trajectories are absolute, don't flip
             ));
         } else {
