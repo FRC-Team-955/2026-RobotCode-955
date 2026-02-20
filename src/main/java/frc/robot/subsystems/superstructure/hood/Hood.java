@@ -108,11 +108,9 @@ public class Hood implements Periodic {
         } else {
             // See the comments above the lookaheadState and goalState variables for why we effectively calculate two profiles
 
-            double setpointRad;
+            double setpointRad = goal.setpointRad.getAsDouble();
             if (robotState.isInTrench()) {
-                setpointRad = Goal.STOW.setpointRad.getAsDouble();
-            } else {
-                setpointRad = goal.setpointRad.getAsDouble();
+                setpointRad = Math.min(setpointRad, maxPositionUnderTrench);
             }
             Logger.recordOutput("Superstructure/Hood/OriginalSetpointRad", setpointRad);
             TrapezoidProfile.State wantedState = new TrapezoidProfile.State(setpointRad, 0.0);
