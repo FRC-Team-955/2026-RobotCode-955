@@ -30,8 +30,6 @@ public class OperatorDashboard implements Periodic {
 
     public final LoggedNetworkBooleanExt coastOverride = new LoggedNetworkBooleanExt(prefix + "CoastOverride", false);
     public final LoggedNetworkBooleanExt autoChosen = new LoggedNetworkBooleanExt(prefix + "AutoChosen", false);
-    private final Debouncer lowBatteryDebouncer = new Debouncer(3.0, Debouncer.DebounceType.kRising);
-
     private final LoggedNetworkBooleanExt fixedHood = new LoggedNetworkBooleanExt(prefix + "Fixed Hood", false);
 
     @Getter
@@ -44,6 +42,8 @@ public class OperatorDashboard implements Periodic {
     private final Alert constantSetAlert = new Alert("Constants are set.", Alert.AlertType.kInfo);
     private final Alert batteryVoltageAlert = new Alert("Battery is below 12 Volts!", Alert.AlertType.kError);
     private final Alert fixedHoodAlert = new Alert("Fixed hood mode is enabled.", Alert.AlertType.kWarning);
+
+    private final Debouncer lowBatteryDebouncer = new Debouncer(10.0, Debouncer.DebounceType.kRising);
 
     private static OperatorDashboard instance;
 
