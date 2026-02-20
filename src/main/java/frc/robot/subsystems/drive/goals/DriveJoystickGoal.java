@@ -1,9 +1,9 @@
 package frc.robot.subsystems.drive.goals;
 
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.Timer;
 import frc.lib.network.LoggedTunableNumber;
 import frc.robot.Controller;
 import frc.robot.RobotState;
@@ -24,56 +24,49 @@ public class DriveJoystickGoal extends DriveGoal {
     private static final Controller controller = Controller.get();
 
     private final PIDController headingOverride = headingOverrideGains.toPIDWrapRadians();
-    private final Timer headingOverrideSetpointResetTimer = new Timer();
-    private boolean shouldRunHeadingOverride = false;
+    private final Debouncer headingOverrideEnabledDebouncer = new Debouncer(headingOverrideSetpointResetTime.get(), Debouncer.DebounceType.kRising);
+    private boolean runningHeadingOverride = false;
 
     @Override
     public DriveRequest getRequest() {
         if (headingOverrideGains.hasChanged()) {
             headingOverrideGains.applyPID(headingOverride);
         }
+        if (headingOverrideSetpointResetTime.hasChanged()) {
+            headingOverrideEnabledDebouncer.setDebounceTime(headingOverrideSetpointResetTime.get());
+        }
 
         //////////////////////////////////////////////////////////////////////
 
         ChassisSpeeds joystickSetpoint = controller.getDriveSetpointRobotRelative(robotState.getRotation());
 
-        if (joystickSetpoint.omegaRadiansPerSecond == 0.0) {
-            // Once joystick omega is 0, wait X seconds before getting robot rotation
-            // and then start heading override
-            if (!shouldRunHeadingOverride) {
-                if (!headingOverrideSetpointResetTimer.isRunning()) {
-                    // Omega just became 0 - start timer
-                    headingOverrideSetpointResetTimer.restart();
-                } else if (headingOverrideSetpointResetTimer.hasElapsed(headingOverrideSetpointResetTime.get())) {
-                    // Now time to set PID setpoint and start overriding heading
-                    headingOverride.reset();
-                    headingOverride.setSetpoint(robotState.getRotation().getRadians());
-                    shouldRunHeadingOverride = true;
-                }
+        boolean canRunHeadingOverride = headingOverrideEnabledDebouncer.calculate(
+                (
+                        // Stop heading override if we are running and rotate too much on our own
+                        !runningHeadingOverride ||
+                                Math.abs(robotState.getRotation().getRadians() - headingOverride.getSetpoint())
+                                        > Units.degreesToRadians(headingOverrideThresholdDegrees.get())
+                ) && joystickSetpoint.omegaRadiansPerSecond == 0.0
+        );
+        if (canRunHeadingOverride) {
+            if (!runningHeadingOverride) {
+                // Set PID setpoint
+                headingOverride.reset();
+                headingOverride.setSetpoint(robotState.getRotation().getRadians());
+                runningHeadingOverride = true;
             }
 
-            if (shouldRunHeadingOverride) {
-                // Stop heading override if we rotate too much on our own
-                if (Math.abs(robotState.getRotation().getRadians() - headingOverride.getSetpoint()) > Units.degreesToRadians(headingOverrideThresholdDegrees.get())) {
-                    headingOverride.setSetpoint(robotState.getRotation().getRadians());
-                    headingOverrideSetpointResetTimer.stop();
-                    shouldRunHeadingOverride = false;
-                } else {
-                    joystickSetpoint = new ChassisSpeeds(
-                            joystickSetpoint.vxMetersPerSecond,
-                            joystickSetpoint.vyMetersPerSecond,
-                            // limit to drive linear magnitude
-                            // drive linear magnitude is between 0 and 1
-                            headingOverride.calculate(robotState.getRotation().getRadians()) * controller.getDriveLinearMagnitude()
-                    );
-                }
-            }
+            joystickSetpoint = new ChassisSpeeds(
+                    joystickSetpoint.vxMetersPerSecond,
+                    joystickSetpoint.vyMetersPerSecond,
+                    // limit to drive linear magnitude
+                    // drive linear magnitude is between 0 and 1
+                    headingOverride.calculate(robotState.getRotation().getRadians()) * controller.getDriveLinearMagnitude()
+            );
         } else {
-            headingOverride.setSetpoint(robotState.getRotation().getRadians());
-            headingOverrideSetpointResetTimer.stop();
-            shouldRunHeadingOverride = false;
+            runningHeadingOverride = false;
         }
-        Logger.recordOutput("Drive/DriveJoystick/HeadingOverrideRunning", shouldRunHeadingOverride);
+        Logger.recordOutput("Drive/DriveJoystick/HeadingOverrideRunning", runningHeadingOverride);
 
         return DriveRequest.chassisSpeeds(joystickSetpoint);
     }
