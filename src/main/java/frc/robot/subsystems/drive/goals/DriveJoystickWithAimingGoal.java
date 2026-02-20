@@ -15,7 +15,8 @@ import frc.robot.subsystems.drive.DriveRequest;
 import lombok.RequiredArgsConstructor;
 import org.littletonrobotics.junction.Logger;
 
-import static frc.robot.subsystems.drive.DriveTuning.headingOverrideGainsTunable;
+import static frc.robot.subsystems.drive.DriveConstants.driveConfig;
+
 
 @RequiredArgsConstructor
 public class DriveJoystickWithAimingGoal extends DriveGoal {
@@ -27,13 +28,15 @@ public class DriveJoystickWithAimingGoal extends DriveGoal {
     private static final ShootingKinematics shootingKinematics = ShootingKinematics.get();
 
     private final SlewRateLimiter2d linearAccelerationLimiter = new SlewRateLimiter2d(maxLinearAccelerationMetersPerSecPerSec.get(), robotState.getMeasuredChassisSpeeds());
-    private final PIDController headingOverride = headingOverrideGainsTunable.getOrOriginal().toPIDWrapRadians();
+    private final PIDController headingOverride = driveConfig.headingOverrideGains().toPIDWrapRadians();
 
     private Rotation2d lastLinearDirection = new Rotation2d();
 
     @Override
     public DriveRequest getRequest() {
-        headingOverrideGainsTunable.ifChanged(gains -> gains.applyPID(headingOverride));
+        if (driveConfig.headingOverrideGains().hasChanged()) {
+            driveConfig.headingOverrideGains().applyPID(headingOverride);
+        }
         if (maxLinearAccelerationMetersPerSecPerSec.hasChanged()) {
             linearAccelerationLimiter.setLimit(maxLinearAccelerationMetersPerSecPerSec.get());
         }

@@ -1,7 +1,6 @@
 package frc.robot.subsystems.superintake.intakerollers;
 
 import edu.wpi.first.math.system.plant.DCMotor;
-import frc.lib.PIDF;
 import frc.lib.motor.MotorIO;
 import frc.lib.motor.MotorIOSim;
 import frc.lib.motor.MotorIOSparkMax;
@@ -18,15 +17,15 @@ public class IntakeRollersConstants {
                     true,
                     40,
                     gearRatio,
-                    PIDF.zero(),
-                    PIDF.zero()
+                    null,
+                    null
             );
             case SIM -> new MotorIOSim(
                     gearRatio,
                     0.01,
                     DCMotor.getNEO(1),
-                    PIDF.zero(),
-                    PIDF.zero()
+                    null,
+                    null
             );
             case REPLAY -> new MotorIO();
         };

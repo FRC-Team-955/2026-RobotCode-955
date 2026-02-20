@@ -6,7 +6,6 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import frc.lib.PIDF;
 import frc.lib.Util;
 import frc.lib.motor.MotorIO;
 import frc.lib.motor.MotorIOInputsAutoLogged;
@@ -28,7 +27,6 @@ import java.util.function.DoubleSupplier;
 import static frc.robot.subsystems.superstructure.hood.HoodConstants.*;
 
 public class Hood implements Periodic {
-    private static final PIDF.Tunable gainsTunable = gains.tunable("Superstructure/Hood/Gains");
     private static final LoggedTunableNumber profileLookaheadTimeSec = new LoggedTunableNumber("Superstructure/Hood/ProfileLookaheadTimeSec", 0.15);
     private static final LoggedTunableNumber stowSetpointDegrees = new LoggedTunableNumber("Superstructure/Hood/Goal/StowDegrees", -45.0);
     private static final LoggedTunableNumber shootHubManualSetpointDegrees = new LoggedTunableNumber("Superstructure/Hood/Goal/ShootHubManualDegrees", -45.0);
@@ -97,7 +95,9 @@ public class Hood implements Periodic {
             io.setBrakeMode(!operatorDashboard.coastOverride.get());
         }
 
-        gainsTunable.ifChanged(io::setPositionPIDF);
+        if (gains.hasChanged()) {
+            io.setPositionPIDF(gains);
+        }
     }
 
     @Override

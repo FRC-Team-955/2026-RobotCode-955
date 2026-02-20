@@ -1,7 +1,7 @@
 package frc.robot.subsystems.superstructure.flywheel;
 
-import frc.lib.PIDF;
 import frc.lib.motor.MotorIOInputsAutoLogged;
+import frc.lib.network.LoggedTunablePIDF;
 import org.littletonrobotics.junction.AutoLog;
 
 public class FlywheelIO {
@@ -18,7 +18,7 @@ public class FlywheelIO {
      * Change PIDF gains. IO layers should not rely on this method being called, and
      * should default to the gains in the constants
      */
-    public void setVelocityPIDF(PIDF newGains) {
+    public void setVelocityPIDF(LoggedTunablePIDF newGains) {
     }
 
     public void setVelocityRequest(double setpointRadPerSec) {

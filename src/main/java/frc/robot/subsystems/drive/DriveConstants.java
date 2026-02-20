@@ -1,8 +1,9 @@
 package frc.robot.subsystems.drive;
 
+import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
-import frc.lib.PIDF;
+import frc.lib.network.LoggedTunablePIDF;
 import frc.robot.BuildConstants;
 
 public class DriveConstants {
@@ -10,8 +11,8 @@ public class DriveConstants {
     public static final double assistMaximumDistanceMeters = Units.feetToMeters(5);
 
     public static final MoveToConfig moveToConfig = new MoveToConfig(
-            PIDF.ofPD(4.5, 0.05),
-            PIDF.ofPD(4.5, 0.05),
+            new LoggedTunablePIDF("Drive/MoveTo/Linear").withP(4.5).withD(0.05),
+            new LoggedTunablePIDF("Drive/MoveTo/Angular").withP(4.5).withD(0.05),
             0.02,
             0.1,
             Units.degreesToRadians(2),
@@ -34,9 +35,10 @@ public class DriveConstants {
             Units.inchesToMeters(36.5),
             Units.inchesToMeters(31.5),
             Units.inchesToMeters(-0.247776),
-            PIDF.ofPD(3.5, 0),
-            PIDF.ofPD(3, 0),
-            PIDF.ofP(6),
+            new LoggedTunablePIDF("Drive/ChoreoFeedbackXY").withP(3.5),
+            new LoggedTunablePIDF("Drive/ChoreoFeedbackOmega").withP(3),
+            new LoggedTunablePIDF("Drive/HeadingOverrideGains").withP(6).withD(1),
+            new LoggedTunablePIDF("Drive/AssistY").withP(4.5),
             4.58
     );
 
@@ -65,11 +67,13 @@ public class DriveConstants {
         // TO TUNE DRIVE CURRENT LIMIT: Put the robot against a wall while having it on carpet and run the slip
         // current characterization auto. Output will be in console in AdvantageScope.
         case REAL, REPLAY -> new ModuleConfig(
-                PIDF.ofPDSVA(
-                        0.0, 0.0,
-                        0.19, 0.125, 0.005
-                ),
-                PIDF.ofPD(5, 0.04),
+                new LoggedTunablePIDF("Drive/DriveGains")
+                        .withS(0.19, StaticFeedforwardSignValue.UseVelocitySign)
+                        .withV(0.125)
+                        .withA(0.005),
+                new LoggedTunablePIDF("Drive/TurnGains")
+                        .withP(5)
+                        .withD(0.04),
                 Mk4iGearRatios.L2,
                 Mk4iGearRatios.TURN,
                 true,
@@ -79,8 +83,12 @@ public class DriveConstants {
                 60
         );
         case SIM -> new ModuleConfig(
-                PIDF.ofPDSV(0.05, 0.0, 0.04075, 0.14117),
-                PIDF.ofPD(10.0, 0.07),
+                new LoggedTunablePIDF("Drive/DriveGains")
+                        .withS(0.04075, StaticFeedforwardSignValue.UseClosedLoopSign)
+                        .withV(0.14117),
+                new LoggedTunablePIDF("Drive/TurnGains")
+                        .withP(10.0)
+                        .withD(0.07),
                 Mk4iGearRatios.L2,
                 Mk4iGearRatios.TURN,
                 true,
@@ -139,8 +147,8 @@ public class DriveConstants {
     }
 
     public record MoveToConfig(
-            PIDF linear,
-            PIDF angular,
+            LoggedTunablePIDF linear,
+            LoggedTunablePIDF angular,
             double linearPositionToleranceMeters,
             double linearVelocityToleranceMetersPerSec,
             double angularPositionToleranceRad,
@@ -157,16 +165,17 @@ public class DriveConstants {
             double bumperLengthMeters,
             // Measured from bottom of frame rails (2x1s) to center of swerve wheels
             double bottomOfFrameRailsToCenterOfWheelsMeters,
-            PIDF choreoFeedbackXY,
-            PIDF choreoFeedbackOmega,
-            PIDF headingOverrideGains,
+            LoggedTunablePIDF choreoFeedbackXY,
+            LoggedTunablePIDF choreoFeedbackOmega,
+            LoggedTunablePIDF headingOverrideGains,
+            LoggedTunablePIDF assistY,
             double maxVelocityMetersPerSec // Maximum velocity of the robot
     ) {
     }
 
     record ModuleConfig(
-            PIDF driveGains,
-            PIDF turnGains,
+            LoggedTunablePIDF driveGains,
+            LoggedTunablePIDF turnGains,
             double driveGearRatio,
             double turnGearRatio,
             boolean turnInverted,

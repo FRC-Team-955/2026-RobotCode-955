@@ -3,7 +3,7 @@ package frc.robot.subsystems.superstructure.flywheel;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
-import frc.lib.PIDF;
+import frc.lib.network.LoggedTunablePIDF;
 import frc.robot.BuildConstants;
 
 public class FlywheelConstants {
@@ -11,9 +11,9 @@ public class FlywheelConstants {
     static final double velocityToleranceRadPerSec = Units.rotationsPerMinuteToRadiansPerSecond(100);
 
     static final double gearRatio = 1;
-    static final PIDF velocityGains = switch (BuildConstants.mode) {
-        case REAL, REPLAY -> PIDF.zero();
-        case SIM -> PIDF.ofSV(0.0, 0.02);
+    static final LoggedTunablePIDF velocityGains = switch (BuildConstants.mode) {
+        case REAL, REPLAY -> new LoggedTunablePIDF("Superstructure/Flywheel/Gains");
+        case SIM -> new LoggedTunablePIDF("Superstructure/Flywheel/Gains").withV(0.02);
     };
 
     static FlywheelIO createIO() {

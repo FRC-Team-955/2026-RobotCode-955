@@ -21,16 +21,14 @@ import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.FeedbackSensor;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkClosedLoopController;
-import com.revrobotics.spark.SparkClosedLoopController.ArbFFUnits;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.filter.Debouncer;
 import frc.lib.HighFrequencySamplingThread;
-import frc.lib.PIDF;
+import frc.lib.network.LoggedTunablePIDF;
 
 import java.util.Queue;
 import java.util.function.DoubleSupplier;
@@ -66,8 +64,6 @@ public class ModuleIOSparkMax extends ModuleIO {
     private final Debouncer driveConnectedDebounce = new Debouncer(0.5);
     private final Debouncer turnConnectedDebounce = new Debouncer(0.5);
 
-    private SimpleMotorFeedforward driveFF = moduleConfig.driveGains().toSimpleFF();
-
     public ModuleIOSparkMax(
             int driveCanID,
             int turnCanID,
@@ -97,7 +93,7 @@ public class ModuleIOSparkMax extends ModuleIO {
         driveConfig
                 .closedLoop
                 .feedbackSensor(FeedbackSensor.kPrimaryEncoder);
-        moduleConfig.driveGains().applySparkWithoutFeedforward(driveConfig.closedLoop, ClosedLoopSlot.kSlot0);
+        moduleConfig.driveGains().applySpark(driveConfig.closedLoop, ClosedLoopSlot.kSlot0);
         driveConfig
                 .signals
                 .primaryEncoderPositionAlwaysOn(true)
@@ -132,7 +128,7 @@ public class ModuleIOSparkMax extends ModuleIO {
                 .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
                 .positionWrappingEnabled(true)
                 .positionWrappingInputRange(0.0, 2 * Math.PI);
-        moduleConfig.turnGains().applySparkWithoutFeedforward(turnConfig.closedLoop, ClosedLoopSlot.kSlot0);
+        moduleConfig.turnGains().applySpark(turnConfig.closedLoop, ClosedLoopSlot.kSlot0);
         turnConfig
                 .signals
                 .absoluteEncoderPositionAlwaysOn(true)
@@ -200,11 +196,10 @@ public class ModuleIOSparkMax extends ModuleIO {
     }
 
     @Override
-    public void setDrivePIDF(PIDF newGains) {
+    public void setDrivePIDF(LoggedTunablePIDF newGains) {
         System.out.println("Setting drive gains");
-        driveFF = newGains.toSimpleFF();
         var newConfig = new SparkMaxConfig();
-        newGains.applySparkWithoutFeedforward(newConfig.closedLoop, ClosedLoopSlot.kSlot0);
+        newGains.applySpark(newConfig.closedLoop, ClosedLoopSlot.kSlot0);
         tryUntilOkAsync(5, () -> driveSpark.configure(
                 newConfig,
                 ResetMode.kNoResetSafeParameters,
@@ -213,10 +208,10 @@ public class ModuleIOSparkMax extends ModuleIO {
     }
 
     @Override
-    public void setTurnPIDF(PIDF newGains) {
+    public void setTurnPIDF(LoggedTunablePIDF newGains) {
         System.out.println("Setting turn gains");
         var newConfig = new SparkMaxConfig();
-        newGains.applySparkWithoutFeedforward(newConfig.closedLoop, ClosedLoopSlot.kSlot0);
+        newGains.applySpark(newConfig.closedLoop, ClosedLoopSlot.kSlot0);
         tryUntilOkAsync(5, () -> turnSpark.configure(
                 newConfig,
                 ResetMode.kNoResetSafeParameters,
@@ -256,13 +251,10 @@ public class ModuleIOSparkMax extends ModuleIO {
 
     @Override
     public void setDriveClosedLoop(double velocityRadPerSec) {
-        var ffVolts = driveFF.calculate(velocityRadPerSec);
         driveController.setSetpoint(
                 velocityRadPerSec,
                 ControlType.kVelocity,
-                ClosedLoopSlot.kSlot0,
-                ffVolts,
-                ArbFFUnits.kVoltage
+                ClosedLoopSlot.kSlot0
         );
     }
 

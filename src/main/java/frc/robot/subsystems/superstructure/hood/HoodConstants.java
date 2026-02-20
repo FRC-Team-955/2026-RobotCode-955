@@ -3,10 +3,10 @@ package frc.robot.subsystems.superstructure.hood;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
-import frc.lib.PIDF;
 import frc.lib.motor.MotorIO;
 import frc.lib.motor.MotorIOSim;
 import frc.lib.motor.MotorIOSparkMax;
+import frc.lib.network.LoggedTunablePIDF;
 import frc.robot.BuildConstants;
 
 public class HoodConstants {
@@ -15,9 +15,9 @@ public class HoodConstants {
     static final TrapezoidProfile.Constraints constraints = new TrapezoidProfile.Constraints(1, 3);
 
     static final double gearRatio = 120;
-    static final PIDF gains = switch (BuildConstants.mode) {
-        case REAL, REPLAY -> PIDF.zero();
-        case SIM -> PIDF.ofPDSV(18.9, 0.0, 0.0, 0.0);
+    static final LoggedTunablePIDF gains = switch (BuildConstants.mode) {
+        case REAL, REPLAY -> new LoggedTunablePIDF("Superstructure/Hood/Gains");
+        case SIM -> new LoggedTunablePIDF("Superstructure/Hood/Gains").withP(18.9);
     };
 
     static MotorIO createIO() {
@@ -29,14 +29,14 @@ public class HoodConstants {
                     40,
                     gearRatio,
                     gains,
-                    PIDF.zero()
+                    null
             );
             case SIM -> new MotorIOSim(
                     gearRatio,
                     0.01,
                     DCMotor.getNEO(1),
                     gains,
-                    PIDF.zero()
+                    null
             );
             case REPLAY -> new MotorIO();
         };

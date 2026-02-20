@@ -4,7 +4,7 @@ import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
-import frc.lib.PIDF;
+import frc.lib.network.LoggedTunablePIDF;
 import frc.lib.Util;
 import frc.robot.Constants;
 
@@ -27,7 +27,7 @@ public class MotorIOArmSim extends MotorIO {
             boolean simulateGravity,
             double startingAngleRads,
             double measurementStdDevs,
-            PIDF gains
+            LoggedTunablePIDF gains
     ) {
         armSim = new SingleJointedArmSim(
                 motor,
@@ -64,14 +64,14 @@ public class MotorIOArmSim extends MotorIO {
     }
 
     @Override
-    public void setPositionPIDF(PIDF newGains) {
+    public void setPositionPIDF(LoggedTunablePIDF newGains) {
         System.out.println("Setting motor position gains");
         pid = newGains.toPID();
         ff = newGains.toArmFF();
     }
 
     @Override
-    public void setVelocityPIDF(PIDF newGains) {
+    public void setVelocityPIDF(LoggedTunablePIDF newGains) {
         Util.error("Motor should only set position PIDF");
     }
 

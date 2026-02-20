@@ -7,9 +7,8 @@ import com.revrobotics.ResetMode;
 import com.revrobotics.spark.*;
 import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.filter.Debouncer;
-import frc.lib.PIDF;
+import frc.lib.network.LoggedTunablePIDF;
 
 import java.util.function.DoubleSupplier;
 
@@ -27,22 +26,18 @@ public class MotorIOSparkMax extends MotorIO {
     // Connection debouncers
     private final Debouncer connectedDebounce = new Debouncer(0.5);
 
-    private SimpleMotorFeedforward velocityFeedforward;
-
     public MotorIOSparkMax(
             int canID,
             boolean inverted,
             boolean brakeMode,
             int currentLimitAmps,
             double gearRatio,
-            PIDF positionGains,
-            PIDF velocityGains
+            LoggedTunablePIDF positionGains,
+            LoggedTunablePIDF velocityGains
     ) {
         spark = new SparkMax(canID, SparkLowLevel.MotorType.kBrushless);
         encoder = spark.getEncoder();
         controller = spark.getClosedLoopController();
-
-        velocityFeedforward = velocityGains.toSimpleFF();
 
         // Configure drive motor
         config = new SparkMaxConfig();
@@ -60,8 +55,10 @@ public class MotorIOSparkMax extends MotorIO {
         config
                 .closedLoop
                 .feedbackSensor(FeedbackSensor.kPrimaryEncoder);
-        positionGains.applySparkWithoutFeedforward(config.closedLoop, ClosedLoopSlot.kSlot0); // position = slot0
-        velocityGains.applySparkWithoutFeedforward(config.closedLoop, ClosedLoopSlot.kSlot1); // velocity = slot1
+        if (positionGains != null)
+            positionGains.applySpark(config.closedLoop, ClosedLoopSlot.kSlot0); // position = slot0
+        if (velocityGains != null)
+            velocityGains.applySpark(config.closedLoop, ClosedLoopSlot.kSlot1); // velocity = slot1
         config
                 .signals
                 .primaryEncoderPositionAlwaysOn(true)
@@ -94,10 +91,10 @@ public class MotorIOSparkMax extends MotorIO {
     }
 
     @Override
-    public void setPositionPIDF(PIDF newGains) {
+    public void setPositionPIDF(LoggedTunablePIDF newGains) {
         System.out.println("Setting motor position gains");
         var newConfig = new SparkMaxConfig();
-        newGains.applySparkWithoutFeedforward(newConfig.closedLoop, ClosedLoopSlot.kSlot0);
+        newGains.applySpark(newConfig.closedLoop, ClosedLoopSlot.kSlot0); // position = slot0
         tryUntilOkAsync(5, () -> spark.configure(
                 newConfig,
                 ResetMode.kNoResetSafeParameters,
@@ -106,11 +103,10 @@ public class MotorIOSparkMax extends MotorIO {
     }
 
     @Override
-    public void setVelocityPIDF(PIDF newGains) {
+    public void setVelocityPIDF(LoggedTunablePIDF newGains) {
         System.out.println("Setting motor velocity gains");
-        velocityFeedforward = newGains.toSimpleFF();
         var newConfig = new SparkMaxConfig();
-        newGains.applySparkWithoutFeedforward(newConfig.closedLoop, ClosedLoopSlot.kSlot0);
+        newGains.applySpark(newConfig.closedLoop, ClosedLoopSlot.kSlot1); // velocity = slot1
         tryUntilOkAsync(5, () -> spark.configure(
                 newConfig,
                 ResetMode.kNoResetSafeParameters,
@@ -121,7 +117,8 @@ public class MotorIOSparkMax extends MotorIO {
     @Override
     public void setBrakeMode(boolean enable) {
         System.out.println("Setting motor brake mode to " + enable);
-        var newConfig = new SparkMaxConfig().idleMode(enable ? SparkBaseConfig.IdleMode.kBrake : SparkBaseConfig.IdleMode.kCoast);
+        var newConfig = new SparkMaxConfig()
+                .idleMode(enable ? SparkBaseConfig.IdleMode.kBrake : SparkBaseConfig.IdleMode.kCoast);
         tryUntilOkAsync(5, () -> spark.configure(
                 newConfig,
                 ResetMode.kNoResetSafeParameters,
@@ -138,16 +135,11 @@ public class MotorIOSparkMax extends MotorIO {
                     SparkBase.ControlType.kPosition,
                     ClosedLoopSlot.kSlot0 // position = slot0
             );
-            case VelocityRadPerSec -> {
-                var ffVolts = velocityFeedforward.calculate(value);
-                controller.setSetpoint(
-                        value,
-                        SparkBase.ControlType.kVelocity,
-                        ClosedLoopSlot.kSlot1,  // velocity = slot1
-                        ffVolts,
-                        SparkClosedLoopController.ArbFFUnits.kVoltage
-                );
-            }
+            case VelocityRadPerSec -> controller.setSetpoint(
+                    value,
+                    SparkBase.ControlType.kVelocity,
+                    ClosedLoopSlot.kSlot1  // velocity = slot1
+            );
         }
     }
 

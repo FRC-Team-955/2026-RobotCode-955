@@ -17,8 +17,8 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.*;
-import frc.lib.PIDF;
 import frc.lib.PhoenixUtil;
+import frc.lib.network.LoggedTunablePIDF;
 import frc.robot.Constants;
 
 public class MotorIOTalonFX extends MotorIO {
@@ -46,8 +46,8 @@ public class MotorIOTalonFX extends MotorIO {
             boolean brakeMode,
             int currentLimitAmps,
             double gearRatio,
-            PIDF positionGains,
-            PIDF velocityGains
+            LoggedTunablePIDF positionGains,
+            LoggedTunablePIDF velocityGains
     ) {
         talon = new TalonFX(canID, Constants.canivoreBus);
 
@@ -61,7 +61,7 @@ public class MotorIOTalonFX extends MotorIO {
         config.TorqueCurrent.PeakForwardTorqueCurrent = currentLimitAmps;
         config.TorqueCurrent.PeakReverseTorqueCurrent = -currentLimitAmps;
         config.Feedback.SensorToMechanismRatio = gearRatio;
-        config.Slot0 = Slot0Configs.from(positionGains.toPhoenixWithoutFeedforward());
+        config.Slot0 = Slot0Configs.from(positionGains.toPhoenix());
         config.Slot1 = Slot1Configs.from(velocityGains.toPhoenix());
         PhoenixUtil.tryUntilOk(5, () -> talon.getConfigurator().apply(config, 0.25));
         PhoenixUtil.tryUntilOk(5, () -> talon.setPosition(0.0, 0.25));
@@ -95,14 +95,14 @@ public class MotorIOTalonFX extends MotorIO {
     }
 
     @Override
-    public void setPositionPIDF(PIDF newGains) {
+    public void setPositionPIDF(LoggedTunablePIDF newGains) {
         System.out.println("Setting motor position gains");
-        config.Slot0 = Slot0Configs.from(newGains.toPhoenixWithoutFeedforward());
+        config.Slot0 = Slot0Configs.from(newGains.toPhoenix());
         PhoenixUtil.tryUntilOkAsync(5, () -> talon.getConfigurator().apply(config, 0.25));
     }
 
     @Override
-    public void setVelocityPIDF(PIDF newGains) {
+    public void setVelocityPIDF(LoggedTunablePIDF newGains) {
         System.out.println("Setting motor velocity gains");
         config.Slot1 = Slot1Configs.from(newGains.toPhoenix());
         PhoenixUtil.tryUntilOkAsync(5, () -> talon.getConfigurator().apply(config, 0.25));

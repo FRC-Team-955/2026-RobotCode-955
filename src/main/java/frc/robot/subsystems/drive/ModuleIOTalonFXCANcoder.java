@@ -28,7 +28,7 @@ import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.*;
 import frc.lib.HighFrequencySamplingThread;
-import frc.lib.PIDF;
+import frc.lib.network.LoggedTunablePIDF;
 
 import java.util.Queue;
 
@@ -124,7 +124,7 @@ public class ModuleIOTalonFXCANcoder extends ModuleIO {
         // Configure turn motor
         turnConfig = new TalonFXConfiguration();
         turnConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-        turnConfig.Slot0 = Slot0Configs.from(moduleConfig.turnGains().toPhoenix(StaticFeedforwardSignValue.UseClosedLoopSign));
+        turnConfig.Slot0 = Slot0Configs.from(moduleConfig.turnGains().toPhoenix());
         turnConfig.Feedback.FeedbackRemoteSensorID = cancoderCanID;
         turnConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
         turnConfig.Feedback.RotorToSensorRatio = moduleConfig.turnGearRatio();
@@ -232,14 +232,14 @@ public class ModuleIOTalonFXCANcoder extends ModuleIO {
     }
 
     @Override
-    public void setDrivePIDF(PIDF newGains) {
+    public void setDrivePIDF(LoggedTunablePIDF newGains) {
         System.out.println("Setting drive gains");
         driveConfig.Slot0 = Slot0Configs.from(newGains.toPhoenix());
         tryUntilOkAsync(5, () -> driveTalon.getConfigurator().apply(driveConfig, 0.25));
     }
 
     @Override
-    public void setTurnPIDF(PIDF newGains) {
+    public void setTurnPIDF(LoggedTunablePIDF newGains) {
         System.out.println("Setting turn gains");
         turnConfig.Slot0 = Slot0Configs.from(newGains.toPhoenix());
         tryUntilOkAsync(5, () -> turnTalon.getConfigurator().apply(turnConfig, 0.25));

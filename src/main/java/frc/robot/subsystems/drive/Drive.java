@@ -17,7 +17,6 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.lib.PIDF;
 import frc.lib.Util;
 import frc.lib.subsystem.CommandBasedSubsystem;
 import frc.robot.Constants;
@@ -38,9 +37,6 @@ import static frc.lib.HighFrequencySamplingThread.highFrequencyLock;
 import static frc.robot.subsystems.drive.DriveConstants.*;
 
 public class Drive extends CommandBasedSubsystem {
-    private static final PIDF.Tunable moduleDriveGainsTunable = moduleConfig.driveGains().tunable("Drive/ModuleDrive");
-    private static final PIDF.Tunable moduleTurnGainsTunable = moduleConfig.turnGains().tunable("Drive/ModuleTurn");
-
     private static final RobotState robotState = RobotState.get();
     private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
 
@@ -237,16 +233,16 @@ public class Drive extends CommandBasedSubsystem {
             }
         }
 
-        moduleDriveGainsTunable.ifChanged(gains -> {
+        if (moduleConfig.driveGains().hasChanged()) {
             for (var module : modules) {
-                module.setDrivePIDF(gains);
+                module.setDrivePIDF(moduleConfig.driveGains());
             }
-        });
-        moduleTurnGainsTunable.ifChanged(gains -> {
+        }
+        if (moduleConfig.turnGains().hasChanged()) {
             for (var module : modules) {
-                module.setTurnPIDF(gains);
+                module.setTurnPIDF(moduleConfig.turnGains());
             }
-        });
+        }
     }
 
     @Override
@@ -361,18 +357,6 @@ public class Drive extends CommandBasedSubsystem {
 
     public Command moveTo(Supplier<Pose2d> poseSupplier, boolean mergeJoystickDrive) {
         return startIdle(() -> goal = new MoveToGoal(poseSupplier, mergeJoystickDrive));
-    }
-
-    public Command moveToWithAiming(Supplier<Pose2d> poseSupplier) {
-        return startIdle(() -> goal = new MoveToWithAimingGoal(poseSupplier));
-    }
-
-    public void setGoalMoveToWithAiming(Supplier<Pose2d> poseSupplier) {
-        goal = new MoveToWithAimingGoal(poseSupplier);
-    }
-
-    public void setGoalMoveTo(Supplier<Pose2d> poseSupplier, boolean mergeJoystickDrive) {
-        goal = new MoveToGoal(poseSupplier, mergeJoystickDrive);
     }
 
     public Command driveJoystick() {

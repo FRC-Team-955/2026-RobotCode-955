@@ -1,9 +1,9 @@
 package frc.robot.subsystems.superstructure.flywheel;
 
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
-import frc.lib.PIDF;
 import frc.lib.motor.MotorIOTalonFX;
 import frc.lib.motor.RequestType;
+import frc.lib.network.LoggedTunablePIDF;
 
 public class FlywheelIOTalonFX extends FlywheelIO {
     private static final int currentLimitAmps = 120;
@@ -23,7 +23,7 @@ public class FlywheelIOTalonFX extends FlywheelIO {
                 false,
                 currentLimitAmps,
                 FlywheelConstants.gearRatio,
-                PIDF.zero(),
+                null,
                 FlywheelConstants.velocityGains
         );
 
@@ -33,8 +33,8 @@ public class FlywheelIOTalonFX extends FlywheelIO {
                 false,
                 currentLimitAmps,
                 FlywheelConstants.gearRatio,
-                PIDF.zero(),
-                PIDF.zero()
+                null,
+                null
         );
         follower.setFollow(leader, motorAlignment);
     }
@@ -46,7 +46,7 @@ public class FlywheelIOTalonFX extends FlywheelIO {
     }
 
     @Override
-    public void setVelocityPIDF(PIDF newGains) {
+    public void setVelocityPIDF(LoggedTunablePIDF newGains) {
         leader.setVelocityPIDF(newGains);
     }
 

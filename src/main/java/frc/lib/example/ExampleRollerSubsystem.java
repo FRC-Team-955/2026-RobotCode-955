@@ -4,7 +4,6 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import frc.lib.PIDF;
 import frc.lib.Util;
 import frc.lib.motor.MotorIO;
 import frc.lib.motor.MotorIOInputsAutoLogged;
@@ -23,8 +22,6 @@ import java.util.function.DoubleSupplier;
 import static frc.lib.example.ExampleRollerSubsystemConstants.*;
 
 public class ExampleRollerSubsystem implements Periodic {
-    private static final PIDF.Tunable positionGainsTunable = positionGains.tunable("ExampleRollerSubsystem/Position");
-    private static final PIDF.Tunable velocityGainsTunable = velocityGains.tunable("ExampleRollerSubsystem/Velocity");
     private static final LoggedTunableNumber runAtVoltage = new LoggedTunableNumber("ExampleRollerSubsystem/Goal/RunAtVoltage", 3.0);
 
     private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
@@ -79,8 +76,12 @@ public class ExampleRollerSubsystem implements Periodic {
             io.setBrakeMode(!operatorDashboard.coastOverride.get());
         }
 
-        positionGainsTunable.ifChanged(io::setPositionPIDF);
-        velocityGainsTunable.ifChanged(io::setVelocityPIDF);
+        if (positionGains.hasChanged()) {
+            io.setPositionPIDF(positionGains);
+        }
+        if (velocityGains.hasChanged()) {
+            io.setVelocityPIDF(velocityGains);
+        }
     }
 
     @Override

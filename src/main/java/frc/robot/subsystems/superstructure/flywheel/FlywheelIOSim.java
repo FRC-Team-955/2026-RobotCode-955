@@ -1,9 +1,9 @@
 package frc.robot.subsystems.superstructure.flywheel;
 
 import edu.wpi.first.math.system.plant.DCMotor;
-import frc.lib.PIDF;
 import frc.lib.motor.MotorIOSim;
 import frc.lib.motor.RequestType;
+import frc.lib.network.LoggedTunablePIDF;
 
 public class FlywheelIOSim extends FlywheelIO {
     private final MotorIOSim leader;
@@ -14,16 +14,16 @@ public class FlywheelIOSim extends FlywheelIO {
                 FlywheelConstants.gearRatio,
                 JKgMetersSquared,
                 motor,
-                PIDF.zero(),
-                PIDF.zero()
+                null,
+                null
         );
 
         follower = new MotorIOSim(
                 FlywheelConstants.gearRatio,
                 JKgMetersSquared,
                 motor,
-                PIDF.zero(),
-                PIDF.zero()
+                null,
+                null
         );
     }
 
@@ -35,7 +35,7 @@ public class FlywheelIOSim extends FlywheelIO {
     }
 
     @Override
-    public void setVelocityPIDF(PIDF newGains) {
+    public void setVelocityPIDF(LoggedTunablePIDF newGains) {
         leader.setVelocityPIDF(newGains);
     }
 

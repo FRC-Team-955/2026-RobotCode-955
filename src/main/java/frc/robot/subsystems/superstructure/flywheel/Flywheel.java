@@ -5,7 +5,6 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import frc.lib.PIDF;
 import frc.lib.Util;
 import frc.lib.network.LoggedTunableNumber;
 import frc.lib.subsystem.Periodic;
@@ -22,7 +21,6 @@ import java.util.function.DoubleSupplier;
 import static frc.robot.subsystems.superstructure.flywheel.FlywheelConstants.*;
 
 public class Flywheel implements Periodic {
-    private static final PIDF.Tunable velocityGainsTunable = velocityGains.tunable("Superstructure/Flywheel/Velocity");
     private static final LoggedTunableNumber shootHubManualMetersPerSec = new LoggedTunableNumber("Superstructure/Flywheel/Goal/ShootHubManualMetersPerSec", 5.0);
     private static final LoggedTunableNumber shootTowerManualMetersPerSec = new LoggedTunableNumber("Superstructure/Flywheel/Goal/ShootTowerManualMetersPerSec", 5.0);
     private static final LoggedTunableNumber passManualMetersPerSec = new LoggedTunableNumber("Superstructure/Flywheel/Goal/PassManualMetersPerSec", 5.0);
@@ -79,7 +77,9 @@ public class Flywheel implements Periodic {
         leaderMotorDisconnectedAlert.set(!inputs.leader.connected);
         followerMotorDisconnectedAlert.set(!inputs.follower.connected);
 
-        velocityGainsTunable.ifChanged(io::setVelocityPIDF);
+        if (velocityGains.hasChanged()) {
+            io.setVelocityPIDF(velocityGains);
+        }
     }
 
     @Override

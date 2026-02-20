@@ -4,7 +4,6 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import frc.lib.PIDF;
 import frc.robot.Controller;
 import frc.robot.RobotState;
 import frc.robot.subsystems.drive.DriveGoal;
@@ -15,12 +14,14 @@ import org.littletonrobotics.junction.Logger;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+import static frc.robot.subsystems.drive.DriveConstants.driveConfig;
+
 @RequiredArgsConstructor
 public class DriveJoystickWithAssistGoal extends DriveGoal {
     private static final RobotState robotState = RobotState.get();
     private static final Controller controller = Controller.get();
 
-    private static final PIDController assistPIDY = PIDF.ofPD(4.5, 0.0).toPID();
+    private final PIDController assistPIDY = driveConfig.assistY().toPID();
     private final Supplier<Optional<Pose2d>> assistPoseSupplier;
 
     @Override
@@ -43,7 +44,7 @@ public class DriveJoystickWithAssistGoal extends DriveGoal {
         return DriveRequest.chassisSpeeds(controller.getDriveSetpointRobotRelative(robotState.getRotation()));
     }
 
-    private static ChassisSpeeds getAssisted(Pose2d assistPose) {
+    private ChassisSpeeds getAssisted(Pose2d assistPose) {
         var currentPose = robotState.getPose();
 //        double assistX = 0;
 //        //   double assistY = 0;

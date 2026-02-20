@@ -14,7 +14,7 @@
 package frc.robot.subsystems.drive;
 
 import com.ctre.phoenix6.signals.MagnetHealthValue;
-import frc.lib.PIDF;
+import frc.lib.network.LoggedTunablePIDF;
 import org.littletonrobotics.junction.AutoLog;
 
 public class ModuleIO {
@@ -53,14 +53,14 @@ public class ModuleIO {
      * Change PIDF gains. IO layers should not rely on this method being called, and
      * should default to the gains in the constants
      */
-    public void setDrivePIDF(PIDF newGains) {
+    public void setDrivePIDF(LoggedTunablePIDF newGains) {
     }
 
     /**
      * Change PIDF gains. IO layers should not rely on this method being called, and
      * should default to the gains in the constants
      */
-    public void setTurnPIDF(PIDF newGains) {
+    public void setTurnPIDF(LoggedTunablePIDF newGains) {
     }
 
     /**

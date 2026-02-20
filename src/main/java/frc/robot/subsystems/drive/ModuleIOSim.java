@@ -20,7 +20,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.Timer;
-import frc.lib.PIDF;
+import frc.lib.network.LoggedTunablePIDF;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.COTS;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
@@ -132,14 +132,14 @@ public class ModuleIOSim extends ModuleIO {
     }
 
     @Override
-    public void setDrivePIDF(PIDF newGains) {
+    public void setDrivePIDF(LoggedTunablePIDF newGains) {
         System.out.println("Setting drive gains");
         driveFF = newGains.toSimpleFF();
         driveController = newGains.toPID();
     }
 
     @Override
-    public void setTurnPIDF(PIDF newGains) {
+    public void setTurnPIDF(LoggedTunablePIDF newGains) {
         System.out.println("Setting turn gains");
         turnController = newGains.toPIDWrapRadians();
     }

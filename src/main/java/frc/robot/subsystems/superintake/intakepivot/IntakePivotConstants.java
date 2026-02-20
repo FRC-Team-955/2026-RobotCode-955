@@ -1,12 +1,13 @@
 package frc.robot.subsystems.superintake.intakepivot;
 
+import com.ctre.phoenix6.signals.GravityTypeValue;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
-import frc.lib.PIDF;
 import frc.lib.motor.MotorIO;
 import frc.lib.motor.MotorIOArmSim;
 import frc.lib.motor.MotorIOSparkMax;
+import frc.lib.network.LoggedTunablePIDF;
 import frc.robot.BuildConstants;
 
 public class IntakePivotConstants {
@@ -15,9 +16,10 @@ public class IntakePivotConstants {
     static final TrapezoidProfile.Constraints constraints = new TrapezoidProfile.Constraints(1, 3);
 
     static final double gearRatio = 150;
-    static final PIDF gains = switch (BuildConstants.mode) {
-        case REAL, REPLAY -> PIDF.zero();
-        case SIM -> PIDF.ofPDSG(20.0, 0.0, 0.0, 2.65);
+    static final LoggedTunablePIDF gains = switch (BuildConstants.mode) {
+        case REAL, REPLAY -> new LoggedTunablePIDF("Superintake/IntakePivot/Gains");
+        case SIM ->
+                new LoggedTunablePIDF("Superintake/IntakePivot/Gains").withP(20.0).withG(2.65, GravityTypeValue.Arm_Cosine);
     };
 
     static MotorIO createIO() {
@@ -29,7 +31,7 @@ public class IntakePivotConstants {
                     40,
                     gearRatio,
                     gains,
-                    PIDF.zero()
+                    null
             );
             case SIM -> new MotorIOArmSim(
                     DCMotor.getNEO(1),

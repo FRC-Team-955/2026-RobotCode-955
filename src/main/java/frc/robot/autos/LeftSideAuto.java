@@ -21,7 +21,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;
 
 public final class LeftSideAuto {
-    private LeftSideAuto() {}
+    private LeftSideAuto() {
+    }
 
     private static final List<Pose2d> baseWaypoints = List.of(
             new Pose2d(3.5, 5.5, Rotation2d.fromDegrees(-90)),
@@ -154,11 +155,11 @@ public final class LeftSideAuto {
             if (needsSwitch) {
                 if (isOnInterpolationLine) {
                     Logger.recordOutput("LeftSideAuto/Drive/Mode", "MoveToWithAiming");
-                    drive.setGoalMoveToWithAiming(currentGoal::get);
+//                    drive.setGoalMoveToWithAiming(currentGoal::get);
                     usingAimingMode.set(true);
                 } else {
                     Logger.recordOutput("LeftSideAuto/Drive/Mode", "MoveTo");
-                    drive.setGoalMoveTo(currentGoal::get, false);
+//                    drive.setGoalMoveTo(currentGoal::get, false);
                     usingAimingMode.set(false);
                 }
                 goalInitialized.set(true);

@@ -6,7 +6,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import frc.lib.PIDF;
 import frc.lib.SlewRateLimiter2d;
 import frc.lib.network.LoggedTunableNumber;
 import frc.robot.Controller;
@@ -23,9 +22,6 @@ import static frc.robot.subsystems.drive.DriveConstants.moveToConfig;
 
 @RequiredArgsConstructor
 public class MoveToGoal extends DriveGoal {
-    private static final PIDF.Tunable moveToLinearTunable = moveToConfig.linear().tunable("Drive/MoveTo/Linear");
-    private static final PIDF.Tunable moveToAngularTunable = moveToConfig.angular().tunable("Drive/MoveTo/Angular");
-
     private static final LoggedTunableNumber maxAccelerationMetersPerSecPerSec = new LoggedTunableNumber("Drive/MoveTo/MaxAccelerationMetersPerSecPerSec", moveToConfig.maxAccelerationMetersPerSecPerSec());
 
     private static final RobotState robotState = RobotState.get();
@@ -34,14 +30,14 @@ public class MoveToGoal extends DriveGoal {
     private final Supplier<Pose2d> poseSupplier;
     private final boolean mergeJoystickDrive;
 
-    private final PIDController moveToLinear = moveToLinearTunable.getOrOriginal()
+    private final PIDController moveToLinear = moveToConfig.linear()
             .toPID(
                     moveToConfig.linearPositionToleranceMeters(),
                     moveToConfig.linearVelocityToleranceMetersPerSec()
             );
     private final SlewRateLimiter2d moveToLinearAccelerationLimiter = new SlewRateLimiter2d(maxAccelerationMetersPerSecPerSec.get(), robotState.getMeasuredChassisSpeeds());
 
-    private final PIDController moveToAngular = moveToAngularTunable.getOrOriginal()
+    private final PIDController moveToAngular = moveToConfig.angular()
             .toPIDWrapRadians(
                     moveToConfig.angularPositionToleranceRad(),
                     moveToConfig.angularVelocityToleranceRadPerSec()
@@ -49,8 +45,12 @@ public class MoveToGoal extends DriveGoal {
 
     @Override
     public DriveRequest getRequest() {
-        moveToLinearTunable.ifChanged(gains -> gains.applyPID(moveToLinear));
-        moveToAngularTunable.ifChanged(gains -> gains.applyPID(moveToAngular));
+        if (moveToConfig.linear().hasChanged()) {
+            moveToConfig.linear().applyPID(moveToLinear);
+        }
+        if (moveToConfig.angular().hasChanged()) {
+            moveToConfig.angular().applyPID(moveToAngular);
+        }
         if (maxAccelerationMetersPerSecPerSec.hasChanged()) {
             moveToLinearAccelerationLimiter.setLimit(maxAccelerationMetersPerSecPerSec.get());
         }

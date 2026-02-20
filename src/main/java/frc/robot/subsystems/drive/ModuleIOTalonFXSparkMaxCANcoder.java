@@ -41,9 +41,9 @@ import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.*;
 import frc.lib.HighFrequencySamplingThread;
-import frc.lib.PIDF;
 import frc.lib.PhoenixUtil;
 import frc.lib.SparkUtil;
+import frc.lib.network.LoggedTunablePIDF;
 
 import java.util.Queue;
 import java.util.function.DoubleSupplier;
@@ -150,7 +150,7 @@ public class ModuleIOTalonFXSparkMaxCANcoder extends ModuleIO {
                 .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
                 .positionWrappingEnabled(true)
                 .positionWrappingInputRange(0.0, 2 * Math.PI);
-        moduleConfig.turnGains().applySparkWithoutFeedforward(turnConfig.closedLoop, ClosedLoopSlot.kSlot0);
+        moduleConfig.turnGains().applySpark(turnConfig.closedLoop, ClosedLoopSlot.kSlot0);
         turnConfig
                 .signals
                 .primaryEncoderPositionAlwaysOn(true)
@@ -256,17 +256,17 @@ public class ModuleIOTalonFXSparkMaxCANcoder extends ModuleIO {
     }
 
     @Override
-    public void setDrivePIDF(PIDF newGains) {
+    public void setDrivePIDF(LoggedTunablePIDF newGains) {
         System.out.println("Setting drive gains");
         driveConfig.Slot0 = Slot0Configs.from(newGains.toPhoenix());
         PhoenixUtil.tryUntilOkAsync(5, () -> driveTalon.getConfigurator().apply(driveConfig, 0.25));
     }
 
     @Override
-    public void setTurnPIDF(PIDF newGains) {
+    public void setTurnPIDF(LoggedTunablePIDF newGains) {
         System.out.println("Setting turn gains");
         var newConfig = new SparkMaxConfig();
-        newGains.applySparkWithoutFeedforward(newConfig.closedLoop, ClosedLoopSlot.kSlot0);
+        newGains.applySpark(newConfig.closedLoop, ClosedLoopSlot.kSlot0);
         SparkUtil.tryUntilOkAsync(5, () -> turnSpark.configure(
                 newConfig,
                 ResetMode.kNoResetSafeParameters,

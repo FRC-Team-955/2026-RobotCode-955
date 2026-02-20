@@ -5,7 +5,7 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
-import frc.lib.PIDF;
+import frc.lib.network.LoggedTunablePIDF;
 import frc.robot.Constants;
 
 public class MotorIOSim extends MotorIO {
@@ -24,8 +24,8 @@ public class MotorIOSim extends MotorIO {
             double gearRatio,
             double JKgMetersSquared,
             DCMotor motor,
-            PIDF positionGains,
-            PIDF velocityGains
+            LoggedTunablePIDF positionGains,
+            LoggedTunablePIDF velocityGains
     ) {
         motorSim = new DCMotorSim(
                 LinearSystemId.createDCMotorSystem(motor, JKgMetersSquared, gearRatio),
@@ -34,9 +34,9 @@ public class MotorIOSim extends MotorIO {
                 0.0
         );
 
-        velocityFeedforward = velocityGains.toSimpleFF();
-        positionPid = positionGains.toPID();
-        velocityPid = velocityGains.toPID();
+        velocityFeedforward = velocityGains != null ? velocityGains.toSimpleFF() : new SimpleMotorFeedforward(0, 0);
+        positionPid = positionGains != null ? positionGains.toPID() : new PIDController(0, 0, 0);
+        velocityPid = velocityGains != null ? velocityGains.toPID() : new PIDController(0, 0, 0);
     }
 
     @Override
@@ -61,13 +61,13 @@ public class MotorIOSim extends MotorIO {
     }
 
     @Override
-    public void setPositionPIDF(PIDF newGains) {
+    public void setPositionPIDF(LoggedTunablePIDF newGains) {
         System.out.println("Setting motor position gains");
         positionPid = newGains.toPID();
     }
 
     @Override
-    public void setVelocityPIDF(PIDF newGains) {
+    public void setVelocityPIDF(LoggedTunablePIDF newGains) {
         System.out.println("Setting motor velocity gains");
         velocityFeedforward = newGains.toSimpleFF();
         velocityPid = newGains.toPID();

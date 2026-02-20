@@ -6,7 +6,6 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import frc.lib.PIDF;
 import frc.lib.Util;
 import frc.lib.motor.MotorIO;
 import frc.lib.motor.MotorIOInputsAutoLogged;
@@ -26,7 +25,6 @@ import java.util.function.DoubleSupplier;
 import static frc.robot.subsystems.superintake.intakepivot.IntakePivotConstants.*;
 
 public class IntakePivot implements Periodic {
-    private static final PIDF.Tunable gainsTunable = gains.tunable("Superintake/IntakePivot/Gains");
     private static final LoggedTunableNumber profileLookaheadTimeSec = new LoggedTunableNumber("Superintake/IntakePivot/ProfileLookaheadTimeSec", 0.15);
     private static final LoggedTunableNumber deploySetpointDegrees = new LoggedTunableNumber("Superintake/IntakePivot/Goal/DeployDegrees", -45.0);
 
@@ -86,7 +84,9 @@ public class IntakePivot implements Periodic {
             io.setBrakeMode(!operatorDashboard.coastOverride.get());
         }
 
-        gainsTunable.ifChanged(io::setPositionPIDF);
+        if (gains.hasChanged()) {
+            io.setPositionPIDF(gains);
+        }
     }
 
     @Override

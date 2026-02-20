@@ -6,7 +6,6 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import frc.lib.PIDF;
 import frc.lib.Util;
 import frc.lib.motor.MotorIO;
 import frc.lib.motor.MotorIOInputsAutoLogged;
@@ -26,7 +25,6 @@ import java.util.function.DoubleSupplier;
 import static frc.lib.example.ExampleServoSubsystemConstants.*;
 
 public class ExampleServoSubsystem implements Periodic {
-    private static final PIDF.Tunable gainsTunable = gains.tunable("ExampleServoSubsystem/Gains");
     private static final LoggedTunableNumber deploySetpointDegrees = new LoggedTunableNumber("ExampleServoSubsystem/Goal/Deploy", -45.0);
     private static final LoggedTunableNumber profileLookaheadTimeSec = new LoggedTunableNumber("ExampleServoSubsystem/ProfileLookaheadTimeSec", 0.15);
 
@@ -85,7 +83,9 @@ public class ExampleServoSubsystem implements Periodic {
             io.setBrakeMode(!operatorDashboard.coastOverride.get());
         }
 
-        gainsTunable.ifChanged(io::setPositionPIDF);
+        if (gains.hasChanged()) {
+            io.setPositionPIDF(gains);
+        }
     }
 
     @Override
