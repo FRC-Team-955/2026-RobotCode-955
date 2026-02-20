@@ -7,9 +7,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.Util;
-import frc.lib.motor.MotorIO;
 import frc.lib.motor.MotorIOInputsAutoLogged;
-import frc.lib.motor.RequestType;
 import frc.lib.network.LoggedTunableNumber;
 import frc.lib.subsystem.Periodic;
 import frc.robot.Constants;
@@ -30,7 +28,7 @@ public class IntakePivot implements Periodic {
 
     private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
 
-    private final MotorIO io = createIO();
+    private final IntakePivotIO io = createIO();
     private final MotorIOInputsAutoLogged inputs = new MotorIOInputsAutoLogged();
 
 
@@ -46,6 +44,8 @@ public class IntakePivot implements Periodic {
     @Setter
     @Getter
     private Goal goal = Goal.STOW;
+
+    private IntakePivotIO.IntakePivotCurrentLimitMode currentLimitMode = IntakePivotIO.IntakePivotCurrentLimitMode.NORMAL;
 
     private final TrapezoidProfile profile = new TrapezoidProfile(constraints);
     private Double lastSetpointRad = null;
@@ -88,7 +88,7 @@ public class IntakePivot implements Periodic {
     public void periodicAfterCommands() {
         Logger.recordOutput("Superintake/IntakePivot/Goal", goal);
         if (DriverStation.isDisabled()) {
-            io.setRequest(RequestType.VoltageVolts, 0);
+            io.setStopRequest();
         } else {
             // See the comments above the lookaheadState and goalState variables for why we effectively calculate two profiles
 
@@ -108,7 +108,14 @@ public class IntakePivot implements Periodic {
             lookaheadState = profile.calculate(Constants.loopPeriod, lookaheadState, wantedState);
             Logger.recordOutput("Superintake/IntakePivot/LookaheadSetpointRad", lookaheadState.position);
 
-            io.setRequest(RequestType.PositionRad, lookaheadState.position);
+            io.setPositionRequest(lookaheadState.position);
+        }
+    }
+
+    public void setCurrentLimitMode(IntakePivotIO.IntakePivotCurrentLimitMode newCurrentLimitMode) {
+        if (currentLimitMode != newCurrentLimitMode) {
+            currentLimitMode = newCurrentLimitMode;
+            io.setCurrentLimit(currentLimitMode);
         }
     }
 

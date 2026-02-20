@@ -1,13 +1,9 @@
 package frc.robot.subsystems.superintake.intakepivot;
 
 import com.ctre.phoenix6.signals.GravityTypeValue;
-import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
-import frc.lib.motor.MotorIO;
-import frc.lib.motor.MotorIOArmSim;
-import frc.lib.motor.MotorIOTalonFX;
 import frc.lib.network.LoggedTunablePIDF;
 import frc.robot.BuildConstants;
 
@@ -23,30 +19,17 @@ public class IntakePivotConstants {
                 new LoggedTunablePIDF("Superintake/IntakePivot/Gains").withP(20.0).withG(2.65, GravityTypeValue.Arm_Cosine);
     };
 
-    static MotorIO createIO() {
+    static IntakePivotIO createIO() {
         return switch (BuildConstants.mode) {
-            case REAL -> new MotorIOTalonFX(
+            case REAL -> new IntakePivotIOTalonFX(
                     -1,
-                    true,
-                    NeutralModeValue.Coast,
-                    40,
-                    gearRatio,
-                    gains,
-                    null
+                    true
             );
-            case SIM -> new MotorIOArmSim(
-                    DCMotor.getNEO(1),
-                    gearRatio,
+            case SIM -> new IntakePivotIOSim(
                     0.0768892879,
-                    Units.inchesToMeters(10),
-                    Units.degreesToRadians(-90),
-                    Units.degreesToRadians(0),
-                    true,
-                    Units.degreesToRadians(0),
-                    0.001,
-                    gains
+                    DCMotor.getKrakenX60(1)
             );
-            case REPLAY -> new MotorIO();
+            case REPLAY -> new IntakePivotIO();
         };
     }
 }

@@ -1,5 +1,6 @@
 package frc.robot.subsystems.superstructure.hood;
 
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
@@ -7,9 +8,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.Util;
-import frc.lib.motor.MotorIO;
 import frc.lib.motor.MotorIOInputsAutoLogged;
-import frc.lib.motor.RequestType;
 import frc.lib.network.LoggedTunableNumber;
 import frc.lib.subsystem.Periodic;
 import frc.robot.Constants;
@@ -38,7 +37,7 @@ public class Hood implements Periodic {
     private static final ShootingKinematics shootingKinematics = ShootingKinematics.get();
     private static final RobotState robotState = RobotState.get();
 
-    private final MotorIO io = createIO();
+    private final HoodIO io = createIO();
     private final MotorIOInputsAutoLogged inputs = new MotorIOInputsAutoLogged();
 
     @RequiredArgsConstructor
@@ -57,6 +56,8 @@ public class Hood implements Periodic {
     @Setter
     @Getter
     private Goal goal = Goal.STOW;
+
+    private HoodIO.HoodCurrentLimitMode currentLimitMode = HoodIO.HoodCurrentLimitMode.NORMAL;
 
     private final TrapezoidProfile profile = new TrapezoidProfile(constraints);
     private Double lastSetpointRad = null;
@@ -92,7 +93,7 @@ public class Hood implements Periodic {
 
         // Apply network inputs
         if (operatorDashboard.coastOverride.hasChanged()) {
-            io.setBrakeMode(!operatorDashboard.coastOverride.get());
+            io.setNeutralMode(operatorDashboard.coastOverride.get() ? NeutralModeValue.Coast : NeutralModeValue.Brake);
         }
 
         if (gains.hasChanged()) {
@@ -104,7 +105,7 @@ public class Hood implements Periodic {
     public void periodicAfterCommands() {
         Logger.recordOutput("Superstructure/Hood/Goal", goal);
         if (DriverStation.isDisabled()) {
-            io.setRequest(RequestType.VoltageVolts, 0);
+            io.setStopRequest();
         } else {
             // See the comments above the lookaheadState and goalState variables for why we effectively calculate two profiles
 
@@ -127,7 +128,14 @@ public class Hood implements Periodic {
             lookaheadState = profile.calculate(Constants.loopPeriod, lookaheadState, wantedState);
             Logger.recordOutput("Superstructure/Hood/LookaheadSetpointRad", lookaheadState.position);
 
-            io.setRequest(RequestType.PositionRad, lookaheadState.position);
+            io.setPositionRequest(lookaheadState.position);
+        }
+    }
+
+    public void setCurrentLimitMode(HoodIO.HoodCurrentLimitMode newCurrentLimitMode) {
+        if (currentLimitMode != newCurrentLimitMode) {
+            currentLimitMode = newCurrentLimitMode;
+            io.setCurrentLimit(currentLimitMode);
         }
     }
 

@@ -1,12 +1,8 @@
 package frc.robot.subsystems.superstructure.hood;
 
-import com.revrobotics.spark.config.SparkBaseConfig;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
-import frc.lib.motor.MotorIO;
-import frc.lib.motor.MotorIOSim;
-import frc.lib.motor.MotorIOSparkMax;
 import frc.lib.network.LoggedTunablePIDF;
 import frc.robot.BuildConstants;
 
@@ -23,25 +19,17 @@ public class HoodConstants {
         case SIM -> new LoggedTunablePIDF("Superstructure/Hood/Gains").withP(18.9);
     };
 
-    static MotorIO createIO() {
+    static HoodIO createIO() {
         return switch (BuildConstants.mode) {
-            case REAL -> new MotorIOSparkMax(
+            case REAL -> new HoodIOSparkMax(
                     -1,
-                    true,
-                    SparkBaseConfig.IdleMode.kBrake,
-                    40,
-                    gearRatio,
-                    gains,
-                    null
+                    false
             );
-            case SIM -> new MotorIOSim(
-                    gearRatio,
+            case SIM -> new HoodIOSim(
                     0.01,
-                    DCMotor.getNEO(1),
-                    gains,
-                    null
+                    DCMotor.getNeo550(1)
             );
-            case REPLAY -> new MotorIO();
+            case REPLAY -> new HoodIO();
         };
     }
 }
