@@ -88,7 +88,7 @@ public class Controller implements Periodic {
         omegaMagnitude = Math.copySign(omegaMagnitude * omegaMagnitude, omegaMagnitude);
 
         // Scale linear magnitude by omega - when going full omega, want half linear
-        driveLinearMagnitude *= MathUtil.clamp(1.0 - Math.abs(omegaMagnitude / 2.0), 0.5, 1.0);
+        driveLinearMagnitude *= MathUtil.clamp(1.0 - Math.abs(omegaMagnitude * 0.5), 0.5, 1.0);
 
         // If x and y are both 0, Rotation2d will not be happy
         // Intermediates - used in assist calculations
