@@ -15,7 +15,8 @@ public class FlywheelIOSim extends FlywheelIO {
                 JKgMetersSquared,
                 motor,
                 null,
-                null
+                null,
+                0.0
         );
 
         follower = new MotorIOSim(
@@ -23,7 +24,8 @@ public class FlywheelIOSim extends FlywheelIO {
                 JKgMetersSquared,
                 motor,
                 null,
-                null
+                null,
+                0.0
         );
     }
 

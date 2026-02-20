@@ -2,24 +2,29 @@ package frc.robot.subsystems.superstructure.hood;
 
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.util.Units;
 import frc.lib.motor.MotorIO.MotorIOInputs;
-import frc.lib.motor.MotorIOSim;
+import frc.lib.motor.MotorIOArmSim;
 import frc.lib.motor.RequestType;
 import frc.lib.network.LoggedTunablePIDF;
 
-import static frc.robot.subsystems.superstructure.hood.HoodConstants.gains;
-import static frc.robot.subsystems.superstructure.hood.HoodConstants.gearRatio;
+import static frc.robot.subsystems.superstructure.hood.HoodConstants.*;
 
 public class HoodIOSim extends HoodIO {
-    private final MotorIOSim motor;
+    private final MotorIOArmSim motor;
 
     public HoodIOSim(double JKgMetersSquared, DCMotor dcMotor) {
-        motor = new MotorIOSim(
+        motor = new MotorIOArmSim(
+                dcMotor,
                 gearRatio,
                 JKgMetersSquared,
-                dcMotor,
-                gains,
-                null
+                Units.inchesToMeters(2),
+                minPositionRad,
+                maxPositionRad,
+                true,
+                initialPositionRad,
+                0.001,
+                gains
         );
     }
 

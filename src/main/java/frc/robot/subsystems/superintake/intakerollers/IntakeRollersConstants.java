@@ -19,14 +19,16 @@ public class IntakeRollersConstants {
                     40,
                     gearRatio,
                     null,
-                    null
+                    null,
+                    0.0
             );
             case SIM -> new MotorIOSim(
                     gearRatio,
                     0.01,
                     DCMotor.getNEO(1),
                     null,
-                    null
+                    null,
+                    0.0
             );
             case REPLAY -> new MotorIO();
         };

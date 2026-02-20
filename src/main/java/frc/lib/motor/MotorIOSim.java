@@ -26,7 +26,8 @@ public class MotorIOSim extends MotorIO {
             double JKgMetersSquared,
             DCMotor motor,
             LoggedTunablePIDF positionGains,
-            LoggedTunablePIDF velocityGains
+            LoggedTunablePIDF velocityGains,
+            double initialPositionRad
     ) {
         motorSim = new DCMotorSim(
                 LinearSystemId.createDCMotorSystem(motor, JKgMetersSquared, gearRatio),
@@ -34,6 +35,7 @@ public class MotorIOSim extends MotorIO {
                 0.004,
                 0.0
         );
+        motorSim.setAngle(initialPositionRad);
 
         velocityFeedforward = velocityGains != null ? velocityGains.toSimpleFF() : new SimpleMotorFeedforward(0, 0);
         positionPid = positionGains != null ? positionGains.toPID() : new PIDController(0, 0, 0);

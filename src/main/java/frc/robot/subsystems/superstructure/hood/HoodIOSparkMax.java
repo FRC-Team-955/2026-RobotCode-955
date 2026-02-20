@@ -7,8 +7,7 @@ import frc.lib.motor.MotorIOSparkMax;
 import frc.lib.motor.RequestType;
 import frc.lib.network.LoggedTunablePIDF;
 
-import static frc.robot.subsystems.superstructure.hood.HoodConstants.gains;
-import static frc.robot.subsystems.superstructure.hood.HoodConstants.gearRatio;
+import static frc.robot.subsystems.superstructure.hood.HoodConstants.*;
 
 public class HoodIOSparkMax extends HoodIO {
     private static final int normalCurrentLimitAmps = 40;
@@ -24,7 +23,8 @@ public class HoodIOSparkMax extends HoodIO {
                 normalCurrentLimitAmps,
                 gearRatio,
                 gains,
-                null
+                null,
+                initialPositionRad
         );
     }
 

@@ -34,7 +34,8 @@ public class MotorIOSparkMax extends MotorIO {
             int currentLimitAmps,
             double gearRatio,
             LoggedTunablePIDF positionGains,
-            LoggedTunablePIDF velocityGains
+            LoggedTunablePIDF velocityGains,
+            double initialPositionRad
     ) {
         spark = new SparkMax(canID, SparkLowLevel.MotorType.kBrushless);
         encoder = spark.getEncoder();
@@ -73,7 +74,7 @@ public class MotorIOSparkMax extends MotorIO {
                 ResetMode.kResetSafeParameters,
                 PersistMode.kPersistParameters
         ));
-        tryUntilOk(5, () -> encoder.setPosition(0.0));
+        tryUntilOk(5, () -> encoder.setPosition(initialPositionRad));
     }
 
     @Override

@@ -15,6 +15,11 @@ public class ExampleServoSubsystemConstants {
 
     static final TrapezoidProfile.Constraints constraints = new TrapezoidProfile.Constraints(1, 3);
 
+    // 0 = parallel with ground
+    static final double minPositionRad = Units.degreesToRadians(0);
+    static final double maxPositionRad = Units.degreesToRadians(90);
+    static final double initialPositionRad = minPositionRad;
+
     static final double gearRatio = 120;
     static final LoggedTunablePIDF gains = switch (BuildConstants.mode) {
         case REAL, REPLAY, SIM -> new LoggedTunablePIDF("ExampleServoSubsystem/Gains");
@@ -29,15 +34,17 @@ public class ExampleServoSubsystemConstants {
                     40,
                     gearRatio,
                     gains,
-                    null
+                    null,
+                    initialPositionRad
             );
-            // NOTE: if you are doing an arm, consider making a custom sim class like this: https://github.com/FRC-Team-955/2025-RobotCode-955/blob/f8c49295fb474156c657fc3c8da3a28d8b3a7430/src/main/java/frc/robot/subsystems/intakepivot/IntakePivotIOSim.java
+            // NOTE: if you are doing an arm, use MotorIOArmSim
             case SIM -> new MotorIOSim(
                     gearRatio,
                     0.01,
                     DCMotor.getNEO(1),
                     gains,
-                    null
+                    null,
+                    initialPositionRad
             );
             case REPLAY -> new MotorIO();
         };

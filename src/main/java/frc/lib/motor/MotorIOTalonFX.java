@@ -49,7 +49,8 @@ public class MotorIOTalonFX extends MotorIO {
             int currentLimitAmps,
             double gearRatio,
             LoggedTunablePIDF positionGains,
-            LoggedTunablePIDF velocityGains
+            LoggedTunablePIDF velocityGains,
+            double initialPositionRad
     ) {
         talon = new TalonFX(canID, Constants.canivoreBus);
 
@@ -66,7 +67,7 @@ public class MotorIOTalonFX extends MotorIO {
         if (positionGains != null) config.Slot0 = Slot0Configs.from(positionGains.toPhoenix());
         if (velocityGains != null) config.Slot1 = Slot1Configs.from(velocityGains.toPhoenix());
         tryUntilOk(5, () -> talon.getConfigurator().apply(config, 0.25));
-        tryUntilOk(5, () -> talon.setPosition(0.0, 0.25));
+        tryUntilOk(5, () -> talon.setPosition(Units.radiansToRotations(initialPositionRad), 0.25));
 
         position = talon.getPosition();
         velocity = talon.getVelocity();

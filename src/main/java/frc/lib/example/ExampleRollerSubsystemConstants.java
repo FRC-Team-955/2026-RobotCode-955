@@ -29,14 +29,16 @@ public class ExampleRollerSubsystemConstants {
                     40,
                     gearRatio,
                     positionGains,
-                    velocityGains
+                    velocityGains,
+                    0.0
             );
             case SIM -> new MotorIOSim(
                     gearRatio,
                     0.01,
                     DCMotor.getNEO(1),
                     positionGains,
-                    velocityGains
+                    velocityGains,
+                    0.0
             );
             case REPLAY -> new MotorIO();
         };

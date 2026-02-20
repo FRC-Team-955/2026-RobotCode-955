@@ -21,7 +21,7 @@ public class IntakePivotIOSim extends IntakePivotIO {
                 minPositionRad,
                 maxPositionRad,
                 true,
-                Units.degreesToRadians(0),
+                initialPositionRad,
                 0.001,
                 gains
         );

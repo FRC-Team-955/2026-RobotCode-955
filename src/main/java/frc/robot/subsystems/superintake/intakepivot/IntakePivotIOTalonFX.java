@@ -6,8 +6,7 @@ import frc.lib.motor.MotorIOTalonFX;
 import frc.lib.motor.RequestType;
 import frc.lib.network.LoggedTunablePIDF;
 
-import static frc.robot.subsystems.superintake.intakepivot.IntakePivotConstants.gains;
-import static frc.robot.subsystems.superintake.intakepivot.IntakePivotConstants.gearRatio;
+import static frc.robot.subsystems.superintake.intakepivot.IntakePivotConstants.*;
 
 public class IntakePivotIOTalonFX extends IntakePivotIO {
     private static final int normalCurrentLimitAmps = 80;
@@ -23,7 +22,8 @@ public class IntakePivotIOTalonFX extends IntakePivotIO {
                 normalCurrentLimitAmps,
                 gearRatio,
                 gains,
-                null
+                null,
+                initialPositionRad
         );
     }
 

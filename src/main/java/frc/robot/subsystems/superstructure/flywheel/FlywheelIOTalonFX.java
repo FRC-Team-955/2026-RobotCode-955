@@ -6,6 +6,9 @@ import frc.lib.motor.MotorIOTalonFX;
 import frc.lib.motor.RequestType;
 import frc.lib.network.LoggedTunablePIDF;
 
+import static frc.robot.subsystems.superstructure.flywheel.FlywheelConstants.gearRatio;
+import static frc.robot.subsystems.superstructure.flywheel.FlywheelConstants.velocityGains;
+
 public class FlywheelIOTalonFX extends FlywheelIO {
     private static final int shootCurrentLimitAmps = 120;
     private static final int spinupCurrentLimitAmps = 20;
@@ -24,9 +27,10 @@ public class FlywheelIOTalonFX extends FlywheelIO {
                 leaderInverted,
                 NeutralModeValue.Coast,
                 shootCurrentLimitAmps,
-                FlywheelConstants.gearRatio,
+                gearRatio,
                 null,
-                FlywheelConstants.velocityGains
+                velocityGains,
+                0.0
         );
 
         follower = new MotorIOTalonFX(
@@ -34,9 +38,10 @@ public class FlywheelIOTalonFX extends FlywheelIO {
                 false,
                 NeutralModeValue.Coast,
                 shootCurrentLimitAmps,
-                FlywheelConstants.gearRatio,
+                gearRatio,
                 null,
-                null
+                null,
+                0.0
         );
         follower.setFollow(leader, followerAlignment);
     }

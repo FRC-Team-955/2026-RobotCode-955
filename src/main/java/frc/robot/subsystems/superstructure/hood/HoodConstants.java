@@ -13,6 +13,7 @@ public class HoodConstants {
 
     static final double minPositionRad = Units.degreesToRadians(15.0);
     static final double maxPositionRad = Units.degreesToRadians(45.0);
+    static final double initialPositionRad = minPositionRad;
     static final double maxPositionUnderTrench = Units.degreesToRadians(35.0);
 
     static final double gearRatio = 120;
