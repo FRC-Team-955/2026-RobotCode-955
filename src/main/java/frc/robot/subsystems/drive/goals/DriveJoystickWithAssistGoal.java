@@ -33,15 +33,12 @@ public class DriveJoystickWithAssistGoal extends DriveGoal {
         var optionalAssistPose = assistPoseSupplier.get();
         if (optionalAssistPose.isPresent()) {
             // Mark assist pose as present
-            Logger.recordOutput("Drive/Assist/Present", true);
             Pose2d assistPose = optionalAssistPose.get();
 
             if (controller.shouldAssist(robotState.getPose(), assistPose)) {
                 Logger.recordOutput("Drive/Assist/Running", true);
                 return DriveRequest.chassisSpeeds(getAssisted(assistPose));
             }
-        } else {
-            Logger.recordOutput("Drive/Assist/Present", false);
         }
 
         Logger.recordOutput("Drive/Assist/Running", false);

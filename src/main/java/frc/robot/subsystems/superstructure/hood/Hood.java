@@ -112,7 +112,7 @@ public class Hood implements Periodic {
             if (robotState.isInTrench()) {
                 setpointRad = Math.min(setpointRad, maxPositionUnderTrench);
             }
-            Logger.recordOutput("Superstructure/Hood/OriginalSetpointRad", setpointRad);
+//            Logger.recordOutput("Superstructure/Hood/OriginalSetpointRad", setpointRad);
             TrapezoidProfile.State wantedState = new TrapezoidProfile.State(setpointRad, 0.0);
 
             if (lastSetpointRad == null || setpointRad != lastSetpointRad) {

@@ -99,7 +99,7 @@ public class ShootingKinematics implements Periodic {
                                 .plus(fuelExitRotation)
                 )
         );
-        Logger.recordOutput("ShootingKinematics/FuelExitPose", fuelExitPose);
+//        Logger.recordOutput("ShootingKinematics/FuelExitPose", fuelExitPose);
 
         Translation3d hubTranslation = AllianceFlipUtil.apply(FieldConstants.Hub.topCenterPoint);
         Pose3d hubPose = new Pose3d(hubTranslation, new Rotation3d());
@@ -108,8 +108,8 @@ public class ShootingKinematics implements Periodic {
         double xyDist = fuelExitToHub.getTranslation().toTranslation2d().getNorm();
         double zDist = fuelExitToHub.getTranslation().getZ();
         double v0 = distanceToVelocity.get(xyDist);
-        Logger.recordOutput("ShootingKinematics/XYDist", xyDist);
-        Logger.recordOutput("ShootingKinematics/Stationary/Velocity", v0);
+//        Logger.recordOutput("ShootingKinematics/XYDist", xyDist);
+//        Logger.recordOutput("ShootingKinematics/Stationary/Velocity", v0);
 
         // 1. Compute stationary shooting velocity
         // maple-sim uses 11 m/s² for gravity
@@ -126,12 +126,12 @@ public class ShootingKinematics implements Periodic {
         double phi_stationary;
         if (isValidHoodAngle(phi_1) && (phi_1 > phi_2 || !isValidHoodAngle(phi_2))) {
             phi_stationary = phi_1;
-            Logger.recordOutput("ShootingKinematics/Stationary/Phi", phi_1);
-            Logger.recordOutput("ShootingKinematics/Stationary/PhiAlternative", phi_2);
+//            Logger.recordOutput("ShootingKinematics/Stationary/Phi", phi_1);
+//            Logger.recordOutput("ShootingKinematics/Stationary/PhiAlternative", phi_2);
         } else if (isValidHoodAngle(phi_2)) {
             phi_stationary = phi_2;
-            Logger.recordOutput("ShootingKinematics/Stationary/Phi", phi_2);
-            Logger.recordOutput("ShootingKinematics/Stationary/PhiAlternative", phi_1);
+//            Logger.recordOutput("ShootingKinematics/Stationary/Phi", phi_2);
+//            Logger.recordOutput("ShootingKinematics/Stationary/PhiAlternative", phi_1);
         } else {
             return false;
         }
@@ -174,17 +174,17 @@ public class ShootingKinematics implements Periodic {
         vy -= linearVelocityDueToAngularVelocity.get(1);
 
         // 5. Log final shooting vector
-        Logger.recordOutput("ShootingKinematics/Velocity/X", vx);
-        Logger.recordOutput("ShootingKinematics/Velocity/Y", vy);
-        Logger.recordOutput("ShootingKinematics/Velocity/Z", vz);
+//        Logger.recordOutput("ShootingKinematics/Velocity/X", vx);
+//        Logger.recordOutput("ShootingKinematics/Velocity/Y", vy);
+//        Logger.recordOutput("ShootingKinematics/Velocity/Z", vz);
 
         // 6. Now calculate phi, theta, and shooting magnitude from 3d shooting vector
         double v = Math.sqrt(vx * vx + vy * vy + vz * vz);
         double phi = Math.asin(vz / v);
         double theta = Math.atan2(vy, vx);
-        Logger.recordOutput("ShootingKinematics/Velocity", v);
-        Logger.recordOutput("ShootingKinematics/Phi", phi);
-        Logger.recordOutput("ShootingKinematics/Theta", theta);
+//        Logger.recordOutput("ShootingKinematics/Velocity", v);
+//        Logger.recordOutput("ShootingKinematics/Phi", phi);
+//        Logger.recordOutput("ShootingKinematics/Theta", theta);
 
         shootingParameters = new ShootingParameters(v, phi, theta);
         return true;

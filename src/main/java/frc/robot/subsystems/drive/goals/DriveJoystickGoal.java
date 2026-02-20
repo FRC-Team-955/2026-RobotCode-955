@@ -10,7 +10,6 @@ import frc.robot.RobotState;
 import frc.robot.subsystems.drive.DriveGoal;
 import frc.robot.subsystems.drive.DriveRequest;
 import lombok.RequiredArgsConstructor;
-import org.littletonrobotics.junction.Logger;
 
 import static frc.robot.subsystems.drive.DriveConstants.headingOverrideGains;
 
@@ -66,7 +65,7 @@ public class DriveJoystickGoal extends DriveGoal {
         } else {
             runningHeadingOverride = false;
         }
-        Logger.recordOutput("Drive/DriveJoystick/HeadingOverrideRunning", runningHeadingOverride);
+//        Logger.recordOutput("Drive/DriveJoystick/HeadingOverrideRunning", runningHeadingOverride);
 
         return DriveRequest.chassisSpeeds(joystickSetpoint);
     }

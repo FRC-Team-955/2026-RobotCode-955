@@ -13,7 +13,6 @@ import frc.robot.subsystems.drive.DriveConstants;
 import frc.robot.subsystems.drive.DriveGoal;
 import frc.robot.subsystems.drive.DriveRequest;
 import lombok.RequiredArgsConstructor;
-import org.littletonrobotics.junction.Logger;
 
 import static frc.robot.subsystems.drive.DriveConstants.headingOverrideGains;
 
@@ -56,7 +55,7 @@ public class DriveJoystickWithAimingGoal extends DriveGoal {
 
         Translation2d linearVelocity = new Translation2d(linearMagnitude, linearDirection);
         linearVelocity = linearAccelerationLimiter.calculate(linearVelocity);
-        Logger.recordOutput("Drive/DriveJoystickWithAiming/LinearMagnitudeLimited", linearVelocity.getNorm());
+//        Logger.recordOutput("Drive/DriveJoystickWithAiming/LinearMagnitudeLimited", linearVelocity.getNorm());
 
         double angularVelocity = headingOverride.calculate(robotState.getRotation().getRadians(), shootingKinematics.getShootingParameters().headingRad());
 

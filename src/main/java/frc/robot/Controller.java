@@ -16,7 +16,6 @@ import frc.lib.Util;
 import frc.lib.controller.CommandSteamInputController;
 import frc.lib.subsystem.Periodic;
 import lombok.Getter;
-import org.littletonrobotics.junction.Logger;
 
 import static frc.robot.subsystems.drive.DriveConstants.*;
 
@@ -77,9 +76,9 @@ public class Controller implements Periodic {
         // right on joystick is positive x - we want negative x for right (CCW is positive)
         double omega = -controller.getRightX();
 
-        Logger.recordOutput("Controller/Drive/Suppliers/X", x);
-        Logger.recordOutput("Controller/Drive/Suppliers/Y", y);
-        Logger.recordOutput("Controller/Drive/Suppliers/Omega", omega);
+//        Logger.recordOutput("Controller/Drive/Suppliers/X", x);
+//        Logger.recordOutput("Controller/Drive/Suppliers/Y", y);
+//        Logger.recordOutput("Controller/Drive/Suppliers/Omega", omega);
 
         driveLinearMagnitude = MathUtil.clamp(MathUtil.applyDeadband(Math.hypot(x, y), joystickDriveDeadband), -1, 1);
         driveLinearMagnitude = driveLinearMagnitude * driveLinearMagnitude;
@@ -105,10 +104,10 @@ public class Controller implements Periodic {
             linearVelocity = new Translation2d();
         }
 
-        Logger.recordOutput("Controller/Drive/LinearMagnitude", driveLinearMagnitude);
-        Logger.recordOutput("Controller/Drive/LinearDirection", driveLinearDirection);
-        Logger.recordOutput("Controller/Drive/LinearVelocity", linearVelocity);
-        Logger.recordOutput("Controller/Drive/OmegaMagnitude", omegaMagnitude);
+//        Logger.recordOutput("Controller/Drive/LinearMagnitude", driveLinearMagnitude);
+//        Logger.recordOutput("Controller/Drive/LinearDirection", driveLinearDirection);
+//        Logger.recordOutput("Controller/Drive/LinearVelocity", linearVelocity);
+//        Logger.recordOutput("Controller/Drive/OmegaMagnitude", omegaMagnitude);
 
         driveSetpointFieldRelative = new ChassisSpeeds(
                 linearVelocity.getX() * driveConfig.maxVelocityMetersPerSec(),
@@ -118,26 +117,26 @@ public class Controller implements Periodic {
     }
 
     public boolean shouldAssist(Pose2d currentPose, Pose2d assistPose) {
-        Logger.recordOutput("Controller/Drive/Assist/Pose", assistPose);
+//        Logger.recordOutput("Controller/Drive/Assist/Pose", assistPose);
 
         // Get the translation between robot and assist
         Translation2d robotToAssist = assistPose.getTranslation().minus(currentPose.getTranslation());
         // Calculate direction from robot to assist
         Rotation2d robotToAssistDirection = robotToAssist.getAngle();
-        Logger.recordOutput("Controller/Drive/Assist/RobotToAssistDirection", robotToAssistDirection);
+//        Logger.recordOutput("Controller/Drive/Assist/RobotToAssistDirection", robotToAssistDirection);
 
         // Flip joystick direction to match robot to assist direction
         // Joystick direction is relative to alliance wall and needs to be flipped on red alliance to match origin
         Rotation2d joystickLinearDirectionFlipped = AllianceFlipUtil.apply(driveLinearDirection);
-        Logger.recordOutput("Controller/Drive/Assist/FlippedJoystickLinearDirection", joystickLinearDirectionFlipped);
+//        Logger.recordOutput("Controller/Drive/Assist/FlippedJoystickLinearDirection", joystickLinearDirectionFlipped);
 
         // Get difference between joystick direction and assist direction
         Rotation2d directionDiff = robotToAssistDirection.minus(joystickLinearDirectionFlipped);
-        Logger.recordOutput("Controller/Drive/Assist/DirectionDifference", directionDiff);
+//        Logger.recordOutput("Controller/Drive/Assist/DirectionDifference", directionDiff);
 
         // Get distance to assist pose
         double distanceToAssist = currentPose.getTranslation().getDistance(assistPose.getTranslation());
-        Logger.recordOutput("Controller/Drive/Assist/DistanceToAssist", distanceToAssist);
+//        Logger.recordOutput("Controller/Drive/Assist/DistanceToAssist", distanceToAssist);
 
         // If we are:
         if (
@@ -149,10 +148,10 @@ public class Controller implements Periodic {
                         distanceToAssist < assistMaximumDistanceMeters
         ) {
             // then use automatic control.
-            Logger.recordOutput("Controller/Drive/Assist/Running", true);
+//            Logger.recordOutput("Controller/Drive/Assist/Running", true);
             return true;
         } else {
-            Logger.recordOutput("Controller/Drive/Assist/Running", false);
+//            Logger.recordOutput("Controller/Drive/Assist/Running", false);
             return false;
         }
     }

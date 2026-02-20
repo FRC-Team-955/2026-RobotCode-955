@@ -75,7 +75,7 @@ public class IntakeRollers implements Periodic {
         if (DriverStation.isDisabled()) {
             io.setRequest(RequestType.VoltageVolts, 0);
         } else {
-            Logger.recordOutput("Superintake/IntakeRollers/RequestType", goal.type);
+//            Logger.recordOutput("Superintake/IntakeRollers/RequestType", goal.type);
             double value = goal.value.getAsDouble();
             Logger.recordOutput("Superintake/IntakeRollers/RequestValue", value);
             io.setRequest(goal.type, value);

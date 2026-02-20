@@ -196,7 +196,7 @@ public class Drive extends CommandBasedSubsystem {
                     anySampleDiscarded = true;
                 }
             }
-            Logger.recordOutput("Drive/AnySampleDiscarded", anySampleDiscarded);
+//            Logger.recordOutput("Drive/AnySampleDiscarded", anySampleDiscarded);
         } else {
             boolean discardSample = processOdometrySample(
                     Timer.getTimestamp(),
@@ -206,7 +206,7 @@ public class Drive extends CommandBasedSubsystem {
                     () -> gyroInputs.yawPositionRad
             );
 
-            Logger.recordOutput("Drive/SampleDiscarded", discardSample);
+//            Logger.recordOutput("Drive/SampleDiscarded", discardSample);
         }
 
         // Chassis speeds

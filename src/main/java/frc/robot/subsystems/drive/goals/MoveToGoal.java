@@ -63,7 +63,7 @@ public class MoveToGoal extends DriveGoal {
         Logger.recordOutput("Drive/MoveTo/Goal", goalPose);
 
         double distanceToGoal = currentPose.getTranslation().getDistance(goalPose.getTranslation());
-        Logger.recordOutput("Drive/MoveTo/DistanceToGoalMeters", distanceToGoal);
+//        Logger.recordOutput("Drive/MoveTo/DistanceToGoalMeters", distanceToGoal);
 
         double linearVelocityMetersPerSec;
         {
@@ -71,10 +71,10 @@ public class MoveToGoal extends DriveGoal {
                     distanceToGoal,
                     0.0
             );
-            Logger.recordOutput("Drive/MoveTo/LinearSetpointUnlimited", linearVelocityMetersPerSec);
+//            Logger.recordOutput("Drive/MoveTo/LinearSetpointUnlimited", linearVelocityMetersPerSec);
 
             boolean linearAtSetpoint = moveToLinear.atSetpoint();
-            Logger.recordOutput("Drive/MoveTo/LinearAtSetpoint", linearAtSetpoint);
+//            Logger.recordOutput("Drive/MoveTo/LinearAtSetpoint", linearAtSetpoint);
             if (linearAtSetpoint) {
                 linearVelocityMetersPerSec = 0.0;
             }
@@ -86,10 +86,10 @@ public class MoveToGoal extends DriveGoal {
                     MathUtil.angleModulus(currentPose.getRotation().getRadians()),
                     MathUtil.angleModulus(goalPose.getRotation().getRadians())
             );
-            Logger.recordOutput("Drive/MoveTo/AngularSetpoint", angularVelocityRadPerSec);
+//            Logger.recordOutput("Drive/MoveTo/AngularSetpoint", angularVelocityRadPerSec);
 
             boolean angularAtSetpoint = moveToAngular.atSetpoint();
-            Logger.recordOutput("Drive/MoveTo/AngularAtSetpoint", angularAtSetpoint);
+//            Logger.recordOutput("Drive/MoveTo/AngularAtSetpoint", angularAtSetpoint);
             if (angularAtSetpoint) {
                 angularVelocityRadPerSec = 0.0;
             }
@@ -102,7 +102,7 @@ public class MoveToGoal extends DriveGoal {
         Rotation2d angleToGoalRad = currentPose.getTranslation().minus(goalPose.getTranslation()).getAngle();
         Translation2d linearXYVelocityMetersPerSec = new Translation2d(linearVelocityMetersPerSec, angleToGoalRad);
         linearXYVelocityMetersPerSec = moveToLinearAccelerationLimiter.calculate(linearXYVelocityMetersPerSec);
-        Logger.recordOutput("Drive/MoveTo/LinearSetpoint", linearXYVelocityMetersPerSec.getNorm());
+//        Logger.recordOutput("Drive/MoveTo/LinearSetpoint", linearXYVelocityMetersPerSec.getNorm());
 
         ChassisSpeeds moveToSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
                 linearXYVelocityMetersPerSec.getX() * linearScalar,
@@ -111,7 +111,7 @@ public class MoveToGoal extends DriveGoal {
                 currentPose.getRotation() // Move to is absolute, don't flip
         );
 
-        Logger.recordOutput("Drive/MoveTo/MergeJoystickDrive", mergeJoystickDrive);
+//        Logger.recordOutput("Drive/MoveTo/MergeJoystickDrive", mergeJoystickDrive);
         if (mergeJoystickDrive) {
             ChassisSpeeds joystickDriveSpeeds = controller.getDriveSetpointRobotRelative(robotState.getRotation());
             return DriveRequest.chassisSpeeds(moveToSpeeds.plus(joystickDriveSpeeds.times(0.3)));
