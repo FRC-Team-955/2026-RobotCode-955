@@ -1,5 +1,6 @@
 package frc.lib.example;
 
+import com.revrobotics.spark.config.SparkBaseConfig;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 import frc.lib.motor.MotorIO;
@@ -24,7 +25,7 @@ public class ExampleRollerSubsystemConstants {
             case REAL -> new MotorIOSparkMax(
                     -1,
                     true,
-                    true,
+                    SparkBaseConfig.IdleMode.kCoast,
                     40,
                     gearRatio,
                     positionGains,

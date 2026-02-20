@@ -1,6 +1,7 @@
 package frc.robot.subsystems.superstructure.flywheel;
 
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import frc.lib.motor.MotorIOTalonFX;
 import frc.lib.motor.RequestType;
 import frc.lib.network.LoggedTunablePIDF;
@@ -20,7 +21,7 @@ public class FlywheelIOTalonFX extends FlywheelIO {
         leader = new MotorIOTalonFX(
                 leaderCanID,
                 leaderInverted,
-                false,
+                NeutralModeValue.Coast,
                 currentLimitAmps,
                 FlywheelConstants.gearRatio,
                 null,
@@ -30,7 +31,7 @@ public class FlywheelIOTalonFX extends FlywheelIO {
         follower = new MotorIOTalonFX(
                 followerCanID,
                 false,
-                false,
+                NeutralModeValue.Coast,
                 currentLimitAmps,
                 FlywheelConstants.gearRatio,
                 null,
