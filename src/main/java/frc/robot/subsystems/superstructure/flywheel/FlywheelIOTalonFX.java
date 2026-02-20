@@ -17,7 +17,7 @@ public class FlywheelIOTalonFX extends FlywheelIO {
             int leaderCanID,
             int followerCanID,
             boolean leaderInverted,
-            MotorAlignmentValue motorAlignment
+            MotorAlignmentValue followerAlignment
     ) {
         leader = new MotorIOTalonFX(
                 leaderCanID,
@@ -38,7 +38,7 @@ public class FlywheelIOTalonFX extends FlywheelIO {
                 null,
                 null
         );
-        follower.setFollow(leader, motorAlignment);
+        follower.setFollow(leader, followerAlignment);
     }
 
     @Override
