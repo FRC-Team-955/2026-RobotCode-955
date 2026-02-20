@@ -85,7 +85,7 @@ public class Flywheel implements Periodic {
     @Override
     public void periodicAfterCommands() {
         Logger.recordOutput("Superstructure/Flywheel/Goal", goal);
-        if (DriverStation.isDisabled()) {
+        if (DriverStation.isDisabled() || goal == Goal.IDLE) {
             io.setStopRequest();
         } else {
             double value = goal.value.getAsDouble();
