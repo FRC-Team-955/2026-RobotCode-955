@@ -4,8 +4,8 @@ import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
-import frc.lib.network.LoggedTunablePIDF;
 import frc.lib.Util;
+import frc.lib.network.LoggedTunablePIDF;
 import frc.robot.Constants;
 
 public class MotorIOArmSim extends MotorIO {
