@@ -15,7 +15,6 @@ package frc.robot;
 
 import edu.wpi.first.hal.AllianceStationID;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
@@ -294,46 +293,36 @@ public class Robot extends LoggedRobot {
         robotContainer.robotState.setPose(ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose());
     }
 
-    boolean isHittingBumppre = false;
-
-    boolean isHittingBump2 = false;
+    private boolean lastInNeutralZone = false;
 
     @Override
     public void simulationPeriodic() {
         // In case of replay, don't do sim
         if (BuildConstants.mode == BuildConstants.Mode.REPLAY) return;
 
-        boolean isHittingBump = ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose().getX() >= 4.4
-                && ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose().getY() >= 2.2 ||
-                ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose().getX() >= 4.4
-                        && ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose().getY() <= 5.9;
-
-        boolean isHittingBumpother = ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose().getX() <= 11.2
-                && ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose().getY() <= 5.9 ||
-                ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose().getX() <= 11.2
-                        && ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose().getY() >= 2.2;
-
-        if (isHittingBump != isHittingBumppre || isHittingBump2 != isHittingBumpother) {
-            double randomX = ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose().getX() - .5 + Math.random();
-            double randomY = ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose().getY() - .5 + Math.random();
-            Rotation2d Angle = ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose().getRotation();
-            Pose2d teleportTarget = new Pose2d(randomX, randomY, Angle);
-            ModuleIOSim.driveSimulation.setSimulationWorldPose(teleportTarget);
-            System.out.println("Robot hit the Bump and 'slipped' to " + teleportTarget);
+        Pose2d pose = ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose();
+        boolean inNeutralZone =
+                pose.getX() > FieldConstants.LinesVertical.hubCenter &&
+                        pose.getX() < FieldConstants.LinesVertical.oppHubCenter;
+        if (
+            // If we exited the neutral zone
+                inNeutralZone != lastInNeutralZone &&
+                        // If we are not going through the trench
+                        pose.getY() > FieldConstants.LinesHorizontal.rightTrenchOpenStart &&
+                        pose.getY() < FieldConstants.LinesHorizontal.leftTrenchOpenEnd
+        ) {
+            // We went over the bump
+            ModuleIOSim.driveSimulation.setSimulationWorldPose(new Pose2d(
+                    pose.getX() + Math.random() * Math.signum(
+                            pose.getX() < FieldConstants.LinesVertical.center
+                                    ? pose.getX() - FieldConstants.LinesVertical.hubCenter
+                                    : pose.getX() - FieldConstants.LinesVertical.oppHubCenter
+                    ),
+                    pose.getY() + 2.0 * Math.random() - 1.0,
+                    pose.getRotation()
+            ));
         }
-        isHittingBumppre = isHittingBump;
-        isHittingBump2 = isHittingBumpother;
-
-
-        /*double randomX = Math.random() * 14.0 + 1.0;w
-        double randomY = Math.random() * 6.0 + 1.0;
-        Rotation2d randomAngle = Rotation2d.fromDegrees(Math.random() * 360);
-        Pose2d teleportTarget = new Pose2d(randomX, randomY, randomAngle);
-
-        if (ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose().getX() > 0
-                && ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose().getY() > 10)
-        {ModuleIOSim.driveSimulation.setSimulationWorldPose(teleportTarget);
-        }*/
+        lastInNeutralZone = inNeutralZone;
 
         SimulatedArena.getInstance().simulationPeriodic();
 
