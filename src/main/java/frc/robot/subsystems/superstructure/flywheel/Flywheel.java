@@ -10,6 +10,7 @@ import frc.lib.network.LoggedTunableNumber;
 import frc.lib.subsystem.Periodic;
 import frc.robot.OperatorDashboard;
 import frc.robot.ShootingKinematics;
+import frc.robot.subsystems.superstructure.flywheel.FlywheelIO.FlywheelCurrentLimitMode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -50,7 +51,14 @@ public class Flywheel implements Periodic {
     @Getter
     private Goal goal = Goal.IDLE;
 
-    private FlywheelIO.FlywheelCurrentLimitMode currentLimitMode = FlywheelIO.FlywheelCurrentLimitMode.SHOOT;
+    private FlywheelCurrentLimitMode currentLimitMode = FlywheelCurrentLimitMode.SHOOT;
+
+    public void setCurrentLimitMode(FlywheelCurrentLimitMode newCurrentLimitMode) {
+        if (currentLimitMode != newCurrentLimitMode) {
+            currentLimitMode = newCurrentLimitMode;
+            io.setCurrentLimit(currentLimitMode);
+        }
+    }
 
     private final Alert leaderMotorDisconnectedAlert = new Alert("Flywheel leader motor is disconnected.", Alert.AlertType.kError);
     private final Alert followerMotorDisconnectedAlert = new Alert("Flywheel follower motor is disconnected.", Alert.AlertType.kError);
@@ -96,12 +104,6 @@ public class Flywheel implements Periodic {
         }
     }
 
-    public void setCurrentLimitMode(FlywheelIO.FlywheelCurrentLimitMode newCurrentLimitMode) {
-        if (currentLimitMode != newCurrentLimitMode) {
-            currentLimitMode = newCurrentLimitMode;
-            io.setCurrentLimit(currentLimitMode);
-        }
-    }
 
     public double getPositionRad() {
         return inputs.leader.positionRad;

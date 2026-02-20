@@ -8,7 +8,7 @@ import frc.robot.RobotState;
 import frc.robot.ShootingKinematics;
 import frc.robot.subsystems.superstructure.feeder.Feeder;
 import frc.robot.subsystems.superstructure.flywheel.Flywheel;
-import frc.robot.subsystems.superstructure.flywheel.FlywheelIO;
+import frc.robot.subsystems.superstructure.flywheel.FlywheelIO.FlywheelCurrentLimitMode;
 import frc.robot.subsystems.superstructure.hood.Hood;
 import frc.robot.subsystems.superstructure.spindexer.Spindexer;
 import lombok.Getter;
@@ -106,18 +106,18 @@ public class Superstructure extends CommandBasedSubsystem {
                     }
                 }
                 if (goal == Goal.SHOOT && shootingKinematics.isShootingParametersMet()) {
-                    flywheel.setCurrentLimitMode(FlywheelIO.FlywheelCurrentLimitMode.SHOOT);
+                    flywheel.setCurrentLimitMode(FlywheelCurrentLimitMode.SHOOT);
                     feeder.setGoal(Feeder.Goal.FEED);
                     spindexer.setGoal(Spindexer.Goal.FEED);
                 } else {
-                    flywheel.setCurrentLimitMode(FlywheelIO.FlywheelCurrentLimitMode.SPINUP);
+                    flywheel.setCurrentLimitMode(FlywheelCurrentLimitMode.SPINUP);
                     feeder.setGoal(Feeder.Goal.IDLE);
                     spindexer.setGoal(Spindexer.Goal.IDLE);
                 }
             }
             case EJECT -> {
                 flywheel.setGoal(Flywheel.Goal.EJECT);
-                flywheel.setCurrentLimitMode(FlywheelIO.FlywheelCurrentLimitMode.SHOOT);
+                flywheel.setCurrentLimitMode(FlywheelCurrentLimitMode.SHOOT);
                 hood.setGoal(Hood.Goal.EJECT);
                 feeder.setGoal(Feeder.Goal.EJECT);
                 spindexer.setGoal(Spindexer.Goal.EJECT);

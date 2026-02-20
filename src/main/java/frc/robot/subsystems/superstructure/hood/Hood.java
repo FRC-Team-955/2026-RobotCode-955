@@ -16,6 +16,7 @@ import frc.robot.Constants;
 import frc.robot.OperatorDashboard;
 import frc.robot.RobotState;
 import frc.robot.ShootingKinematics;
+import frc.robot.subsystems.superstructure.hood.HoodIO.HoodCurrentLimitMode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -58,7 +59,14 @@ public class Hood implements Periodic {
     @Getter
     private Goal goal = Goal.STOW;
 
-    private HoodIO.HoodCurrentLimitMode currentLimitMode = HoodIO.HoodCurrentLimitMode.NORMAL;
+    private HoodCurrentLimitMode currentLimitMode = HoodCurrentLimitMode.NORMAL;
+
+    public void setCurrentLimitMode(HoodCurrentLimitMode newCurrentLimitMode) {
+        if (currentLimitMode != newCurrentLimitMode) {
+            currentLimitMode = newCurrentLimitMode;
+            io.setCurrentLimit(currentLimitMode);
+        }
+    }
 
     private final TrapezoidProfile profile = new TrapezoidProfile(constraints);
     private Double lastSetpointRad = null;
@@ -131,13 +139,6 @@ public class Hood implements Periodic {
             Logger.recordOutput("Superstructure/Hood/LookaheadSetpointRad", lookaheadState.position);
 
             io.setPositionRequest(lookaheadState.position);
-        }
-    }
-
-    public void setCurrentLimitMode(HoodIO.HoodCurrentLimitMode newCurrentLimitMode) {
-        if (currentLimitMode != newCurrentLimitMode) {
-            currentLimitMode = newCurrentLimitMode;
-            io.setCurrentLimit(currentLimitMode);
         }
     }
 

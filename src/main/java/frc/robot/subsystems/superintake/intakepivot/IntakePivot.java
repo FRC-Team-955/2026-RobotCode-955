@@ -13,6 +13,7 @@ import frc.lib.network.LoggedTunableNumber;
 import frc.lib.subsystem.Periodic;
 import frc.robot.Constants;
 import frc.robot.OperatorDashboard;
+import frc.robot.subsystems.superintake.intakepivot.IntakePivotIO.IntakePivotCurrentLimitMode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -46,7 +47,14 @@ public class IntakePivot implements Periodic {
     @Getter
     private Goal goal = Goal.STOW;
 
-    private IntakePivotIO.IntakePivotCurrentLimitMode currentLimitMode = IntakePivotIO.IntakePivotCurrentLimitMode.NORMAL;
+    private IntakePivotCurrentLimitMode currentLimitMode = IntakePivotCurrentLimitMode.NORMAL;
+
+    public void setCurrentLimitMode(IntakePivotCurrentLimitMode newCurrentLimitMode) {
+        if (currentLimitMode != newCurrentLimitMode) {
+            currentLimitMode = newCurrentLimitMode;
+            io.setCurrentLimit(currentLimitMode);
+        }
+    }
 
     private final TrapezoidProfile profile = new TrapezoidProfile(constraints);
     private Double lastSetpointRad = null;
@@ -111,13 +119,6 @@ public class IntakePivot implements Periodic {
             Logger.recordOutput("Superintake/IntakePivot/LookaheadSetpointRad", lookaheadState.position);
 
             io.setPositionRequest(lookaheadState.position);
-        }
-    }
-
-    public void setCurrentLimitMode(IntakePivotIO.IntakePivotCurrentLimitMode newCurrentLimitMode) {
-        if (currentLimitMode != newCurrentLimitMode) {
-            currentLimitMode = newCurrentLimitMode;
-            io.setCurrentLimit(currentLimitMode);
         }
     }
 
