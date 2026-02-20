@@ -44,7 +44,7 @@ public class GamePieceVisionConstants {
     static final double camWidth = 640;
     static final double diagFOVRad = 2 * Math.atan(Math.tan(horizontalFOVRad / 2) * Math.sqrt(1 + Math.pow(0.75, 2)));
     static final double pixelsToRad = camWidth / horizontalFOVRad;
-    static final double fuelDiameterMeters = 0.15;
+    public static final double fuelDiameterMeters = 0.15;
     static final double minDistanceForSameCoralMeters = 1;
     static final double staleExpireTimeSeconds = 3;
 

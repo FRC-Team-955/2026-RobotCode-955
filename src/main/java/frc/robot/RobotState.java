@@ -16,7 +16,6 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.Util;
 import frc.lib.subsystem.Periodic;
 import frc.robot.subsystems.drive.DriveConstants;
-import frc.robot.subsystems.drive.ModuleIOSim;
 import lombok.Getter;
 import lombok.Setter;
 import org.littletonrobotics.junction.AutoLogOutput;
@@ -199,9 +198,6 @@ public class RobotState implements Periodic {
 
     public void setPose(Pose2d pose) {
         poseEstimator.resetPose(pose);
-        if (BuildConstants.mode == BuildConstants.Mode.SIM) {
-            ModuleIOSim.driveSimulation.setSimulationWorldPose(pose);
-        }
     }
 
     public Command setPose(Supplier<Pose2d> pose) {

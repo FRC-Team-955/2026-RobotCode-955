@@ -5,15 +5,13 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Timer;
 import frc.robot.ShootingKinematics;
-import frc.robot.subsystems.drive.DriveConstants;
-import frc.robot.subsystems.drive.ModuleIOSim;
+import frc.robot.SimManager;
 import frc.robot.subsystems.superintake.intakepivot.IntakePivot;
 import frc.robot.subsystems.superintake.intakerollers.IntakeRollers;
 import frc.robot.subsystems.superstructure.feeder.Feeder;
 import frc.robot.subsystems.superstructure.flywheel.Flywheel;
 import frc.robot.subsystems.superstructure.hood.Hood;
 import frc.robot.subsystems.superstructure.spindexer.Spindexer;
-import org.ironmaple.simulation.IntakeSimulation;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.seasonspecific.rebuilt2026.RebuiltFuelOnFly;
 import org.littletonrobotics.junction.Logger;
@@ -22,7 +20,6 @@ import static edu.wpi.first.units.Units.*;
 
 public class SuperstructureIOSim extends SuperstructureIO {
     private static final double shootingBallsPerSec = 4.0;
-    private static final int hopperCapacity = 50;
     private static final double ballShootDelay = 1.0 / shootingBallsPerSec;
 
     private static final IntakePivot intakePivot = IntakePivot.get();
@@ -32,16 +29,7 @@ public class SuperstructureIOSim extends SuperstructureIO {
     private static final Hood hood = Hood.get();
     private static final Spindexer spindexer = Spindexer.get();
 
-    private final IntakeSimulation intakeSimulation = IntakeSimulation.OverTheBumperIntake(
-            "Fuel",
-            ModuleIOSim.driveSimulation,
-            // Width of the intake
-            Meters.of(DriveConstants.driveConfig.trackWidthMeters()),
-            // The extension length of the intake beyond the robot's bumper (when activated)
-            Inches.of(5.625),
-            IntakeSimulation.IntakeSide.FRONT,
-            hopperCapacity
-    );
+    private final SimManager simManager = SimManager.get();
 
     private double lastShotTimestamp = 0.0;
 
@@ -55,15 +43,15 @@ public class SuperstructureIOSim extends SuperstructureIO {
                         intakePivot.getGoal() == IntakePivot.Goal.DEPLOY &&
                         intakePivot.atGoal()
         ) {
-            if (!intakeSimulation.isRunning()) {
-                intakeSimulation.startIntake();
+            if (!simManager.intakeSimulation.isRunning()) {
+                simManager.intakeSimulation.startIntake();
             }
-        } else if (intakeSimulation.isRunning()) {
-            intakeSimulation.stopIntake();
+        } else if (simManager.intakeSimulation.isRunning()) {
+            simManager.intakeSimulation.stopIntake();
         }
 
         // get this value before potentially subtracting 1 when shooting
-        int gamePiecesInHopper = intakeSimulation.getGamePiecesAmount();
+        int gamePiecesInHopper = simManager.intakeSimulation.getGamePiecesAmount();
 
         if (
                 feeder.getGoal() == Feeder.Goal.FEED &&
@@ -71,15 +59,15 @@ public class SuperstructureIOSim extends SuperstructureIO {
         ) {
             if (
                     Timer.getTimestamp() - lastShotTimestamp > ballShootDelay &&
-                            intakeSimulation.obtainGamePieceFromIntake()
+                            simManager.intakeSimulation.obtainGamePieceFromIntake()
             ) {
                 lastShotTimestamp = Timer.getTimestamp();
 
-                Pose2d robotPose = ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose();
+                Pose2d robotPose = simManager.driveSimulation.getSimulatedDriveTrainPose();
                 var gamePiece = new RebuiltFuelOnFly(
                         robotPose.getTranslation(),
                         ShootingKinematics.fuelExitTranslation.toTranslation2d(),
-                        ModuleIOSim.driveSimulation.getDriveTrainSimulatedChassisSpeedsFieldRelative(),
+                        simManager.driveSimulation.getDriveTrainSimulatedChassisSpeedsFieldRelative(),
                         robotPose.getRotation(),
                         Meters.of(ShootingKinematics.fuelExitTranslation.getZ()),
                         MetersPerSecond.of(flywheel.getVelocityMetersPerSec()),
@@ -104,6 +92,6 @@ public class SuperstructureIOSim extends SuperstructureIO {
             inputs.canrangeMeasurementHealth = MeasurementHealthValue.Bad;
         }
 
-        Logger.recordOutput("FieldSimulation/NumberOfFuelInHopper", intakeSimulation.getGamePiecesAmount());
+        Logger.recordOutput("FieldSimulation/NumberOfFuelInHopper", simManager.intakeSimulation.getGamePiecesAmount());
     }
 }

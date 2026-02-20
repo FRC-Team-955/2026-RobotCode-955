@@ -2,8 +2,11 @@ package frc.robot.subsystems.drive;
 
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.robot.Constants;
+import frc.robot.SimManager;
 
 public class AccelerometerIOSim extends AccelerometerIO {
+    private final SimManager simManager = SimManager.get();
+
     private ChassisSpeeds lastSpeeds = new ChassisSpeeds();
 
     public AccelerometerIOSim() {
@@ -11,7 +14,7 @@ public class AccelerometerIOSim extends AccelerometerIO {
 
     @Override
     public void updateInputs(AccelerometerIOInputs inputs) {
-        ChassisSpeeds currentSpeeds = ModuleIOSim.driveSimulation.getDriveTrainSimulatedChassisSpeedsRobotRelative();
+        ChassisSpeeds currentSpeeds = simManager.driveSimulation.getDriveTrainSimulatedChassisSpeedsRobotRelative();
         ChassisSpeeds dSpeeds = currentSpeeds.minus(lastSpeeds).div(Constants.loopPeriod);
         lastSpeeds = currentSpeeds;
 

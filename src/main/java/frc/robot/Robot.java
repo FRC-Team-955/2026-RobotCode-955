@@ -14,7 +14,6 @@
 package frc.robot;
 
 import edu.wpi.first.hal.AllianceStationID;
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
@@ -22,11 +21,8 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.simulation.DriverStationSim;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import frc.lib.LoggedTracer;
 import frc.lib.subsystem.Periodic;
-import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.leds.LEDs;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.seasonspecific.rebuilt2026.Arena2026Rebuilt;
@@ -287,49 +283,14 @@ public class Robot extends LoggedRobot {
         DriverStationSim.setAllianceStationId(AllianceStationID.Blue1);
         DriverStationSim.setEnabled(true);
         DriverStationSim.notifyNewData();
-
-        SimulatedArena.getInstance().resetFieldForAuto();
-        RobotModeTriggers.autonomous().onTrue(Commands.runOnce(SimulatedArena.getInstance()::resetFieldForAuto));
-        robotContainer.robotState.setPose(ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose());
     }
 
-    private boolean lastInNeutralZone = false;
 
     @Override
     public void simulationPeriodic() {
         // In case of replay, don't do sim
         if (BuildConstants.mode == BuildConstants.Mode.REPLAY) return;
 
-        Pose2d pose = ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose();
-        boolean inNeutralZone =
-                pose.getX() > FieldConstants.LinesVertical.hubCenter &&
-                        pose.getX() < FieldConstants.LinesVertical.oppHubCenter;
-        if (
-            // If we exited the neutral zone
-                inNeutralZone != lastInNeutralZone &&
-                        // If we are not going through the trench
-                        pose.getY() > FieldConstants.LinesHorizontal.rightTrenchOpenStart &&
-                        pose.getY() < FieldConstants.LinesHorizontal.leftTrenchOpenEnd
-        ) {
-            // We went over the bump
-            ModuleIOSim.driveSimulation.setSimulationWorldPose(new Pose2d(
-                    pose.getX() + Math.random() * Math.signum(
-                            pose.getX() < FieldConstants.LinesVertical.center
-                                    ? pose.getX() - FieldConstants.LinesVertical.hubCenter
-                                    : pose.getX() - FieldConstants.LinesVertical.oppHubCenter
-                    ),
-                    pose.getY() + 2.0 * Math.random() - 1.0,
-                    pose.getRotation()
-            ));
-        }
-        lastInNeutralZone = inNeutralZone;
-
-        SimulatedArena.getInstance().simulationPeriodic();
-
-        Logger.recordOutput("FieldSimulation/RobotPosition", ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose());
-        Logger.recordOutput(
-                "FieldSimulation/Fuel",
-                SimulatedArena.getInstance().getGamePiecesArrayByType("Fuel")
-        );
+        SimManager.get().periodic();
     }
 }

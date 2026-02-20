@@ -16,22 +16,17 @@ package frc.robot.subsystems.drive;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.Timer;
 import frc.lib.network.LoggedTunablePIDF;
+import frc.robot.SimManager;
 import org.ironmaple.simulation.SimulatedArena;
-import org.ironmaple.simulation.drivesims.COTS;
-import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.ironmaple.simulation.drivesims.SwerveModuleSimulation;
-import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
 import org.ironmaple.simulation.motorsims.SimulatedMotorController;
 
 import java.util.Arrays;
 
 import static edu.wpi.first.units.Units.*;
-import static frc.robot.subsystems.drive.DriveConstants.driveConfig;
 import static frc.robot.subsystems.drive.DriveConstants.moduleConfig;
 
 /**
@@ -39,30 +34,7 @@ import static frc.robot.subsystems.drive.DriveConstants.moduleConfig;
  * constants from Phoenix. Simulation is always based on voltage control.
  */
 public class ModuleIOSim extends ModuleIO {
-    public static final SwerveDriveSimulation driveSimulation = new SwerveDriveSimulation(
-            // Specify Configuration
-            DriveTrainSimulationConfig.Default()
-                    // Specify gyro type (for realistic gyro drifting and error simulation)
-                    .withGyro(COTS.ofPigeon2())
-                    // Specify swerve module (for realistic swerve dynamics)
-                    .withSwerveModule(COTS.ofMark4i(
-                            DCMotor.getKrakenX60(1),
-                            DCMotor.getNEO(1),
-                            COTS.WHEELS.DEFAULT_NEOPRENE_TREAD.cof,
-                            2 // L2 Gear ratio
-                    ))
-                    // Configures the track length and track width (spacing between swerve modules)
-                    .withTrackLengthTrackWidth(Meters.of(driveConfig.trackLengthMeters()), Meters.of(driveConfig.trackWidthMeters()))
-                    // Configures the bumper size (dimensions of the robot bumper)
-                    .withBumperSize(Meters.of(driveConfig.bumperLengthMeters()), Meters.of(driveConfig.bumperWidthMeters()))
-                    .withRobotMass(Pounds.of(125)),
-            // Specify starting pose
-            new Pose2d(1, 1, new Rotation2d())
-    );
-
-    static {
-        SimulatedArena.getInstance().addDriveTrainSimulation(driveSimulation);
-    }
+    private final SimManager simManager = SimManager.get();
 
     private final SwerveModuleSimulation moduleSimulation;
     private final SimulatedMotorController.GenericMotorController driveMotor;
@@ -78,7 +50,7 @@ public class ModuleIOSim extends ModuleIO {
     private double turnAppliedVolts = 0.0;
 
     public ModuleIOSim(int index) {
-        moduleSimulation = driveSimulation.getModules()[index];
+        moduleSimulation = simManager.driveSimulation.getModules()[index];
 
         driveMotor = moduleSimulation
                 .useGenericMotorControllerForDrive()
