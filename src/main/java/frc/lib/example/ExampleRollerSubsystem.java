@@ -1,5 +1,6 @@
 package frc.lib.example;
 
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -73,7 +74,7 @@ public class ExampleRollerSubsystem implements Periodic {
 
         // Apply network inputs
         if (operatorDashboard.coastOverride.hasChanged()) {
-            io.setBrakeMode(!operatorDashboard.coastOverride.get());
+            io.setNeutralMode(operatorDashboard.coastOverride.get() ? NeutralModeValue.Coast : NeutralModeValue.Brake);
         }
 
         if (positionGains.hasChanged()) {

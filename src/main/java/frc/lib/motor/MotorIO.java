@@ -1,5 +1,6 @@
 package frc.lib.motor;
 
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import frc.lib.network.LoggedTunablePIDF;
 import org.littletonrobotics.junction.AutoLog;
 
@@ -34,7 +35,7 @@ public class MotorIO {
     /**
      * Enable or disable brake mode on the motor.
      */
-    public void setBrakeMode(boolean enable) {
+    public void setNeutralMode(NeutralModeValue neutralMode) {
     }
 
     public void setRequest(RequestType type, double value) {

@@ -1,6 +1,7 @@
 package frc.lib.motor;
 
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
@@ -115,10 +116,13 @@ public class MotorIOSparkMax extends MotorIO {
     }
 
     @Override
-    public void setBrakeMode(boolean enable) {
-        System.out.println("Setting motor brake mode to " + enable);
+    public void setNeutralMode(NeutralModeValue neutralMode) {
+        System.out.println("Setting motor neutral mode to " + neutralMode);
         var newConfig = new SparkMaxConfig()
-                .idleMode(enable ? SparkBaseConfig.IdleMode.kBrake : SparkBaseConfig.IdleMode.kCoast);
+                .idleMode(switch (neutralMode) {
+                    case Coast -> SparkBaseConfig.IdleMode.kCoast;
+                    case Brake -> SparkBaseConfig.IdleMode.kBrake;
+                });
         tryUntilOkAsync(5, () -> spark.configure(
                 newConfig,
                 ResetMode.kNoResetSafeParameters,

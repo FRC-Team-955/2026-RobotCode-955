@@ -1,5 +1,6 @@
 package frc.lib.example;
 
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
@@ -80,7 +81,7 @@ public class ExampleServoSubsystem implements Periodic {
 
         // Apply network inputs
         if (operatorDashboard.coastOverride.hasChanged()) {
-            io.setBrakeMode(!operatorDashboard.coastOverride.get());
+            io.setNeutralMode(operatorDashboard.coastOverride.get() ? NeutralModeValue.Coast : NeutralModeValue.Brake);
         }
 
         if (gains.hasChanged()) {

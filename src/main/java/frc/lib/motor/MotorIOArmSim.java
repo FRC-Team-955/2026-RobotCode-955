@@ -1,5 +1,6 @@
 package frc.lib.motor;
 
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.system.plant.DCMotor;
@@ -76,8 +77,8 @@ public class MotorIOArmSim extends MotorIO {
     }
 
     @Override
-    public void setBrakeMode(boolean enable) {
-        System.out.println("Setting motor brake mode to " + enable);
+    public void setNeutralMode(NeutralModeValue neutralMode) {
+        System.out.println("Setting motor neutral mode to " + neutralMode);
     }
 
     @Override

@@ -111,9 +111,9 @@ public class MotorIOTalonFX extends MotorIO {
     }
 
     @Override
-    public void setBrakeMode(boolean enable) {
-        System.out.println("Setting motor brake mode to " + enable);
-        config.MotorOutput.NeutralMode = enable ? NeutralModeValue.Brake : NeutralModeValue.Coast;
+    public void setNeutralMode(NeutralModeValue neutralMode) {
+        System.out.println("Setting motor neutral mode to " + neutralMode);
+        config.MotorOutput.NeutralMode = neutralMode;
         tryUntilOkAsync(5, () -> talon.getConfigurator().apply(config, 0.25));
     }
 
