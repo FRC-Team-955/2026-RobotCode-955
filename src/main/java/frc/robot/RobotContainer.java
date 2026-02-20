@@ -1,6 +1,5 @@
 package frc.robot;
 
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
@@ -19,8 +18,6 @@ import frc.robot.subsystems.leds.LEDs;
 import frc.robot.subsystems.superintake.Superintake;
 import frc.robot.subsystems.superstructure.Superstructure;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
-
-import java.util.Optional;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -99,26 +96,28 @@ public class RobotContainer {
 
 
         controller.rightTrigger()
-                .whileTrue(superintake.setGoal(Superintake.Goal.INTAKE).alongWith(
-                        drive.driveJoystickWithAssist(() -> {
-                                    Pose2d robotPose = robotState.getPose();
-                                    Pose2d closestFuel = null;
-                                    double closestDist = Double.MAX_VALUE;
-
-                                    for (var fuel : gamePieceVision.getFreshCoral()) {
-                                        Pose2d fuelPose = fuel.toPose2d();
-                                        double dist = fuelPose.getTranslation().getDistance(robotPose.getTranslation());
-
-                                        if (dist < closestDist) {
-                                            closestDist = dist;
-                                            closestFuel = fuelPose;
-                                        }
-                                    }
-
-                                    return Optional.ofNullable(closestFuel);
-                                }
-
-                        )));
+                .whileTrue(
+                        superintake.setGoal(Superintake.Goal.INTAKE)
+//                                .alongWith(drive.driveJoystickWithAssist(() -> {
+//                                            Pose2d robotPose = robotState.getPose();
+//                                            Pose2d closestFuel = null;
+//                                            double closestDist = Double.MAX_VALUE;
+//
+//                                            for (var fuel : gamePieceVision.getFreshCoral()) {
+//                                                Pose2d fuelPose = fuel.toPose2d();
+//                                                double dist = fuelPose.getTranslation().getDistance(robotPose.getTranslation());
+//
+//                                                if (dist < closestDist) {
+//                                                    closestDist = dist;
+//                                                    closestFuel = fuelPose;
+//                                                }
+//                                            }
+//
+//                                            return Optional.ofNullable(closestFuel);
+//                                        }
+//
+//                                ))
+                );
 
         controller.a()
                 .onTrue(CommandsExt.eagerSequence(
