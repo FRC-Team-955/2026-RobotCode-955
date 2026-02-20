@@ -19,6 +19,7 @@ import java.util.function.Supplier;
 public class DriveJoystickWithAssistGoal extends DriveGoal {
     private static final RobotState robotState = RobotState.get();
     private static final Controller controller = Controller.get();
+
     private static final PIDController assistPIDY = PIDF.ofPD(4.5, 0.0).toPID();
     private final Supplier<Optional<Pose2d>> assistPoseSupplier;
 
@@ -27,7 +28,6 @@ public class DriveJoystickWithAssistGoal extends DriveGoal {
         var optionalAssistPose = assistPoseSupplier.get();
         if (optionalAssistPose.isPresent()) {
             // Mark assist pose as present
-
             Logger.recordOutput("Drive/Assist/Present", true);
             Pose2d assistPose = optionalAssistPose.get();
 
