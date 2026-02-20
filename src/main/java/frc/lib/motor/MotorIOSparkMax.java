@@ -1,5 +1,6 @@
 package frc.lib.motor;
 
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
@@ -148,5 +149,17 @@ public class MotorIOSparkMax extends MotorIO {
                 );
             }
         }
+    }
+
+    /**
+     * NOTE: BLOCKS THE MAIN THREAD!!! ONLY CALL ON STARTUP!!!!
+     */
+    public void setFollow(MotorIOSparkMax leader, MotorAlignmentValue alignment) {
+        config.follow(leader.spark, alignment == MotorAlignmentValue.Opposed);
+        tryUntilOk(5, () -> spark.configure(
+                config,
+                ResetMode.kResetSafeParameters,
+                PersistMode.kPersistParameters
+        ));
     }
 }

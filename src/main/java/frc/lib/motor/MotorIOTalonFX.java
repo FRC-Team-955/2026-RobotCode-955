@@ -5,12 +5,14 @@ import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.Slot1Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.util.Units;
@@ -120,5 +122,9 @@ public class MotorIOTalonFX extends MotorIO {
             case PositionRad -> positionRequest.withPosition(Units.radiansToRotations(value));
             case VelocityRadPerSec -> velocityRequest.withVelocity(Units.radiansToRotations(value));
         });
+    }
+
+    public void setFollow(MotorIOTalonFX leader, MotorAlignmentValue alignment) {
+        talon.setControl(new Follower(leader.talon.getDeviceID(), alignment));
     }
 }

@@ -1,11 +1,9 @@
 package frc.robot.subsystems.superstructure.flywheel;
 
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 import frc.lib.PIDF;
-import frc.lib.motor.MotorIO;
-import frc.lib.motor.MotorIOSim;
-import frc.lib.motor.MotorIOSparkMax;
 import frc.robot.BuildConstants;
 
 public class FlywheelConstants {
@@ -18,25 +16,19 @@ public class FlywheelConstants {
         case SIM -> PIDF.ofSV(0.0, 0.02);
     };
 
-    static MotorIO createIO() {
+    static FlywheelIO createIO() {
         return switch (BuildConstants.mode) {
-            case REAL -> new MotorIOSparkMax(
+            case REAL -> new FlywheelIOTalonFX(
                     -1,
-                    true,
-                    true,
-                    40,
-                    gearRatio,
-                    PIDF.zero(),
-                    velocityGains
+                    -1,
+                    false,
+                    MotorAlignmentValue.Opposed
             );
-            case SIM -> new MotorIOSim(
-                    gearRatio,
+            case SIM -> new FlywheelIOSim(
                     0.01,
-                    DCMotor.getKrakenX60(2),
-                    PIDF.zero(),
-                    velocityGains
+                    DCMotor.getKrakenX60(2)
             );
-            case REPLAY -> new MotorIO();
+            case REPLAY -> new FlywheelIO();
         };
     }
 }

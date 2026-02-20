@@ -7,9 +7,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.PIDF;
 import frc.lib.Util;
-import frc.lib.motor.MotorIO;
-import frc.lib.motor.MotorIOInputsAutoLogged;
-import frc.lib.motor.RequestType;
 import frc.lib.network.LoggedTunableNumber;
 import frc.lib.subsystem.Periodic;
 import frc.robot.OperatorDashboard;
@@ -34,29 +31,29 @@ public class Flywheel implements Periodic {
     private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
     private static final ShootingKinematics shootingKinematics = ShootingKinematics.get();
 
-    private final MotorIO io = createIO();
-    private final MotorIOInputsAutoLogged inputs = new MotorIOInputsAutoLogged();
+    private final FlywheelIO io = createIO();
+    private final FlywheelIOInputsAutoLogged inputs = new FlywheelIOInputsAutoLogged();
 
     @RequiredArgsConstructor
     public enum Goal {
-        IDLE(() -> 0, RequestType.VoltageVolts),
-        SHOOT_AND_PASS_AUTOMATIC(() -> shootingKinematics.getShootingParameters().velocityMetersPerSec() / flywheelRadiusMeters, RequestType.VelocityRadPerSec),
-        SHOOT_HUB_MANUAL(() -> shootHubManualMetersPerSec.get() / flywheelRadiusMeters, RequestType.VelocityRadPerSec),
-        SHOOT_TOWER_MANUAL(() -> shootTowerManualMetersPerSec.get() / flywheelRadiusMeters, RequestType.VelocityRadPerSec),
-        PASS_MANUAL(() -> passManualMetersPerSec.get() / flywheelRadiusMeters, RequestType.VelocityRadPerSec),
-        EJECT(() -> Units.rotationsPerMinuteToRadiansPerSecond(ejectRPM.get()), RequestType.VelocityRadPerSec),
+        IDLE(() -> 0),
+        SHOOT_AND_PASS_AUTOMATIC(() -> shootingKinematics.getShootingParameters().velocityMetersPerSec() / flywheelRadiusMeters),
+        SHOOT_HUB_MANUAL(() -> shootHubManualMetersPerSec.get() / flywheelRadiusMeters),
+        SHOOT_TOWER_MANUAL(() -> shootTowerManualMetersPerSec.get() / flywheelRadiusMeters),
+        PASS_MANUAL(() -> passManualMetersPerSec.get() / flywheelRadiusMeters),
+        EJECT(() -> Units.rotationsPerMinuteToRadiansPerSecond(ejectRPM.get())),
         ;
 
         /** Should be constant for every loop cycle */
         private final DoubleSupplier value;
-        private final RequestType type;
     }
 
     @Setter
     @Getter
     private Goal goal = Goal.IDLE;
 
-    private final Alert motorDisconnectedAlert = new Alert("Flywheel motor is disconnected.", Alert.AlertType.kError);
+    private final Alert leaderMotorDisconnectedAlert = new Alert("Flywheel leader motor is disconnected.", Alert.AlertType.kError);
+    private final Alert followerMotorDisconnectedAlert = new Alert("Flywheel follower motor is disconnected.", Alert.AlertType.kError);
 
     private static Flywheel instance;
 
@@ -79,12 +76,8 @@ public class Flywheel implements Periodic {
         io.updateInputs(inputs);
         Logger.processInputs("Inputs/Superstructure/Flywheel", inputs);
 
-        motorDisconnectedAlert.set(!inputs.connected);
-
-        // Apply network inputs
-        if (operatorDashboard.coastOverride.hasChanged()) {
-            io.setBrakeMode(!operatorDashboard.coastOverride.get());
-        }
+        leaderMotorDisconnectedAlert.set(!inputs.leader.connected);
+        followerMotorDisconnectedAlert.set(!inputs.follower.connected);
 
         velocityGainsTunable.ifChanged(io::setVelocityPIDF);
     }
@@ -93,31 +86,26 @@ public class Flywheel implements Periodic {
     public void periodicAfterCommands() {
         Logger.recordOutput("Superstructure/Flywheel/Goal", goal);
         if (DriverStation.isDisabled()) {
-            io.setRequest(RequestType.VoltageVolts, 0);
+            io.setStopRequest();
         } else {
-            Logger.recordOutput("Superstructure/Flywheel/RequestType", goal.type);
             double value = goal.value.getAsDouble();
             Logger.recordOutput("Superstructure/Flywheel/RequestValue", value);
-            io.setRequest(goal.type, value);
+            io.setVelocityRequest(value);
         }
     }
 
     public double getPositionRad() {
-        return inputs.positionRad;
+        return inputs.leader.positionRad;
     }
 
     public double getVelocityMetersPerSec() {
-        return inputs.velocityRadPerSec * FlywheelConstants.flywheelRadiusMeters;
+        return inputs.leader.velocityRadPerSec * FlywheelConstants.flywheelRadiusMeters;
     }
 
     @AutoLogOutput(key = "Superstructure/Flywheel/AtGoal")
     public boolean atGoal() {
         double value = goal.value.getAsDouble();
-        return switch (goal.type) {
-            case VelocityRadPerSec -> Math.abs(inputs.velocityRadPerSec - value) <= velocityToleranceRadPerSec;
-
-            case PositionRad, VoltageVolts -> false;
-        };
+        return Math.abs(inputs.leader.velocityRadPerSec - value) <= velocityToleranceRadPerSec;
     }
 
     public Command waitUntilAtGoal() {

@@ -19,21 +19,14 @@ public class MotorIOSim extends MotorIO {
     private boolean positionControl = false;
     private double ffVolts;
 
-    // If using SysID values, kA and kV are the gains returned from SysID, in volts/(rad/sec) or volts/(rad/sec^2)
-    public MotorIOSim(DCMotor motor, double kV, double kA, PIDF positionGains, PIDF velocityGains) {
-        motorSim = new DCMotorSim(
-                LinearSystemId.createDCMotorSystem(kV, kA),
-                motor,
-                0.004
-        );
-
-        positionPid = positionGains.toPID();
-        velocityFeedforward = velocityGains.toSimpleFF();
-        velocityPid = velocityGains.toPID();
-    }
-
     // If using physical values, JKgMetersSquared is the moment of inertia J of the flywheel
-    public MotorIOSim(double gearRatio, double JKgMetersSquared, DCMotor motor, PIDF positionGains, PIDF velocityGains) {
+    public MotorIOSim(
+            double gearRatio,
+            double JKgMetersSquared,
+            DCMotor motor,
+            PIDF positionGains,
+            PIDF velocityGains
+    ) {
         motorSim = new DCMotorSim(
                 LinearSystemId.createDCMotorSystem(motor, JKgMetersSquared, gearRatio),
                 motor,
