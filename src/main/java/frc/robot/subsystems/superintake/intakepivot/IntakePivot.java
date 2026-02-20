@@ -1,5 +1,6 @@
 package frc.robot.subsystems.superintake.intakepivot;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
@@ -93,6 +94,7 @@ public class IntakePivot implements Periodic {
             // See the comments above the lookaheadState and goalState variables for why we effectively calculate two profiles
 
             double setpointRad = goal.setpointRad.getAsDouble();
+            setpointRad = MathUtil.clamp(setpointRad, minPositionRad, maxPositionRad);
 //            Logger.recordOutput("Superintake/IntakePivot/OriginalSetpointRad", setpointRad);
             TrapezoidProfile.State wantedState = new TrapezoidProfile.State(setpointRad, 0.0);
 

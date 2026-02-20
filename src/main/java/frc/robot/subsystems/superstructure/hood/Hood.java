@@ -1,6 +1,7 @@
 package frc.robot.subsystems.superstructure.hood;
 
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
@@ -113,6 +114,7 @@ public class Hood implements Periodic {
             if (robotState.isInTrench()) {
                 setpointRad = Math.min(setpointRad, maxPositionUnderTrench);
             }
+            setpointRad = MathUtil.clamp(setpointRad, minPositionRad, maxPositionRad);
 //            Logger.recordOutput("Superstructure/Hood/OriginalSetpointRad", setpointRad);
             TrapezoidProfile.State wantedState = new TrapezoidProfile.State(setpointRad, 0.0);
 

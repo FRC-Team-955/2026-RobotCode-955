@@ -7,8 +7,7 @@ import frc.lib.motor.MotorIOArmSim;
 import frc.lib.motor.RequestType;
 import frc.lib.network.LoggedTunablePIDF;
 
-import static frc.robot.subsystems.superintake.intakepivot.IntakePivotConstants.gains;
-import static frc.robot.subsystems.superintake.intakepivot.IntakePivotConstants.gearRatio;
+import static frc.robot.subsystems.superintake.intakepivot.IntakePivotConstants.*;
 
 public class IntakePivotIOSim extends IntakePivotIO {
     private final MotorIOArmSim motor;
@@ -19,8 +18,8 @@ public class IntakePivotIOSim extends IntakePivotIO {
                 gearRatio,
                 JKgMetersSquared,
                 Units.inchesToMeters(10),
-                Units.degreesToRadians(-90),
-                Units.degreesToRadians(0),
+                minPositionRad,
+                maxPositionRad,
                 true,
                 Units.degreesToRadians(0),
                 0.001,

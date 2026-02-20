@@ -11,6 +11,8 @@ public class HoodConstants {
 
     static final TrapezoidProfile.Constraints constraints = new TrapezoidProfile.Constraints(1, 3);
 
+    static final double minPositionRad = Units.degreesToRadians(15.0);
+    static final double maxPositionRad = Units.degreesToRadians(45.0);
     static final double maxPositionUnderTrench = Units.degreesToRadians(35.0);
 
     static final double gearRatio = 120;
