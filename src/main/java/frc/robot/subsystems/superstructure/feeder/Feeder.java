@@ -67,11 +67,6 @@ public class Feeder implements Periodic {
         Logger.processInputs("Inputs/Superstructure/Feeder", inputs);
 
         motorDisconnectedAlert.set(!inputs.connected);
-
-        // Apply network inputs
-        if (operatorDashboard.coastOverride.hasChanged()) {
-            io.setBrakeMode(!operatorDashboard.coastOverride.get());
-        }
     }
 
     @Override

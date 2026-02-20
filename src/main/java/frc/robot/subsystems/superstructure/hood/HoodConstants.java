@@ -1,5 +1,6 @@
 package frc.robot.subsystems.superstructure.hood;
 
+import com.revrobotics.spark.config.SparkBaseConfig;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
@@ -25,7 +26,7 @@ public class HoodConstants {
             case REAL -> new MotorIOSparkMax(
                     -1,
                     true,
-                    true,
+                    SparkBaseConfig.IdleMode.kBrake,
                     40,
                     gearRatio,
                     gains,

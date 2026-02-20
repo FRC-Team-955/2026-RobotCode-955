@@ -1,5 +1,6 @@
 package frc.robot.subsystems.superstructure.feeder;
 
+import com.revrobotics.spark.config.SparkBaseConfig;
 import edu.wpi.first.math.system.plant.DCMotor;
 import frc.lib.motor.MotorIO;
 import frc.lib.motor.MotorIOSim;
@@ -14,7 +15,7 @@ public class FeederConstants {
             case REAL -> new MotorIOSparkMax(
                     -1,
                     true,
-                    true,
+                    SparkBaseConfig.IdleMode.kCoast,
                     40,
                     gearRatio,
                     null,

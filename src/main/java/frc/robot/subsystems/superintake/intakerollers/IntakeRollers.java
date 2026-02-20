@@ -67,11 +67,6 @@ public class IntakeRollers implements Periodic {
         Logger.processInputs("Inputs/Superintake/IntakeRollers", inputs);
 
         motorDisconnectedAlert.set(!inputs.connected);
-
-        // Apply network inputs
-        if (operatorDashboard.coastOverride.hasChanged()) {
-            io.setBrakeMode(!operatorDashboard.coastOverride.get());
-        }
     }
 
     @Override

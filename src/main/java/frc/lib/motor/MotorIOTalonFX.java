@@ -43,7 +43,7 @@ public class MotorIOTalonFX extends MotorIO {
     public MotorIOTalonFX(
             int canID,
             boolean inverted,
-            boolean brakeMode,
+            NeutralModeValue neutralMode,
             int currentLimitAmps,
             double gearRatio,
             LoggedTunablePIDF positionGains,
@@ -52,7 +52,7 @@ public class MotorIOTalonFX extends MotorIO {
         talon = new TalonFX(canID, Constants.canivoreBus);
 
         config = new TalonFXConfiguration();
-        config.MotorOutput.NeutralMode = brakeMode ? NeutralModeValue.Brake : NeutralModeValue.Coast;
+        config.MotorOutput.NeutralMode = neutralMode;
         config.MotorOutput.Inverted = inverted
                 ? InvertedValue.Clockwise_Positive
                 : InvertedValue.CounterClockwise_Positive;
@@ -61,8 +61,8 @@ public class MotorIOTalonFX extends MotorIO {
         config.TorqueCurrent.PeakForwardTorqueCurrent = currentLimitAmps;
         config.TorqueCurrent.PeakReverseTorqueCurrent = -currentLimitAmps;
         config.Feedback.SensorToMechanismRatio = gearRatio;
-        config.Slot0 = Slot0Configs.from(positionGains.toPhoenix());
-        config.Slot1 = Slot1Configs.from(velocityGains.toPhoenix());
+        if (positionGains != null) config.Slot0 = Slot0Configs.from(positionGains.toPhoenix());
+        if (velocityGains != null) config.Slot1 = Slot1Configs.from(velocityGains.toPhoenix());
         PhoenixUtil.tryUntilOk(5, () -> talon.getConfigurator().apply(config, 0.25));
         PhoenixUtil.tryUntilOk(5, () -> talon.setPosition(0.0, 0.25));
 

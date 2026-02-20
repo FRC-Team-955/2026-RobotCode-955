@@ -29,7 +29,7 @@ public class MotorIOSparkMax extends MotorIO {
     public MotorIOSparkMax(
             int canID,
             boolean inverted,
-            boolean brakeMode,
+            SparkBaseConfig.IdleMode idleMode,
             int currentLimitAmps,
             double gearRatio,
             LoggedTunablePIDF positionGains,
@@ -43,7 +43,7 @@ public class MotorIOSparkMax extends MotorIO {
         config = new SparkMaxConfig();
         config
                 .inverted(inverted)
-                .idleMode(brakeMode ? SparkBaseConfig.IdleMode.kBrake : SparkBaseConfig.IdleMode.kCoast)
+                .idleMode(idleMode)
                 .smartCurrentLimit(currentLimitAmps)
                 .voltageCompensation(12.0);
         config

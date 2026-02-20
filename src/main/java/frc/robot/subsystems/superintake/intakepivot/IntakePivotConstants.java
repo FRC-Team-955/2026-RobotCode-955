@@ -1,12 +1,13 @@
 package frc.robot.subsystems.superintake.intakepivot;
 
 import com.ctre.phoenix6.signals.GravityTypeValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import frc.lib.motor.MotorIO;
 import frc.lib.motor.MotorIOArmSim;
-import frc.lib.motor.MotorIOSparkMax;
+import frc.lib.motor.MotorIOTalonFX;
 import frc.lib.network.LoggedTunablePIDF;
 import frc.robot.BuildConstants;
 
@@ -24,10 +25,10 @@ public class IntakePivotConstants {
 
     static MotorIO createIO() {
         return switch (BuildConstants.mode) {
-            case REAL -> new MotorIOSparkMax(
+            case REAL -> new MotorIOTalonFX(
                     -1,
                     true,
-                    true,
+                    NeutralModeValue.Coast,
                     40,
                     gearRatio,
                     gains,

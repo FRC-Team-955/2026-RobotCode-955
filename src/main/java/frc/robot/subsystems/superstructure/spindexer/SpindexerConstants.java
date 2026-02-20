@@ -1,9 +1,10 @@
 package frc.robot.subsystems.superstructure.spindexer;
 
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.system.plant.DCMotor;
 import frc.lib.motor.MotorIO;
 import frc.lib.motor.MotorIOSim;
-import frc.lib.motor.MotorIOSparkMax;
+import frc.lib.motor.MotorIOTalonFX;
 import frc.robot.BuildConstants;
 
 public class SpindexerConstants {
@@ -11,10 +12,10 @@ public class SpindexerConstants {
 
     static MotorIO createIO() {
         return switch (BuildConstants.mode) {
-            case REAL -> new MotorIOSparkMax(
+            case REAL -> new MotorIOTalonFX(
                     -1,
                     true,
-                    true,
+                    NeutralModeValue.Coast,
                     40,
                     gearRatio,
                     null,

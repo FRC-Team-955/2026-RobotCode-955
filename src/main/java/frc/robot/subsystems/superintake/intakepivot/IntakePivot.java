@@ -79,11 +79,6 @@ public class IntakePivot implements Periodic {
 
         motorDisconnectedAlert.set(!inputs.connected);
 
-        // Apply network inputs
-        if (operatorDashboard.coastOverride.hasChanged()) {
-            io.setBrakeMode(!operatorDashboard.coastOverride.get());
-        }
-
         if (gains.hasChanged()) {
             io.setPositionPIDF(gains);
         }
