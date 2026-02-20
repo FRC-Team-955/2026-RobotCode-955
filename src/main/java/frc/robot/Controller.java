@@ -20,10 +20,6 @@ import lombok.Getter;
 import static frc.robot.subsystems.drive.DriveConstants.*;
 
 public class Controller implements Periodic {
-    public enum Mode {
-
-    }
-
     private final CommandXboxController controller;
     private final Alert controllerDisconnectedAlert = new Alert("Driver controller is not connected!", Alert.AlertType.kError);
 
