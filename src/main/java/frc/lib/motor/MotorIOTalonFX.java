@@ -139,6 +139,12 @@ public class MotorIOTalonFX extends MotorIO {
         });
     }
 
+    @Override
+    public void setEncoderPosition(double positionRad) {
+        System.out.println("Setting encoder position to " + positionRad);
+        tryUntilOkAsync(5, () -> talon.setPosition(Units.radiansToRotations(positionRad), 0.25));
+    }
+
     public void setFollow(MotorIOTalonFX leader, MotorAlignmentValue alignment) {
         talon.setControl(new Follower(leader.talon.getDeviceID(), alignment));
     }

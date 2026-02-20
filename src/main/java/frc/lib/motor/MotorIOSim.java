@@ -101,4 +101,10 @@ public class MotorIOSim extends MotorIO {
             }
         }
     }
+
+    @Override
+    public void setEncoderPosition(double positionRad) {
+        System.out.println("Setting encoder position to " + positionRad);
+        motorSim.setAngle(positionRad);
+    }
 }

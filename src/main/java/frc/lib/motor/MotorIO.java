@@ -40,4 +40,12 @@ public class MotorIO {
 
     public void setRequest(RequestType type, double value) {
     }
+
+    /**
+     * NOTE: The position will not instantly change!! Keep this in mind!
+     * You may want to add a delay before returning to closed loop control
+     * so that the motor does not attempt to move to an invalid position
+     */
+    public void setEncoderPosition(double positionRad) {
+    }
 }

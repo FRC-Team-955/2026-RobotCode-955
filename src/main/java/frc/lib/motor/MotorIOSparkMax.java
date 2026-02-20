@@ -163,6 +163,12 @@ public class MotorIOSparkMax extends MotorIO {
         }
     }
 
+    @Override
+    public void setEncoderPosition(double positionRad) {
+        System.out.println("Setting encoder position to " + positionRad);
+        tryUntilOkAsync(5, () -> encoder.setPosition(positionRad));
+    }
+
     /**
      * NOTE: BLOCKS THE MAIN THREAD!!! ONLY CALL ON STARTUP!!!!
      */

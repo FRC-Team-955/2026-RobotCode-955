@@ -95,4 +95,10 @@ public class MotorIOArmSim extends MotorIO {
             default -> Util.error("Motor should only use PositionRad");
         }
     }
+
+    @Override
+    public void setEncoderPosition(double positionRad) {
+        System.out.println("Setting encoder position to " + positionRad);
+        armSim.setState(positionRad, armSim.getVelocityRadPerSec());
+    }
 }
