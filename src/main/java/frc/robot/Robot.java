@@ -303,21 +303,21 @@ public class Robot extends LoggedRobot {
         // In case of replay, don't do sim
         if (BuildConstants.mode == BuildConstants.Mode.REPLAY) return;
 
-        boolean isHittingBump = ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose().getX() >= 4.57
-                && ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose().getY() >= 2.0 ||
-                ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose().getX() >= 4.57
-                        && ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose().getY() <= 6;
+        boolean isHittingBump = ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose().getX() >= 4.4
+                && ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose().getY() >= 2.2 ||
+                ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose().getX() >= 4.4
+                        && ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose().getY() <= 5.9;
 
-        boolean isHittingBumpother = ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose().getX() <= 12.0
-                && ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose().getY() <= 6.0 ||
-                ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose().getX() <= 12.0
-                        && ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose().getY() >= 2.0;
+        boolean isHittingBumpother = ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose().getX() <= 11.2
+                && ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose().getY() <= 5.9 ||
+                ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose().getX() <= 11.2
+                        && ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose().getY() >= 2.2;
 
         if (isHittingBump != isHittingBumppre || isHittingBump2 != isHittingBumpother) {
             double randomX = ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose().getX() - .5 + Math.random();
             double randomY = ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose().getY() - .5 + Math.random();
-            Rotation2d randomAngle = Rotation2d.fromDegrees(Math.random() * 180d);
-            Pose2d teleportTarget = new Pose2d(randomX, randomY, randomAngle);
+            Rotation2d Angle = ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose().getRotation();
+            Pose2d teleportTarget = new Pose2d(randomX, randomY, Angle);
             ModuleIOSim.driveSimulation.setSimulationWorldPose(teleportTarget);
             System.out.println("Robot hit the Bump and 'slipped' to " + teleportTarget);
         }
