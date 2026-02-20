@@ -7,7 +7,8 @@ import frc.lib.motor.RequestType;
 import frc.lib.network.LoggedTunablePIDF;
 
 public class FlywheelIOTalonFX extends FlywheelIO {
-    private static final int currentLimitAmps = 120;
+    private static final int shootCurrentLimitAmps = 120;
+    private static final int spinupCurrentLimitAmps = 20;
 
     private final MotorIOTalonFX leader;
     private final MotorIOTalonFX follower;
@@ -22,7 +23,7 @@ public class FlywheelIOTalonFX extends FlywheelIO {
                 leaderCanID,
                 leaderInverted,
                 NeutralModeValue.Coast,
-                currentLimitAmps,
+                shootCurrentLimitAmps,
                 FlywheelConstants.gearRatio,
                 null,
                 FlywheelConstants.velocityGains
@@ -32,7 +33,7 @@ public class FlywheelIOTalonFX extends FlywheelIO {
                 followerCanID,
                 false,
                 NeutralModeValue.Coast,
-                currentLimitAmps,
+                shootCurrentLimitAmps,
                 FlywheelConstants.gearRatio,
                 null,
                 null
@@ -59,5 +60,16 @@ public class FlywheelIOTalonFX extends FlywheelIO {
     @Override
     public void setStopRequest() {
         leader.setRequest(RequestType.VoltageVolts, 0);
+    }
+
+    @Override
+    public void setCurrentLimit(FlywheelCurrentLimitMode mode) {
+        System.out.println("Setting flywheel current limit to " + mode);
+        double currentLimitAmps = switch (mode) {
+            case SHOOT -> shootCurrentLimitAmps;
+            case SPINUP -> spinupCurrentLimitAmps;
+        };
+        leader.setCurrentLimit(currentLimitAmps);
+        follower.setCurrentLimit(currentLimitAmps);
     }
 }

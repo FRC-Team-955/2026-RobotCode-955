@@ -126,6 +126,21 @@ public class MotorIOSparkMax extends MotorIO {
         ));
     }
 
+    // This is not included in MotorIO because it should not be used by subsystem code directly
+    // If you need to use this, make a custom IO layer that either subclasses or nests this IO layer
+    // and take an enum as the argument instead of raw current limit
+    // We do this because wanted current limit varies based on which motor we are using
+    public void setCurrentLimit(int currentLimitAmps) {
+        System.out.println("Setting motor current limit to " + currentLimitAmps);
+        var newConfig = new SparkMaxConfig()
+                .smartCurrentLimit(currentLimitAmps);
+        tryUntilOkAsync(5, () -> spark.configure(
+                newConfig,
+                ResetMode.kNoResetSafeParameters,
+                PersistMode.kPersistParameters
+        ));
+    }
+
     @Override
     public void setRequest(RequestType type, double value) {
         switch (type) {

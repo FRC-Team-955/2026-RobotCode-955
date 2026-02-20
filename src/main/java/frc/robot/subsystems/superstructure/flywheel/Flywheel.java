@@ -10,6 +10,7 @@ import frc.lib.network.LoggedTunableNumber;
 import frc.lib.subsystem.Periodic;
 import frc.robot.OperatorDashboard;
 import frc.robot.ShootingKinematics;
+import frc.robot.subsystems.superstructure.flywheel.FlywheelIO.FlywheelCurrentLimitMode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -49,6 +50,8 @@ public class Flywheel implements Periodic {
     @Setter
     @Getter
     private Goal goal = Goal.IDLE;
+
+    private FlywheelCurrentLimitMode currentLimitMode = FlywheelCurrentLimitMode.SHOOT;
 
     private final Alert leaderMotorDisconnectedAlert = new Alert("Flywheel leader motor is disconnected.", Alert.AlertType.kError);
     private final Alert followerMotorDisconnectedAlert = new Alert("Flywheel follower motor is disconnected.", Alert.AlertType.kError);
@@ -91,6 +94,13 @@ public class Flywheel implements Periodic {
             double value = goal.value.getAsDouble();
             Logger.recordOutput("Superstructure/Flywheel/RequestValue", value);
             io.setVelocityRequest(value);
+        }
+    }
+
+    public void setCurrentLimitMode(FlywheelCurrentLimitMode newCurrentLimitMode) {
+        if (currentLimitMode != newCurrentLimitMode) {
+            currentLimitMode = newCurrentLimitMode;
+            io.setCurrentLimit(currentLimitMode);
         }
     }
 

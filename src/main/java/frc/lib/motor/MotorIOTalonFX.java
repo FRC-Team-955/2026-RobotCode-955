@@ -17,9 +17,11 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.*;
-import frc.lib.PhoenixUtil;
 import frc.lib.network.LoggedTunablePIDF;
 import frc.robot.Constants;
+
+import static frc.lib.PhoenixUtil.tryUntilOk;
+import static frc.lib.PhoenixUtil.tryUntilOkAsync;
 
 public class MotorIOTalonFX extends MotorIO {
     // Hardware objects
@@ -63,8 +65,8 @@ public class MotorIOTalonFX extends MotorIO {
         config.Feedback.SensorToMechanismRatio = gearRatio;
         if (positionGains != null) config.Slot0 = Slot0Configs.from(positionGains.toPhoenix());
         if (velocityGains != null) config.Slot1 = Slot1Configs.from(velocityGains.toPhoenix());
-        PhoenixUtil.tryUntilOk(5, () -> talon.getConfigurator().apply(config, 0.25));
-        PhoenixUtil.tryUntilOk(5, () -> talon.setPosition(0.0, 0.25));
+        tryUntilOk(5, () -> talon.getConfigurator().apply(config, 0.25));
+        tryUntilOk(5, () -> talon.setPosition(0.0, 0.25));
 
         position = talon.getPosition();
         velocity = talon.getVelocity();
@@ -98,21 +100,33 @@ public class MotorIOTalonFX extends MotorIO {
     public void setPositionPIDF(LoggedTunablePIDF newGains) {
         System.out.println("Setting motor position gains");
         config.Slot0 = Slot0Configs.from(newGains.toPhoenix());
-        PhoenixUtil.tryUntilOkAsync(5, () -> talon.getConfigurator().apply(config, 0.25));
+        tryUntilOkAsync(5, () -> talon.getConfigurator().apply(config, 0.25));
     }
 
     @Override
     public void setVelocityPIDF(LoggedTunablePIDF newGains) {
         System.out.println("Setting motor velocity gains");
         config.Slot1 = Slot1Configs.from(newGains.toPhoenix());
-        PhoenixUtil.tryUntilOkAsync(5, () -> talon.getConfigurator().apply(config, 0.25));
+        tryUntilOkAsync(5, () -> talon.getConfigurator().apply(config, 0.25));
     }
 
     @Override
     public void setBrakeMode(boolean enable) {
         System.out.println("Setting motor brake mode to " + enable);
         config.MotorOutput.NeutralMode = enable ? NeutralModeValue.Brake : NeutralModeValue.Coast;
-        PhoenixUtil.tryUntilOkAsync(5, () -> talon.getConfigurator().apply(config, 0.25));
+        tryUntilOkAsync(5, () -> talon.getConfigurator().apply(config, 0.25));
+    }
+
+    // This is not included in MotorIO because it should not be used by subsystem code directly
+    // If you need to use this, make a custom IO layer that either subclasses or nests this IO layer
+    // and take an enum as the argument instead of raw current limit
+    // We do this because wanted current limit varies based on which motor we are using
+    public void setCurrentLimit(double currentLimitAmps) {
+        System.out.println("Setting motor current limit to " + currentLimitAmps);
+        config.CurrentLimits.StatorCurrentLimit = currentLimitAmps;
+        config.TorqueCurrent.PeakForwardTorqueCurrent = currentLimitAmps;
+        config.TorqueCurrent.PeakReverseTorqueCurrent = -currentLimitAmps;
+        tryUntilOkAsync(5, () -> talon.getConfigurator().apply(config, 0.25));
     }
 
     @Override
