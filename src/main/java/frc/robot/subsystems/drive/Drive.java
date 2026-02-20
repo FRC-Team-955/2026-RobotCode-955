@@ -257,6 +257,18 @@ public class Drive extends CommandBasedSubsystem {
             for (var module : modules) {
                 module.stop();
             }
+        } else if (request.type() == DriveRequest.Type.STOP_WITH_X) {
+            // Create a list of headings where each heading points from the center
+            // of the robot to the module. Tell the module to point at this angle.
+            // This means that the modules will point towards the center of the
+            // robot, forming an X.
+            Rotation2d[] headings = new Rotation2d[modules.length];
+            for (int i = 0; i < modules.length; i++) {
+                headings[i] = moduleTranslations[i].getAngle();
+                modules[i].runSetpoint(new SwerveModuleState(0.0, headings[i]));
+            }
+            // We also need to make kinematics aware of the new headings
+            robotState.getKinematics().resetHeadings(headings);
         }
         // Closed loop control
         else if (request.type() == DriveRequest.Type.CHASSIS_SPEEDS) {
@@ -266,7 +278,7 @@ public class Drive extends CommandBasedSubsystem {
             // Discretize - use larger dt than actual to reduce translational skew when rotating and translating at the same time
             // See https://www.chiefdelphi.com/t/whitepaper-swerve-drive-skew-and-second-order-kinematics/416964/5
             // and https://github.com/frc1678/C2024-Public/blob/main/src/main/java/com/team1678/frc2024/subsystems/Drive.java#L406
-            ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(rawSpeeds, Constants.loopPeriod * 6.0);
+            ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(rawSpeeds, Constants.loopPeriod * 4.0);
 
             // Convert to module states and desaturate
             SwerveModuleState[] setpointStates = robotState.getKinematics().toSwerveModuleStates(discreteSpeeds);
@@ -293,17 +305,6 @@ public class Drive extends CommandBasedSubsystem {
             for (var module : modules) {
                 module.runCharacterization(request.value().vxMetersPerSecond);
             }
-        } else if (request.type() == DriveRequest.Type.STOP_WITH_X) {
-            Rotation2d[] headings = new Rotation2d[modules.length];
-            for (int i = 0; i < modules.length; i++) {
-                headings[i] = moduleTranslations[i].getAngle();
-                modules[i].runSetpoint(new SwerveModuleState(0.0, headings[i]));
-            }
-            // Why does this work? See SwerveDriveKinematics.toModuleStates
-            robotState.getKinematics().resetHeadings(headings);
-            //closedLoopSetpoint = new ChassisSpeeds();
-
-
         } else {
             Util.error("Unknown request type: " + request.type());
         }
