@@ -226,11 +226,13 @@ public class RobotState implements Periodic {
     }
 
     public boolean isInTrench() {
+        // make each bounding box larger so that the hood has time to move down before going under the trench
+        final double wiggleRoomMeters = 0.5;
         Translation2d t = getTranslation();
-        boolean inNeutralZone = t.getX() > FieldConstants.LinesVertical.hubCenter &&
-                t.getX() < FieldConstants.LinesVertical.oppHubCenter;
-        boolean inLeftTrench = t.getY() >= FieldConstants.LinesHorizontal.leftTrenchOpenEnd;
-        boolean inRightTrench = t.getY() <= FieldConstants.LinesHorizontal.rightTrenchOpenStart;
-        return inNeutralZone && (inLeftTrench || inRightTrench);
+        boolean inNeutralZone = t.getX() > FieldConstants.LinesVertical.neutralZoneNear + wiggleRoomMeters &&
+                t.getX() < FieldConstants.LinesVertical.neutralZoneFar - wiggleRoomMeters;
+        boolean inLeftTrench = t.getY() > FieldConstants.LinesHorizontal.leftTrenchOpenEnd - wiggleRoomMeters;
+        boolean inRightTrench = t.getY() < FieldConstants.LinesHorizontal.rightTrenchOpenStart + wiggleRoomMeters;
+        return !inNeutralZone && (inLeftTrench || inRightTrench);
     }
 }
