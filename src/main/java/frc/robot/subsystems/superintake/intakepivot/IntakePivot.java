@@ -126,13 +126,9 @@ public class IntakePivot implements Periodic {
         return inputs.positionRad;
     }
 
-    @AutoLogOutput(key = "Superintake/IntakePivot/AtGoal")
-    public boolean atGoal() {
-        double value = goal.setpointRad.getAsDouble();
-        return Math.abs(inputs.positionRad - value) <= positionToleranceRad;
+    public boolean isCurrentAtThresholdForHoming() {
+        return inputs.currentAmps >= 10.0;
     }
 
-    public Command waitUntilAtGoal() {
-        return Commands.waitUntil(this::atGoal);
     }
 }

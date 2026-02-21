@@ -3,8 +3,6 @@ package frc.robot.subsystems.superstructure.flywheel;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.Util;
 import frc.lib.network.LoggedTunableNumber;
 import frc.lib.subsystem.Periodic;
@@ -14,7 +12,6 @@ import frc.robot.subsystems.superstructure.flywheel.FlywheelIO.FlywheelCurrentLi
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.function.DoubleSupplier;
@@ -111,15 +108,5 @@ public class Flywheel implements Periodic {
 
     public double getVelocityMetersPerSec() {
         return inputs.leader.velocityRadPerSec * FlywheelConstants.flywheelRadiusMeters;
-    }
-
-    @AutoLogOutput(key = "Superstructure/Flywheel/AtGoal")
-    public boolean atGoal() {
-        double value = goal.value.getAsDouble();
-        return Math.abs(inputs.leader.velocityRadPerSec - value) <= velocityToleranceRadPerSec;
-    }
-
-    public Command waitUntilAtGoal() {
-        return Commands.waitUntil(this::atGoal);
     }
 }

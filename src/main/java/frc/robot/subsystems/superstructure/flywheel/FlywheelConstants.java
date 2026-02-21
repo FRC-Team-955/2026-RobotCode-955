@@ -8,9 +8,9 @@ import frc.robot.BuildConstants;
 
 public class FlywheelConstants {
     public static final double flywheelRadiusMeters = Units.inchesToMeters(2.0);
-    static final double velocityToleranceRadPerSec = Units.rotationsPerMinuteToRadiansPerSecond(100);
 
     static final double gearRatio = 1;
+
     static final LoggedTunablePIDF velocityGains = switch (BuildConstants.mode) {
         case REAL, REPLAY -> new LoggedTunablePIDF("Superstructure/Flywheel/Gains");
         case SIM -> new LoggedTunablePIDF("Superstructure/Flywheel/Gains").withV(0.02);

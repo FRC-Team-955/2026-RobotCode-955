@@ -40,8 +40,7 @@ public class SuperstructureIOSim extends SuperstructureIO {
     public void updateInputs(SuperstructureIOInputs inputs) {
         if (
                 intakeRollers.getGoal() == IntakeRollers.Goal.INTAKE &&
-                        intakePivot.getGoal() == IntakePivot.Goal.DEPLOY &&
-                        intakePivot.atGoal()
+                        intakePivot.getGoal() == IntakePivot.Goal.DEPLOY
         ) {
             if (!simManager.intakeSimulation.isRunning()) {
                 simManager.intakeSimulation.startIntake();
