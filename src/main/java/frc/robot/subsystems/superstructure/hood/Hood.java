@@ -29,11 +29,11 @@ import static frc.robot.subsystems.superstructure.hood.HoodConstants.*;
 
 public class Hood implements Periodic {
     private static final LoggedTunableNumber profileLookaheadTimeSec = new LoggedTunableNumber("Superstructure/Hood/ProfileLookaheadTimeSec", 0.15);
-    private static final LoggedTunableNumber stowSetpointDegrees = new LoggedTunableNumber("Superstructure/Hood/Goal/StowDegrees", -45.0);
-    private static final LoggedTunableNumber shootHubManualSetpointDegrees = new LoggedTunableNumber("Superstructure/Hood/Goal/ShootHubManualDegrees", -45.0);
-    private static final LoggedTunableNumber shootTowerManualSetpointDegrees = new LoggedTunableNumber("Superstructure/Hood/Goal/ShootTowerManualDegrees", -45.0);
-    private static final LoggedTunableNumber passManualSetpointDegrees = new LoggedTunableNumber("Superstructure/Hood/Goal/PassManualDegrees", -45.0);
-    private static final LoggedTunableNumber ejectSetpointDegrees = new LoggedTunableNumber("Superstructure/Hood/Goal/EjectDegrees", -45.0);
+    private static final LoggedTunableNumber stowSetpointDegrees = new LoggedTunableNumber("Superstructure/Hood/Goal/StowDegrees", 45.0);
+    private static final LoggedTunableNumber shootHubManualSetpointDegrees = new LoggedTunableNumber("Superstructure/Hood/Goal/ShootHubManualDegrees", 45.0);
+    private static final LoggedTunableNumber shootTowerManualSetpointDegrees = new LoggedTunableNumber("Superstructure/Hood/Goal/ShootTowerManualDegrees", 45.0);
+    private static final LoggedTunableNumber passManualSetpointDegrees = new LoggedTunableNumber("Superstructure/Hood/Goal/PassManualDegrees", 45.0);
+    private static final LoggedTunableNumber ejectSetpointDegrees = new LoggedTunableNumber("Superstructure/Hood/Goal/EjectDegrees", 45.0);
 
     private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
     private static final ShootingKinematics shootingKinematics = ShootingKinematics.get();
