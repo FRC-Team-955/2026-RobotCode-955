@@ -11,6 +11,8 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.Util;
@@ -38,6 +40,8 @@ public class RobotState implements Periodic {
             },
             new Pose2d()
     );
+
+    private final Field2d field2d = new Field2d();
 
     /**
      * Field relative
@@ -152,6 +156,9 @@ public class RobotState implements Periodic {
                 new Pose2d(t, r.plus(new Rotation2d(poseUncertaintyAngularRad))),
                 new Pose2d(t, r.minus(new Rotation2d(poseUncertaintyAngularRad)))
         );
+
+        SmartDashboard.putData("Field2d", field2d);
+        field2d.setRobotPose(getPose());
     }
 
     public void applyOdometryUpdate(
