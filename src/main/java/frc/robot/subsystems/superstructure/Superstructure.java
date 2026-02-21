@@ -1,12 +1,13 @@
 package frc.robot.subsystems.superstructure;
 
-import edu.wpi.first.math.util.Units;
+import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.Util;
+import frc.lib.network.LoggedTunableNumber;
 import frc.lib.subsystem.CommandBasedSubsystem;
 import frc.robot.OperatorDashboard;
 import frc.robot.RobotState;
@@ -25,6 +26,11 @@ import static frc.robot.subsystems.superstructure.SuperstructureConstants.create
 import static frc.robot.subsystems.superstructure.SuperstructureConstants.robotToCANrange;
 
 public class Superstructure extends CommandBasedSubsystem {
+    // https://v6.docs.ctr-electronics.com/en/stable/docs/application-notes/tuning-canrange.html
+    private static final LoggedTunableNumber hasFuelThresholdMeters = new LoggedTunableNumber("Superstructure/HasFuelThresholdMeters", 0.33);
+    private static final LoggedTunableNumber commitToShotThresholdMeters = new LoggedTunableNumber("Superstructure/CommitToShotThresholdMeters", 0.15);
+    private static final LoggedTunableNumber commitToShotTimeSeconds = new LoggedTunableNumber("Superstructure/CommitToShotTimeSeconds", 0.1);
+
     private static final RobotState robotState = RobotState.get();
     private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
     private static final ShootingKinematics shootingKinematics = ShootingKinematics.get();
@@ -71,6 +77,9 @@ public class Superstructure extends CommandBasedSubsystem {
                 .until(this::shouldGoalEnd);
     }
 
+    private final Debouncer hasFuelDebouncer = new Debouncer(3.0, Debouncer.DebounceType.kFalling);
+    private final Debouncer commitToShotDebouncer = new Debouncer(commitToShotTimeSeconds.get(), Debouncer.DebounceType.kFalling);
+
     private static Superstructure instance;
 
     public static synchronized Superstructure get() {
@@ -91,6 +100,10 @@ public class Superstructure extends CommandBasedSubsystem {
     public void periodicBeforeCommands() {
         io.updateInputs(inputs);
         Logger.processInputs("Inputs/Superstructure", inputs);
+
+        if (commitToShotTimeSeconds.hasChanged()) {
+            commitToShotDebouncer.setDebounceTime(commitToShotTimeSeconds.get());
+        }
     }
 
     @Override
@@ -105,10 +118,16 @@ public class Superstructure extends CommandBasedSubsystem {
                 spindexer.setGoal(Spindexer.Goal.IDLE);
             }
             case SPINUP, SHOOT -> {
-                flywheel.setGoal(Flywheel.Goal.SHOOT);
                 hood.setGoal(Hood.Goal.SHOOT);
+                if (hasFuelDebouncer.calculate(inputs.canrangeDistanceMeters < hasFuelThresholdMeters.get())) {
+                    flywheel.setGoal(Flywheel.Goal.SHOOT);
+                } else {
+                    flywheel.setGoal(Flywheel.Goal.IDLE);
+                }
 
-                if (goal == Goal.SHOOT && shootingKinematics.isShootingParametersMet()) {
+                boolean shouldShoot = shootingKinematics.isShootingParametersMet() ||
+                        commitToShotDebouncer.calculate(inputs.canrangeDistanceMeters < commitToShotThresholdMeters.get());
+                if (goal == Goal.SHOOT && shouldShoot) {
 //                    flywheel.setCurrentLimitMode(FlywheelCurrentLimitMode.SHOOT);
                     feeder.setGoal(Feeder.Goal.FEED);
                     spindexer.setGoal(Spindexer.Goal.FEED);
