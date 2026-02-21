@@ -20,8 +20,8 @@ import org.littletonrobotics.junction.Logger;
 public class ShootingKinematics implements Periodic {
     private static final LoggedTunableNumber robotVelocityScalar = new LoggedTunableNumber("ShootingKinematics/RobotVelocityScalar", 1.2);
     private static final LoggedTunableNumber headingToleranceDeg = new LoggedTunableNumber("ShootingKinematics/HeadingToleranceDegrees", 5.0);
-    private static final LoggedTunableNumber velocityToleranceMetersPerSec = new LoggedTunableNumber("ShootingKinematics/VelocityToleranceMetersPerSec", 0.5);
-    private static final LoggedTunableNumber hoodToleranceDeg = new LoggedTunableNumber("ShootingKinematics/HoodToleranceDegrees", 1.0);
+    public static final LoggedTunableNumber velocityToleranceRPM = new LoggedTunableNumber("ShootingKinematics/VelocityToleranceRPM", 100);
+    public static final LoggedTunableNumber hoodToleranceDeg = new LoggedTunableNumber("ShootingKinematics/HoodToleranceDegrees", 1.0);
 
     public static final Translation3d fuelExitTranslation = new Translation3d(
             Units.inchesToMeters(-4.0),
@@ -80,7 +80,7 @@ public class ShootingKinematics implements Periodic {
 
         shootingParametersMet =
                 Math.abs(robotState.getPose().getRotation().getRadians() - shootingParameters.headingRad()) <= Units.degreesToRadians(headingToleranceDeg.get()) &&
-                        Math.abs(flywheel.getVelocityMetersPerSec() - shootingParameters.velocityMetersPerSec()) <= velocityToleranceMetersPerSec.get() &&
+                        Math.abs(flywheel.getVelocityRPM() - shootingParameters.velocityRPM()) <= velocityToleranceRPM.get() &&
                         Math.abs(hood.getPositionRad() - shootingParameters.hoodAngleRad()) <= Units.degreesToRadians(hoodToleranceDeg.get());
         Logger.recordOutput("ShootingKinematics/ShootingParametersMet", shootingParametersMet);
     }
@@ -190,5 +190,5 @@ public class ShootingKinematics implements Periodic {
         return true;
     }
 
-    public record ShootingParameters(double velocityMetersPerSec, double hoodAngleRad, double headingRad) {}
+    public record ShootingParameters(double velocityRPM, double hoodAngleRad, double headingRad) {}
 }

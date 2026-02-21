@@ -10,6 +10,7 @@ import frc.robot.subsystems.superintake.intakepivot.IntakePivot;
 import frc.robot.subsystems.superintake.intakerollers.IntakeRollers;
 import frc.robot.subsystems.superstructure.feeder.Feeder;
 import frc.robot.subsystems.superstructure.flywheel.Flywheel;
+import frc.robot.subsystems.superstructure.flywheel.FlywheelConstants;
 import frc.robot.subsystems.superstructure.hood.Hood;
 import frc.robot.subsystems.superstructure.spindexer.Spindexer;
 import org.ironmaple.simulation.SimulatedArena;
@@ -69,7 +70,7 @@ public class SuperstructureIOSim extends SuperstructureIO {
                         simManager.driveSimulation.getDriveTrainSimulatedChassisSpeedsFieldRelative(),
                         robotPose.getRotation(),
                         Meters.of(ShootingKinematics.fuelExitTranslation.getZ()),
-                        MetersPerSecond.of(flywheel.getVelocityMetersPerSec()),
+                        MetersPerSecond.of(Units.rotationsPerMinuteToRadiansPerSecond(flywheel.getVelocityRPM()) * FlywheelConstants.flywheelRadiusMeters),
                         // Applying the shooter facing direction to the maple-sim parameter
                         // causes issues because it causes the shooter position to be rotated
                         // which puts it in the opposite corner of the robot. Instead, just

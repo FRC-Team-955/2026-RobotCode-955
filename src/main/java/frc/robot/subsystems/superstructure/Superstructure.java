@@ -1,5 +1,6 @@
 package frc.robot.subsystems.superstructure;
 
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.Util;
 import frc.lib.subsystem.CommandBasedSubsystem;
@@ -118,7 +119,13 @@ public class Superstructure extends CommandBasedSubsystem {
                         hood.setGoal(Hood.Goal.PASS_MANUAL);
                     }
                 }
-                if (goal == Goal.SHOOT && shootingKinematics.isShootingParametersMet()) {
+
+                boolean parametersMet = operatorDashboard.getSelectedScoringMode() == OperatorDashboard.ScoringMode.ShootAndPassAutomatic
+                        ? shootingKinematics.isShootingParametersMet()
+                        : Math.abs(flywheel.getVelocityRPM() - flywheel.getSetpointRPM()) <= ShootingKinematics.velocityToleranceRPM.get() &&
+                        Math.abs(hood.getPositionRad() - hood.getSetpointRad()) <= Units.degreesToRadians(ShootingKinematics.hoodToleranceDeg.get());
+
+                if (goal == Goal.SHOOT && parametersMet) {
                     flywheel.setCurrentLimitMode(FlywheelCurrentLimitMode.SHOOT);
                     feeder.setGoal(Feeder.Goal.FEED);
                     spindexer.setGoal(Spindexer.Goal.FEED);

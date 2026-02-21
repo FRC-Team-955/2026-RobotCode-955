@@ -16,12 +16,13 @@ import org.littletonrobotics.junction.Logger;
 
 import java.util.function.DoubleSupplier;
 
-import static frc.robot.subsystems.superstructure.flywheel.FlywheelConstants.*;
+import static frc.robot.subsystems.superstructure.flywheel.FlywheelConstants.createIO;
+import static frc.robot.subsystems.superstructure.flywheel.FlywheelConstants.velocityGains;
 
 public class Flywheel implements Periodic {
-    private static final LoggedTunableNumber shootHubManualMetersPerSec = new LoggedTunableNumber("Superstructure/Flywheel/Goal/ShootHubManualMetersPerSec", 5.0);
-    private static final LoggedTunableNumber shootTowerManualMetersPerSec = new LoggedTunableNumber("Superstructure/Flywheel/Goal/ShootTowerManualMetersPerSec", 5.0);
-    private static final LoggedTunableNumber passManualMetersPerSec = new LoggedTunableNumber("Superstructure/Flywheel/Goal/PassManualMetersPerSec", 5.0);
+    private static final LoggedTunableNumber shootHubManualRPM = new LoggedTunableNumber("Superstructure/Flywheel/Goal/ShootHubManualRPM", 5.0);
+    private static final LoggedTunableNumber shootTowerManualRPM = new LoggedTunableNumber("Superstructure/Flywheel/Goal/ShootTowerManualRPM", 5.0);
+    private static final LoggedTunableNumber passManualRPM = new LoggedTunableNumber("Superstructure/Flywheel/Goal/PassManualRPM", 5.0);
     private static final LoggedTunableNumber ejectRPM = new LoggedTunableNumber("Superstructure/Flywheel/Goal/EjectRPM", -300);
 
     private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
@@ -33,15 +34,15 @@ public class Flywheel implements Periodic {
     @RequiredArgsConstructor
     public enum Goal {
         IDLE(() -> 0),
-        SHOOT_AND_PASS_AUTOMATIC(() -> shootingKinematics.getShootingParameters().velocityMetersPerSec() / flywheelRadiusMeters),
-        SHOOT_HUB_MANUAL(() -> shootHubManualMetersPerSec.get() / flywheelRadiusMeters),
-        SHOOT_TOWER_MANUAL(() -> shootTowerManualMetersPerSec.get() / flywheelRadiusMeters),
-        PASS_MANUAL(() -> passManualMetersPerSec.get() / flywheelRadiusMeters),
-        EJECT(() -> Units.rotationsPerMinuteToRadiansPerSecond(ejectRPM.get())),
+        SHOOT_AND_PASS_AUTOMATIC(() -> shootingKinematics.getShootingParameters().velocityRPM()),
+        SHOOT_HUB_MANUAL(shootHubManualRPM::get),
+        SHOOT_TOWER_MANUAL(shootTowerManualRPM::get),
+        PASS_MANUAL(passManualRPM::get),
+        EJECT(ejectRPM::get),
         ;
 
         /** Should be constant for every loop cycle */
-        private final DoubleSupplier value;
+        private final DoubleSupplier setpointRPM;
     }
 
     @Setter
@@ -95,7 +96,7 @@ public class Flywheel implements Periodic {
         if (DriverStation.isDisabled() || goal == Goal.IDLE) {
             io.setStopRequest();
         } else {
-            double value = goal.value.getAsDouble();
+            double value = Units.rotationsPerMinuteToRadiansPerSecond(goal.setpointRPM.getAsDouble());
             Logger.recordOutput("Superstructure/Flywheel/RequestValue", value);
             io.setVelocityRequest(value);
         }
@@ -106,7 +107,11 @@ public class Flywheel implements Periodic {
         return inputs.leader.positionRad;
     }
 
-    public double getVelocityMetersPerSec() {
-        return inputs.leader.velocityRadPerSec * FlywheelConstants.flywheelRadiusMeters;
+    public double getVelocityRPM() {
+        return Units.radiansPerSecondToRotationsPerMinute(inputs.leader.velocityRadPerSec);
+    }
+
+    public double getSetpointRPM() {
+        return goal.setpointRPM.getAsDouble();
     }
 }

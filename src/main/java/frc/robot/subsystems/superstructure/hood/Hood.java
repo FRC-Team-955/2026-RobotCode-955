@@ -146,6 +146,13 @@ public class Hood implements Periodic {
         return inputs.positionRad;
     }
 
+    public double getSetpointRad() {
+        if (goal.setpointRad == null) {
+            return inputs.positionRad;
+        }
+        return goal.setpointRad.getAsDouble();
+    }
+
     public boolean isCurrentAtThresholdForHoming() {
         return inputs.currentAmps >= 10.0;
     }
