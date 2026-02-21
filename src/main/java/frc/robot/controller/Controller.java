@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.AllianceFlipUtil;
@@ -20,8 +21,17 @@ import lombok.Getter;
 import static frc.robot.subsystems.drive.DriveConstants.*;
 
 public class Controller implements Periodic {
-    private final CommandXboxController controller;
-    private final Alert controllerDisconnectedAlert = new Alert("Driver controller is not connected!", Alert.AlertType.kError);
+    private enum ControllerType {
+        NOT_CHOSEN,
+        PS5,
+        XBOX,
+    }
+
+    private final CommandPS5Controller ps5Controller = new CommandPS5Controller(0);
+    private CommandXboxController xboxController;
+
+    private final Alert typeNotChosenAlert = new Alert("Driver controller type has not been chosen!", Alert.AlertType.kError);
+    private final Alert disconnectedAlert = new Alert("Driver controller is not connected!", Alert.AlertType.kError);
 
     // Intermediates - used in assist calculations
     @Getter
@@ -58,7 +68,12 @@ public class Controller implements Periodic {
 
     @Override
     public void periodicBeforeCommands() {
-        controllerDisconnectedAlert.set(!controller.isConnected());
+        typeNotChosenAlert.set(ps5Controller == null && xboxController == null);
+        disconnectedAlert.set(!controller.isConnected());
+
+        if (ps5Controller != null && xboxController != null) {
+            Util.error("");
+        }
 
         updateDriveSetpoint();
     }
