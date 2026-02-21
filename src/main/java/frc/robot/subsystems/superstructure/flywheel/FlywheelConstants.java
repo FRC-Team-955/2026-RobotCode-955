@@ -26,7 +26,7 @@ public class FlywheelConstants {
             );
             case SIM -> new FlywheelIOSim(
                     0.01,
-                    DCMotor.getKrakenX60(2)
+                    DCMotor.getKrakenX60(1)
             );
             case REPLAY -> new FlywheelIO();
         };
