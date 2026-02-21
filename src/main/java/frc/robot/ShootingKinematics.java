@@ -75,6 +75,11 @@ public class ShootingKinematics implements Periodic {
         validShootingParameters = operatorDashboard.getSelectedScoringMode() == OperatorDashboard.ScoringMode.ShootAndPassAutomatic
                 ? updateShootingParametersAutomatic()
                 : updateShootingParametersManual();
+        shootingParameters = new ShootingParameters(
+                shootingParameters.velocityRPM() + operatorDashboard.flywheelSmudgeRPM.get(),
+                shootingParameters.hoodAngleRad() + operatorDashboard.hoodSmudgeDegrees.get(),
+                shootingParameters.headingRad
+        );
         Logger.recordOutput("ShootingKinematics/ShootingParameters", shootingParameters);
         Logger.recordOutput("ShootingKinematics/ValidShootingParameters", validShootingParameters);
         noValidShootingParametersAlert.set(!validShootingParameters);
