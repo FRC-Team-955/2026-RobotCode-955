@@ -1,7 +1,6 @@
 package frc.robot;
 
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
@@ -9,16 +8,15 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.CANLogger;
+import frc.robot.autos.AutoManager;
+import frc.robot.controller.Controller;
 import frc.robot.subsystems.apriltagvision.AprilTagVision;
 import frc.robot.subsystems.drive.Drive;
-import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.goals.WheelRadiusCharacterizationGoal;
 import frc.robot.subsystems.gamepiecevision.GamePieceVision;
 import frc.robot.subsystems.leds.LEDs;
 import frc.robot.subsystems.superintake.Superintake;
 import frc.robot.subsystems.superstructure.Superstructure;
-import org.ironmaple.simulation.SimulatedArena;
-import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeAlgaeOnFly;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -29,7 +27,6 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
  */
 public class RobotContainer {
     // Dashboard inputs
-    private final LoggedDashboardChooser<Command> autoChooser = new LoggedDashboardChooser<>("Auto Choices");
     private final LoggedDashboardChooser<Command> characterizationChooser = new LoggedDashboardChooser<>("Characterization Choices");
 
     public final RobotState robotState = RobotState.get();
@@ -38,6 +35,7 @@ public class RobotContainer {
     public final CANLogger canLogger = CANLogger.get();
     public final RobotMechanism robotMechanism = RobotMechanism.get();
     public final ShootingKinematics shootingKinematics = ShootingKinematics.get();
+    public final AutoManager autoManager = AutoManager.get();
 
     /* Subsystems */
     public final Drive drive = Drive.get();
@@ -49,7 +47,7 @@ public class RobotContainer {
     public final Superstructure superstructure = Superstructure.get();
 
     public RobotContainer() {
-        addAutos();
+        autoManager.autoChooser.addOption("Characterization", Commands.deferredProxy(characterizationChooser::get));
         addCharacterizations();
         setDefaultCommands();
         configureBindings();
@@ -58,11 +56,6 @@ public class RobotContainer {
                 .onTrue(controller.rumble(0.5, 2.0));
     }
 
-    private void addAutos() {
-        autoChooser.addOption("None", Commands.none());
-
-        autoChooser.addOption("Characterization", Commands.deferredProxy(characterizationChooser::get));
-    }
 
     private void addCharacterizations() {
         characterizationChooser.addOption("Drive 1 m/s Characterization", drive.runRobotRelative(() -> new ChassisSpeeds(1.0, 0.0, 0.0)));
@@ -75,7 +68,7 @@ public class RobotContainer {
     }
 
     private void setDefaultCommands() {
-        drive.setDefaultCommand(drive.driveJoystick());
+        drive.setDefaultCommand(drive.driveJoystick(false));
         superintake.setDefaultCommand(superintake.setGoal(Superintake.Goal.IDLE).ignoringDisable(true));
         superstructure.setDefaultCommand(superstructure.setGoal(() -> DriverStation.isEnabled() ? Superstructure.Goal.SPINUP : Superstructure.Goal.IDLE).ignoringDisable(true));
     }
@@ -89,7 +82,7 @@ public class RobotContainer {
     private void configureBindings() {
         controller.y().onTrue(robotState.resetRotation());
 
-        var shouldAutoAim = new Trigger(() -> operatorDashboard.getSelectedScoringMode() == OperatorDashboard.ScoringMode.ShootAndPassAutomatic);
+        var shouldAutoAim = new Trigger(() -> operatorDashboard.getSelectedScoringMode() == OperatorDashboard.ScoringMode.ShootAndPassAutomatic || !operatorDashboard.manualAiming.get());
         controller.leftTrigger()
                 .and(shouldAutoAim)
                 .whileTrue(Commands.parallel(
@@ -98,27 +91,47 @@ public class RobotContainer {
                 ));
         controller.leftTrigger()
                 .and(shouldAutoAim.negate())
-                .whileTrue(superstructure.setGoal(Superstructure.Goal.SHOOT));
+                .whileTrue(Commands.parallel(
+                        drive.driveJoystick(true),
+                        superstructure.setGoal(Superstructure.Goal.SHOOT)
+                ));
+
 
         controller.rightTrigger()
-                .whileTrue(superintake.setGoal(Superintake.Goal.INTAKE));
+                .whileTrue(
+                        superintake.setGoal(Superintake.Goal.INTAKE)
+//                                .alongWith(drive.driveJoystickWithAssist(() -> {
+//                                            Pose2d robotPose = robotState.getPose();
+//                                            Pose2d closestFuel = null;
+//                                            double closestDist = Double.MAX_VALUE;
+//
+//                                            for (var fuel : gamePieceVision.getFreshCoral()) {
+//                                                Pose2d fuelPose = fuel.toPose2d();
+//                                                double dist = fuelPose.getTranslation().getDistance(robotPose.getTranslation());
+//
+//                                                if (dist < closestDist) {
+//                                                    closestDist = dist;
+//                                                    closestFuel = fuelPose;
+//                                                }
+//                                            }
+//
+//                                            return Optional.ofNullable(closestFuel);
+//                                        }
+//
+//                                ))
+                );
 
-        controller.leftTrigger().whileTrue(Commands.repeatingSequence(
-                Commands.runOnce(() -> {
-                    if (!shootingKinematics.isValidShootingParameters()) return;
-                    SimulatedArena.getInstance().addGamePieceProjectile(new ReefscapeAlgaeOnFly(
-                            ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose().getTranslation(),
-                            ShootingKinematics.fuelExitTransform.getTranslation().toTranslation2d(),
-                            ModuleIOSim.driveSimulation.getDriveTrainSimulatedChassisSpeedsFieldRelative(),
-                            //Rotation2d.fromRadians(shootingKinematics.getShootingParameters().headingRad()),
-                            ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose().getRotation(),
-                            Units.Meters.of(ShootingKinematics.fuelExitTransform.getTranslation().getZ()),
-                            Units.MetersPerSecond.of(shootingKinematics.getShootingParameters().velocityMetersPerSec()),
-                            Units.Radians.of(shootingKinematics.getShootingParameters().hoodAngleRad())
-                    ).disableBecomesGamePieceOnFieldAfterTouchGround());
-                }),
-                Commands.waitSeconds(0.1)
-        ));
+        new Trigger(operatorDashboard.homeIntakePivot::get)
+                .onTrue(Commands.parallel(
+                        Commands.runOnce(() -> operatorDashboard.homeIntakePivot.set(false)),
+                        superintake.setGoal(Superintake.Goal.HOME_INTAKE_PIVOT)
+                ));
+
+        new Trigger(operatorDashboard.homeHood::get)
+                .onTrue(Commands.parallel(
+                        Commands.runOnce(() -> operatorDashboard.homeHood.set(false)),
+                        superstructure.setGoal(Superstructure.Goal.HOME_HOOD)
+                ));
     }
 
     /**
@@ -127,6 +140,6 @@ public class RobotContainer {
      * @return the command to run in autonomous
      */
     public Command getAutonomousCommand() {
-        return autoChooser.get();
+        return autoManager.getSelectedAuto();
     }
 }

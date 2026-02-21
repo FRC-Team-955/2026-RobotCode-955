@@ -1,33 +1,51 @@
 {
-	"name": "955",
-	"disableSimplification": true,
-	"rotations": [{ "axis": "x", "degrees": 90 }],
-	"position": [0, 0, 0],
-	"cameras": [],
-	"components": [
-		{
-			"zeroedRotations": [],
-			"zeroedPositions": []
-		},
-		{
-			"zeroedRotations": [],
-			"zeroedPositions": []
-		},
-		{
-			"zeroedRotations": [],
-			"zeroedPositions": []
-		},
-		{
-		  "zeroedRotations": [],
-		  "zeroedPositions": []
-		},
-		{
-			"zeroedRotations": [{ "axis": "x", "degrees": 90 }],
-			"zeroedPositions": []
-		},
-		{
-			"zeroedRotations": [{ "axis": "x", "degrees": 90 }],
-			"zeroedPositions": []
-		}
-	]
+  "name": "955",
+  "rotations": [
+    {
+      "axis": "x",
+      "degrees": 90
+    }
+  ],
+  "position": [
+    0,
+    0,
+    0
+  ],
+  "cameras": [],
+  "components": [
+    {
+      "zeroedRotations": [],
+      "zeroedPositions": []
+    },
+    {
+      "zeroedRotations": [],
+      "zeroedPositions": []
+    },
+    {
+      "zeroedRotations": [],
+      "zeroedPositions": []
+    },
+    {
+      "zeroedRotations": [],
+      "zeroedPositions": []
+    },
+    {
+      "zeroedRotations": [
+        {
+          "axis": "x",
+          "degrees": 90
+        }
+      ],
+      "zeroedPositions": []
+    },
+    {
+      "zeroedRotations": [
+        {
+          "axis": "x",
+          "degrees": 90
+        }
+      ],
+      "zeroedPositions": []
+    }
+  ]
 }

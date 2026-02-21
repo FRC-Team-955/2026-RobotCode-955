@@ -1,10 +1,10 @@
 package frc.robot.subsystems.superintake.intakerollers;
 
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.system.plant.DCMotor;
-import frc.lib.PIDF;
 import frc.lib.motor.MotorIO;
 import frc.lib.motor.MotorIOSim;
-import frc.lib.motor.MotorIOSparkMax;
+import frc.lib.motor.MotorIOTalonFX;
 import frc.robot.BuildConstants;
 
 public class IntakeRollersConstants {
@@ -12,21 +12,23 @@ public class IntakeRollersConstants {
 
     static MotorIO createIO() {
         return switch (BuildConstants.mode) {
-            case REAL -> new MotorIOSparkMax(
+            case REAL -> new MotorIOTalonFX(
                     -1,
                     true,
-                    true,
+                    NeutralModeValue.Coast,
                     40,
                     gearRatio,
-                    PIDF.zero(),
-                    PIDF.zero()
+                    null,
+                    null,
+                    0.0
             );
             case SIM -> new MotorIOSim(
                     gearRatio,
                     0.01,
                     DCMotor.getNEO(1),
-                    PIDF.zero(),
-                    PIDF.zero()
+                    null,
+                    null,
+                    0.0
             );
             case REPLAY -> new MotorIO();
         };

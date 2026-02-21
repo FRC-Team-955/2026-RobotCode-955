@@ -1,11 +1,13 @@
 package frc.lib.motor;
 
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
-import frc.lib.PIDF;
+import frc.lib.network.LoggedTunablePIDF;
+import frc.robot.Constants;
 
 public class MotorIOSim extends MotorIO {
     private final DCMotorSim motorSim;
@@ -18,31 +20,26 @@ public class MotorIOSim extends MotorIO {
     private boolean positionControl = false;
     private double ffVolts;
 
-    // If using SysID values, kA and kV are the gains returned from SysID, in volts/(rad/sec) or volts/(rad/sec^2)
-    public MotorIOSim(DCMotor motor, double kV, double kA, PIDF positionGains, PIDF velocityGains) {
-        motorSim = new DCMotorSim(
-                LinearSystemId.createDCMotorSystem(kV, kA),
-                motor,
-                0.004
-        );
-
-        positionPid = positionGains.toPID();
-        velocityFeedforward = velocityGains.toSimpleFF();
-        velocityPid = velocityGains.toPID();
-    }
-
     // If using physical values, JKgMetersSquared is the moment of inertia J of the flywheel
-    public MotorIOSim(double gearRatio, double JKgMetersSquared, DCMotor motor, PIDF positionGains, PIDF velocityGains) {
+    public MotorIOSim(
+            double gearRatio,
+            double JKgMetersSquared,
+            DCMotor motor,
+            LoggedTunablePIDF positionGains,
+            LoggedTunablePIDF velocityGains,
+            double initialPositionRad
+    ) {
         motorSim = new DCMotorSim(
                 LinearSystemId.createDCMotorSystem(motor, JKgMetersSquared, gearRatio),
                 motor,
                 0.004,
                 0.0
         );
+        motorSim.setAngle(initialPositionRad);
 
-        velocityFeedforward = velocityGains.toSimpleFF();
-        positionPid = positionGains.toPID();
-        velocityPid = velocityGains.toPID();
+        velocityFeedforward = velocityGains != null ? velocityGains.toSimpleFF() : new SimpleMotorFeedforward(0, 0);
+        positionPid = positionGains != null ? positionGains.toPID() : new PIDController(0, 0, 0);
+        velocityPid = velocityGains != null ? velocityGains.toPID() : new PIDController(0, 0, 0);
     }
 
     @Override
@@ -57,7 +54,7 @@ public class MotorIOSim extends MotorIO {
 
         motorSim.setInputVoltage(appliedVolts);
 
-        motorSim.update(0.02);
+        motorSim.update(Constants.loopPeriod);
 
         inputs.connected = true;
         inputs.positionRad = motorSim.getAngularPositionRad();
@@ -67,21 +64,21 @@ public class MotorIOSim extends MotorIO {
     }
 
     @Override
-    public void setPositionPIDF(PIDF newGains) {
+    public void setPositionPIDF(LoggedTunablePIDF newGains) {
         System.out.println("Setting motor position gains");
         positionPid = newGains.toPID();
     }
 
     @Override
-    public void setVelocityPIDF(PIDF newGains) {
+    public void setVelocityPIDF(LoggedTunablePIDF newGains) {
         System.out.println("Setting motor velocity gains");
         velocityFeedforward = newGains.toSimpleFF();
         velocityPid = newGains.toPID();
     }
 
     @Override
-    public void setBrakeMode(boolean enable) {
-        System.out.println("Setting motor brake mode to " + enable);
+    public void setNeutralMode(NeutralModeValue neutralMode) {
+        System.out.println("Setting motor neutral mode to " + neutralMode);
     }
 
     @Override
@@ -103,5 +100,11 @@ public class MotorIOSim extends MotorIO {
                 velocityPid.setSetpoint(value);
             }
         }
+    }
+
+    @Override
+    public void setEncoderPosition(double positionRad) {
+        System.out.println("Setting encoder position to " + positionRad);
+        motorSim.setAngle(positionRad);
     }
 }

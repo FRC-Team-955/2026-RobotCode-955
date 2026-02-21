@@ -21,13 +21,11 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.simulation.DriverStationSim;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import frc.lib.LoggedTracer;
 import frc.lib.subsystem.Periodic;
-import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.leds.LEDs;
 import org.ironmaple.simulation.SimulatedArena;
+import org.ironmaple.simulation.seasonspecific.rebuilt2026.Arena2026Rebuilt;
 import org.littletonrobotics.junction.AutoLogOutputManager;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
@@ -53,8 +51,16 @@ public class Robot extends LoggedRobot {
     private static List<Periodic> periodics;
 
     public Robot() {
+        super(Constants.loopPeriod);
+
+        if (BuildConstants.mode == BuildConstants.Mode.SIM) {
+            // Setup arena BEFORE any of our robot code tries to use it
+            // Otherwise, literally everything in maple-sim breaks
+            SimulatedArena.overrideInstance(new Arena2026Rebuilt(false));
+        }
+
         @SuppressWarnings("resource")
-        Notifier ledsStartupNotifier = LEDs.get().createAndStartStartupNotifier();
+        Notifier ledsStartupNotifier = LEDs.createAndStartStartupNotifier();
 
         AutoLogOutputManager.addPackage("frc");
 
@@ -129,6 +135,8 @@ public class Robot extends LoggedRobot {
                 // The rest of the subsystems require vision
                 robotContainer.aprilTagVision,
                 robotContainer.gamePieceVision,
+                // Pose stuff - after drive/vision, but before anything else that might use pose
+                robotContainer.robotState,
                 // Subsystems depend on shooting, shooting depends on vision
                 robotContainer.shootingKinematics,
                 // Operator dashboard before super*
@@ -228,7 +236,7 @@ public class Robot extends LoggedRobot {
         autonomousCommand = robotContainer.getAutonomousCommand();
 
         if (autonomousCommand != null) {
-            autonomousCommand.schedule();
+            CommandScheduler.getInstance().schedule(autonomousCommand);
             autonomousStart = Timer.getTimestamp();
             System.out.println("********** Auto started **********");
         }
@@ -275,27 +283,14 @@ public class Robot extends LoggedRobot {
         DriverStationSim.setAllianceStationId(AllianceStationID.Blue1);
         DriverStationSim.setEnabled(true);
         DriverStationSim.notifyNewData();
-
-        SimulatedArena.getInstance().resetFieldForAuto();
-        RobotModeTriggers.autonomous().onTrue(Commands.runOnce(SimulatedArena.getInstance()::resetFieldForAuto));
-        robotContainer.robotState.setPose(ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose());
     }
+
 
     @Override
     public void simulationPeriodic() {
         // In case of replay, don't do sim
         if (BuildConstants.mode == BuildConstants.Mode.REPLAY) return;
 
-        SimulatedArena.getInstance().simulationPeriodic();
-
-        Logger.recordOutput("FieldSimulation/RobotPosition", ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose());
-        Logger.recordOutput(
-                "FieldSimulation/Algae",
-                SimulatedArena.getInstance().getGamePiecesArrayByType("Algae")
-        );
-        Logger.recordOutput(
-                "FieldSimulation/Coral",
-                SimulatedArena.getInstance().getGamePiecesArrayByType("Coral")
-        );
+        SimManager.get().periodic();
     }
 }

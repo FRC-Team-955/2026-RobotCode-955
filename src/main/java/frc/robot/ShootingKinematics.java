@@ -8,20 +8,28 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
+import frc.lib.AllianceFlipUtil;
 import frc.lib.Util;
 import frc.lib.network.LoggedTunableNumber;
 import frc.lib.subsystem.Periodic;
+import frc.robot.subsystems.superstructure.flywheel.Flywheel;
+import frc.robot.subsystems.superstructure.flywheel.FlywheelConstants;
+import frc.robot.subsystems.superstructure.hood.Hood;
 import lombok.Getter;
 import org.littletonrobotics.junction.Logger;
 
 public class ShootingKinematics implements Periodic {
     private static final LoggedTunableNumber robotVelocityScalar = new LoggedTunableNumber("ShootingKinematics/RobotVelocityScalar", 1.2);
+    private static final LoggedTunableNumber headingToleranceDeg = new LoggedTunableNumber("ShootingKinematics/HeadingToleranceDegrees", 5.0);
+    public static final LoggedTunableNumber velocityToleranceRPM = new LoggedTunableNumber("ShootingKinematics/VelocityToleranceRPM", 100);
+    public static final LoggedTunableNumber hoodToleranceDeg = new LoggedTunableNumber("ShootingKinematics/HoodToleranceDegrees", 1.0);
 
-    public static final Transform3d fuelExitTransform = new Transform3d(
-            new Translation3d(Units.inchesToMeters(-4.0), Units.inchesToMeters(-9.0), Units.inchesToMeters(15.0)),
-            new Rotation3d()
+    public static final Translation3d fuelExitTranslation = new Translation3d(
+            Units.inchesToMeters(-4.0),
+            Units.inchesToMeters(-9.0),
+            Units.inchesToMeters(15.0)
     );
-    private static final Translation3d blueHubTranslation = new Translation3d(4.6256194, 4.0346376, 1.8288);
+    public static final Rotation2d fuelExitRotation = Rotation2d.k180deg;
     private static final InterpolatingDoubleTreeMap distanceToVelocity = new InterpolatingDoubleTreeMap();
 
     static {
@@ -32,53 +40,104 @@ public class ShootingKinematics implements Periodic {
     }
 
     private static final RobotState robotState = RobotState.get();
+    private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
+
+    private static final Flywheel flywheel = Flywheel.get();
+    private static final Hood hood = Hood.get();
 
     @Getter
-    private ShootingParameters shootingParameters = null;
+    private ShootingParameters shootingParameters = new ShootingParameters(0, 0, 0);
     @Getter
     private boolean validShootingParameters = false;
+    @Getter
+    private boolean shootingParametersMet = false;
 
     private final Alert noValidShootingParametersAlert = new Alert("Could not find valid shooting parameters.", Alert.AlertType.kInfo);
 
     private static ShootingKinematics instance;
 
-    public static ShootingKinematics get() {
-        if (instance == null)
-            synchronized (ShootingKinematics.class) {
-                instance = new ShootingKinematics();
-            }
+    public static synchronized ShootingKinematics get() {
+        if (instance == null) {
+            instance = new ShootingKinematics();
+        }
 
         return instance;
     }
 
     private ShootingKinematics() {
-    }
-
-    private boolean isValidHoodAngle(double hoodAngleRad) {
-        return hoodAngleRad > Units.degreesToRadians(15) && hoodAngleRad < Units.degreesToRadians(90);
+        if (instance != null) {
+            Util.error("Duplicate ShootingKinematics created");
+        }
     }
 
     @Override
     public void periodicBeforeCommands() {
-        validShootingParameters = updateShootingParameters();
+        validShootingParameters = operatorDashboard.getSelectedScoringMode() == OperatorDashboard.ScoringMode.ShootAndPassAutomatic
+                ? updateShootingParametersAutomatic()
+                : updateShootingParametersManual();
+        shootingParameters = new ShootingParameters(
+                shootingParameters.velocityRPM() + operatorDashboard.flywheelSmudgeRPM.get(),
+                shootingParameters.hoodAngleRad() + operatorDashboard.hoodSmudgeDegrees.get(),
+                shootingParameters.headingRad
+        );
+        Logger.recordOutput("ShootingKinematics/ShootingParameters", shootingParameters);
+        Logger.recordOutput("ShootingKinematics/ValidShootingParameters", validShootingParameters);
         noValidShootingParametersAlert.set(!validShootingParameters);
+
+        shootingParametersMet = validShootingParameters &&
+                Math.abs(robotState.getPose().getRotation().getRadians() - shootingParameters.headingRad()) <= Units.degreesToRadians(headingToleranceDeg.get()) &&
+                Math.abs(flywheel.getVelocityRPM() - shootingParameters.velocityRPM()) <= velocityToleranceRPM.get() &&
+                Math.abs(hood.getPositionRad() - shootingParameters.hoodAngleRad()) <= Units.degreesToRadians(hoodToleranceDeg.get());
+        Logger.recordOutput("ShootingKinematics/ShootingParametersMet", shootingParametersMet);
     }
 
-    private boolean updateShootingParameters() {
-        Pose2d robotPose2d = robotState.getPose();
-        Pose3d robotPose = new Pose3d(robotPose2d);
-        Pose3d fuelExitPose = robotPose.transformBy(fuelExitTransform);
-        Logger.recordOutput("ShootingKinematics/fuelExitPose", fuelExitPose);
+    private static final LoggedTunableNumber shootHubManualFlywheelRPM = new LoggedTunableNumber("ShootingKinematics/ShootHubManual/FlywheelRPM", 5.0);
+    private static final LoggedTunableNumber shootHubManualHoodDegrees = new LoggedTunableNumber("ShootingKinematics/ShootHubManual/HoodDegrees", 45.0);
 
-        Translation3d hubTranslation = Util.flipIfNeeded(blueHubTranslation);
-        Pose3d hubPose = new Pose3d(hubTranslation, new Rotation3d());
-        Transform3d fuelExitToHub = new Transform3d(fuelExitPose, hubPose);
+    private static final LoggedTunableNumber shootTowerManualFlywheelRPM = new LoggedTunableNumber("ShootingKinematics/ShootTowerManual/FlywheelRPM", 5.0);
+    private static final LoggedTunableNumber shootTowerManualHoodDegrees = new LoggedTunableNumber("ShootingKinematics/ShootTowerManual/HoodDegrees", 45.0);
 
-        double xyDist = fuelExitToHub.getTranslation().toTranslation2d().getNorm();
-        double zDist = fuelExitToHub.getTranslation().getZ();
+    private static final LoggedTunableNumber passManualFlywheelRPM = new LoggedTunableNumber("ShootingKinematics/PassManual/FlywheelRPM", 5.0);
+    private static final LoggedTunableNumber passManualHoodDegrees = new LoggedTunableNumber("ShootingKinematics/PassManual/HoodDegrees", 45.0);
+
+    private boolean updateShootingParametersManual() {
+        double headingRad = getFuelExitToHub().angle().getRadians();
+        switch (operatorDashboard.getSelectedScoringMode()) {
+            case ShootAndPassAutomatic -> {
+                return false;
+            }
+            case ShootHubManual -> shootingParameters = new ShootingParameters(
+                    shootHubManualFlywheelRPM.get(),
+                    Units.degreesToRadians(shootHubManualHoodDegrees.get()),
+                    headingRad
+            );
+            case ShootTowerManual -> shootingParameters = new ShootingParameters(
+                    shootTowerManualFlywheelRPM.get(),
+                    Units.degreesToRadians(shootTowerManualHoodDegrees.get()),
+                    headingRad
+            );
+            case PassManual -> shootingParameters = new ShootingParameters(
+                    passManualFlywheelRPM.get(),
+                    Units.degreesToRadians(passManualHoodDegrees.get()),
+                    headingRad
+            );
+        }
+
+        return true;
+    }
+
+    private boolean isValidHoodAngle(double hoodAngleRad) {
+        return hoodAngleRad > Units.degreesToRadians(15) && hoodAngleRad < Units.degreesToRadians(45);
+    }
+
+    private boolean updateShootingParametersAutomatic() {
+        FuelExitToHub fuelExitToHub = getFuelExitToHub();
+
+        double xyDist = fuelExitToHub.transform().getTranslation().toTranslation2d().getNorm();
+        double zDist = fuelExitToHub.transform().getTranslation().getZ();
         double v0 = distanceToVelocity.get(xyDist);
-        Logger.recordOutput("ShootingKinematics/XYDist", xyDist);
-        Logger.recordOutput("ShootingKinematics/Stationary/Velocity", v0);
+//        Logger.recordOutput("ShootingKinematics/XYDist", xyDist);
+//        Logger.recordOutput("ShootingKinematics/Stationary/Velocity", v0);
 
         // 1. Compute stationary shooting velocity
         // maple-sim uses 11 m/s² for gravity
@@ -95,12 +154,12 @@ public class ShootingKinematics implements Periodic {
         double phi_stationary;
         if (isValidHoodAngle(phi_1) && (phi_1 > phi_2 || !isValidHoodAngle(phi_2))) {
             phi_stationary = phi_1;
-            Logger.recordOutput("ShootingKinematics/Stationary/Phi", phi_1);
-            Logger.recordOutput("ShootingKinematics/Stationary/PhiAlternative", phi_2);
+//            Logger.recordOutput("ShootingKinematics/Stationary/Phi", phi_1);
+//            Logger.recordOutput("ShootingKinematics/Stationary/PhiAlternative", phi_2);
         } else if (isValidHoodAngle(phi_2)) {
             phi_stationary = phi_2;
-            Logger.recordOutput("ShootingKinematics/Stationary/Phi", phi_2);
-            Logger.recordOutput("ShootingKinematics/Stationary/PhiAlternative", phi_1);
+//            Logger.recordOutput("ShootingKinematics/Stationary/Phi", phi_2);
+//            Logger.recordOutput("ShootingKinematics/Stationary/PhiAlternative", phi_1);
         } else {
             return false;
         }
@@ -112,24 +171,25 @@ public class ShootingKinematics implements Periodic {
         // Note that using fuel exit pose instead of robot pose automatically takes care
         // of compensating for theta difference when looking from center of robot and from
         // fuel exit point
-        Rotation2d fuelExitToHubAngle = hubPose.getTranslation().toTranslation2d()
-                .minus(fuelExitPose.getTranslation().toTranslation2d())
-                .getAngle();
         // We could use Translation2d to rotate it, but since vy = 0, it's simple enough
         // to just use trig
-        double vy = vx * fuelExitToHubAngle.getSin();
-        vx = vx * fuelExitToHubAngle.getCos();
+        double vy = vx * fuelExitToHub.angle().getSin();
+        vx = vx * fuelExitToHub.angle().getCos();
 
         // 3. Now subtract robot velocity from stationary shooting velocity to get final
         // shooting vector
         ChassisSpeeds robotSpeeds = robotState.getMeasuredChassisSpeeds().times(robotVelocityScalar.get());
-        vx -= robotSpeeds.vxMetersPerSecond;
-        vy -= robotSpeeds.vyMetersPerSecond;
+        Translation2d robotSpeedsRotated = new Translation2d(
+                robotSpeeds.vxMetersPerSecond,
+                robotSpeeds.vyMetersPerSecond
+        ).rotateBy(fuelExitRotation);
+        vx -= robotSpeedsRotated.getX();
+        vy -= robotSpeedsRotated.getY();
 
         // 4. Account for drivebase angular velocity
         Vector<N3> fuelExitFieldRelative = new Translation3d(
-                fuelExitTransform.getTranslation().toTranslation2d()
-                        .rotateBy(robotPose2d.getRotation())
+                fuelExitTranslation.toTranslation2d()
+                        .rotateBy(robotState.getRotation())
         ).toVector();
         Vector<N3> angularVelocityVector = VecBuilder.fill(0.0, 0.0, robotSpeeds.omegaRadiansPerSecond);
         // ω⃗ × e⃗, where ω⃗ is angular velocity vector and e⃗ is exit vector
@@ -138,21 +198,49 @@ public class ShootingKinematics implements Periodic {
         vy -= linearVelocityDueToAngularVelocity.get(1);
 
         // 5. Log final shooting vector
-        Logger.recordOutput("ShootingKinematics/Velocity/X", vx);
-        Logger.recordOutput("ShootingKinematics/Velocity/Y", vy);
-        Logger.recordOutput("ShootingKinematics/Velocity/Z", vz);
+//        Logger.recordOutput("ShootingKinematics/Velocity/X", vx);
+//        Logger.recordOutput("ShootingKinematics/Velocity/Y", vy);
+//        Logger.recordOutput("ShootingKinematics/Velocity/Z", vz);
 
         // 6. Now calculate phi, theta, and shooting magnitude from 3d shooting vector
         double v = Math.sqrt(vx * vx + vy * vy + vz * vz);
         double phi = Math.asin(vz / v);
         double theta = Math.atan2(vy, vx);
-        Logger.recordOutput("ShootingKinematics/Velocity", v);
-        Logger.recordOutput("ShootingKinematics/Phi", phi);
-        Logger.recordOutput("ShootingKinematics/Theta", theta);
+//        Logger.recordOutput("ShootingKinematics/Velocity", v);
+//        Logger.recordOutput("ShootingKinematics/Phi", phi);
+//        Logger.recordOutput("ShootingKinematics/Theta", theta);
 
-        shootingParameters = new ShootingParameters(v, phi, theta);
+        shootingParameters = new ShootingParameters(Units.radiansPerSecondToRotationsPerMinute(v / FlywheelConstants.flywheelRadiusMeters), phi, theta);
         return true;
     }
 
-    public record ShootingParameters(double velocityMetersPerSec, double hoodAngleRad, double headingRad) {}
+    private FuelExitToHub getFuelExitToHub() {
+        Pose2d robotPose2d = robotState.getPose();
+        Pose3d fuelExitPose = new Pose3d(
+                new Pose3d(robotPose2d)
+                        .transformBy(new Transform3d(
+                                fuelExitTranslation,
+                                new Rotation3d()
+                        ))
+                        .getTranslation(),
+                new Rotation3d(
+                        robotPose2d.getRotation()
+                                .plus(fuelExitRotation)
+                )
+        );
+
+        Translation3d hubTranslation = AllianceFlipUtil.apply(FieldConstants.Hub.topCenterPoint);
+        Pose3d hubPose = new Pose3d(hubTranslation, new Rotation3d());
+        return new FuelExitToHub(
+                new Transform3d(fuelExitPose, hubPose),
+                hubPose.getTranslation().toTranslation2d()
+                        .minus(fuelExitPose.getTranslation().toTranslation2d())
+                        .getAngle()
+                        .plus(fuelExitRotation)
+        );
+    }
+
+    private record FuelExitToHub(Transform3d transform, Rotation2d angle) {}
+
+    public record ShootingParameters(double velocityRPM, double hoodAngleRad, double headingRad) {}
 }

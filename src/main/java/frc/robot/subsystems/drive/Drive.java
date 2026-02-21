@@ -4,8 +4,10 @@ import choreo.trajectory.SwerveSample;
 import choreo.trajectory.Trajectory;
 import edu.wpi.first.hal.FRCNetComm;
 import edu.wpi.first.hal.HAL;
+import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -15,9 +17,9 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.lib.PIDF;
 import frc.lib.Util;
 import frc.lib.subsystem.CommandBasedSubsystem;
+import frc.robot.Constants;
 import frc.robot.OperatorDashboard;
 import frc.robot.RobotState;
 import frc.robot.subsystems.drive.goals.*;
@@ -35,14 +37,17 @@ import static frc.lib.HighFrequencySamplingThread.highFrequencyLock;
 import static frc.robot.subsystems.drive.DriveConstants.*;
 
 public class Drive extends CommandBasedSubsystem {
-    private static final PIDF.Tunable moduleDriveGainsTunable = moduleConfig.driveGains().tunable("Drive/ModuleDrive");
-    private static final PIDF.Tunable moduleTurnGainsTunable = moduleConfig.turnGains().tunable("Drive/ModuleTurn");
-
-    private final RobotState robotState = RobotState.get();
-    private final OperatorDashboard operatorDashboard = OperatorDashboard.get();
+    private static final RobotState robotState = RobotState.get();
+    private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
 
     private final GyroIO gyroIO = createGyroIO();
     private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
+
+    private final AccelerometerIO accelerometerIO = createAccelerometerIO();
+    private final AccelerometerIOInputsAutoLogged accelerometerInputs = new AccelerometerIOInputsAutoLogged();
+
+    private final LinearFilter accelerationXFilter = LinearFilter.movingAverage(4);
+    private final LinearFilter accelerationYFilter = LinearFilter.movingAverage(4);
 
     @Getter
     private DriveGoal goal = new IdleGoal();
@@ -64,16 +69,19 @@ public class Drive extends CommandBasedSubsystem {
 
     private static Drive instance;
 
-    public static Drive get() {
-        if (instance == null)
-            synchronized (Drive.class) {
-                instance = new Drive();
-            }
+    public static synchronized Drive get() {
+        if (instance == null) {
+            instance = new Drive();
+        }
 
         return instance;
     }
 
     private Drive() {
+        if (instance != null) {
+            Util.error("Duplicate Drive created");
+        }
+
         var moduleIO = createModuleIO();
         // Array is currently four nulls, so length works just fine
         for (int i = 0; i < modules.length; i++) {
@@ -156,6 +164,10 @@ public class Drive extends CommandBasedSubsystem {
 
         highFrequencyLock.unlock();
 
+        // The accelerometer has no high-frequency inputs, no need to update while in lock
+        accelerometerIO.updateInputs(accelerometerInputs);
+        Logger.processInputs("Inputs/Drive/Accelerometer", accelerometerInputs);
+
         for (var module : modules) {
             module.periodicBeforeCommands();
         }
@@ -184,7 +196,7 @@ public class Drive extends CommandBasedSubsystem {
                     anySampleDiscarded = true;
                 }
             }
-            Logger.recordOutput("Drive/AnySampleDiscarded", anySampleDiscarded);
+//            Logger.recordOutput("Drive/AnySampleDiscarded", anySampleDiscarded);
         } else {
             boolean discardSample = processOdometrySample(
                     Timer.getTimestamp(),
@@ -194,7 +206,7 @@ public class Drive extends CommandBasedSubsystem {
                     () -> gyroInputs.yawPositionRad
             );
 
-            Logger.recordOutput("Drive/SampleDiscarded", discardSample);
+//            Logger.recordOutput("Drive/SampleDiscarded", discardSample);
         }
 
         // Chassis speeds
@@ -206,6 +218,14 @@ public class Drive extends CommandBasedSubsystem {
         );
         robotState.setMeasuredChassisSpeeds(measuredChassisSpeedsFieldRelative);
 
+        // Update filtered acceleration
+        Translation2d filteredAccelerationMetersPerSecPerSec = new Translation2d(
+                accelerationXFilter.calculate(accelerometerInputs.accelerationXMetersPerSecPerSec),
+                accelerationYFilter.calculate(accelerometerInputs.accelerationYMetersPerSecPerSec)
+        ).rotateBy(robotState.getRotation());
+        robotState.setFilteredAccelerationMetersPerSecPerSec(filteredAccelerationMetersPerSecPerSec);
+        Logger.recordOutput("Drive/FilteredAccelerationMetersPerSecPerSec", filteredAccelerationMetersPerSecPerSec);
+
         // Apply network inputs
         if (operatorDashboard.coastOverride.hasChanged()) {
             for (var module : modules) {
@@ -213,16 +233,16 @@ public class Drive extends CommandBasedSubsystem {
             }
         }
 
-        moduleDriveGainsTunable.ifChanged(gains -> {
+        if (moduleConfig.driveGains().hasChanged()) {
             for (var module : modules) {
-                module.setDrivePIDF(gains);
+                module.setDrivePIDF(moduleConfig.driveGains());
             }
-        });
-        moduleTurnGainsTunable.ifChanged(gains -> {
+        }
+        if (moduleConfig.turnGains().hasChanged()) {
             for (var module : modules) {
-                module.setTurnPIDF(gains);
+                module.setTurnPIDF(moduleConfig.turnGains());
             }
-        });
+        }
     }
 
     @Override
@@ -237,6 +257,18 @@ public class Drive extends CommandBasedSubsystem {
             for (var module : modules) {
                 module.stop();
             }
+        } else if (request.type() == DriveRequest.Type.STOP_WITH_X) {
+            // Create a list of headings where each heading points from the center
+            // of the robot to the module. Tell the module to point at this angle.
+            // This means that the modules will point towards the center of the
+            // robot, forming an X.
+            Rotation2d[] headings = new Rotation2d[modules.length];
+            for (int i = 0; i < modules.length; i++) {
+                headings[i] = moduleTranslations[i].getAngle();
+                modules[i].runSetpoint(new SwerveModuleState(0.0, headings[i]));
+            }
+            // We also need to make kinematics aware of the new headings
+            robotState.getKinematics().resetHeadings(headings);
         }
         // Closed loop control
         else if (request.type() == DriveRequest.Type.CHASSIS_SPEEDS) {
@@ -246,7 +278,7 @@ public class Drive extends CommandBasedSubsystem {
             // Discretize - use larger dt than actual to reduce translational skew when rotating and translating at the same time
             // See https://www.chiefdelphi.com/t/whitepaper-swerve-drive-skew-and-second-order-kinematics/416964/5
             // and https://github.com/frc1678/C2024-Public/blob/main/src/main/java/com/team1678/frc2024/subsystems/Drive.java#L406
-            ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(rawSpeeds, 0.02 * 6.0);
+            ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(rawSpeeds, Constants.loopPeriod * 4.0);
 
             // Convert to module states and desaturate
             SwerveModuleState[] setpointStates = robotState.getKinematics().toSwerveModuleStates(discreteSpeeds);
@@ -277,21 +309,6 @@ public class Drive extends CommandBasedSubsystem {
             Util.error("Unknown request type: " + request.type());
         }
     }
-
-    // TODO goal or something
-//    /**
-//     * Stops the drive and turns the modules to an X arrangement to resist movement. The modules will
-//     * return to their normal orientations the next time a nonzero velocity is requested.
-//     */
-//    private void stopWithX() {
-//        Rotation2d[] headings = new Rotation2d[modules.length];
-//        for (int i = 0; i < modules.length; i++) {
-//            headings[i] = moduleTranslations[i].getAngle();
-//        }
-//        // Why does this work? See SwerveDriveKinematics.toModuleStates
-//        robotState.getKinematics().resetHeadings(headings);
-//        closedLoopSetpoint = new ChassisSpeeds();
-//    }
 
     /**
      * Returns the module states (turn angles and drive velocities) for all of the modules.
@@ -336,8 +353,8 @@ public class Drive extends CommandBasedSubsystem {
         return startIdle(() -> goal = new MoveToGoal(poseSupplier, mergeJoystickDrive));
     }
 
-    public Command driveJoystick() {
-        return startIdle(() -> goal = new DriveJoystickGoal());
+    public Command driveJoystick(boolean stopWithX) {
+        return startIdle(() -> goal = new DriveJoystickGoal(stopWithX));
     }
 
     public Command driveJoystickWithAssist(Supplier<Optional<Pose2d>> assistPoseSupplier) {
@@ -354,6 +371,10 @@ public class Drive extends CommandBasedSubsystem {
 
     public Command fullSpeedCharacterization() {
         return startIdle(() -> goal = new FullSpeedCharacterizationGoal());
+    }
+
+    public Command idle() {
+        return run(() -> goal.getRequest());
     }
 
     public Command wheelRadiusCharacterization(WheelRadiusCharacterizationGoal.Direction direction) {

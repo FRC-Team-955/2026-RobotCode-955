@@ -5,6 +5,8 @@ import edu.wpi.first.wpilibj.LEDPattern;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.util.Color;
 
+import java.util.function.DoubleSupplier;
+
 import static edu.wpi.first.units.Units.Seconds;
 
 /**
@@ -66,20 +68,24 @@ public class LEDPatterns {
         };
     }
 
+    public static LEDPattern autoPlacementProgress(DoubleSupplier progressSupplier) {
+        return LEDPattern.solid(Color.kGreen).mask(LEDPattern.progressMaskLayer(progressSupplier));
+    }
+
     // All modes
-    public static final LEDPattern lowBattery = LEDPattern.solid(Color.kRed).blink(Seconds.of(2.0));
+    public static final LEDPattern lowBattery = LEDPattern.solid(Color.kRed).blink(Seconds.of(1.0 / 3.0));
 
     // Disabled
     public static final LEDPattern autoNotChosen = LEDPattern.solid(Color.kBlue).blink(Seconds.of(1));
     public static final LEDPattern badAutoPlacement = LEDPattern.solid(Color.kYellow).blink(Seconds.of(0.5));
     public static final LEDPattern visionDisconnected = LEDPattern.solid(Color.kRed).blink(Seconds.of(0.5));
-    public static final LEDPattern autoReady = wave(new Color(255, 0, 128), Color.kRed, 2.0);
-
+    public static final LEDPattern autoReady = wave(Color.kRed, new Color(255, 0, 128), 2.0);
     // Enabled
     public static final LEDPattern endgame = LEDPattern.solid(Color.kPurple).blink(Seconds.of(0.5));
     public static final LEDPattern eject = LEDPattern.solid(Color.kRed).blink(Seconds.of(0.1));
     public static final LEDPattern aiming = LEDPattern.solid(Color.kYellow);
-    public static final LEDPattern shooting = LEDPattern.solid(Color.kGreen).blink(Seconds.of(0.1));
-    public static final LEDPattern intaking = LEDPattern.solid(Color.kYellow).blink(Seconds.of(0.1));
+    public static final LEDPattern shooting = LEDPattern.solid(Color.kGreen);
+    public static final LEDPattern intaking = LEDPattern.solid(Color.kWhite).blink(Seconds.of(0.1));
+    public static final LEDPattern homing = LEDPattern.solid(Color.kBlue);
     public static final LEDPattern idle = LEDPattern.kOff;
 }

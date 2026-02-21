@@ -19,7 +19,7 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
-import frc.lib.PIDF;
+import frc.lib.network.LoggedTunablePIDF;
 import org.littletonrobotics.junction.Logger;
 
 import static frc.robot.subsystems.drive.DriveConstants.disableDriving;
@@ -86,11 +86,11 @@ public class Module {
         io.setTurnOpenLoop(0.0);
     }
 
-    public void setDrivePIDF(PIDF newGains) {
+    public void setDrivePIDF(LoggedTunablePIDF newGains) {
         io.setDrivePIDF(newGains);
     }
 
-    public void setTurnPIDF(PIDF newGains) {
+    public void setTurnPIDF(LoggedTunablePIDF newGains) {
         io.setTurnPIDF(newGains);
     }
 

@@ -1,10 +1,16 @@
 package frc.robot.subsystems.leds;
 
-import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
+import frc.lib.Util;
 import frc.lib.subsystem.Periodic;
+import frc.robot.Constants;
+import frc.robot.OperatorDashboard;
+import frc.robot.ShootingKinematics;
+import frc.robot.autos.AutoManager;
+import frc.robot.subsystems.apriltagvision.AprilTagVision;
+import frc.robot.subsystems.gamepiecevision.GamePieceVision;
 import frc.robot.subsystems.superintake.Superintake;
 import frc.robot.subsystems.superstructure.Superstructure;
 import org.littletonrobotics.junction.Logger;
@@ -15,32 +21,39 @@ import org.littletonrobotics.junction.mechanism.LoggedMechanismRoot2d;
 import static frc.robot.subsystems.leds.LEDConstants.*;
 
 public class LEDs implements Periodic {
-    private final Superintake superintake = Superintake.get();
-    private final Superstructure superstructure = Superstructure.get();
+    private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
+    private static final Superintake superintake = Superintake.get();
+    private static final Superstructure superstructure = Superstructure.get();
+    private static final ShootingKinematics shootingKinematics = ShootingKinematics.get();
+    private static final AutoManager autoManager = AutoManager.get();
+    private static final AprilTagVision aprilTagVision = AprilTagVision.get();
+    private static final GamePieceVision gamePieceVision = GamePieceVision.get();
 
-    private final LEDsIO io = createIO();
+    // See createAndStartStartupNotifier for why this is static
+    private static final LEDsIO io = createIO();
 
     private final AddressableLEDBuffer buffer = new AddressableLEDBuffer(length);
     private final AddressableLEDBufferView firstHalfView = new AddressableLEDBufferView(buffer, 0, length / 2 - 1);
     private final AddressableLEDBufferView secondHalfView = new AddressableLEDBufferView(buffer, length / 2, length - 1);
-
-    private final Debouncer lowBatteryDebouncer = new Debouncer(3.0, Debouncer.DebounceType.kRising);
 
     private final LoggedMechanism2d mechanism = new LoggedMechanism2d(1.5, 2.1, new Color8Bit(Color.kBlack));
     private final LoggedMechanismLigament2d[] ligaments = new LoggedMechanismLigament2d[length];
 
     private static LEDs instance;
 
-    public static LEDs get() {
-        if (instance == null)
-            synchronized (LEDs.class) {
-                instance = new LEDs();
-            }
+    public static synchronized LEDs get() {
+        if (instance == null) {
+            instance = new LEDs();
+        }
 
         return instance;
     }
 
     private LEDs() {
+        if (instance != null) {
+            Util.error("Duplicate LEDs created");
+        }
+
         double bottomY = 0.5;
         double middleOfRobot = 1.5 / 2.0;
         for (int index = 0; index < length; index++) {
@@ -60,26 +73,40 @@ public class LEDs implements Periodic {
         }
     }
 
-    public Notifier createAndStartStartupNotifier() {
+    /**
+     * If we don't make this static, LEDs will need to be instantiated, which means that
+     * Superintake, Superstructure, etc etc needs to be instantiated as well.
+     */
+    public static Notifier createAndStartStartupNotifier() {
         LEDPattern pattern = LEDPatterns.startup();
+        AddressableLEDBuffer buffer = new AddressableLEDBuffer(length);
         Runnable callback = () -> {
             pattern.applyTo(buffer);
             io.setData(buffer);
         };
         callback.run(); // run it once, before the notifier starts
         Notifier notifier = new Notifier(callback);
-        notifier.startPeriodic(0.02);
+        notifier.startPeriodic(Constants.loopPeriod);
         return notifier;
     }
 
     @Override
     public void periodicAfterCommands() {
-        boolean lowBattery = lowBatteryDebouncer.calculate(RobotController.getBatteryVoltage() <= lowBatteryThresholdVolts);
+        boolean lowBattery = operatorDashboard.isBatteryVoltageAlertActive();
+        boolean cameraError = aprilTagVision.anyCamerasDisconnected() || gamePieceVision.anyCamerasDisconnected();
 
         if (lowBattery) {
             LEDPatterns.lowBattery.applyTo(buffer);
+        } else if (cameraError) {
+            LEDPatterns.visionDisconnected.applyTo(buffer);
         } else if (DriverStation.isDisabled()) {
-            LEDPatterns.autoReady.applyTo(buffer);
+            if (autoManager.isAtAutoStartingPose()) {
+                LEDPatterns.autoReady.applyTo(buffer);
+            } else if (autoManager.getClosestAutoStartingPose().isPresent()) {
+                LEDPatterns.autoPlacementProgress(autoManager::getPlacementProgress).applyTo(buffer);
+            } else {
+                LEDPatterns.autoReady.applyTo(buffer);
+            }
         } else if (DriverStation.isEnabled()) {
             boolean endgame = DriverStation.isTeleop() &&
                     DriverStation.getMatchTime() > endgameLowerThresholdSeconds &&
@@ -91,12 +118,17 @@ public class LEDs implements Periodic {
                     case IDLE -> null;
                     case INTAKE -> LEDPatterns.intaking;
                     case EJECT -> LEDPatterns.eject;
+                    case HOME_INTAKE_PIVOT -> LEDPatterns.homing;
                 };
 
                 LEDPattern superstructurePattern = switch (superstructure.getGoal()) {
                     case IDLE, SPINUP -> null;
-                    case SHOOT -> LEDPatterns.shooting;
+                    case SHOOT -> shootingKinematics.isValidShootingParameters() &&
+                            shootingKinematics.isShootingParametersMet()
+                            ? LEDPatterns.shooting
+                            : LEDPatterns.aiming;
                     case EJECT -> LEDPatterns.eject;
+                    case HOME_HOOD -> LEDPatterns.homing;
                 };
 
                 if (superintakePattern != null && superstructurePattern != null) {

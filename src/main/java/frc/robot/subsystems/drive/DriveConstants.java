@@ -1,8 +1,9 @@
 package frc.robot.subsystems.drive;
 
+import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
-import frc.lib.PIDF;
+import frc.lib.network.LoggedTunablePIDF;
 import frc.robot.BuildConstants;
 
 public class DriveConstants {
@@ -10,14 +11,19 @@ public class DriveConstants {
     public static final double assistMaximumDistanceMeters = Units.feetToMeters(5);
 
     public static final MoveToConfig moveToConfig = new MoveToConfig(
-            PIDF.ofPD(4.5, 0.05),
-            PIDF.ofPD(4.5, 0.05),
+            new LoggedTunablePIDF("Drive/MoveTo/Linear").withP(4.5).withD(0.05),
+            new LoggedTunablePIDF("Drive/MoveTo/Angular").withP(4.5).withD(0.05),
             0.02,
             0.1,
             Units.degreesToRadians(2),
             Units.degreesToRadians(10),
             15
     );
+
+    public static final LoggedTunablePIDF choreoFeedbackXY = new LoggedTunablePIDF("Drive/ChoreoFeedbackXY").withP(3.5);
+    public static final LoggedTunablePIDF choreoFeedbackOmega = new LoggedTunablePIDF("Drive/ChoreoFeedbackOmega").withP(3);
+    public static final LoggedTunablePIDF headingOverrideGains = new LoggedTunablePIDF("Drive/HeadingOverrideGains").withP(6).withD(1);
+    public static final LoggedTunablePIDF assistYGains = new LoggedTunablePIDF("Drive/AssistY").withP(4.5);
 
     public static final boolean disableDriving = false;
     public static final boolean disableGyro = false;
@@ -34,9 +40,6 @@ public class DriveConstants {
             Units.inchesToMeters(36.5),
             Units.inchesToMeters(31.5),
             Units.inchesToMeters(-0.247776),
-            PIDF.ofPD(3.5, 0),
-            PIDF.ofPD(3, 0),
-            PIDF.ofP(6),
             4.58
     );
 
@@ -65,13 +68,13 @@ public class DriveConstants {
         // TO TUNE DRIVE CURRENT LIMIT: Put the robot against a wall while having it on carpet and run the slip
         // current characterization auto. Output will be in console in AdvantageScope.
         case REAL, REPLAY -> new ModuleConfig(
-                PIDF.ofPDSVA(
-                        0.0, 0.0,
-                        0.19, 0.125, 0.005
-                ),
-                PIDF.ofPD(5, 0.04),
-                Mk4iGearRatios.L2,
-                Mk4iGearRatios.TURN,
+                new LoggedTunablePIDF("Drive/DriveGains")
+                        .withS(0.19, StaticFeedforwardSignValue.UseVelocitySign)
+                        .withV(0.125)
+                        .withA(0.005),
+                new LoggedTunablePIDF("Drive/TurnGains")
+                        .withP(5)
+                        .withD(0.04),
                 true,
                 false,
                 false,
@@ -79,16 +82,26 @@ public class DriveConstants {
                 60
         );
         case SIM -> new ModuleConfig(
-                PIDF.ofPDSV(0.05, 0.0, 0.04075, 0.14117),
-                PIDF.ofPD(10.0, 0.07),
-                Mk4iGearRatios.L2,
-                Mk4iGearRatios.TURN,
+                new LoggedTunablePIDF("Drive/DriveGains")
+                        .withS(0.04075, StaticFeedforwardSignValue.UseClosedLoopSign)
+                        .withV(0.14117),
+                new LoggedTunablePIDF("Drive/TurnGains")
+                        .withP(10.0)
+                        .withD(0.07),
                 true,
                 false,
                 false,
                 77,
                 60
         );
+    };
+
+    static final GearRatioConfig[] gearRatioConfigs = new GearRatioConfig[]{
+            // Module order: FL, FR, BL, BR
+            new GearRatioConfig(Mk4GearRatios.L2_PLUS, Mk4GearRatios.MK4I_TURN),
+            new GearRatioConfig(Mk4GearRatios.L2_PLUS, Mk4GearRatios.MK4I_TURN),
+            new GearRatioConfig(Mk4GearRatios.L2_PLUS, Mk4GearRatios.MK4N_TURN),
+            new GearRatioConfig(Mk4GearRatios.L2_PLUS, Mk4GearRatios.MK4N_TURN),
     };
 
     static ModuleIO[] createModuleIO() {
@@ -107,10 +120,10 @@ public class DriveConstants {
             // to the absolute encoder offset parameter in the IO layer constructor.
             // Module order: FL, FR, BL, BR
             case REAL -> new ModuleIO[]{
-                    new ModuleIOTalonFXSparkMaxCANcoder(1, 1, 5, 1.577),
-                    new ModuleIOTalonFXSparkMaxCANcoder(2, 2, 6, 1.770),
-                    new ModuleIOTalonFXSparkMaxCANcoder(3, 3, 7, 3.105),
-                    new ModuleIOTalonFXSparkMaxCANcoder(4, 4, 8, -2.817),
+                    new ModuleIOTalonFXSparkMaxCANcoder(0, 1, 1, 5, 1.577),
+                    new ModuleIOTalonFXSparkMaxCANcoder(1, 2, 2, 6, 1.770),
+                    new ModuleIOTalonFXSparkMaxCANcoder(2, 3, 3, 7, 3.105),
+                    new ModuleIOTalonFXSparkMaxCANcoder(3, 4, 4, 8, -2.817),
             };
             case SIM -> new ModuleIO[]{
                     new ModuleIOSim(0),
@@ -130,14 +143,22 @@ public class DriveConstants {
         };
     }
 
+    static AccelerometerIO createAccelerometerIO() {
+        return switch (BuildConstants.mode) {
+            case REAL -> new AccelerometerIOroboRIO();
+            case SIM -> new AccelerometerIOSim();
+            case REPLAY -> new AccelerometerIO();
+        };
+    }
+
     public record MoveToConfig(
-            PIDF linear,
-            PIDF angular,
+            LoggedTunablePIDF linear,
+            LoggedTunablePIDF angular,
             double linearPositionToleranceMeters,
             double linearVelocityToleranceMetersPerSec,
             double angularPositionToleranceRad,
             double angularVelocityToleranceRadPerSec,
-            double maxAccelerationMetersPerSecSquared // Maximum acceleration of the robot during move to
+            double maxAccelerationMetersPerSecPerSec // Maximum acceleration of the robot during move to
     ) {
     }
 
@@ -149,18 +170,13 @@ public class DriveConstants {
             double bumperLengthMeters,
             // Measured from bottom of frame rails (2x1s) to center of swerve wheels
             double bottomOfFrameRailsToCenterOfWheelsMeters,
-            PIDF choreoFeedbackXY,
-            PIDF choreoFeedbackOmega,
-            PIDF headingOverrideGains,
             double maxVelocityMetersPerSec // Maximum velocity of the robot
     ) {
     }
 
     record ModuleConfig(
-            PIDF driveGains,
-            PIDF turnGains,
-            double driveGearRatio,
-            double turnGearRatio,
+            LoggedTunablePIDF driveGains,
+            LoggedTunablePIDF turnGains,
             boolean turnInverted,
             boolean driveInverted,
             boolean encoderInverted,
@@ -169,10 +185,16 @@ public class DriveConstants {
     ) {
     }
 
-    private static class Mk4iGearRatios {
-        public static final double L2 = (50.0 / 14.0) * (17.0 / 27.0) * (45.0 / 15.0);
-        public static final double L3 = (50.0 / 14.0) * (16.0 / 28.0) * (45.0 / 15.0);
+    record GearRatioConfig(
+            double driveGearRatio,
+            double turnGearRatio
+    ) {}
 
-        public static final double TURN = (150.0 / 7.0);
+    private static class Mk4GearRatios {
+        public static final double L2 = (50.0 / 14.0) * (17.0 / 27.0) * (45.0 / 15.0);
+        public static final double L2_PLUS = (50.0 / 16.0) * (17.0 / 27.0) * (45.0 / 15.0);
+
+        public static final double MK4I_TURN = (150.0 / 7.0);
+        public static final double MK4N_TURN = 18.75;
     }
 }

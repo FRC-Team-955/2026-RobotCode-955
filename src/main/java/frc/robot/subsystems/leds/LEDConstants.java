@@ -11,7 +11,7 @@ public class LEDConstants {
 
     static LEDsIO createIO() {
         return switch (BuildConstants.mode) {
-            case REAL -> new LEDsIOReal();
+            case REAL -> new LEDsIOroboRIO();
             case SIM, REPLAY -> new LEDsIO();
         };
     }

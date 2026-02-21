@@ -56,16 +56,21 @@ public class HighFrequencySamplingThread extends Thread {
 
     private final List<Queue<Double>> timestampQueues = new ArrayList<>();
 
-    private static HighFrequencySamplingThread instance = null;
+    private static HighFrequencySamplingThread instance;
 
-    public static HighFrequencySamplingThread get() {
+    public static synchronized HighFrequencySamplingThread get() {
         if (instance == null) {
             instance = new HighFrequencySamplingThread();
         }
+
         return instance;
     }
 
     private HighFrequencySamplingThread() {
+        if (instance != null) {
+            Util.error("Duplicate HighFrequencySamplingThread created");
+        }
+
         setName("HighFrequencySamplingThread");
         setDaemon(true);
         super.start();
@@ -169,7 +174,7 @@ public class HighFrequencySamplingThread extends Thread {
             // Wait for updates from all signals
             signalsLock.lock();
             try {
-                if (Constants.CANivore.isCANFD && phoenixSignals.length > 0) {
+                if (Constants.isCANFD && phoenixSignals.length > 0) {
                     BaseStatusSignal.waitForAll(2.0 / frequencyHz, phoenixSignals);
                 } else {
                     // "waitForAll" does not support blocking on multiple signals with a bus

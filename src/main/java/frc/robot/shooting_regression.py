@@ -1,10 +1,9 @@
-from math import floor
-from multiprocessing import Pool
-from time import time
-
 import matplotlib.pyplot as plt
 import numpy as np
+from math import floor
+from multiprocessing import Pool
 from scipy.optimize import minimize
+from time import time
 
 DEBUG_SHOT = False
 DEBUG_SHOT_DISTANCE = 1
