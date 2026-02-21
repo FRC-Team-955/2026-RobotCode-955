@@ -2,8 +2,6 @@ package frc.robot.autos;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.wpilibj.Alert;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.Util;
@@ -15,8 +13,6 @@ import java.util.Optional;
 public class AutoManager {
     private final RobotState robotState = RobotState.get();
     public final LoggedDashboardChooser<Command> autoChooser = new LoggedDashboardChooser<>("Auto Choices");
-
-    private final Alert autoNotAlignedAlert = new Alert("Robot is not aligned for Auto!", Alert.AlertType.kWarning);
 
     public static final double READY_THRESHOLD_METERS = 0.1;
     public static final double MAX_DISTANCE_METERS = 3.0;
@@ -137,11 +133,4 @@ public class AutoManager {
 
         return (translationProgress * 0.7) + (rotationProgress * 0.3);
     }
-
-    public void updateAlert() {
-        autoNotAlignedAlert.set(DriverStation.isDisabled() && !isAtAutoStartingPose());
-    }
 }
-
-
-

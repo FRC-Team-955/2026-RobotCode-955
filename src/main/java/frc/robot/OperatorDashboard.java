@@ -2,6 +2,7 @@ package frc.robot;
 
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.wpilibj.Alert;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import frc.lib.Util;
 import frc.lib.network.LoggedNetworkBooleanExt;
@@ -27,6 +28,7 @@ public class OperatorDashboard implements Periodic {
 
     private static final RobotState robotState = RobotState.get();
     private static final Controller controller = Controller.get();
+    private static final AutoManager autoManager = AutoManager.get();
 
     private static final String prefix = "/OperatorDashboard/";
 
@@ -43,6 +45,8 @@ public class OperatorDashboard implements Periodic {
 
     private final Alert coastOverrideAlert = new Alert("Coast override is enabled.", Alert.AlertType.kWarning);
     private final Alert autoNotChosenAlert = new Alert("Auto is not chosen!", Alert.AlertType.kError);
+
+    private final Alert autoNotAlignedAlert = new Alert("Robot is not aligned for auto!", Alert.AlertType.kWarning);
     @SuppressWarnings("FieldCanBeLocal")
     private final Alert constantSetAlert = new Alert("Constants are set.", Alert.AlertType.kInfo);
     private final Alert batteryVoltageAlert = new Alert("Battery is below 12 volts!", Alert.AlertType.kError);
@@ -81,7 +85,7 @@ public class OperatorDashboard implements Periodic {
         // So subsystem toggles are handled in their respective subsystems
         coastOverrideAlert.set(coastOverride.get());
         autoNotChosenAlert.set(!autoChosen.get());
-        AutoManager.get().updateAlert();
+        autoNotAlignedAlert.set(DriverStation.isDisabled() && !autoManager.isAtAutoStartingPose());
         batteryVoltageAlert.set(lowBatteryDebouncer.calculate(RobotController.getBatteryVoltage() <= 12.0));
         fixedHoodAlert.set(fixedHood.get());
         manualAimingAlert.set(manualAiming.get());
