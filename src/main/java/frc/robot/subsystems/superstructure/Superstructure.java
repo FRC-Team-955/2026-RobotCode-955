@@ -1,6 +1,10 @@
 package frc.robot.subsystems.superstructure;
 
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.Util;
 import frc.lib.subsystem.CommandBasedSubsystem;
@@ -19,6 +23,7 @@ import org.littletonrobotics.junction.Logger;
 import java.util.function.Supplier;
 
 import static frc.robot.subsystems.superstructure.SuperstructureConstants.createIO;
+import static frc.robot.subsystems.superstructure.SuperstructureConstants.robotToCANrange;
 
 public class Superstructure extends CommandBasedSubsystem {
     private static final RobotState robotState = RobotState.get();
@@ -149,5 +154,15 @@ public class Superstructure extends CommandBasedSubsystem {
                 spindexer.setGoal(Spindexer.Goal.IDLE);
             }
         }
+
+        Logger.recordOutput(
+                "Superstructure/FuelPose",
+                new Pose3d(robotState.getPose())
+                        .transformBy(robotToCANrange)
+                        .transformBy(new Transform3d(
+                                new Translation3d(inputs.canrangeDistanceMeters, 0.0, 0.0),
+                                new Rotation3d()
+                        ))
+        );
     }
 }
