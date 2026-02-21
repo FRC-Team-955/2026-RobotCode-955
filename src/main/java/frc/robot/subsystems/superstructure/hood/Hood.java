@@ -149,4 +149,8 @@ public class Hood implements Periodic {
     public boolean isCurrentAtThresholdForHoming() {
         return inputs.currentAmps >= 10.0;
     }
+
+    public void finishHoming() {
+        io.setEncoderPositionToInitial();
+    }
 }

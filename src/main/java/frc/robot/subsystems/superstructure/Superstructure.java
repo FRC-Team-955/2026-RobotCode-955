@@ -48,7 +48,10 @@ public class Superstructure extends CommandBasedSubsystem {
 
     private boolean shouldGoalEnd() {
         if (goal == Goal.HOME_HOOD) {
-            return hood.isCurrentAtThresholdForHoming();
+            if (hood.isCurrentAtThresholdForHoming()) {
+                hood.finishHoming();
+                return true;
+            }
         }
         return false;
     }

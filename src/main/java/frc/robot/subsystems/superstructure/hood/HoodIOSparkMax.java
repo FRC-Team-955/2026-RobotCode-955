@@ -63,4 +63,9 @@ public class HoodIOSparkMax extends HoodIO {
         };
         motor.setCurrentLimit(currentLimitAmps);
     }
+
+    @Override
+    public void setEncoderPositionToInitial() {
+        motor.setEncoderPosition(initialPositionRad);
+    }
 }

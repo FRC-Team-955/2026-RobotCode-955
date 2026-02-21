@@ -57,4 +57,9 @@ public class HoodIOSim extends HoodIO {
     public void setCurrentLimit(HoodCurrentLimitMode mode) {
         System.out.println("Setting hood current limit to " + mode);
     }
+
+    @Override
+    public void setEncoderPositionToInitial() {
+        motor.setEncoderPosition(initialPositionRad);
+    }
 }

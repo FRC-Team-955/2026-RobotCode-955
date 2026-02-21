@@ -34,4 +34,7 @@ public class HoodIO {
 
     public void setCurrentLimit(HoodCurrentLimitMode mode) {
     }
+
+    public void setEncoderPositionToInitial() {
+    }
 }
