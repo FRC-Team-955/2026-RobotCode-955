@@ -13,6 +13,7 @@ import frc.lib.Util;
 import frc.lib.network.LoggedTunableNumber;
 import frc.lib.subsystem.Periodic;
 import frc.robot.subsystems.superstructure.flywheel.Flywheel;
+import frc.robot.subsystems.superstructure.flywheel.FlywheelConstants;
 import frc.robot.subsystems.superstructure.hood.Hood;
 import lombok.Getter;
 import org.littletonrobotics.junction.Logger;
@@ -204,7 +205,7 @@ public class ShootingKinematics implements Periodic {
 //        Logger.recordOutput("ShootingKinematics/Phi", phi);
 //        Logger.recordOutput("ShootingKinematics/Theta", theta);
 
-        shootingParameters = new ShootingParameters(v, phi, theta);
+        shootingParameters = new ShootingParameters(Units.radiansPerSecondToRotationsPerMinute(v / FlywheelConstants.flywheelRadiusMeters), phi, theta);
         return true;
     }
 
