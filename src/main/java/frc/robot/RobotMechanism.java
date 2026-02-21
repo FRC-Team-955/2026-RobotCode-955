@@ -32,8 +32,8 @@ public class RobotMechanism implements Periodic {
             new Rotation3d(0.0, 0.0, Units.degreesToRadians(90.0))
     );
     private static final Transform3d intakePivotInitial = new Transform3d(
-            new Translation3d(Units.inchesToMeters(9.25), 0.0, Units.inchesToMeters(5.81)),
-            new Rotation3d(0.0, 0.0, 0.0)
+            new Translation3d(Units.inchesToMeters(10.0), 0.0, Units.inchesToMeters(6.25)),
+            new Rotation3d(0.0, Units.degreesToRadians(90.0), 0.0)
     );
     private static final Transform3d hoodInitial = new Transform3d(
             flywheelsInitial.getTranslation(),
@@ -75,7 +75,7 @@ public class RobotMechanism implements Periodic {
 
         Transform3d intakePivotTransform = intakePivotInitial.plus(new Transform3d(
                 new Translation3d(),
-                new Rotation3d(0.0, superintake.intakePivot.getPositionRad(), 0.0)
+                new Rotation3d(0.0, -superintake.intakePivot.getPositionRad(), 0.0)
         ));
 
         Transform3d spindexerTransform = spindexerInitial.plus(new Transform3d(
