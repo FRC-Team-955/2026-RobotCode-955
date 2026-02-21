@@ -26,6 +26,8 @@ public class LEDs implements Periodic {
     private static final Superstructure superstructure = Superstructure.get();
     private static final ShootingKinematics shootingKinematics = ShootingKinematics.get();
     private static final AutoManager autoManager = AutoManager.get();
+    private static final AprilTagVision aprilTagVision = AprilTagVision.get();
+    private static final GamePieceVision gamePieceVision = GamePieceVision.get();
 
     // See createAndStartStartupNotifier for why this is static
     private static final LEDsIO io = createIO();
@@ -91,7 +93,7 @@ public class LEDs implements Periodic {
     @Override
     public void periodicAfterCommands() {
         boolean lowBattery = operatorDashboard.isBatteryVoltageAlertActive();
-        boolean cameraError = AprilTagVision.get().anyCamerasDisconnected() || GamePieceVision.get().anyCamerasDisconnected();
+        boolean cameraError = aprilTagVision.anyCamerasDisconnected() || gamePieceVision.anyCamerasDisconnected();
 
         if (lowBattery) {
             LEDPatterns.lowBattery.applyTo(buffer);
