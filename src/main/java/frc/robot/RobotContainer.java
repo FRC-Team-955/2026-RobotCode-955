@@ -82,7 +82,6 @@ public class RobotContainer {
      */
     private void configureBindings() {
         controller.y().onTrue(robotState.resetRotation());
-        controller.x().onTrue(superintake.autoIntakeCoral().alongWith(superintake.setGoal(Superintake.Goal.IDLE)));
 
         var shouldAutoAim = new Trigger(() -> operatorDashboard.getSelectedScoringMode() == OperatorDashboard.ScoringMode.ShootAndPassAutomatic);
         controller.leftTrigger()
