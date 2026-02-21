@@ -5,64 +5,158 @@
     {
       "name": "Teleoperated",
       "grid_layout": {
-        "layouts": [],
-        "containers": [
+        "layouts": [
           {
-            "title": "PassManual",
-            "x": 0.0,
-            "y": 384.0,
-            "width": 256.0,
-            "height": 128.0,
-            "type": "Toggle Switch",
-            "properties": {
-              "topic": "/Tuning/OperatorDashboard/ScoringMode/PassManual",
-              "period": 0.06,
-              "data_type": "boolean"
-            }
-          },
-          {
-            "title": "ShootAndPassAutomatic",
+            "title": "ShootingMode",
             "x": 0.0,
             "y": 0.0,
             "width": 256.0,
-            "height": 128.0,
-            "type": "Toggle Switch",
+            "height": 384.0,
+            "type": "List Layout",
             "properties": {
-              "topic": "/Tuning/OperatorDashboard/ScoringMode/ShootAndPassAutomatic",
-              "period": 0.06,
-              "data_type": "boolean"
-            }
+              "label_position": "TOP"
+            },
+            "children": [
+              {
+                "title": "ShootAndPassAutomatic",
+                "x": 128.0,
+                "y": 512.0,
+                "width": 256.0,
+                "height": 128.0,
+                "type": "Toggle Switch",
+                "properties": {
+                  "topic": "/Tuning/OperatorDashboard/ScoringMode/ShootAndPassAutomatic",
+                  "period": 0.06,
+                  "data_type": "boolean"
+                }
+              },
+              {
+                "title": "ShootHubManual",
+                "x": 128.0,
+                "y": 384.0,
+                "width": 256.0,
+                "height": 128.0,
+                "type": "Toggle Switch",
+                "properties": {
+                  "topic": "/Tuning/OperatorDashboard/ScoringMode/ShootHubManual",
+                  "period": 0.06,
+                  "data_type": "boolean"
+                }
+              },
+              {
+                "title": "ShootTowerManual",
+                "x": 128.0,
+                "y": 384.0,
+                "width": 256.0,
+                "height": 128.0,
+                "type": "Toggle Switch",
+                "properties": {
+                  "topic": "/Tuning/OperatorDashboard/ScoringMode/ShootTowerManual",
+                  "period": 0.06,
+                  "data_type": "boolean"
+                }
+              },
+              {
+                "title": "PassManual",
+                "x": 128.0,
+                "y": 512.0,
+                "width": 256.0,
+                "height": 128.0,
+                "type": "Toggle Switch",
+                "properties": {
+                  "topic": "/Tuning/OperatorDashboard/ScoringMode/PassManual",
+                  "period": 0.06,
+                  "data_type": "boolean"
+                }
+              }
+            ]
           },
           {
-            "title": "ShootHubManual",
-            "x": 0.0,
-            "y": 128.0,
-            "width": 256.0,
-            "height": 128.0,
-            "type": "Toggle Switch",
+            "title": "Home",
+            "x": 256.0,
+            "y": 0.0,
+            "width": 128.0,
+            "height": 256.0,
+            "type": "List Layout",
             "properties": {
-              "topic": "/Tuning/OperatorDashboard/ScoringMode/ShootHubManual",
-              "period": 0.06,
-              "data_type": "boolean"
-            }
+              "label_position": "TOP"
+            },
+            "children": [
+              {
+                "title": "IntakePivot",
+                "x": 1024.0,
+                "y": 640.0,
+                "width": 256.0,
+                "height": 128.0,
+                "type": "Toggle Switch",
+                "properties": {
+                  "topic": "/Tuning/OperatorDashboard/HomeIntakePivot",
+                  "period": 0.06,
+                  "data_type": "boolean"
+                }
+              },
+              {
+                "title": "Hood",
+                "x": 1024.0,
+                "y": 640.0,
+                "width": 256.0,
+                "height": 128.0,
+                "type": "Toggle Switch",
+                "properties": {
+                  "topic": "/Tuning/OperatorDashboard/HomeHood",
+                  "period": 0.06,
+                  "data_type": "boolean"
+                }
+              }
+            ]
           },
           {
-            "title": "ShootTowerManual",
+            "title": "Goals",
             "x": 0.0,
-            "y": 256.0,
+            "y": 384.0,
             "width": 256.0,
-            "height": 128.0,
-            "type": "Toggle Switch",
+            "height": 256.0,
+            "type": "List Layout",
             "properties": {
-              "topic": "/Tuning/OperatorDashboard/ScoringMode/ShootTowerManual",
-              "period": 0.06,
-              "data_type": "boolean"
-            }
-          },
+              "label_position": "TOP"
+            },
+            "children": [
+              {
+                "title": "Superintake",
+                "x": 256.0,
+                "y": 512.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/AdvantageKit/RealOutputs/Superintake/Goal",
+                  "period": 0.06,
+                  "data_type": "string",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "Superstructure",
+                "x": 256.0,
+                "y": 640.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/AdvantageKit/RealOutputs/Superstructure/Goal",
+                  "period": 0.06,
+                  "data_type": "string",
+                  "show_submit_button": false
+                }
+              }
+            ]
+          }
+        ],
+        "containers": [
           {
             "title": "AutoChosen",
-            "x": 1024.0,
-            "y": 384.0,
+            "x": 1536.0,
+            "y": 768.0,
             "width": 128.0,
             "height": 128.0,
             "type": "Toggle Switch",
@@ -74,10 +168,10 @@
           },
           {
             "title": "Alerts",
-            "x": 1024.0,
+            "x": 1536.0,
             "y": 0.0,
-            "width": 256.0,
-            "height": 384.0,
+            "width": 384.0,
+            "height": 512.0,
             "type": "Alerts",
             "properties": {
               "topic": "/SmartDashboard/Alerts",
@@ -86,8 +180,8 @@
           },
           {
             "title": "CoastOverride",
-            "x": 1152.0,
-            "y": 384.0,
+            "x": 1408.0,
+            "y": 768.0,
             "width": 128.0,
             "height": 128.0,
             "type": "Toggle Switch",
@@ -99,8 +193,8 @@
           },
           {
             "title": "DisableCANrange",
-            "x": 512.0,
-            "y": 0.0,
+            "x": 256.0,
+            "y": 256.0,
             "width": 256.0,
             "height": 128.0,
             "type": "Toggle Switch",
@@ -112,7 +206,7 @@
           },
           {
             "title": "FixedHood",
-            "x": 512.0,
+            "x": 384.0,
             "y": 128.0,
             "width": 128.0,
             "height": 128.0,
@@ -125,7 +219,7 @@
           },
           {
             "title": "FlywheelSmudgeRPM",
-            "x": 768.0,
+            "x": 512.0,
             "y": 0.0,
             "width": 256.0,
             "height": 128.0,
@@ -139,7 +233,7 @@
           },
           {
             "title": "HoodSmudgeDegrees",
-            "x": 768.0,
+            "x": 512.0,
             "y": 128.0,
             "width": 256.0,
             "height": 128.0,
@@ -152,35 +246,9 @@
             }
           },
           {
-            "title": "HomeHood",
-            "x": 768.0,
-            "y": 256.0,
-            "width": 256.0,
-            "height": 128.0,
-            "type": "Toggle Switch",
-            "properties": {
-              "topic": "/Tuning/OperatorDashboard/HomeHood",
-              "period": 0.06,
-              "data_type": "boolean"
-            }
-          },
-          {
-            "title": "HomeIntakePivot",
-            "x": 768.0,
-            "y": 384.0,
-            "width": 256.0,
-            "height": 128.0,
-            "type": "Toggle Switch",
-            "properties": {
-              "topic": "/Tuning/OperatorDashboard/HomeIntakePivot",
-              "period": 0.06,
-              "data_type": "boolean"
-            }
-          },
-          {
             "title": "ManualAiming",
-            "x": 640.0,
-            "y": 128.0,
+            "x": 384.0,
+            "y": 0.0,
             "width": 128.0,
             "height": 128.0,
             "type": "Toggle Switch",
@@ -192,10 +260,10 @@
           },
           {
             "title": "ShooterCam-processed",
-            "x": 256.0,
+            "x": 1024.0,
             "y": 0.0,
-            "width": 256.0,
-            "height": 256.0,
+            "width": 512.0,
+            "height": 384.0,
             "type": "Camera Stream",
             "properties": {
               "topic": "/CameraPublisher/ShooterCam-processed",
@@ -206,9 +274,9 @@
           {
             "title": "Field2d",
             "x": 256.0,
-            "y": 256.0,
-            "width": 512.0,
-            "height": 256.0,
+            "y": 384.0,
+            "width": 1152.0,
+            "height": 512.0,
             "type": "Field",
             "properties": {
               "topic": "/SmartDashboard/Field2d",
@@ -223,6 +291,36 @@
               "trajectory_color": 4294967295,
               "show_robot_outside_widget": true
             }
+          },
+          {
+            "title": "MatchTime",
+            "x": 1408.0,
+            "y": 512.0,
+            "width": 256.0,
+            "height": 256.0,
+            "type": "Match Time",
+            "properties": {
+              "topic": "/AdvantageKit/DriverStation/MatchTime",
+              "period": 0.06,
+              "data_type": "double",
+              "time_display_mode": "Minutes and Seconds",
+              "red_start_time": 20,
+              "yellow_start_time": 30
+            }
+          },
+          {
+            "title": "Timestamp",
+            "x": 1408.0,
+            "y": 384.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/Timestamp",
+              "period": 0.06,
+              "data_type": "int",
+              "show_submit_button": false
+            }
           }
         ]
       }
@@ -234,7 +332,7 @@
         "containers": [
           {
             "title": "Auto Choices",
-            "x": 256.0,
+            "x": 512.0,
             "y": 0.0,
             "width": 256.0,
             "height": 128.0,
@@ -247,7 +345,7 @@
           },
           {
             "title": "Characterization Choices",
-            "x": 256.0,
+            "x": 512.0,
             "y": 128.0,
             "width": 256.0,
             "height": 128.0,
@@ -272,7 +370,7 @@
           },
           {
             "title": "PhotonAlerts",
-            "x": 512.0,
+            "x": 256.0,
             "y": 0.0,
             "width": 256.0,
             "height": 384.0,
