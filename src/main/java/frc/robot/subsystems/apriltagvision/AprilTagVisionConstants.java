@@ -42,55 +42,54 @@ public class AprilTagVisionConstants {
     @RequiredArgsConstructor
     enum Camera {
         // BrainpanCam - ThriftyCam
-        BlueCam(
+//        BlueCam(
+//                new Transform3d(
+//                        Units.inchesToMeters(-11.203173), Units.inchesToMeters(4.211493), Units.inchesToMeters(7.604844),
+//                        // Rotation order matters
+//                        new Rotation3d(0.0, Units.degreesToRadians(-15.822126), 0.0)
+//                                .rotateBy(new Rotation3d(0.0, 0.0, Units.degreesToRadians(161.0)))
+//                ),
+//                (cam) -> switch (BuildConstants.mode) {
+//                    case REAL -> new AprilTagVisionIOPhotonVision("BlueCam");
+//                    case SIM -> new AprilTagVisionIOPhotonVisionSim("BlueCam", cam.robotToCamera);
+//                    case REPLAY -> new AprilTagVisionIO();
+//                },
+//                // Relatively stable, even at long distance
+//                2.0,
+//                1.0
+//        ),
+        ShooterCam(
                 new Transform3d(
-                        Units.inchesToMeters(-11.203173), Units.inchesToMeters(4.211493), Units.inchesToMeters(7.604844),
+                        Units.inchesToMeters(-11.668592), Units.inchesToMeters(-13.462841), Units.inchesToMeters(7.136914),
                         // Rotation order matters
-                        new Rotation3d(0.0, Units.degreesToRadians(-15.822126), 0.0)
-                                .rotateBy(new Rotation3d(0.0, 0.0, Units.degreesToRadians(161.0)))
+                        new Rotation3d(0.0, Units.degreesToRadians(-30.0), 0.0)
+                                .rotateBy(new Rotation3d(0.0, 0.0, Units.degreesToRadians(-180.0 + 25.0)))
                 ),
                 (cam) -> switch (BuildConstants.mode) {
-                    case REAL -> new AprilTagVisionIOPhotonVision("BlueCam");
-                    case SIM -> new AprilTagVisionIOPhotonVisionSim("BlueCam", cam.robotToCamera);
+                    case REAL -> new AprilTagVisionIOPhotonVision("ShooterCam");
+                    case SIM -> new AprilTagVisionIOPhotonVisionSim("ShooterCam", cam.robotToCamera);
                     case REPLAY -> new AprilTagVisionIO();
                 },
                 // Relatively stable, even at long distance
                 2.0,
                 1.0
         ),
-        // ShooterCam - OV2311
-        GreenCam(
-                new Transform3d(
-                        Units.inchesToMeters(-12.174301), Units.inchesToMeters(-12.532570), Units.inchesToMeters(7.647165),
-                        // Rotation order matters
-                        new Rotation3d(0.0, Units.degreesToRadians(-12.260063), 0.0)
-                                .rotateBy(new Rotation3d(0.0, 0.0, Units.degreesToRadians(-168.0)))
-                ),
-                (cam) -> switch (BuildConstants.mode) {
-                    case REAL -> new AprilTagVisionIOPhotonVision("GreenCam");
-                    case SIM -> new AprilTagVisionIOPhotonVisionSim("GreenCam", cam.robotToCamera);
-                    case REPLAY -> new AprilTagVisionIO();
-                },
-                // Trust more at close distance, less at long distance
-                2.5,
-                0.5
-        ),
         // HopperCam - OV2311
-        YellowCam(
-                new Transform3d(
-                        Units.inchesToMeters(-5.549223), Units.inchesToMeters(12.125000), Units.inchesToMeters(20.060018),
-                        // Rotation order matters
-                        new Rotation3d(0.0, Units.degreesToRadians(-35), 0.0)
-                ),
-                (cam) -> switch (BuildConstants.mode) {
-                    case REAL -> new AprilTagVisionIOPhotonVision("YellowCam");
-                    case SIM -> new AprilTagVisionIOPhotonVisionSim("YellowCam", cam.robotToCamera);
-                    case REPLAY -> new AprilTagVisionIO();
-                },
-                // Trust more at close distance, less at long distance
-                2.0,
-                1.0
-        ),
+//        YellowCam(
+//                new Transform3d(
+//                        Units.inchesToMeters(-5.549223), Units.inchesToMeters(12.125000), Units.inchesToMeters(20.060018),
+//                        // Rotation order matters
+//                        new Rotation3d(0.0, Units.degreesToRadians(-35), 0.0)
+//                ),
+//                (cam) -> switch (BuildConstants.mode) {
+//                    case REAL -> new AprilTagVisionIOPhotonVision("YellowCam");
+//                    case SIM -> new AprilTagVisionIOPhotonVisionSim("YellowCam", cam.robotToCamera);
+//                    case REPLAY -> new AprilTagVisionIO();
+//                },
+//                // Trust more at close distance, less at long distance
+//                2.0,
+//                1.0
+//        ),
         ;
 
         final Transform3d robotToCamera;

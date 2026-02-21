@@ -13,10 +13,8 @@
 
 package frc.robot.subsystems.gamepiecevision;
 
-import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.util.Units;
-import frc.robot.BuildConstants;
 import lombok.RequiredArgsConstructor;
 
 import java.util.function.Function;
@@ -55,21 +53,21 @@ public class GamePieceVisionConstants {
 
     @RequiredArgsConstructor
     enum Camera {
-        GPVCam(
-
-                new Transform3d(
-                        Units.inchesToMeters(3.770), Units.inchesToMeters(-12.406), Units.inchesToMeters(20.485),
-                        // Rotation order matters
-                        new Rotation3d(0.0, Units.degreesToRadians(6.963), 0.0)
-                                .rotateBy(new Rotation3d(0.0, 0.0, Units.degreesToRadians(10.0)))
-                ),
-                (cam) -> switch (BuildConstants.mode) {
-                    case REAL -> new GamePieceVisionIOPhotonVision("GPVCam");
-                    case SIM -> new GamePieceVisionIOPhotonVisionSim("GPVCam", cam.robotToCamera);
-                    case REPLAY -> new GamePieceVisionIO();
-                }
-                // Relatively stable, even at long dist
-        ),
+//        GPVCam(
+//
+//                new Transform3d(
+//                        Units.inchesToMeters(3.770), Units.inchesToMeters(-12.406), Units.inchesToMeters(20.485),
+//                        // Rotation order matters
+//                        new Rotation3d(0.0, Units.degreesToRadians(6.963), 0.0)
+//                                .rotateBy(new Rotation3d(0.0, 0.0, Units.degreesToRadians(10.0)))
+//                ),
+//                (cam) -> switch (BuildConstants.mode) {
+//                    case REAL -> new GamePieceVisionIOPhotonVision("GPVCam");
+//                    case SIM -> new GamePieceVisionIOPhotonVisionSim("GPVCam", cam.robotToCamera);
+//                    case REPLAY -> new GamePieceVisionIO();
+//                }
+//                // Relatively stable, even at long dist
+//        ),
         ;
 
         final Transform3d robotToCamera;
