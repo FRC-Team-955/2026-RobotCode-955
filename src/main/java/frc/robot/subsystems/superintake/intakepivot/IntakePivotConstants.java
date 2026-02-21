@@ -18,8 +18,9 @@ public class IntakePivotConstants {
 
     static final LoggedTunablePIDF gains = switch (BuildConstants.mode) {
         case REAL, REPLAY -> new LoggedTunablePIDF("Superintake/IntakePivot/Gains");
-        case SIM ->
-                new LoggedTunablePIDF("Superintake/IntakePivot/Gains").withP(20.0).withG(2.65, GravityTypeValue.Arm_Cosine);
+        case SIM -> new LoggedTunablePIDF("Superintake/IntakePivot/Gains")
+                .withP(20.0)
+                .withG(2.65, GravityTypeValue.Arm_Cosine);
     };
 
     static IntakePivotIO createIO() {
