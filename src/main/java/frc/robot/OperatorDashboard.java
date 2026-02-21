@@ -48,6 +48,7 @@ public class OperatorDashboard implements Periodic {
     private final Alert batteryVoltageAlert = new Alert("Battery is below 12 volts!", Alert.AlertType.kError);
     private final Alert fixedHoodAlert = new Alert("Fixed hood mode is enabled.", Alert.AlertType.kWarning);
     private final Alert manualAimingAlert = new Alert("Manual aiming is enabled.", Alert.AlertType.kWarning);
+    private final Alert smudgesNotZeroAlert = new Alert("Smudges are not zero.", Alert.AlertType.kWarning);
 
     private final Debouncer lowBatteryDebouncer = new Debouncer(10.0, Debouncer.DebounceType.kRising);
 
@@ -84,6 +85,7 @@ public class OperatorDashboard implements Periodic {
         batteryVoltageAlert.set(lowBatteryDebouncer.calculate(RobotController.getBatteryVoltage() <= 12.0));
         fixedHoodAlert.set(fixedHood.get());
         manualAimingAlert.set(manualAiming.get());
+        smudgesNotZeroAlert.set(flywheelSmudgeRPM.get() != 0 || hoodSmudgeDegrees.get() != 0);
     }
 
     private static <E extends Enum<E>> void handleEnumToggles(
