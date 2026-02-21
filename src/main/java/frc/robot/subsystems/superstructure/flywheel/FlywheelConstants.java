@@ -13,7 +13,9 @@ public class FlywheelConstants {
 
     static final LoggedTunablePIDF velocityGains = switch (BuildConstants.mode) {
         case REAL, REPLAY -> new LoggedTunablePIDF("Superstructure/Flywheel/Gains");
-        case SIM -> new LoggedTunablePIDF("Superstructure/Flywheel/Gains").withV(0.02);
+        case SIM -> new LoggedTunablePIDF("Superstructure/Flywheel/Gains")
+                .withV(0.02)
+                .withP(1.0);
     };
 
     static FlywheelIO createIO() {
