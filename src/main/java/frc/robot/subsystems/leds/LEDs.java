@@ -130,6 +130,7 @@ public class LEDs implements Periodic {
                             ? LEDPatterns.shooting
                             : LEDPatterns.aiming;
                     case EJECT -> LEDPatterns.eject;
+                    case HOME_HOOD -> LEDPatterns.homing;
                 };
 
                 if (superintakePattern != null && superstructurePattern != null) {

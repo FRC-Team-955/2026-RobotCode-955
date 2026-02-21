@@ -23,7 +23,7 @@ public class HoodIO {
     public void setPositionRequest(double positionRad) {
     }
 
-    public void setStopRequest() {
+    public void setVoltageRequest(double volts) {
     }
 
     /**

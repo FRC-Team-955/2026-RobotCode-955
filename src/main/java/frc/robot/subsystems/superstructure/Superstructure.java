@@ -40,17 +40,27 @@ public class Superstructure extends CommandBasedSubsystem {
         SPINUP,
         SHOOT,
         EJECT,
+        HOME_HOOD,
     }
 
     @Getter
     private Goal goal = Goal.IDLE;
 
+    private boolean shouldGoalEnd() {
+        if (goal == Goal.HOME_HOOD) {
+            return hood.isCurrentAtThresholdForHoming();
+        }
+        return false;
+    }
+
     public Command setGoal(Goal goal) {
-        return startIdle(() -> this.goal = goal);
+        return startIdle(() -> this.goal = goal)
+                .until(this::shouldGoalEnd);
     }
 
     public Command setGoal(Supplier<Goal> goal) {
-        return run(() -> this.goal = goal.get());
+        return run(() -> this.goal = goal.get())
+                .until(this::shouldGoalEnd);
     }
 
     private static Superstructure instance;
@@ -121,6 +131,12 @@ public class Superstructure extends CommandBasedSubsystem {
                 hood.setGoal(Hood.Goal.EJECT);
                 feeder.setGoal(Feeder.Goal.EJECT);
                 spindexer.setGoal(Spindexer.Goal.EJECT);
+            }
+            case HOME_HOOD -> {
+                flywheel.setGoal(Flywheel.Goal.IDLE);
+                hood.setGoal(Hood.Goal.HOME);
+                feeder.setGoal(Feeder.Goal.IDLE);
+                spindexer.setGoal(Spindexer.Goal.IDLE);
             }
         }
     }

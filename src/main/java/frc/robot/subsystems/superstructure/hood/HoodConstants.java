@@ -7,8 +7,6 @@ import frc.lib.network.LoggedTunablePIDF;
 import frc.robot.BuildConstants;
 
 public class HoodConstants {
-    static final double positionToleranceRad = Units.degreesToRadians(10);
-
     static final TrapezoidProfile.Constraints constraints = new TrapezoidProfile.Constraints(1, 3);
 
     static final double minPositionRad = Units.degreesToRadians(15.0);

@@ -44,8 +44,8 @@ public class HoodIOSim extends HoodIO {
     }
 
     @Override
-    public void setStopRequest() {
-        motor.setRequest(RequestType.VoltageVolts, 0.0);
+    public void setVoltageRequest(double volts) {
+        motor.setRequest(RequestType.VoltageVolts, volts);
     }
 
     @Override

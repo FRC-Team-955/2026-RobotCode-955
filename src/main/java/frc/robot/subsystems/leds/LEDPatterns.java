@@ -85,6 +85,7 @@ public class LEDPatterns {
     public static final LEDPattern eject = LEDPattern.solid(Color.kRed).blink(Seconds.of(0.1));
     public static final LEDPattern aiming = LEDPattern.solid(Color.kYellow);
     public static final LEDPattern shooting = LEDPattern.solid(Color.kGreen);
-    public static final LEDPattern intaking = LEDPattern.solid(Color.kBlue).blink(Seconds.of(0.1));
+    public static final LEDPattern intaking = LEDPattern.solid(Color.kWhite).blink(Seconds.of(0.1));
+    public static final LEDPattern homing = LEDPattern.solid(Color.kBlue);
     public static final LEDPattern idle = LEDPattern.kOff;
 }

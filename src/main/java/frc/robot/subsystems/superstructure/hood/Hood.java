@@ -6,8 +6,6 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.Util;
 import frc.lib.motor.MotorIOInputsAutoLogged;
 import frc.lib.network.LoggedTunableNumber;
@@ -20,7 +18,6 @@ import frc.robot.subsystems.superstructure.hood.HoodIO.HoodCurrentLimitMode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.function.DoubleSupplier;
@@ -50,6 +47,7 @@ public class Hood implements Periodic {
         SHOOT_TOWER_MANUAL(() -> Units.degreesToRadians(shootTowerManualSetpointDegrees.get())),
         PASS_MANUAL(() -> Units.degreesToRadians(passManualSetpointDegrees.get())),
         EJECT(() -> Units.degreesToRadians(ejectSetpointDegrees.get())),
+        HOME(null),
         ;
 
         private final DoubleSupplier setpointRad;
@@ -114,7 +112,9 @@ public class Hood implements Periodic {
     public void periodicAfterCommands() {
         Logger.recordOutput("Superstructure/Hood/Goal", goal);
         if (DriverStation.isDisabled()) {
-            io.setStopRequest();
+            io.setVoltageRequest(0.0);
+        } else if (goal == Goal.HOME) {
+            io.setVoltageRequest(-2.0);
         } else {
             // See the comments above the lookaheadState and goalState variables for why we effectively calculate two profiles
 
@@ -146,13 +146,7 @@ public class Hood implements Periodic {
         return inputs.positionRad;
     }
 
-    @AutoLogOutput(key = "Superstructure/Hood/AtGoal")
-    public boolean atGoal() {
-        double value = goal.setpointRad.getAsDouble();
-        return Math.abs(inputs.positionRad - value) <= positionToleranceRad;
-    }
-
-    public Command waitUntilAtGoal() {
-        return Commands.waitUntil(this::atGoal);
+    public boolean isCurrentAtThresholdForHoming() {
+        return inputs.currentAmps >= 10.0;
     }
 }
