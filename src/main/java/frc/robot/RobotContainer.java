@@ -8,7 +8,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.CANLogger;
-import frc.lib.commands.CommandsExt;
 import frc.robot.autos.AutoManager;
 import frc.robot.controller.Controller;
 import frc.robot.subsystems.apriltagvision.AprilTagVision;
@@ -122,19 +121,17 @@ public class RobotContainer {
 //                                ))
                 );
 
-        controller.a()
-                .onTrue(CommandsExt.eagerSequence(
-                        superstructure.setGoal(Superstructure.Goal.IDLE),
-                        superintake.setGoal(Superintake.Goal.IDLE)
-                ).ignoringDisable(true));
+        new Trigger(operatorDashboard.homeIntakePivot::get)
+                .onTrue(Commands.parallel(
+                        Commands.runOnce(() -> operatorDashboard.homeIntakePivot.set(false)),
+                        superintake.setGoal(Superintake.Goal.HOME_INTAKE_PIVOT)
+                ));
 
-        controller.leftTrigger().whileTrue(Commands.repeatingSequence(
-                Commands.runOnce(() -> {
-                    if (!shootingKinematics.isValidShootingParameters()) {
-                    }
-                }),
-                Commands.waitSeconds(0.1)
-        ));
+        new Trigger(operatorDashboard.homeHood::get)
+                .onTrue(Commands.parallel(
+                        Commands.runOnce(() -> operatorDashboard.homeHood.set(false)),
+                        superstructure.setGoal(Superstructure.Goal.HOME_HOOD)
+                ));
     }
 
     /**

@@ -32,6 +32,11 @@ public class OperatorDashboard implements Periodic {
 
     private static final String prefix = "/OperatorDashboard/";
 
+    // Buttons
+    public final LoggedNetworkBooleanExt homeIntakePivot = new LoggedNetworkBooleanExt(prefix + "HomeIntakePivot", false);
+    public final LoggedNetworkBooleanExt homeHood = new LoggedNetworkBooleanExt(prefix + "HomeHood", false);
+
+    // Toggles and overrides
     public final LoggedNetworkBooleanExt coastOverride = new LoggedNetworkBooleanExt(prefix + "CoastOverride", false);
     public final LoggedNetworkBooleanExt autoChosen = new LoggedNetworkBooleanExt(prefix + "AutoChosen", false);
     public final LoggedNetworkBooleanExt fixedHood = new LoggedNetworkBooleanExt(prefix + "FixedHood", false);
@@ -44,6 +49,7 @@ public class OperatorDashboard implements Periodic {
     private ScoringMode selectedScoringMode = ScoringMode.ShootAndPassAutomatic;
     private final EnumMap<ScoringMode, LoggedNetworkBooleanExt> scoringModeToggles = generateTogglesForEnum("ScoringMode", ScoringMode.values(), ScoringMode.class);
 
+    // Alerts
     private final Alert coastOverrideAlert = new Alert("Coast override is enabled.", Alert.AlertType.kWarning);
     private final Alert autoNotChosenAlert = new Alert("Auto is not chosen!", Alert.AlertType.kError);
 
