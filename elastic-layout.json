@@ -61,8 +61,8 @@
           },
           {
             "title": "AutoChosen",
-            "x": 256.0,
-            "y": 0.0,
+            "x": 1024.0,
+            "y": 384.0,
             "width": 128.0,
             "height": 128.0,
             "type": "Toggle Switch",
@@ -86,8 +86,8 @@
           },
           {
             "title": "CoastOverride",
-            "x": 512.0,
-            "y": 0.0,
+            "x": 1152.0,
+            "y": 384.0,
             "width": 128.0,
             "height": 128.0,
             "type": "Toggle Switch",
@@ -99,9 +99,9 @@
           },
           {
             "title": "DisableCANrange",
-            "x": 640.0,
+            "x": 512.0,
             "y": 0.0,
-            "width": 128.0,
+            "width": 256.0,
             "height": 128.0,
             "type": "Toggle Switch",
             "properties": {
@@ -188,6 +188,40 @@
               "topic": "/Tuning/OperatorDashboard/ManualAiming",
               "period": 0.06,
               "data_type": "boolean"
+            }
+          },
+          {
+            "title": "ShooterCam-processed",
+            "x": 256.0,
+            "y": 0.0,
+            "width": 256.0,
+            "height": 256.0,
+            "type": "Camera Stream",
+            "properties": {
+              "topic": "/CameraPublisher/ShooterCam-processed",
+              "period": 0.06,
+              "rotation_turns": 0
+            }
+          },
+          {
+            "title": "Field2d",
+            "x": 256.0,
+            "y": 256.0,
+            "width": 512.0,
+            "height": 256.0,
+            "type": "Field",
+            "properties": {
+              "topic": "/SmartDashboard/Field2d",
+              "period": 0.06,
+              "field_game": "Rebuilt (No Fuel)",
+              "robot_width": 0.9335341,
+              "robot_length": 0.80645,
+              "show_other_objects": true,
+              "show_trajectories": true,
+              "field_rotation": 0.0,
+              "robot_color": 4294198070,
+              "trajectory_color": 4294967295,
+              "show_robot_outside_widget": true
             }
           }
         ]
