@@ -7,6 +7,7 @@ import edu.wpi.first.math.util.Units;
 import frc.lib.network.LoggedTunableNumber;
 import frc.robot.RobotState;
 import frc.robot.controller.Controller;
+import frc.robot.subsystems.drive.DriveConstants;
 import frc.robot.subsystems.drive.DriveGoal;
 import frc.robot.subsystems.drive.DriveRequest;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,8 @@ public class DriveJoystickGoal extends DriveGoal {
 
     private static final RobotState robotState = RobotState.get();
     private static final Controller controller = Controller.get();
+
+    private final boolean stopWithX;
 
     private final PIDController headingOverride = headingOverrideGains.toPIDWrapRadians();
     private final Debouncer headingOverrideEnabledDebouncer = new Debouncer(headingOverrideSetpointResetTime.get(), Debouncer.DebounceType.kRising);
@@ -67,6 +70,15 @@ public class DriveJoystickGoal extends DriveGoal {
         }
 //        Logger.recordOutput("Drive/DriveJoystick/HeadingOverrideRunning", runningHeadingOverride);
 
-        return DriveRequest.chassisSpeeds(joystickSetpoint);
+        if (
+                stopWithX &&
+                        joystickSetpoint.vxMetersPerSecond == 0.0 &&
+                        joystickSetpoint.vyMetersPerSecond == 0.0 &&
+                        Math.abs(joystickSetpoint.omegaRadiansPerSecond) <= DriveConstants.joystickDriveDeadband
+        ) {
+            return DriveRequest.stopWithX();
+        } else {
+            return DriveRequest.chassisSpeeds(joystickSetpoint);
+        }
     }
 }

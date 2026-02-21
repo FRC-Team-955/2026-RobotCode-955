@@ -310,13 +310,6 @@ public class Drive extends CommandBasedSubsystem {
         }
     }
 
-    // TODO goal or something
-//    /**
-//     * Stops the drive and turns the modules to an X arrangement to resist movement. The modules will
-//     * return to their normal orientations the next time a nonzero velocity is requested.
-//     */
-
-
     /**
      * Returns the module states (turn angles and drive velocities) for all of the modules.
      */
@@ -360,8 +353,8 @@ public class Drive extends CommandBasedSubsystem {
         return startIdle(() -> goal = new MoveToGoal(poseSupplier, mergeJoystickDrive));
     }
 
-    public Command driveJoystick() {
-        return startIdle(() -> goal = new DriveJoystickGoal());
+    public Command driveJoystick(boolean stopWithX) {
+        return startIdle(() -> goal = new DriveJoystickGoal(stopWithX));
     }
 
     public Command driveJoystickWithAssist(Supplier<Optional<Pose2d>> assistPoseSupplier) {

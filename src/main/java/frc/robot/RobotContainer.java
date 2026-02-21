@@ -69,7 +69,7 @@ public class RobotContainer {
     }
 
     private void setDefaultCommands() {
-        drive.setDefaultCommand(drive.driveJoystick());
+        drive.setDefaultCommand(drive.driveJoystick(false));
         superintake.setDefaultCommand(superintake.setGoal(Superintake.Goal.IDLE).ignoringDisable(true));
         superstructure.setDefaultCommand(superstructure.setGoal(() -> DriverStation.isEnabled() ? Superstructure.Goal.SPINUP : Superstructure.Goal.IDLE).ignoringDisable(true));
     }
@@ -92,7 +92,10 @@ public class RobotContainer {
                 ));
         controller.leftTrigger()
                 .and(shouldAutoAim.negate())
-                .whileTrue(superstructure.setGoal(Superstructure.Goal.SHOOT));
+                .whileTrue(Commands.parallel(
+                        drive.driveJoystick(true),
+                        superstructure.setGoal(Superstructure.Goal.SHOOT)
+                ));
 
 
         controller.rightTrigger()
