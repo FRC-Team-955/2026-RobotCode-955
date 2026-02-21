@@ -27,9 +27,6 @@ import static frc.robot.subsystems.superstructure.hood.HoodConstants.*;
 public class Hood implements Periodic {
     private static final LoggedTunableNumber profileLookaheadTimeSec = new LoggedTunableNumber("Superstructure/Hood/ProfileLookaheadTimeSec", 0.15);
     private static final LoggedTunableNumber stowSetpointDegrees = new LoggedTunableNumber("Superstructure/Hood/Goal/StowDegrees", 45.0);
-    private static final LoggedTunableNumber shootHubManualSetpointDegrees = new LoggedTunableNumber("Superstructure/Hood/Goal/ShootHubManualDegrees", 45.0);
-    private static final LoggedTunableNumber shootTowerManualSetpointDegrees = new LoggedTunableNumber("Superstructure/Hood/Goal/ShootTowerManualDegrees", 45.0);
-    private static final LoggedTunableNumber passManualSetpointDegrees = new LoggedTunableNumber("Superstructure/Hood/Goal/PassManualDegrees", 45.0);
     private static final LoggedTunableNumber ejectSetpointDegrees = new LoggedTunableNumber("Superstructure/Hood/Goal/EjectDegrees", 45.0);
 
     private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
@@ -42,10 +39,7 @@ public class Hood implements Periodic {
     @RequiredArgsConstructor
     public enum Goal {
         STOW(() -> Units.degreesToRadians(stowSetpointDegrees.get())),
-        SHOOT_AND_PASS_AUTOMATIC(() -> shootingKinematics.getShootingParameters().hoodAngleRad()),
-        SHOOT_HUB_MANUAL(() -> Units.degreesToRadians(shootHubManualSetpointDegrees.get())),
-        SHOOT_TOWER_MANUAL(() -> Units.degreesToRadians(shootTowerManualSetpointDegrees.get())),
-        PASS_MANUAL(() -> Units.degreesToRadians(passManualSetpointDegrees.get())),
+        SHOOT(() -> shootingKinematics.getShootingParameters().hoodAngleRad()),
         EJECT(() -> Units.degreesToRadians(ejectSetpointDegrees.get())),
         HOME(null),
         ;

@@ -13,7 +13,6 @@ import frc.robot.RobotState;
 import frc.robot.ShootingKinematics;
 import frc.robot.subsystems.superstructure.feeder.Feeder;
 import frc.robot.subsystems.superstructure.flywheel.Flywheel;
-import frc.robot.subsystems.superstructure.flywheel.FlywheelIO.FlywheelCurrentLimitMode;
 import frc.robot.subsystems.superstructure.hood.Hood;
 import frc.robot.subsystems.superstructure.spindexer.Spindexer;
 import lombok.Getter;
@@ -106,43 +105,22 @@ public class Superstructure extends CommandBasedSubsystem {
                 spindexer.setGoal(Spindexer.Goal.IDLE);
             }
             case SPINUP, SHOOT -> {
-                switch (operatorDashboard.getSelectedScoringMode()) {
-                    case ShootAndPassAutomatic -> {
-                        flywheel.setGoal(Flywheel.Goal.SHOOT_AND_PASS_AUTOMATIC);
-                        hood.setGoal(Hood.Goal.SHOOT_AND_PASS_AUTOMATIC);
-                    }
-                    case ShootHubManual -> {
-                        flywheel.setGoal(Flywheel.Goal.SHOOT_HUB_MANUAL);
-                        hood.setGoal(Hood.Goal.SHOOT_HUB_MANUAL);
-                    }
-                    case ShootTowerManual -> {
-                        flywheel.setGoal(Flywheel.Goal.SHOOT_TOWER_MANUAL);
-                        hood.setGoal(Hood.Goal.SHOOT_TOWER_MANUAL);
-                    }
-                    case PassManual -> {
-                        flywheel.setGoal(Flywheel.Goal.PASS_MANUAL);
-                        hood.setGoal(Hood.Goal.PASS_MANUAL);
-                    }
-                }
+                flywheel.setGoal(Flywheel.Goal.SHOOT);
+                hood.setGoal(Hood.Goal.SHOOT);
 
-                boolean parametersMet = operatorDashboard.getSelectedScoringMode() == OperatorDashboard.ScoringMode.ShootAndPassAutomatic
-                        ? shootingKinematics.isShootingParametersMet()
-                        : Math.abs(flywheel.getVelocityRPM() - flywheel.getSetpointRPM()) <= ShootingKinematics.velocityToleranceRPM.get() &&
-                        Math.abs(hood.getPositionRad() - hood.getSetpointRad()) <= Units.degreesToRadians(ShootingKinematics.hoodToleranceDeg.get());
-
-                if (goal == Goal.SHOOT && parametersMet) {
-                    flywheel.setCurrentLimitMode(FlywheelCurrentLimitMode.SHOOT);
+                if (goal == Goal.SHOOT && shootingKinematics.isShootingParametersMet()) {
+//                    flywheel.setCurrentLimitMode(FlywheelCurrentLimitMode.SHOOT);
                     feeder.setGoal(Feeder.Goal.FEED);
                     spindexer.setGoal(Spindexer.Goal.FEED);
                 } else {
-                    flywheel.setCurrentLimitMode(FlywheelCurrentLimitMode.SPINUP);
+//                    flywheel.setCurrentLimitMode(FlywheelCurrentLimitMode.SPINUP);
                     feeder.setGoal(Feeder.Goal.IDLE);
                     spindexer.setGoal(Spindexer.Goal.IDLE);
                 }
             }
             case EJECT -> {
                 flywheel.setGoal(Flywheel.Goal.EJECT);
-                flywheel.setCurrentLimitMode(FlywheelCurrentLimitMode.SHOOT);
+//                flywheel.setCurrentLimitMode(FlywheelCurrentLimitMode.SHOOT);
                 hood.setGoal(Hood.Goal.EJECT);
                 feeder.setGoal(Feeder.Goal.EJECT);
                 spindexer.setGoal(Spindexer.Goal.EJECT);

@@ -20,9 +20,6 @@ import static frc.robot.subsystems.superstructure.flywheel.FlywheelConstants.cre
 import static frc.robot.subsystems.superstructure.flywheel.FlywheelConstants.velocityGains;
 
 public class Flywheel implements Periodic {
-    private static final LoggedTunableNumber shootHubManualRPM = new LoggedTunableNumber("Superstructure/Flywheel/Goal/ShootHubManualRPM", 5.0);
-    private static final LoggedTunableNumber shootTowerManualRPM = new LoggedTunableNumber("Superstructure/Flywheel/Goal/ShootTowerManualRPM", 5.0);
-    private static final LoggedTunableNumber passManualRPM = new LoggedTunableNumber("Superstructure/Flywheel/Goal/PassManualRPM", 5.0);
     private static final LoggedTunableNumber ejectRPM = new LoggedTunableNumber("Superstructure/Flywheel/Goal/EjectRPM", -300);
 
     private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
@@ -34,10 +31,7 @@ public class Flywheel implements Periodic {
     @RequiredArgsConstructor
     public enum Goal {
         IDLE(() -> 0),
-        SHOOT_AND_PASS_AUTOMATIC(() -> shootingKinematics.getShootingParameters().velocityRPM()),
-        SHOOT_HUB_MANUAL(shootHubManualRPM::get),
-        SHOOT_TOWER_MANUAL(shootTowerManualRPM::get),
-        PASS_MANUAL(passManualRPM::get),
+        SHOOT(() -> shootingKinematics.getShootingParameters().velocityRPM()),
         EJECT(ejectRPM::get),
         ;
 

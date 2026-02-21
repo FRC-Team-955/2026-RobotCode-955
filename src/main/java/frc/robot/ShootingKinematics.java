@@ -39,6 +39,8 @@ public class ShootingKinematics implements Periodic {
     }
 
     private static final RobotState robotState = RobotState.get();
+    private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
+
     private static final Flywheel flywheel = Flywheel.get();
     private static final Hood hood = Hood.get();
 
@@ -67,46 +69,65 @@ public class ShootingKinematics implements Periodic {
         }
     }
 
-    private boolean isValidHoodAngle(double hoodAngleRad) {
-        return hoodAngleRad > Units.degreesToRadians(15) && hoodAngleRad < Units.degreesToRadians(90);
-    }
-
     @Override
     public void periodicBeforeCommands() {
-        validShootingParameters = updateShootingParameters();
+        validShootingParameters = operatorDashboard.getSelectedScoringMode() == OperatorDashboard.ScoringMode.ShootAndPassAutomatic
+                ? updateShootingParametersAutomatic()
+                : updateShootingParametersManual();
         Logger.recordOutput("ShootingKinematics/ShootingParameters", shootingParameters);
         Logger.recordOutput("ShootingKinematics/ValidShootingParameters", validShootingParameters);
         noValidShootingParametersAlert.set(!validShootingParameters);
 
-        shootingParametersMet =
-                Math.abs(robotState.getPose().getRotation().getRadians() - shootingParameters.headingRad()) <= Units.degreesToRadians(headingToleranceDeg.get()) &&
-                        Math.abs(flywheel.getVelocityRPM() - shootingParameters.velocityRPM()) <= velocityToleranceRPM.get() &&
-                        Math.abs(hood.getPositionRad() - shootingParameters.hoodAngleRad()) <= Units.degreesToRadians(hoodToleranceDeg.get());
+        shootingParametersMet = Math.abs(robotState.getPose().getRotation().getRadians() - shootingParameters.headingRad()) <= Units.degreesToRadians(headingToleranceDeg.get()) &&
+                Math.abs(flywheel.getVelocityRPM() - shootingParameters.velocityRPM()) <= velocityToleranceRPM.get() &&
+                Math.abs(hood.getPositionRad() - shootingParameters.hoodAngleRad()) <= Units.degreesToRadians(hoodToleranceDeg.get());
         Logger.recordOutput("ShootingKinematics/ShootingParametersMet", shootingParametersMet);
     }
 
-    private boolean updateShootingParameters() {
-        Pose2d robotPose2d = robotState.getPose();
-        Pose3d fuelExitPose = new Pose3d(
-                new Pose3d(robotPose2d)
-                        .transformBy(new Transform3d(
-                                fuelExitTranslation,
-                                new Rotation3d()
-                        ))
-                        .getTranslation(),
-                new Rotation3d(
-                        robotPose2d.getRotation()
-                                .plus(fuelExitRotation)
-                )
-        );
-//        Logger.recordOutput("ShootingKinematics/FuelExitPose", fuelExitPose);
+    private static final LoggedTunableNumber shootHubManualFlywheelRPM = new LoggedTunableNumber("ShootingKinematics/ShootHubManual/FlywheelRPM", 5.0);
+    private static final LoggedTunableNumber shootHubManualHoodDegrees = new LoggedTunableNumber("ShootingKinematics/ShootHubManual/HoodDegrees", 45.0);
 
-        Translation3d hubTranslation = AllianceFlipUtil.apply(FieldConstants.Hub.topCenterPoint);
-        Pose3d hubPose = new Pose3d(hubTranslation, new Rotation3d());
-        Transform3d fuelExitToHub = new Transform3d(fuelExitPose, hubPose);
+    private static final LoggedTunableNumber shootTowerManualFlywheelRPM = new LoggedTunableNumber("ShootingKinematics/ShootTowerManual/FlywheelRPM", 5.0);
+    private static final LoggedTunableNumber shootTowerManualHoodDegrees = new LoggedTunableNumber("ShootingKinematics/ShootTowerManual/HoodDegrees", 45.0);
 
-        double xyDist = fuelExitToHub.getTranslation().toTranslation2d().getNorm();
-        double zDist = fuelExitToHub.getTranslation().getZ();
+    private static final LoggedTunableNumber passManualFlywheelRPM = new LoggedTunableNumber("ShootingKinematics/PassManual/FlywheelRPM", 5.0);
+    private static final LoggedTunableNumber passManualHoodDegrees = new LoggedTunableNumber("ShootingKinematics/PassManual/HoodDegrees", 45.0);
+
+    private boolean updateShootingParametersManual() {
+        double headingRad = getFuelExitToHub().angle().getRadians();
+        switch (operatorDashboard.getSelectedScoringMode()) {
+            case ShootAndPassAutomatic -> {
+                return false;
+            }
+            case ShootHubManual -> shootingParameters = new ShootingParameters(
+                    shootHubManualFlywheelRPM.get(),
+                    Units.degreesToRadians(shootHubManualHoodDegrees.get()),
+                    headingRad
+            );
+            case ShootTowerManual -> shootingParameters = new ShootingParameters(
+                    shootTowerManualFlywheelRPM.get(),
+                    Units.degreesToRadians(shootTowerManualHoodDegrees.get()),
+                    headingRad
+            );
+            case PassManual -> shootingParameters = new ShootingParameters(
+                    passManualFlywheelRPM.get(),
+                    Units.degreesToRadians(passManualHoodDegrees.get()),
+                    headingRad
+            );
+        }
+
+        return true;
+    }
+
+    private boolean isValidHoodAngle(double hoodAngleRad) {
+        return hoodAngleRad > Units.degreesToRadians(15) && hoodAngleRad < Units.degreesToRadians(90);
+    }
+
+    private boolean updateShootingParametersAutomatic() {
+        FuelExitToHub fuelExitToHub = getFuelExitToHub();
+
+        double xyDist = fuelExitToHub.transform().getTranslation().toTranslation2d().getNorm();
+        double zDist = fuelExitToHub.transform().getTranslation().getZ();
         double v0 = distanceToVelocity.get(xyDist);
 //        Logger.recordOutput("ShootingKinematics/XYDist", xyDist);
 //        Logger.recordOutput("ShootingKinematics/Stationary/Velocity", v0);
@@ -143,14 +164,10 @@ public class ShootingKinematics implements Periodic {
         // Note that using fuel exit pose instead of robot pose automatically takes care
         // of compensating for theta difference when looking from center of robot and from
         // fuel exit point
-        Rotation2d fuelExitToHubAngle = hubPose.getTranslation().toTranslation2d()
-                .minus(fuelExitPose.getTranslation().toTranslation2d())
-                .getAngle()
-                .plus(fuelExitRotation);
         // We could use Translation2d to rotate it, but since vy = 0, it's simple enough
         // to just use trig
-        double vy = vx * fuelExitToHubAngle.getSin();
-        vx = vx * fuelExitToHubAngle.getCos();
+        double vy = vx * fuelExitToHub.angle().getSin();
+        vx = vx * fuelExitToHub.angle().getCos();
 
         // 3. Now subtract robot velocity from stationary shooting velocity to get final
         // shooting vector
@@ -165,7 +182,7 @@ public class ShootingKinematics implements Periodic {
         // 4. Account for drivebase angular velocity
         Vector<N3> fuelExitFieldRelative = new Translation3d(
                 fuelExitTranslation.toTranslation2d()
-                        .rotateBy(robotPose2d.getRotation())
+                        .rotateBy(robotState.getRotation())
         ).toVector();
         Vector<N3> angularVelocityVector = VecBuilder.fill(0.0, 0.0, robotSpeeds.omegaRadiansPerSecond);
         // ω⃗ × e⃗, where ω⃗ is angular velocity vector and e⃗ is exit vector
@@ -189,6 +206,34 @@ public class ShootingKinematics implements Periodic {
         shootingParameters = new ShootingParameters(v, phi, theta);
         return true;
     }
+
+    private FuelExitToHub getFuelExitToHub() {
+        Pose2d robotPose2d = robotState.getPose();
+        Pose3d fuelExitPose = new Pose3d(
+                new Pose3d(robotPose2d)
+                        .transformBy(new Transform3d(
+                                fuelExitTranslation,
+                                new Rotation3d()
+                        ))
+                        .getTranslation(),
+                new Rotation3d(
+                        robotPose2d.getRotation()
+                                .plus(fuelExitRotation)
+                )
+        );
+
+        Translation3d hubTranslation = AllianceFlipUtil.apply(FieldConstants.Hub.topCenterPoint);
+        Pose3d hubPose = new Pose3d(hubTranslation, new Rotation3d());
+        return new FuelExitToHub(
+                new Transform3d(fuelExitPose, hubPose),
+                hubPose.getTranslation().toTranslation2d()
+                        .minus(fuelExitPose.getTranslation().toTranslation2d())
+                        .getAngle()
+                        .plus(fuelExitRotation)
+        );
+    }
+
+    private record FuelExitToHub(Transform3d transform, Rotation2d angle) {}
 
     public record ShootingParameters(double velocityRPM, double hoodAngleRad, double headingRad) {}
 }
