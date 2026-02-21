@@ -37,7 +37,7 @@ public class RobotMechanism implements Periodic {
     );
     private static final Transform3d hoodInitial = new Transform3d(
             flywheelsInitial.getTranslation(),
-            new Rotation3d(0.0, Units.degreesToRadians(-90.0), 0.0)
+            new Rotation3d(0.0, Units.degreesToRadians(-90.0), Math.PI)
     );
 
     private static final RobotState robotState = RobotState.get();
@@ -95,7 +95,7 @@ public class RobotMechanism implements Periodic {
 
         Transform3d hoodTransform = hoodInitial.plus(new Transform3d(
                 new Translation3d(),
-                new Rotation3d(0.0, -superstructure.hood.getPositionRad(), 0.0)
+                new Rotation3d(0.0, superstructure.hood.getPositionRad(), 0.0)
         ));
 
         Logger.recordOutput("RobotMechanism/Pose", robotPose);
