@@ -121,7 +121,7 @@ public class ShootingKinematics implements Periodic {
     }
 
     private boolean isValidHoodAngle(double hoodAngleRad) {
-        return hoodAngleRad > Units.degreesToRadians(15) && hoodAngleRad < Units.degreesToRadians(90);
+        return hoodAngleRad > Units.degreesToRadians(15) && hoodAngleRad < Units.degreesToRadians(45);
     }
 
     private boolean updateShootingParametersAutomatic() {
