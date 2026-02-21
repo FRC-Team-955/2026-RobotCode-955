@@ -5,8 +5,6 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.Util;
 import frc.lib.motor.MotorIOInputsAutoLogged;
 import frc.lib.network.LoggedTunableNumber;
@@ -17,7 +15,6 @@ import frc.robot.subsystems.superintake.intakepivot.IntakePivotIO.IntakePivotCur
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.function.DoubleSupplier;
@@ -26,7 +23,7 @@ import static frc.robot.subsystems.superintake.intakepivot.IntakePivotConstants.
 
 public class IntakePivot implements Periodic {
     private static final LoggedTunableNumber profileLookaheadTimeSec = new LoggedTunableNumber("Superintake/IntakePivot/ProfileLookaheadTimeSec", 0.15);
-    private static final LoggedTunableNumber deploySetpointDegrees = new LoggedTunableNumber("Superintake/IntakePivot/Goal/DeployDegrees", 45.0);
+    private static final LoggedTunableNumber stowSetpointDegrees = new LoggedTunableNumber("Superintake/IntakePivot/Goal/StowDegrees", 45.0);
 
     private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
 
@@ -36,8 +33,9 @@ public class IntakePivot implements Periodic {
 
     @RequiredArgsConstructor
     public enum Goal {
-        STOW(() -> 0),
-        DEPLOY(() -> Units.degreesToRadians(deploySetpointDegrees.get())),
+        STOW(() -> Units.degreesToRadians(stowSetpointDegrees.get())),
+        DEPLOY(() -> minPositionRad),
+        HOME(null),
         ;
 
         private final DoubleSupplier setpointRad;
@@ -97,7 +95,9 @@ public class IntakePivot implements Periodic {
     public void periodicAfterCommands() {
         Logger.recordOutput("Superintake/IntakePivot/Goal", goal);
         if (DriverStation.isDisabled()) {
-            io.setStopRequest();
+            io.setVoltageRequest(0.0);
+        } else if (goal == Goal.HOME) {
+            io.setVoltageRequest(-2.0);
         } else {
             // See the comments above the lookaheadState and goalState variables for why we effectively calculate two profiles
 
@@ -130,5 +130,7 @@ public class IntakePivot implements Periodic {
         return inputs.currentAmps >= 10.0;
     }
 
+    public void finishHoming() {
+        io.setEncoderPositionToInitial();
     }
 }

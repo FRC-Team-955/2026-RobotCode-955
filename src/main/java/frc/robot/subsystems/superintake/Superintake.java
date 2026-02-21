@@ -1,26 +1,17 @@
 package frc.robot.subsystems.superintake;
 
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.Util;
 import frc.lib.subsystem.CommandBasedSubsystem;
 import frc.robot.OperatorDashboard;
 import frc.robot.RobotState;
 import frc.robot.subsystems.drive.Drive;
-import frc.robot.subsystems.drive.DriveConstants;
 import frc.robot.subsystems.gamepiecevision.GamePieceVision;
 import frc.robot.subsystems.superintake.intakepivot.IntakePivot;
 import frc.robot.subsystems.superintake.intakerollers.IntakeRollers;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.littletonrobotics.junction.Logger;
-
-import java.util.function.Supplier;
 
 public class Superintake extends CommandBasedSubsystem {
     private static final RobotState robotState = RobotState.get();
@@ -38,16 +29,25 @@ public class Superintake extends CommandBasedSubsystem {
         IDLE,
         INTAKE,
         EJECT,
-        AUTO_INTAKE_SEARCHING,
-        AUTO_INTAKE_SEARCHING_FOR_STALE,
-        AUTO_INTAKE_INTAKING,
+        HOME_INTAKE_PIVOT,
     }
 
     @Getter
     private Goal goal = Goal.IDLE;
 
+    private boolean shouldGoalEnd() {
+        if (goal == Goal.HOME_INTAKE_PIVOT) {
+            if (intakePivot.isCurrentAtThresholdForHoming()) {
+                intakePivot.finishHoming();
+                return true;
+            }
+        }
+        return false;
+    }
+
     public Command setGoal(Goal goal) {
-        return startIdle(() -> this.goal = goal);
+        return startIdle(() -> this.goal = goal)
+                .until(this::shouldGoalEnd);
     }
 
     private static Superintake instance;
@@ -86,6 +86,10 @@ public class Superintake extends CommandBasedSubsystem {
             case EJECT -> {
                 intakePivot.setGoal(IntakePivot.Goal.DEPLOY);
                 intakeRollers.setGoal(IntakeRollers.Goal.EJECT);
+            }
+            case HOME_INTAKE_PIVOT -> {
+                intakePivot.setGoal(IntakePivot.Goal.HOME);
+                intakeRollers.setGoal(IntakeRollers.Goal.IDLE);
             }
         }
     }

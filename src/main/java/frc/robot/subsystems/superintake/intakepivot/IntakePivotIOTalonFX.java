@@ -43,8 +43,8 @@ public class IntakePivotIOTalonFX extends IntakePivotIO {
     }
 
     @Override
-    public void setStopRequest() {
-        motor.setRequest(RequestType.VoltageVolts, 0.0);
+    public void setVoltageRequest(double volts) {
+        motor.setRequest(RequestType.VoltageVolts, volts);
     }
 
     @Override
@@ -55,5 +55,10 @@ public class IntakePivotIOTalonFX extends IntakePivotIO {
             case HOMING -> homingCurrentLimitAmps;
         };
         motor.setCurrentLimit(currentLimitAmps);
+    }
+
+    @Override
+    public void setEncoderPositionToInitial() {
+        motor.setEncoderPosition(initialPositionRad);
     }
 }

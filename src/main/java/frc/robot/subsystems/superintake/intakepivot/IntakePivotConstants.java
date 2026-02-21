@@ -15,6 +15,7 @@ public class IntakePivotConstants {
     static final double initialPositionRad = minPositionRad;
 
     static final double gearRatio = 150;
+
     static final LoggedTunablePIDF gains = switch (BuildConstants.mode) {
         case REAL, REPLAY -> new LoggedTunablePIDF("Superintake/IntakePivot/Gains");
         case SIM ->

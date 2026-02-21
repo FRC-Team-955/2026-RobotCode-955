@@ -22,9 +22,12 @@ public class IntakePivotIO {
     public void setPositionRequest(double positionRad) {
     }
 
-    public void setStopRequest() {
+    public void setVoltageRequest(double volts) {
     }
 
     public void setCurrentLimit(IntakePivotCurrentLimitMode mode) {
+    }
+
+    public void setEncoderPositionToInitial() {
     }
 }

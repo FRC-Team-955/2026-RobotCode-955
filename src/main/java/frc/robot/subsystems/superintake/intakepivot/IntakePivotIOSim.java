@@ -43,12 +43,17 @@ public class IntakePivotIOSim extends IntakePivotIO {
     }
 
     @Override
-    public void setStopRequest() {
-        motor.setRequest(RequestType.VoltageVolts, 0.0);
+    public void setVoltageRequest(double volts) {
+        motor.setRequest(RequestType.VoltageVolts, volts);
     }
 
     @Override
     public void setCurrentLimit(IntakePivotCurrentLimitMode mode) {
         System.out.println("Setting hood current limit to " + mode);
+    }
+
+    @Override
+    public void setEncoderPositionToInitial() {
+        motor.setEncoderPosition(initialPositionRad);
     }
 }
