@@ -35,6 +35,7 @@ import java.util.Queue;
 import static frc.lib.PhoenixUtil.tryUntilOk;
 import static frc.lib.PhoenixUtil.tryUntilOkAsync;
 import static frc.robot.Constants.canivoreBus;
+import static frc.robot.subsystems.drive.DriveConstants.gearRatioConfigs;
 import static frc.robot.subsystems.drive.DriveConstants.moduleConfig;
 
 /**
@@ -96,6 +97,7 @@ public class ModuleIOTalonFXCANcoder extends ModuleIO {
     private final Debouncer turnEncoderConnectedDebounce = new Debouncer(0.5);
 
     public ModuleIOTalonFXCANcoder(
+            int index,
             int driveCanID,
             int turnCanID,
             int cancoderCanID,
@@ -109,7 +111,7 @@ public class ModuleIOTalonFXCANcoder extends ModuleIO {
         driveConfig = new TalonFXConfiguration();
         driveConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
         driveConfig.Slot0 = Slot0Configs.from(moduleConfig.driveGains().toPhoenix());
-        driveConfig.Feedback.SensorToMechanismRatio = moduleConfig.driveGearRatio();
+        driveConfig.Feedback.SensorToMechanismRatio = gearRatioConfigs[index].driveGearRatio();
         driveConfig.TorqueCurrent.PeakForwardTorqueCurrent = moduleConfig.driveCurrentLimit();
         driveConfig.TorqueCurrent.PeakReverseTorqueCurrent = -moduleConfig.driveCurrentLimit();
         driveConfig.CurrentLimits.StatorCurrentLimit = moduleConfig.driveCurrentLimit();
@@ -127,14 +129,14 @@ public class ModuleIOTalonFXCANcoder extends ModuleIO {
         turnConfig.Slot0 = Slot0Configs.from(moduleConfig.turnGains().toPhoenix());
         turnConfig.Feedback.FeedbackRemoteSensorID = cancoderCanID;
         turnConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
-        turnConfig.Feedback.RotorToSensorRatio = moduleConfig.turnGearRatio();
+        turnConfig.Feedback.RotorToSensorRatio = gearRatioConfigs[index].turnGearRatio();
         turnConfig.TorqueCurrent.PeakForwardTorqueCurrent = moduleConfig.turnCurrentLimit();
         turnConfig.TorqueCurrent.PeakReverseTorqueCurrent = -moduleConfig.turnCurrentLimit();
         turnConfig.CurrentLimits.StatorCurrentLimit = moduleConfig.turnCurrentLimit();
         turnConfig.CurrentLimits.StatorCurrentLimitEnable = true;
-        turnConfig.MotionMagic.MotionMagicCruiseVelocity = 100.0 / moduleConfig.turnGearRatio();
+        turnConfig.MotionMagic.MotionMagicCruiseVelocity = 100.0 / gearRatioConfigs[index].turnGearRatio();
         turnConfig.MotionMagic.MotionMagicAcceleration = turnConfig.MotionMagic.MotionMagicCruiseVelocity / 0.100;
-        turnConfig.MotionMagic.MotionMagicExpo_kV = 0.12 * moduleConfig.turnGearRatio();
+        turnConfig.MotionMagic.MotionMagicExpo_kV = 0.12 * gearRatioConfigs[index].turnGearRatio();
         turnConfig.MotionMagic.MotionMagicExpo_kA = 0.1;
         turnConfig.ClosedLoopGeneral.ContinuousWrap = true;
         turnConfig.MotorOutput.Inverted =

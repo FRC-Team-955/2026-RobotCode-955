@@ -13,6 +13,7 @@ import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.COTS;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
+import org.ironmaple.simulation.drivesims.configs.SwerveModuleSimulationConfig;
 import org.littletonrobotics.junction.Logger;
 import org.photonvision.estimation.TargetModel;
 import org.photonvision.simulation.VisionSystemSim;
@@ -28,18 +29,32 @@ public class SimManager {
 
     private static final RobotState robotState = RobotState.get();
 
+    private static SwerveModuleSimulationConfig createConfig(double turnGearRatio) {
+        return new SwerveModuleSimulationConfig(
+                DCMotor.getKrakenX60(1),
+                DCMotor.getNEO(1),
+                (50.0 / 16.0) * (17.0 / 27.0) * (45.0 / 15.0),
+                turnGearRatio,
+                Volts.of(0.1),
+                Volts.of(0.2),
+                Inches.of(2),
+                KilogramSquareMeters.of(0.03),
+                COTS.WHEELS.DEFAULT_NEOPRENE_TREAD.cof
+        );
+    }
+
     public final SwerveDriveSimulation driveSimulation = new SwerveDriveSimulation(
             // Specify Configuration
             DriveTrainSimulationConfig.Default()
                     // Specify gyro type (for realistic gyro drifting and error simulation)
                     .withGyro(COTS.ofPigeon2())
                     // Specify swerve module (for realistic swerve dynamics)
-                    .withSwerveModule(COTS.ofMark4i(
-                            DCMotor.getKrakenX60(1),
-                            DCMotor.getNEO(1),
-                            COTS.WHEELS.DEFAULT_NEOPRENE_TREAD.cof,
-                            2 // L2 Gear ratio
-                    ))
+                    .withSwerveModules(
+                            createConfig(150.0 / 7.0),
+                            createConfig(150.0 / 7.0),
+                            createConfig(18.75),
+                            createConfig(18.75)
+                    )
                     // Configures the track length and track width (spacing between swerve modules)
                     .withTrackLengthTrackWidth(Meters.of(driveConfig.trackLengthMeters()), Meters.of(driveConfig.trackWidthMeters()))
                     // Configures the bumper size (dimensions of the robot bumper)

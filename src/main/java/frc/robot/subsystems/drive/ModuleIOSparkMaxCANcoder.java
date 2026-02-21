@@ -44,6 +44,7 @@ import java.util.Queue;
 import java.util.function.DoubleSupplier;
 
 import static frc.robot.Constants.canivoreBus;
+import static frc.robot.subsystems.drive.DriveConstants.gearRatioConfigs;
 import static frc.robot.subsystems.drive.DriveConstants.moduleConfig;
 
 /**
@@ -78,6 +79,7 @@ public class ModuleIOSparkMaxCANcoder extends ModuleIO {
     private final Debouncer turnEncoderConnectedDebounce = new Debouncer(0.5);
 
     public ModuleIOSparkMaxCANcoder(
+            int index,
             int driveCanID,
             int turnCanID,
             int cancoderCanID,
@@ -100,8 +102,8 @@ public class ModuleIOSparkMaxCANcoder extends ModuleIO {
                 .voltageCompensation(12.0);
         driveConfig
                 .encoder
-                .positionConversionFactor(2 * Math.PI / moduleConfig.driveGearRatio()) // Rotor Rotations -> Wheel Radians
-                .velocityConversionFactor((2 * Math.PI) / 60.0 / moduleConfig.driveGearRatio()) // Rotor RPM -> Wheel Rad/Sec
+                .positionConversionFactor(2 * Math.PI / gearRatioConfigs[index].driveGearRatio()) // Rotor Rotations -> Wheel Radians
+                .velocityConversionFactor((2 * Math.PI) / 60.0 / gearRatioConfigs[index].driveGearRatio()) // Rotor RPM -> Wheel Rad/Sec
                 .uvwMeasurementPeriod(10)
                 .uvwAverageDepth(2);
         driveConfig
@@ -133,8 +135,8 @@ public class ModuleIOSparkMaxCANcoder extends ModuleIO {
                 .voltageCompensation(12.0);
         turnConfig
                 .encoder
-                .positionConversionFactor(2 * Math.PI / moduleConfig.turnGearRatio()) // Rotor Rotations -> Wheel Radians
-                .velocityConversionFactor((2 * Math.PI) / 60.0 / moduleConfig.turnGearRatio()) // Rotor RPM -> Wheel Rad/Sec
+                .positionConversionFactor(2 * Math.PI / gearRatioConfigs[index].turnGearRatio()) // Rotor Rotations -> Wheel Radians
+                .velocityConversionFactor((2 * Math.PI) / 60.0 / gearRatioConfigs[index].turnGearRatio()) // Rotor RPM -> Wheel Rad/Sec
                 .uvwMeasurementPeriod(10)
                 .uvwAverageDepth(2);
         turnConfig

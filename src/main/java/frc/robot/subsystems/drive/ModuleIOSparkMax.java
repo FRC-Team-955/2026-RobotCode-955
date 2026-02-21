@@ -34,6 +34,7 @@ import java.util.Queue;
 import java.util.function.DoubleSupplier;
 
 import static frc.lib.SparkUtil.*;
+import static frc.robot.subsystems.drive.DriveConstants.gearRatioConfigs;
 import static frc.robot.subsystems.drive.DriveConstants.moduleConfig;
 
 /**
@@ -65,6 +66,7 @@ public class ModuleIOSparkMax extends ModuleIO {
     private final Debouncer turnConnectedDebounce = new Debouncer(0.5);
 
     public ModuleIOSparkMax(
+            int index,
             int driveCanID,
             int turnCanID,
             double absoluteEncoderOffsetRad
@@ -86,8 +88,8 @@ public class ModuleIOSparkMax extends ModuleIO {
                 .voltageCompensation(12.0);
         driveConfig
                 .encoder
-                .positionConversionFactor(2 * Math.PI / moduleConfig.driveGearRatio()) // Rotor Rotations -> Wheel Radians
-                .velocityConversionFactor((2 * Math.PI) / 60.0 / moduleConfig.driveGearRatio()) // Rotor RPM -> Wheel Rad/Sec
+                .positionConversionFactor(2 * Math.PI / gearRatioConfigs[index].driveGearRatio()) // Rotor Rotations -> Wheel Radians
+                .velocityConversionFactor((2 * Math.PI) / 60.0 / gearRatioConfigs[index].driveGearRatio()) // Rotor RPM -> Wheel Rad/Sec
                 .uvwMeasurementPeriod(10)
                 .uvwAverageDepth(2);
         driveConfig
