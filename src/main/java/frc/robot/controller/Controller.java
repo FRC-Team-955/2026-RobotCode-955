@@ -1,4 +1,4 @@
-package frc.robot;
+package frc.robot.controller;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -6,7 +6,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Alert;
-import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
@@ -14,23 +13,17 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.AllianceFlipUtil;
 import frc.lib.Util;
-import frc.lib.controller.CommandSteamInputController;
 import frc.lib.subsystem.Periodic;
+import frc.robot.BuildConstants;
 import lombok.Getter;
 
 import static frc.robot.subsystems.drive.DriveConstants.*;
 
 public class Controller implements Periodic {
-    private enum ControllerType {
-        NOT_CHOSEN,
-        PS5,
-        XBOX,
-    }
+    private final ControllerIO io = BuildConstants.mode == BuildConstants.Mode.SIM
+            ? new ControllerIOXbox(new CommandXboxController(0))
+            : new ControllerIOPS5(new CommandPS5Controller(0));
 
-    private final CommandPS5Controller ps5Controller = new CommandPS5Controller(0);
-    private CommandXboxController xboxController;
-
-    private final Alert typeNotChosenAlert = new Alert("Driver controller type has not been chosen!", Alert.AlertType.kError);
     private final Alert disconnectedAlert = new Alert("Driver controller is not connected!", Alert.AlertType.kError);
 
     // Intermediates - used in assist calculations
@@ -58,22 +51,12 @@ public class Controller implements Periodic {
             Util.error("Duplicate Controller created");
         }
 
-        if (BuildConstants.mode == BuildConstants.Mode.SIM && System.getProperty("os.name").contains("Mac OS X")) {
-            controller = new CommandSteamInputController(0);
-//            controller = new CommandNintendoSwitchProController(0);
-        } else {
-            controller = new CommandXboxController(0);
-        }
+        System.out.println("Name of controller IO is " + io.getClass().getSimpleName());
     }
 
     @Override
     public void periodicBeforeCommands() {
-        typeNotChosenAlert.set(ps5Controller == null && xboxController == null);
-        disconnectedAlert.set(!controller.isConnected());
-
-        if (ps5Controller != null && xboxController != null) {
-            Util.error("");
-        }
+        disconnectedAlert.set(!io.isConnected());
 
         updateDriveSetpoint();
     }
@@ -81,11 +64,11 @@ public class Controller implements Periodic {
     private void updateDriveSetpoint() {
         // https://docs.wpilib.org/en/stable/docs/software/basic-programming/coordinate-system.html
         // forward on joystick is negative y - we want positive x for forward
-        double x = -controller.getLeftY();
+        double x = -io.getLeftY();
         // right on joystick is positive x - we want negative y for right
-        double y = -controller.getLeftX();
+        double y = -io.getLeftX();
         // right on joystick is positive x - we want negative x for right (CCW is positive)
-        double omega = -controller.getRightX();
+        double omega = -io.getRightX();
 
 //        Logger.recordOutput("Controller/Drive/Suppliers/X", x);
 //        Logger.recordOutput("Controller/Drive/Suppliers/Y", y);
@@ -173,49 +156,33 @@ public class Controller implements Periodic {
 
     public Command rumble(double value, double timeSeconds) {
         return Commands.startEnd(
-                () -> controller.setRumble(GenericHID.RumbleType.kBothRumble, value),
-                () -> controller.setRumble(GenericHID.RumbleType.kBothRumble, 0)
+                () -> io.setRumble(value),
+                () -> io.setRumble(0)
         ).withTimeout(timeSeconds);
     }
 
     public Trigger a() {
-        return controller.a();
+        return io.a();
     }
 
     public Trigger b() {
-        return controller.b();
+        return io.b();
     }
 
     public Trigger x() {
-        return controller.x();
+        return io.x();
     }
 
     public Trigger y() {
-        return controller.y();
+        return io.y();
     }
 
     public Trigger leftBumper() {
-        return controller.leftBumper();
+        return io.leftBumper();
     }
 
     public Trigger rightBumper() {
-        return controller.rightBumper();
-    }
-
-    public Trigger back() {
-        return controller.back();
-    }
-
-    public Trigger start() {
-        return controller.start();
-    }
-
-    public Trigger leftStick() {
-        return controller.leftStick();
-    }
-
-    public Trigger rightStick() {
-        return controller.rightStick();
+        return io.rightBumper();
     }
 
     /**
@@ -223,7 +190,7 @@ public class Controller implements Periodic {
      * will be true when the axis value is greater than 0.5.
      */
     public Trigger leftTrigger() {
-        return controller.leftTrigger();
+        return io.leftTrigger();
     }
 
     /**
@@ -231,50 +198,6 @@ public class Controller implements Periodic {
      * will be true when the axis value is greater than 0.5.
      */
     public Trigger rightTrigger() {
-        return controller.rightTrigger();
-    }
-
-    /**
-     * Get the X axis value of left side of the controller. Right is positive.
-     */
-    public double getLeftX() {
-        return controller.getLeftX();
-    }
-
-    /**
-     * Get the X axis value of right side of the controller. Right is positive.
-     */
-    public double getRightX() {
-        return controller.getRightX();
-    }
-
-    /**
-     * Get the Y axis value of left side of the controller. Back is positive.
-     */
-    public double getLeftY() {
-        return controller.getLeftY();
-    }
-
-    /**
-     * Get the Y axis value of right side of the controller. Back is positive.
-     */
-    public double getRightY() {
-        return controller.getRightY();
-    }
-
-    /**
-     * Get the left trigger axis value of the controller. Note that this axis is bound to the
-     * range of [0, 1] as opposed to the usual [-1, 1].
-     */
-    public double getLeftTriggerAxis() {
-        return controller.getLeftTriggerAxis();
-    }
-
-    /**
-     * Get the right trigger axis value of the controller. Note that this axis is bound to the
-     * range of [0, 1] as opposed to the usual [-1, 1].
-     */
-    public double getRightTriggerAxis() {
-        return controller.getRightTriggerAxis();
+        return io.rightTrigger();
     }
 }

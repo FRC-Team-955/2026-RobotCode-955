@@ -7,6 +7,7 @@ import frc.lib.Util;
 import frc.lib.network.LoggedNetworkBooleanExt;
 import frc.lib.subsystem.Periodic;
 import frc.robot.autos.AutoManager;
+import frc.robot.controller.Controller;
 import frc.robot.subsystems.drive.DriveConstants;
 import lombok.Getter;
 import org.littletonrobotics.junction.Logger;
