@@ -119,14 +119,22 @@ public class Superstructure extends CommandBasedSubsystem {
             }
             case SPINUP, SHOOT -> {
                 hood.setGoal(Hood.Goal.SHOOT);
-                if (hasFuelDebouncer.calculate(inputs.canrangeDistanceMeters < hasFuelThresholdMeters.get())) {
+                if (
+                        operatorDashboard.disableCANrange.get() ||
+                                hasFuelDebouncer.calculate(inputs.canrangeDistanceMeters < hasFuelThresholdMeters.get())
+                ) {
                     flywheel.setGoal(Flywheel.Goal.SHOOT);
                 } else {
                     flywheel.setGoal(Flywheel.Goal.IDLE);
                 }
 
-                boolean shouldShoot = shootingKinematics.isShootingParametersMet() ||
-                        commitToShotDebouncer.calculate(inputs.canrangeDistanceMeters < commitToShotThresholdMeters.get());
+                boolean shouldShoot = (
+                        shootingKinematics.isShootingParametersMet() ||
+                                commitToShotDebouncer.calculate(inputs.canrangeDistanceMeters < commitToShotThresholdMeters.get())
+                ) || (
+                        shootingKinematics.isShootingParametersMet() &&
+                                operatorDashboard.disableCANrange.get()
+                );
                 if (goal == Goal.SHOOT && shouldShoot) {
 //                    flywheel.setCurrentLimitMode(FlywheelCurrentLimitMode.SHOOT);
                     feeder.setGoal(Feeder.Goal.FEED);
