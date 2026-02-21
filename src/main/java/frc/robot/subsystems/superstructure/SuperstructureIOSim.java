@@ -85,10 +85,10 @@ public class SuperstructureIOSim extends SuperstructureIO {
         if (gamePiecesInHopper > 0) {
             inputs.canrangeDistanceMeters = Timer.getTimestamp() - lastShotTimestamp < ballShootDelay * 0.5
                     ? Units.inchesToMeters(5.0)
-                    : Units.inchesToMeters(15.0);
+                    : 0.3;
             inputs.canrangeMeasurementHealth = MeasurementHealthValue.Good;
         } else {
-            inputs.canrangeDistanceMeters = Units.inchesToMeters(20.0);
+            inputs.canrangeDistanceMeters = 0.4;
             inputs.canrangeMeasurementHealth = MeasurementHealthValue.Bad;
         }
 
