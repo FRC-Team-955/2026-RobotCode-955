@@ -90,7 +90,7 @@ public class MotorIOArmSim extends MotorIO {
             }
             case VoltageVolts -> {
                 closedLoop = false;
-                appliedVolts = 0.0;
+                appliedVolts = value;
             }
             default -> Util.error("Motor should only use PositionRad");
         }
