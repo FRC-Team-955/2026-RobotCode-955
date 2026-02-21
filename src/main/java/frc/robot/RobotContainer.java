@@ -83,7 +83,7 @@ public class RobotContainer {
     private void configureBindings() {
         controller.y().onTrue(robotState.resetRotation());
 
-        var shouldAutoAim = new Trigger(() -> operatorDashboard.getSelectedScoringMode() == OperatorDashboard.ScoringMode.ShootAndPassAutomatic);
+        var shouldAutoAim = new Trigger(() -> operatorDashboard.getSelectedScoringMode() == OperatorDashboard.ScoringMode.ShootAndPassAutomatic || !operatorDashboard.manualAiming.get());
         controller.leftTrigger()
                 .and(shouldAutoAim)
                 .whileTrue(Commands.parallel(
