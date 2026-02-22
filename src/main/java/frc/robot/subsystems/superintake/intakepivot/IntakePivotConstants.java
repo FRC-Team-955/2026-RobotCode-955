@@ -8,7 +8,7 @@ import frc.lib.network.LoggedTunablePIDF;
 import frc.robot.BuildConstants;
 
 public class IntakePivotConstants {
-    static final TrapezoidProfile.Constraints constraints = new TrapezoidProfile.Constraints(1, 3);
+    static final TrapezoidProfile.Constraints constraints = new TrapezoidProfile.Constraints(3, 8);
 
     static final double minPositionRad = Units.degreesToRadians(16.827716);
     static final double maxPositionRad = Units.degreesToRadians(95.554559);
@@ -17,7 +17,9 @@ public class IntakePivotConstants {
     static final double gearRatio = 150;
 
     static final LoggedTunablePIDF gains = switch (BuildConstants.mode) {
-        case REAL, REPLAY -> new LoggedTunablePIDF("Superintake/IntakePivot/Gains");
+        case REAL, REPLAY -> new LoggedTunablePIDF("Superintake/IntakePivot/Gains")
+                .withP(15.0)
+                .withG(0.0, GravityTypeValue.Arm_Cosine);
         case SIM -> new LoggedTunablePIDF("Superintake/IntakePivot/Gains")
                 .withP(20.0)
                 .withG(2.65, GravityTypeValue.Arm_Cosine);
@@ -27,7 +29,7 @@ public class IntakePivotConstants {
         return switch (BuildConstants.mode) {
             case REAL -> new IntakePivotIOTalonFX(
                     14,
-                    true
+                    false
             );
             case SIM -> new IntakePivotIOSim(
                     0.0768892879,

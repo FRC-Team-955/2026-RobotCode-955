@@ -125,8 +125,10 @@ public class Superstructure extends CommandBasedSubsystem {
             case SPINUP, SHOOT -> {
                 hood.setGoal(Hood.Goal.SHOOT);
                 if (
-                        operatorDashboard.disableCANrange.get() ||
-                                hasFuelDebouncer.calculate(inputs.canrangeDistanceMeters < hasFuelThresholdMeters.get())
+                        goal == Goal.SHOOT && (
+                                operatorDashboard.disableCANrange.get() ||
+                                        hasFuelDebouncer.calculate(inputs.canrangeDistanceMeters < hasFuelThresholdMeters.get())
+                        )
                 ) {
                     flywheel.setGoal(Flywheel.Goal.SHOOT);
                 } else {

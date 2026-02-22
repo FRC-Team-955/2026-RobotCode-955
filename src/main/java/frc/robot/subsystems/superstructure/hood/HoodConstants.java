@@ -1,5 +1,6 @@
 package frc.robot.subsystems.superstructure.hood;
 
+import com.ctre.phoenix6.signals.GravityTypeValue;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
@@ -16,15 +17,18 @@ public class HoodConstants {
 
     static final double gearRatio = 50.0 * (220.0 / 20.0);
     static final LoggedTunablePIDF gains = switch (BuildConstants.mode) {
-        case REAL, REPLAY -> new LoggedTunablePIDF("Superstructure/Hood/Gains");
-        case SIM -> new LoggedTunablePIDF("Superstructure/Hood/Gains").withP(18.9);
+        case REAL, REPLAY -> new LoggedTunablePIDF("Superstructure/Hood/Gains")
+                .withP(4)
+                .withG(0.1, GravityTypeValue.Arm_Cosine);
+        case SIM -> new LoggedTunablePIDF("Superstructure/Hood/Gains")
+                .withP(18.9);
     };
 
     static HoodIO createIO() {
         return switch (BuildConstants.mode) {
             case REAL -> new HoodIOSparkMax(
                     10,
-                    false
+                    true
             );
             case SIM -> new HoodIOSim(
                     0.01,

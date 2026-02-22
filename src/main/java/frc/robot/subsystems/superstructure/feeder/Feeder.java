@@ -19,7 +19,7 @@ import java.util.function.DoubleSupplier;
 import static frc.robot.subsystems.superstructure.feeder.FeederConstants.createIO;
 
 public class Feeder implements Periodic {
-    private static final LoggedTunableNumber feedVoltage = new LoggedTunableNumber("Superstructure/Feeder/Goal/FeedVoltage", 3.0);
+    private static final LoggedTunableNumber feedVoltage = new LoggedTunableNumber("Superstructure/Feeder/Goal/FeedVoltage", 12.0);
     private static final LoggedTunableNumber ejectVoltage = new LoggedTunableNumber("Superstructure/Feeder/Goal/EjectVoltage", -3.0);
 
     private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();

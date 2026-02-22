@@ -128,7 +128,7 @@ public class RobotContainer {
                 .onTrue(superintake.setGoal(Superintake.Goal.HOME_INTAKE_PIVOT));
         new Trigger(operatorDashboard.homeIntakePivot::get)
                 .and(DriverStation::isDisabled)
-                .onTrue(Commands.runOnce(superintake.intakePivot::finishHoming));
+                .onTrue(Commands.runOnce(superintake.intakePivot::finishHoming).ignoringDisable(true));
 
         new Trigger(operatorDashboard.homeHood::get)
                 .onTrue(Commands.runOnce(() -> operatorDashboard.homeHood.set(false)));
@@ -137,7 +137,7 @@ public class RobotContainer {
                 .onTrue(superstructure.setGoal(Superstructure.Goal.HOME_HOOD));
         new Trigger(operatorDashboard.homeHood::get)
                 .and(DriverStation::isDisabled)
-                .onTrue(Commands.runOnce(superstructure.hood::finishHoming));
+                .onTrue(Commands.runOnce(superstructure.hood::finishHoming).ignoringDisable(true));
     }
 
     /**
