@@ -122,16 +122,22 @@ public class RobotContainer {
                 );
 
         new Trigger(operatorDashboard.homeIntakePivot::get)
-                .onTrue(Commands.parallel(
-                        Commands.runOnce(() -> operatorDashboard.homeIntakePivot.set(false)),
-                        superintake.setGoal(Superintake.Goal.HOME_INTAKE_PIVOT)
-                ));
+                .onTrue(Commands.runOnce(() -> operatorDashboard.homeIntakePivot.set(false)));
+        new Trigger(operatorDashboard.homeIntakePivot::get)
+                .and(DriverStation::isEnabled)
+                .onTrue(superintake.setGoal(Superintake.Goal.HOME_INTAKE_PIVOT));
+        new Trigger(operatorDashboard.homeIntakePivot::get)
+                .and(DriverStation::isDisabled)
+                .onTrue(Commands.runOnce(superintake.intakePivot::finishHoming));
 
         new Trigger(operatorDashboard.homeHood::get)
-                .onTrue(Commands.parallel(
-                        Commands.runOnce(() -> operatorDashboard.homeHood.set(false)),
-                        superstructure.setGoal(Superstructure.Goal.HOME_HOOD)
-                ));
+                .onTrue(Commands.runOnce(() -> operatorDashboard.homeHood.set(false)));
+        new Trigger(operatorDashboard.homeHood::get)
+                .and(DriverStation::isEnabled)
+                .onTrue(superstructure.setGoal(Superstructure.Goal.HOME_HOOD));
+        new Trigger(operatorDashboard.homeHood::get)
+                .and(DriverStation::isDisabled)
+                .onTrue(Commands.runOnce(superstructure.hood::finishHoming));
     }
 
     /**
