@@ -50,10 +50,12 @@ public class OperatorDashboard implements Periodic {
     private final EnumMap<ScoringMode, LoggedNetworkBooleanExt> scoringModeToggles = generateTogglesForEnum("ScoringMode", ScoringMode.values(), ScoringMode.class);
 
     // Alerts
+    public final Alert intakePivotNotHomedAlert = new Alert("Intake pivot has not been homed!", Alert.AlertType.kError);
+    public final Alert hoodNotHomedAlert = new Alert("Hood has not been homed!", Alert.AlertType.kError);
     private final Alert coastOverrideAlert = new Alert("Coast override is enabled.", Alert.AlertType.kWarning);
     private final Alert autoNotChosenAlert = new Alert("Auto is not chosen!", Alert.AlertType.kError);
 
-    private final Alert autoNotAlignedAlert = new Alert("Robot is not aligned for auto!", Alert.AlertType.kWarning);
+    private final Alert autoNotAlignedAlert = new Alert("Robot is not aligned for auto!", Alert.AlertType.kError);
     @SuppressWarnings("FieldCanBeLocal")
     private final Alert constantSetAlert = new Alert("Constants are set.", Alert.AlertType.kInfo);
     private final Alert batteryVoltageAlert = new Alert("Battery is below 12 volts!", Alert.AlertType.kError);
@@ -78,6 +80,9 @@ public class OperatorDashboard implements Periodic {
         if (instance != null) {
             Util.error("Duplicate OperatorDashboard created");
         }
+
+        intakePivotNotHomedAlert.set(true);
+        hoodNotHomedAlert.set(true);
 
         if (BuildConstants.tuningMode || DriveConstants.disableDriving || DriveConstants.disableGyro) {
             constantSetAlert.set(true);

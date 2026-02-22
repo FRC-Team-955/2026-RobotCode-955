@@ -153,5 +153,6 @@ public class Hood implements Periodic {
 
     public void finishHoming() {
         io.setEncoderPositionToInitial();
+        operatorDashboard.hoodNotHomedAlert.set(false);
     }
 }
