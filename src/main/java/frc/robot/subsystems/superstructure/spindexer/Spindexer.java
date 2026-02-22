@@ -2,6 +2,7 @@ package frc.robot.subsystems.superstructure.spindexer;
 
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Timer;
 import frc.lib.Util;
 import frc.lib.motor.MotorIO;
 import frc.lib.motor.MotorIOInputsAutoLogged;
@@ -30,7 +31,7 @@ public class Spindexer implements Periodic {
     @RequiredArgsConstructor
     public enum Goal {
         IDLE(() -> 0, RequestType.VoltageVolts),
-        FEED(feedVoltage::get, RequestType.VoltageVolts),
+        FEED(() -> Timer.getTimestamp() % 2.0 < 0.2 ? -feedVoltage.get() : feedVoltage.get(), RequestType.VoltageVolts),
         EJECT(ejectVoltage::get, RequestType.VoltageVolts),
         ;
 
