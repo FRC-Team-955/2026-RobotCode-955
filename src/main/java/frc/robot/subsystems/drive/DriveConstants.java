@@ -120,10 +120,10 @@ public class DriveConstants {
             // to the absolute encoder offset parameter in the IO layer constructor.
             // Module order: FL, FR, BL, BR
             case REAL -> new ModuleIO[]{
-                    new ModuleIOTalonFXSparkMaxCANcoder(0, 1, 1, 5, 1.577),
-                    new ModuleIOTalonFXSparkMaxCANcoder(1, 2, 2, 6, 1.770),
-                    new ModuleIOTalonFXSparkMaxCANcoder(2, 3, 3, 7, 3.105),
-                    new ModuleIOTalonFXSparkMaxCANcoder(3, 4, 4, 8, -2.817),
+                    new ModuleIOTalonFXSparkMaxCANcoder(0, 2, 1, 9, 0),
+                    new ModuleIOTalonFXSparkMaxCANcoder(1, 4, 3, 10, 0),
+                    new ModuleIOTalonFXSparkMaxCANcoder(2, 6, 5, 11, 0),
+                    new ModuleIOTalonFXSparkMaxCANcoder(3, 8, 7, 12, 0),
             };
             case SIM -> new ModuleIO[]{
                     new ModuleIOSim(0),
@@ -137,7 +137,7 @@ public class DriveConstants {
 
     static GyroIO createGyroIO() {
         return switch (BuildConstants.mode) {
-            case REAL -> new GyroIOPigeon2(9);
+            case REAL -> new GyroIOPigeon2(18);
             case SIM -> new GyroIOSim();
             case REPLAY -> new GyroIO();
         };

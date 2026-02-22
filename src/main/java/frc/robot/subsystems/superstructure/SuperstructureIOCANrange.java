@@ -13,7 +13,7 @@ import frc.lib.PhoenixUtil;
 import frc.robot.Constants;
 
 public class SuperstructureIOCANrange extends SuperstructureIO {
-    private final CANrange canrange = new CANrange(-1, Constants.canivoreBus);
+    private final CANrange canrange = new CANrange(17, Constants.canivoreBus);
 
     private final StatusSignal<Distance> distance;
     private final StatusSignal<Distance> distanceStdDev;

@@ -13,7 +13,7 @@ public class SpindexerConstants {
     static MotorIO createIO() {
         return switch (BuildConstants.mode) {
             case REAL -> new MotorIOTalonFX(
-                    -1,
+                    13,
                     true,
                     NeutralModeValue.Coast,
                     40,

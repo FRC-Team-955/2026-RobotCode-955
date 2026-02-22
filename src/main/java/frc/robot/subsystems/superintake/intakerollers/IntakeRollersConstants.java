@@ -13,7 +13,7 @@ public class IntakeRollersConstants {
     static MotorIO createIO() {
         return switch (BuildConstants.mode) {
             case REAL -> new MotorIOTalonFX(
-                    -1,
+                    15,
                     true,
                     NeutralModeValue.Coast,
                     40,

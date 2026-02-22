@@ -26,7 +26,7 @@ public class IntakePivotConstants {
     static IntakePivotIO createIO() {
         return switch (BuildConstants.mode) {
             case REAL -> new IntakePivotIOTalonFX(
-                    -1,
+                    14,
                     true
             );
             case SIM -> new IntakePivotIOSim(
