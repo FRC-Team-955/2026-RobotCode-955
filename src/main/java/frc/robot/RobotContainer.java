@@ -96,7 +96,6 @@ public class RobotContainer {
                         superstructure.setGoal(Superstructure.Goal.SHOOT)
                 ));
 
-
         controller.rightTrigger()
                 .whileTrue(
                         superintake.setGoal(Superintake.Goal.INTAKE)
@@ -120,6 +119,12 @@ public class RobotContainer {
 //
 //                                ))
                 );
+
+        controller.a()
+                .whileTrue(Commands.parallel(
+                        superintake.setGoal(Superintake.Goal.EJECT),
+                        superstructure.setGoal(Superstructure.Goal.EJECT)
+                ));
 
         new Trigger(operatorDashboard.homeIntakePivot::get)
                 .onTrue(Commands.runOnce(() -> operatorDashboard.homeIntakePivot.set(false)).ignoringDisable(true));

@@ -21,7 +21,7 @@ import static frc.robot.subsystems.superstructure.spindexer.SpindexerConstants.c
 
 public class Spindexer implements Periodic {
     private static final LoggedTunableNumber feedVoltage = new LoggedTunableNumber("Superstructure/Spindexer/Goal/FeedVoltage", 6.7);
-    private static final LoggedTunableNumber ejectVoltage = new LoggedTunableNumber("Superstructure/Spindexer/Goal/EjectVoltage", -3.0);
+    private static final LoggedTunableNumber ejectVoltage = new LoggedTunableNumber("Superstructure/Spindexer/Goal/EjectVoltage", -12.0);
 
     private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
 

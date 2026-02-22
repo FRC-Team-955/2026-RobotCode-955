@@ -27,7 +27,6 @@ import static frc.robot.subsystems.superstructure.hood.HoodConstants.*;
 public class Hood implements Periodic {
     private static final LoggedTunableNumber profileLookaheadTimeSec = new LoggedTunableNumber("Superstructure/Hood/ProfileLookaheadTimeSec", 0.15);
     private static final LoggedTunableNumber stowSetpointDegrees = new LoggedTunableNumber("Superstructure/Hood/Goal/StowDegrees", 45.0);
-    private static final LoggedTunableNumber ejectSetpointDegrees = new LoggedTunableNumber("Superstructure/Hood/Goal/EjectDegrees", 45.0);
 
     private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
     private static final ShootingKinematics shootingKinematics = ShootingKinematics.get();
@@ -40,7 +39,7 @@ public class Hood implements Periodic {
     public enum Goal {
         STOW(() -> Units.degreesToRadians(stowSetpointDegrees.get())),
         SHOOT(() -> shootingKinematics.getShootingParameters().hoodAngleRad()),
-        EJECT(() -> Units.degreesToRadians(ejectSetpointDegrees.get())),
+        EJECT(() -> minPositionRad),
         HOME(null),
         ;
 
