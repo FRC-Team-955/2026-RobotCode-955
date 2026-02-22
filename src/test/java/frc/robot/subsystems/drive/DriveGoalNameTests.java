@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class DriveGoalNameTests {
     @Test
     void driveGoalTests() {
-        assertEquals(new DriveJoystickGoal().loggableName, "DRIVE_JOYSTICK");
+        assertEquals(new DriveJoystickGoal(false).loggableName, "DRIVE_JOYSTICK");
         assertEquals(new FollowTrajectoryGoal(null).loggableName, "FOLLOW_TRAJECTORY");
     }
 }
