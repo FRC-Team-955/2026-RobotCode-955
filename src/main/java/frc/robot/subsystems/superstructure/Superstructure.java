@@ -5,6 +5,7 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.Util;
 import frc.lib.network.LoggedTunableNumber;
@@ -80,6 +81,8 @@ public class Superstructure extends CommandBasedSubsystem {
     private final Debouncer hasFuelDebouncer = new Debouncer(3.0, Debouncer.DebounceType.kFalling);
     private final Debouncer commitToShotDebouncer = new Debouncer(commitToShotTimeSeconds.get(), Debouncer.DebounceType.kFalling);
 
+    private final Alert canrangeDisconnectedAlert = new Alert("CANrange is disconnected.", Alert.AlertType.kError);
+
     private static Superstructure instance;
 
     public static synchronized Superstructure get() {
@@ -100,6 +103,8 @@ public class Superstructure extends CommandBasedSubsystem {
     public void periodicBeforeCommands() {
         io.updateInputs(inputs);
         Logger.processInputs("Inputs/Superstructure", inputs);
+
+        canrangeDisconnectedAlert.set(!inputs.canrangeConnected);
 
         if (commitToShotTimeSeconds.hasChanged()) {
             commitToShotDebouncer.setDebounceTime(commitToShotTimeSeconds.get());
