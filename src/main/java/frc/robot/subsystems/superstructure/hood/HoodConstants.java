@@ -14,7 +14,7 @@ public class HoodConstants {
     static final double initialPositionRad = minPositionRad;
     static final double maxPositionUnderTrench = Units.degreesToRadians(35.0);
 
-    static final double gearRatio = 120;
+    static final double gearRatio = 50.0 * (220.0 / 20.0);
     static final LoggedTunablePIDF gains = switch (BuildConstants.mode) {
         case REAL, REPLAY -> new LoggedTunablePIDF("Superstructure/Hood/Gains");
         case SIM -> new LoggedTunablePIDF("Superstructure/Hood/Gains").withP(18.9);
