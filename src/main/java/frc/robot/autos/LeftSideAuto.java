@@ -21,6 +21,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;
 
+import static frc.robot.subsystems.drive.DriveConstants.defaultMoveToConstraints;
+
 public final class LeftSideAuto {
     private LeftSideAuto() {
     }
@@ -82,11 +84,11 @@ public final class LeftSideAuto {
 
             return robotState.isAtPoseWithTolerance(
                     currentGoal.get(),
-                    DriveConstants.moveToConfig.linearPositionToleranceMeters(),
+                    DriveConstants.moveToConfig.linearPositionToleranceMeters().get(),
                     Math.PI * 2)
                     && robotState.isMeasuredChassisSpeedsBelowTolerance(
-                    DriveConstants.defaultMoveToConstraints.linearVelocityToleranceMetersPerSec(),
-                    DriveConstants.defaultMoveToConstraints.angularVelocityToleranceRadPerSec());
+                    DriveConstants.moveToConfig.linearVelocityToleranceMetersPerSec().get(),
+                    DriveConstants.moveToConfig.angularVelocityToleranceRadPerSec().get());
         };
 
         AtomicReference<Boolean> onInterpolationLine = new AtomicReference<>(false);
@@ -170,11 +172,11 @@ public final class LeftSideAuto {
                 superstructure.setGoal(Superstructure.Goal.SHOOT)
         ).onlyWhile(DriverStation::isAutonomousEnabled);
 
-        Command driveMoveTo = drive.moveTo(currentGoal::get, false);
+        Command driveMoveTo = drive.moveTo(currentGoal::get, defaultMoveToConstraints);
         Command driveMoveToWithAiming = drive.moveTo(() -> {
             Pose2d goal = currentGoal.get();
             return new Pose2d(goal.getTranslation(), Rotation2d.fromRadians(ShootingKinematics.get().getShootingParameters().headingRad()));
-        }, false);
+        }, defaultMoveToConstraints);
 
         return Commands.sequence(
                 setInitialPose,

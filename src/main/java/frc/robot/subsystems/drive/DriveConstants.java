@@ -56,15 +56,15 @@ public class DriveConstants {
     public static final MoveToConstraints defaultMoveToConstraints = new MoveToConstraints(
             new LoggedTunableNumber("Drive/MoveTo/MaxLinearVelocity", driveConfig.maxVelocityMetersPerSec()),
             new LoggedTunableNumber("Drive/MoveTo/MaxLinearAcceleration", 15.0),
-            new LoggedTunableNumber(maxAngularVelocityRadPerSec),
-            new LoggedTunableNumber(30.0)
+            new LoggedTunableNumber("Drive/MoveTo/MaxAngularVelocity", maxAngularVelocityRadPerSec),
+            new LoggedTunableNumber("Drive/MoveTo/maxAngularAcceleration", 30.0)
     );
 
     public static final MoveToConfig moveToConfig = new MoveToConfig(
-            new LoggedTunableNumber(0.02),
-            new LoggedTunableNumber(0.1),
-            new LoggedTunableNumber(Units.degreesToRadians(2)),
-            new LoggedTunableNumber(Units.degreesToRadians(10))
+            new LoggedTunableNumber("linearPositionTolerance",0.02),
+            new LoggedTunableNumber("linearVelocityToleranceMeters", 0.1),
+            new LoggedTunableNumber("angularPositionTolerance", Units.degreesToRadians(2)),
+            new LoggedTunableNumber("angularVelocityTolerance", Units.degreesToRadians(10))
     );
 
     public static final double joystickMaxAngularSpeedRadPerSec = Math.min(Units.degreesToRadians(500), maxAngularVelocityRadPerSec);

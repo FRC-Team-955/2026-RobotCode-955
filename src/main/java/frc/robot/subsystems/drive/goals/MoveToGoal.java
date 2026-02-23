@@ -1,18 +1,26 @@
 package frc.robot.subsystems.drive.goals;
 
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import frc.lib.SlewRateLimiter2d;
+import frc.lib.network.LoggedTunableNumber;
 import frc.robot.RobotState;
 import frc.robot.controller.Controller;
 import frc.robot.subsystems.drive.DriveConstants;
 import frc.robot.subsystems.drive.DriveGoal;
 import frc.robot.subsystems.drive.DriveRequest;
 import lombok.RequiredArgsConstructor;
+import org.littletonrobotics.junction.Logger;
 
 import java.util.function.Supplier;
 
 @RequiredArgsConstructor
 public class MoveToGoal extends DriveGoal {
-    private static final LoggedTunableNumber maxAccelerationMetersPerSecPerSec = new LoggedTunableNumber("Drive/MoveTo/MaxAccelerationMetersPerSecPerSec", defaultMoveToConfig.maxAccelerationMetersPerSecPerSec());
+    private static final LoggedTunableNumber maxAccelerationMetersPerSecPerSec = new LoggedTunableNumber("Drive/MoveTo/MaxAccelerationMetersPerSecPerSec", DriveConstants.defaultMoveToConstraints.maxLinearAccelerationMetersPerSecPerSec().get());
 
     private static final RobotState robotState = RobotState.get();
     private static final Controller controller = Controller.get();
@@ -20,26 +28,26 @@ public class MoveToGoal extends DriveGoal {
     private final Supplier<Pose2d> poseSupplier;
     private final DriveConstants.MoveToConstraints config;
 
-    private final PIDController moveToLinear = defaultMoveToConfig.linear()
+    private final PIDController moveToLinear = DriveConstants.moveToLinear
             .toPID(
-                    defaultMoveToConfig.linearPositionToleranceMeters(),
-                    defaultMoveToConfig.linearVelocityToleranceMetersPerSec()
+                    DriveConstants.moveToConfig.linearPositionToleranceMeters().get(),
+                    DriveConstants.moveToConfig.linearVelocityToleranceMetersPerSec().get()
             );
     private final SlewRateLimiter2d moveToLinearAccelerationLimiter = new SlewRateLimiter2d(maxAccelerationMetersPerSecPerSec.get(), robotState.getMeasuredChassisSpeeds());
 
-    private final PIDController moveToAngular = defaultMoveToConfig.angular()
+    private final PIDController moveToAngular = DriveConstants.moveToAngular
             .toPIDWrapRadians(
-                    defaultMoveToConfig.angularPositionToleranceRad(),
-                    defaultMoveToConfig.angularVelocityToleranceRadPerSec()
+                    DriveConstants.moveToConfig.angularPositionToleranceRad().get(),
+                    DriveConstants.moveToConfig.angularVelocityToleranceRadPerSec().get()
             );
 
     @Override
     public DriveRequest getRequest() {
-        if (defaultMoveToConfig.linear().hasChanged()) {
-            defaultMoveToConfig.linear().applyPID(moveToLinear);
+        if (DriveConstants.moveToLinear.hasChanged()) {
+            DriveConstants.moveToLinear.applyPID(moveToLinear);
         }
-        if (defaultMoveToConfig.angular().hasChanged()) {
-            defaultMoveToConfig.angular().applyPID(moveToAngular);
+        if (DriveConstants.moveToAngular.hasChanged()) {
+            DriveConstants.moveToAngular.applyPID(moveToAngular);
         }
         if (maxAccelerationMetersPerSecPerSec.hasChanged()) {
             moveToLinearAccelerationLimiter.setLimit(maxAccelerationMetersPerSecPerSec.get());
@@ -88,7 +96,7 @@ public class MoveToGoal extends DriveGoal {
 
         // Scale linear speed by angular speed so that angular change is prioritized
         // When going max angular speed, reduce linear to 50%
-        double linearScalar = MathUtil.clamp(1 - angularVelocityRadPerSec / maxAngularVelocityRadPerSec, 0.50, 1);
+        double linearScalar = MathUtil.clamp(1 - angularVelocityRadPerSec / DriveConstants.maxAngularVelocityRadPerSec, 0.50, 1);
 
         Rotation2d angleToGoalRad = currentPose.getTranslation().minus(goalPose.getTranslation()).getAngle();
         Translation2d linearXYVelocityMetersPerSec = new Translation2d(linearVelocityMetersPerSec, angleToGoalRad);
@@ -101,6 +109,5 @@ public class MoveToGoal extends DriveGoal {
                 angularVelocityRadPerSec,
                 currentPose.getRotation() // Move to is absolute, don't flip
         ));
-        return DriveRequest.stop();
     }
 }

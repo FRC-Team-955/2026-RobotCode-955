@@ -12,6 +12,7 @@ import frc.robot.RobotState;
 import frc.robot.ShootingKinematics;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.DriveConstants;
+import frc.robot.subsystems.drive.DriveConstants.MoveToConfig;
 import frc.robot.subsystems.superintake.Superintake;
 import frc.robot.subsystems.superstructure.Superstructure;
 import org.littletonrobotics.junction.Logger;
@@ -20,6 +21,9 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;
+
+import static frc.robot.subsystems.drive.DriveConstants.defaultMoveToConstraints;
+import static frc.robot.subsystems.drive.DriveConstants.moveToConfig;
 
 public final class RightSideAuto {
     private RightSideAuto() {
@@ -82,11 +86,11 @@ public final class RightSideAuto {
 
             return robotState.isAtPoseWithTolerance(
                     currentGoal.get(),
-                    DriveConstants.defaultMoveToConstraints.linearPositionToleranceMeters(),
+                    moveToConfig.linearPositionToleranceMeters().get(),
                     Math.PI * 2)
                     && robotState.isMeasuredChassisSpeedsBelowTolerance(
-                    DriveConstants.defaultMoveToConstraints.linearVelocityToleranceMetersPerSec(),
-                    DriveConstants.defaultMoveToConstraints.angularVelocityToleranceRadPerSec());
+                    moveToConfig.linearVelocityToleranceMetersPerSec().get(),
+                    moveToConfig.angularVelocityToleranceRadPerSec().get());
         };
 
         AtomicReference<Boolean> onInterpolationLine = new AtomicReference<>(false);
@@ -170,11 +174,11 @@ public final class RightSideAuto {
                 superstructure.setGoal(Superstructure.Goal.SHOOT)
         ).onlyWhile(DriverStation::isAutonomousEnabled);
 
-        Command driveMoveTo = drive.moveTo(currentGoal::get, false);
+        Command driveMoveTo = drive.moveTo(currentGoal::get, defaultMoveToConstraints);
         Command driveMoveToWithAiming = drive.moveTo(() -> {
             Pose2d goal = currentGoal.get();
             return new Pose2d(goal.getTranslation(), Rotation2d.fromRadians(ShootingKinematics.get().getShootingParameters().headingRad()));
-        }, false);
+        }, defaultMoveToConstraints);
 
         return Commands.sequence(
                 setInitialPose,

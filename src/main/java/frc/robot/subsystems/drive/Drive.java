@@ -350,7 +350,11 @@ public class Drive extends CommandBasedSubsystem {
     }
 
     public Command moveTo(Supplier<Pose2d> poseSupplier) {
-        return startIdle(() -> goal = new MoveToGoal(poseSupplier));
+        return startIdle(() -> goal = new MoveToGoal(poseSupplier, defaultMoveToConstraints));
+    }
+
+    public Command moveTo(Supplier<Pose2d> poseSupplier, DriveConstants.MoveToConstraints moveToConstraints) {
+        return startIdle(() -> goal = new MoveToGoal(poseSupplier, moveToConstraints));
     }
 
     public Command driveJoystick(boolean stopWithX) {
