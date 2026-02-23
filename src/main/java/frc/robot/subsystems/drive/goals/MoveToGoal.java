@@ -1,55 +1,45 @@
 package frc.robot.subsystems.drive.goals;
 
-import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import frc.lib.SlewRateLimiter2d;
-import frc.lib.network.LoggedTunableNumber;
 import frc.robot.RobotState;
 import frc.robot.controller.Controller;
+import frc.robot.subsystems.drive.DriveConstants;
 import frc.robot.subsystems.drive.DriveGoal;
 import frc.robot.subsystems.drive.DriveRequest;
 import lombok.RequiredArgsConstructor;
-import org.littletonrobotics.junction.Logger;
 
 import java.util.function.Supplier;
 
-import static frc.robot.subsystems.drive.DriveConstants.maxAngularVelocityRadPerSec;
-import static frc.robot.subsystems.drive.DriveConstants.moveToConfig;
-
 @RequiredArgsConstructor
 public class MoveToGoal extends DriveGoal {
-    private static final LoggedTunableNumber maxAccelerationMetersPerSecPerSec = new LoggedTunableNumber("Drive/MoveTo/MaxAccelerationMetersPerSecPerSec", moveToConfig.maxAccelerationMetersPerSecPerSec());
+    private static final LoggedTunableNumber maxAccelerationMetersPerSecPerSec = new LoggedTunableNumber("Drive/MoveTo/MaxAccelerationMetersPerSecPerSec", defaultMoveToConfig.maxAccelerationMetersPerSecPerSec());
 
     private static final RobotState robotState = RobotState.get();
     private static final Controller controller = Controller.get();
 
     private final Supplier<Pose2d> poseSupplier;
-    private final boolean mergeJoystickDrive;
+    private final DriveConstants.MoveToConstraints config;
 
-    private final PIDController moveToLinear = moveToConfig.linear()
+    private final PIDController moveToLinear = defaultMoveToConfig.linear()
             .toPID(
-                    moveToConfig.linearPositionToleranceMeters(),
-                    moveToConfig.linearVelocityToleranceMetersPerSec()
+                    defaultMoveToConfig.linearPositionToleranceMeters(),
+                    defaultMoveToConfig.linearVelocityToleranceMetersPerSec()
             );
     private final SlewRateLimiter2d moveToLinearAccelerationLimiter = new SlewRateLimiter2d(maxAccelerationMetersPerSecPerSec.get(), robotState.getMeasuredChassisSpeeds());
 
-    private final PIDController moveToAngular = moveToConfig.angular()
+    private final PIDController moveToAngular = defaultMoveToConfig.angular()
             .toPIDWrapRadians(
-                    moveToConfig.angularPositionToleranceRad(),
-                    moveToConfig.angularVelocityToleranceRadPerSec()
+                    defaultMoveToConfig.angularPositionToleranceRad(),
+                    defaultMoveToConfig.angularVelocityToleranceRadPerSec()
             );
 
     @Override
     public DriveRequest getRequest() {
-        if (moveToConfig.linear().hasChanged()) {
-            moveToConfig.linear().applyPID(moveToLinear);
+        if (defaultMoveToConfig.linear().hasChanged()) {
+            defaultMoveToConfig.linear().applyPID(moveToLinear);
         }
-        if (moveToConfig.angular().hasChanged()) {
-            moveToConfig.angular().applyPID(moveToAngular);
+        if (defaultMoveToConfig.angular().hasChanged()) {
+            defaultMoveToConfig.angular().applyPID(moveToAngular);
         }
         if (maxAccelerationMetersPerSecPerSec.hasChanged()) {
             moveToLinearAccelerationLimiter.setLimit(maxAccelerationMetersPerSecPerSec.get());
@@ -71,6 +61,7 @@ public class MoveToGoal extends DriveGoal {
                     distanceToGoal,
                     0.0
             );
+            linearVelocityMetersPerSec = MathUtil.clamp(linearVelocityMetersPerSec, -2, 2);
 //            Logger.recordOutput("Drive/MoveTo/LinearSetpointUnlimited", linearVelocityMetersPerSec);
 
             boolean linearAtSetpoint = moveToLinear.atSetpoint();
@@ -104,19 +95,12 @@ public class MoveToGoal extends DriveGoal {
         linearXYVelocityMetersPerSec = moveToLinearAccelerationLimiter.calculate(linearXYVelocityMetersPerSec);
 //        Logger.recordOutput("Drive/MoveTo/LinearSetpoint", linearXYVelocityMetersPerSec.getNorm());
 
-        ChassisSpeeds moveToSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
+        return DriveRequest.chassisSpeeds(ChassisSpeeds.fromFieldRelativeSpeeds(
                 linearXYVelocityMetersPerSec.getX() * linearScalar,
                 linearXYVelocityMetersPerSec.getY() * linearScalar,
                 angularVelocityRadPerSec,
                 currentPose.getRotation() // Move to is absolute, don't flip
-        );
-
-//        Logger.recordOutput("Drive/MoveTo/MergeJoystickDrive", mergeJoystickDrive);
-        if (mergeJoystickDrive) {
-            ChassisSpeeds joystickDriveSpeeds = controller.getDriveSetpointRobotRelative(robotState.getRotation());
-            return DriveRequest.chassisSpeeds(moveToSpeeds.plus(joystickDriveSpeeds.times(0.3)));
-        } else {
-            return DriveRequest.chassisSpeeds(moveToSpeeds);
-        }
+        ));
+        return DriveRequest.stop();
     }
 }

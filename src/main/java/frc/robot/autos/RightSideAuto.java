@@ -82,11 +82,11 @@ public final class RightSideAuto {
 
             return robotState.isAtPoseWithTolerance(
                     currentGoal.get(),
-                    DriveConstants.moveToConfig.linearPositionToleranceMeters(),
+                    DriveConstants.defaultMoveToConstraints.linearPositionToleranceMeters(),
                     Math.PI * 2)
                     && robotState.isMeasuredChassisSpeedsBelowTolerance(
-                    DriveConstants.moveToConfig.linearVelocityToleranceMetersPerSec(),
-                    DriveConstants.moveToConfig.angularVelocityToleranceRadPerSec());
+                    DriveConstants.defaultMoveToConstraints.linearVelocityToleranceMetersPerSec(),
+                    DriveConstants.defaultMoveToConstraints.angularVelocityToleranceRadPerSec());
         };
 
         AtomicReference<Boolean> onInterpolationLine = new AtomicReference<>(false);

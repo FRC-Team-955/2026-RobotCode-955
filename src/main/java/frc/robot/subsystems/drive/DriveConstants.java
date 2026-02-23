@@ -3,22 +3,17 @@ package frc.robot.subsystems.drive;
 import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
+import frc.lib.network.LoggedTunableNumber;
 import frc.lib.network.LoggedTunablePIDF;
 import frc.robot.BuildConstants;
+import lombok.With;
 
 public class DriveConstants {
     public static final double assistDirectionToleranceRad = Units.degreesToRadians(50);
     public static final double assistMaximumDistanceMeters = Units.feetToMeters(5);
 
-    public static final MoveToConfig moveToConfig = new MoveToConfig(
-            new LoggedTunablePIDF("Drive/MoveTo/Linear").withP(4.5).withD(0.05),
-            new LoggedTunablePIDF("Drive/MoveTo/Angular").withP(4.5).withD(0.05),
-            0.02,
-            0.1,
-            Units.degreesToRadians(2),
-            Units.degreesToRadians(10),
-            15
-    );
+    public static final LoggedTunablePIDF moveToLinear = new LoggedTunablePIDF("Drive/MoveTo/Linear").withP(4.5).withD(0.05);
+    public static final LoggedTunablePIDF moveToAngular = new LoggedTunablePIDF("Drive/MoveTo/Angular").withP(4.5).withD(0.05);
 
     public static final LoggedTunablePIDF choreoFeedbackXY = new LoggedTunablePIDF("Drive/ChoreoFeedbackXY").withP(3.5);
     public static final LoggedTunablePIDF choreoFeedbackOmega = new LoggedTunablePIDF("Drive/ChoreoFeedbackOmega").withP(3);
@@ -57,6 +52,20 @@ public class DriveConstants {
 
     /** Maximum angular velocity of the whole drivetrain if all drive motors/wheels are going at full speed. */
     public static final double maxAngularVelocityRadPerSec = driveConfig.maxVelocityMetersPerSec() / drivebaseRadiusMeters;
+
+    public static final MoveToConstraints defaultMoveToConstraints = new MoveToConstraints(
+            new LoggedTunableNumber("Drive/MoveTo/MaxLinearVelocity", driveConfig.maxVelocityMetersPerSec()),
+            new LoggedTunableNumber("Drive/MoveTo/MaxLinearAcceleration", 15.0),
+            new LoggedTunableNumber(maxAngularVelocityRadPerSec),
+            new LoggedTunableNumber(30.0)
+    );
+
+    public static final MoveToConfig moveToConfig = new MoveToConfig(
+            new LoggedTunableNumber(0.02),
+            new LoggedTunableNumber(0.1),
+            new LoggedTunableNumber(Units.degreesToRadians(2)),
+            new LoggedTunableNumber(Units.degreesToRadians(10))
+    );
 
     public static final double joystickMaxAngularSpeedRadPerSec = Math.min(Units.degreesToRadians(500), maxAngularVelocityRadPerSec);
     public static final double joystickDriveDeadband = 0.05;
@@ -151,14 +160,20 @@ public class DriveConstants {
         };
     }
 
+    @With
+    public record MoveToConstraints(
+            LoggedTunableNumber maxLinearVelocityMetersPerSec,
+            LoggedTunableNumber maxLinearAccelerationMetersPerSecPerSec,
+            LoggedTunableNumber maxAngularVelocityRadPerSec,
+            LoggedTunableNumber maxAngularAccelerationRadPerSecPerSec
+    ) {
+    }
+
     public record MoveToConfig(
-            LoggedTunablePIDF linear,
-            LoggedTunablePIDF angular,
-            double linearPositionToleranceMeters,
-            double linearVelocityToleranceMetersPerSec,
-            double angularPositionToleranceRad,
-            double angularVelocityToleranceRadPerSec,
-            double maxAccelerationMetersPerSecPerSec // Maximum acceleration of the robot during move to
+            LoggedTunableNumber linearPositionToleranceMeters,
+            LoggedTunableNumber linearVelocityToleranceMetersPerSec,
+            LoggedTunableNumber angularPositionToleranceRad,
+            LoggedTunableNumber angularVelocityToleranceRadPerSec
     ) {
     }
 
@@ -170,7 +185,7 @@ public class DriveConstants {
             double bumperLengthMeters,
             // Measured from bottom of frame rails (2x1s) to center of swerve wheels
             double bottomOfFrameRailsToCenterOfWheelsMeters,
-            double maxVelocityMetersPerSec // Maximum velocity of the robot
+            double maxVelocityMetersPerSec // Maximum velocity of module
     ) {
     }
 

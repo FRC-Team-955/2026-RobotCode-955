@@ -85,8 +85,8 @@ public final class LeftSideAuto {
                     DriveConstants.moveToConfig.linearPositionToleranceMeters(),
                     Math.PI * 2)
                     && robotState.isMeasuredChassisSpeedsBelowTolerance(
-                    DriveConstants.moveToConfig.linearVelocityToleranceMetersPerSec(),
-                    DriveConstants.moveToConfig.angularVelocityToleranceRadPerSec());
+                    DriveConstants.defaultMoveToConstraints.linearVelocityToleranceMetersPerSec(),
+                    DriveConstants.defaultMoveToConstraints.angularVelocityToleranceRadPerSec());
         };
 
         AtomicReference<Boolean> onInterpolationLine = new AtomicReference<>(false);
