@@ -77,7 +77,7 @@ public class Superintake extends CommandBasedSubsystem {
         switch (goal) {
             case IDLE -> {
                 intakePivot.setGoal(IntakePivot.Goal.STOW);
-                intakeRollers.setGoal(IntakeRollers.Goal.IDLE);
+                intakeRollers.setGoal(IntakeRollers.Goal.AGITATE);
             }
             case INTAKE -> {
                 intakePivot.setGoal(IntakePivot.Goal.DEPLOY);
@@ -89,7 +89,7 @@ public class Superintake extends CommandBasedSubsystem {
             }
             case HOME_INTAKE_PIVOT -> {
                 intakePivot.setGoal(IntakePivot.Goal.HOME);
-                intakeRollers.setGoal(IntakeRollers.Goal.IDLE);
+                intakeRollers.setGoal(IntakeRollers.Goal.AGITATE);
             }
         }
     }
