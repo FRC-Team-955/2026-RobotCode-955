@@ -3,7 +3,6 @@ package frc.robot.subsystems.superstructure.hood;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.lib.Util;
@@ -26,7 +25,6 @@ import static frc.robot.subsystems.superstructure.hood.HoodConstants.*;
 
 public class Hood implements Periodic {
     private static final LoggedTunableNumber profileLookaheadTimeSec = new LoggedTunableNumber("Superstructure/Hood/ProfileLookaheadTimeSec", 0.15);
-    private static final LoggedTunableNumber stowSetpointDegrees = new LoggedTunableNumber("Superstructure/Hood/Goal/StowDegrees", 45.0);
 
     private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
     private static final ShootingKinematics shootingKinematics = ShootingKinematics.get();
@@ -37,9 +35,7 @@ public class Hood implements Periodic {
 
     @RequiredArgsConstructor
     public enum Goal {
-        STOW(() -> Units.degreesToRadians(stowSetpointDegrees.get())),
         SHOOT(() -> shootingKinematics.getShootingParameters().hoodAngleRad()),
-        EJECT(() -> minPositionRad),
         HOME(null),
         ;
 
@@ -48,7 +44,7 @@ public class Hood implements Periodic {
 
     @Setter
     @Getter
-    private Goal goal = Goal.STOW;
+    private Goal goal = Goal.SHOOT;
 
     private HoodCurrentLimitMode currentLimitMode = HoodCurrentLimitMode.NORMAL;
 
