@@ -61,7 +61,8 @@ public class SimManager {
                     .withBumperSize(Meters.of(driveConfig.bumperLengthMeters()), Meters.of(driveConfig.bumperWidthMeters()))
                     .withRobotMass(Pounds.of(125)),
             // Specify starting pose
-            new Pose2d(1, 1, new Rotation2d())
+            // Real starting pose is specified in periodic
+            new Pose2d()
     );
 
     public final IntakeSimulation intakeSimulation = IntakeSimulation.OverTheBumperIntake(
@@ -100,13 +101,18 @@ public class SimManager {
 
             SimulatedArena.getInstance().resetFieldForAuto();
             RobotModeTriggers.autonomous().onTrue(Commands.runOnce(SimulatedArena.getInstance()::resetFieldForAuto));
-            robotState.setPose(driveSimulation.getSimulatedDriveTrainPose());
         }
     }
 
+    private boolean setInitialPose = false;
     private boolean lastInNeutralZone = false;
 
     public void periodic() {
+        if (!setInitialPose) {
+            robotState.setPose(new Pose2d(1, 1, new Rotation2d()));
+            setInitialPose = true;
+        }
+
         SimulatedArena.getInstance().simulationPeriodic();
 
         // Bump sim

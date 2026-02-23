@@ -205,6 +205,9 @@ public class RobotState implements Periodic {
 
     public void setPose(Pose2d pose) {
         poseEstimator.resetPose(pose);
+        if (BuildConstants.mode == BuildConstants.Mode.SIM) {
+            SimManager.get().driveSimulation.setSimulationWorldPose(pose);
+        }
     }
 
     public Command setPose(Supplier<Pose2d> pose) {

@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.AllianceFlipUtil;
 import frc.robot.FieldConstants;
 import frc.robot.RobotState;
+import frc.robot.ShootingKinematics;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.DriveConstants;
 import frc.robot.subsystems.superintake.Superintake;
@@ -43,6 +44,7 @@ public final class LeftSideAuto {
     private static final RobotState robotState = RobotState.get();
     private static final Superintake superintake = Superintake.get();
     private static final Superstructure superstructure = Superstructure.get();
+    private static final ShootingKinematics shootingKinematics = ShootingKinematics.get();
 
     public static Pose2d getStartingPose() {
         return AllianceFlipUtil.apply(baseWaypoints.get(0));
@@ -63,7 +65,7 @@ public final class LeftSideAuto {
                 FieldConstants.Depot.depotCenter.getY()
         ));
 
-        Command setInitialPose = Commands.runOnce(() -> robotState.setPose(poses.get(0)), drive);
+        Command setInitialPose = Commands.runOnce(() -> robotState.setPose(poses.get(0)));
 
         AtomicInteger goalIndex = new AtomicInteger(1);
         AtomicReference<Pose2d> currentGoal = new AtomicReference<>(poses.get(Math.min(1, poses.size() - 1)));
@@ -155,16 +157,14 @@ public final class LeftSideAuto {
             if (needsSwitch) {
                 if (isOnInterpolationLine) {
                     Logger.recordOutput("LeftSideAuto/Drive/Mode", "MoveToWithAiming");
-//                    drive.setGoalMoveToWithAiming(currentGoal::get);
                     usingAimingMode.set(true);
                 } else {
                     Logger.recordOutput("LeftSideAuto/Drive/Mode", "MoveTo");
-//                    drive.setGoalMoveTo(currentGoal::get, false);
                     usingAimingMode.set(false);
                 }
                 goalInitialized.set(true);
             }
-        }, drive).until(atFinalGoal);
+        }).until(atFinalGoal);
 
         Command intakeWhileMoving = Commands.run(() -> {
             int index = goalIndex.get();
@@ -185,14 +185,26 @@ public final class LeftSideAuto {
         }, superstructure).until(atFinalGoal);
 
         Command shootAfterFinalGoal = Commands.parallel(
-                drive.driveJoystickWithAiming(),
                 superstructure.setGoal(Superstructure.Goal.SHOOT)
         ).onlyWhile(DriverStation::isAutonomousEnabled);
 
-        return Commands.sequence(
-                setInitialPose,
-                Commands.deadline(advanceGoals, followPath, intakeWhileMoving, aimWhileOnInterpolationLine),
-                shootAfterFinalGoal
+        return Commands.parallel(
+                Commands.sequence(
+                        setInitialPose,
+                        Commands.deadline(advanceGoals, followPath, intakeWhileMoving, aimWhileOnInterpolationLine),
+                        shootAfterFinalGoal
+                ),
+                drive.moveTo(() -> {
+                    if (usingAimingMode.get()) {
+                        return new Pose2d(
+                                currentGoal.get().getX(),
+                                currentGoal.get().getY(),
+                                Rotation2d.fromRadians(shootingKinematics.getShootingParameters().headingRad())
+                        );
+                    } else {
+                        return currentGoal.get();
+                    }
+                }, false)
         );
     }
 }

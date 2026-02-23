@@ -11,7 +11,7 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import java.util.Optional;
 
 public class AutoManager {
-    private final RobotState robotState = RobotState.get();
+    private static final RobotState robotState = RobotState.get();
     public final LoggedDashboardChooser<Command> autoChooser = new LoggedDashboardChooser<>("Auto Choices");
 
     public static final double READY_THRESHOLD_METERS = 0.1;
