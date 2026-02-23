@@ -171,7 +171,10 @@ public final class LeftSideAuto {
         ).onlyWhile(DriverStation::isAutonomousEnabled);
 
         Command driveMoveTo = drive.moveTo(currentGoal::get, false);
-        Command driveMoveToWithAiming = drive.moveToWithAiming(currentGoal::get, 0.5);
+        Command driveMoveToWithAiming = drive.moveTo(() -> {
+            Pose2d goal = currentGoal.get();
+            return new Pose2d(goal.getTranslation(), Rotation2d.fromRadians(ShootingKinematics.get().getShootingParameters().headingRad()));
+        }, false);
 
         return Commands.sequence(
                 setInitialPose,
