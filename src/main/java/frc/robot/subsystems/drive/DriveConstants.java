@@ -22,7 +22,7 @@ public class DriveConstants {
 
     public static final LoggedTunablePIDF choreoFeedbackXY = new LoggedTunablePIDF("Drive/ChoreoFeedbackXY").withP(3.5);
     public static final LoggedTunablePIDF choreoFeedbackOmega = new LoggedTunablePIDF("Drive/ChoreoFeedbackOmega").withP(3);
-    public static final LoggedTunablePIDF headingOverrideGains = new LoggedTunablePIDF("Drive/HeadingOverrideGains").withP(6).withD(1);
+    public static final LoggedTunablePIDF headingOverrideGains = new LoggedTunablePIDF("Drive/HeadingOverrideGains").withP(6);
     public static final LoggedTunablePIDF assistYGains = new LoggedTunablePIDF("Drive/AssistY").withP(4.5);
 
     public static final boolean disableDriving = false;
