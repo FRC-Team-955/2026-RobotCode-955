@@ -20,6 +20,8 @@ import org.photonvision.simulation.PhotonCameraSim;
 import org.photonvision.simulation.SimCameraProperties;
 
 public class AprilTagVisionIOPhotonVisionSim extends AprilTagVisionIOPhotonVision {
+    private static final SimManager simManager = SimManager.get();
+
     public AprilTagVisionIOPhotonVisionSim(String name, Transform3d robotToCamera) {
         super(name);
 
@@ -32,6 +34,12 @@ public class AprilTagVisionIOPhotonVisionSim extends AprilTagVisionIOPhotonVisio
         cameraProperties.setLatencyStdDevMs(10);
         PhotonCameraSim cameraSim = new PhotonCameraSim(camera, cameraProperties);
         cameraSim.setMaxSightRange(5.0);
-        SimManager.get().visionSystem.addCamera(cameraSim, robotToCamera);
+        simManager.aprilTagVisionSystem.addCamera(cameraSim, robotToCamera);
+    }
+
+    @Override
+    public void updateInputs(AprilTagVisionIOInputs inputs) {
+        simManager.ensureAprilTagVisionSystemUpdated();
+        super.updateInputs(inputs);
     }
 }

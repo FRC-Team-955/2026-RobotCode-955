@@ -113,11 +113,6 @@ public class AprilTagVision implements Periodic {
 
             // Add tag poses
             for (var observation : data.inputs.aprilTagObservations) {
-                if (observation.id() < 0) {
-                    // workaround for sim when game piece targets have an ID of -1
-                    continue;
-                }
-
                 var tagPose = aprilTagLayout.getTagPose(observation.id());
                 if (tagPose.isPresent()) {
                     tagPoses.add(tagPose.get());
@@ -130,12 +125,6 @@ public class AprilTagVision implements Periodic {
             //  robotToCam.clear();
             //rotXYZ.clear();
             for (var observation : data.inputs.bestTargetObservations) {
-                if (observation.tagID() < 0) {
-                    // workaround for sim when game piece targets have an ID of -1
-                    continue;
-                }
-
-
                 tagToCamQuatY = observation.cameraToTarget().inverse().getRotation().getQuaternion().getY();
                 tagToCamQuatW = observation.cameraToTarget().inverse().getRotation().getQuaternion().getW();
                 tagToCamQuatZ = observation.cameraToTarget().inverse().getRotation().getQuaternion().getZ();
