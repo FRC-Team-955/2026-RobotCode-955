@@ -70,7 +70,7 @@ public class RobotContainer {
     private void setDefaultCommands() {
         drive.setDefaultCommand(drive.driveJoystick(false));
         superintake.setDefaultCommand(superintake.setGoal(Superintake.Goal.IDLE).ignoringDisable(true));
-        superstructure.setDefaultCommand(superstructure.setGoal(() -> DriverStation.isEnabled() ? Superstructure.Goal.SPINUP : Superstructure.Goal.IDLE).ignoringDisable(true));
+        superstructure.setDefaultCommand(superstructure.setGoal(Superstructure.Goal.IDLE).ignoringDisable(true));
     }
 
     /**

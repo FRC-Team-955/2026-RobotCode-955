@@ -21,8 +21,6 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.littletonrobotics.junction.Logger;
 
-import java.util.function.Supplier;
-
 import static frc.robot.subsystems.superstructure.SuperstructureConstants.createIO;
 import static frc.robot.subsystems.superstructure.SuperstructureConstants.robotToCANrange;
 
@@ -49,7 +47,6 @@ public class Superstructure extends CommandBasedSubsystem {
     @RequiredArgsConstructor
     public enum Goal {
         IDLE,
-        SPINUP,
         SHOOT,
         EJECT,
         HOME_HOOD,
@@ -70,11 +67,6 @@ public class Superstructure extends CommandBasedSubsystem {
 
     public Command setGoal(Goal goal) {
         return startIdle(() -> this.goal = goal)
-                .until(this::shouldGoalEnd);
-    }
-
-    public Command setGoal(Supplier<Goal> goal) {
-        return run(() -> this.goal = goal.get())
                 .until(this::shouldGoalEnd);
     }
 
@@ -122,14 +114,9 @@ public class Superstructure extends CommandBasedSubsystem {
                 feeder.setGoal(Feeder.Goal.IDLE);
                 spindexer.setGoal(Spindexer.Goal.IDLE);
             }
-            case SPINUP, SHOOT -> {
+            case SHOOT -> {
                 hood.setGoal(Hood.Goal.SHOOT);
-                if (
-                        goal == Goal.SHOOT && (
-                                operatorDashboard.disableCANrange.get() ||
-                                        hasFuelDebouncer.calculate(inputs.canrangeDistanceMeters < hasFuelThresholdMeters.get())
-                        )
-                ) {
+                if (operatorDashboard.disableCANrange.get() || hasFuelDebouncer.calculate(inputs.canrangeDistanceMeters < hasFuelThresholdMeters.get())) {
                     flywheel.setGoal(Flywheel.Goal.SHOOT);
                 } else {
                     flywheel.setGoal(Flywheel.Goal.IDLE);
@@ -142,7 +129,7 @@ public class Superstructure extends CommandBasedSubsystem {
                         shootingKinematics.isShootingParametersMet() &&
                                 operatorDashboard.disableCANrange.get()
                 );
-                if (goal == Goal.SHOOT && shouldShoot) {
+                if (shouldShoot) {
 //                    flywheel.setCurrentLimitMode(FlywheelCurrentLimitMode.SHOOT);
                     feeder.setGoal(Feeder.Goal.FEED);
                     spindexer.setGoal(Spindexer.Goal.FEED);

@@ -122,7 +122,7 @@ public class LEDs implements Periodic {
                 };
 
                 LEDPattern superstructurePattern = switch (superstructure.getGoal()) {
-                    case IDLE, SPINUP -> null;
+                    case IDLE -> null;
                     case SHOOT -> shootingKinematics.isValidShootingParameters() &&
                             shootingKinematics.isShootingParametersMet()
                             ? LEDPatterns.shooting
