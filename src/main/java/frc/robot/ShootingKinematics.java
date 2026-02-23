@@ -33,10 +33,10 @@ public class ShootingKinematics implements Periodic {
     private static final InterpolatingDoubleTreeMap distanceToVelocity = new InterpolatingDoubleTreeMap();
 
     static {
-        distanceToVelocity.put(1.5, 6.5);
-        distanceToVelocity.put(2.0, 7.0);
-        distanceToVelocity.put(4.0, 8.0);
-        distanceToVelocity.put(5.0, 9.0);
+        distanceToVelocity.put(1.5, 10.0);
+        distanceToVelocity.put(2.0, 15.0);
+        distanceToVelocity.put(4.0, 20.0);
+        distanceToVelocity.put(5.0, 30.0);
     }
 
     private static final RobotState robotState = RobotState.get();

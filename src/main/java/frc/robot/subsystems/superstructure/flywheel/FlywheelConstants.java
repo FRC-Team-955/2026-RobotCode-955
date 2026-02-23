@@ -18,8 +18,9 @@ public class FlywheelConstants {
                 .withV(0.02)
                 .withP(0.01);
         case SIM -> new LoggedTunablePIDF("Superstructure/Flywheel/Gains")
-                .withV(0.02)
-                .withP(1.0);
+                .withS(0.2, StaticFeedforwardSignValue.UseVelocitySign)
+                .withV(0.019)
+                .withP(0.01);
     };
 
     static FlywheelIO createIO() {
@@ -31,8 +32,8 @@ public class FlywheelConstants {
                     MotorAlignmentValue.Opposed
             );
             case SIM -> new FlywheelIOSim(
-                    0.01,
-                    DCMotor.getKrakenX60(1)
+                    0.001,
+                    DCMotor.getKrakenX60(2)
             );
             case REPLAY -> new FlywheelIO();
         };
