@@ -128,18 +128,15 @@ public class Superstructure extends CommandBasedSubsystem {
                                 operatorDashboard.disableCANrange.get()
                 );
                 if (shouldShoot) {
-//                    flywheel.setCurrentLimitMode(FlywheelCurrentLimitMode.SHOOT);
                     feeder.setGoal(Feeder.Goal.FEED);
                     spindexer.setGoal(Spindexer.Goal.FEED);
                 } else {
-//                    flywheel.setCurrentLimitMode(FlywheelCurrentLimitMode.SPINUP);
                     feeder.setGoal(Feeder.Goal.IDLE);
                     spindexer.setGoal(Spindexer.Goal.IDLE);
                 }
             }
             case EJECT -> {
                 flywheel.setGoal(Flywheel.Goal.EJECT);
-//                flywheel.setCurrentLimitMode(FlywheelCurrentLimitMode.SHOOT);
                 feeder.setGoal(Feeder.Goal.EJECT);
                 spindexer.setGoal(Spindexer.Goal.EJECT);
             }

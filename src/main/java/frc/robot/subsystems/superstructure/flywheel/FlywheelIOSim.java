@@ -50,9 +50,4 @@ public class FlywheelIOSim extends FlywheelIO {
     public void setStopRequest() {
         leader.setRequest(RequestType.VoltageVolts, 0);
     }
-
-    @Override
-    public void setCurrentLimit(FlywheelCurrentLimitMode mode) {
-        System.out.println("Setting flywheel current limit to " + mode);
-    }
 }

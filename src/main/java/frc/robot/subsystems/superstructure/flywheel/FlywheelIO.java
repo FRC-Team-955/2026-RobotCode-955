@@ -11,11 +11,6 @@ public class FlywheelIO {
         public MotorIOInputsAutoLogged follower = new MotorIOInputsAutoLogged();
     }
 
-    public enum FlywheelCurrentLimitMode {
-        SHOOT,
-        SPINUP,
-    }
-
     public void updateInputs(FlywheelIOInputs inputs) {
     }
 
@@ -30,8 +25,5 @@ public class FlywheelIO {
     }
 
     public void setStopRequest() {
-    }
-
-    public void setCurrentLimit(FlywheelCurrentLimitMode mode) {
     }
 }

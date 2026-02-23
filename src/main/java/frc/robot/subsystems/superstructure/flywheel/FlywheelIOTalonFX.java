@@ -10,8 +10,7 @@ import static frc.robot.subsystems.superstructure.flywheel.FlywheelConstants.gea
 import static frc.robot.subsystems.superstructure.flywheel.FlywheelConstants.velocityGains;
 
 public class FlywheelIOTalonFX extends FlywheelIO {
-    private static final int shootCurrentLimitAmps = 120;
-    private static final int spinupCurrentLimitAmps = 20;
+    private static final int currentLimitAmps = 120;
 
     private final MotorIOTalonFX leader;
     private final MotorIOTalonFX follower;
@@ -26,7 +25,7 @@ public class FlywheelIOTalonFX extends FlywheelIO {
                 leaderCanID,
                 leaderInverted,
                 NeutralModeValue.Coast,
-                shootCurrentLimitAmps,
+                currentLimitAmps,
                 gearRatio,
                 null,
                 velocityGains,
@@ -37,7 +36,7 @@ public class FlywheelIOTalonFX extends FlywheelIO {
                 followerCanID,
                 false,
                 NeutralModeValue.Coast,
-                shootCurrentLimitAmps,
+                currentLimitAmps,
                 gearRatio,
                 null,
                 null,
@@ -65,16 +64,5 @@ public class FlywheelIOTalonFX extends FlywheelIO {
     @Override
     public void setStopRequest() {
         leader.setRequest(RequestType.VoltageVolts, 0);
-    }
-
-    @Override
-    public void setCurrentLimit(FlywheelCurrentLimitMode mode) {
-        System.out.println("Setting flywheel current limit to " + mode);
-        double currentLimitAmps = switch (mode) {
-            case SHOOT -> shootCurrentLimitAmps;
-            case SPINUP -> spinupCurrentLimitAmps;
-        };
-        leader.setCurrentLimit(currentLimitAmps);
-        follower.setCurrentLimit(currentLimitAmps);
     }
 }
