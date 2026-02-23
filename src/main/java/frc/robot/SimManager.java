@@ -1,9 +1,11 @@
 package frc.robot;
 
+import edu.wpi.first.hal.AllianceStationID;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.wpilibj.simulation.DriverStationSim;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import frc.lib.Util;
@@ -76,7 +78,8 @@ public class SimManager {
             hopperCapacity
     );
 
-    public final VisionSystemSim visionSystem = new VisionSystemSim("photonvision");
+    public final VisionSystemSim aprilTagVisionSystem = new VisionSystemSim("apriltag");
+    public final VisionSystemSim gamePieceVisionSystem = new VisionSystemSim("gamepiece");
 
     private static SimManager instance;
 
@@ -96,18 +99,32 @@ public class SimManager {
         if (BuildConstants.mode != BuildConstants.Mode.SIM) {
             Util.error("SimManager created when not in sim");
         } else {
-            visionSystem.addAprilTags(aprilTagLayout);
+            aprilTagVisionSystem.addAprilTags(aprilTagLayout);
+
             SimulatedArena.getInstance().addDriveTrainSimulation(driveSimulation);
 
             SimulatedArena.getInstance().resetFieldForAuto();
-            RobotModeTriggers.autonomous().onTrue(Commands.runOnce(SimulatedArena.getInstance()::resetFieldForAuto));
+            RobotModeTriggers.autonomous().onTrue(Commands.runOnce(() -> {
+                // maple-sim currently has a bug where the two outposts are swapped.
+                // So when the alliance is set to blue, only the red outpost will have
+                // fuel in it. Therefore, we have to swap the alliance when resetting the field
+                DriverStationSim.setAllianceStationId(AllianceStationID.Red1);
+                DriverStationSim.notifyNewData();
+                SimulatedArena.getInstance().resetFieldForAuto();
+                DriverStationSim.setAllianceStationId(AllianceStationID.Blue1);
+                DriverStationSim.notifyNewData();
+            }));
+
+            DriverStationSim.setAllianceStationId(AllianceStationID.Blue1);
+            DriverStationSim.setEnabled(true);
+            DriverStationSim.notifyNewData();
         }
     }
 
     private boolean setInitialPose = false;
     private boolean lastInNeutralZone = false;
 
-    public void periodic() {
+    public void periodicBeforeNormalCode() {
         if (!setInitialPose) {
             robotState.setPose(new Pose2d(1, 1, new Rotation2d()));
             setInitialPose = true;
@@ -140,21 +157,43 @@ public class SimManager {
         }
         lastInNeutralZone = inNeutralZone;
 
-        // Vision sim
-        Pose3d[] fuelPoses = SimulatedArena.getInstance().getGamePiecesArrayByType("Fuel");
-        TargetModel targetModel = new TargetModel(fuelDiameterMeters);
-        // Only remove old fuel - don't remove AprilTags
-        visionSystem.removeVisionTargets("targets");
-        for (Pose3d fuelPose : fuelPoses) {
-            VisionTargetSim visionTarget = new VisionTargetSim(fuelPose, targetModel);
-            visionSystem.addVisionTargets(visionTarget);
-        }
-        visionSystem.update(driveSimulation.getSimulatedDriveTrainPose());
-
         Logger.recordOutput("FieldSimulation/RobotPosition", driveSimulation.getSimulatedDriveTrainPose());
         Logger.recordOutput(
                 "FieldSimulation/Fuel",
                 SimulatedArena.getInstance().getGamePiecesArrayByType("Fuel")
         );
+
+        aprilTagVisionSystemUpdated = false;
+        gamePieceVisionSystemUpdated = false;
+    }
+
+    private boolean aprilTagVisionSystemUpdated = false;
+
+    public void ensureAprilTagVisionSystemUpdated() {
+        // Avoid updating the vision system more than once per cycle (multiple cameras
+        // would cause multiple updates if we don't check this)
+        if (!aprilTagVisionSystemUpdated) {
+            aprilTagVisionSystem.update(driveSimulation.getSimulatedDriveTrainPose());
+            aprilTagVisionSystemUpdated = true;
+        }
+    }
+
+    private boolean gamePieceVisionSystemUpdated = false;
+
+    public void ensureGamePieceVisionSystemUpdated() {
+        // Avoid updating the vision system more than once per cycle (multiple cameras
+        // would cause multiple updates if we don't check this)
+        if (!gamePieceVisionSystemUpdated) {
+            Pose3d[] fuelPoses = SimulatedArena.getInstance().getGamePiecesArrayByType("Fuel");
+            TargetModel targetModel = new TargetModel(fuelDiameterMeters);
+            gamePieceVisionSystem.clearVisionTargets();
+            for (Pose3d fuelPose : fuelPoses) {
+                VisionTargetSim visionTarget = new VisionTargetSim(fuelPose, targetModel);
+                gamePieceVisionSystem.addVisionTargets(visionTarget);
+            }
+
+            gamePieceVisionSystem.update(driveSimulation.getSimulatedDriveTrainPose());
+            gamePieceVisionSystemUpdated = true;
+        }
     }
 }

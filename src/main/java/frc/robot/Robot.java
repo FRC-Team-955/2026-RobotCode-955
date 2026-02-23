@@ -13,12 +13,10 @@
 
 package frc.robot;
 
-import edu.wpi.first.hal.AllianceStationID;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.simulation.DriverStationSim;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.lib.LoggedTracer;
@@ -194,6 +192,11 @@ public class Robot extends LoggedRobot {
     public void robotPeriodic() {
         LoggedTracer.reset();
 
+        if (BuildConstants.mode == BuildConstants.Mode.SIM) {
+            SimManager.get().periodicBeforeNormalCode();
+            LoggedTracer.record("Simulation");
+        }
+
         for (var periodic : periodics) {
 //            System.out.println("periodicBeforeCommands: " + periodic.getClass().getSimpleName());
             periodic.periodicBeforeCommands();
@@ -263,34 +266,5 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void teleopPeriodic() {
-    }
-
-    @Override
-    public void testInit() {
-        // Cancels all running commands at the start of test mode.
-        CommandScheduler.getInstance().cancelAll();
-    }
-
-    @Override
-    public void testPeriodic() {
-    }
-
-    @Override
-    public void simulationInit() {
-        // In case of replay, don't do sim
-        if (BuildConstants.mode == BuildConstants.Mode.REPLAY) return;
-
-        DriverStationSim.setAllianceStationId(AllianceStationID.Blue1);
-        DriverStationSim.setEnabled(true);
-        DriverStationSim.notifyNewData();
-    }
-
-
-    @Override
-    public void simulationPeriodic() {
-        // In case of replay, don't do sim
-        if (BuildConstants.mode == BuildConstants.Mode.REPLAY) return;
-
-        SimManager.get().periodic();
     }
 }

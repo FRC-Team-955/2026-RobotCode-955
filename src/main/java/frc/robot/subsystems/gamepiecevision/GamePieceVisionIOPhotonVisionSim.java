@@ -9,6 +9,8 @@ import org.photonvision.simulation.SimCameraProperties;
 import static frc.robot.subsystems.gamepiecevision.GamePieceVisionConstants.diagFOVRad;
 
 public class GamePieceVisionIOPhotonVisionSim extends GamePieceVisionIOPhotonVision {
+    private static final SimManager simManager = SimManager.get();
+
     public GamePieceVisionIOPhotonVisionSim(String name, Transform3d robotToCamera) {
         super(name);
 
@@ -21,6 +23,12 @@ public class GamePieceVisionIOPhotonVisionSim extends GamePieceVisionIOPhotonVis
         cameraProperties.setLatencyStdDevMs(10);
         PhotonCameraSim cameraSim = new PhotonCameraSim(camera, cameraProperties);
         cameraSim.setMaxSightRange(3.0);
-        SimManager.get().visionSystem.addCamera(cameraSim, robotToCamera);
+        simManager.gamePieceVisionSystem.addCamera(cameraSim, robotToCamera);
+    }
+
+    @Override
+    public void updateInputs(GamePieceVisionIOInputs inputs) {
+        simManager.ensureGamePieceVisionSystemUpdated();
+        super.updateInputs(inputs);
     }
 }
