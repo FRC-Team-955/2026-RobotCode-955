@@ -29,7 +29,7 @@ public class DriveConstants {
     public static final DriveConfig driveConfig = new DriveConfig(
             // TO TUNE WHEEL RADIUS: Place robot on carpet and use wheel radius characterization auto.
             // Output will be in console in AdvantageScope.
-            Units.inchesToMeters(1.935948620917915),
+            Units.inchesToMeters(1.91443),
             Units.inchesToMeters(19.25),
             Units.inchesToMeters(24.25),
             Units.inchesToMeters(36.5),
@@ -57,14 +57,14 @@ public class DriveConstants {
             new LoggedTunableNumber("Drive/MoveTo/MaxLinearVelocity", driveConfig.maxVelocityMetersPerSec()),
             new LoggedTunableNumber("Drive/MoveTo/MaxLinearAcceleration", 15.0),
             new LoggedTunableNumber("Drive/MoveTo/MaxAngularVelocity", maxAngularVelocityRadPerSec),
-            new LoggedTunableNumber("Drive/MoveTo/maxAngularAcceleration", 30.0)
+            new LoggedTunableNumber("Drive/MoveTo/MaxAngularAcceleration", 30.0)
     );
 
     public static final MoveToConfig moveToConfig = new MoveToConfig(
-            new LoggedTunableNumber("linearPositionTolerance",0.02),
-            new LoggedTunableNumber("linearVelocityToleranceMeters", 0.1),
-            new LoggedTunableNumber("angularPositionTolerance", Units.degreesToRadians(2)),
-            new LoggedTunableNumber("angularVelocityTolerance", Units.degreesToRadians(10))
+            new LoggedTunableNumber("Drive/MoveTo/LinearPositionTolerance", 0.02),
+            new LoggedTunableNumber("Drive/MoveTo/LinearVelocityToleranceMeters", 0.1),
+            new LoggedTunableNumber("Drive/MoveTo/AngularPositionTolerance", Units.degreesToRadians(2)),
+            new LoggedTunableNumber("Drive/MoveTo/AngularVelocityTolerance", Units.degreesToRadians(10))
     );
 
     public static final double joystickMaxAngularSpeedRadPerSec = Math.min(Units.degreesToRadians(500), maxAngularVelocityRadPerSec);
@@ -87,7 +87,7 @@ public class DriveConstants {
                 true,
                 false,
                 false,
-                120,
+                75,
                 60
         );
         case SIM -> new ModuleConfig(
