@@ -1,0 +1,17 @@
+package frc.robot;
+
+public class ShootingRegression {
+    public record Input(double distanceMeters, double radialRobotVelocityMetersPerSec) {}
+
+    public static double calculateVelocityMetersPerSec(Input input) {
+        double x = input.distanceMeters;
+        double y = input.radialRobotVelocityMetersPerSec;
+        return 6.896230557134219 + 0.22456448761574227 * x + -0.29391105314575194 * y + -0.033992750266301684 * x * y + 0.03843387521476815 * x * x + 0.05178730830447483 * y * y + -0.00039934374297571196 * x * x * y * y;
+    }
+
+    public static double calculateHoodAngleRad(Input input) {
+        double x = input.distanceMeters;
+        double y = input.radialRobotVelocityMetersPerSec;
+        return 1.7080620201259207 + -0.22343028497668138 * x + 0.13186053372068055 * y + -0.007259765181294991 * x * y + 0.01774249396590478 * x * x + 0.00544894718565025 * y * y + -3.582939141855887e-05 * x * x * y * y;
+    }
+}

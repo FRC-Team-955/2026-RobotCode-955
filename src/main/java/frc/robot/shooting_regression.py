@@ -1,9 +1,11 @@
-import matplotlib.pyplot as plt
-import numpy as np
 from math import floor
 from multiprocessing import Pool
-from scipy.optimize import minimize
+from os.path import realpath, dirname
 from time import time
+
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy.optimize import minimize, curve_fit
 
 DEBUG_SHOT = False
 DEBUG_SHOT_DISTANCE = 1
@@ -265,10 +267,10 @@ def optimize_shot(distance, robot_radial_vel):
         cost_fun,
         np.array([v_initial, hood_angle_initial]),
         method="Nelder-Mead",
-        options={"maxiter": 800}
+        options={"maxiter": 2000}
     )
 
-    if not res.success or cost_fun(res.x) > 0.1:
+    if not res.success or cost_fun(res.x) > 0.4:
         print(f"Optimization failed.")
         print(f"\tdistance = {distance}, robot_radial_vel = {robot_radial_vel}")
         print(f"\tres = {res}")
@@ -321,7 +323,7 @@ else:
                 print(
                     f"[{worker_index}] {progress_count} FAILED (distance = {distance}, velocity = {velocity})")
                 continue
-            shots.append(((distance, velocity), {v, hood_angle}))
+            shots.append(((distance, velocity), (v, hood_angle)))
             print(f"[{worker_index}] {progress_count}\t{progress_percent}%")
 
         end_time_worker = time()
@@ -334,13 +336,13 @@ else:
     if __name__ == "__main__":
         distance_velocity_pairs = []
 
-        start_dist = 0.5
+        start_dist = 2.5
         stop_dist = 7
         max_vel = 4.5
-        for distance in np.linspace(start_dist, stop_dist, 70):
+        for distance in np.linspace(start_dist, stop_dist, 50):
             max_vel_away_from_hub = -max_vel
             max_vel_towards_hub = min(max_vel, 1 + 2 * distance)
-            for velocity in np.linspace(max_vel_away_from_hub, max_vel_towards_hub, 20):
+            for velocity in np.linspace(max_vel_away_from_hub, max_vel_towards_hub, 5):
                 distance_velocity_pairs.append((distance, velocity))
 
         all_shots = []
@@ -371,3 +373,97 @@ else:
         end_time = time()
         print(f"Took {end_time - start_time} seconds")
         print(f"Of {len(distance_velocity_pairs)} shots, {len(all_shots)} succeeded.")
+
+        all_shots = np.array(all_shots)
+
+        X = (all_shots[:, 0, 0], all_shots[:, 0, 1])
+        y_vel = all_shots[:, 1, 0]
+        y_hood_angle = all_shots[:, 1, 1]
+
+        print(X, y_vel, y_hood_angle)
+
+        def f(X, i0, i1, i2, i3, i4, i5, i6):  # i7, i8, i9):
+            return (
+                    i0 +
+                    i1 * X[0] +
+                    i2 * X[1] +
+                    i3 * X[0] * X[1] +
+                    i4 * X[0] ** 2 +
+                    i5 * X[1] ** 2 +
+                    i6 * X[0] ** 2 * X[1] ** 2  # +
+                # i7 * X[0] ** 3 +
+                # i8 * X[1] ** 3 +
+                # i9 * X[0] ** 3 * X[1] ** 3
+            )
+
+        vel_coeff, vel_cov = curve_fit(f, X, y_vel)
+        vel_equation = (
+            f"{vel_coeff[0]}"
+            f" + {vel_coeff[1]} * x"
+            f" + {vel_coeff[2]} * y"
+            f" + {vel_coeff[3]} * x * y"
+            f" + {vel_coeff[4]} * x * x"
+            f" + {vel_coeff[5]} * y * y"
+            f" + {vel_coeff[6]} * x * x * y * y"
+            # f" + {vel_coeff[7]} * x * x * x"
+            # f" + {vel_coeff[8]} * y * y * y"
+            # f" + {vel_coeff[9]} * x * x * x * y * y * y"
+        )
+        print(f"vel: {vel_equation}")
+        print(vel_cov)
+
+        ax.scatter(X[0], X[1], y_vel, label="Velocity data")
+        ax.scatter(
+            X[0],
+            X[1],
+            f(X, *vel_coeff),
+            label="Velocity regression"
+        )
+
+        hood_angle_coeff, hood_angle_cov = curve_fit(f, X, y_hood_angle)
+        hood_angle_equation = (
+            f"{hood_angle_coeff[0]}"
+            f" + {hood_angle_coeff[1]} * x"
+            f" + {hood_angle_coeff[2]} * y"
+            f" + {hood_angle_coeff[3]} * x * y"
+            f" + {hood_angle_coeff[4]} * x * x"
+            f" + {hood_angle_coeff[5]} * y * y"
+            f" + {hood_angle_coeff[6]} * x * x * y * y"
+            # f" + {hood_angle_coeff[7]} * x * x * x"
+            # f" + {hood_angle_coeff[8]} * y * y * y"
+            # f" + {hood_angle_coeff[9]} * x * x * x * y * y * y"
+        )
+        print(f"hood_angle: {hood_angle_equation}")
+        print(hood_angle_cov)
+
+        ax.scatter(X[0], X[1], y_hood_angle, label="Hood angle data")
+        ax.scatter(
+            X[0],
+            X[1],
+            f(X, *hood_angle_coeff),
+            label="Hood angle regression"
+        )
+
+        with open(dirname(realpath(__file__)) + "/ShootingRegression.java", "w") as f:
+            f.write("""package frc.robot;
+
+public class ShootingRegression {
+    public record Input(double distanceMeters, double radialRobotVelocityMetersPerSec) {}
+
+    public static double calculateVelocityMetersPerSec(Input input) {
+        double x = input.distanceMeters;
+        double y = input.radialRobotVelocityMetersPerSec;
+        return """ + vel_equation + """;
+    }
+
+    public static double calculateHoodAngleRad(Input input) {
+        double x = input.distanceMeters;
+        double y = input.radialRobotVelocityMetersPerSec;
+        return """ + hood_angle_equation + """;
+    }
+}
+""")
+
+        ax.set(label="X", ylabel="Y", zlabel="Z")
+        ax.legend()
+        plt.show()
