@@ -28,11 +28,11 @@ bottom_of_frame_rails_to_center_of_wheels = -0.247776 * 2.54 / 100
 
 # KEEP SYNCED WITH ShootingKinematics.java
 bottom_of_frame_rails_to_shooter_height = 12.861380 * 2.54 / 100
+shooter_radius_to_center_of_ball_exit = 4.602756 * 2.54 / 100
 
 z_initial_base = bottom_of_frame_rails_to_center_of_wheels + wheel_radius + bottom_of_frame_rails_to_shooter_height
 
-shooter_radius_to_center_of_ball_exit = 4.602756 * 2.54 / 100
-
+# TODO FIX HEIGHT
 hubz = 72 * 2.54 / 100
 # Add some clearance to the top of the hub edge (15.5 + clearance)
 hub_edgez = hubz + (15.5 + 5) * 2.54 / 100 + fuel_radius
@@ -79,8 +79,8 @@ def norm(v):
 def normalize(v):
     return v / norm(v)
 
-def calculate_trajectory_kinematics(vel, hood_angle, robot_radial_velocity):
-    vx, vy, vz = polar_velocity_to_components(vel, hood_angle)
+def calculate_trajectory_kinematics(vel, angle, robot_radial_velocity):
+    vx, vy, vz = polar_velocity_to_components(vel, angle)
     vx += robot_radial_velocity
 
     res = (
@@ -100,8 +100,8 @@ def calculate_trajectory_kinematics(vel, hood_angle, robot_radial_velocity):
 
     return res
 
-def calculate_trajectory_iterative(vel, hood_angle, robot_radial_velocity):
-    vx, vy, vz = polar_velocity_to_components(vel, hood_angle)
+def calculate_trajectory_iterative(vel, angle, robot_radial_velocity):
+    vx, vy, vz = polar_velocity_to_components(vel, angle)
     vx += robot_radial_velocity
 
     x = np.zeros_like(t)
@@ -116,9 +116,13 @@ def calculate_trajectory_iterative(vel, hood_angle, robot_radial_velocity):
             ly = y[i - 1]
             lz = z[i - 1]
         else:
+            # ShootingKinematics.java measures distance including the X offset due to angle
+            # so we don't need to include the X offset here
             lx = 0
+            # lx = (shooter_radius_to_center_of_ball_exit +
+            #      np.cos(np.pi / 2.0 - angle) * -shooter_radius_to_center_of_ball_exit)
             ly = 0
-            lz = z_initial_base
+            lz = z_initial_base + np.sin(np.pi / 2.0 - angle) * shooter_radius_to_center_of_ball_exit
 
         lvx = vx
         lvy = vy
@@ -206,28 +210,28 @@ def calculate_shooting_params_kinematics(distance, robot_radial_vel):
         return deg_to_rad(15) < phi < deg_to_rad(90)
 
     if is_valid_phi(phi_1) and (phi_1 > phi_2 or not is_valid_phi(phi_2)):
-        hood_angle = phi_1
+        angle = phi_1
     elif is_valid_phi(phi_2):
-        hood_angle = phi_2
+        angle = phi_2
     else:
         print("\tNo phi found")
         exit(1)
 
-    # print(f"\tphi_1 = {rad_to_deg(phi_1)}, phi_2 = {rad_to_deg(phi_2)}, hood_angle = {rad_to_deg(hood_angle)}")
+    # print(f"\tphi_1 = {rad_to_deg(phi_1)}, phi_2 = {rad_to_deg(phi_2)}, angle = {rad_to_deg(angle)}")
 
-    vx = v0 * np.cos(hood_angle)
+    vx = v0 * np.cos(angle)
     vy = 0
-    vz = v0 * np.sin(hood_angle)
+    vz = v0 * np.sin(angle)
 
     # Now subtract robot velocity from stationary shooting velocity
     vx -= vr
 
-    # Now calculate hood_angle and shooting magnitude from 3d shooting vector
+    # Now calculate angle and shooting magnitude from 3d shooting vector
     v = np.sqrt(vx ** 2 + vy ** 2 + vz ** 2)
-    hood_angle = np.asin(vz / v)
-    # print(f"\tafter compensate: v = {v}, hood_angle = {rad_to_deg(hood_angle)}")
+    angle = np.asin(vz / v)
+    # print(f"\tafter compensate: v = {v}, angle = {rad_to_deg(angle)}")
 
-    return v, hood_angle
+    return v, angle
 
 def optimize_shot(distance, robot_radial_vel):
     hubx = distance
@@ -235,7 +239,7 @@ def optimize_shot(distance, robot_radial_vel):
     ax.scatter(hubx, 0, hubz, c="red")
     ax.scatter(hub_edgex, 0, hub_edgez, c="red")
 
-    v_initial, hood_angle_initial = calculate_shooting_params_kinematics(distance, robot_radial_vel)
+    v_initial, angle_initial = calculate_shooting_params_kinematics(distance, robot_radial_vel)
 
     def cost_fun(x):
         # if x[1] < deg_to_rad(15.0) or x[1] > deg_to_rad(45.0):
@@ -280,7 +284,7 @@ def optimize_shot(distance, robot_radial_vel):
 
     res = minimize(
         cost_fun,
-        np.array([v_initial, hood_angle_initial]),
+        np.array([v_initial, angle_initial]),
         method="Nelder-Mead",
         options={"maxiter": 2000}
     )
@@ -291,19 +295,19 @@ def optimize_shot(distance, robot_radial_vel):
         print(f"\tres = {res}")
         return None, None
 
-    v_final, hood_angle_final = res.x
+    v_final, angle_final = res.x
 
     if DEBUG_SHOT:
         print(res)
-        # ax.plot(*calculate_trajectory_kinematics(v_initial, hood_angle_initial, robot_radial_vel), label="Simple Kinematics (Initial)")
-        # ax.plot(*calculate_trajectory_kinematics(v_final, hood_angle_final, robot_radial_vel), label="Simple Kinematics (Final)")
-        # ax.plot(*calculate_trajectory_iterative(v_initial, hood_angle_initial, robot_radial_vel), label="Iterative Simulation (Initial)")
+        # ax.plot(*calculate_trajectory_kinematics(v_initial, angle_initial, robot_radial_vel), label="Simple Kinematics (Initial)")
+        # ax.plot(*calculate_trajectory_kinematics(v_final, angle_final, robot_radial_vel), label="Simple Kinematics (Final)")
+        # ax.plot(*calculate_trajectory_iterative(v_initial, angle_initial, robot_radial_vel), label="Iterative Simulation (Initial)")
         ax.plot(
-            *calculate_trajectory_iterative(v_final, hood_angle_final, robot_radial_vel),
+            *calculate_trajectory_iterative(v_final, angle_final, robot_radial_vel),
             label="Iterative Simulation (Final)" if not DEBUG_RANGE else None
         )
 
-    return v_final, hood_angle_final
+    return v_final, angle_final
 
 if DEBUG_SHOT:
     if DEBUG_RANGE:
@@ -333,12 +337,12 @@ else:
             progress_count = f"{counter}/{len(worker_distance_velocity_pairs)}"
             progress_percent = round(float(counter) / float(len(worker_distance_velocity_pairs)) * 100)
 
-            v, hood_angle = optimize_shot(distance, velocity)
-            if v is None and hood_angle is None:
+            v, angle = optimize_shot(distance, velocity)
+            if v is None and angle is None:
                 print(
                     f"[{worker_index}] {progress_count} FAILED (distance = {distance}, velocity = {velocity})")
                 continue
-            shots.append(((distance, velocity), (v, hood_angle)))
+            shots.append(((distance, velocity), (v, angle)))
             print(f"[{worker_index}] {progress_count}\t{progress_percent}%")
 
         end_time_worker = time()
@@ -393,9 +397,9 @@ else:
 
         X = (all_shots[:, 0, 0], all_shots[:, 0, 1])
         y_vel = all_shots[:, 1, 0]
-        y_hood_angle = all_shots[:, 1, 1]
+        y_angle = all_shots[:, 1, 1]
 
-        print(X, y_vel, y_hood_angle)
+        print(X, y_vel, y_angle)
 
         def f(X, i0, i1, i2, i3, i4, i5, i6):  # i7, i8, i9):
             return (
@@ -411,6 +415,7 @@ else:
                 # i9 * X[0] ** 3 * X[1] ** 3
             )
 
+        # TODO plot surface
         vel_coeff, vel_cov = curve_fit(f, X, y_vel)
         vel_equation = (
             f"{vel_coeff[0]}"
@@ -435,28 +440,28 @@ else:
             label="Velocity regression"
         )
 
-        hood_angle_coeff, hood_angle_cov = curve_fit(f, X, y_hood_angle)
-        hood_angle_equation = (
-            f"{hood_angle_coeff[0]}"
-            f" + {hood_angle_coeff[1]} * x"
-            f" + {hood_angle_coeff[2]} * y"
-            f" + {hood_angle_coeff[3]} * x * y"
-            f" + {hood_angle_coeff[4]} * x * x"
-            f" + {hood_angle_coeff[5]} * y * y"
-            f" + {hood_angle_coeff[6]} * x * x * y * y"
-            # f" + {hood_angle_coeff[7]} * x * x * x"
-            # f" + {hood_angle_coeff[8]} * y * y * y"
-            # f" + {hood_angle_coeff[9]} * x * x * x * y * y * y"
+        angle_coeff, angle_cov = curve_fit(f, X, y_angle)
+        angle_equation = (
+            f"{angle_coeff[0]}"
+            f" + {angle_coeff[1]} * x"
+            f" + {angle_coeff[2]} * y"
+            f" + {angle_coeff[3]} * x * y"
+            f" + {angle_coeff[4]} * x * x"
+            f" + {angle_coeff[5]} * y * y"
+            f" + {angle_coeff[6]} * x * x * y * y"
+            # f" + {angle_coeff[7]} * x * x * x"
+            # f" + {angle_coeff[8]} * y * y * y"
+            # f" + {angle_coeff[9]} * x * x * x * y * y * y"
         )
-        print(f"hood_angle: {hood_angle_equation}")
-        print(hood_angle_cov)
+        print(f"angle: {angle_equation}")
+        print(angle_cov)
 
-        ax.scatter(X[0], X[1], y_hood_angle, label="Hood angle data")
+        ax.scatter(X[0], X[1], y_angle, label="Angle data")
         ax.scatter(
             X[0],
             X[1],
-            f(X, *hood_angle_coeff),
-            label="Hood angle regression"
+            f(X, *angle_coeff),
+            label="Angle regression"
         )
 
         with open(dirname(realpath(__file__)) + "/ShootingRegression.java", "w") as f:
@@ -477,7 +482,7 @@ public class ShootingRegression {
         // Shooting sim angle for vertical shot is 90°
         // Shooting sim angle for 15° from vertical is 75°
         // Therefore, hood angle = 90° - shooting sim angle
-        return Math.PI / 2.0 - (""" + hood_angle_equation + """);
+        return Math.PI / 2.0 - (""" + angle_equation + """);
     }
 }
 """)

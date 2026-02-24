@@ -17,22 +17,27 @@ import frc.robot.subsystems.superstructure.hood.Hood;
 import lombok.Getter;
 import org.littletonrobotics.junction.Logger;
 
+import java.util.function.DoubleFunction;
+
 import static frc.robot.subsystems.drive.DriveConstants.driveConfig;
 
 public class ShootingKinematics implements Periodic {
+    // KEEP SYNCED WITH shooting_regression.py
     private static final double bottomOfFrameRailsToShooterHeightMeters = Units.inchesToMeters(12.861380);
+    private static final double shooterRadiusToCenterOfBallExitMeters = Units.inchesToMeters(4.602756);
 
     private static final LoggedTunableNumber robotVelocityScalar = new LoggedTunableNumber("ShootingKinematics/RobotVelocityScalar", 1.2);
     private static final LoggedTunableNumber headingToleranceDeg = new LoggedTunableNumber("ShootingKinematics/HeadingToleranceDegrees", 30.0);
     public static final LoggedTunableNumber velocityToleranceRPM = new LoggedTunableNumber("ShootingKinematics/VelocityToleranceRPM", 1000);
     public static final LoggedTunableNumber hoodToleranceDeg = new LoggedTunableNumber("ShootingKinematics/HoodToleranceDegrees", 10.0);
 
-    public static final Translation3d fuelExitTranslation = new Translation3d(
-            Units.inchesToMeters(-2.188570),
+    public static final DoubleFunction<Translation3d> fuelExitTranslation = (hoodAngleRad) -> new Translation3d(
+            Units.inchesToMeters(-6.910046) + Math.cos(hoodAngleRad) * shooterRadiusToCenterOfBallExitMeters,
             Units.inchesToMeters(-9.172244),
             driveConfig.bottomOfFrameRailsToCenterOfWheelsMeters() +
                     driveConfig.wheelRadiusMeters() +
-                    bottomOfFrameRailsToShooterHeightMeters
+                    bottomOfFrameRailsToShooterHeightMeters +
+                    Math.sin(hoodAngleRad) * shooterRadiusToCenterOfBallExitMeters
     );
     public static final Rotation2d fuelExitRotation = Rotation2d.k180deg;
 
@@ -144,7 +149,7 @@ public class ShootingKinematics implements Periodic {
         Translation2d robotSpeedsRotated = new Translation2d(
                 robotSpeeds.vxMetersPerSecond,
                 robotSpeeds.vyMetersPerSecond
-        ).rotateBy(fuelExitRotation);
+        ).rotateBy(fuelExitToHub.angle().plus(Rotation2d.k180deg));
         Logger.recordOutput("ShootingKinematics/RobotSpeedsRotated", robotSpeedsRotated);
 
         double v0 = ShootingRegression.calculateVelocityMetersPerSec(xyDist, 0.0);//robotSpeedsRotated.getX());
@@ -168,7 +173,7 @@ public class ShootingKinematics implements Periodic {
 
         // 4. Account for drivebase angular velocity
         Vector<N3> fuelExitFieldRelative = new Translation3d(
-                fuelExitTranslation.toTranslation2d()
+                fuelExitTranslation.apply(hood.getPositionRad()).toTranslation2d()
                         .rotateBy(robotState.getRotation())
         ).toVector();
         Vector<N3> angularVelocityVector = VecBuilder.fill(0.0, 0.0, robotSpeeds.omegaRadiansPerSecond);
@@ -199,7 +204,7 @@ public class ShootingKinematics implements Periodic {
         Pose3d fuelExitPose = new Pose3d(
                 new Pose3d(robotPose2d)
                         .transformBy(new Transform3d(
-                                fuelExitTranslation,
+                                fuelExitTranslation.apply(hood.getPositionRad()),
                                 new Rotation3d()
                         ))
                         .getTranslation(),
