@@ -134,38 +134,21 @@ public class ShootingKinematics implements Periodic {
         FuelExitToHub fuelExitToHub = getFuelExitToHub();
 
         double xyDist = fuelExitToHub.transform().getTranslation().toTranslation2d().getNorm();
-        double zDist = fuelExitToHub.transform().getTranslation().getZ();
-        double v0 = distanceToVelocity.get(xyDist);
-//        Logger.recordOutput("ShootingKinematics/XYDist", xyDist);
-//        Logger.recordOutput("ShootingKinematics/Stationary/Velocity", v0);
 
-        // 1. Compute stationary shooting velocity
-        // maple-sim uses 11 m/s² for gravity
-        final double g = 10.4; //9.81;
-        double discriminant = Math.pow(v0, 4) - g * (g * xyDist * xyDist + 2 * zDist * v0 * v0);
-        if (discriminant < 0) {
-            return false;
-        }
-        double phi_1 = Math.atan((v0 * v0 + Math.sqrt(discriminant)) / (g * xyDist));
-        double phi_2 = Math.atan((v0 * v0 - Math.sqrt(discriminant)) / (g * xyDist));
+        // 1. Compute velocity and angle from regression
+        ChassisSpeeds robotSpeeds = robotState.getMeasuredChassisSpeeds().times(robotVelocityScalar.get());
+        Translation2d robotSpeedsRotated = new Translation2d(
+                robotSpeeds.vxMetersPerSecond,
+                robotSpeeds.vyMetersPerSecond
+        ).rotateBy(fuelExitRotation);
+        Logger.recordOutput("ShootingKinematics/RobotSpeedsRotated", robotSpeedsRotated);
 
-        // Find largest and valid phi (largest guarantees we have a path that will fall
-        // down into the hub instead of going straight at the hub)
-        double phi_stationary;
-        if (isValidHoodAngle(phi_1) && (phi_1 > phi_2 || !isValidHoodAngle(phi_2))) {
-            phi_stationary = phi_1;
-//            Logger.recordOutput("ShootingKinematics/Stationary/Phi", phi_1);
-//            Logger.recordOutput("ShootingKinematics/Stationary/PhiAlternative", phi_2);
-        } else if (isValidHoodAngle(phi_2)) {
-            phi_stationary = phi_2;
-//            Logger.recordOutput("ShootingKinematics/Stationary/Phi", phi_2);
-//            Logger.recordOutput("ShootingKinematics/Stationary/PhiAlternative", phi_1);
-        } else {
-            return false;
-        }
+        var input = new ShootingRegression.Input(xyDist, 0.0);//robotSpeedsRotated.getX());
+        double v0 = ShootingRegression.calculateVelocityMetersPerSec(input);
+        double angle = ShootingRegression.calculateHoodAngleRad(input);
 
-        double vx = v0 * Math.cos(phi_stationary);
-        double vz = v0 * Math.sin(phi_stationary);
+        double vx = v0 * Math.cos(angle);
+        double vz = v0 * Math.sin(angle);
 
         // 2. Next, rotate shooting vector into field coordinates
         // Note that using fuel exit pose instead of robot pose automatically takes care
@@ -176,14 +159,8 @@ public class ShootingKinematics implements Periodic {
         double vy = vx * fuelExitToHub.angle().getSin();
         vx = vx * fuelExitToHub.angle().getCos();
 
-        // 3. Now subtract robot velocity from stationary shooting velocity to get final
+        // 3. Now subtract tangential robot velocity from initial shooting vectory to get final
         // shooting vector
-        ChassisSpeeds robotSpeeds = robotState.getMeasuredChassisSpeeds().times(robotVelocityScalar.get());
-        Translation2d robotSpeedsRotated = new Translation2d(
-                robotSpeeds.vxMetersPerSecond,
-                robotSpeeds.vyMetersPerSecond
-        ).rotateBy(fuelExitRotation);
-        vx -= robotSpeedsRotated.getX();
         vy -= robotSpeedsRotated.getY();
 
         // 4. Account for drivebase angular velocity

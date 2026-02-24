@@ -70,7 +70,7 @@ public class SuperstructureIOSim extends SuperstructureIO {
                         simManager.driveSimulation.getDriveTrainSimulatedChassisSpeedsFieldRelative(),
                         robotPose.getRotation(),
                         Meters.of(ShootingKinematics.fuelExitTranslation.getZ()),
-                        MetersPerSecond.of(Units.rotationsPerMinuteToRadiansPerSecond(flywheel.getVelocityRPM()) * FlywheelConstants.flywheelRadiusMeters * 0.35),
+                        MetersPerSecond.of(Units.rotationsPerMinuteToRadiansPerSecond(flywheel.getVelocityRPM()) * FlywheelConstants.flywheelRadiusMeters),
                         // Applying the shooter facing direction to the maple-sim parameter
                         // causes issues because it causes the shooter position to be rotated
                         // which puts it in the opposite corner of the robot. Instead, just
