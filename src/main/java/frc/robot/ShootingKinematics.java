@@ -13,7 +13,6 @@ import frc.lib.Util;
 import frc.lib.network.LoggedTunableNumber;
 import frc.lib.subsystem.Periodic;
 import frc.robot.subsystems.superstructure.flywheel.Flywheel;
-import frc.robot.subsystems.superstructure.flywheel.FlywheelConstants;
 import frc.robot.subsystems.superstructure.hood.Hood;
 import lombok.Getter;
 import org.littletonrobotics.junction.Logger;
@@ -30,13 +29,11 @@ public class ShootingKinematics implements Periodic {
             Units.inchesToMeters(15.0)
     );
     public static final Rotation2d fuelExitRotation = Rotation2d.k180deg;
-    private static final InterpolatingDoubleTreeMap distanceToVelocity = new InterpolatingDoubleTreeMap();
+
+    private static final InterpolatingDoubleTreeMap velocityToRPM = new InterpolatingDoubleTreeMap();
 
     static {
-        distanceToVelocity.put(1.5, 10.0);
-        distanceToVelocity.put(2.0, 15.0);
-        distanceToVelocity.put(4.0, 20.0);
-        distanceToVelocity.put(5.0, 30.0);
+        velocityToRPM.put(ShootingRegression.calculateVelocityMetersPerSec(2.5, 0.0), 1000.0);
     }
 
     private static final RobotState robotState = RobotState.get();
@@ -134,6 +131,7 @@ public class ShootingKinematics implements Periodic {
         FuelExitToHub fuelExitToHub = getFuelExitToHub();
 
         double xyDist = fuelExitToHub.transform().getTranslation().toTranslation2d().getNorm();
+        Logger.recordOutput("ShootingKinematics/XYDist", xyDist);
 
         // 1. Compute velocity and angle from regression
         ChassisSpeeds robotSpeeds = robotState.getMeasuredChassisSpeeds().times(robotVelocityScalar.get());
@@ -143,9 +141,8 @@ public class ShootingKinematics implements Periodic {
         ).rotateBy(fuelExitRotation);
         Logger.recordOutput("ShootingKinematics/RobotSpeedsRotated", robotSpeedsRotated);
 
-        var input = new ShootingRegression.Input(xyDist, 0.0);//robotSpeedsRotated.getX());
-        double v0 = ShootingRegression.calculateVelocityMetersPerSec(input);
-        double angle = ShootingRegression.calculateHoodAngleRad(input);
+        double v0 = ShootingRegression.calculateVelocityMetersPerSec(xyDist, 0.0);//robotSpeedsRotated.getX());
+        double angle = ShootingRegression.calculateHoodAngleRad(xyDist, 0.0);//robotSpeedsRotated.getX());
 
         double vx = v0 * Math.cos(angle);
         double vz = v0 * Math.sin(angle);
@@ -187,7 +184,7 @@ public class ShootingKinematics implements Periodic {
 //        Logger.recordOutput("ShootingKinematics/Phi", phi);
 //        Logger.recordOutput("ShootingKinematics/Theta", theta);
 
-        shootingParameters = new ShootingParameters(Units.radiansPerSecondToRotationsPerMinute(v / FlywheelConstants.flywheelRadiusMeters), phi, theta);
+        shootingParameters = new ShootingParameters(velocityToRPM.get(v), phi, theta);
         return true;
     }
 
