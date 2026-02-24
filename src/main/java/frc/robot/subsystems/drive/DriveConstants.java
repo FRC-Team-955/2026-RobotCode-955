@@ -29,11 +29,13 @@ public class DriveConstants {
     public static final DriveConfig driveConfig = new DriveConfig(
             // TO TUNE WHEEL RADIUS: Place robot on carpet and use wheel radius characterization auto.
             // Output will be in console in AdvantageScope.
+            // KEEP SYNCED WITH shooting_regression.py
             Units.inchesToMeters(1.91443),
             Units.inchesToMeters(19.25),
             Units.inchesToMeters(24.25),
             Units.inchesToMeters(36.5),
             Units.inchesToMeters(31.5),
+            // KEEP SYNCED WITH shooting_regression.py
             Units.inchesToMeters(-0.247776),
             4.58
     );

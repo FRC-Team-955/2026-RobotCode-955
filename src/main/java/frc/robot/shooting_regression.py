@@ -22,6 +22,17 @@ fig, ax = plt.subplots(subplot_kw=dict(projection="3d"))
 fuel_mass = 0.2150028  # kg - note, this is the average weight according to the range in the game manual
 fuel_radius = (15 / 100) / 2
 
+# KEEP SYNCED WITH DriveConstants.java
+wheel_radius = 1.935948620917915 * 2.54 / 100
+bottom_of_frame_rails_to_center_of_wheels = -0.247776 * 2.54 / 100
+
+# KEEP SYNCED WITH ShootingKinematics.java
+bottom_of_frame_rails_to_shooter_height = 12.861380 * 2.54 / 100
+
+z_initial_base = bottom_of_frame_rails_to_center_of_wheels + wheel_radius + bottom_of_frame_rails_to_shooter_height
+
+shooter_radius_to_center_of_ball_exit = 4.602756 * 2.54 / 100
+
 hubz = 72 * 2.54 / 100
 # Add some clearance to the top of the hub edge (15.5 + clearance)
 hub_edgez = hubz + (15.5 + 5) * 2.54 / 100 + fuel_radius
@@ -105,7 +116,9 @@ def calculate_trajectory_iterative(vel, hood_angle, robot_radial_velocity):
             ly = y[i - 1]
             lz = z[i - 1]
         else:
-            lx = ly = lz = 0
+            lx = 0
+            ly = 0
+            lz = z_initial_base
 
         lvx = vx
         lvy = vy

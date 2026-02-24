@@ -17,16 +17,22 @@ import frc.robot.subsystems.superstructure.hood.Hood;
 import lombok.Getter;
 import org.littletonrobotics.junction.Logger;
 
+import static frc.robot.subsystems.drive.DriveConstants.driveConfig;
+
 public class ShootingKinematics implements Periodic {
+    private static final double bottomOfFrameRailsToShooterHeightMeters = Units.inchesToMeters(12.861380);
+
     private static final LoggedTunableNumber robotVelocityScalar = new LoggedTunableNumber("ShootingKinematics/RobotVelocityScalar", 1.2);
     private static final LoggedTunableNumber headingToleranceDeg = new LoggedTunableNumber("ShootingKinematics/HeadingToleranceDegrees", 30.0);
     public static final LoggedTunableNumber velocityToleranceRPM = new LoggedTunableNumber("ShootingKinematics/VelocityToleranceRPM", 1000);
     public static final LoggedTunableNumber hoodToleranceDeg = new LoggedTunableNumber("ShootingKinematics/HoodToleranceDegrees", 10.0);
 
     public static final Translation3d fuelExitTranslation = new Translation3d(
-            Units.inchesToMeters(-4.0),
-            Units.inchesToMeters(-9.0),
-            Units.inchesToMeters(15.0)
+            Units.inchesToMeters(-2.188570),
+            Units.inchesToMeters(-9.172244),
+            driveConfig.bottomOfFrameRailsToCenterOfWheelsMeters() +
+                    driveConfig.wheelRadiusMeters() +
+                    bottomOfFrameRailsToShooterHeightMeters
     );
     public static final Rotation2d fuelExitRotation = Rotation2d.k180deg;
 
@@ -202,6 +208,7 @@ public class ShootingKinematics implements Periodic {
                                 .plus(fuelExitRotation)
                 )
         );
+        Logger.recordOutput("ShootingKinematics/FuelExitPose", fuelExitPose);
 
         Translation3d hubTranslation = AllianceFlipUtil.apply(FieldConstants.Hub.topCenterPoint);
         Pose3d hubPose = new Pose3d(hubTranslation, new Rotation3d());
