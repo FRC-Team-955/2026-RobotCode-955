@@ -432,13 +432,14 @@ else:
         print(f"vel: {vel_equation}")
         print(vel_cov)
 
-        ax.scatter(X[0], X[1], y_vel, label="Velocity data")
-        ax.scatter(
-            X[0],
-            X[1],
-            f(X, *vel_coeff),
+        X_reg = np.meshgrid(np.linspace(0, 10, 50), np.linspace(-6, 6, 50))
+        ax.plot_surface(
+            X_reg[0],
+            X_reg[1],
+            f(X_reg, *vel_coeff),
             label="Velocity regression"
         )
+        ax.scatter(X[0], X[1], y_vel, label="Velocity data", c="g")
 
         angle_coeff, angle_cov = curve_fit(f, X, y_angle)
         angle_equation = (
@@ -456,13 +457,13 @@ else:
         print(f"angle: {angle_equation}")
         print(angle_cov)
 
-        ax.scatter(X[0], X[1], y_angle, label="Angle data")
-        ax.scatter(
-            X[0],
-            X[1],
-            f(X, *angle_coeff),
+        ax.plot_surface(
+            X_reg[0],
+            X_reg[1],
+            f(X_reg, *angle_coeff),
             label="Angle regression"
         )
+        ax.scatter(X[0], X[1], y_angle, label="Angle data", c="y")
 
         with open(dirname(realpath(__file__)) + "/ShootingRegression.java", "w") as f:
             f.write("""package frc.robot;
