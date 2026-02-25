@@ -355,7 +355,7 @@ else:
     if __name__ == "__main__":
         distance_velocity_pairs = []
 
-        start_dist = 2.5
+        start_dist = 1
         stop_dist = 7
         max_vel = 4.5
         for distance in np.linspace(start_dist, stop_dist, 50):

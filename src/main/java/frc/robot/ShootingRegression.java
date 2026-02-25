@@ -5,7 +5,7 @@ public class ShootingRegression {
     public static double calculateVelocityMetersPerSec(double distanceMeters, double radialRobotVelocityMetersPerSec) {
         double x = distanceMeters;
         double y = radialRobotVelocityMetersPerSec;
-        return 5.98184266941433 + 0.38990881243173814 * x + -0.3240728526264065 * y + -0.032856643709916915 * x * y + 0.025454308918660514 * x * x + 0.053982613756920435 * y * y + -0.0004056322482506517 * x * x * y * y;
+        return 6.648753258939372 + 0.10688477714695434 * x + -0.12431566390300404 * y + -0.06888533841020121 * x * y + 0.05417523533442376 * x * x + 0.05716514765468613 * y * y + -0.0005382931675358387 * x * x * y * y;
     }
 
     public static double calculateHoodAngleRad(double distanceMeters, double radialRobotVelocityMetersPerSec) {
@@ -15,6 +15,6 @@ public class ShootingRegression {
         // Shooting sim angle for vertical shot is 90°
         // Shooting sim angle for 15° from vertical is 75°
         // Therefore, hood angle = 90° - shooting sim angle
-        return Math.PI / 2.0 - (1.5845707897494905 + -0.19498035526928892 * x + 0.1384925000286077 * y + -0.007813621427349484 * x * y + 0.015332123168953871 * x * x + 0.006460303639596439 * y * y + -5.363788872225973e-05 * x * x * y * y);
+        return Math.PI / 2.0 - (1.6036291388689314 + -0.19724795245538537 * x + 0.14655515677175784 * y + -0.009294488738627803 * x * y + 0.015243039052398051 * x * x + 0.005285208224518302 * y * y + -2.8222378721088437e-05 * x * x * y * y);
     }
 }
