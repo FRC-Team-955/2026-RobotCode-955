@@ -415,7 +415,6 @@ else:
                 # i9 * X[0] ** 3 * X[1] ** 3
             )
 
-        # TODO plot surface
         vel_coeff, vel_cov = curve_fit(f, X, y_vel)
         vel_equation = (
             f"{vel_coeff[0]}"
