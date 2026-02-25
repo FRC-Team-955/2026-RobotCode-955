@@ -146,14 +146,14 @@ public class ShootingKinematics implements Periodic {
 
         // 1. Compute velocity and angle from regression
         ChassisSpeeds robotSpeeds = robotState.getMeasuredChassisSpeeds().times(robotVelocityScalar.get());
-        Translation2d robotSpeedsRotated = new Translation2d(
+        Translation2d robotSpeedsFuelExitRelative = new Translation2d(
                 robotSpeeds.vxMetersPerSecond,
                 robotSpeeds.vyMetersPerSecond
-        ).rotateBy(fuelExitToHub.angle().plus(Rotation2d.k180deg));
-        Logger.recordOutput("ShootingKinematics/RobotSpeedsRotated", robotSpeedsRotated);
+        ).rotateBy(fuelExitRotation.plus(fuelExitToHub.angle().unaryMinus()));
+        Logger.recordOutput("ShootingKinematics/RobotSpeedsRotated", robotSpeedsFuelExitRelative);
 
-        double v0 = ShootingRegression.calculateVelocityMetersPerSec(xyDist, 0.0);//robotSpeedsRotated.getX());
-        double angle = ShootingRegression.calculateHoodAngleRad(xyDist, 0.0);//robotSpeedsRotated.getX());
+        double v0 = ShootingRegression.calculateVelocityMetersPerSec(xyDist, robotSpeedsFuelExitRelative.getX());
+        double angle = ShootingRegression.calculateHoodAngleRad(xyDist, robotSpeedsFuelExitRelative.getX());
 
         double vx = v0 * Math.cos(angle);
         double vz = v0 * Math.sin(angle);
@@ -169,7 +169,9 @@ public class ShootingKinematics implements Periodic {
 
         // 3. Now subtract tangential robot velocity from initial shooting vectory to get final
         // shooting vector
-        vy -= robotSpeedsRotated.getY();
+        // Note that we must subtract the fuel exit rotation to account for the robot speeds
+        // being fuel exit relative
+        vy -= robotSpeedsFuelExitRelative.rotateBy(fuelExitRotation.unaryMinus()).getY();
 
         // 4. Account for drivebase angular velocity
         Vector<N3> fuelExitFieldRelative = new Translation3d(
