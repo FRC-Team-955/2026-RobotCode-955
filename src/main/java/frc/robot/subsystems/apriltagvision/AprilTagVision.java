@@ -47,9 +47,9 @@ public class AprilTagVision implements Periodic {
         return Commands.runOnce(() -> tagIdFilter = tagIds);
     }
 
-    private final double tagToRobotX = 0.5;
-    private final double tagToRobotY = 0.0;
-    private final double tagToRobotZ = -0.38;
+    private final double tagToRobotX = Units.inchesToMeters(-30.0625);
+    private final double tagToRobotY = Units.inchesToMeters(13.75);
+    private final double tagToRobotZ = Units.inchesToMeters(-12.0 - (1.0 / 32.0));
     private final double tagToRobotYaw = 180.0;
     private double tagToCamQuatW;
     private double tagToCamQuatX;
@@ -140,10 +140,10 @@ public class AprilTagVision implements Periodic {
                 robotToCam = tagToRobot.inverse().plus(tagToCam);
                 rotXYZ = new Rotation3d(robotToCam.getRotation().getX(),
                         robotToCam.getRotation().getY(), robotToCam.getRotation().getZ());
-                Logger.recordOutput("AprilTagVision/" + cam.getKey() + "robotToCam", robotToCam);
-                Logger.recordOutput("AprilTagVision/" + cam.getKey() + "robotToCam/Rotation/X", Units.radiansToDegrees(rotXYZ.getX()));
-                Logger.recordOutput("AprilTagVision/" + cam.getKey() + "robotToCam/Rotation/Y", Units.radiansToDegrees(rotXYZ.getY()));
-                Logger.recordOutput("AprilTagVision/" + cam.getKey() + "robotToCam/Rotation/Z", Units.radiansToDegrees(rotXYZ.getZ()));
+                Logger.recordOutput("AprilTagVision/" + cam.getKey() + "robotToCam" + observation.tagID(), robotToCam);
+                Logger.recordOutput("AprilTagVision/" + cam.getKey() + "robotToCam" + observation.tagID() + "/Rotation/X", Units.radiansToDegrees(rotXYZ.getX()));
+                Logger.recordOutput("AprilTagVision/" + cam.getKey() + "robotToCam" + observation.tagID() + "/Rotation/Y", Units.radiansToDegrees(rotXYZ.getY()));
+                Logger.recordOutput("AprilTagVision/" + cam.getKey() + "robotToCam" + observation.tagID() + "/Rotation/Z", Units.radiansToDegrees(rotXYZ.getZ()));
 
 
                 Optional<Pose3d> tagPoseOptional = aprilTagLayout.getTagPose(observation.tagID());

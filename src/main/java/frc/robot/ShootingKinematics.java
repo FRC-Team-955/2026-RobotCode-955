@@ -44,7 +44,22 @@ public class ShootingKinematics implements Periodic {
     private static final InterpolatingDoubleTreeMap velocityToRPM = new InterpolatingDoubleTreeMap();
 
     static {
-        velocityToRPM.put(ShootingRegression.calculateVelocityMetersPerSec(2.5, 0.0), 1000.0);
+        velocityToRPM.put(ShootingRegression.calculateVelocityMetersPerSec(1.5, 0.0), 1800.0);
+        velocityToRPM.put(ShootingRegression.calculateVelocityMetersPerSec(1.75, 0.0), 1900.0);
+        velocityToRPM.put(ShootingRegression.calculateVelocityMetersPerSec(2.0, 0.0), 2000.0);
+        velocityToRPM.put(ShootingRegression.calculateVelocityMetersPerSec(2.25, 0.0), 2000.0);
+        velocityToRPM.put(ShootingRegression.calculateVelocityMetersPerSec(2.5, 0.0), 2000.0);
+        velocityToRPM.put(ShootingRegression.calculateVelocityMetersPerSec(2.75, 0.0), 2000.0);
+        velocityToRPM.put(ShootingRegression.calculateVelocityMetersPerSec(3.0, 0.0), 2000.0);
+        velocityToRPM.put(ShootingRegression.calculateVelocityMetersPerSec(3.25, 0.0), 2100.0);
+        velocityToRPM.put(ShootingRegression.calculateVelocityMetersPerSec(3.5, 0.0), 2100.0);
+        velocityToRPM.put(ShootingRegression.calculateVelocityMetersPerSec(3.75, 0.0), 2200.0);
+        velocityToRPM.put(ShootingRegression.calculateVelocityMetersPerSec(4.0, 0.0), 2200.0);
+        velocityToRPM.put(ShootingRegression.calculateVelocityMetersPerSec(4.25, 0.0), 2200.0);
+        velocityToRPM.put(ShootingRegression.calculateVelocityMetersPerSec(4.5, 0.0), 2300.0);
+        velocityToRPM.put(ShootingRegression.calculateVelocityMetersPerSec(4.75, 0.0), 2400.0);
+        velocityToRPM.put(ShootingRegression.calculateVelocityMetersPerSec(5.0, 0.0), 2400.0);
+        velocityToRPM.put(ShootingRegression.calculateVelocityMetersPerSec(5.25, 0.0), 2500.0);
     }
 
     private static final RobotState robotState = RobotState.get();

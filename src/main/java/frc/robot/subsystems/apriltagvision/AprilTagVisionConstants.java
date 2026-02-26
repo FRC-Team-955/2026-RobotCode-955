@@ -61,6 +61,7 @@ public class AprilTagVisionConstants {
         ShooterCam(
                 new Transform3d(
                         Units.inchesToMeters(-11.668592), Units.inchesToMeters(-13.462841), Units.inchesToMeters(7.136914),
+//                        new Rotation3d(new Quaternion(-0.947, -0.032, 0.224, -0.229))
                         // Rotation order matters
                         new Rotation3d(0.0, Units.degreesToRadians(-30.0), 0.0)
                                 .rotateBy(new Rotation3d(0.0, 0.0, Units.degreesToRadians(-180.0 + 25.0)))
