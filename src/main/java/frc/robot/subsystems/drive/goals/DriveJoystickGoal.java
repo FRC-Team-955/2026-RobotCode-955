@@ -15,6 +15,7 @@ import frc.robot.controller.Controller;
 import frc.robot.shooting.ShootingKinematics;
 import frc.robot.subsystems.drive.DriveGoal;
 import frc.robot.subsystems.drive.DriveRequest;
+import frc.robot.subsystems.gamepiecevision.GamePieceVision;
 import lombok.RequiredArgsConstructor;
 import org.littletonrobotics.junction.Logger;
 
@@ -44,7 +45,9 @@ public class DriveJoystickGoal extends DriveGoal {
     private static final Controller controller = Controller.get();
     private static final ShootingKinematics shootingKinematics = ShootingKinematics.get();
 
-    private static final Supplier<Optional<Translation2d>> assistTranslationSupplier = () -> Optional.of(new Translation2d(2, 2));
+    private static final GamePieceVision gamePieceVision = GamePieceVision.get();
+
+    private static final Supplier<Optional<Translation2d>> assistTranslationSupplier = () -> gamePieceVision.getBestTargets().stream().findFirst();
 
     private final Mode mode;
 
