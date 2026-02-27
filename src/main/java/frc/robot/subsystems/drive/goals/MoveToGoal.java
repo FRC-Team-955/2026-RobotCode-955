@@ -81,7 +81,7 @@ public class MoveToGoal extends DriveGoal {
         //Logger.recordOutput("Drive/MoveTo/DistanceToGoalMeters", distanceToGoal);
 
         double linearVelocityMetersPerSec = calculateLinearVelocityMetersPerSec(distanceToGoal);
-        Rotation2d angleToGoalRad = currentPose.getTranslation().minus(goalPose.getTranslation()).getAngle();
+        Rotation2d angleToGoalRad = goalPose.getTranslation().minus(currentPose.getTranslation()).getAngle();
         Translation2d linearXYVelocityMetersPerSec = new Translation2d(linearVelocityMetersPerSec, angleToGoalRad);
 
         double angularVelocityRadPerSec = calculateAngularVelocityRadPerSec(currentPose, goalPose, linearXYVelocityMetersPerSec);
@@ -107,7 +107,7 @@ public class MoveToGoal extends DriveGoal {
     private double calculateLinearVelocityMetersPerSec(double distanceToGoal) {
         if (!constraints.fullSpeed()) {
             double linearVelocityMetersPerSec = moveToLinear.calculate(
-                    distanceToGoal,
+                    -distanceToGoal,
                     0.0
             );
             // linear velocity *shouldn't* ever be negative because it is a magnitude
