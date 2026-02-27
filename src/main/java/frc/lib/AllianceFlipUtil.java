@@ -68,4 +68,16 @@ public class AllianceFlipUtil {
     public static Pose3d apply(Pose3d pose) {
         return new Pose3d(apply(pose.getTranslation()), apply(pose.getRotation()));
     }
+
+    public static Bounds apply(Bounds bounds) {
+        if (shouldFlip()) {
+            return new Bounds(
+                    applyX(bounds.maxX()),
+                    applyX(bounds.minX()),
+                    applyY(bounds.maxY()),
+                    applyY(bounds.minY()));
+        } else {
+            return bounds;
+        }
+    }
 }
