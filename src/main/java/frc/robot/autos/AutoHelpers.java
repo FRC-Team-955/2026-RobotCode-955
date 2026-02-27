@@ -18,8 +18,7 @@ import frc.robot.subsystems.gamepiecevision.GamePieceVision;
 
 import java.util.function.Supplier;
 
-import static frc.robot.subsystems.drive.DriveConstants.defaultMoveToConstraints;
-import static frc.robot.subsystems.drive.DriveConstants.moveToConfig;
+import static frc.robot.subsystems.drive.DriveConstants.*;
 
 public class AutoHelpers {
     private static final double intermediateLinearTolerance = 0.1;
@@ -39,20 +38,30 @@ public class AutoHelpers {
                                 .withFullSpeed(true)
                 )
                 .until(() -> robotState.isAtPoseWithTolerance(
-                        poseSupplier.get(),
+                        AllianceFlipUtil.apply(poseSupplier.get()),
                         intermediateLinearTolerance,
                         intermediateAngularTolerance
                 ));
     }
 
     public static Command intermediateWaypointWithAiming(Supplier<Translation2d> translationSupplier, DriveConstants.MoveToConstraints constraints) {
-        return intermediateWaypoint(
+        Supplier<Pose2d> poseSupplier =
                 () -> new Pose2d(
                         AllianceFlipUtil.apply(translationSupplier.get()),
                         Rotation2d.fromRadians(shootingKinematics.getShootingParameters().headingRad())
-                ),
-                constraints.withApplyAimingFeedforward(true)
-        );
+                );
+        return drive
+                .moveTo(
+                        poseSupplier,
+                        constraints
+                                .withFullSpeed(true)
+                                .withApplyAimingFeedforward(true)
+                )
+                .until(() -> robotState.isAtPoseWithTolerance(
+                        poseSupplier.get(),
+                        intermediateLinearTolerance,
+                        intermediateAngularTolerance
+                ));
     }
 
     public static Command finalWaypoint(Supplier<Pose2d> poseSupplier, DriveConstants.MoveToConstraints constraints) {
@@ -62,28 +71,39 @@ public class AutoHelpers {
                         constraints
                 )
                 .until(() -> robotState.isAtPoseWithTolerance(
-                        poseSupplier.get(),
+                        AllianceFlipUtil.apply(poseSupplier.get()),
                         moveToConfig.linearPositionToleranceMeters().get(),
                         moveToConfig.angularPositionToleranceRad().get()
                 ));
     }
 
     public static Command finalWaypointWithAiming(Supplier<Translation2d> translationSupplier, DriveConstants.MoveToConstraints constraints) {
-        return finalWaypoint(
+        Supplier<Pose2d> poseSupplier =
                 () -> new Pose2d(
                         AllianceFlipUtil.apply(translationSupplier.get()),
                         Rotation2d.fromRadians(shootingKinematics.getShootingParameters().headingRad())
-                ),
-                constraints.withApplyAimingFeedforward(true)
-        );
+                );
+        return drive
+                .moveTo(
+                        poseSupplier,
+                        constraints
+                                .withApplyAimingFeedforward(true)
+                )
+                .until(() -> robotState.isAtPoseWithTolerance(
+                        poseSupplier.get(),
+                        moveToConfig.linearPositionToleranceMeters().get(),
+                        moveToConfig.angularPositionToleranceRad().get()
+                ));
     }
 
-    private static Pose2d yDistanceInterpolation(
+    public static Pose2d yDistanceInterpolation(
             Pose2d start,
             Pose2d end,
             double yDistanceToStartInterpolation
     ) {
-        double yDistance = Math.abs(new Transform2d(end, robotState.getPose()).getY());
+        // note that robot pose needs to be flipped BACK to blue alliance
+        // because the waypoint functions will flip it to red alliance if needed
+        double yDistance = Math.abs(new Transform2d(end, AllianceFlipUtil.apply(robotState.getPose())).getY());
         yDistance -= 0.1; // Add a slight offset so that we actually reach the end position
         // No clamping needed, Pose2d.interpolate will handle it
         double interp = 1.0 - (yDistance / yDistanceToStartInterpolation);
@@ -121,21 +141,28 @@ public class AutoHelpers {
             Bounds bounds,
             Supplier<Pose2d> poseSupplierIfNoGamePieces
     ) {
-        return finalWaypoint(
-                () -> {
-                    for (var target : gamePieceVision.getBestTargets()) {
-                        if (AllianceFlipUtil.apply(bounds).contains(target)) {
-                            return new Pose2d(
-                                    target,
-                                    // Point towards target
-                                    target.minus(robotState.getTranslation()).getAngle()
-                            );
-                        }
-                    }
-                    return poseSupplierIfNoGamePieces.get();
-                },
-                intakeConstraints
-        );
+        Supplier<Pose2d> poseSupplier = () -> {
+            for (var target : gamePieceVision.getBestTargets()) {
+                if (AllianceFlipUtil.apply(bounds).contains(target)) {
+                    return new Pose2d(
+                            target,
+                            // Point towards target
+                            target.minus(robotState.getTranslation()).getAngle()
+                    );
+                }
+            }
+            return AllianceFlipUtil.apply(poseSupplierIfNoGamePieces.get());
+        };
+        return drive
+                .moveTo(
+                        poseSupplier,
+                        intakeConstraints
+                )
+                .until(() -> robotState.isAtPoseWithTolerance(
+                        poseSupplier.get(),
+                        moveToConfig.linearPositionToleranceMeters().get(),
+                        moveToConfig.angularPositionToleranceRad().get()
+                ));
     }
 
     public static Command intakeFromLeftNeutralZone(Supplier<Pose2d> poseSupplierIfNoGamePieces) {

@@ -5,6 +5,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.simulation.DriverStationSim;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
@@ -108,10 +109,11 @@ public class SimManager {
                 // maple-sim currently has a bug where the two outposts are swapped.
                 // So when the alliance is set to blue, only the red outpost will have
                 // fuel in it. Therefore, we have to swap the alliance when resetting the field
-                DriverStationSim.setAllianceStationId(AllianceStationID.Red1);
+                DriverStation.Alliance initial = DriverStation.getAlliance().orElseThrow();
+                DriverStationSim.setAllianceStationId(initial == DriverStation.Alliance.Blue ? AllianceStationID.Red1 : AllianceStationID.Blue1);
                 DriverStationSim.notifyNewData();
                 SimulatedArena.getInstance().resetFieldForAuto();
-                DriverStationSim.setAllianceStationId(AllianceStationID.Blue1);
+                DriverStationSim.setAllianceStationId(initial == DriverStation.Alliance.Blue ? AllianceStationID.Blue1 : AllianceStationID.Red1);
                 DriverStationSim.notifyNewData();
             }));
 
