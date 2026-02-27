@@ -7,7 +7,9 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.AllianceFlipUtil;
+import frc.lib.Bounds;
 import frc.lib.network.LoggedTunableNumber;
+import frc.robot.FieldConstants;
 import frc.robot.RobotState;
 import frc.robot.shooting.ShootingKinematics;
 import frc.robot.subsystems.drive.Drive;
@@ -97,22 +99,14 @@ public class AutoHelpers {
     private static final DriveConstants.MoveToConstraints intakeConstraints = defaultMoveToConstraints
             .withMaxLinearVelocityMetersPerSec(new LoggedTunableNumber("AutoHelpers/Intake/MaxVelocity", 2.5));
 
-    public static Command intakeFromNeutralZone(
-            double xMin,
-            double xMax,
-            double yMin,
-            double yMax,
+    private static Command intakeFromNeutralZone(
+            Bounds bounds,
             Supplier<Pose2d> poseSupplierIfNoGamePieces
     ) {
         return finalWaypoint(
                 () -> {
                     for (var target : gamePieceVision.getBestTargets()) {
-                        if (
-                                target.getX() >= xMin &&
-                                        target.getX() <= xMax &&
-                                        target.getY() >= yMin &&
-                                        target.getY() <= yMax
-                        ) {
+                        if (AllianceFlipUtil.apply(bounds).contains(target)) {
                             return new Pose2d(
                                     target,
                                     // Point towards target
@@ -123,6 +117,30 @@ public class AutoHelpers {
                     return poseSupplierIfNoGamePieces.get();
                 },
                 intakeConstraints
+        );
+    }
+
+    public static Command intakeFromLeftNeutralZone(Supplier<Pose2d> poseSupplierIfNoGamePieces) {
+        return intakeFromNeutralZone(
+                new Bounds(
+                        FieldConstants.LinesVertical.neutralZoneNear,
+                        FieldConstants.LinesVertical.center,
+                        FieldConstants.LinesHorizontal.center,
+                        FieldConstants.fieldWidth
+                ),
+                poseSupplierIfNoGamePieces
+        );
+    }
+
+    public static Command intakeFromRightNeutralZone(Supplier<Pose2d> poseSupplierIfNoGamePieces) {
+        return intakeFromNeutralZone(
+                new Bounds(
+                        FieldConstants.LinesVertical.neutralZoneNear,
+                        FieldConstants.LinesVertical.center,
+                        0.0,
+                        FieldConstants.LinesHorizontal.center
+                ),
+                poseSupplierIfNoGamePieces
         );
     }
 }
