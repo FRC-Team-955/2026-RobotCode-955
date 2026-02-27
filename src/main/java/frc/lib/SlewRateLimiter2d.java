@@ -128,6 +128,10 @@ public class SlewRateLimiter2d {
         m_prevTime = MathSharedStore.getTimestamp();
     }
 
+    public void reset(ChassisSpeeds value) {
+        reset(new Translation2d(value.vxMetersPerSecond, value.vyMetersPerSecond));
+    }
+
     /**
      * Sets the rate-of-change limit to the given positive and negative rate limits.
      *

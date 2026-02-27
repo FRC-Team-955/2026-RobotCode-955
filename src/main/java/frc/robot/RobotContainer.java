@@ -13,6 +13,7 @@ import frc.robot.controller.Controller;
 import frc.robot.shooting.ShootingKinematics;
 import frc.robot.subsystems.apriltagvision.AprilTagVision;
 import frc.robot.subsystems.drive.Drive;
+import frc.robot.subsystems.drive.goals.DriveJoystickGoal;
 import frc.robot.subsystems.drive.goals.WheelRadiusCharacterizationGoal;
 import frc.robot.subsystems.gamepiecevision.GamePieceVision;
 import frc.robot.subsystems.leds.LEDs;
@@ -69,7 +70,7 @@ public class RobotContainer {
     }
 
     private void setDefaultCommands() {
-        drive.setDefaultCommand(drive.driveJoystick(false));
+        drive.setDefaultCommand(drive.driveJoystick(DriveJoystickGoal.Mode.Normal));
         superintake.setDefaultCommand(superintake.setGoal(Superintake.Goal.IDLE).ignoringDisable(true));
         superstructure.setDefaultCommand(superstructure.setGoal(Superstructure.Goal.IDLE).ignoringDisable(true));
     }
@@ -85,41 +86,53 @@ public class RobotContainer {
 
         var shouldAutoAim = new Trigger(() -> operatorDashboard.getSelectedScoringMode() == OperatorDashboard.ScoringMode.ShootAndPassAutomatic || !operatorDashboard.manualAiming.get());
         controller.leftTrigger()
+                .and(controller.rightTrigger().negate())
                 .and(shouldAutoAim)
                 .whileTrue(Commands.parallel(
-                        drive.driveJoystickWithAiming(),
+                        drive.driveJoystick(DriveJoystickGoal.Mode.Aim),
                         superstructure.setGoal(Superstructure.Goal.SHOOT)
                 ));
         controller.leftTrigger()
+                .and(controller.rightTrigger().negate())
                 .and(shouldAutoAim.negate())
                 .whileTrue(Commands.parallel(
-                        drive.driveJoystick(true),
+                        drive.driveJoystick(DriveJoystickGoal.Mode.StopWithX),
                         superstructure.setGoal(Superstructure.Goal.SHOOT)
                 ));
 
         controller.rightTrigger()
-                .whileTrue(
+                .and(controller.leftTrigger().negate())
+                .whileTrue(Commands.parallel(
+                        drive.driveJoystick(DriveJoystickGoal.Mode.Assist),
                         superintake.setGoal(Superintake.Goal.INTAKE)
-//                                .alongWith(drive.driveJoystickWithAssist(() -> {
-//                                            Pose2d robotPose = robotState.getPose();
-//                                            Pose2d closestFuel = null;
-//                                            double closestDist = Double.MAX_VALUE;
-//
-//                                            for (var fuel : gamePieceVision.getFreshCoral()) {
-//                                                Pose2d fuelPose = fuel.toPose2d();
-//                                                double dist = fuelPose.getTranslation().getDistance(robotPose.getTranslation());
-//
-//                                                if (dist < closestDist) {
-//                                                    closestDist = dist;
-//                                                    closestFuel = fuelPose;
-//                                                }
-//                                            }
-//
-//                                            return Optional.ofNullable(closestFuel);
-//                                        }
-//
-//                                ))
-                );
+                ));
+
+        controller.leftTrigger()
+                .and(controller.rightTrigger())
+                .whileTrue(Commands.parallel(
+                        drive.driveJoystick(DriveJoystickGoal.Mode.AimAndAssist),
+                        superintake.setGoal(Superintake.Goal.INTAKE),
+                        superstructure.setGoal(Superstructure.Goal.SHOOT)
+                ));
+        //                                .alongWith(drive.driveJoystickWithAssist(() -> {
+        //                                            Pose2d robotPose = robotState.getPose();
+        //                                            Pose2d closestFuel = null;
+        //                                            double closestDist = Double.MAX_VALUE;
+        //
+        //                                            for (var fuel : gamePieceVision.getFreshCoral()) {
+        //                                                Pose2d fuelPose = fuel.toPose2d();
+        //                                                double dist = fuelPose.getTranslation().getDistance(robotPose.getTranslation());
+        //
+        //                                                if (dist < closestDist) {
+        //                                                    closestDist = dist;
+        //                                                    closestFuel = fuelPose;
+        //                                                }
+        //                                            }
+        //
+        //                                            return Optional.ofNullable(closestFuel);
+        //                                        }
+        //
+        //                                ))
 
         controller.a()
                 .whileTrue(Commands.parallel(

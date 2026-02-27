@@ -28,7 +28,6 @@ import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.Arrays;
-import java.util.Optional;
 import java.util.function.DoubleSupplier;
 import java.util.function.IntToDoubleFunction;
 import java.util.function.Supplier;
@@ -196,7 +195,7 @@ public class Drive extends CommandBasedSubsystem {
                     anySampleDiscarded = true;
                 }
             }
-//            Logger.recordOutput("Drive/AnySampleDiscarded", anySampleDiscarded);
+            //Logger.recordOutput("Drive/AnySampleDiscarded", anySampleDiscarded);
         } else {
             boolean discardSample = processOdometrySample(
                     Timer.getTimestamp(),
@@ -206,7 +205,7 @@ public class Drive extends CommandBasedSubsystem {
                     () -> gyroInputs.yawPositionRad
             );
 
-//            Logger.recordOutput("Drive/SampleDiscarded", discardSample);
+            //Logger.recordOutput("Drive/SampleDiscarded", discardSample);
         }
 
         // Chassis speeds
@@ -357,16 +356,8 @@ public class Drive extends CommandBasedSubsystem {
         return startIdle(() -> goal = new MoveToGoal(poseSupplier, moveToConstraints));
     }
 
-    public Command driveJoystick(boolean stopWithX) {
-        return startIdle(() -> goal = new DriveJoystickGoal(stopWithX));
-    }
-
-    public Command driveJoystickWithAssist(Supplier<Optional<Pose2d>> assistPoseSupplier) {
-        return startIdle(() -> goal = new DriveJoystickWithAssistGoal(assistPoseSupplier));
-    }
-
-    public Command driveJoystickWithAiming() {
-        return startIdle(() -> goal = new DriveJoystickWithAimingGoal());
+    public Command driveJoystick(DriveJoystickGoal.Mode mode) {
+        return startIdle(() -> goal = new DriveJoystickGoal(mode));
     }
 
     public Command runRobotRelative(Supplier<ChassisSpeeds> chassisSpeedsSupplier) {
