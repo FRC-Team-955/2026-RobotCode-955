@@ -7,11 +7,13 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.AllianceFlipUtil;
+import frc.lib.network.LoggedTunableNumber;
 import frc.robot.FieldConstants;
 import frc.robot.RobotState;
 import frc.robot.shooting.ShootingKinematics;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.DriveConstants;
+import frc.robot.subsystems.drive.goals.DriveJoystickGoal;
 import frc.robot.subsystems.superintake.Superintake;
 import frc.robot.subsystems.superstructure.Superstructure;
 import org.littletonrobotics.junction.Logger;
@@ -21,7 +23,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;
 
-import static frc.robot.subsystems.drive.DriveConstants.defaultMoveToConstraints;
+import static frc.robot.subsystems.drive.DriveConstants.*;
 
 public final class LeftSideAuto {
     private LeftSideAuto() {
@@ -38,6 +40,13 @@ public final class LeftSideAuto {
             new Pose2d(6.0, 7.5, Rotation2d.fromDegrees(-90)),
             new Pose2d(3.5, 7.5, Rotation2d.fromDegrees(-90)),
             new Pose2d(2.5, 7.5, Rotation2d.fromDegrees(180))
+    );
+
+    public static final DriveConstants.MoveToConstraints LeftSideAutoMoveToConstraints = new DriveConstants.MoveToConstraints(
+            new LoggedTunableNumber("Drive/MoveTo/MaxLinearVelocity", 0.5),
+            new LoggedTunableNumber("Drive/MoveTo/MaxLinearAcceleration", 15.0),
+            new LoggedTunableNumber("Drive/MoveTo/MaxAngularVelocity", maxAngularVelocityRadPerSec),
+            new LoggedTunableNumber("Drive/MoveTo/MaxAngularAcceleration", 30.0)
     );
 
     private static final int INTERPOLATION_START_INDEX = baseWaypoints.size();
@@ -156,6 +165,10 @@ public final class LeftSideAuto {
 
         Runnable aimWhileOnInterpolationLineRunnable = () -> {
             if (onInterpolationLine.get()) {
+                currentGoal.set(new Pose2d(
+                        currentGoal.get().getTranslation(),
+                        Rotation2d.fromRadians(ShootingKinematics.get().getShootingParameters().headingRad())
+                ));
                 superstructure.setGoal(Superstructure.Goal.SHOOT).initialize();
                 Logger.recordOutput("LeftSideAuto/Aiming", true);
             } else {
@@ -168,25 +181,25 @@ public final class LeftSideAuto {
                         Commands.waitUntil(() -> ShootingKinematics.get().isShootingParametersMet()),
                         Commands.waitSeconds(2.0)
                 ),
-                drive.driveJoystickWithAiming(),
+                drive.driveJoystick(DriveJoystickGoal.Mode.Aim),
                 superstructure.setGoal(Superstructure.Goal.SHOOT)
         ).onlyWhile(DriverStation::isAutonomousEnabled);
 
-        Command driveMoveTo = drive.moveTo(currentGoal::get, defaultMoveToConstraints);
+        Command driveMoveTo = drive.moveTo(currentGoal::get);
         Command driveMoveToWithAiming = drive.moveTo(() -> {
             Pose2d goal = currentGoal.get();
             return new Pose2d(goal.getTranslation(), Rotation2d.fromRadians(ShootingKinematics.get().getShootingParameters().headingRad()));
-        }, defaultMoveToConstraints);
+        }, LeftSideAutoMoveToConstraints);
 
         return Commands.sequence(
                 setInitialPose,
-                Commands.deadline(
+                Commands.race(
                         Commands.run(advanceGoalsRunnable).until(onInterpolationLine::get),
                         driveMoveTo,
                         Commands.run(intakeWhileMovingRunnable, superintake),
                         Commands.run(aimWhileOnInterpolationLineRunnable, superstructure)
                 ),
-                Commands.deadline(
+                Commands.race(
                         Commands.run(advanceGoalsRunnable).until(atFinalGoal),
                         driveMoveToWithAiming,
                         Commands.run(intakeWhileMovingRunnable, superintake),
