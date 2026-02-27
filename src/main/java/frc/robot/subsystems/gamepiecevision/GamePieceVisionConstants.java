@@ -46,11 +46,9 @@ public class GamePieceVisionConstants {
     static final double pixelsToRad = camWidth / horizontalFOVRad;
     public static final double fuelDiameterMeters = 0.15;
     static final double minDistanceForSameCoralMeters = 1;
-    static final double staleExpireTimeSeconds = 3;
+    static final double expireTimeSeconds = 0.5;
 
     static final double coralHeightMeters = Units.inchesToMeters(4.25);
-
-    static final double freshExpireTimeSeconds = 0.5;
 
 
     @RequiredArgsConstructor

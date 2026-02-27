@@ -7,13 +7,16 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.AllianceFlipUtil;
+import frc.lib.network.LoggedTunableNumber;
 import frc.robot.RobotState;
 import frc.robot.shooting.ShootingKinematics;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.DriveConstants;
+import frc.robot.subsystems.gamepiecevision.GamePieceVision;
 
 import java.util.function.Supplier;
 
+import static frc.robot.subsystems.drive.DriveConstants.defaultMoveToConstraints;
 import static frc.robot.subsystems.drive.DriveConstants.moveToConfig;
 
 public class AutoHelpers {
@@ -22,6 +25,7 @@ public class AutoHelpers {
 
     private static final RobotState robotState = RobotState.get();
     private static final ShootingKinematics shootingKinematics = ShootingKinematics.get();
+    private static final GamePieceVision gamePieceVision = GamePieceVision.get();
 
     private static final Drive drive = Drive.get();
 
@@ -87,6 +91,38 @@ public class AutoHelpers {
                     return start.interpolate(end, interp);
                 },
                 constraints
+        );
+    }
+
+    private static final DriveConstants.MoveToConstraints intakeConstraints = defaultMoveToConstraints
+            .withMaxLinearVelocityMetersPerSec(new LoggedTunableNumber("AutoHelpers/Intake/MaxVelocity", 2.5));
+
+    public static Command intakeFromNeutralZone(
+            double xMin,
+            double xMax,
+            double yMin,
+            double yMax,
+            Supplier<Pose2d> poseSupplierIfNoGamePieces
+    ) {
+        return finalWaypoint(
+                () -> {
+                    for (var target : gamePieceVision.getBestTargets()) {
+                        if (
+                                target.getX() >= xMin &&
+                                        target.getX() <= xMax &&
+                                        target.getY() >= yMin &&
+                                        target.getY() <= yMax
+                        ) {
+                            return new Pose2d(
+                                    target,
+                                    // Point towards target
+                                    target.minus(robotState.getTranslation()).getAngle()
+                            );
+                        }
+                    }
+                    return poseSupplierIfNoGamePieces.get();
+                },
+                intakeConstraints
         );
     }
 }

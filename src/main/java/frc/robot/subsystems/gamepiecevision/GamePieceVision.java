@@ -24,11 +24,9 @@ public class GamePieceVision implements Periodic {
                             new Alert("Game piece vision camera " + cam.name() + " is disconnected.", Alert.AlertType.kError)
                     ));
 
-    private final Map<Pose3d, Double> coralPoseToLastSeen = new HashMap<>();
+    private final Map<Translation2d, Double> targetsToLastSeen = new HashMap<>();
     @Getter
-    private List<Pose3d> freshCoral = List.of();
-    @Getter
-    private List<Pose3d> staleCoral = List.of();
+    private List<Translation2d> bestTargets = List.of();
 
     private static GamePieceVision instance;
 
@@ -56,8 +54,9 @@ public class GamePieceVision implements Periodic {
             // Update disconnected alert
             data.disconnectedAlert.set(!data.inputs.connected);
         }
-        Map<Pose3d, Double> newlySeenCoral = new HashMap<>();
-        List<Translation2d> targetPoints = new LinkedList<>();
+
+        Map<Translation2d, Double> newlySeenTargets = new HashMap<>();
+        List<Translation2d> targetXYPoints = new LinkedList<>();
 
         for (Map.Entry<Camera, CameraData> cam : cameras.entrySet()) {
             Camera metadata = cam.getKey();
@@ -72,7 +71,7 @@ public class GamePieceVision implements Periodic {
                 }
                 var robotPose = new Pose3d(robotPose2d.get());
                 Translation2d targetYawPitch = new Translation2d(observation.yawRad(), observation.pitchRad());
-                targetPoints.add(targetYawPitch);
+                targetXYPoints.add(targetYawPitch);
                 // Account for roll of camera
                 // TODO: fix roll compensation - this doesn't fully work
                 double gamepieceWidthRad = observation.gamePieceWidthInPixels() / pixelsToRad;
@@ -126,42 +125,41 @@ public class GamePieceVision implements Periodic {
                 Translation3d robotToTarget = new Translation3d(robotToTargetXY.getX(), robotToTargetXY.getY(), robotToTargetZ);
                 Logger.recordOutput("GamePieceVision/tagX", camToTargetXY.getX());
 
-                // TODO: kalman filter or PoseEstimator for stability?
-                newlySeenCoral.put(
-                        robotPose.transformBy(new Transform3d(robotToGamepiece, new Rotation3d())),
-                        observation.timestampSeconds());
-            }
-// robotPose.transformBy(new Transform3d(robotToTarget, new Rotation3d()))
-
-            // Handle newly seen coral
-            for (var pose : newlySeenCoral.keySet()) {
-                // Remove old coral within distance to be counted as the same piece of coral
-                coralPoseToLastSeen.keySet()
-                        .removeIf(otherPose -> pose.getTranslation().getDistance(otherPose.getTranslation()) < minDistanceForSameCoralMeters);
-            }
-            coralPoseToLastSeen.putAll(newlySeenCoral);
-
-            // Remove expired coral
-            coralPoseToLastSeen.values().removeIf(lastSeen -> Timer.getTimestamp() - lastSeen > staleExpireTimeSeconds);
-
-            // Generate fresh/stale arrays
-            freshCoral = new LinkedList<>();
-            staleCoral = new LinkedList<>();
-            for (var entry : coralPoseToLastSeen.entrySet()) {
-                Pose3d pose = entry.getKey();
-                double lastSeen = entry.getValue();
-
-                if (Timer.getTimestamp() - lastSeen < freshExpireTimeSeconds) {
-                    freshCoral.add(pose);
-                } else {
-                    staleCoral.add(pose);
-                }
+                newlySeenTargets.put(
+                        robotPose
+                                .transformBy(new Transform3d(
+                                        robotToGamepiece,
+                                        new Rotation3d()
+                                ))
+                                .getTranslation()
+                                .toTranslation2d(),
+                        observation.timestampSeconds()
+                );
             }
         }
+
+        // Handle newly seen targets
+        for (var target : newlySeenTargets.keySet()) {
+            // Remove old targets within distance to be counted as the same target
+            targetsToLastSeen.keySet()
+                    .removeIf(otherTarget -> target.getDistance(otherTarget) < minDistanceForSameCoralMeters);
+        }
+        targetsToLastSeen.putAll(newlySeenTargets);
+
+        // Remove expired coral
+        targetsToLastSeen.values().removeIf(lastSeen -> Timer.getTimestamp() - lastSeen > expireTimeSeconds);
+
+        // For now, just sort by distance
+        // In the future, we should find the biggest group of targets
+        bestTargets = targetsToLastSeen.keySet().stream().sorted((a, b) -> {
+            double aDist = a.getDistance(robotState.getTranslation());
+            double bDist = b.getDistance(robotState.getTranslation());
+            return Double.compare(aDist, bDist);
+        }).toList();
+
         // Log results
-        Logger.recordOutput("GamePieceVision/TargetPoints", targetPoints.toArray(Translation2d[]::new));
-        Logger.recordOutput("GamePieceVision/FreshCoral", freshCoral.toArray(Pose3d[]::new));
-        Logger.recordOutput("GamePieceVision/StaleCoral", staleCoral.toArray(Pose3d[]::new));
+        Logger.recordOutput("GamePieceVision/TargetXYPoints", targetXYPoints.toArray(Translation2d[]::new));
+        Logger.recordOutput("GamePieceVision/BestTargets", bestTargets.toArray(Translation2d[]::new));
     }
 
     @Override
