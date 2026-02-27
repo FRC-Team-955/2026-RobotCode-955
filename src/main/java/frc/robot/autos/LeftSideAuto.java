@@ -43,10 +43,10 @@ public final class LeftSideAuto {
     );
 
     public static final DriveConstants.MoveToConstraints LeftSideAutoMoveToConstraints = new DriveConstants.MoveToConstraints(
-            new LoggedTunableNumber("Drive/MoveTo/MaxLinearVelocity", 0.5),
-            new LoggedTunableNumber("Drive/MoveTo/MaxLinearAcceleration", 15.0),
-            new LoggedTunableNumber("Drive/MoveTo/MaxAngularVelocity", maxAngularVelocityRadPerSec),
-            new LoggedTunableNumber("Drive/MoveTo/MaxAngularAcceleration", 30.0)
+            new LoggedTunableNumber("LeftSideAuto/MoveTo/MaxLinearVelocity", 0.75),
+            new LoggedTunableNumber("LeftSideAuto/MoveTo/MaxLinearAcceleration", 15.0),
+            new LoggedTunableNumber("LeftSideAuto/MoveTo/MaxAngularVelocity", maxAngularVelocityRadPerSec),
+            new LoggedTunableNumber("LeftSideAuto/MoveTo/MaxAngularAcceleration", 30.0)
     );
 
     private static final int INTERPOLATION_START_INDEX = baseWaypoints.size();
@@ -88,7 +88,7 @@ public final class LeftSideAuto {
         double switchAngularToleranceRad = Math.toRadians(10);
 
         BooleanSupplier atFinalGoal = () -> {
-            boolean interpolationComplete = interpolationT.get() >= 1.0;
+            boolean interpolationComplete = interpolationT.get() >= 0.97;
             if (!interpolationComplete) return false;
 
             return robotState.isAtPoseWithTolerance(
@@ -191,6 +191,16 @@ public final class LeftSideAuto {
             return new Pose2d(goal.getTranslation(), Rotation2d.fromRadians(ShootingKinematics.get().getShootingParameters().headingRad()));
         }, LeftSideAutoMoveToConstraints);
 
+        Command finalShortMove = Commands.sequence(
+                drive.moveTo(() -> new Pose2d(1.29, 5.36, Rotation2d.fromRadians(ShootingKinematics.get().getShootingParameters().headingRad())), LeftSideAutoMoveToConstraints).until(
+                        () -> robotState.isAtPoseWithTolerance(
+                                new Pose2d(1.29, 5.36, Rotation2d.fromRadians(ShootingKinematics.get().getShootingParameters().headingRad())),
+                                DriveConstants.moveToConfig.linearPositionToleranceMeters().get(),
+                                Math.PI * 2)
+                ),
+                drive.moveTo(() -> new Pose2d(0.8, 6, Rotation2d.fromRadians(ShootingKinematics.get().getShootingParameters().headingRad())), LeftSideAutoMoveToConstraints)
+        );
+
         return Commands.sequence(
                 setInitialPose,
                 Commands.race(
@@ -205,6 +215,7 @@ public final class LeftSideAuto {
                         Commands.run(intakeWhileMovingRunnable, superintake),
                         Commands.run(aimWhileOnInterpolationLineRunnable, superstructure)
                 ),
+                finalShortMove,
                 shootAfterFinalGoal
         );
     }
