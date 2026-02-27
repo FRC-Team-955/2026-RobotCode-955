@@ -17,7 +17,7 @@ import frc.robot.subsystems.superstructure.Superstructure;
 
 import java.util.function.Supplier;
 
-public class Shootauto {
+public class Test {
     private static final RobotState robotState = RobotState.get();
     private static final ShootingKinematics shootingKinematics = ShootingKinematics.get();
 
@@ -62,13 +62,17 @@ public class Shootauto {
                         superintake.setGoal(Superintake.Goal.INTAKE),
                         superstructure.setGoal(Superstructure.Goal.IDLE)
                 ),
-                Commands.parallel(
-                        waypoint(new Translation2d(3.8, 7.5))
-                                .andThen(waypoint(FieldConstants.Depot.depotCenter.toTranslation2d())),
-                        superintake.setGoal(Superintake.Goal.INTAKE),
-                        superstructure.setGoal(Superstructure.Goal.SHOOT).withTimeout(3)
+                Commands.race(
+                        waypoint(new Translation2d(3.8, 7.5)).andThen(
+                                waypoint(new Translation2d(1.275, 5.1))), //2.0 x 4.2 is good for y
+                                superintake.setGoal(Superintake.Goal.INTAKE),
+                                superstructure.setGoal(Superstructure.Goal.SHOOT).withTimeout(3)),
+                Commands.race(
+                        waypoint(FieldConstants.Depot.depotCenter.toTranslation2d()).alongWith(
+                                superintake.setGoal(Superintake.Goal.INTAKE),
+                        superstructure.setGoal(Superstructure.Goal.SHOOT))
                 ),
-                waypoint(new Translation2d(3.25, 7.0))
+                waypoint(FieldConstants.Depot.depotCenter.toTranslation2d())
         );
     }
 }
