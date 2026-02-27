@@ -9,10 +9,10 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.lib.SlewRateLimiter2d;
 import frc.lib.wpilib.SlewRateLimiter;
 import frc.robot.RobotState;
+import frc.robot.shooting.ShootingKinematics;
 import frc.robot.subsystems.drive.DriveConstants;
 import frc.robot.subsystems.drive.DriveGoal;
 import frc.robot.subsystems.drive.DriveRequest;
-import lombok.RequiredArgsConstructor;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.function.Supplier;
@@ -21,6 +21,7 @@ import static frc.robot.subsystems.drive.DriveConstants.moveToConfig;
 
 public class MoveToGoal extends DriveGoal {
     private static final RobotState robotState = RobotState.get();
+    private static final ShootingKinematics shootingKinematics = ShootingKinematics.get();
 
     private final Supplier<Pose2d> poseSupplier;
     private final DriveConstants.MoveToConstraints constraints;
@@ -80,15 +81,15 @@ public class MoveToGoal extends DriveGoal {
         //Logger.recordOutput("Drive/MoveTo/DistanceToGoalMeters", distanceToGoal);
 
         double linearVelocityMetersPerSec = calculateLinearVelocityMetersPerSec(distanceToGoal);
+        Rotation2d angleToGoalRad = currentPose.getTranslation().minus(goalPose.getTranslation()).getAngle();
+        Translation2d linearXYVelocityMetersPerSec = new Translation2d(linearVelocityMetersPerSec, angleToGoalRad);
 
-        double angularVelocityRadPerSec = calculateAngularVelocityRadPerSec(currentPose, goalPose);
+        double angularVelocityRadPerSec = calculateAngularVelocityRadPerSec(currentPose, goalPose, linearXYVelocityMetersPerSec);
 
         // Scale linear speed by angular speed so that angular change is prioritized
         // When going max angular speed, reduce linear to 50%
         double linearScalar = MathUtil.clamp(1 - angularVelocityRadPerSec / DriveConstants.maxAngularVelocityRadPerSec, 0.50, 1);
 
-        Rotation2d angleToGoalRad = currentPose.getTranslation().minus(goalPose.getTranslation()).getAngle();
-        Translation2d linearXYVelocityMetersPerSec = new Translation2d(linearVelocityMetersPerSec, angleToGoalRad);
         linearXYVelocityMetersPerSec = moveToLinearAccelerationLimiter.calculate(linearXYVelocityMetersPerSec);
         //Logger.recordOutput("Drive/MoveTo/LinearSetpoint", linearXYVelocityMetersPerSec.getNorm());
 
@@ -104,29 +105,33 @@ public class MoveToGoal extends DriveGoal {
     }
 
     private double calculateLinearVelocityMetersPerSec(double distanceToGoal) {
-        double linearVelocityMetersPerSec = moveToLinear.calculate(
-                distanceToGoal,
-                0.0
-        );
-        // linear velocity *shouldn't* ever be negative because it is a magnitude
-        // but eh you never know
-        linearVelocityMetersPerSec = MathUtil.clamp(
-                linearVelocityMetersPerSec,
-                -constraints.maxLinearVelocityMetersPerSec().get(),
-                constraints.maxLinearVelocityMetersPerSec().get()
-        );
-        //Logger.recordOutput("Drive/MoveTo/LinearSetpointUnlimited", linearVelocityMetersPerSec);
+        if (!constraints.fullSpeed()) {
+            double linearVelocityMetersPerSec = moveToLinear.calculate(
+                    distanceToGoal,
+                    0.0
+            );
+            // linear velocity *shouldn't* ever be negative because it is a magnitude
+            // but eh you never know
+            linearVelocityMetersPerSec = MathUtil.clamp(
+                    linearVelocityMetersPerSec,
+                    -constraints.maxLinearVelocityMetersPerSec().get(),
+                    constraints.maxLinearVelocityMetersPerSec().get()
+            );
+            //Logger.recordOutput("Drive/MoveTo/LinearSetpointUnlimited", linearVelocityMetersPerSec);
 
-        boolean linearAtSetpoint = moveToLinear.atSetpoint();
-        //Logger.recordOutput("Drive/MoveTo/LinearAtSetpoint", linearAtSetpoint);
-        if (linearAtSetpoint) {
-            linearVelocityMetersPerSec = 0.0;
+            boolean linearAtSetpoint = moveToLinear.atSetpoint();
+            //Logger.recordOutput("Drive/MoveTo/LinearAtSetpoint", linearAtSetpoint);
+            if (linearAtSetpoint) {
+                linearVelocityMetersPerSec = 0.0;
+            }
+
+            return linearVelocityMetersPerSec;
+        } else {
+            return constraints.maxLinearVelocityMetersPerSec().get();
         }
-
-        return linearVelocityMetersPerSec;
     }
 
-    private double calculateAngularVelocityRadPerSec(Pose2d currentPose, Pose2d goalPose) {
+    private double calculateAngularVelocityRadPerSec(Pose2d currentPose, Pose2d goalPose, Translation2d linearSetpoint) {
         double angularVelocityRadPerSec = moveToAngular.calculate(
                 MathUtil.angleModulus(currentPose.getRotation().getRadians()),
                 MathUtil.angleModulus(goalPose.getRotation().getRadians())
@@ -142,6 +147,10 @@ public class MoveToGoal extends DriveGoal {
         //Logger.recordOutput("Drive/MoveTo/AngularAtSetpoint", angularAtSetpoint);
         if (angularAtSetpoint) {
             angularVelocityRadPerSec = 0.0;
+        }
+
+        if (constraints.applyAimingFeedforward()) {
+            angularVelocityRadPerSec += shootingKinematics.rotationAboutHubRadiansPerSec(linearSetpoint);
         }
 
         return angularVelocityRadPerSec;

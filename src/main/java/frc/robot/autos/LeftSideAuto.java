@@ -23,7 +23,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;
 
-import static frc.robot.subsystems.drive.DriveConstants.*;
+import static frc.robot.subsystems.drive.DriveConstants.maxAngularVelocityRadPerSec;
 
 public final class LeftSideAuto {
     private LeftSideAuto() {
@@ -46,7 +46,9 @@ public final class LeftSideAuto {
             new LoggedTunableNumber("LeftSideAuto/MoveTo/MaxLinearVelocity", 0.75),
             new LoggedTunableNumber("LeftSideAuto/MoveTo/MaxLinearAcceleration", 15.0),
             new LoggedTunableNumber("LeftSideAuto/MoveTo/MaxAngularVelocity", maxAngularVelocityRadPerSec),
-            new LoggedTunableNumber("LeftSideAuto/MoveTo/MaxAngularAcceleration", 30.0)
+            new LoggedTunableNumber("LeftSideAuto/MoveTo/MaxAngularAcceleration", 30.0),
+            false,
+            false
     );
 
     private static final int INTERPOLATION_START_INDEX = baseWaypoints.size();
