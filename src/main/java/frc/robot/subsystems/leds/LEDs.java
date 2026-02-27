@@ -7,7 +7,7 @@ import frc.lib.Util;
 import frc.lib.subsystem.Periodic;
 import frc.robot.Constants;
 import frc.robot.OperatorDashboard;
-import frc.robot.ShootingKinematics;
+import frc.robot.shooting.ShootingKinematics;
 import frc.robot.autos.AutoManager;
 import frc.robot.subsystems.apriltagvision.AprilTagVision;
 import frc.robot.subsystems.gamepiecevision.GamePieceVision;

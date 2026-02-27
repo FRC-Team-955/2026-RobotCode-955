@@ -20,6 +20,7 @@ fig, ax = plt.subplots(subplot_kw=dict(projection="3d"))
 # All length quantities are in meters
 
 fuel_mass = 0.2150028  # kg - note, this is the average weight according to the range in the game manual
+# todo: maybe add some random mass difference to account for error?
 fuel_radius = (15 / 100) / 2
 
 # KEEP SYNCED WITH DriveConstants.java
