@@ -43,10 +43,10 @@ public final class RightSideAuto {
     );
 
     public static final DriveConstants.MoveToConstraints RightSideAutoMoveToConstraints = new DriveConstants.MoveToConstraints(
-            new LoggedTunableNumber("Drive/MoveTo/MaxLinearVelocity", 0.5),
-            new LoggedTunableNumber("Drive/MoveTo/MaxLinearAcceleration", 15.0),
-            new LoggedTunableNumber("Drive/MoveTo/MaxAngularVelocity", maxAngularVelocityRadPerSec),
-            new LoggedTunableNumber("Drive/MoveTo/MaxAngularAcceleration", 30.0)
+            new LoggedTunableNumber("RightSideAuto/MoveTo/MaxLinearVelocity", 0.5),
+            new LoggedTunableNumber("RightSideAuto/MoveTo/MaxLinearAcceleration", 15.0),
+            new LoggedTunableNumber("RightSideAuto/MoveTo/MaxAngularVelocity", maxAngularVelocityRadPerSec),
+            new LoggedTunableNumber("RightSideAuto/MoveTo/MaxAngularAcceleration", 30.0)
     );
 
     private static final int INTERPOLATION_START_INDEX = baseWaypoints.size();
