@@ -6,6 +6,7 @@ import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.AllianceFlipUtil;
 import frc.lib.Bounds;
 import frc.lib.network.LoggedTunableNumber;
@@ -15,6 +16,7 @@ import frc.robot.shooting.ShootingKinematics;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.DriveConstants;
 import frc.robot.subsystems.gamepiecevision.GamePieceVision;
+import frc.robot.subsystems.superintake.Superintake;
 
 import java.util.function.Supplier;
 
@@ -29,6 +31,7 @@ public class AutoHelpers {
     private static final GamePieceVision gamePieceVision = GamePieceVision.get();
 
     private static final Drive drive = Drive.get();
+    private static final Superintake superintake = Superintake.get();
 
     public static Command intermediateWaypoint(Supplier<Pose2d> poseSupplier, DriveConstants.MoveToConstraints constraints) {
         return drive
@@ -108,72 +111,85 @@ public class AutoHelpers {
     }
 
     public static Pose2d yDistanceInterpolation(
-            Pose2d start,
-            Pose2d end,
+            Translation2d start,
+            Translation2d end,
+            Rotation2d heading,
             double yDistanceToStartInterpolation
     ) {
+        Rotation2d startToEndFacing = end.minus(start).getAngle();
+
         // note that robot pose needs to be flipped BACK to blue alliance
         // because the waypoint functions will flip it to red alliance if needed
-        double yDistance = Math.abs(new Transform2d(end, AllianceFlipUtil.apply(robotState.getPose())).getY());
+        double yDistance = Math.abs(new Transform2d(new Pose2d(end, startToEndFacing), AllianceFlipUtil.apply(robotState.getPose())).getY());
         yDistance -= 0.1; // Add a slight offset so that we actually reach the end position
         // No clamping needed, Pose2d.interpolate will handle it
         double interp = 1.0 - (yDistance / yDistanceToStartInterpolation);
-        return start.interpolate(end, interp);
+        return new Pose2d(start.interpolate(end, interp), heading);
     }
 
     public static Command yDistanceInterpolatingWaypoint(
-            Pose2d start,
-            Pose2d end,
+            Translation2d start,
+            Translation2d end,
+            Rotation2d heading,
             double yDistanceToStartInterpolation,
             DriveConstants.MoveToConstraints constraints
     ) {
         return finalWaypoint(
-                () -> yDistanceInterpolation(start, end, yDistanceToStartInterpolation),
+                () -> yDistanceInterpolation(start, end, heading, yDistanceToStartInterpolation),
                 constraints
         );
     }
 
     public static Command yDistanceInterpolatingWaypointWithAiming(
-            Pose2d start,
-            Pose2d end,
+            Translation2d start,
+            Translation2d end,
+            Rotation2d heading,
             double yDistanceToStartInterpolation,
             DriveConstants.MoveToConstraints constraints
     ) {
         return finalWaypointWithAiming(
-                () -> yDistanceInterpolation(start, end, yDistanceToStartInterpolation).getTranslation(),
+                () -> yDistanceInterpolation(start, end, heading, yDistanceToStartInterpolation).getTranslation(),
                 constraints
         );
     }
 
     private static final DriveConstants.MoveToConstraints intakeConstraints = defaultMoveToConstraints
-            .withMaxLinearVelocityMetersPerSec(new LoggedTunableNumber("AutoHelpers/Intake/MaxVelocity", 2.5));
+            .withMaxLinearVelocityMetersPerSec(new LoggedTunableNumber("AutoHelpers/Intake/MaxLinearVelocity", 2.5))
+            .withMaxAngularAccelerationRadPerSecPerSec(new LoggedTunableNumber("AutoHelpers/Intake/MaxAngularAcceleration", 10.0));
 
     private static Command intakeFromNeutralZone(
             Bounds bounds,
             Supplier<Pose2d> poseSupplierIfNoGamePieces
     ) {
-        return drive.moveTo(
-                () -> {
-                    for (var target : gamePieceVision.getBestTargets()) {
-                        if (AllianceFlipUtil.apply(bounds).contains(target)) {
-                            return new Pose2d(
-                                    target,
-                                    // Point towards target
-                                    target.minus(robotState.getTranslation()).getAngle()
-                            );
-                        }
-                    }
-                    return AllianceFlipUtil.apply(poseSupplierIfNoGamePieces.get());
-                },
-                intakeConstraints
+        return Commands.parallel(
+                drive.moveTo(
+                        () -> {
+                            for (var target : gamePieceVision.getBestTargets()) {
+                                if (AllianceFlipUtil.apply(bounds).contains(target)) {
+                                    return new Pose2d(
+                                            target,
+                                            // Point towards target
+                                            target.minus(robotState.getTranslation()).getAngle()
+                                    );
+                                }
+                            }
+                            return AllianceFlipUtil.apply(poseSupplierIfNoGamePieces.get());
+                        },
+                        intakeConstraints
+                ),
+                superintake.setGoal(Superintake.Goal.INTAKE).asProxy()
         );
     }
+
+    private static final double neutralZoneXMin = FieldConstants.LinesVertical.neutralZoneNear + driveConfig.bumperLengthMeters() / 2.0;
+    // Allow going over center line a little bit
+    private static final double neutralZoneXMax = FieldConstants.LinesVertical.center;
 
     public static Command intakeFromLeftNeutralZone(Supplier<Pose2d> poseSupplierIfNoGamePieces) {
         return intakeFromNeutralZone(
                 new Bounds(
-                        FieldConstants.LinesVertical.neutralZoneNear + driveConfig.bumperLengthMeters() / 2.0,
-                        FieldConstants.LinesVertical.center - driveConfig.bumperLengthMeters() / 2.0,
+                        neutralZoneXMin,
+                        neutralZoneXMax,
                         FieldConstants.LinesHorizontal.center + driveConfig.bumperLengthMeters() / 2.0,
                         FieldConstants.fieldWidth - driveConfig.bumperLengthMeters() / 2.0
                 ),
@@ -184,8 +200,8 @@ public class AutoHelpers {
     public static Command intakeFromRightNeutralZone(Supplier<Pose2d> poseSupplierIfNoGamePieces) {
         return intakeFromNeutralZone(
                 new Bounds(
-                        FieldConstants.LinesVertical.neutralZoneNear + driveConfig.bumperLengthMeters() / 2.0,
-                        FieldConstants.LinesVertical.center - driveConfig.bumperLengthMeters() / 2.0,
+                        neutralZoneXMin,
+                        neutralZoneXMax,
                         0.0 + driveConfig.bumperLengthMeters() / 2.0,
                         FieldConstants.LinesHorizontal.center - driveConfig.bumperLengthMeters() / 2.0
                 ),
