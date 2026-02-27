@@ -166,18 +166,22 @@ public class DriveJoystickGoal extends DriveGoal {
             }
 
             angularSetpoint = headingOverride.calculate(robotState.getRotation().getRadians());
-            if (mode == Mode.Aim || mode == Mode.AimAndAssist) {
-                angularSetpoint += shootingKinematics.rotationAboutHubRadiansPerSec(linearSetpoint);
-            } else {
-                // limit to drive linear magnitude when not aiming
-                // drive linear magnitude is between 0 and 1
-                angularSetpoint *= linearMagnitude;
-            }
 
             boolean headingOverrideAtSetpoint = headingOverride.atSetpoint();
             //Logger.recordOutput("Drive/DriveJoystick/HeadingOverrideAtSetpoint", headingOverrideAtSetpoint);
             if (headingOverrideAtSetpoint) {
                 angularSetpoint = 0.0;
+            }
+
+            if (mode == Mode.Aim || mode == Mode.AimAndAssist) {
+                // Note that this is after setpoint checking so thqt
+                // even if we are at the setpoint, the feedforward is
+                // still applied
+                angularSetpoint += shootingKinematics.rotationAboutHubRadiansPerSec(linearSetpoint);
+            } else {
+                // limit to drive linear magnitude when not aiming
+                // drive linear magnitude is between 0 and 1
+                angularSetpoint *= linearMagnitude;
             }
         } else {
             runningHeadingOverride = false;
