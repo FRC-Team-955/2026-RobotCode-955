@@ -96,6 +96,17 @@ public class AutoHelpers {
                 ));
     }
 
+    public static Command finalWaypointWithAimingForever(Supplier<Translation2d> translationSupplier, DriveConstants.MoveToConstraints constraints) {
+        return drive.moveTo(
+                () -> new Pose2d(
+                        AllianceFlipUtil.apply(translationSupplier.get()),
+                        Rotation2d.fromRadians(shootingKinematics.getShootingParameters().headingRad())
+                ),
+                constraints
+                        .withApplyAimingFeedforward(true)
+        );
+    }
+
     public static Pose2d yDistanceInterpolation(
             Pose2d start,
             Pose2d end,
@@ -141,28 +152,21 @@ public class AutoHelpers {
             Bounds bounds,
             Supplier<Pose2d> poseSupplierIfNoGamePieces
     ) {
-        Supplier<Pose2d> poseSupplier = () -> {
-            for (var target : gamePieceVision.getBestTargets()) {
-                if (AllianceFlipUtil.apply(bounds).contains(target)) {
-                    return new Pose2d(
-                            target,
-                            // Point towards target
-                            target.minus(robotState.getTranslation()).getAngle()
-                    );
-                }
-            }
-            return AllianceFlipUtil.apply(poseSupplierIfNoGamePieces.get());
-        };
-        return drive
-                .moveTo(
-                        poseSupplier,
-                        intakeConstraints
-                )
-                .until(() -> robotState.isAtPoseWithTolerance(
-                        poseSupplier.get(),
-                        moveToConfig.linearPositionToleranceMeters().get(),
-                        moveToConfig.angularPositionToleranceRad().get()
-                ));
+        return drive.moveTo(
+                () -> {
+                    for (var target : gamePieceVision.getBestTargets()) {
+                        if (AllianceFlipUtil.apply(bounds).contains(target)) {
+                            return new Pose2d(
+                                    target,
+                                    // Point towards target
+                                    target.minus(robotState.getTranslation()).getAngle()
+                            );
+                        }
+                    }
+                    return AllianceFlipUtil.apply(poseSupplierIfNoGamePieces.get());
+                },
+                intakeConstraints
+        );
     }
 
     public static Command intakeFromLeftNeutralZone(Supplier<Pose2d> poseSupplierIfNoGamePieces) {
