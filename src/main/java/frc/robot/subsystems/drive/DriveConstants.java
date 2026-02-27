@@ -12,9 +12,6 @@ public class DriveConstants {
     public static final double assistDirectionToleranceRad = Units.degreesToRadians(50);
     public static final double assistMaximumDistanceMeters = Units.feetToMeters(5);
 
-    public static final LoggedTunablePIDF moveToLinear = new LoggedTunablePIDF("Drive/MoveTo/Linear").withP(4.5).withD(0.05);
-    public static final LoggedTunablePIDF moveToAngular = new LoggedTunablePIDF("Drive/MoveTo/Angular").withP(4.5).withD(0.05);
-
     public static final LoggedTunablePIDF choreoFeedbackXY = new LoggedTunablePIDF("Drive/ChoreoFeedbackXY").withP(3.5);
     public static final LoggedTunablePIDF choreoFeedbackOmega = new LoggedTunablePIDF("Drive/ChoreoFeedbackOmega").withP(3);
     public static final LoggedTunablePIDF headingOverrideGains = new LoggedTunablePIDF("Drive/HeadingOverrideGains").withP(4);
@@ -63,8 +60,10 @@ public class DriveConstants {
     );
 
     public static final MoveToConfig moveToConfig = new MoveToConfig(
+            new LoggedTunablePIDF("Drive/MoveTo/Linear").withP(4.5).withD(0.05),
             new LoggedTunableNumber("Drive/MoveTo/LinearPositionTolerance", 0.02),
             new LoggedTunableNumber("Drive/MoveTo/LinearVelocityToleranceMeters", 0.1),
+            new LoggedTunablePIDF("Drive/MoveTo/Angular").withP(4.5).withD(0.05),
             new LoggedTunableNumber("Drive/MoveTo/AngularPositionTolerance", Units.degreesToRadians(2)),
             new LoggedTunableNumber("Drive/MoveTo/AngularVelocityTolerance", Units.degreesToRadians(10))
     );
@@ -172,8 +171,10 @@ public class DriveConstants {
     }
 
     public record MoveToConfig(
+            LoggedTunablePIDF linearGains,
             LoggedTunableNumber linearPositionToleranceMeters,
             LoggedTunableNumber linearVelocityToleranceMetersPerSec,
+            LoggedTunablePIDF angularGains,
             LoggedTunableNumber angularPositionToleranceRad,
             LoggedTunableNumber angularVelocityToleranceRadPerSec
     ) {
