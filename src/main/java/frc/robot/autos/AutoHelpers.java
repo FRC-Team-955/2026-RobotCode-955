@@ -154,7 +154,7 @@ public class AutoHelpers {
     }
 
     private static final DriveConstants.MoveToConstraints intakeConstraints = defaultMoveToConstraints
-            .withMaxLinearVelocityMetersPerSec(new LoggedTunableNumber("AutoHelpers/Intake/MaxLinearVelocity", 2.5))
+            .withMaxLinearVelocityMetersPerSec(new LoggedTunableNumber("AutoHelpers/Intake/MaxLinearVelocity", 1.5))
             .withMaxAngularAccelerationRadPerSecPerSec(new LoggedTunableNumber("AutoHelpers/Intake/MaxAngularAcceleration", 10.0));
 
     private static Command intakeFromNeutralZone(
