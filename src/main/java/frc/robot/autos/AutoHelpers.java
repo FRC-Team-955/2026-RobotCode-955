@@ -168,10 +168,10 @@ public class AutoHelpers {
     public static Command intakeFromLeftNeutralZone(Supplier<Pose2d> poseSupplierIfNoGamePieces) {
         return intakeFromNeutralZone(
                 new Bounds(
-                        FieldConstants.LinesVertical.neutralZoneNear,
-                        FieldConstants.LinesVertical.center,
-                        FieldConstants.LinesHorizontal.center,
-                        FieldConstants.fieldWidth
+                        FieldConstants.LinesVertical.neutralZoneNear + driveConfig.bumperLengthMeters() / 2.0,
+                        FieldConstants.LinesVertical.center - driveConfig.bumperLengthMeters() / 2.0,
+                        FieldConstants.LinesHorizontal.center + driveConfig.bumperLengthMeters() / 2.0,
+                        FieldConstants.fieldWidth - driveConfig.bumperLengthMeters() / 2.0
                 ),
                 poseSupplierIfNoGamePieces
         );
@@ -180,10 +180,10 @@ public class AutoHelpers {
     public static Command intakeFromRightNeutralZone(Supplier<Pose2d> poseSupplierIfNoGamePieces) {
         return intakeFromNeutralZone(
                 new Bounds(
-                        FieldConstants.LinesVertical.neutralZoneNear,
-                        FieldConstants.LinesVertical.center,
-                        0.0,
-                        FieldConstants.LinesHorizontal.center
+                        FieldConstants.LinesVertical.neutralZoneNear + driveConfig.bumperLengthMeters() / 2.0,
+                        FieldConstants.LinesVertical.center - driveConfig.bumperLengthMeters() / 2.0,
+                        0.0 + driveConfig.bumperLengthMeters() / 2.0,
+                        FieldConstants.LinesHorizontal.center - driveConfig.bumperLengthMeters() / 2.0
                 ),
                 poseSupplierIfNoGamePieces
         );
