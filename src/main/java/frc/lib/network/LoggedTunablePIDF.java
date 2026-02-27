@@ -162,11 +162,7 @@ public class LoggedTunablePIDF {
     }
 
     public PIDController toPID(double errorTolerance, double errorDerivativeTolerance) {
-        var pid = new PIDController(
-                this.kP != null ? this.kP.get() : 0.0,
-                this.kI != null ? this.kI.get() : 0.0,
-                this.kD != null ? this.kD.get() : 0.0
-        );
+        var pid = toPID();
         pid.setTolerance(errorTolerance, errorDerivativeTolerance);
         return pid;
     }
@@ -182,12 +178,7 @@ public class LoggedTunablePIDF {
     }
 
     public PIDController toPIDWrapRadians(double errorTolerance, double errorDerivativeTolerance) {
-        var pid = new PIDController(
-                this.kP != null ? this.kP.get() : 0.0,
-                this.kI != null ? this.kI.get() : 0.0,
-                this.kD != null ? this.kD.get() : 0.0
-        );
-        pid.enableContinuousInput(-Math.PI, Math.PI);
+        var pid = toPIDWrapRadians();
         pid.setTolerance(errorTolerance, errorDerivativeTolerance);
         return pid;
     }
