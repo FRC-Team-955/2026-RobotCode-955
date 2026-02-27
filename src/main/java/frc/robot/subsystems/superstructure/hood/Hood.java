@@ -12,7 +12,7 @@ import frc.lib.subsystem.Periodic;
 import frc.robot.Constants;
 import frc.robot.OperatorDashboard;
 import frc.robot.RobotState;
-import frc.robot.ShootingKinematics;
+import frc.robot.shooting.ShootingKinematics;
 import frc.robot.subsystems.superstructure.hood.HoodIO.HoodCurrentLimitMode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

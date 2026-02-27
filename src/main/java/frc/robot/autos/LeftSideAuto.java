@@ -9,7 +9,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.AllianceFlipUtil;
 import frc.robot.FieldConstants;
 import frc.robot.RobotState;
-import frc.robot.ShootingKinematics;
+import frc.robot.shooting.ShootingKinematics;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.DriveConstants;
 import frc.robot.subsystems.superintake.Superintake;

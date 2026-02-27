@@ -1,4 +1,4 @@
-package frc.robot;
+package frc.robot.shooting;
 
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
@@ -12,6 +12,9 @@ import frc.lib.AllianceFlipUtil;
 import frc.lib.Util;
 import frc.lib.network.LoggedTunableNumber;
 import frc.lib.subsystem.Periodic;
+import frc.robot.FieldConstants;
+import frc.robot.OperatorDashboard;
+import frc.robot.RobotState;
 import frc.robot.subsystems.superstructure.flywheel.Flywheel;
 import frc.robot.subsystems.superstructure.flywheel.FlywheelConstants;
 import frc.robot.subsystems.superstructure.hood.Hood;
@@ -248,6 +251,17 @@ public class ShootingKinematics implements Periodic {
                         .getAngle()
                         .plus(fuelExitRotation)
         );
+    }
+
+    public double rotationAboutHubRadiansPerSec(Translation2d fieldRelativeMetersPerSec) {
+        Translation2d fuelExitToHubPerp = getFuelExitToHub().transform.getTranslation().toTranslation2d()
+                .rotateBy(new Rotation2d(- Math.PI / 2));
+
+        // Dot product projection of the robot velocity onto the perpendicular direction to the hub
+        double tangentialVelocity = fuelExitToHubPerp.dot(fieldRelativeMetersPerSec) / fuelExitToHubPerp.getNorm();
+
+        // same as distance to center of hub, even if rotated by 90 degrees
+        return tangentialVelocity / fuelExitToHubPerp.getNorm();
     }
 
     private record FuelExitToHub(Transform3d transform, Rotation2d angle) {}

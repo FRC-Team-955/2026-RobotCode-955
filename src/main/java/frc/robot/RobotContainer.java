@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.CANLogger;
 import frc.robot.autos.AutoManager;
 import frc.robot.controller.Controller;
+import frc.robot.shooting.ShootingKinematics;
 import frc.robot.subsystems.apriltagvision.AprilTagVision;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.goals.WheelRadiusCharacterizationGoal;

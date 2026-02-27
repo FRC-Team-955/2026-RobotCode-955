@@ -7,7 +7,7 @@ import frc.lib.Util;
 import frc.lib.network.LoggedTunableNumber;
 import frc.lib.subsystem.Periodic;
 import frc.robot.OperatorDashboard;
-import frc.robot.ShootingKinematics;
+import frc.robot.shooting.ShootingKinematics;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;

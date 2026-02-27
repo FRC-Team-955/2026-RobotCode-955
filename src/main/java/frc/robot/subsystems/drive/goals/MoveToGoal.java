@@ -19,7 +19,6 @@ import java.util.function.Supplier;
 
 import static frc.robot.subsystems.drive.DriveConstants.moveToConfig;
 
-@RequiredArgsConstructor
 public class MoveToGoal extends DriveGoal {
     private static final RobotState robotState = RobotState.get();
 
@@ -31,20 +30,28 @@ public class MoveToGoal extends DriveGoal {
                     moveToConfig.linearPositionToleranceMeters().get(),
                     moveToConfig.linearVelocityToleranceMetersPerSec().get()
             );
-    private final SlewRateLimiter2d moveToLinearAccelerationLimiter = new SlewRateLimiter2d(
-            constraints.maxLinearAccelerationMetersPerSecPerSec().get(),
-            robotState.getMeasuredChassisSpeeds()
-    );
+    private final SlewRateLimiter2d moveToLinearAccelerationLimiter;
 
     private final PIDController moveToAngular = moveToConfig.angularGains()
             .toPIDWrapRadians(
                     moveToConfig.angularPositionToleranceRad().get(),
                     moveToConfig.angularVelocityToleranceRadPerSec().get()
             );
-    private final SlewRateLimiter moveToAngularAccelerationLimiter = new SlewRateLimiter(
-            constraints.maxAngularAccelerationRadPerSecPerSec().get(),
-            robotState.getMeasuredChassisSpeeds().omegaRadiansPerSecond
-    );
+    private final SlewRateLimiter moveToAngularAccelerationLimiter;
+
+    public MoveToGoal(Supplier<Pose2d> poseSupplier, DriveConstants.MoveToConstraints constraints) {
+        this.poseSupplier = poseSupplier;
+        this.constraints = constraints;
+
+        moveToAngularAccelerationLimiter = new SlewRateLimiter(
+                constraints.maxAngularAccelerationRadPerSecPerSec().get(),
+                robotState.getMeasuredChassisSpeeds().omegaRadiansPerSecond
+        );
+        moveToLinearAccelerationLimiter = new SlewRateLimiter2d(
+                constraints.maxLinearAccelerationMetersPerSecPerSec().get(),
+                robotState.getMeasuredChassisSpeeds()
+        );
+    }
 
     @Override
     public DriveRequest getRequest() {

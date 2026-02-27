@@ -7,7 +7,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.lib.SlewRateLimiter2d;
 import frc.lib.network.LoggedTunableNumber;
 import frc.robot.RobotState;
-import frc.robot.ShootingKinematics;
+import frc.robot.shooting.ShootingKinematics;
 import frc.robot.controller.Controller;
 import frc.robot.subsystems.drive.DriveConstants;
 import frc.robot.subsystems.drive.DriveGoal;
@@ -57,7 +57,8 @@ public class DriveJoystickWithAimingGoal extends DriveGoal {
         linearVelocity = linearAccelerationLimiter.calculate(linearVelocity);
 //        Logger.recordOutput("Drive/DriveJoystickWithAiming/LinearMagnitudeLimited", linearVelocity.getNorm());
 
-        double angularVelocity = headingOverride.calculate(robotState.getRotation().getRadians(), shootingKinematics.getShootingParameters().headingRad());
+        double angularVelocity = headingOverride.calculate(robotState.getRotation().getRadians(), shootingKinematics.getShootingParameters().headingRad())
+                + shootingKinematics.rotationAboutHubRadiansPerSec(linearVelocity);
 
         if (linearMagnitude == 0.0 && Math.abs(angularVelocity) <= DriveConstants.joystickDriveDeadband) {
             return DriveRequest.stopWithX();
