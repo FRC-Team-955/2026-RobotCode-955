@@ -83,8 +83,8 @@ public class AutoHelpers {
                     double yDistance = Math.abs(new Transform2d(end, robotState.getPose()).getY());
                     yDistance -= 0.1; // Add a slight offset so that we actually reach the end position
                     // No clamping needed, Pose2d.interpolate will handle it
-                    double initialInterp = 1.0 - (yDistance / yDistanceToStartInterpolation);
-                    return start.interpolate(end, initialInterp);
+                    double interp = 1.0 - (yDistance / yDistanceToStartInterpolation);
+                    return start.interpolate(end, interp);
                 },
                 constraints
         );
