@@ -78,6 +78,18 @@ public class AutoHelpers {
         );
     }
 
+    private static Pose2d yDistanceInterpolation(
+            Pose2d start,
+            Pose2d end,
+            double yDistanceToStartInterpolation
+    ) {
+        double yDistance = Math.abs(new Transform2d(end, robotState.getPose()).getY());
+        yDistance -= 0.1; // Add a slight offset so that we actually reach the end position
+        // No clamping needed, Pose2d.interpolate will handle it
+        double interp = 1.0 - (yDistance / yDistanceToStartInterpolation);
+        return start.interpolate(end, interp);
+    }
+
     public static Command yDistanceInterpolatingWaypoint(
             Pose2d start,
             Pose2d end,
@@ -85,13 +97,19 @@ public class AutoHelpers {
             DriveConstants.MoveToConstraints constraints
     ) {
         return finalWaypoint(
-                () -> {
-                    double yDistance = Math.abs(new Transform2d(end, robotState.getPose()).getY());
-                    yDistance -= 0.1; // Add a slight offset so that we actually reach the end position
-                    // No clamping needed, Pose2d.interpolate will handle it
-                    double interp = 1.0 - (yDistance / yDistanceToStartInterpolation);
-                    return start.interpolate(end, interp);
-                },
+                () -> yDistanceInterpolation(start, end, yDistanceToStartInterpolation),
+                constraints
+        );
+    }
+
+    public static Command yDistanceInterpolatingWaypointWithAiming(
+            Pose2d start,
+            Pose2d end,
+            double yDistanceToStartInterpolation,
+            DriveConstants.MoveToConstraints constraints
+    ) {
+        return finalWaypointWithAiming(
+                () -> yDistanceInterpolation(start, end, yDistanceToStartInterpolation).getTranslation(),
                 constraints
         );
     }
