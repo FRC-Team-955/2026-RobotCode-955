@@ -62,7 +62,6 @@ public class GamePieceVision implements Periodic {
             Camera metadata = cam.getKey();
             CameraData data = cam.getValue();
 
-
             // Process observations
             for (var observation : data.inputs.targetObservations) {
                 var robotPose2d = robotState.getPoseAtTimestamp(observation.timestampSeconds());
