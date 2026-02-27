@@ -38,8 +38,7 @@ public class AutoManager {
         autoChooser.addOption("LeftSideAuto", LeftSideAuto.build());
         autoChooser.addOption("RightSideAuto", RightSideAuto.build());
         autoChooser.addOption("DepotAuto", DepotAuto.build());
-        autoChooser.addOption("Shootauto",Shootauto.build());
-        autoChooser.addOption("Test", Test.build());
+        autoChooser.addOption("MarkAuto", MarkAuto.build());
     }
 
     public Command getSelectedAuto() {
