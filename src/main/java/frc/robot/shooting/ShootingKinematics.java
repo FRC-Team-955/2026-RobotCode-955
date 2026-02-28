@@ -107,7 +107,13 @@ public class ShootingKinematics implements Periodic {
                 shootingParameters.angleRad() + operatorDashboard.hoodSmudgeDegrees.get(),
                 shootingParameters.headingRad
         );
-        Logger.recordOutput("ShootingKinematics/ShootingParameters", shootingParameters);
+
+        Logger.recordOutput("ShootingKinematics/ShootingParameters/HeadingRad", shootingParameters.headingRad());
+        Logger.recordOutput("ShootingKinematics/ShootingParameters/HeadingRadMeasured", robotState.getPose().getRotation().getRadians());
+        Logger.recordOutput("ShootingKinematics/ShootingParameters/VelocityRPM", shootingParameters.velocityRPM());
+        Logger.recordOutput("ShootingKinematics/ShootingParameters/VelocityRPMMeasured", flywheel.getVelocityRPM());
+        Logger.recordOutput("ShootingKinematics/ShootingParameters/AngleRad", shootingParameters.angleRad());
+        Logger.recordOutput("ShootingKinematics/ShootingParameters/AngleRadMeasured", hood.getShotAngleRad());
 
         boolean shiftMet = operatorDashboard.disableShiftTracking.get() || hubShiftTracker.getShiftInfo().active();
         Logger.recordOutput("ShootingKinematics/ShiftMet", shiftMet);
