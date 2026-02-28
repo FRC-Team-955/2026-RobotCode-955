@@ -184,7 +184,7 @@ public final class RightSideAuto {
                         Commands.waitUntil(() -> ShootingKinematics.get().isShootingParametersMet()),
                         Commands.waitSeconds(2.0)
                 ),
-                drive.driveJoystick(DriveJoystickGoal.Mode.Aim),
+                drive.driveJoystick(() -> DriveJoystickGoal.Mode.Aim),
                 superstructure.setGoal(Superstructure.Goal.SHOOT)
         ).onlyWhile(DriverStation::isAutonomousEnabled);
 
