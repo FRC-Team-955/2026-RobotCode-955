@@ -40,7 +40,7 @@ public class GamePieceVisionConstants {
     // Max difference between 3d solve and trig for trig to be used
     static final double trig3dSolveMaxDiffMeters = 0.2;
     static final double trig3dSolveMaxDiffRad = 0.15;
-    static final double horizontalFOVRad = Math.toRadians(70.0);
+    static final double horizontalFOVRad = Math.toRadians(170.0);
     static final double camWidth = 640;
     static final double focalLengthPixels = camWidth / (2.0 * Math.tan(horizontalFOVRad / 2.0));
     static final double clusterGroupingDistanceMeters = 0.3;
