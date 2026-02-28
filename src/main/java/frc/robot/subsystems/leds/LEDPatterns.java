@@ -88,4 +88,5 @@ public class LEDPatterns {
     public static final LEDPattern intaking = LEDPattern.solid(Color.kYellow).blink(Seconds.of(0.1));
     public static final LEDPattern homing = LEDPattern.solid(Color.kBlue);
     public static final LEDPattern idle = LEDPattern.kOff;
+    public static final LEDPattern hubSwitch = wave(Color.kRed, Color.kCyan, 2.0);
 }
