@@ -22,7 +22,7 @@ import lombok.RequiredArgsConstructor;
 import java.util.function.Function;
 
 public class GamePieceVisionConstants {
-    static final double horizontalFOVRad = Math.toRadians(170.0);
+    static final double horizontalFOVRad = Math.toRadians(160.0);
     static final double camWidth = 640;
     static final double focalLengthPixels = camWidth / (2.0 * Math.tan(horizontalFOVRad / 2.0));
     static final double clusterGroupingDistanceMeters = 0.3;
