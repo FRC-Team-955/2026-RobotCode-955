@@ -90,6 +90,12 @@ public class OperatorDashboard implements Periodic {
 
     @Override
     public void periodicBeforeCommands() {
+        if (coastOverride.get() && DriverStation.isEnabled()) {
+            // Note that there will be one cycle while enabled when coast
+            // override is still enabled. Oh well.
+            coastOverride.set(false);
+        }
+
         handleEnumToggles(scoringModeToggles, selectedScoringMode, selectNew -> selectedScoringMode = selectNew);
         Logger.recordOutput("OperatorDashboard/SelectedScoringMode", selectedScoringMode);
 
