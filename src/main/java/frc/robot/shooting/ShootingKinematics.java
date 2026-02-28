@@ -12,10 +12,7 @@ import frc.lib.AllianceFlipUtil;
 import frc.lib.Util;
 import frc.lib.network.LoggedTunableNumber;
 import frc.lib.subsystem.Periodic;
-import frc.robot.BuildConstants;
-import frc.robot.FieldConstants;
-import frc.robot.OperatorDashboard;
-import frc.robot.RobotState;
+import frc.robot.*;
 import frc.robot.subsystems.superstructure.flywheel.Flywheel;
 import frc.robot.subsystems.superstructure.flywheel.FlywheelConstants;
 import frc.robot.subsystems.superstructure.hood.Hood;
@@ -69,6 +66,7 @@ public class ShootingKinematics implements Periodic {
 
     private static final RobotState robotState = RobotState.get();
     private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
+    private static final HubShiftTracker hubShiftTracker = HubShiftTracker.get();
 
     private static final Flywheel flywheel = Flywheel.get();
     private static final Hood hood = Hood.get();
@@ -115,7 +113,8 @@ public class ShootingKinematics implements Periodic {
         shootingParametersMet = validShootingParameters &&
                 (operatorDashboard.manualAiming.get() || Math.abs(robotState.getPose().getRotation().getRadians() - shootingParameters.headingRad()) <= Units.degreesToRadians(headingToleranceDeg.get())) &&
                 Math.abs(flywheel.getVelocityRPM() - shootingParameters.velocityRPM()) <= velocityToleranceRPM.get() &&
-                Math.abs(hood.getPositionRad() - shootingParameters.hoodAngleRad()) <= Units.degreesToRadians(hoodToleranceDeg.get());
+                Math.abs(hood.getPositionRad() - shootingParameters.hoodAngleRad()) <= Units.degreesToRadians(hoodToleranceDeg.get()) &&
+                (operatorDashboard.disableShiftTracking.get() || hubShiftTracker.getShiftInfo().active());
         Logger.recordOutput("ShootingKinematics/ShootingParametersMet", shootingParametersMet);
     }
 
