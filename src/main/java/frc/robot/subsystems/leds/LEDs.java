@@ -138,14 +138,12 @@ public class LEDs implements Periodic {
                     superintakePattern.applyTo(buffer);
                 } else if (superstructurePattern != null) {
                     superstructurePattern.applyTo(buffer);
+                } else if (HubShiftTracker.get().getShiftInfo().remainingTime() < 3.0) {
+                    LEDPatterns.hubSwitch.applyTo(buffer);
                 } else {
                     LEDPatterns.idle.applyTo(buffer);
                 }
             }
-        } else if (HubShiftTracker.get().getShiftInfo().remainingTime() < 3.0) {
-            LEDPatterns.hubSwitch.applyTo(buffer);
-        } else {
-            LEDPatterns.idle.applyTo(buffer);
         }
 
         io.setData(buffer);
