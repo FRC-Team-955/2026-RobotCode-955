@@ -23,7 +23,7 @@ import java.util.function.Supplier;
 import static frc.robot.subsystems.drive.DriveConstants.*;
 
 public class AutoHelpers {
-    private static final double intermediateLinearTolerance = 0.3;
+    private static final double intermediateLinearTolerance = 0.6;
     private static final double intermediateAngularTolerance = Units.degreesToRadians(45);
 
     private static final RobotState robotState = RobotState.get();
@@ -140,6 +140,37 @@ public class AutoHelpers {
         );
     }
 
+    public static Pose2d xDistanceToStartInterpolation(
+            Translation2d start,
+            Translation2d end,
+            Rotation2d heading,
+            double xDistanceToStartInterpolation
+    ) {
+        Rotation2d startToEndFacing = end.minus(start).getAngle();
+
+        // note that robot pose needs to be flipped BACK to blue alliance
+        // because the waypoint functions will flip it to red alliance if needed
+        double xDistance = Math.abs(new Transform2d(new Pose2d(end, startToEndFacing), AllianceFlipUtil.apply(robotState.getPose())).getX());
+        xDistance -= 0.1; // Add a slight offset so that we actually reach the end position
+        // No clamping needed, Pose2d.interpolate will handle it
+        double interp = 1.0 - (xDistance / xDistanceToStartInterpolation);
+        return new Pose2d(start.interpolate(end, interp), heading);
+    }
+
+
+    public static Command xDistanceInterpolatingWaypoint(
+            Translation2d start,
+            Translation2d end,
+            Rotation2d heading,
+            double xDistanceToStartInterpolation,
+            DriveConstants.MoveToConstraints constraints
+    ) {
+        return finalWaypoint(
+                () -> xDistanceToStartInterpolation(start, end, heading, xDistanceToStartInterpolation),
+                constraints
+        );
+    }
+
     public static Command yDistanceInterpolatingWaypointWithAiming(
             Translation2d start,
             Translation2d end,
@@ -153,7 +184,7 @@ public class AutoHelpers {
         );
     }
 
-    private static final DriveConstants.MoveToConstraints intakeConstraints = defaultMoveToConstraints
+    public static final DriveConstants.MoveToConstraints intakeConstraints = defaultMoveToConstraints
             .withMaxLinearVelocityMetersPerSec(new LoggedTunableNumber("AutoHelpers/Intake/MaxLinearVelocity", 2))
             .withMaxAngularAccelerationRadPerSecPerSec(new LoggedTunableNumber("AutoHelpers/Intake/MaxAngularAcceleration", 40.0));
 
@@ -178,7 +209,7 @@ public class AutoHelpers {
                         },
                         intakeConstraints
                 ),
-                superintake.setGoal(Superintake.Goal.INTAKE).asProxy()
+                superintake.setGoal(Superintake.Goal.INTAKE)
         );
     }
 

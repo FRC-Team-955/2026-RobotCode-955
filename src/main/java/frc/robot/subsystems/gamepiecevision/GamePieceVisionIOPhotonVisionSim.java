@@ -18,7 +18,7 @@ public class GamePieceVisionIOPhotonVisionSim extends GamePieceVisionIOPhotonVis
         var cameraProperties = new SimCameraProperties();
         cameraProperties.setCalibration(640, 480, Rotation2d.fromRadians(diagFOVRad));
         cameraProperties.setCalibError(0, 0);
-        cameraProperties.setFPS(120);
+        cameraProperties.setFPS(30);
         cameraProperties.setAvgLatencyMs(45);
         cameraProperties.setLatencyStdDevMs(10);
         PhotonCameraSim cameraSim = new PhotonCameraSim(camera, cameraProperties);

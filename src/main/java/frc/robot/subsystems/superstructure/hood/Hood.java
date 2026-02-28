@@ -35,7 +35,7 @@ public class Hood implements Periodic {
 
     @RequiredArgsConstructor
     public enum Goal {
-        SHOOT(() -> shootingKinematics.getShootingParameters().hoodAngleRad()),
+        SHOOT(() -> convertBetweenShotAngleAndHoodAngleRad(shootingKinematics.getShootingParameters().angleRad())),
         HOME(null),
         ;
 
@@ -111,8 +111,8 @@ public class Hood implements Periodic {
             if (robotState.isInTrench()) {
                 setpointRad = Math.min(setpointRad, maxPositionUnderTrench);
             }
+            Logger.recordOutput("Superstructure/Hood/OriginalSetpointRad", setpointRad);
             setpointRad = MathUtil.clamp(setpointRad, minPositionRad, maxPositionRad);
-//            Logger.recordOutput("Superstructure/Hood/OriginalSetpointRad", setpointRad);
             TrapezoidProfile.State wantedState = new TrapezoidProfile.State(setpointRad, 0.0);
 
             if (lastSetpointRad == null || setpointRad != lastSetpointRad) {
@@ -135,11 +135,8 @@ public class Hood implements Periodic {
         return inputs.positionRad;
     }
 
-    public double getSetpointRad() {
-        if (goal.setpointRad == null) {
-            return inputs.positionRad;
-        }
-        return goal.setpointRad.getAsDouble();
+    public double getShotAngleRad() {
+        return convertBetweenShotAngleAndHoodAngleRad(getPositionRad());
     }
 
     public boolean isCurrentAtThresholdForHoming() {
