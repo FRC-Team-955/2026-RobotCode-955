@@ -57,7 +57,7 @@ public class GamePieceVisionConstants {
         GPVCam(
 
                 new Transform3d(
-                        Units.inchesToMeters(14.367598), Units.inchesToMeters(11.517161), Units.inchesToMeters(17.924370),
+                        Units.inchesToMeters(15.902293), Units.inchesToMeters(11.595038), Units.inchesToMeters(16.533898),
                         // Rotation order matters
                         new Rotation3d(0.0, Units.degreesToRadians(10.0), 0.0)
                                 .rotateBy(new Rotation3d(0.0, 0.0, Units.degreesToRadians(0.0)))
