@@ -28,9 +28,9 @@ public class BigYahuAuto {
         Supplier<Command> intake = () -> Commands.parallel(
                 AutoHelpers.intakeFromLeftNeutralZone(
                         () -> AutoHelpers.yDistanceInterpolation(
-                                new Translation2d(7.4, 7.4),
-                                new Translation2d(7.4, 4.5),
-                                Rotation2d.fromDegrees(-45.0 * Timer.getTimestamp()),
+                                new Translation2d(7.2, 7.6),
+                                new Translation2d(7.5, 4.8),
+                                Rotation2d.fromDegrees(-90.0),
                                 2
                         )
                 ),
@@ -38,10 +38,10 @@ public class BigYahuAuto {
         ).withTimeout(3);
 
         return CommandsExt.eagerSequence(
-                robotState.setPose(() -> AllianceFlipUtil.apply(new Pose2d(4, 7.4, Rotation2d.fromDegrees(-90)))),
+                robotState.setPose(() -> AllianceFlipUtil.apply(new Pose2d(4, 7.4, Rotation2d.fromDegrees(90)))),
 
                 // move out of trench
-                AutoHelpers.intermediateWaypoint(() -> new Pose2d(5, 7.4, Rotation2d.fromDegrees(-90)), defaultMoveToConstraints),
+                AutoHelpers.intermediateWaypoint(() -> new Pose2d(5, 7.4, Rotation2d.fromDegrees(45)), defaultMoveToConstraints),
 
                 // intake
                 intake.get(),
@@ -59,7 +59,7 @@ public class BigYahuAuto {
                 ).withTimeout(4),
 
                 // move out of trench
-                AutoHelpers.intermediateWaypoint(() -> new Pose2d(5, 7.4, Rotation2d.fromDegrees(90)), defaultMoveToConstraints),
+                AutoHelpers.intermediateWaypoint(() -> new Pose2d(5, 7.4, Rotation2d.fromDegrees(45)), defaultMoveToConstraints),
 
                 // intake
                 intake.get(),
