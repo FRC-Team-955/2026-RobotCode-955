@@ -29,7 +29,7 @@ public class ShootingKinematics implements Periodic {
     private static final double shooterRadiusToCenterOfBallExitMeters = Units.inchesToMeters(4.602756);
 
     private static final LoggedTunableNumber phaseDelay = new LoggedTunableNumber("ShootingKinematics/PhaseDelay", 0.03);
-    private static final LoggedTunableNumber robotVelocityScalar = new LoggedTunableNumber("ShootingKinematics/RobotVelocityScalar", 1.2);
+    private static final LoggedTunableNumber robotVelocityScalar = new LoggedTunableNumber("ShootingKinematics/RobotVelocityScalar (DEBUG ONLY)", 1);
     private static final LoggedTunableNumber headingToleranceDeg = new LoggedTunableNumber("ShootingKinematics/HeadingToleranceDegrees", 5.0);
     public static final LoggedTunableNumber velocityToleranceRPM = new LoggedTunableNumber("ShootingKinematics/VelocityToleranceRPM", 100);
     public static final LoggedTunableNumber hoodToleranceDeg = new LoggedTunableNumber("ShootingKinematics/HoodToleranceDegrees", 3.0);
@@ -108,6 +108,9 @@ public class ShootingKinematics implements Periodic {
                 shootingParameters.headingRad
         );
         Logger.recordOutput("ShootingKinematics/ShootingParameters", shootingParameters);
+        Logger.recordOutput("ShootingKinematics/ShootingParameters/HeadingRadReal", robotState.getPose().getRotation().getRadians());
+        Logger.recordOutput("ShootingKinematics/ShootingParameters/VelocityRPMReal", flywheel.getVelocityRPM());
+        Logger.recordOutput("ShootingKinematics/ShootingParameters/HoodAngleRadReal", hood.getPositionRad());
         Logger.recordOutput("ShootingKinematics/ValidShootingParameters", validShootingParameters);
         noValidShootingParametersAlert.set(!validShootingParameters);
 
@@ -174,39 +177,43 @@ public class ShootingKinematics implements Periodic {
 
         FuelExitToHub fuelExitToHub = getFuelExitToHub();
 
-        double xyDist = fuelExitToHub.transform().getTranslation().toTranslation2d().getNorm();
-        Logger.recordOutput("ShootingKinematics/XYDist", xyDist);
 
-        // 1. Compute velocity and angle from regression
+        double xyDist = fuelExitToHub.transform().getTranslation().toTranslation2d().getNorm();
+        // Logger.recordOutput("ShootingKinematics/XYDist", xyDist);
+
+        // 1. Compute velocity and angle from regression and rotate shooting vector into field coordinates
+        // Note that using fuel exit pose instead of robot pose automatically takes care
+        // of compensating for theta difference when looking from center of robot and from
+        // fuel exit point
         ChassisSpeeds robotSpeeds = robotState.getMeasuredChassisSpeedsFieldRelative().times(robotVelocityScalar.get());
-        Translation2d robotSpeedsFuelExitRelative = new Translation2d(
+        Translation2d robotSpeedsFuelExitRelative = robotVelocityHubRelative(new Translation2d(
                 robotSpeeds.vxMetersPerSecond,
                 robotSpeeds.vyMetersPerSecond
-        ).rotateBy(fuelExitRotation.plus(fuelExitToHub.angle().unaryMinus()));
-        Logger.recordOutput("ShootingKinematics/RobotSpeedsRotated", robotSpeedsFuelExitRelative);
+        ));
+        //Logger.recordOutput("ShootingKinematics/RobotSpeedsRotated", robotSpeedsFuelExitRelative);
 
         double v0 = ShootingRegression.calculateVelocityMetersPerSec(xyDist, robotSpeedsFuelExitRelative.getX());
         double angle = ShootingRegression.calculateHoodAngleRad(xyDist, robotSpeedsFuelExitRelative.getX());
 
-        double vx = v0 * Math.cos(angle);
-        double vz = v0 * Math.sin(angle);
+        double vx2d = v0 * Math.sin(angle);
+        double vz = v0 * Math.cos(angle);
 
-        // 2. Next, rotate shooting vector into field coordinates
-        // Note that using fuel exit pose instead of robot pose automatically takes care
-        // of compensating for theta difference when looking from center of robot and from
-        // fuel exit point
-        // We could use Translation2d to rotate it, but since vy = 0, it's simple enough
-        // to just use trig
-        double vy = vx * fuelExitToHub.angle().getSin();
-        vx = vx * fuelExitToHub.angle().getCos();
+        // Logger.recordOutput("ShootingKinematics/ShotSpeedTargetFieldRelative", v0);
+        Translation2d robotShotFieldRelative = new Translation2d(vx2d, fuelExitToHub.angle());
 
-        // 3. Now subtract tangential robot velocity from initial shooting vectory to get final
+        // Logger.recordOutput("ShootingKinematics/ShotTargetFieldRelative", robotShotFieldRelative);
+
+        // 2. Now subtract tangential robot velocity from initial shooting vector to get final
         // shooting vector
         // Note that we must subtract the fuel exit rotation to account for the robot speeds
         // being fuel exit relative
-        vy -= robotSpeedsFuelExitRelative.rotateBy(fuelExitRotation.unaryMinus()).getY();
+        Translation2d tangentialRobotVelocityRobotRelative = new Translation2d(0, robotSpeedsFuelExitRelative.rotateBy(fuelExitRotation.unaryMinus()).getY());
+        robotShotFieldRelative = robotShotFieldRelative.plus(tangentialRobotVelocityRobotRelative.rotateBy(fuelExitToHub.angle));
 
-        // 4. Account for drivebase angular velocity
+        // Logger.recordOutput("ShootingKinematics/TangentialRobotVelocityFieldRelative", tangentialRobotVelocityRobotRelative.rotateBy(fuelExitToHub.angle));
+
+
+        // 3. Account for drivebase angular velocity
         Vector<N3> fuelExitFieldRelative = new Translation3d(
                 fuelExitTranslation.apply(hood.getPositionRad()).toTranslation2d()
                         .rotateBy(robotState.getRotation())
@@ -214,17 +221,14 @@ public class ShootingKinematics implements Periodic {
         Vector<N3> angularVelocityVector = VecBuilder.fill(0.0, 0.0, robotSpeeds.omegaRadiansPerSecond);
         // ω⃗ × e⃗, where ω⃗ is angular velocity vector and e⃗ is exit vector
         Vector<N3> linearVelocityDueToAngularVelocity = Vector.cross(angularVelocityVector, fuelExitFieldRelative);
-        vx -= linearVelocityDueToAngularVelocity.get(0);
-        vy -= linearVelocityDueToAngularVelocity.get(1);
+        Translation2d angularVelToLinearVel = new Translation2d(linearVelocityDueToAngularVelocity.get(0), linearVelocityDueToAngularVelocity.get(1));
+        robotShotFieldRelative = robotShotFieldRelative.minus(angularVelToLinearVel);
+        double vx = robotShotFieldRelative.getX();
+        double vy = robotShotFieldRelative.getY();
 
-        // 5. Log final shooting vector
-//        Logger.recordOutput("ShootingKinematics/Velocity/X", vx);
-//        Logger.recordOutput("ShootingKinematics/Velocity/Y", vy);
-//        Logger.recordOutput("ShootingKinematics/Velocity/Z", vz);
-
-        // 6. Now calculate phi, theta, and shooting magnitude from 3d shooting vector
+        // 4. Now calculate phi, theta, and shooting magnitude from 3d shooting vector
         double v = Math.sqrt(vx * vx + vy * vy + vz * vz);
-        double phi = Math.asin(vz / v);
+        double phi = Math.PI / 2 - Math.asin(vz / v);
         double theta = Math.atan2(vy, vx);
 //        Logger.recordOutput("ShootingKinematics/Velocity", v);
 //        Logger.recordOutput("ShootingKinematics/Phi", phi);
@@ -268,15 +272,19 @@ public class ShootingKinematics implements Periodic {
         );
     }
 
+    // Robot velocity centered at the shooter relative to the hub (positive x is towards hub, positive y is CLOCKWISE)
+    // robotSpeeds field relative
+    private Translation2d robotVelocityHubRelative(Translation2d robotSpeeds) {
+        FuelExitToHub fuelExitToHub = getFuelExitToHub();
+        return robotSpeeds.rotateBy(fuelExitRotation.minus(fuelExitToHub.angle()));
+    }
+
     public double rotationAboutHubRadiansPerSec(Translation2d fieldRelativeMetersPerSec) {
-        Translation2d fuelExitToHubPerp = getFuelExitToHub().transform.getTranslation().toTranslation2d()
-                .rotateBy(new Rotation2d(- Math.PI / 2));
+        Translation2d hubRelative = robotVelocityHubRelative(fieldRelativeMetersPerSec);
+        FuelExitToHub fuelExitToHub = getFuelExitToHub();
 
-        // Dot product projection of the robot velocity onto the perpendicular direction to the hub
-        double tangentialVelocity = fuelExitToHubPerp.dot(fieldRelativeMetersPerSec) / fuelExitToHubPerp.getNorm();
-
-        // same as distance to center of hub, even if rotated by 90 degrees
-        return tangentialVelocity / fuelExitToHubPerp.getNorm();
+        // CW positive for hubRelative, so need to negate into CCW positive
+        return - hubRelative.getY() / fuelExitToHub.transform.getTranslation().toTranslation2d().getNorm();
     }
 
     private record FuelExitToHub(Transform3d transform, Rotation2d angle) {}
