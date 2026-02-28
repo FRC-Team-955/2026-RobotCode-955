@@ -123,13 +123,13 @@ public class ShootingKinematics implements Periodic {
     }
 
     private static final LoggedTunableNumber shootHubManualFlywheelRPM = new LoggedTunableNumber("ShootingKinematics/ShootHubManual/FlywheelRPM", 2000.0);
-    private static final LoggedTunableNumber shootHubManualHoodDegrees = new LoggedTunableNumber("ShootingKinematics/ShootHubManual/HoodDegrees", 20.0);
+    private static final LoggedTunableNumber shootHubManualAngleDegrees = new LoggedTunableNumber("ShootingKinematics/ShootHubManual/AngleDegrees", 70.0);
 
     private static final LoggedTunableNumber shootTowerManualFlywheelRPM = new LoggedTunableNumber("ShootingKinematics/ShootTowerManual/FlywheelRPM", 5.0);
-    private static final LoggedTunableNumber shootTowerManualHoodDegrees = new LoggedTunableNumber("ShootingKinematics/ShootTowerManual/HoodDegrees", 45.0);
+    private static final LoggedTunableNumber shootTowerManualAngleDegrees = new LoggedTunableNumber("ShootingKinematics/ShootTowerManual/AngleDegrees", 45.0);
 
     private static final LoggedTunableNumber passManualFlywheelRPM = new LoggedTunableNumber("ShootingKinematics/PassManual/FlywheelRPM", 5.0);
-    private static final LoggedTunableNumber passManualHoodDegrees = new LoggedTunableNumber("ShootingKinematics/PassManual/HoodDegrees", 45.0);
+    private static final LoggedTunableNumber passManualAngleDegrees = new LoggedTunableNumber("ShootingKinematics/PassManual/AngleDegrees", 45.0);
 
     private boolean updateShootingParametersManual() {
         double headingRad = getFuelExitToHub().angle().getRadians();
@@ -139,17 +139,17 @@ public class ShootingKinematics implements Periodic {
             }
             case ShootHubManual -> shootingParameters = new ShootingParameters(
                     shootHubManualFlywheelRPM.get(),
-                    Units.degreesToRadians(shootHubManualHoodDegrees.get()),
+                    Units.degreesToRadians(shootHubManualAngleDegrees.get()),
                     headingRad
             );
             case ShootTowerManual -> shootingParameters = new ShootingParameters(
                     shootTowerManualFlywheelRPM.get(),
-                    Units.degreesToRadians(shootTowerManualHoodDegrees.get()),
+                    Units.degreesToRadians(shootTowerManualAngleDegrees.get()),
                     headingRad
             );
             case PassManual -> shootingParameters = new ShootingParameters(
                     passManualFlywheelRPM.get(),
-                    Units.degreesToRadians(passManualHoodDegrees.get()),
+                    Units.degreesToRadians(passManualAngleDegrees.get()),
                     headingRad
             );
         }
