@@ -38,6 +38,7 @@ public class RobotContainer {
     public final RobotMechanism robotMechanism = RobotMechanism.get();
     public final ShootingKinematics shootingKinematics = ShootingKinematics.get();
     public final AutoManager autoManager = AutoManager.get();
+    public final HubShiftTracker hubShiftTracker = HubShiftTracker.get();
 
     /* Subsystems */
     public final Drive drive = Drive.get();

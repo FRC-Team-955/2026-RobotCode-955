@@ -126,6 +126,9 @@ public class Robot extends LoggedRobot {
         periodics = List.of(
                 // Order matters! Execution order is ascending (that is, the first one listed will execute first)
 
+                // Start with hub shift tracker
+                robotContainer.hubShiftTracker,
+
                 // Lots of things depend on controller
                 robotContainer.controller,
                 // Vision depends on drive
@@ -198,7 +201,7 @@ public class Robot extends LoggedRobot {
         }
 
         for (var periodic : periodics) {
-//            System.out.println("periodicBeforeCommands: " + periodic.getClass().getSimpleName());
+            //System.out.println("periodicBeforeCommands: " + periodic.getClass().getSimpleName());
             periodic.periodicBeforeCommands();
             LoggedTracer.record(periodic.getClass().getSimpleName() + "PeriodicBeforeCommands");
         }
@@ -220,7 +223,7 @@ public class Robot extends LoggedRobot {
         LoggedTracer.record("AutoTimer");
 
         for (var periodic : periodics) {
-//            System.out.println("periodicAfterCommands: " + periodic.getClass().getSimpleName());
+            //System.out.println("periodicAfterCommands: " + periodic.getClass().getSimpleName());
             periodic.periodicAfterCommands();
             LoggedTracer.record(periodic.getClass().getSimpleName() + "PeriodicAfterCommands");
         }

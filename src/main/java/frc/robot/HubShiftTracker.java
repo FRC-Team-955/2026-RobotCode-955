@@ -25,15 +25,17 @@ package frc.robot;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
-import lombok.Setter;
-
-import java.util.Optional;
-import java.util.function.Supplier;
+import frc.lib.Util;
+import frc.lib.subsystem.Periodic;
+import lombok.Getter;
+import org.littletonrobotics.junction.Logger;
 
 /**
  * https://github.com/Mechanical-Advantage/RobotCode2026Public/blob/main/src/main/java/org/littletonrobotics/frc2026/util/HubShiftUtil.java
  */
-public class HubShiftTracker {
+public class HubShiftTracker implements Periodic {
+    private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
+
     public enum ShiftEnum {
         TRANSITION,
         SHIFT1,
@@ -47,7 +49,6 @@ public class HubShiftTracker {
 
     public record ShiftInfo(ShiftEnum currentShift, double elapsedTime, double remainingTime, boolean active) {}
 
-    private static Timer shiftTimer = new Timer();
     private static final ShiftEnum[] shiftsEnums = ShiftEnum.values();
 
     private static final double[] shiftStartTimes = {0.0, 10.0, 35.0, 60.0, 85.0, 110.0};
@@ -59,27 +60,54 @@ public class HubShiftTracker {
     private static final double approachingActiveFudge = -1 * minFuelCountDelay;
     private static final double endingActiveFudge = shiftEndFuelCountExtension + -1 * maxFuelCountDelay;
 
-    public static final double autoEndTime = 20.0;
-    public static final double teleopDuration = 140.0;
+    private static final double autoEndTime = 20.0;
     private static final boolean[] activeSchedule = {true, true, false, true, false, true};
     private static final boolean[] inactiveSchedule = {true, false, true, false, true, true};
 
-    @Setter
-    private static Supplier<Optional<Boolean>> allianceWinOverride = Optional::empty;
+    private final Timer shiftTimer = new Timer();
 
-    public static Optional<Boolean> getAllianceWinOverride() {
-        return allianceWinOverride.get();
+    @Getter
+    private ShiftInfo shiftInfo = getShiftedShiftInfo();
+
+    private static HubShiftTracker instance;
+
+    public static synchronized HubShiftTracker get() {
+        if (instance == null) {
+            instance = new HubShiftTracker();
+        }
+
+        return instance;
     }
 
-    public static Alliance getFirstActiveAlliance() {
+    private HubShiftTracker() {
+        if (instance != null) {
+            Util.error("Duplicate HubShiftTracker created");
+        }
+    }
+
+    @Override
+    public void periodicBeforeCommands() {
+        if (DriverStation.isTeleopEnabled()) {
+            if (!shiftTimer.isRunning()) {
+                shiftTimer.restart();
+            }
+        } else {
+            shiftTimer.stop();
+            shiftTimer.reset();
+        }
+
+        shiftInfo = getShiftedShiftInfo();
+        Logger.recordOutput("HubShiftTracker/ShiftInfo", shiftInfo);
+    }
+
+    private Alliance getFirstActiveAlliance() {
         var alliance = DriverStation.getAlliance().orElse(Alliance.Blue);
 
         // Return override value
-        var winOverride = getAllianceWinOverride();
-        if (winOverride.isPresent()) {
-            return winOverride.get()
-                    ? (alliance == Alliance.Blue ? Alliance.Red : Alliance.Blue)
-                    : (alliance == Alliance.Blue ? Alliance.Blue : Alliance.Red);
+        if (operatorDashboard.wonAuto.get()) {
+            return alliance == Alliance.Blue ? Alliance.Red : Alliance.Blue;
+        } else if (operatorDashboard.lostAuto.get()) {
+            return alliance == Alliance.Blue ? Alliance.Blue : Alliance.Red;
         }
 
         // Return FMS value
@@ -97,23 +125,20 @@ public class HubShiftTracker {
         return alliance == Alliance.Blue ? Alliance.Red : Alliance.Blue;
     }
 
-    /** Starts the timer at the beginning of teleop. */
-    public static void initialize() {
-        shiftTimer.restart();
-    }
-
-    private static boolean[] getSchedule() {
+    private boolean[] getSchedule() {
         boolean[] currentSchedule;
         Alliance startAlliance = getFirstActiveAlliance();
-        currentSchedule =
-                startAlliance == DriverStation.getAlliance().orElse(Alliance.Blue)
-                        ? activeSchedule
-                        : inactiveSchedule;
+        currentSchedule = startAlliance == DriverStation.getAlliance().orElse(Alliance.Blue)
+                ? activeSchedule
+                : inactiveSchedule;
         return currentSchedule;
     }
 
-    private static ShiftInfo getShiftInfo(
-            boolean[] currentSchedule, double[] shiftStartTimes, double[] shiftEndTimes) {
+    private ShiftInfo getShiftInfo(
+            boolean[] currentSchedule,
+            double[] shiftStartTimes,
+            double[] shiftEndTimes
+    ) {
         double currentTime = shiftTimer.get();
         double stateTimeElapsed = shiftTimer.get();
         double stateTimeRemaining = 0.0;
@@ -163,14 +188,14 @@ public class HubShiftTracker {
         return shiftInfo;
     }
 
-    public static ShiftInfo getOfficialShiftInfo() {
+    private ShiftInfo getOfficialShiftInfo() {
         return getShiftInfo(getSchedule(), shiftStartTimes, shiftEndTimes);
     }
 
-    public static ShiftInfo getShiftedShiftInfo() {
+    private ShiftInfo getShiftedShiftInfo() {
         boolean[] shiftSchedule = getSchedule();
-        // Starting active
-        if (shiftSchedule[1] == true) {
+        if (shiftSchedule[1]) {
+            // Starting active
             double[] shiftedShiftStartTimes = {
                     0.0,
                     10.0,
@@ -188,24 +213,25 @@ public class HubShiftTracker {
                     140.0
             };
             return getShiftInfo(shiftSchedule, shiftedShiftStartTimes, shiftedShiftEndTimes);
+        } else {
+            // Starting inactive
+            double[] shiftedShiftStartTimes = {
+                    0.0,
+                    10.0 + endingActiveFudge,
+                    35.0 + approachingActiveFudge,
+                    60.0 + endingActiveFudge,
+                    85.0 + approachingActiveFudge,
+                    110.0
+            };
+            double[] shiftedShiftEndTimes = {
+                    10.0 + endingActiveFudge,
+                    35.0 + approachingActiveFudge,
+                    60.0 + endingActiveFudge,
+                    85.0 + approachingActiveFudge,
+                    110.0,
+                    140.0
+            };
+            return getShiftInfo(shiftSchedule, shiftedShiftStartTimes, shiftedShiftEndTimes);
         }
-        double[] shiftedShiftStartTimes = {
-                0.0,
-                10.0 + endingActiveFudge,
-                35.0 + approachingActiveFudge,
-                60.0 + endingActiveFudge,
-                85.0 + approachingActiveFudge,
-                110.0
-        };
-        double[] shiftedShiftEndTimes = {
-                10.0 + endingActiveFudge,
-                35.0 + approachingActiveFudge,
-                60.0 + endingActiveFudge,
-                85.0 + approachingActiveFudge,
-                110.0,
-                140.0
-        };
-        return getShiftInfo(shiftSchedule, shiftedShiftStartTimes, shiftedShiftEndTimes);
-        // }
     }
 }

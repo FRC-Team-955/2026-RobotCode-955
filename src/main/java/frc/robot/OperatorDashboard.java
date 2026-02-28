@@ -44,6 +44,8 @@ public class OperatorDashboard implements Periodic {
     public final LoggedNetworkBooleanExt disableCANrange = new LoggedNetworkBooleanExt(prefix + "DisableCANrange", true);
     public final LoggedNetworkNumberExt flywheelSmudgeRPM = new LoggedNetworkNumberExt(prefix + "FlywheelSmudgeRPM", 0.0);
     public final LoggedNetworkNumberExt hoodSmudgeDegrees = new LoggedNetworkNumberExt(prefix + "HoodSmudgeDegrees", 0.0);
+    public final LoggedNetworkBooleanExt lostAuto = new LoggedNetworkBooleanExt(prefix + "LostAuto", false);
+    public final LoggedNetworkBooleanExt wonAuto = new LoggedNetworkBooleanExt(prefix + "WonAuto", false);
 
     @Getter
     private ScoringMode selectedScoringMode = ScoringMode.ShootAndPassAutomatic;
