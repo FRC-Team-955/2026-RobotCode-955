@@ -167,10 +167,6 @@ public class ShootingKinematics implements Periodic {
         };
     }
 
-    private boolean isValidHoodAngle(double hoodAngleRad) {
-        return hoodAngleRad > Units.degreesToRadians(15) && hoodAngleRad < Units.degreesToRadians(45);
-    }
-
     private ShootingParameters getShootingParametersAutomatic() {
         if (robotState.getPose().getX() > AllianceFlipUtil.applyX(FieldConstants.LinesVertical.neutralZoneNear)) {
             return new ShootingParameters(
