@@ -181,7 +181,11 @@ public class ShootingKinematics implements Periodic {
     }
 
     private ShootingParameters getShootingParametersAutomatic() {
-        if (robotState.getPose().getX() > AllianceFlipUtil.applyX(FieldConstants.LinesVertical.neutralZoneNear)) {
+        if (
+                AllianceFlipUtil.shouldFlip()
+                        ? robotState.getPose().getX() < FieldConstants.LinesVertical.neutralZoneFar
+                        : robotState.getPose().getX() > FieldConstants.LinesVertical.neutralZoneNear
+        ) {
             return new ShootingParameters(
                     passManualFlywheelRPM.get(),
                     Units.degreesToRadians(passManualAngleDegrees.get()),
