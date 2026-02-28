@@ -106,7 +106,7 @@ public class DriveJoystickGoal extends DriveGoal {
                     Logger.recordOutput("Drive/AssistRunning", true);
 
                     // First convert to robot relative
-                    Rotation2d linearDirectionRobotRelative = linearDirection.rotateBy(robotState.getRotation().unaryMinus());
+                    Rotation2d linearDirectionRobotRelative = linearDirection.rotateBy(robotState.getRotation());
 
                     double yDist = new Transform2d(
                             robotState.getPose(),
@@ -115,9 +115,9 @@ public class DriveJoystickGoal extends DriveGoal {
 
                     // Adjust Y (left/right) to go towards game piece
                     // Note that there is a negative sign
-                    linearDirection = new Rotation2d(linearDirectionRobotRelative.getCos(), -assistPID.calculate(yDist, 0))
+                    linearDirection = new Rotation2d(linearDirectionRobotRelative.getCos(), assistPID.calculate(yDist, 0))
                             // Rotate back to field relative
-                            .rotateBy(robotState.getRotation());
+                            .rotateBy(robotState.getRotation().unaryMinus());
                 }
             }
         }
