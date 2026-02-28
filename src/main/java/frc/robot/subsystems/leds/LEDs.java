@@ -100,13 +100,13 @@ public class LEDs implements Periodic {
         } else if (cameraError) {
             LEDPatterns.visionDisconnected.applyTo(buffer);
         } else if (DriverStation.isDisabled()) {
-            //if (autoManager.isAtAutoStartingPose()) {
-            //    LEDPatterns.autoReady.applyTo(buffer);
-            //} else if (autoManager.getClosestAutoStartingPose().isPresent()) {
-            //    LEDPatterns.autoPlacementProgress(autoManager::getPlacementProgress).applyTo(buffer);
-            //} else {
+            if (autoManager.isAtAutoStartingPose() && operatorDashboard.autoChosen.get()) {
+                LEDPatterns.autoReady.applyTo(buffer);
+            } else if (autoManager.getClosestAutoStartingPose().isPresent() && operatorDashboard.autoChosen.get()) {
+                LEDPatterns.autoPlacementProgress(autoManager::getPlacementProgress).applyTo(buffer);
+            } else {
             LEDPatterns.autoReady.applyTo(buffer);
-            //}
+            }
         } else if (DriverStation.isEnabled()) {
             boolean endgame = DriverStation.isTeleop() &&
                     DriverStation.getMatchTime() > endgameLowerThresholdSeconds &&
