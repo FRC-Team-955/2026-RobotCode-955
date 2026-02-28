@@ -54,7 +54,7 @@ public class GamePieceVisionConstants {
 
     @RequiredArgsConstructor
     enum Camera {
-        GPVCam(
+        IntakeCam(
 
                 new Transform3d(
                         Units.inchesToMeters(14.367598), Units.inchesToMeters(11.517161), Units.inchesToMeters(17.924370),
@@ -63,8 +63,8 @@ public class GamePieceVisionConstants {
                                 .rotateBy(new Rotation3d(0.0, 0.0, Units.degreesToRadians(0.0)))
                 ),
                 (cam) -> switch (BuildConstants.mode) {
-                    case REAL -> new GamePieceVisionIOPhotonVision("GPVCam");
-                    case SIM -> new GamePieceVisionIOPhotonVisionSim("GPVCam", cam.robotToCamera);
+                    case REAL -> new GamePieceVisionIOPhotonVision("IntakeCam");
+                    case SIM -> new GamePieceVisionIOPhotonVisionSim("IntakeCam", cam.robotToCamera);
                     case REPLAY -> new GamePieceVisionIO();
                 }
                 // Relatively stable, even at long dist
