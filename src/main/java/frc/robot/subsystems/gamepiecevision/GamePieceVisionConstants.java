@@ -30,6 +30,7 @@ public class GamePieceVisionConstants {
     static final double pixelsToRad = camWidth / horizontalFOVRad;
     static final double minDistanceForSameCoralMeters = 1;
     static final double expireTimeSeconds = 0.5;
+    static final double targetMultiplier = 0.5;
 
     @RequiredArgsConstructor
     enum Camera {

@@ -71,7 +71,7 @@ public class GamePieceVision implements Periodic {
                 }
                 var robotPose = new Pose3d(robotPose2d.get());
                 Translation2d pitchYawTranslation =
-                        new Translation2d(Math.tan(observation.yawRad()), Math.tan(-observation.pitchRad()))
+                        new Translation2d(Math.tan(observation.yawRad() * targetMultiplier), Math.tan(-observation.pitchRad() * targetMultiplier))
                                 .rotateBy(new Rotation2d(-metadata.robotToCamera.getRotation().getX()));
                 targetXYPoints.add(pitchYawTranslation);
                 double targetYaw = Math.atan(pitchYawTranslation.getX());
