@@ -37,13 +37,13 @@ public class PlanetaryAuto {
                 robotState.setPose(() -> AllianceFlipUtil.apply(new Pose2d(4, 7.4, Rotation2d.fromDegrees(90)))),
 
                 // move out of trench
-                AutoHelpers.intermediateWaypoint(() -> new Pose2d(7.4, 7.4, Rotation2d.fromDegrees(-45)), defaultMoveToConstraints),
+                //AutoHelpers.intermediateWaypoint(() -> new Pose2d(7.4, 7.4, Rotation2d.fromDegrees(-45)), defaultMoveToConstraints),
 
                 // intake, go to neturalzone
                 Commands.race(
                         AutoHelpers.yDistanceInterpolatingWaypoint(new Translation2d(5.5, 7.4),
                                 new Translation2d(7.65, 6.4)
-                                , Rotation2d.fromDegrees(-90),
+                                , Rotation2d.fromDegrees(-80),
                                 2,
                                 defaultMoveToConstraints
                                 )),
