@@ -2,14 +2,13 @@
   "hubs": [
     {
       "x": 0,
-      "y": 30,
-      "width": 1920,
-      "height": 1055,
+      "y": 33,
+      "width": 1280,
+      "height": 799,
       "state": {
         "sidebar": {
           "width": 300,
           "expanded": [
-            "/Tuning/Drive",
             "/Tuning/Drive/DriveJoystickWithAiming",
             "/Inputs/Superintake/IntakePivot",
             "/Inputs/Superintake/IntakeRollers",
@@ -20,17 +19,55 @@
             "/RealOutputs/RobotState",
             "/RealOutputs",
             "/RealOutputs/FieldSimulation",
-            "/RealOutputs/Drive",
-            "/RealOutputs/GamePieceVision",
-            "/Inputs",
-            "/Inputs/GamePieceVision",
             "/Inputs/GamePieceVision/GPVCam",
             "/RealOutputs/GamePieceVision/TargetPoints",
-            "/RealOutputs/GamePieceVision/StaleCoral"
+            "/RealOutputs/GamePieceVision/StaleCoral",
+            "/RealOutputs/Superstructure",
+            "/RealOutputs/Superstructure/Hood",
+            "/Inputs/Superstructure/Flywheel/Follower",
+            "/RealOutputs/Superstructure/Flywheel",
+            "/Inputs/Superstructure/Flywheel",
+            "/Inputs/Superstructure/Flywheel/Leader",
+            "/Tuning",
+            "/Tuning/Superstructure",
+            "/Tuning/Superstructure/Flywheel",
+            "/Tuning/Superstructure/Flywheel/Gains",
+            "/Tuning/OperatorDashboard/ScoringMode",
+            "/Tuning/Superstructure/Flywheel/Goal",
+            "/Tuning/ShootingKinematics",
+            "/Tuning/ShootingKinematics/ShootHubManual",
+            "/Inputs/Superstructure/Hood",
+            "/RealOutputs/ShootingKinematics",
+            "/Tuning/OperatorDashboard",
+            "/RealOutputs/LeftSideAuto",
+            "/RealOutputs/LeftSideAuto/Drive",
+            "/RealOutputs/LeftSideAuto/CurrentGoal",
+            "/Inputs/AprilTagVision",
+            "/Inputs/AprilTagVision/ShooterCam",
+            "/Inputs/AprilTagVision/ShooterCam/BestTargetObservations",
+            "/Inputs/AprilTagVision/ShooterCam/AprilTagObservations",
+            "/Inputs/AprilTagVision/ShooterCam/MultiTagObservations",
+            "/RealOutputs/OperatorDashboard",
+            "/RealOutputs/ShootingKinematics/ShootingParameters",
+            "/RealOutputs/RobotState/Pose",
+            "/RealOutputs/RobotState/Pose/rotation",
+            "/Inputs/Superstructure",
+            "/RealOutputs/ShootingKinematics/RobotSpeedsRotated",
+            "/RealOutputs/Drive",
+            "/Tuning/Drive",
+            "/Tuning/Drive/AssistY",
+            "/RealOutputs/Drive/MoveTo",
+            "/RealOutputs/GamePieceVision",
+            "/DriverStation",
+            "/RealOutputs/HubShiftTracker",
+            "/RealOutputs/HubShiftTracker/ShiftInfo",
+            "/RealOutputs/LEDs",
+            "/RealOutputs/RobotMechanism",
+            "/Tuning/MyAuto"
           ]
         },
         "tabs": {
-          "selected": 10,
+          "selected": 9,
           "tabs": [
             {
               "type": 0,
@@ -39,45 +76,6 @@
               "controllerUUID": "3oytym58n7ljqr754rgeiy870d5xwub0",
               "renderer": "",
               "controlsHeight": 0
-            },
-            {
-              "type": 1,
-              "title": "Alerts",
-              "controller": {
-                "leftSources": [],
-                "rightSources": [],
-                "discreteSources": [
-                  {
-                    "type": "alerts",
-                    "logKey": "/RealOutputs/Alerts",
-                    "logType": "Alerts",
-                    "visible": true,
-                    "options": {}
-                  },
-                  {
-                    "type": "alerts",
-                    "logKey": "/RealOutputs/PhotonAlerts",
-                    "logType": "Alerts",
-                    "visible": true,
-                    "options": {}
-                  }
-                ],
-                "leftLockedRange": null,
-                "rightLockedRange": null,
-                "leftUnitConversion": {
-                  "autoTarget": null,
-                  "preset": null
-                },
-                "rightUnitConversion": {
-                  "autoTarget": null,
-                  "preset": null
-                },
-                "leftFilter": 0,
-                "rightFilter": 0
-              },
-              "controllerUUID": "k9pqbahhb2zjooic3iqnw6i4jh66uha9",
-              "renderer": null,
-              "controlsHeight": 200
             },
             {
               "type": 5,
@@ -113,6 +111,29 @@
                     "options": {
                       "color": "#e5b31b"
                     }
+                  },
+                  {
+                    "type": "stripes",
+                    "logKey": "/RealOutputs/Drive/Goal",
+                    "logType": "String",
+                    "visible": true,
+                    "options": {
+                      "color": "#af2437"
+                    }
+                  },
+                  {
+                    "type": "alerts",
+                    "logKey": "/RealOutputs/Alerts",
+                    "logType": "Alerts",
+                    "visible": true,
+                    "options": {}
+                  },
+                  {
+                    "type": "alerts",
+                    "logKey": "/RealOutputs/PhotonAlerts",
+                    "logType": "Alerts",
+                    "visible": true,
+                    "options": {}
                   }
                 ],
                 "leftLockedRange": null,
@@ -301,11 +322,11 @@
                 "leftSources": [
                   {
                     "type": "stepped",
-                    "logKey": "/Inputs/Superstructure/Flywheel/VelocityRadPerSec",
+                    "logKey": "/Inputs/Superstructure/Flywheel/Leader/VelocityRadPerSec",
                     "logType": "Number",
                     "visible": true,
                     "options": {
-                      "color": "#af2437",
+                      "color": "#c0b487",
                       "size": "normal"
                     }
                   },
@@ -357,7 +378,12 @@
                 "rightLockedRange": null,
                 "leftUnitConversion": {
                   "autoTarget": null,
-                  "preset": null
+                  "preset": {
+                    "type": "angular velocity",
+                    "factor": 1,
+                    "from": "radians/second",
+                    "to": "rotations/minute"
+                  }
                 },
                 "rightUnitConversion": {
                   "autoTarget": null,
@@ -579,6 +605,15 @@
                     "options": {
                       "color": "#80588e"
                     }
+                  },
+                  {
+                    "type": "stripes",
+                    "logKey": "/RealOutputs/ShootingKinematics/ShootingParametersMet",
+                    "logType": "Boolean",
+                    "visible": true,
+                    "options": {
+                      "color": "#e48b32"
+                    }
                   }
                 ],
                 "leftLockedRange": null,
@@ -670,21 +705,11 @@
                   },
                   {
                     "type": "vision",
-                    "logKey": "/RealOutputs/GamePieceVision/FreshCoral",
-                    "logType": "Pose3d[]",
+                    "logKey": "/RealOutputs/GamePieceVision/BestTargets",
+                    "logType": "Translation2d[]",
                     "visible": true,
                     "options": {
                       "color": "#ffff00",
-                      "size": "normal"
-                    }
-                  },
-                  {
-                    "type": "vision",
-                    "logKey": "/RealOutputs/GamePieceVision/StaleCoral",
-                    "logType": "Pose3d[]",
-                    "visible": true,
-                    "options": {
-                      "color": "#ff8c00",
                       "size": "normal"
                     }
                   },
@@ -715,7 +740,7 @@
                     "type": "ghost",
                     "logKey": "/RealOutputs/RobotState/PoseUncertaintyRange",
                     "logType": "Pose2d[]",
-                    "visible": true,
+                    "visible": false,
                     "options": {
                       "model": "955",
                       "color": "#ff0000"
@@ -728,7 +753,33 @@
                     "visible": true,
                     "options": {
                       "model": "955",
-                      "color": "#00ff00"
+                      "color": "#ff00ff"
+                    }
+                  },
+                  {
+                    "type": "gamePiece",
+                    "logKey": "/RealOutputs/Superstructure/FuelPose",
+                    "logType": "Pose3d",
+                    "visible": true,
+                    "options": {
+                      "variant": "Fuel"
+                    }
+                  },
+                  {
+                    "type": "axes",
+                    "logKey": "/RealOutputs/ShootingKinematics/FuelExitPose",
+                    "logType": "Pose3d",
+                    "visible": true,
+                    "options": {}
+                  },
+                  {
+                    "type": "ghost",
+                    "logKey": "/RealOutputs/Drive/MoveTo/Goal",
+                    "logType": "Pose2d",
+                    "visible": true,
+                    "options": {
+                      "model": "955",
+                      "color": "#0000ff"
                     }
                   }
                 ],
@@ -739,17 +790,32 @@
                 "cameraIndex": -1,
                 "orbitFov": 90,
                 "cameraPosition": [
-                  -3.7890200769897278,
-                  4.190147764114718,
-                  1.842740744147416
+                  -1.850069976967575,
+                  7.011086708298296,
+                  1.2426581292158028
                 ],
                 "cameraTarget": [
-                  -3.789574979111878,
-                  1.2180400339430109,
-                  1.7800053222374266
+                  -1.8500616023620478,
+                  -1.3642052306829584,
+                  1.2426580219902124
                 ]
               },
-              "controlsHeight": 430
+              "controlsHeight": 225
+            },
+            {
+              "type": 8,
+              "title": "Joysticks",
+              "controller": [
+                "Xbox Controller (White)",
+                "None",
+                "None",
+                "None",
+                "None",
+                "None"
+              ],
+              "controllerUUID": "cw19i5n5davdvdzt10ss5l70pfb5ff27",
+              "renderer": null,
+              "controlsHeight": 85
             },
             {
               "type": 9,
@@ -818,7 +884,26 @@
               "type": 2,
               "title": "2D Field",
               "controller": {
-                "sources": [],
+                "sources": [
+                  {
+                    "type": "robot",
+                    "logKey": "/RealOutputs/RobotState/Pose",
+                    "logType": "Pose2d",
+                    "visible": true,
+                    "options": {
+                      "bumpers": ""
+                    }
+                  },
+                  {
+                    "type": "ghost",
+                    "logKey": "/RealOutputs/RobotState/PoseUncertaintyRange",
+                    "logType": "Pose2d[]",
+                    "visible": false,
+                    "options": {
+                      "color": "#ff0000"
+                    }
+                  }
+                ],
                 "field": "FRC:2026 Field",
                 "orientation": 0,
                 "size": "large"
