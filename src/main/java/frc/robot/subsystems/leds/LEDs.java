@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj.util.Color8Bit;
 import frc.lib.Util;
 import frc.lib.subsystem.Periodic;
 import frc.robot.Constants;
+import frc.robot.HubShiftTracker;
 import frc.robot.OperatorDashboard;
 import frc.robot.autos.AutoManager;
 import frc.robot.shooting.ShootingKinematics;
@@ -141,6 +142,10 @@ public class LEDs implements Periodic {
                     LEDPatterns.idle.applyTo(buffer);
                 }
             }
+        } else if (HubShiftTracker.get().getShiftInfo().remainingTime() < 3.0) {
+            LEDPatterns.hubSwitch.applyTo(buffer);
+        } else {
+            LEDPatterns.idle.applyTo(buffer);
         }
 
         io.setData(buffer);
