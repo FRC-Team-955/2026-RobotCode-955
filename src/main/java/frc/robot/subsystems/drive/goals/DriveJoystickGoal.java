@@ -59,7 +59,7 @@ public class DriveJoystickGoal extends DriveGoal {
     private final Debouncer headingOverrideEnabledDebouncer = new Debouncer(headingOverrideSetpointResetTime.get(), Debouncer.DebounceType.kRising);
     private boolean runningHeadingOverride = false;
 
-    private final SlewRateLimiter2d aimLinearAccelerationLimiter = new SlewRateLimiter2d(aimMaxLinearAccelerationMetersPerSecPerSec.get(), robotState.getMeasuredChassisSpeeds());
+    private final SlewRateLimiter2d aimLinearAccelerationLimiter = new SlewRateLimiter2d(aimMaxLinearAccelerationMetersPerSecPerSec.get(), robotState.getMeasuredChassisSpeedsFieldRelative());
 
     private final PIDController assistPID = assistGains.toPID();
 
@@ -136,7 +136,7 @@ public class DriveJoystickGoal extends DriveGoal {
                     linearDirection
             );
             // Reset with latest speeds
-            aimLinearAccelerationLimiter.reset(robotState.getMeasuredChassisSpeeds());
+            aimLinearAccelerationLimiter.reset(robotState.getMeasuredChassisSpeedsFieldRelative());
         }
 
         if (mode == Mode.Aim || mode == Mode.AimAndAssist) {

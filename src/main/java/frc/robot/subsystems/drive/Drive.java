@@ -211,11 +211,12 @@ public class Drive extends CommandBasedSubsystem {
         // Chassis speeds
         ChassisSpeeds measuredChassisSpeeds = robotState.getKinematics().toChassisSpeeds(getMeasuredModuleStates());
         Logger.recordOutput("Drive/ChassisSpeeds/Measured", measuredChassisSpeeds);
+        robotState.setMeasuredChassisSpeedsRobotRelative(measuredChassisSpeeds);
         ChassisSpeeds measuredChassisSpeedsFieldRelative = ChassisSpeeds.fromRobotRelativeSpeeds(
                 measuredChassisSpeeds,
                 robotState.getRotation() // Field is absolute, don't flip
         );
-        robotState.setMeasuredChassisSpeeds(measuredChassisSpeedsFieldRelative);
+        robotState.setMeasuredChassisSpeedsFieldRelative(measuredChassisSpeedsFieldRelative);
 
         // Update filtered acceleration
         Translation2d filteredAccelerationMetersPerSecPerSec = new Translation2d(

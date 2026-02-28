@@ -43,12 +43,12 @@ public class RobotState implements Periodic {
 
     private final Field2d field2d = new Field2d();
 
-    /**
-     * Field relative
-     */
     @Getter
     @Setter
-    private ChassisSpeeds measuredChassisSpeeds = new ChassisSpeeds();
+    private ChassisSpeeds measuredChassisSpeedsRobotRelative = new ChassisSpeeds();
+    @Getter
+    @Setter
+    private ChassisSpeeds measuredChassisSpeedsFieldRelative = new ChassisSpeeds();
 
     /**
      * Field relative
@@ -103,11 +103,11 @@ public class RobotState implements Periodic {
     public void periodicBeforeCommands() {
         // Increase uncertainty if we are moving
         final double chassisSpeedsLinearFactor = 0.06;
-        poseUncertaintyLinearXMeters += Constants.loopPeriod * chassisSpeedsLinearFactor * Math.abs(measuredChassisSpeeds.vxMetersPerSecond);
-        poseUncertaintyLinearYMeters += Constants.loopPeriod * chassisSpeedsLinearFactor * Math.abs(measuredChassisSpeeds.vyMetersPerSecond);
+        poseUncertaintyLinearXMeters += Constants.loopPeriod * chassisSpeedsLinearFactor * Math.abs(measuredChassisSpeedsFieldRelative.vxMetersPerSecond);
+        poseUncertaintyLinearYMeters += Constants.loopPeriod * chassisSpeedsLinearFactor * Math.abs(measuredChassisSpeedsFieldRelative.vyMetersPerSecond);
         // Gyro is generally pretty trustworthy
         final double chassisSpeedsAngularFactor = 0.0005;
-        poseUncertaintyAngularRad += Constants.loopPeriod * chassisSpeedsAngularFactor * Math.abs(measuredChassisSpeeds.omegaRadiansPerSecond);
+        poseUncertaintyAngularRad += Constants.loopPeriod * chassisSpeedsAngularFactor * Math.abs(measuredChassisSpeedsFieldRelative.omegaRadiansPerSecond);
 
         // Increase uncertainty if we went over the bump
         Translation2d t = getTranslation();
@@ -227,8 +227,8 @@ public class RobotState implements Periodic {
     }
 
     public boolean isMeasuredChassisSpeedsBelowTolerance(double linearToleranceMetersPerSec, double angularToleranceRadPerSec) {
-        return Math.hypot(getMeasuredChassisSpeeds().vxMetersPerSecond, getMeasuredChassisSpeeds().vyMetersPerSecond) < linearToleranceMetersPerSec
-                && Math.abs(getMeasuredChassisSpeeds().omegaRadiansPerSecond) < angularToleranceRadPerSec;
+        return Math.hypot(getMeasuredChassisSpeedsFieldRelative().vxMetersPerSecond, getMeasuredChassisSpeedsFieldRelative().vyMetersPerSecond) < linearToleranceMetersPerSec
+                && Math.abs(getMeasuredChassisSpeedsFieldRelative().omegaRadiansPerSecond) < angularToleranceRadPerSec;
     }
 
     public boolean isInTrench() {

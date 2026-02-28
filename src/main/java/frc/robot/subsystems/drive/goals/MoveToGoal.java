@@ -46,11 +46,11 @@ public class MoveToGoal extends DriveGoal {
 
         moveToAngularAccelerationLimiter = new SlewRateLimiter(
                 constraints.maxAngularAccelerationRadPerSecPerSec().get(),
-                robotState.getMeasuredChassisSpeeds().omegaRadiansPerSecond
+                robotState.getMeasuredChassisSpeedsFieldRelative().omegaRadiansPerSecond
         );
         moveToLinearAccelerationLimiter = new SlewRateLimiter2d(
                 constraints.maxLinearAccelerationMetersPerSecPerSec().get(),
-                robotState.getMeasuredChassisSpeeds()
+                robotState.getMeasuredChassisSpeedsFieldRelative()
         );
     }
 

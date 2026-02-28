@@ -28,6 +28,7 @@ public class ShootingKinematics implements Periodic {
     private static final double bottomOfFrameRailsToShooterHeightMeters = Units.inchesToMeters(12.861380);
     private static final double shooterRadiusToCenterOfBallExitMeters = Units.inchesToMeters(4.602756);
 
+    private static final LoggedTunableNumber phaseDelay = new LoggedTunableNumber("ShootingKinematics/PhaseDelay", 0.03);
     private static final LoggedTunableNumber robotVelocityScalar = new LoggedTunableNumber("ShootingKinematics/RobotVelocityScalar", 1.2);
     private static final LoggedTunableNumber headingToleranceDeg = new LoggedTunableNumber("ShootingKinematics/HeadingToleranceDegrees", 5.0);
     public static final LoggedTunableNumber velocityToleranceRPM = new LoggedTunableNumber("ShootingKinematics/VelocityToleranceRPM", 100);
@@ -164,7 +165,7 @@ public class ShootingKinematics implements Periodic {
         Logger.recordOutput("ShootingKinematics/XYDist", xyDist);
 
         // 1. Compute velocity and angle from regression
-        ChassisSpeeds robotSpeeds = robotState.getMeasuredChassisSpeeds().times(robotVelocityScalar.get());
+        ChassisSpeeds robotSpeeds = robotState.getMeasuredChassisSpeedsFieldRelative().times(robotVelocityScalar.get());
         Translation2d robotSpeedsFuelExitRelative = new Translation2d(
                 robotSpeeds.vxMetersPerSecond,
                 robotSpeeds.vyMetersPerSecond
@@ -227,7 +228,8 @@ public class ShootingKinematics implements Periodic {
     }
 
     private FuelExitToHub getFuelExitToHub() {
-        Pose2d robotPose2d = robotState.getPose();
+        Pose2d robotPose2d = robotState.getPose()
+                .exp(robotState.getMeasuredChassisSpeedsRobotRelative().toTwist2d(phaseDelay.get()));
         Pose3d fuelExitPose = new Pose3d(
                 new Pose3d(robotPose2d)
                         .transformBy(new Transform3d(
