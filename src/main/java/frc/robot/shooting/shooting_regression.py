@@ -35,8 +35,9 @@ z_initial_base = bottom_of_frame_rails_to_center_of_wheels + wheel_radius + bott
 
 # TODO FIX HEIGHT
 hubz = 72 * 2.54 / 100
-# Add some clearance to the top of the hub edge (15.5 + clearance)
-hub_edgez = hubz + (15.5 + 5) * 2.54 / 100 + fuel_radius
+# 72 inches is the height of the edge
+# For clearance, add the fuel radius + 10 inches
+hub_edgez = hubz + 10 * 2.54 / 100 + fuel_radius
 hub_edgex_offset = -24 * 2.54 / 100
 
 dt = 0.005
