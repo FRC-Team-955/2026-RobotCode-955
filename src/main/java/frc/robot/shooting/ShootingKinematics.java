@@ -75,8 +75,6 @@ public class ShootingKinematics implements Periodic {
     @Getter
     private ShootingParameters shootingParameters = new ShootingParameters(0, 0, 0);
     @Getter
-    private boolean validShootingParameters = false;
-    @Getter
     private boolean shootingParametersMet = false;
 
     private final Alert noValidShootingParametersAlert = new Alert("Could not find valid shooting parameters.", Alert.AlertType.kInfo);
@@ -99,27 +97,31 @@ public class ShootingKinematics implements Periodic {
 
     @Override
     public void periodicBeforeCommands() {
-        validShootingParameters = operatorDashboard.getSelectedScoringMode() == OperatorDashboard.ScoringMode.ShootAndPassAutomatic
-                ? updateShootingParametersAutomatic()
-                : updateShootingParametersManual();
+        if (operatorDashboard.getSelectedScoringMode() == OperatorDashboard.ScoringMode.ShootAndPassAutomatic) {
+            shootingParameters = getShootingParametersAutomatic();
+        } else {
+            shootingParameters = getShootingParametersManual();
+        }
         shootingParameters = new ShootingParameters(
                 shootingParameters.velocityRPM() + operatorDashboard.flywheelSmudgeRPM.get(),
                 shootingParameters.angleRad() + operatorDashboard.hoodSmudgeDegrees.get(),
                 shootingParameters.headingRad
         );
         Logger.recordOutput("ShootingKinematics/ShootingParameters", shootingParameters);
-        Logger.recordOutput("ShootingKinematics/ShootingParameters/HeadingRadReal", robotState.getPose().getRotation().getRadians());
-        Logger.recordOutput("ShootingKinematics/ShootingParameters/VelocityRPMReal", flywheel.getVelocityRPM());
-        Logger.recordOutput("ShootingKinematics/ShootingParameters/HoodAngleRadReal", hood.getPositionRad());
-        Logger.recordOutput("ShootingKinematics/ValidShootingParameters", validShootingParameters);
-        noValidShootingParametersAlert.set(!validShootingParameters);
 
-        shootingParametersMet = validShootingParameters &&
-                (operatorDashboard.manualAiming.get() || Math.abs(robotState.getPose().getRotation().getRadians() - shootingParameters.headingRad()) <= Units.degreesToRadians(headingToleranceDeg.get())) &&
-                Math.abs(flywheel.getVelocityRPM() - shootingParameters.velocityRPM()) <= velocityToleranceRPM.get() &&
-                Math.abs(hood.getShotAngleRad() - shootingParameters.angleRad()) <= Units.degreesToRadians(hoodToleranceDeg.get()) &&
-                (operatorDashboard.disableShiftTracking.get() || hubShiftTracker.getShiftInfo().active());
-        Logger.recordOutput("ShootingKinematics/ShootingParametersMet", shootingParametersMet);
+        boolean shiftMet = operatorDashboard.disableShiftTracking.get() || hubShiftTracker.getShiftInfo().active();
+        Logger.recordOutput("ShootingKinematics/ShiftMet", shiftMet);
+
+        boolean headingMet = operatorDashboard.manualAiming.get() || Math.abs(robotState.getPose().getRotation().getRadians() - shootingParameters.headingRad()) <= Units.degreesToRadians(headingToleranceDeg.get());
+        Logger.recordOutput("ShootingKinematics/HeadingMet", headingMet);
+
+        boolean velocityMet = Math.abs(flywheel.getVelocityRPM() - shootingParameters.velocityRPM()) <= velocityToleranceRPM.get();
+        Logger.recordOutput("ShootingKinematics/VelocityMet", velocityMet);
+
+        boolean angleMet = Math.abs(hood.getShotAngleRad() - shootingParameters.angleRad()) <= Units.degreesToRadians(hoodToleranceDeg.get());
+        Logger.recordOutput("ShootingKinematics/AngleMet", angleMet);
+
+        shootingParametersMet = shiftMet && headingMet && velocityMet && angleMet;
     }
 
     private static final LoggedTunableNumber shootHubManualFlywheelRPM = new LoggedTunableNumber("ShootingKinematics/ShootHubManual/FlywheelRPM", 2000.0);
@@ -128,51 +130,48 @@ public class ShootingKinematics implements Periodic {
     private static final LoggedTunableNumber shootTowerManualFlywheelRPM = new LoggedTunableNumber("ShootingKinematics/ShootTowerManual/FlywheelRPM", 5.0);
     private static final LoggedTunableNumber shootTowerManualAngleDegrees = new LoggedTunableNumber("ShootingKinematics/ShootTowerManual/AngleDegrees", 45.0);
 
-    private static final LoggedTunableNumber passManualFlywheelRPM = new LoggedTunableNumber("ShootingKinematics/PassManual/FlywheelRPM", 5.0);
+    private static final LoggedTunableNumber passManualFlywheelRPM = new LoggedTunableNumber("ShootingKinematics/PassManual/FlywheelRPM", 2000.0);
     private static final LoggedTunableNumber passManualAngleDegrees = new LoggedTunableNumber("ShootingKinematics/PassManual/AngleDegrees", 45.0);
 
-    private boolean updateShootingParametersManual() {
+    private ShootingParameters getShootingParametersManual() {
         double headingRad = getFuelExitToHub().angle().getRadians();
-        switch (operatorDashboard.getSelectedScoringMode()) {
-            case ShootAndPassAutomatic -> {
-                return false;
-            }
-            case ShootHubManual -> shootingParameters = new ShootingParameters(
+        return switch (operatorDashboard.getSelectedScoringMode()) {
+            case ShootHubManual -> new ShootingParameters(
                     shootHubManualFlywheelRPM.get(),
                     Units.degreesToRadians(shootHubManualAngleDegrees.get()),
                     headingRad
             );
-            case ShootTowerManual -> shootingParameters = new ShootingParameters(
+            case ShootTowerManual -> new ShootingParameters(
                     shootTowerManualFlywheelRPM.get(),
                     Units.degreesToRadians(shootTowerManualAngleDegrees.get()),
                     headingRad
             );
-            case PassManual -> shootingParameters = new ShootingParameters(
+            case PassManual -> new ShootingParameters(
                     passManualFlywheelRPM.get(),
                     Units.degreesToRadians(passManualAngleDegrees.get()),
                     headingRad
             );
-        }
 
-        return true;
+            // something went wrong
+            case ShootAndPassAutomatic -> new ShootingParameters(
+                    0.0,
+                    0.0,
+                    robotState.getRotation().getRadians()
+            );
+        };
     }
 
     private boolean isValidHoodAngle(double hoodAngleRad) {
         return hoodAngleRad > Units.degreesToRadians(15) && hoodAngleRad < Units.degreesToRadians(45);
     }
 
-    private boolean updateShootingParametersAutomatic() {
-        if (robotState.getPose().getX() > AllianceFlipUtil.applyX(FieldConstants.LinesVertical.hubCenter)) {
-
-
-            shootingParameters = new ShootingParameters(
+    private ShootingParameters getShootingParametersAutomatic() {
+        if (robotState.getPose().getX() > AllianceFlipUtil.applyX(FieldConstants.LinesVertical.neutralZoneNear)) {
+            return new ShootingParameters(
                     passManualFlywheelRPM.get(),
-                    Units.degreesToRadians(passManualHoodDegrees.get()),
-                    Math.PI);
-
-            // how does it know if we wanna give it a constant value 3.14 instead of 1 pi radian???
-            // face towards alliance zone
-            // return manual passing setpoint
+                    Units.degreesToRadians(passManualAngleDegrees.get()),
+                    AllianceFlipUtil.shouldFlip() ? Math.PI : 0.0
+            );
         }
 
         FuelExitToHub fuelExitToHub = getFuelExitToHub();
@@ -233,14 +232,13 @@ public class ShootingKinematics implements Periodic {
         //Logger.recordOutput("ShootingKinematics/Phi", phi);
         //Logger.recordOutput("ShootingKinematics/Theta", theta);
 
-        shootingParameters = new ShootingParameters(
+        return new ShootingParameters(
                 BuildConstants.mode == BuildConstants.Mode.SIM
                         ? Units.radiansPerSecondToRotationsPerMinute(v / FlywheelConstants.flywheelRadiusMeters)
                         : velocityToRPM.get(v),
                 phi,
                 theta
         );
-        return true;
     }
 
     private FuelExitToHub getFuelExitToHub() {

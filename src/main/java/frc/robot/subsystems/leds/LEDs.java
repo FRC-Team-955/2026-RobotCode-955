@@ -105,7 +105,7 @@ public class LEDs implements Periodic {
             } else if (autoManager.getClosestAutoStartingPose().isPresent() && operatorDashboard.autoChosen.get()) {
                 LEDPatterns.autoPlacementProgress(autoManager::getPlacementProgress).applyTo(buffer);
             } else {
-            LEDPatterns.autoReady.applyTo(buffer);
+                LEDPatterns.autoReady.applyTo(buffer);
             }
         } else if (DriverStation.isEnabled()) {
             boolean endgame = DriverStation.isTeleop() &&
@@ -123,8 +123,7 @@ public class LEDs implements Periodic {
 
                 LEDPattern superstructurePattern = switch (superstructure.getGoal()) {
                     case IDLE -> null;
-                    case SHOOT -> shootingKinematics.isValidShootingParameters() &&
-                            shootingKinematics.isShootingParametersMet()
+                    case SHOOT -> shootingKinematics.isShootingParametersMet()
                             ? LEDPatterns.shooting
                             : LEDPatterns.aiming;
                     case EJECT -> LEDPatterns.eject;
