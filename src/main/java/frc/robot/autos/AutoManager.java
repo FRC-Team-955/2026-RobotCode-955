@@ -38,7 +38,7 @@ public class AutoManager {
         autoChooser.addOption("LeftSideAuto", LeftSideAuto.build());
         autoChooser.addOption("RightSideAuto", RightSideAuto.build());
         autoChooser.addOption("DepotAuto", DepotAuto.build());
-        autoChooser.addOption("BigYahuAuto", BigYahuAuto.build());
+        autoChooser.addOption("PlanetaryAuto", PlanetaryAuto.build());
     }
 
     public Command getSelectedAuto() {
