@@ -30,7 +30,7 @@ public class ShootingKinematics implements Periodic {
 
     private static final LoggedTunableNumber phaseDelay = new LoggedTunableNumber("ShootingKinematics/PhaseDelay", 0.03);
     private static final LoggedTunableNumber robotVelocityScalar = new LoggedTunableNumber("ShootingKinematics/RobotVelocityScalar (DEBUG ONLY)", 1);
-    private static final LoggedTunableNumber headingToleranceDeg = new LoggedTunableNumber("ShootingKinematics/HeadingToleranceDegrees", 5.0);
+    private static final LoggedTunableNumber yDistToleranceInches = new LoggedTunableNumber("ShootingKinematics/YDistToleranceInches", 3.0);
     public static final LoggedTunableNumber velocityToleranceRPM = new LoggedTunableNumber("ShootingKinematics/VelocityToleranceRPM", 100);
     public static final LoggedTunableNumber hoodToleranceDeg = new LoggedTunableNumber("ShootingKinematics/HoodToleranceDegrees", 3.0);
 
@@ -118,8 +118,8 @@ public class ShootingKinematics implements Periodic {
         boolean shiftMet = operatorDashboard.disableShiftTracking.get() || hubShiftTracker.getShiftInfo().active();
         Logger.recordOutput("ShootingKinematics/ShiftMet", shiftMet);
 
-        boolean headingMet = operatorDashboard.manualAiming.get() || Math.abs(robotState.getPose().getRotation().getRadians() - shootingParameters.headingRad()) <= Units.degreesToRadians(headingToleranceDeg.get());
-        Logger.recordOutput("ShootingKinematics/HeadingMet", headingMet);
+        boolean yDistMet = Math.abs(getFuelExitToHub().transform.getY()) <= yDistToleranceInches.get();
+        Logger.recordOutput("ShootingKinematics/YDistMet", yDistMet);
 
         boolean velocityMet = Math.abs(flywheel.getVelocityRPM() - shootingParameters.velocityRPM()) <= velocityToleranceRPM.get();
         Logger.recordOutput("ShootingKinematics/VelocityMet", velocityMet);
@@ -127,7 +127,7 @@ public class ShootingKinematics implements Periodic {
         boolean angleMet = Math.abs(hood.getShotAngleRad() - shootingParameters.angleRad()) <= Units.degreesToRadians(hoodToleranceDeg.get());
         Logger.recordOutput("ShootingKinematics/AngleMet", angleMet);
 
-        shootingParametersMet = shiftMet && headingMet && velocityMet && angleMet;
+        shootingParametersMet = shiftMet && yDistMet && velocityMet && angleMet;
     }
 
     private static final LoggedTunableNumber shootHubManualFlywheelRPM = new LoggedTunableNumber("ShootingKinematics/ShootHubManual/FlywheelRPM", 2000.0);
