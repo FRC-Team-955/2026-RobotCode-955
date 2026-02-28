@@ -104,7 +104,7 @@ public class ShootingKinematics implements Periodic {
                 : updateShootingParametersManual();
         shootingParameters = new ShootingParameters(
                 shootingParameters.velocityRPM() + operatorDashboard.flywheelSmudgeRPM.get(),
-                shootingParameters.hoodAngleRad() + operatorDashboard.hoodSmudgeDegrees.get(),
+                shootingParameters.angleRad() + operatorDashboard.hoodSmudgeDegrees.get(),
                 shootingParameters.headingRad
         );
         Logger.recordOutput("ShootingKinematics/ShootingParameters", shootingParameters);
@@ -117,7 +117,7 @@ public class ShootingKinematics implements Periodic {
         shootingParametersMet = validShootingParameters &&
                 (operatorDashboard.manualAiming.get() || Math.abs(robotState.getPose().getRotation().getRadians() - shootingParameters.headingRad()) <= Units.degreesToRadians(headingToleranceDeg.get())) &&
                 Math.abs(flywheel.getVelocityRPM() - shootingParameters.velocityRPM()) <= velocityToleranceRPM.get() &&
-                Math.abs(hood.getPositionRad() - shootingParameters.hoodAngleRad()) <= Units.degreesToRadians(hoodToleranceDeg.get()) &&
+                Math.abs(hood.getShotAngleRad() - shootingParameters.angleRad()) <= Units.degreesToRadians(hoodToleranceDeg.get()) &&
                 (operatorDashboard.disableShiftTracking.get() || hubShiftTracker.getShiftInfo().active());
         Logger.recordOutput("ShootingKinematics/ShootingParametersMet", shootingParametersMet);
     }
@@ -177,7 +177,6 @@ public class ShootingKinematics implements Periodic {
 
         FuelExitToHub fuelExitToHub = getFuelExitToHub();
 
-
         double xyDist = fuelExitToHub.transform().getTranslation().toTranslation2d().getNorm();
         // Logger.recordOutput("ShootingKinematics/XYDist", xyDist);
 
@@ -193,10 +192,10 @@ public class ShootingKinematics implements Periodic {
         //Logger.recordOutput("ShootingKinematics/RobotSpeedsRotated", robotSpeedsFuelExitRelative);
 
         double v0 = ShootingRegression.calculateVelocityMetersPerSec(xyDist, robotSpeedsFuelExitRelative.getX());
-        double angle = ShootingRegression.calculateHoodAngleRad(xyDist, robotSpeedsFuelExitRelative.getX());
+        double angle = ShootingRegression.calculateAngleRad(xyDist, robotSpeedsFuelExitRelative.getX());
 
-        double vx2d = v0 * Math.sin(angle);
-        double vz = v0 * Math.cos(angle);
+        double vx2d = v0 * Math.cos(angle);
+        double vz = v0 * Math.sin(angle);
 
         // Logger.recordOutput("ShootingKinematics/ShotSpeedTargetFieldRelative", v0);
         Translation2d robotShotFieldRelative = new Translation2d(vx2d, fuelExitToHub.angle());
@@ -228,11 +227,11 @@ public class ShootingKinematics implements Periodic {
 
         // 4. Now calculate phi, theta, and shooting magnitude from 3d shooting vector
         double v = Math.sqrt(vx * vx + vy * vy + vz * vz);
-        double phi = Math.PI / 2 - Math.asin(vz / v);
+        double phi = Math.asin(vz / v);
         double theta = Math.atan2(vy, vx);
-//        Logger.recordOutput("ShootingKinematics/Velocity", v);
-//        Logger.recordOutput("ShootingKinematics/Phi", phi);
-//        Logger.recordOutput("ShootingKinematics/Theta", theta);
+        //Logger.recordOutput("ShootingKinematics/Velocity", v);
+        //Logger.recordOutput("ShootingKinematics/Phi", phi);
+        //Logger.recordOutput("ShootingKinematics/Theta", theta);
 
         shootingParameters = new ShootingParameters(
                 BuildConstants.mode == BuildConstants.Mode.SIM
@@ -284,10 +283,10 @@ public class ShootingKinematics implements Periodic {
         FuelExitToHub fuelExitToHub = getFuelExitToHub();
 
         // CW positive for hubRelative, so need to negate into CCW positive
-        return - hubRelative.getY() / fuelExitToHub.transform.getTranslation().toTranslation2d().getNorm();
+        return -hubRelative.getY() / fuelExitToHub.transform.getTranslation().toTranslation2d().getNorm();
     }
 
     private record FuelExitToHub(Transform3d transform, Rotation2d angle) {}
 
-    public record ShootingParameters(double velocityRPM, double hoodAngleRad, double headingRad) {}
+    public record ShootingParameters(double velocityRPM, double angleRad, double headingRad) {}
 }
