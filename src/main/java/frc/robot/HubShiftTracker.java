@@ -25,8 +25,10 @@ package frc.robot;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.Util;
 import frc.lib.subsystem.Periodic;
+import frc.robot.controller.Controller;
 import lombok.Getter;
 import org.littletonrobotics.junction.Logger;
 
@@ -35,6 +37,7 @@ import org.littletonrobotics.junction.Logger;
  */
 public class HubShiftTracker implements Periodic {
     private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
+    private static final Controller controller = Controller.get();
 
     public enum ShiftEnum {
         TRANSITION,
@@ -68,6 +71,7 @@ public class HubShiftTracker implements Periodic {
 
     @Getter
     private ShiftInfo shiftInfo = getShiftedShiftInfo();
+    private ShiftEnum lastShift = null;
 
     private static HubShiftTracker instance;
 
@@ -83,6 +87,9 @@ public class HubShiftTracker implements Periodic {
         if (instance != null) {
             Util.error("Duplicate HubShiftTracker created");
         }
+
+        new Trigger(() -> lastShift != shiftInfo.currentShift())
+                .onTrue(controller.rumble(0.5, 2.0));
     }
 
     @Override
@@ -96,6 +103,7 @@ public class HubShiftTracker implements Periodic {
             shiftTimer.reset();
         }
 
+        lastShift = shiftInfo.currentShift();
         shiftInfo = getShiftedShiftInfo();
         Logger.recordOutput("HubShiftTracker/ShiftInfo", shiftInfo);
     }

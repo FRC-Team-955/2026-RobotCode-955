@@ -54,9 +54,6 @@ public class RobotContainer {
         addCharacterizations();
         setDefaultCommands();
         configureBindings();
-
-        new Trigger(() -> DriverStation.isTeleopEnabled() && DriverStation.getMatchTime() > 0 && DriverStation.getMatchTime() < 30)
-                .onTrue(controller.rumble(0.5, 2.0));
     }
 
 
