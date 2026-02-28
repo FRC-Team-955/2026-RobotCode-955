@@ -403,35 +403,43 @@ else:
 
         print(X, y_vel, y_angle)
 
-        def f(X, i0, i1, i2, i3, i4, i5, i6):  # i7, i8, i9):
+        def f(X, i0, i1, i2, i3, i4, i5):  # , i6, i7, i8, i9):
+            x = X[0]
+            y = X[1]
             return (
                     i0 +
-                    i1 * X[0] +
-                    i2 * X[1] +
-                    i3 * X[0] * X[1] +
-                    i4 * X[0] ** 2 +
-                    i5 * X[1] ** 2 +
-                    i6 * X[0] ** 2 * X[1] ** 2  # +
-                # i7 * X[0] ** 3 +
-                # i8 * X[1] ** 3 +
-                # i9 * X[0] ** 3 * X[1] ** 3
+                    + i1 * x
+                    + i2 * y
+                    + i3 * x * y
+                    + i4 * x * x
+                    + i5 * y * y
+                # + i6 * x * x * y * y
+                # + i7 * x * x * x
+                # + i8 * y * y * y
+                # + i9 * x * x * x * y * y * y
             )
 
-        vel_coeff, vel_cov = curve_fit(f, X, y_vel)
-        vel_equation = (
-            f"{vel_coeff[0]}"
-            f" + {vel_coeff[1]} * x"
-            f" + {vel_coeff[2]} * y"
-            f" + {vel_coeff[3]} * x * y"
-            f" + {vel_coeff[4]} * x * x"
-            f" + {vel_coeff[5]} * y * y"
-            f" + {vel_coeff[6]} * x * x * y * y"
-            # f" + {vel_coeff[7]} * x * x * x"
-            # f" + {vel_coeff[8]} * y * y * y"
-            # f" + {vel_coeff[9]} * x * x * x * y * y * y"
-        )
-        print(f"vel: {vel_equation}")
-        print(vel_cov)
+        def make_regression(X, y):
+            coeff, cov = curve_fit(f, X, y)
+            equation = (
+                f"{coeff[0]}"
+                f" + {coeff[1]} * x"
+                f" + {coeff[2]} * y"
+                f" + {coeff[3]} * x * y"
+                f" + {coeff[4]} * x * x"
+                f" + {coeff[5]} * y * y"
+                # f" + {coeff[6]} * x * x * y * y"
+                # f" + {coeff[7]} * x * x * x"
+                # f" + {coeff[8]} * y * y * y"
+                # f" + {coeff[9]} * x * x * x * y * y * y"
+            )
+            print(cov)
+            print(equation)
+            return coeff, equation
+
+        print()
+        print("vel")
+        vel_coeff, vel_equation = make_regression(X, y_vel)
 
         X_reg = np.meshgrid(np.linspace(0, 10, 50), np.linspace(-6, 6, 50))
         ax.plot_surface(
@@ -442,21 +450,9 @@ else:
         )
         ax.scatter(X[0], X[1], y_vel, label="Velocity data", c="g")
 
-        angle_coeff, angle_cov = curve_fit(f, X, y_angle)
-        angle_equation = (
-            f"{angle_coeff[0]}"
-            f" + {angle_coeff[1]} * x"
-            f" + {angle_coeff[2]} * y"
-            f" + {angle_coeff[3]} * x * y"
-            f" + {angle_coeff[4]} * x * x"
-            f" + {angle_coeff[5]} * y * y"
-            f" + {angle_coeff[6]} * x * x * y * y"
-            # f" + {angle_coeff[7]} * x * x * x"
-            # f" + {angle_coeff[8]} * y * y * y"
-            # f" + {angle_coeff[9]} * x * x * x * y * y * y"
-        )
-        print(f"angle: {angle_equation}")
-        print(angle_cov)
+        print()
+        print("angle")
+        angle_coeff, angle_equation = make_regression(X, y_angle)
 
         ax.plot_surface(
             X_reg[0],
