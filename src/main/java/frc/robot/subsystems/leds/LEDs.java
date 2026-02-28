@@ -7,8 +7,8 @@ import frc.lib.Util;
 import frc.lib.subsystem.Periodic;
 import frc.robot.Constants;
 import frc.robot.OperatorDashboard;
-import frc.robot.shooting.ShootingKinematics;
 import frc.robot.autos.AutoManager;
+import frc.robot.shooting.ShootingKinematics;
 import frc.robot.subsystems.apriltagvision.AprilTagVision;
 import frc.robot.subsystems.gamepiecevision.GamePieceVision;
 import frc.robot.subsystems.superintake.Superintake;
@@ -100,13 +100,13 @@ public class LEDs implements Periodic {
         } else if (cameraError) {
             LEDPatterns.visionDisconnected.applyTo(buffer);
         } else if (DriverStation.isDisabled()) {
-            if (autoManager.isAtAutoStartingPose()) {
-                LEDPatterns.autoReady.applyTo(buffer);
-            } else if (autoManager.getClosestAutoStartingPose().isPresent()) {
-                LEDPatterns.autoPlacementProgress(autoManager::getPlacementProgress).applyTo(buffer);
-            } else {
-                LEDPatterns.autoReady.applyTo(buffer);
-            }
+            //if (autoManager.isAtAutoStartingPose()) {
+            //    LEDPatterns.autoReady.applyTo(buffer);
+            //} else if (autoManager.getClosestAutoStartingPose().isPresent()) {
+            //    LEDPatterns.autoPlacementProgress(autoManager::getPlacementProgress).applyTo(buffer);
+            //} else {
+            LEDPatterns.autoReady.applyTo(buffer);
+            //}
         } else if (DriverStation.isEnabled()) {
             boolean endgame = DriverStation.isTeleop() &&
                     DriverStation.getMatchTime() > endgameLowerThresholdSeconds &&
@@ -149,14 +149,14 @@ public class LEDs implements Periodic {
         // Update mechanism
         for (int i = 0; i < buffer.getLength(); i++) {
             // https://github.com/FRC-Team-955/2024-RobotCode-749/blob/kotlin-old/src/main/java/frc/robot/subsystems/leds/LEDs.kt#L88
-//            System.out.print("\u001b[38;2;" + buffer.getRed(i) + ";" + buffer.getGreen(i) + ";" + buffer.getBlue(i) + "m■\u001b[0m");
+            //            System.out.print("\u001b[38;2;" + buffer.getRed(i) + ";" + buffer.getGreen(i) + ";" + buffer.getBlue(i) + "m■\u001b[0m");
             ligaments[i].setColor(new Color8Bit(
                     buffer.getRed(i),
                     buffer.getGreen(i),
                     buffer.getBlue(i)
             ));
         }
-//        System.out.println();
+        //        System.out.println();
         Logger.recordOutput("LEDs/Mechanism", mechanism);
     }
 }
