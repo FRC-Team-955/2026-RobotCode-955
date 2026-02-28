@@ -126,7 +126,11 @@ public class LEDs implements Periodic {
                     case IDLE -> null;
                     case SHOOT -> shootingKinematics.isShootingParametersMet()
                             ? LEDPatterns.shooting
-                            : LEDPatterns.aiming;
+                            : (
+                            shootingKinematics.isShiftMet()
+                                    ? LEDPatterns.aiming
+                                    : LEDPatterns.waitingForShift
+                    );
                     case EJECT -> LEDPatterns.eject;
                     case HOME_HOOD -> LEDPatterns.homing;
                 };

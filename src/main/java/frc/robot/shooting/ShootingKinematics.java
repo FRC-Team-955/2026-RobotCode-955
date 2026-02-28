@@ -7,7 +7,6 @@ import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.Alert;
 import frc.lib.AllianceFlipUtil;
 import frc.lib.Util;
 import frc.lib.network.LoggedTunableNumber;
@@ -77,8 +76,8 @@ public class ShootingKinematics implements Periodic {
     private ShootingParameters shootingParameters = new ShootingParameters(0, 0, 0, OptionalDouble.empty(), false);
     @Getter
     private boolean shootingParametersMet = false;
-
-    private final Alert noValidShootingParametersAlert = new Alert("Could not find valid shooting parameters.", Alert.AlertType.kInfo);
+    @Getter
+    private boolean shiftMet = false;
 
     private static ShootingKinematics instance;
 
@@ -121,7 +120,7 @@ public class ShootingKinematics implements Periodic {
         Logger.recordOutput("ShootingKinematics/ShootingParameters/AngleRad", shootingParameters.angleRad());
         Logger.recordOutput("ShootingKinematics/ShootingParameters/AngleRadMeasured", hood.getShotAngleRad());
 
-        boolean shiftMet = shootingParameters.isPass() || operatorDashboard.disableShiftTracking.get() || hubShiftTracker.getShiftInfo().active();
+        shiftMet = shootingParameters.isPass() || operatorDashboard.disableShiftTracking.get() || hubShiftTracker.getShiftInfo().active();
         Logger.recordOutput("ShootingKinematics/ShiftMet", shiftMet);
 
         boolean yDistMet = Math.abs(getFuelExitToHub().transform.getY()) <= yDistToleranceInches.get();
