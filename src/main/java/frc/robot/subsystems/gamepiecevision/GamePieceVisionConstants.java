@@ -57,10 +57,10 @@ public class GamePieceVisionConstants {
         GPVCam(
 
                 new Transform3d(
-                        Units.inchesToMeters(3.770), Units.inchesToMeters(-12.406), Units.inchesToMeters(20.485),
+                        Units.inchesToMeters(14.367598), Units.inchesToMeters(11.517161), Units.inchesToMeters(17.924370),
                         // Rotation order matters
-                        new Rotation3d(0.0, Units.degreesToRadians(6.963), 0.0)
-                                .rotateBy(new Rotation3d(0.0, 0.0, Units.degreesToRadians(10.0)))
+                        new Rotation3d(0.0, Units.degreesToRadians(10.0), 0.0)
+                                .rotateBy(new Rotation3d(0.0, 0.0, Units.degreesToRadians(0.0)))
                 ),
                 (cam) -> switch (BuildConstants.mode) {
                     case REAL -> new GamePieceVisionIOPhotonVision("GPVCam");
