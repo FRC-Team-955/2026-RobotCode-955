@@ -22,25 +22,7 @@ import lombok.RequiredArgsConstructor;
 import java.util.function.Function;
 
 public class GamePieceVisionConstants {
-    // AprilTag layout
-
-    // Basic filtering thresholds
-    static final double maxAmbiguity = 0.3;
-    static final double maxZError = 0.2;
-
-    // Standard deviation baselines, for 1 meter distance and 1 tag
-    // (Adjusted automatically based on distance and # of tags)
-    static final double linearStdDevBaselineTrigMeters = 0.1;
-    static final double angularStdDevBaselineTrigRad = Units.degreesToRadians(30);
-    static final double linearStdDevBaseline3dSolveMeters = 0.3;
-    static final double angularStdDevBaseline3dSolveRad = Units.degreesToRadians(60);
-
-    // Distance from a tag for trig estimation to be used
-    static final double distanceFromTagForTrigMeters = 1.5;
-    // Max difference between 3d solve and trig for trig to be used
-    static final double trig3dSolveMaxDiffMeters = 0.2;
-    static final double trig3dSolveMaxDiffRad = 0.15;
-    static final double horizontalFOVRad = Math.toRadians(170.0);
+    static final double horizontalFOVRad = Math.toRadians(160.0);
     static final double camWidth = 640;
     static final double focalLengthPixels = camWidth / (2.0 * Math.tan(horizontalFOVRad / 2.0));
     static final double clusterGroupingDistanceMeters = 0.3;
@@ -49,13 +31,9 @@ public class GamePieceVisionConstants {
     static final double minDistanceForSameCoralMeters = 1;
     static final double expireTimeSeconds = 0.5;
 
-    static final double coralHeightMeters = Units.inchesToMeters(4.25);
-
-
     @RequiredArgsConstructor
     enum Camera {
-        GPVCam(
-
+        IntakeCam(
                 new Transform3d(
                         Units.inchesToMeters(15.902293), Units.inchesToMeters(11.595038), Units.inchesToMeters(16.533898),
                         // Rotation order matters
@@ -63,8 +41,8 @@ public class GamePieceVisionConstants {
                                 .rotateBy(new Rotation3d(0.0, 0.0, Units.degreesToRadians(0.0)))
                 ),
                 (cam) -> switch (BuildConstants.mode) {
-                    case REAL -> new GamePieceVisionIOPhotonVision("GPVCam");
-                    case SIM -> new GamePieceVisionIOPhotonVisionSim("GPVCam", cam.robotToCamera);
+                    case REAL -> new GamePieceVisionIOPhotonVision("IntakeCam");
+                    case SIM -> new GamePieceVisionIOPhotonVisionSim("IntakeCam", cam.robotToCamera);
                     case REPLAY -> new GamePieceVisionIO();
                 }
                 // Relatively stable, even at long dist
