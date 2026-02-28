@@ -125,7 +125,7 @@ public class ShootingKinematics implements Periodic {
     private static final LoggedTunableNumber shootTowerManualFlywheelRPM = new LoggedTunableNumber("ShootingKinematics/ShootTowerManual/FlywheelRPM", 5.0);
     private static final LoggedTunableNumber shootTowerManualHoodDegrees = new LoggedTunableNumber("ShootingKinematics/ShootTowerManual/HoodDegrees", 45.0);
 
-    private static final LoggedTunableNumber passManualFlywheelRPM = new LoggedTunableNumber("ShootingKinematics/PassManual/FlywheelRPM", 5.0);
+    private static final LoggedTunableNumber passManualFlywheelRPM = new LoggedTunableNumber("ShootingKinematics/PassManual/FlywheelRPM", 2000.0);
     private static final LoggedTunableNumber passManualHoodDegrees = new LoggedTunableNumber("ShootingKinematics/PassManual/HoodDegrees", 45.0);
 
     private boolean updateShootingParametersManual() {
@@ -205,17 +205,17 @@ public class ShootingKinematics implements Periodic {
         vy -= linearVelocityDueToAngularVelocity.get(1);
 
         // 5. Log final shooting vector
-//        Logger.recordOutput("ShootingKinematics/Velocity/X", vx);
-//        Logger.recordOutput("ShootingKinematics/Velocity/Y", vy);
-//        Logger.recordOutput("ShootingKinematics/Velocity/Z", vz);
+        //        Logger.recordOutput("ShootingKinematics/Velocity/X", vx);
+        //        Logger.recordOutput("ShootingKinematics/Velocity/Y", vy);
+        //        Logger.recordOutput("ShootingKinematics/Velocity/Z", vz);
 
         // 6. Now calculate phi, theta, and shooting magnitude from 3d shooting vector
         double v = Math.sqrt(vx * vx + vy * vy + vz * vz);
         double phi = Math.asin(vz / v);
         double theta = Math.atan2(vy, vx);
-//        Logger.recordOutput("ShootingKinematics/Velocity", v);
-//        Logger.recordOutput("ShootingKinematics/Phi", phi);
-//        Logger.recordOutput("ShootingKinematics/Theta", theta);
+        //        Logger.recordOutput("ShootingKinematics/Velocity", v);
+        //        Logger.recordOutput("ShootingKinematics/Phi", phi);
+        //        Logger.recordOutput("ShootingKinematics/Theta", theta);
 
         shootingParameters = new ShootingParameters(
                 BuildConstants.mode == BuildConstants.Mode.SIM
@@ -257,7 +257,7 @@ public class ShootingKinematics implements Periodic {
 
     public double rotationAboutHubRadiansPerSec(Translation2d fieldRelativeMetersPerSec) {
         Translation2d fuelExitToHubPerp = getFuelExitToHub().transform.getTranslation().toTranslation2d()
-                .rotateBy(new Rotation2d(- Math.PI / 2));
+                .rotateBy(new Rotation2d(-Math.PI / 2));
 
         // Dot product projection of the robot velocity onto the perpendicular direction to the hub
         double tangentialVelocity = fuelExitToHubPerp.dot(fieldRelativeMetersPerSec) / fuelExitToHubPerp.getNorm();
