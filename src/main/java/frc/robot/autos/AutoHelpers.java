@@ -23,8 +23,8 @@ import java.util.function.Supplier;
 import static frc.robot.subsystems.drive.DriveConstants.*;
 
 public class AutoHelpers {
-    private static final double intermediateLinearTolerance = 0.1;
-    private static final double intermediateAngularTolerance = Units.degreesToRadians(20);
+    private static final double intermediateLinearTolerance = 0.3;
+    private static final double intermediateAngularTolerance = Units.degreesToRadians(45);
 
     private static final RobotState robotState = RobotState.get();
     private static final ShootingKinematics shootingKinematics = ShootingKinematics.get();
