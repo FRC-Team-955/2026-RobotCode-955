@@ -24,6 +24,9 @@ package frc.lib;
 
 import edu.wpi.first.math.geometry.Translation2d;
 
+/**
+ * https://github.com/Mechanical-Advantage/RobotCode2026Public/blob/main/src/main/java/org/littletonrobotics/frc2026/util/geometry/Bounds.java
+ */
 public record Bounds(double minX, double maxX, double minY, double maxY) {
     /** Whether the translation is contained within the bounds. */
     public boolean contains(Translation2d translation) {
