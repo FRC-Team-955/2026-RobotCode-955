@@ -71,7 +71,7 @@ public class RobotContainer {
     }
 
     private void setDefaultCommands() {
-        drive.setDefaultCommand(drive.driveJoystick(DriveJoystickGoal.Mode.Normal));
+        drive.setDefaultCommand(drive.driveJoystick(() -> DriveJoystickGoal.Mode.Normal));
         superintake.setDefaultCommand(superintake.setGoal(Superintake.Goal.IDLE).ignoringDisable(true));
         superstructure.setDefaultCommand(superstructure.setGoal(Superstructure.Goal.IDLE).ignoringDisable(true));
     }
@@ -85,33 +85,34 @@ public class RobotContainer {
     private void configureBindings() {
         controller.y().onTrue(robotState.resetRotation());
 
-        var shouldAutoAim = new Trigger(() -> operatorDashboard.getSelectedScoringMode() == OperatorDashboard.ScoringMode.ShootAndPassAutomatic || !operatorDashboard.manualAiming.get());
         controller.leftTrigger()
                 .and(controller.rightTrigger().negate())
-                .and(shouldAutoAim)
                 .whileTrue(Commands.parallel(
-                        drive.driveJoystick(DriveJoystickGoal.Mode.Aim),
-                        superstructure.setGoal(Superstructure.Goal.SHOOT)
-                ));
-        controller.leftTrigger()
-                .and(controller.rightTrigger().negate())
-                .and(shouldAutoAim.negate())
-                .whileTrue(Commands.parallel(
-                        drive.driveJoystick(DriveJoystickGoal.Mode.StopWithX),
+                        drive.driveJoystick(() -> operatorDashboard.manualAiming.get() ? DriveJoystickGoal.Mode.StopWithX : DriveJoystickGoal.Mode.Aim),
                         superstructure.setGoal(Superstructure.Goal.SHOOT)
                 ));
 
         controller.rightTrigger()
                 .and(controller.leftTrigger().negate())
                 .whileTrue(Commands.parallel(
-                        drive.driveJoystick(DriveJoystickGoal.Mode.Assist),
+                        drive.driveJoystick(() -> operatorDashboard.disableAssist.get() ? DriveJoystickGoal.Mode.Normal : DriveJoystickGoal.Mode.Assist),
                         superintake.setGoal(Superintake.Goal.INTAKE)
                 ));
 
         controller.leftTrigger()
                 .and(controller.rightTrigger())
                 .whileTrue(Commands.parallel(
-                        drive.driveJoystick(DriveJoystickGoal.Mode.AimAndAssist),
+                        drive.driveJoystick(() -> {
+                            if (operatorDashboard.manualAiming.get() && operatorDashboard.disableAssist.get()) {
+                                return DriveJoystickGoal.Mode.StopWithX;
+                            } else if (operatorDashboard.manualAiming.get()) {
+                                return DriveJoystickGoal.Mode.Assist;
+                            } else if (operatorDashboard.disableAssist.get()) {
+                                return DriveJoystickGoal.Mode.Aim;
+                            } else {
+                                return DriveJoystickGoal.Mode.AimAndAssist;
+                            }
+                        }),
                         superintake.setGoal(Superintake.Goal.INTAKE),
                         superstructure.setGoal(Superstructure.Goal.SHOOT)
                 ));

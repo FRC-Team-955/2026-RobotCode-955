@@ -356,7 +356,7 @@ public class Drive extends CommandBasedSubsystem {
         return startIdle(() -> goal = new MoveToGoal(poseSupplier, moveToConstraints));
     }
 
-    public Command driveJoystick(DriveJoystickGoal.Mode mode) {
+    public Command driveJoystick(Supplier<DriveJoystickGoal.Mode> mode) {
         return startIdle(() -> goal = new DriveJoystickGoal(mode));
     }
 

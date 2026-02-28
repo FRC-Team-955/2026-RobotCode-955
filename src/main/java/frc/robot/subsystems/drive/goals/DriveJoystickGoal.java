@@ -49,7 +49,7 @@ public class DriveJoystickGoal extends DriveGoal {
 
     private static final Supplier<Optional<Translation2d>> assistTranslationSupplier = () -> gamePieceVision.getBestTargets().stream().findFirst();
 
-    private final Mode mode;
+    private final Supplier<Mode> modeSupplier;
 
     private final PIDController headingOverride = headingOverrideGains
             .toPIDWrapRadians(
@@ -83,6 +83,8 @@ public class DriveJoystickGoal extends DriveGoal {
         }
 
         //////////////////////////////////////////////////////////////////////
+
+        Mode mode = modeSupplier.get();
 
         Rotation2d linearDirection = controller.getDriveLinearDirection();
         double linearMagnitude = controller.getDriveLinearMagnitude();
