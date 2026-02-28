@@ -132,10 +132,10 @@ public class DriveConstants {
             // to the absolute encoder offset parameter in the IO layer constructor.
             // Module order: FL, FR, BL, BR
             case REAL -> new ModuleIO[]{
-                    new ModuleIOTalonFXSparkMaxCANcoder(0, 2, 1, 9, -1.64),
-                    new ModuleIOTalonFXSparkMaxCANcoder(1, 4, 7, 10, -2.965),
-                    new ModuleIOTalonFXSparkMaxCANcoder(2, 6, 5, 11, -0.594),
-                    new ModuleIOTalonFXSparkMaxCANcoder(3, 8, 3, 12, 2.753),
+                    new ModuleIOTalonFXSparkMaxCANcoder(0, 2, 1, 9, -1.617),
+                    new ModuleIOTalonFXSparkMaxCANcoder(1, 4, 7, 10, -3.125),
+                    new ModuleIOTalonFXSparkMaxCANcoder(2, 6, 5, 11, -0.583),
+                    new ModuleIOTalonFXSparkMaxCANcoder(3, 8, 3, 12, 2.734),
             };
             case SIM -> new ModuleIO[]{
                     new ModuleIOSim(0),
