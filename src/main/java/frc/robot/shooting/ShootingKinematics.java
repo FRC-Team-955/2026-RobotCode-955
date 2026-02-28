@@ -19,6 +19,7 @@ import frc.robot.subsystems.superstructure.hood.Hood;
 import lombok.Getter;
 import org.littletonrobotics.junction.Logger;
 
+import java.util.OptionalDouble;
 import java.util.function.DoubleFunction;
 
 import static frc.robot.subsystems.drive.DriveConstants.driveConfig;
@@ -73,7 +74,7 @@ public class ShootingKinematics implements Periodic {
     private static final Hood hood = Hood.get();
 
     @Getter
-    private ShootingParameters shootingParameters = new ShootingParameters(0, 0, 0);
+    private ShootingParameters shootingParameters = new ShootingParameters(0, 0, 0, OptionalDouble.empty(), false);
     @Getter
     private boolean shootingParametersMet = false;
 
@@ -105,8 +106,13 @@ public class ShootingKinematics implements Periodic {
         shootingParameters = new ShootingParameters(
                 shootingParameters.velocityRPM() + operatorDashboard.flywheelSmudgeRPM.get(),
                 shootingParameters.angleRad() + operatorDashboard.hoodSmudgeDegrees.get(),
-                shootingParameters.headingRad
+                shootingParameters.headingRad(),
+                shootingParameters.timeOfFlightSeconds(),
+                shootingParameters.isPass()
         );
+
+        Logger.recordOutput("ShootingKinematics/ShootingParameters/TimeOfFlightSeconds", shootingParameters.timeOfFlightSeconds().orElse(-1.0));
+        Logger.recordOutput("ShootingKinematics/ShootingParameters/IsPass", shootingParameters.isPass());
 
         Logger.recordOutput("ShootingKinematics/ShootingParameters/HeadingRad", shootingParameters.headingRad());
         Logger.recordOutput("ShootingKinematics/ShootingParameters/HeadingRadMeasured", robotState.getPose().getRotation().getRadians());
@@ -115,7 +121,7 @@ public class ShootingKinematics implements Periodic {
         Logger.recordOutput("ShootingKinematics/ShootingParameters/AngleRad", shootingParameters.angleRad());
         Logger.recordOutput("ShootingKinematics/ShootingParameters/AngleRadMeasured", hood.getShotAngleRad());
 
-        boolean shiftMet = operatorDashboard.disableShiftTracking.get() || hubShiftTracker.getShiftInfo().active();
+        boolean shiftMet = shootingParameters.isPass() || operatorDashboard.disableShiftTracking.get() || hubShiftTracker.getShiftInfo().active();
         Logger.recordOutput("ShootingKinematics/ShiftMet", shiftMet);
 
         boolean yDistMet = Math.abs(getFuelExitToHub().transform.getY()) <= yDistToleranceInches.get();
@@ -145,24 +151,32 @@ public class ShootingKinematics implements Periodic {
             case ShootHubManual -> new ShootingParameters(
                     shootHubManualFlywheelRPM.get(),
                     Units.degreesToRadians(shootHubManualAngleDegrees.get()),
-                    headingRad
+                    headingRad,
+                    OptionalDouble.empty(),
+                    false
             );
             case ShootTowerManual -> new ShootingParameters(
                     shootTowerManualFlywheelRPM.get(),
                     Units.degreesToRadians(shootTowerManualAngleDegrees.get()),
-                    headingRad
+                    headingRad,
+                    OptionalDouble.empty(),
+                    false
             );
             case PassManual -> new ShootingParameters(
                     passManualFlywheelRPM.get(),
                     Units.degreesToRadians(passManualAngleDegrees.get()),
-                    headingRad
+                    headingRad,
+                    OptionalDouble.empty(),
+                    true
             );
 
             // something went wrong
             case ShootAndPassAutomatic -> new ShootingParameters(
                     0.0,
                     0.0,
-                    robotState.getRotation().getRadians()
+                    robotState.getRotation().getRadians(),
+                    OptionalDouble.empty(),
+                    false
             );
         };
     }
@@ -172,7 +186,9 @@ public class ShootingKinematics implements Periodic {
             return new ShootingParameters(
                     passManualFlywheelRPM.get(),
                     Units.degreesToRadians(passManualAngleDegrees.get()),
-                    AllianceFlipUtil.shouldFlip() ? Math.PI : 0.0
+                    AllianceFlipUtil.shouldFlip() ? Math.PI : 0.0,
+                    OptionalDouble.empty(),
+                    true
             );
         }
 
@@ -194,6 +210,7 @@ public class ShootingKinematics implements Periodic {
 
         double v0 = ShootingRegression.calculateVelocityMetersPerSec(xyDist, robotSpeedsFuelExitRelative.getX());
         double angle = ShootingRegression.calculateAngleRad(xyDist, robotSpeedsFuelExitRelative.getX());
+        double toF = ShootingRegression.calculateToFSeconds(xyDist, robotSpeedsFuelExitRelative.getX());
 
         double vx2d = v0 * Math.cos(angle);
         double vz = v0 * Math.sin(angle);
@@ -239,7 +256,9 @@ public class ShootingKinematics implements Periodic {
                         ? Units.radiansPerSecondToRotationsPerMinute(v / FlywheelConstants.flywheelRadiusMeters)
                         : velocityToRPM.get(v),
                 phi,
-                theta
+                theta,
+                OptionalDouble.of(toF),
+                false
         );
     }
 
@@ -288,5 +307,11 @@ public class ShootingKinematics implements Periodic {
 
     private record FuelExitToHub(Transform3d transform, Rotation2d angle) {}
 
-    public record ShootingParameters(double velocityRPM, double angleRad, double headingRad) {}
+    public record ShootingParameters(
+            double velocityRPM,
+            double angleRad,
+            double headingRad,
+            OptionalDouble timeOfFlightSeconds,
+            boolean isPass
+    ) {}
 }
