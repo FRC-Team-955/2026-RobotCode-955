@@ -4,8 +4,8 @@ import com.ctre.phoenix6.signals.MeasurementHealthValue;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Timer;
-import frc.robot.shooting.ShootingKinematics;
 import frc.robot.SimManager;
+import frc.robot.shooting.ShootingKinematics;
 import frc.robot.subsystems.superintake.intakepivot.IntakePivot;
 import frc.robot.subsystems.superintake.intakerollers.IntakeRollers;
 import frc.robot.subsystems.superstructure.feeder.Feeder;
@@ -20,7 +20,7 @@ import org.littletonrobotics.junction.Logger;
 import static edu.wpi.first.units.Units.*;
 
 public class SuperstructureIOSim extends SuperstructureIO {
-    private static final double shootingBallsPerSec = 4.0;
+    private static final double shootingBallsPerSec = 6.0;
     private static final double ballShootDelay = 1.0 / shootingBallsPerSec;
 
     private static final IntakePivot intakePivot = IntakePivot.get();
