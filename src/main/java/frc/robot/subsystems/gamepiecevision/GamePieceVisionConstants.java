@@ -42,9 +42,10 @@ public class GamePieceVisionConstants {
     static final double trig3dSolveMaxDiffRad = 0.15;
     static final double horizontalFOVRad = Math.toRadians(70.0);
     static final double camWidth = 640;
+    static final double focalLengthPixels = camWidth / (2.0 * Math.tan(horizontalFOVRad / 2.0));
+    static final double clusterGroupingDistanceMeters = 0.3;
     static final double diagFOVRad = 2 * Math.atan(Math.tan(horizontalFOVRad / 2) * Math.sqrt(1 + Math.pow(0.75, 2)));
     static final double pixelsToRad = camWidth / horizontalFOVRad;
-    public static final double fuelDiameterMeters = 0.15;
     static final double minDistanceForSameCoralMeters = 1;
     static final double expireTimeSeconds = 0.5;
 

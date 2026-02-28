@@ -38,15 +38,11 @@ public class GamePieceVisionIOPhotonVision extends GamePieceVisionIO {
 
         for (var result : camera.getAllUnreadResults()) {
             for (var target : result.getTargets()) {
-                var corners = target.getDetectedCorners();
-                double minX = corners.stream().mapToDouble(c -> c.x).min().getAsDouble();
-                double maxX = corners.stream().mapToDouble(c -> c.x).max().getAsDouble();
-                double pixelWidth = maxX - minX;
+
                 targetObservations.add(new TargetObservation(
                         result.getTimestampSeconds(),
                         Rotation2d.fromDegrees(target.getYaw()).getRadians(),
-                        Rotation2d.fromDegrees(target.getPitch()).getRadians(),
-                        pixelWidth
+                        Rotation2d.fromDegrees(target.getPitch()).getRadians()
 
 
                 ));

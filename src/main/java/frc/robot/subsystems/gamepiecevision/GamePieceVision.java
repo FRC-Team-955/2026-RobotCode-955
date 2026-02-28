@@ -5,6 +5,7 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Timer;
 import frc.lib.Util;
 import frc.lib.subsystem.Periodic;
+import frc.robot.FieldConstants;
 import frc.robot.RobotState;
 import lombok.Getter;
 import org.littletonrobotics.junction.Logger;
@@ -62,6 +63,7 @@ public class GamePieceVision implements Periodic {
             Camera metadata = cam.getKey();
             CameraData data = cam.getValue();
 
+
             // Process observations
             for (var observation : data.inputs.targetObservations) {
                 var robotPose2d = robotState.getPoseAtTimestamp(observation.timestampSeconds());
@@ -69,73 +71,38 @@ public class GamePieceVision implements Periodic {
                     continue;
                 }
                 var robotPose = new Pose3d(robotPose2d.get());
-                Translation2d targetYawPitch = new Translation2d(observation.yawRad(), observation.pitchRad());
-                targetXYPoints.add(targetYawPitch);
-                // Account for roll of camera
-                // TODO: fix roll compensation - this doesn't fully work
-                double gamepieceWidthRad = observation.gamePieceWidthInPixels() / pixelsToRad;
-                Logger.recordOutput("GamePieceVision/gamepieceWidthRad", gamepieceWidthRad);
+                Translation2d pitchYawTranslation =
+                        new Translation2d(Math.tan(observation.yawRad()), Math.tan(-observation.pitchRad()))
+                                .rotateBy(new Rotation2d(-metadata.robotToCamera.getRotation().getX()));
+                targetXYPoints.add(pitchYawTranslation);
+                double targetYaw = Math.atan(pitchYawTranslation.getX());
+                double targetPitch = -Math.atan(pitchYawTranslation.getY());
 
-                targetYawPitch = targetYawPitch.rotateBy(Rotation2d.fromRadians(-metadata.robotToCamera.getRotation().getX()));
-                double targetYaw = targetYawPitch.getX();
-                double targetPitch = targetYawPitch.getY();
+                double cameraToFuelNorm =
+                        (-metadata.robotToCamera.getZ() + (FieldConstants.fuelDiameter / 2))
+                                / Math.tan(-metadata.robotToCamera.getRotation().getY() + targetPitch)
+                                / Math.cos(targetYaw);
+                Pose2d robotToCameraPose2d = new Pose3d(metadata.robotToCamera.getTranslation(), metadata.robotToCamera.getRotation()).toPose2d();
+                Transform2d robotToCameraTransform2d = new Transform2d(robotToCameraPose2d.getTranslation(), robotToCameraPose2d.getRotation());
 
-                double distance = (fuelDiameterMeters / 2.0) / Math.tan(gamepieceWidthRad / 2.0);
-                double camToGamepieceZ = -metadata.robotToCamera.getZ() + (fuelDiameterMeters / 2.0);
-                double middleLine = Math.sqrt(Math.pow(distance, 2.0) - Math.pow(camToGamepieceZ, 2.0));
+                Pose2d fieldToCamera = robotPose.toPose2d().transformBy(robotToCameraTransform2d);
 
-                double camToGamepieceX = Math.cos(-targetYaw) * middleLine;
-                double camToGamepieceY = middleLine * Math.sin(-targetYaw);
-                Logger.recordOutput("GamePieceVision/camToGamepieceZ", camToGamepieceZ);
-                Logger.recordOutput("GamePieceVision/camToGamepieceX", camToGamepieceX);
-
-                Logger.recordOutput("GamePieceVision/camToGamepieceY", camToGamepieceY);
-                Translation2d camToGamepieceXY = new Translation2d(camToGamepieceX, camToGamepieceY)
-                        // Account for yaw of camera
-                        // Note that we do this BEFORE translating to robot coordinates
-                        .rotateBy(Rotation2d.fromRadians(metadata.robotToCamera.getRotation().getZ()));
-                Translation2d robotToGamepieceXY = metadata.robotToCamera.getTranslation().toTranslation2d().plus(camToGamepieceXY);
-                double robotToGamepieceZ = metadata.robotToCamera.getZ() + camToGamepieceZ;
-                Translation3d robotToGamepiece = new Translation3d(robotToGamepieceXY.getX(), robotToGamepieceXY.getY(), robotToGamepieceZ);
+                Pose2d fieldToFuel =
+                        fieldToCamera
+                                .transformBy(new Transform2d(Translation2d.kZero, new Rotation2d(-targetYaw)))
+                                .transformBy(new Transform2d(new Translation2d(cameraToFuelNorm, 0), Rotation2d.kZero));
+                Pose3d fuelPose = new Pose3d(fieldToFuel).plus(new Transform3d(0, 0, FieldConstants.fuelDiameter / 2.0, new Rotation3d()));
 
 
-//                double totalAngle = metadata.robotToCamera.getRotation().getZ() + robotPose.toPose2d().getRotation().getRadians() + observation.yawRad();
-//                Translation2d camToGamepiece = new Translation2d(distance, new Rotation2d(totalAngle));
-//                Pose3d camPose = robotPose.transformBy(metadata.robotToCamera);
-//
-//                //    +;;).plus(camToGamepiece))
-//                Pose2d gamepiecePose = new Pose2d(camPose.toPose2d().getTranslation().plus(camToGamepiece), new Rotation2d());
-
-
-                // First, calculate position of target in camera space
-                double camToTargetZ = -metadata.robotToCamera.getZ() + fuelDiameterMeters / 2.0;
-                // Account for pitch of camera
-                double camToTargetX = camToTargetZ / Math.tan(targetPitch - metadata.robotToCamera.getRotation().getY());
-                double camToTargetY = camToTargetX * Math.tan(-targetYaw);
-
-                Translation2d camToTargetXY = new Translation2d(camToTargetX, camToTargetY)
-                        // Account for yaw of camera
-                        // Note that we do this BEFORE translating to robot coordinates
-                        .rotateBy(Rotation2d.fromRadians(metadata.robotToCamera.getRotation().getZ()));
-                // Next, translate x and y to robot coordinates
-                Translation2d robotToTargetXY = metadata.robotToCamera.getTranslation().toTranslation2d().plus(camToTargetXY);
-                double robotToTargetZ = metadata.robotToCamera.getZ() + camToTargetZ;
-
-                Translation3d robotToTarget = new Translation3d(robotToTargetXY.getX(), robotToTargetXY.getY(), robotToTargetZ);
-                Logger.recordOutput("GamePieceVision/tagX", camToTargetXY.getX());
+                //
 
                 newlySeenTargets.put(
-                        robotPose
-                                .transformBy(new Transform3d(
-                                        robotToGamepiece,
-                                        new Rotation3d()
-                                ))
-                                .getTranslation()
-                                .toTranslation2d(),
+                        fuelPose.getTranslation().toTranslation2d(),
                         observation.timestampSeconds()
                 );
             }
         }
+        // robotPose.transformBy(new Transform3d(robotToTarget, new Rotation3d()))
 
         // Handle newly seen targets
         for (var target : newlySeenTargets.keySet()) {
@@ -150,16 +117,51 @@ public class GamePieceVision implements Periodic {
 
         // For now, just sort by distance
         // In the future, we should find the biggest group of targets
-        bestTargets = targetsToLastSeen.keySet().stream().sorted((a, b) -> {
-            double aDist = a.getDistance(robotState.getTranslation());
-            double bDist = b.getDistance(robotState.getTranslation());
-            return Double.compare(aDist, bDist);
-        }).toList();
 
-        // Log results
+
+        List<List<Translation2d>> clusters = new ArrayList<>();
+
+        for (Translation2d fuel : targetsToLastSeen.keySet()) {
+            boolean addedToCluster = false;
+
+            for (List<Translation2d> cluster : clusters) {
+                for (Translation2d clusterFuel : cluster) {
+                    if (fuel.getDistance(clusterFuel) < clusterGroupingDistanceMeters) {
+                        cluster.add(fuel);
+                        addedToCluster = true;
+                        break;
+                    }
+                }
+                if (addedToCluster) {
+                    break;
+                }
+            }
+
+            if (!addedToCluster) {
+                List<Translation2d> newCluster = new ArrayList<>();
+                newCluster.add(fuel);
+                clusters.add(newCluster);
+            }
+        }
+
+        //bestTargets = targetsToLastSeen.keySet().stream().sorted((a, b) -> {
+        //    double aDist = a.getDistance(robotState.getTranslation());
+        //    double bDist = b.getDistance(robotState.getTranslation());
+        //    return Double.compare(aDist, bDist);
+        //}).toList();
+        bestTargets = clusters.stream()
+                .max(Comparator.comparing(List::size))
+                .orElse(List.of())
+                .stream()
+                .sorted(Comparator.comparingDouble(t -> t.getDistance(robotState.getTranslation())))
+                .toList();
+
+
         Logger.recordOutput("GamePieceVision/TargetXYPoints", targetXYPoints.toArray(Translation2d[]::new));
         Logger.recordOutput("GamePieceVision/BestTargets", bestTargets.toArray(Translation2d[]::new));
     }
+    // Log results
+
 
     @Override
     public void periodicAfterCommands() {
@@ -181,6 +183,7 @@ public class GamePieceVision implements Periodic {
         return false;
     }
 
+
     private record CameraData(
             GamePieceVisionIOInputsAutoLogged inputs,
             GamePieceVisionIO io,
@@ -188,3 +191,4 @@ public class GamePieceVision implements Periodic {
     ) {
     }
 }
+

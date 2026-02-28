@@ -25,7 +25,6 @@ import org.photonvision.simulation.VisionTargetSim;
 import static edu.wpi.first.units.Units.*;
 import static frc.robot.FieldConstants.aprilTagLayout;
 import static frc.robot.subsystems.drive.DriveConstants.driveConfig;
-import static frc.robot.subsystems.gamepiecevision.GamePieceVisionConstants.fuelDiameterMeters;
 
 public class SimManager {
     private static final int hopperCapacity = 50;
@@ -187,7 +186,7 @@ public class SimManager {
         // would cause multiple updates if we don't check this)
         if (!gamePieceVisionSystemUpdated) {
             Pose3d[] fuelPoses = SimulatedArena.getInstance().getGamePiecesArrayByType("Fuel");
-            TargetModel targetModel = new TargetModel(fuelDiameterMeters);
+            TargetModel targetModel = new TargetModel(FieldConstants.fuelDiameter);
             gamePieceVisionSystem.clearVisionTargets();
             for (Pose3d fuelPose : fuelPoses) {
                 VisionTargetSim visionTarget = new VisionTargetSim(fuelPose, targetModel);
