@@ -24,29 +24,40 @@ public class PlanetaryAuto {
     private static final Pose2d trenchShootingPosition = new Pose2d(3.85, 7.35, Rotation2d.fromDegrees(90));
 
     public static Command build() {
-        Supplier<Command> intake = () -> Commands.parallel(
-                AutoHelpers.intakeFromLeftNeutralZone(
+        Supplier<Command> intake = () -> AutoHelpers.intakeFromLeftNeutralZone(
                         () -> AutoHelpers.yDistanceInterpolation(
                                 new Translation2d(7.2, 7.6),
-                                new Translation2d(7.5, 4.8),
+                                new Translation2d(7.5, 4.0),
                                 Rotation2d.fromDegrees(-90.0),
                                 2
                         )
-                ),
-                superintake.setGoal(Superintake.Goal.INTAKE).asProxy()
-        ).withTimeout(3);
+                ).withTimeout(3);
 
         return CommandsExt.eagerSequence(
                 robotState.setPose(() -> AllianceFlipUtil.apply(new Pose2d(4, 7.4, Rotation2d.fromDegrees(90)))),
 
                 // move out of trench
-                AutoHelpers.intermediateWaypoint(() -> new Pose2d(5, 7.4, Rotation2d.fromDegrees(45)), defaultMoveToConstraints),
+                AutoHelpers.intermediateWaypoint(() -> new Pose2d(7.4, 7.4, Rotation2d.fromDegrees(-45)), defaultMoveToConstraints),
 
-                // intake
-                intake.get(),
+                // intake, go to neturalzone
+                Commands.race(
+                        AutoHelpers.yDistanceInterpolatingWaypoint(new Translation2d(5.5, 7.4),
+                                new Translation2d(7.65, 6.4)
+                                , Rotation2d.fromDegrees(-90),
+                                2,
+                                defaultMoveToConstraints
+                                )),
+                        //move to netruazone middle
+                        Commands.race(
+                                superintake.setGoal(Superintake.Goal.INTAKE),
+                                AutoHelpers.finalWaypoint(() -> new Pose2d(7.65, 4.2, Rotation2d.fromDegrees(-90)),
+                                AutoHelpers.intakeConstraints)),
 
-                // move to entrance to trench
-                AutoHelpers.intermediateWaypoint(() -> new Pose2d(6.1, 7.3, trenchShootingPosition.getRotation()), defaultMoveToConstraints),
+                        //move to entrance to trench
+                        Commands.race(
+                        AutoHelpers.intermediateWaypoint(() -> new Pose2d(6.1, 7.3, trenchShootingPosition.getRotation()), defaultMoveToConstraints),
+                        superintake.setGoal(Superintake.Goal.IDLE)
+                        ),
 
                 // go through trench to shooting position
                 AutoHelpers.finalWaypoint(() -> trenchShootingPosition, defaultMoveToConstraints),
@@ -54,11 +65,12 @@ public class PlanetaryAuto {
                 // shoot
                 Commands.parallel(
                         AutoHelpers.finalWaypointWithAimingForever(trenchShootingPosition::getTranslation, defaultMoveToConstraints),
-                        superstructure.setGoal(Superstructure.Goal.SHOOT).asProxy()
-                ).withTimeout(4),
+                        superstructure.setGoal(Superstructure.Goal.SHOOT)
+                ).withTimeout(5),
+                superstructure.setGoal(Superstructure.Goal.IDLE).until(() -> true),
 
                 // move out of trench
-                AutoHelpers.intermediateWaypoint(() -> new Pose2d(5, 7.4, Rotation2d.fromDegrees(45)), defaultMoveToConstraints),
+                AutoHelpers.intermediateWaypoint(() -> new Pose2d(5.5, 7.4, Rotation2d.fromDegrees(45)), defaultMoveToConstraints),
 
                 // intake
                 intake.get(),
@@ -72,8 +84,8 @@ public class PlanetaryAuto {
                 // shoot
                 Commands.parallel(
                         AutoHelpers.finalWaypointWithAimingForever(trenchShootingPosition::getTranslation, defaultMoveToConstraints),
-                        superstructure.setGoal(Superstructure.Goal.SHOOT).asProxy()
-                ).withTimeout(4)
+                        superstructure.setGoal(Superstructure.Goal.SHOOT)
+                ).withTimeout(5)
         );
     }
 }
