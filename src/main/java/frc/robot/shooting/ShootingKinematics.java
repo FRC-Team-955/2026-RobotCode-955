@@ -30,7 +30,7 @@ public class ShootingKinematics implements Periodic {
 
     private static final LoggedTunableNumber phaseDelay = new LoggedTunableNumber("ShootingKinematics/PhaseDelay", 0.03);
     private static final LoggedTunableNumber robotVelocityScalar = new LoggedTunableNumber("ShootingKinematics/RobotVelocityScalar (DEBUG ONLY)", 1);
-    private static final LoggedTunableNumber yDistToleranceInches = new LoggedTunableNumber("ShootingKinematics/YDistToleranceInches", 3.0);
+    private static final LoggedTunableNumber yDistToleranceInches = new LoggedTunableNumber("ShootingKinematics/YDistToleranceInches", 30.0);
     public static final LoggedTunableNumber velocityToleranceRPM = new LoggedTunableNumber("ShootingKinematics/VelocityToleranceRPM", 100);
     public static final LoggedTunableNumber hoodToleranceDeg = new LoggedTunableNumber("ShootingKinematics/HoodToleranceDegrees", 3.0);
 
@@ -123,7 +123,7 @@ public class ShootingKinematics implements Periodic {
         shiftMet = shootingParameters.isPass() || operatorDashboard.disableShiftTracking.get() || hubShiftTracker.getShiftInfo().active();
         Logger.recordOutput("ShootingKinematics/ShiftMet", shiftMet);
 
-        boolean yDistMet = Math.abs(getFuelExitToHub().transform.getY()) <= yDistToleranceInches.get();
+        boolean yDistMet = Math.abs(getFuelExitToHub().transform.getY()) <= Units.inchesToMeters(yDistToleranceInches.get());
         Logger.recordOutput("ShootingKinematics/YDistMet", yDistMet);
 
         boolean velocityMet = Math.abs(flywheel.getVelocityRPM() - shootingParameters.velocityRPM()) <= velocityToleranceRPM.get();
