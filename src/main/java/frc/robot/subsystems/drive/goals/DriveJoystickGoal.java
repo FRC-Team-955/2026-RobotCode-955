@@ -156,8 +156,9 @@ public class DriveJoystickGoal extends DriveGoal {
                         (
                                 !runningHeadingOverride ||
                                         // Stop heading override if we are running and rotate too much on our own
+                                        // This means that we should keep running if different is *less* than threshold
                                         Math.abs(robotState.getRotation().getRadians() - headingOverride.getSetpoint())
-                                                > Units.degreesToRadians(headingOverrideThresholdDegrees.get())
+                                                < Units.degreesToRadians(headingOverrideThresholdDegrees.get())
                         ) && controller.getDriveAngularMagnitude() == 0.0
                 ) ||
                         mode == Mode.Aim ||
