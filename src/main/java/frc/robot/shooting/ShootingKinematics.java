@@ -95,7 +95,7 @@ public class ShootingKinematics implements Periodic {
             shootingParameters = getShootingParametersManual();
         }
         shootingParameters = new ShootingParameters(
-                0 * shootingParameters.velocityRPM() + operatorDashboard.flywheelSmudgeRPM.get(),
+                shootingParameters.velocityRPM() + operatorDashboard.flywheelSmudgeRPM.get(),
                 shootingParameters.angleRad() + operatorDashboard.hoodSmudgeDegrees.get(),
                 shootingParameters.headingRad(),
                 shootingParameters.timeOfFlightSeconds(),
