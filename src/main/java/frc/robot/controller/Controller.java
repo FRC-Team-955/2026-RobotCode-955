@@ -105,13 +105,8 @@ public class Controller implements Periodic {
         Rotation2d robotToAssistDirection = robotToAssist.getAngle();
         //Logger.recordOutput("Controller/Drive/Assist/RobotToAssistDirection", robotToAssistDirection);
 
-        // Flip joystick direction to match robot to assist direction
-        // Joystick direction is relative to alliance wall and needs to be flipped on red alliance to match origin
-        Rotation2d joystickLinearDirectionFlipped = AllianceFlipUtil.apply(driveLinearDirection);
-        //Logger.recordOutput("Controller/Drive/Assist/FlippedJoystickLinearDirection", joystickLinearDirectionFlipped);
-
         // Get difference between joystick direction and assist direction
-        Rotation2d directionDiff = robotToAssistDirection.minus(joystickLinearDirectionFlipped);
+        Rotation2d directionDiff = robotToAssistDirection.minus(driveLinearDirection);
         //Logger.recordOutput("Controller/Drive/Assist/DirectionDifference", directionDiff);
 
         // Get distance to assist pose
