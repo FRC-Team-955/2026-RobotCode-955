@@ -19,7 +19,8 @@ import org.littletonrobotics.junction.mechanism.LoggedMechanism2d;
 import org.littletonrobotics.junction.mechanism.LoggedMechanismLigament2d;
 import org.littletonrobotics.junction.mechanism.LoggedMechanismRoot2d;
 
-import static frc.robot.subsystems.leds.LEDConstants.*;
+import static frc.robot.subsystems.leds.LEDConstants.createIO;
+import static frc.robot.subsystems.leds.LEDConstants.length;
 
 public class LEDs implements Periodic {
     private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
@@ -101,52 +102,43 @@ public class LEDs implements Periodic {
         } else if (cameraError) {
             LEDPatterns.visionDisconnected.applyTo(buffer);
         } else if (DriverStation.isDisabled()) {
-            if (autoManager.isAtAutoStartingPose() && operatorDashboard.autoChosen.get()) {
-                LEDPatterns.autoReady.applyTo(buffer);
-            } else if (autoManager.getClosestAutoStartingPose().isPresent() && operatorDashboard.autoChosen.get()) {
+            if (operatorDashboard.autoChosen.get() && autoManager.getClosestAutoStartingPose().isPresent() && !autoManager.isAtAutoStartingPose()) {
                 LEDPatterns.autoPlacementProgress(autoManager::getPlacementProgress).applyTo(buffer);
             } else {
                 LEDPatterns.autoReady.applyTo(buffer);
             }
         } else if (DriverStation.isEnabled()) {
-            boolean endgame = DriverStation.isTeleop() &&
-                    DriverStation.getMatchTime() > endgameLowerThresholdSeconds &&
-                    DriverStation.getMatchTime() < endgameUpperThresholdSeconds;
-            if (endgame) {
-                LEDPatterns.endgame.applyTo(buffer);
+            LEDPattern superintakePattern = switch (superintake.getGoal()) {
+                case IDLE -> null;
+                case INTAKE -> LEDPatterns.intaking;
+                case EJECT -> LEDPatterns.eject;
+                case HOME_INTAKE_PIVOT -> LEDPatterns.homing;
+            };
+
+            LEDPattern superstructurePattern = switch (superstructure.getGoal()) {
+                case IDLE -> null;
+                case SHOOT -> shootingKinematics.isShootingParametersMet()
+                        ? LEDPatterns.shooting
+                        : (
+                        shootingKinematics.isShiftMet()
+                                ? LEDPatterns.aiming
+                                : LEDPatterns.waitingForShift
+                );
+                case EJECT -> LEDPatterns.eject;
+                case HOME_HOOD -> LEDPatterns.homing;
+            };
+
+            if (superintakePattern != null && superstructurePattern != null) {
+                superintakePattern.applyTo(firstHalfView);
+                superstructurePattern.applyTo(secondHalfView);
+            } else if (superintakePattern != null) {
+                superintakePattern.applyTo(buffer);
+            } else if (superstructurePattern != null) {
+                superstructurePattern.applyTo(buffer);
+            } else if (HubShiftTracker.get().getShiftInfo().remainingTime() < 3.0) {
+                LEDPatterns.hubSwitch.applyTo(buffer);
             } else {
-                LEDPattern superintakePattern = switch (superintake.getGoal()) {
-                    case IDLE -> null;
-                    case INTAKE -> LEDPatterns.intaking;
-                    case EJECT -> LEDPatterns.eject;
-                    case HOME_INTAKE_PIVOT -> LEDPatterns.homing;
-                };
-
-                LEDPattern superstructurePattern = switch (superstructure.getGoal()) {
-                    case IDLE -> null;
-                    case SHOOT -> shootingKinematics.isShootingParametersMet()
-                            ? LEDPatterns.shooting
-                            : (
-                            shootingKinematics.isShiftMet()
-                                    ? LEDPatterns.aiming
-                                    : LEDPatterns.waitingForShift
-                    );
-                    case EJECT -> LEDPatterns.eject;
-                    case HOME_HOOD -> LEDPatterns.homing;
-                };
-
-                if (superintakePattern != null && superstructurePattern != null) {
-                    superintakePattern.applyTo(firstHalfView);
-                    superstructurePattern.applyTo(secondHalfView);
-                } else if (superintakePattern != null) {
-                    superintakePattern.applyTo(buffer);
-                } else if (superstructurePattern != null) {
-                    superstructurePattern.applyTo(buffer);
-                } else if (HubShiftTracker.get().getShiftInfo().remainingTime() < 3.0) {
-                    LEDPatterns.hubSwitch.applyTo(buffer);
-                } else {
-                    LEDPatterns.idle.applyTo(buffer);
-                }
+                LEDPatterns.idle.applyTo(buffer);
             }
         }
 

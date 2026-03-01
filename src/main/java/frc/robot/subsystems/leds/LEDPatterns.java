@@ -60,7 +60,6 @@ public class LEDPatterns {
     ).scrollAtRelativeSpeed(Hertz.of(2));
 
     // Enabled
-    public static final LEDPattern endgame = LEDPattern.solid(Color.kPurple).blink(Seconds.of(0.5));
     public static final LEDPattern eject = LEDPattern.solid(Color.kRed).blink(Seconds.of(0.1));
     public static final LEDPattern aiming = LEDPattern.solid(Color.kYellow);
     public static final LEDPattern shooting = LEDPattern.solid(Color.kGreen);
