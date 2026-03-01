@@ -107,6 +107,7 @@ public class DriveJoystickGoal extends DriveGoal {
             var optionalAssistTranslation = assistTranslationSupplier.get();
             if (optionalAssistTranslation.isPresent()) {
                 Translation2d assistTranslation = optionalAssistTranslation.get();
+                Logger.recordOutput("Drive/AssistTranslation", assistTranslation);
 
                 if (controller.shouldAssist(robotState.getPose(), assistTranslation)) {
                     Logger.recordOutput("Drive/AssistRunning", true);
