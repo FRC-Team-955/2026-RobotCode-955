@@ -88,8 +88,8 @@ public class DriveConstants {
                         .withP(10.0)
                         .withD(0.04),
                 new LoggedTunablePIDF("Drive/TurnAbsoluteGains")
-                        .withP(10.0)
-                        .withD(0.04),
+                        .withP(4.0)
+                        .withD(0.002),
                 true,
                 false,
                 false,
