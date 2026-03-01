@@ -6,8 +6,6 @@ import frc.robot.SimManager;
 import org.photonvision.simulation.PhotonCameraSim;
 import org.photonvision.simulation.SimCameraProperties;
 
-import static frc.robot.subsystems.gamepiecevision.GamePieceVisionConstants.diagFOVRad;
-
 public class GamePieceVisionIOPhotonVisionSim extends GamePieceVisionIOPhotonVision {
     private static final SimManager simManager = SimManager.get();
 
@@ -16,7 +14,7 @@ public class GamePieceVisionIOPhotonVisionSim extends GamePieceVisionIOPhotonVis
 
         // Add sim camera
         var cameraProperties = new SimCameraProperties();
-        cameraProperties.setCalibration(640, 480, Rotation2d.fromRadians(diagFOVRad));
+        cameraProperties.setCalibration(640, 480, Rotation2d.fromDegrees(120.0));
         cameraProperties.setCalibError(0, 0);
         cameraProperties.setFPS(30);
         cameraProperties.setAvgLatencyMs(45);

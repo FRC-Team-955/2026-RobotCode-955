@@ -31,6 +31,7 @@ public class GamePieceVisionConstants {
     static final double pixelsToRad = camWidth / horizontalFOVRad;
     static final double minDistanceForSameCoralMeters = 1;
     static final double expireTimeSeconds = 0.5;
+    /** Compensates for fisheye lens */
     static final LoggedTunableNumber txtyMultiplier = new LoggedTunableNumber("GamePieceVision/TXTYMultiplier", 0.5);
 
     @RequiredArgsConstructor
