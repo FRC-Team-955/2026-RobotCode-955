@@ -82,13 +82,6 @@ public class RobotContainer {
     private void configureBindings() {
         controller.y().onTrue(robotState.resetRotation());
 
-        controller.leftTrigger()
-                .and(controller.rightTrigger().negate())
-                .whileTrue(Commands.parallel(
-                        drive.driveJoystick(() -> operatorDashboard.manualAiming.get() ? DriveJoystickGoal.Mode.StopWithX : DriveJoystickGoal.Mode.Aim),
-                        superstructure.setGoal(Superstructure.Goal.SHOOT)
-                ));
-
         controller.rightTrigger()
                 .and(controller.leftTrigger().negate())
                 .whileTrue(Commands.parallel(
@@ -97,7 +90,6 @@ public class RobotContainer {
                 ));
 
         controller.leftTrigger()
-                .and(controller.rightTrigger())
                 .whileTrue(Commands.parallel(
                         drive.driveJoystick(() -> {
                             if (operatorDashboard.manualAiming.get() && operatorDashboard.disableAssist.get()) {
@@ -113,27 +105,8 @@ public class RobotContainer {
                         superintake.setGoal(Superintake.Goal.INTAKE),
                         superstructure.setGoal(Superstructure.Goal.SHOOT)
                 ));
-        //                                .alongWith(drive.driveJoystickWithAssist(() -> {
-        //                                            Pose2d robotPose = robotState.getPose();
-        //                                            Pose2d closestFuel = null;
-        //                                            double closestDist = Double.MAX_VALUE;
-        //
-        //                                            for (var fuel : gamePieceVision.getFreshCoral()) {
-        //                                                Pose2d fuelPose = fuel.toPose2d();
-        //                                                double dist = fuelPose.getTranslation().getDistance(robotPose.getTranslation());
-        //
-        //                                                if (dist < closestDist) {
-        //                                                    closestDist = dist;
-        //                                                    closestFuel = fuelPose;
-        //                                                }
-        //                                            }
-        //
-        //                                            return Optional.ofNullable(closestFuel);
-        //                                        }
-        //
-        //                                ))
 
-        controller.a()
+        controller.x()
                 .whileTrue(Commands.parallel(
                         superintake.setGoal(Superintake.Goal.EJECT),
                         superstructure.setGoal(Superstructure.Goal.EJECT)
