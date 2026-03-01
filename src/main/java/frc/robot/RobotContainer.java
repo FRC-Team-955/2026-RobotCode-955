@@ -90,6 +90,7 @@ public class RobotContainer {
                 ));
 
         controller.leftTrigger()
+                .and(() -> controller.getDriveAngularMagnitude() == 0.0)
                 .toggleOnTrue(Commands.parallel(
                         drive.driveJoystick(() -> {
                             if (operatorDashboard.manualAiming.get() && operatorDashboard.disableAssist.get()) {
