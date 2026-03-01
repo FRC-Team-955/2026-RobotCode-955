@@ -212,9 +212,9 @@ public class HighFrequencySamplingThread extends Thread {
                 for (int i = 0; i < sparkSignals.size(); i++) {
                     double value = sparkSignals.get(i).getAsDouble();
                     // If we don't give a value, things will get desynced
-//                    if (sparks.get(i).getLastError() == REVLibError.kOk) {
+                    //                    if (sparks.get(i).getLastError() == REVLibError.kOk) {
                     sparkQueues.get(i).offer(value);
-//                    }
+                    //                    }
                 }
                 for (int i = 0; i < genericDoubleSignals.size(); i++) {
                     genericDoubleQueues.get(i).offer(genericDoubleSignals.get(i).getAsDouble());

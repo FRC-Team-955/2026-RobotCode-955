@@ -25,13 +25,13 @@ public class PlanetaryAuto {
 
     public static Command build() {
         Supplier<Command> intake = () -> AutoHelpers.intakeFromLeftNeutralZone(
-                        () -> AutoHelpers.yDistanceInterpolation(
-                                new Translation2d(7.2, 7.6),
-                                new Translation2d(7.5, 4.0),
-                                Rotation2d.fromDegrees(-90.0),
-                                2
-                        )
-                ).withTimeout(3);
+                () -> AutoHelpers.yDistanceInterpolation(
+                        new Translation2d(7.2, 7.6),
+                        new Translation2d(7.5, 4.0),
+                        Rotation2d.fromDegrees(-90.0),
+                        2
+                )
+        ).withTimeout(3);
 
         return CommandsExt.eagerSequence(
                 robotState.setPose(() -> AllianceFlipUtil.apply(new Pose2d(4, 7.4, Rotation2d.fromDegrees(90)))),
@@ -47,18 +47,18 @@ public class PlanetaryAuto {
                                 , Rotation2d.fromDegrees(-90),
                                 2,
                                 defaultMoveToConstraints
-                                )),
-                        //move to netruazone middle
-                        Commands.race(
-                                superintake.setGoal(Superintake.Goal.INTAKE),
-                                AutoHelpers.finalWaypoint(() -> new Pose2d(7.65, 4.2, Rotation2d.fromDegrees(-90)),
+                        )),
+                //move to netruazone middle
+                Commands.race(
+                        superintake.setGoal(Superintake.Goal.INTAKE),
+                        AutoHelpers.finalWaypoint(() -> new Pose2d(7.65, 4.2, Rotation2d.fromDegrees(-90)),
                                 AutoHelpers.intakeConstraints)),
 
-                        //move to entrance to trench
-                        Commands.race(
+                //move to entrance to trench
+                Commands.race(
                         AutoHelpers.intermediateWaypoint(() -> new Pose2d(6.1, 7.0, trenchShootingPosition.getRotation()), defaultMoveToConstraints),
                         superintake.setGoal(Superintake.Goal.IDLE)
-                        ),
+                ),
 
                 // go through trench to shooting position
                 AutoHelpers.finalWaypoint(() -> trenchShootingPosition, defaultMoveToConstraints),

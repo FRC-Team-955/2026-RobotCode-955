@@ -171,7 +171,6 @@ public class GamePieceVision implements Periodic {
         return false;
     }
 
-
     private record CameraData(
             GamePieceVisionIOInputsAutoLogged inputs,
             GamePieceVisionIO io,

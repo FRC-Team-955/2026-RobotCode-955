@@ -37,13 +37,10 @@ public class GamePieceVisionIOPhotonVision extends GamePieceVisionIO {
 
         for (var result : camera.getAllUnreadResults()) {
             for (var target : result.getTargets()) {
-
                 targetObservations.add(new TargetObservation(
                         result.getTimestampSeconds(),
                         Rotation2d.fromDegrees(target.getYaw()).getRadians(),
                         Rotation2d.fromDegrees(target.getPitch()).getRadians()
-
-
                 ));
             }
         }

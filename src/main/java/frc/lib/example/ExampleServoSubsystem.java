@@ -100,7 +100,7 @@ public class ExampleServoSubsystem implements Periodic {
 
             double setpointRad = goal.setpointRad.getAsDouble();
             setpointRad = MathUtil.clamp(setpointRad, minPositionRad, maxPositionRad);
-//            Logger.recordOutput("ExampleServoSubsystem/OriginalSetpointRad", setpointRad);
+            //            Logger.recordOutput("ExampleServoSubsystem/OriginalSetpointRad", setpointRad);
             TrapezoidProfile.State wantedState = new TrapezoidProfile.State(setpointRad, 0.0);
 
             if (lastSetpointRad == null || setpointRad != lastSetpointRad) {

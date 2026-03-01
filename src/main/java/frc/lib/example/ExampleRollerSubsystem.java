@@ -91,7 +91,7 @@ public class ExampleRollerSubsystem implements Periodic {
         if (DriverStation.isDisabled()) {
             io.setRequest(RequestType.VoltageVolts, 0);
         } else {
-//            Logger.recordOutput("ExampleRollerSubsystem/RequestType", goal.type);
+            //            Logger.recordOutput("ExampleRollerSubsystem/RequestType", goal.type);
             double value = goal.value.getAsDouble();
             Logger.recordOutput("ExampleRollerSubsystem/RequestValue", value);
             io.setRequest(goal.type, value);

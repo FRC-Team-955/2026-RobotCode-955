@@ -47,7 +47,6 @@ public class GamePieceVisionConstants {
                     case SIM -> new GamePieceVisionIOPhotonVisionSim("IntakeCam", cam.robotToCamera);
                     case REPLAY -> new GamePieceVisionIO();
                 }
-                // Relatively stable, even at long dist
         ),
         ;
 

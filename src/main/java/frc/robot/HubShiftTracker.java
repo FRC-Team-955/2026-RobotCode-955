@@ -52,7 +52,7 @@ public class HubShiftTracker implements Periodic {
         SHIFT4,
         ENDGAME,
         AUTO,
-        DISABLED;
+        DISABLED
     }
 
     public record ShiftInfo(ShiftEnum currentShift, double elapsedTime, double remainingTime, boolean active) {}
