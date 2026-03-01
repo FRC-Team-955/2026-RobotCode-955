@@ -15,6 +15,7 @@ import frc.robot.subsystems.drive.DriveGoal;
 import frc.robot.subsystems.drive.DriveRequest;
 import org.littletonrobotics.junction.Logger;
 
+import java.util.Optional;
 import java.util.function.Supplier;
 
 import static frc.robot.subsystems.drive.DriveConstants.moveToConfig;
@@ -96,12 +97,17 @@ public class MoveToGoal extends DriveGoal {
         angularVelocityRadPerSec = moveToAngularAccelerationLimiter.calculate(angularVelocityRadPerSec);
         //Logger.recordOutput("Drive/MoveTo/LinearSetpoint", angularVelocityRadPerSec);
 
-        return DriveRequest.chassisSpeeds(ChassisSpeeds.fromFieldRelativeSpeeds(
-                linearXYVelocityMetersPerSec.getX() * linearScalar,
-                linearXYVelocityMetersPerSec.getY() * linearScalar,
-                angularVelocityRadPerSec,
-                currentPose.getRotation() // Move to is absolute, don't flip
-        ));
+        return DriveRequest.chassisSpeeds(
+                ChassisSpeeds.fromFieldRelativeSpeeds(
+                        linearXYVelocityMetersPerSec.getX() * linearScalar,
+                        linearXYVelocityMetersPerSec.getY() * linearScalar,
+                        angularVelocityRadPerSec,
+                        currentPose.getRotation() // Move to is absolute, don't flip
+                ),
+                constraints.aiming()
+                        ? Optional.of(shootingKinematics.getCenterOfRotationForAiming())
+                        : Optional.empty()
+        );
     }
 
     private double calculateLinearVelocityMetersPerSec(double distanceToGoal) {
@@ -149,7 +155,7 @@ public class MoveToGoal extends DriveGoal {
             angularVelocityRadPerSec = 0.0;
         }
 
-        if (constraints.applyAimingFeedforward()) {
+        if (constraints.aiming()) {
             angularVelocityRadPerSec += shootingKinematics.rotationAboutHubRadiansPerSec(linearSetpoint);
         }
 

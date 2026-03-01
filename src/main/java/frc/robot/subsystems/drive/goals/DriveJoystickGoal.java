@@ -211,12 +211,17 @@ public class DriveJoystickGoal extends DriveGoal {
         ) {
             return DriveRequest.stopWithX();
         } else {
-            return DriveRequest.chassisSpeeds(ChassisSpeeds.fromFieldRelativeSpeeds(
-                    linearSetpoint.getX(),
-                    linearSetpoint.getY(),
-                    angularSetpoint,
-                    robotState.getRotation()
-            ));
+            return DriveRequest.chassisSpeeds(
+                    ChassisSpeeds.fromFieldRelativeSpeeds(
+                            linearSetpoint.getX(),
+                            linearSetpoint.getY(),
+                            angularSetpoint,
+                            robotState.getRotation()
+                    ),
+                    mode == Mode.Aim || mode == Mode.AimAndAssist
+                            ? Optional.of(shootingKinematics.getCenterOfRotationForAiming())
+                            : Optional.empty()
+            );
         }
     }
 }

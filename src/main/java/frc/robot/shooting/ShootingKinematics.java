@@ -306,6 +306,10 @@ public class ShootingKinematics implements Periodic {
         return -hubRelative.getY() / fuelExitToHub.transform.getTranslation().toTranslation2d().getNorm();
     }
 
+    public Translation2d getCenterOfRotationForAiming() {
+        return fuelExitTranslation.apply(hood.getPositionRad()).toTranslation2d();
+    }
+
     private record FuelExitToHub(Transform3d transform, Rotation2d angle) {}
 
     public record ShootingParameters(

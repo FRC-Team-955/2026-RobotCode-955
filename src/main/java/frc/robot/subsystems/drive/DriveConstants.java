@@ -175,7 +175,7 @@ public class DriveConstants {
             LoggedTunableNumber maxLinearAccelerationMetersPerSecPerSec,
             LoggedTunableNumber maxAngularVelocityRadPerSec,
             LoggedTunableNumber maxAngularAccelerationRadPerSecPerSec,
-            boolean applyAimingFeedforward,
+            boolean aiming,
             boolean fullSpeed
     ) {
     }

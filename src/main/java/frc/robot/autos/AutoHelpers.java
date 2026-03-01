@@ -58,7 +58,7 @@ public class AutoHelpers {
                         poseSupplier,
                         constraints
                                 .withFullSpeed(true)
-                                .withApplyAimingFeedforward(true)
+                                .withAiming(true)
                 )
                 .until(() -> robotState.isAtPoseWithTolerance(
                         poseSupplier.get(),
@@ -90,7 +90,7 @@ public class AutoHelpers {
                 .moveTo(
                         poseSupplier,
                         constraints
-                                .withApplyAimingFeedforward(true)
+                                .withAiming(true)
                 )
                 .until(() -> robotState.isAtPoseWithTolerance(
                         poseSupplier.get(),
@@ -106,7 +106,7 @@ public class AutoHelpers {
                         Rotation2d.fromRadians(shootingKinematics.getShootingParameters().headingRad())
                 ),
                 constraints
-                        .withApplyAimingFeedforward(true)
+                        .withAiming(true)
         );
     }
 

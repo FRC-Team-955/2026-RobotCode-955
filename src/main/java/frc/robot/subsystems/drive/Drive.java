@@ -277,8 +277,11 @@ public class Drive extends CommandBasedSubsystem {
         }
         // Closed loop control
         else if (request.type() == DriveRequest.Type.CHASSIS_SPEEDS) {
+            Translation2d centerOfRotation = request.centerOfRotation().orElse(Translation2d.kZero);
+            Logger.recordOutput("Drive/RequestCenterOfRotation", centerOfRotation);
+
             ChassisSpeeds rawSpeeds = request.value();
-            Logger.recordOutput("Drive/ModuleStates/Setpoints", robotState.getKinematics().toSwerveModuleStates(rawSpeeds));
+            Logger.recordOutput("Drive/ModuleStates/Setpoints", robotState.getKinematics().toSwerveModuleStates(rawSpeeds, centerOfRotation));
 
             // Discretize - use larger dt than actual to reduce translational skew when rotating and translating at the same time
             // See https://www.chiefdelphi.com/t/whitepaper-swerve-drive-skew-and-second-order-kinematics/416964/5
@@ -286,7 +289,7 @@ public class Drive extends CommandBasedSubsystem {
             ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(rawSpeeds, Constants.loopPeriod * 4.0);
 
             // Convert to module states and desaturate
-            SwerveModuleState[] setpointStates = robotState.getKinematics().toSwerveModuleStates(discreteSpeeds);
+            SwerveModuleState[] setpointStates = robotState.getKinematics().toSwerveModuleStates(discreteSpeeds, centerOfRotation);
             SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, driveConfig.maxVelocityMetersPerSec());
 
             // Send setpoints to modules
