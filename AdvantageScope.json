@@ -73,7 +73,6 @@
             "/Inputs/Drive/Module0",
             "/Inputs/Drive/Module3",
             "/RealOutputs/Drive/DriveJoystick",
-            "/Inputs",
             "/RealOutputs/Drive/ModuleStates",
             "/RealOutputs/Drive/ModuleStates/Measured",
             "/RealOutputs/Drive/ModuleStates/Measured/0/angle",
@@ -84,7 +83,7 @@
           ]
         },
         "tabs": {
-          "selected": 6,
+          "selected": 9,
           "tabs": [
             {
               "type": 0,
@@ -724,6 +723,26 @@
                     "logType": "Translation2d[]",
                     "visible": true,
                     "options": {
+                      "color": "#ff0000",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "vision",
+                    "logKey": "/RealOutputs/Drive/AssistTranslation",
+                    "logType": "Translation2d",
+                    "visible": true,
+                    "options": {
+                      "color": "#ff00ff",
+                      "size": "bold"
+                    }
+                  },
+                  {
+                    "type": "vision",
+                    "logKey": "/RealOutputs/GamePieceVision/AllTargets",
+                    "logType": "Translation2d[]",
+                    "visible": true,
+                    "options": {
                       "color": "#ffff00",
                       "size": "normal"
                     }
@@ -805,14 +824,14 @@
                 "cameraIndex": -1,
                 "orbitFov": 90,
                 "cameraPosition": [
-                  -6.727041865994047,
-                  2.355436018508927,
-                  2.147880092680842
+                  0.4887005256587809,
+                  4.440352184550145,
+                  -0.16168446374698703
                 ],
                 "cameraTarget": [
-                  -3.7210648202842043,
-                  -1.3642070902259735,
-                  0.3369128279007849
+                  0.48870505526439084,
+                  -0.0892950356992895,
+                  -0.16168448316240028
                 ]
               },
               "controlsHeight": 225
@@ -1012,6 +1031,26 @@
                     "visible": false,
                     "options": {
                       "color": "#ff0000"
+                    }
+                  },
+                  {
+                    "type": "trajectory",
+                    "logKey": "/RealOutputs/FieldSimulation/Fuel",
+                    "logType": "Pose3d[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#ffff00",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "trajectory",
+                    "logKey": "/RealOutputs/GamePieceVision/BestTargets",
+                    "logType": "Translation2d[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#00ff00",
+                      "size": "normal"
                     }
                   }
                 ],

@@ -50,19 +50,6 @@
         ],
         "containers": [
           {
-            "title": "AutoChosen",
-            "x": 1536.0,
-            "y": 768.0,
-            "width": 128.0,
-            "height": 128.0,
-            "type": "Toggle Switch",
-            "properties": {
-              "topic": "/Tuning/OperatorDashboard/AutoChosen",
-              "period": 0.06,
-              "data_type": "boolean"
-            }
-          },
-          {
             "title": "Alerts",
             "x": 1664.0,
             "y": 0.0,
@@ -72,19 +59,6 @@
             "properties": {
               "topic": "/SmartDashboard/Alerts",
               "period": 0.06
-            }
-          },
-          {
-            "title": "CoastOverride",
-            "x": 1408.0,
-            "y": 768.0,
-            "width": 128.0,
-            "height": 128.0,
-            "type": "Toggle Switch",
-            "properties": {
-              "topic": "/Tuning/OperatorDashboard/CoastOverride",
-              "period": 0.06,
-              "data_type": "boolean"
             }
           },
           {
