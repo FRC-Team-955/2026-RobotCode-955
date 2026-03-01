@@ -8,7 +8,7 @@ import frc.lib.network.LoggedTunablePIDF;
 import frc.robot.BuildConstants;
 
 public class IntakePivotConstants {
-    static final TrapezoidProfile.Constraints constraints = new TrapezoidProfile.Constraints(3, 8);
+    static final TrapezoidProfile.Constraints constraints = new TrapezoidProfile.Constraints(5, 15);
 
     static final double minPositionRad = Units.degreesToRadians(16.827716);
     static final double maxPositionRad = Units.degreesToRadians(95.554559);
