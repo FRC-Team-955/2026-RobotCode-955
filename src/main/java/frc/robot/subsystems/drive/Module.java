@@ -27,11 +27,13 @@ import org.littletonrobotics.junction.Logger;
 import static frc.robot.subsystems.drive.DriveConstants.*;
 
 public class Module {
+    private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
+
     private final ModuleIO io;
     private final ModuleIOInputsAutoLogged inputs = new ModuleIOInputsAutoLogged();
     private final int index;
 
-    private PIDController turnPID = moduleConfig.turnAbsoluteGains().toPIDWrapRadians();
+    private PIDController turnAbsolutePID = moduleConfig.turnAbsoluteGains().toPIDWrapRadians();
 
     private final Alert driveDisconnectedAlert;
     private final Alert turnDisconnectedAlert;
@@ -69,11 +71,7 @@ public class Module {
         if (Math.abs(state.speedMetersPerSecond) < 1e-4 && Math.abs(getTurnAngle().minus(state.angle).getRadians()) < 0.1) {
             io.setTurnOpenLoop(0.0);
         } else {
-            if (OperatorDashboard.get().absolutePIDMode.get()){
-                io.setTurnOpenLoop(turnPID.calculate(inputs.turnAbsolutePositionRad, state.angle.getRadians()));
-            } else {
-                io.setTurnClosedLoop(state.angle.getRadians());
-            }
+            setTurnClosedLoop(state.angle.getRadians());
         }
     }
 
@@ -82,10 +80,14 @@ public class Module {
      */
     public void runCharacterization(double output) {
         io.setDriveOpenLoop(output);
-        if (OperatorDashboard.get().absolutePIDMode.get()){
-            io.setTurnOpenLoop(turnPID.calculate(inputs.turnAbsolutePositionRad, 0.0));
+        setTurnClosedLoop(0.0);
+    }
+
+    private void setTurnClosedLoop(double positionRad) {
+        if (operatorDashboard.driveTurnAbsolutePID.get()) {
+            io.setTurnOpenLoop(turnAbsolutePID.calculate(inputs.turnAbsolutePositionRad, positionRad));
         } else {
-            io.setTurnClosedLoop(0.0);
+            io.setTurnClosedLoop(positionRad);
         }
     }
 
@@ -106,9 +108,7 @@ public class Module {
     }
 
     public void setTurnAbsolutePIDF(LoggedTunablePIDF newGains) {
-        io.setTurnAbsolutePIDF(newGains);
-        System.out.println("NEW set tune PID");
-        turnPID = newGains.toPIDWrapRadians();
+        turnAbsolutePID = newGains.toPIDWrapRadians();
     }
 
     public void setBrakeMode(boolean enable) {
@@ -120,7 +120,11 @@ public class Module {
      * Returns the current turn angle of the module.
      */
     public Rotation2d getTurnAngle() {
-        return new Rotation2d(MathUtil.angleModulus(inputs.turnPositionRad));
+        return new Rotation2d(MathUtil.angleModulus(
+                operatorDashboard.driveTurnAbsolutePID.get()
+                        ? inputs.turnAbsolutePositionRad
+                        : inputs.turnPositionRad
+        ));
     }
 
     public double getDrivePositionRad() {

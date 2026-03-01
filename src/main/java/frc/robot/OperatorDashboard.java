@@ -48,7 +48,7 @@ public class OperatorDashboard implements Periodic {
     public final LoggedNetworkBooleanExt lostAuto = new LoggedNetworkBooleanExt(prefix + "LostAuto", false);
     public final LoggedNetworkBooleanExt wonAuto = new LoggedNetworkBooleanExt(prefix + "WonAuto", false);
     public final LoggedNetworkBooleanExt disableShiftTracking = new LoggedNetworkBooleanExt(prefix + "DisableShiftTracking", BuildConstants.mode == BuildConstants.Mode.SIM);
-    public final LoggedNetworkBooleanExt absolutePIDMode = new LoggedNetworkBooleanExt(prefix + "AbsolutePIDMode", false);
+    public final LoggedNetworkBooleanExt driveTurnAbsolutePID = new LoggedNetworkBooleanExt(prefix + "DriveTurnAbsolutePID", false);
 
     @Getter
     private ScoringMode selectedScoringMode = ScoringMode.ShootAndPassAutomatic;
@@ -69,7 +69,7 @@ public class OperatorDashboard implements Periodic {
     private final Alert disabledCANrangeAlert = new Alert("CANrange is disabled.", Alert.AlertType.kWarning);
     private final Alert smudgesNotZeroAlert = new Alert("Smudges are not zero.", Alert.AlertType.kWarning);
     private final Alert disableShiftTrackingAlert = new Alert("Disable shift tracking is enabled.", Alert.AlertType.kWarning);
-    private final Alert absolutePIDModeAlert = new Alert("Absolute PID mode is enabled.", Alert.AlertType.kWarning);
+    private final Alert driveTurnAbsolutePIDAlert = new Alert("Drive turn absolute PID is enabled.", Alert.AlertType.kWarning);
 
     private final Debouncer lowBatteryDebouncer = new Debouncer(10.0, Debouncer.DebounceType.kRising);
 
@@ -119,7 +119,7 @@ public class OperatorDashboard implements Periodic {
         disabledCANrangeAlert.set(disableCANrange.get());
         smudgesNotZeroAlert.set(flywheelSmudgeRPM.get() != 0 || hoodSmudgeDegrees.get() != 0);
         disableShiftTrackingAlert.set(disableShiftTracking.get());
-        absolutePIDModeAlert.set(absolutePIDMode.get());
+        driveTurnAbsolutePIDAlert.set(driveTurnAbsolutePID.get());
     }
 
     private static <E extends Enum<E>> void handleEnumToggles(
