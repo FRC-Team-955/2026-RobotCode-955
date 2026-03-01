@@ -243,6 +243,11 @@ public class Drive extends CommandBasedSubsystem {
                 module.setTurnRelativePIDF(moduleConfig.turnRelativeGains());
             }
         }
+        if (moduleConfig.turnAbsoluteGains().hasChanged()) {
+            for (var module : modules) {
+                module.setTurnAbsolutePIDF(moduleConfig.turnAbsoluteGains());
+            }
+        }
     }
 
     @Override

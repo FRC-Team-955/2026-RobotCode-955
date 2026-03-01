@@ -14,21 +14,24 @@
 package frc.robot.subsystems.drive;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import frc.lib.network.LoggedTunablePIDF;
+import frc.robot.OperatorDashboard;
 import org.littletonrobotics.junction.Logger;
 
-import static frc.robot.subsystems.drive.DriveConstants.disableDriving;
-import static frc.robot.subsystems.drive.DriveConstants.driveConfig;
+import static frc.robot.subsystems.drive.DriveConstants.*;
 
 public class Module {
     private final ModuleIO io;
     private final ModuleIOInputsAutoLogged inputs = new ModuleIOInputsAutoLogged();
     private final int index;
+
+    private PIDController turnPID = moduleConfig.turnAbsoluteGains().toPIDWrapRadians();
 
     private final Alert driveDisconnectedAlert;
     private final Alert turnDisconnectedAlert;
@@ -66,7 +69,11 @@ public class Module {
         if (Math.abs(state.speedMetersPerSecond) < 1e-4 && Math.abs(getTurnAngle().minus(state.angle).getRadians()) < 0.1) {
             io.setTurnOpenLoop(0.0);
         } else {
-            io.setTurnClosedLoop(state.angle.getRadians());
+            if (OperatorDashboard.get().absolutePIDMode.get()){
+                io.setTurnOpenLoop(turnPID.calculate(inputs.turnAbsolutePositionRad, state.angle.getRadians()));
+            } else {
+                io.setTurnClosedLoop(state.angle.getRadians());
+            }
         }
     }
 
@@ -75,7 +82,11 @@ public class Module {
      */
     public void runCharacterization(double output) {
         io.setDriveOpenLoop(output);
-        io.setTurnClosedLoop(0.0);
+        if (OperatorDashboard.get().absolutePIDMode.get()){
+            io.setTurnOpenLoop(turnPID.calculate(inputs.turnAbsolutePositionRad, 0.0));
+        } else {
+            io.setTurnClosedLoop(0.0);
+        }
     }
 
     /**
@@ -92,6 +103,12 @@ public class Module {
 
     public void setTurnRelativePIDF(LoggedTunablePIDF newGains) {
         io.setTurnRelativePIDF(newGains);
+    }
+
+    public void setTurnAbsolutePIDF(LoggedTunablePIDF newGains) {
+        io.setTurnAbsolutePIDF(newGains);
+        System.out.println("NEW set tune PID");
+        turnPID = newGains.toPIDWrapRadians();
     }
 
     public void setBrakeMode(boolean enable) {

@@ -64,6 +64,13 @@ public class ModuleIO {
     }
 
     /**
+     * Change PIDF gains. IO layers should not rely on this method being called, and
+     * should default to the gains in the constants
+     */
+    public void setTurnAbsolutePIDF(LoggedTunablePIDF newGains) {
+    }
+
+    /**
      * Enable or disable brake mode on the drive motor.
      */
     public void setDriveBrakeMode(boolean enable) {
