@@ -123,7 +123,7 @@ public class ShootingKinematics implements Periodic {
         shiftMet = shootingParameters.isPass() || operatorDashboard.disableShiftTracking.get() || hubShiftTracker.getShiftInfo().active();
         Logger.recordOutput("ShootingKinematics/ShiftMet", shiftMet);
 
-        boolean yDistMet = Math.abs(getFuelExitToHub().transform.getY()) <= Units.inchesToMeters(yDistToleranceInches.get());
+        boolean yDistMet = shootingParameters.isPass() || Math.abs(getFuelExitToHub().transform.getY()) <= Units.inchesToMeters(yDistToleranceInches.get());
         Logger.recordOutput("ShootingKinematics/YDistMet", yDistMet);
 
         boolean velocityMet = Math.abs(flywheel.getVelocityRPM() - shootingParameters.velocityRPM()) <= velocityToleranceRPM.get();
