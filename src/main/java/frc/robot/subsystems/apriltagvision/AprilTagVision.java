@@ -14,7 +14,6 @@
 package frc.robot.subsystems.apriltagvision;
 
 import edu.wpi.first.math.geometry.*;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -47,24 +46,6 @@ public class AprilTagVision implements Periodic {
         return Commands.runOnce(() -> tagIdFilter = tagIds);
     }
 
-    private final double tagToRobotX = Units.inchesToMeters(-30.0625);
-    private final double tagToRobotY = Units.inchesToMeters(13.75);
-    private final double tagToRobotZ = Units.inchesToMeters(-12.0 - (1.0 / 32.0));
-    private final double tagToRobotYaw = 180.0;
-    private double tagToCamQuatW;
-    private double tagToCamQuatX;
-    private double
-            tagToCamQuatY;
-    private Rotation3d rotXYZ;
-    private double tagToCamQuatZ;
-    private double tagToCamTransX;
-    private double tagToCamTransY;
-    private double tagToCamTransZ;
-
-
-    private Transform3d tagToCam;
-    private Transform3d robotToCam;
-    private Transform3d tagToRobot;
     private static AprilTagVision instance;
 
     public static synchronized AprilTagVision get() {
@@ -122,29 +103,14 @@ public class AprilTagVision implements Periodic {
             }
 
             List<SingleTagPoseObservation> singleTagPoseObservations = new LinkedList<>();
-            //  robotToCam.clear();
-            //rotXYZ.clear();
             for (var observation : data.inputs.bestTargetObservations) {
-                tagToCamQuatY = observation.cameraToTarget().inverse().getRotation().getQuaternion().getY();
-                tagToCamQuatW = observation.cameraToTarget().inverse().getRotation().getQuaternion().getW();
-                tagToCamQuatZ = observation.cameraToTarget().inverse().getRotation().getQuaternion().getZ();
-                tagToCamQuatX = observation.cameraToTarget().inverse().getRotation().getQuaternion().getX();
-                tagToCamTransX = observation.cameraToTarget().inverse().getTranslation().getX();
-                tagToCamTransY = observation.cameraToTarget().inverse().getTranslation().getY();
-                tagToCamTransZ = observation.cameraToTarget().inverse().getTranslation().getZ();
-
-                tagToRobot = new Transform3d(new Translation3d(tagToRobotX, tagToRobotY, tagToRobotZ)
-                        , new Rotation3d(0, 0, Units.degreesToRadians(tagToRobotYaw)));
-                tagToCam = new Transform3d(new Translation3d(tagToCamTransX, tagToCamTransY, tagToCamTransZ)
-                        , new Rotation3d(new Quaternion(tagToCamQuatW, tagToCamQuatX, tagToCamQuatY, tagToCamQuatZ)));
-                robotToCam = tagToRobot.inverse().plus(tagToCam);
-                rotXYZ = new Rotation3d(robotToCam.getRotation().getX(),
-                        robotToCam.getRotation().getY(), robotToCam.getRotation().getZ());
-                Logger.recordOutput("AprilTagVision/" + cam.getKey() + "robotToCam" + observation.tagID(), robotToCam);
-                Logger.recordOutput("AprilTagVision/" + cam.getKey() + "robotToCam" + observation.tagID() + "/Rotation/X", Units.radiansToDegrees(rotXYZ.getX()));
-                Logger.recordOutput("AprilTagVision/" + cam.getKey() + "robotToCam" + observation.tagID() + "/Rotation/Y", Units.radiansToDegrees(rotXYZ.getY()));
-                Logger.recordOutput("AprilTagVision/" + cam.getKey() + "robotToCam" + observation.tagID() + "/Rotation/Z", Units.radiansToDegrees(rotXYZ.getZ()));
-
+                if (enableExtrinsicCalibration) {
+                    // use https://quaternions.online/ to visualize resulting rotation and convert to euler angles
+                    // use YZX rotation order in euler angles (yaw, then pitch, then roll - aka Tait-Bryan angles)
+                    Transform3d tagToCam = observation.cameraToTarget().inverse();
+                    Transform3d robotToCam = tagToRobot.inverse().plus(tagToCam);
+                    Logger.recordOutput("AprilTagVision/" + metadata.name() + "/ExtrinsicCalibration/Tag" + observation.tagID(), robotToCam);
+                }
 
                 Optional<Pose3d> tagPoseOptional = aprilTagLayout.getTagPose(observation.tagID());
 

@@ -15,6 +15,7 @@ package frc.robot.subsystems.apriltagvision;
 
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import frc.robot.BuildConstants;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +39,18 @@ public class AprilTagVisionConstants {
     // Max difference between 3d solve and trig for trig to be used
     static final double trig3dSolveMaxDiffMeters = 0.2;
     static final double trig3dSolveMaxDiffRad = 0.15;
+
+    // use https://quaternions.online/ to visualize resulting rotation and convert to euler angles
+    // use YZX rotation order in euler angles (yaw, then pitch, then roll - aka Tait-Bryan angles)
+    static final boolean enableExtrinsicCalibration = false;
+    static final Transform3d tagToRobot = new Transform3d(
+            new Translation3d(
+                    Units.inchesToMeters(-30.0625),
+                    Units.inchesToMeters(13.75),
+                    Units.inchesToMeters(-12.0 - (1.0 / 32.0))
+            ),
+            new Rotation3d(0.0, 0.0, Units.degreesToRadians(180.0))
+    );
 
     @RequiredArgsConstructor
     enum Camera {
