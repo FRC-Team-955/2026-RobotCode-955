@@ -1,9 +1,9 @@
 {
   "hubs": [
     {
-      "x": -8,
-      "y": -8,
-      "width": 1936,
+      "x": 0,
+      "y": 25,
+      "width": 1920,
       "height": 1048,
       "state": {
         "sidebar": {
@@ -84,7 +84,7 @@
           ]
         },
         "tabs": {
-          "selected": 11,
+          "selected": 6,
           "tabs": [
             {
               "type": 0,
@@ -439,31 +439,11 @@
                   },
                   {
                     "type": "stepped",
-                    "logKey": "/RealOutputs/Superstructure/Hood/LookaheadSetpointRad",
-                    "logType": "Number",
-                    "visible": false,
-                    "options": {
-                      "color": "#e48b32",
-                      "size": "normal"
-                    }
-                  },
-                  {
-                    "type": "stepped",
-                    "logKey": "/RealOutputs/Superstructure/Hood/OriginalSetpointRad",
+                    "logKey": "/RealOutputs/Superstructure/Hood/SetpointRad",
                     "logType": "Number",
                     "visible": true,
                     "options": {
-                      "color": "#c0b487",
-                      "size": "normal"
-                    }
-                  },
-                  {
-                    "type": "stepped",
-                    "logKey": "/RealOutputs/Superstructure/Hood/ProfileSetpointRad",
-                    "logType": "Number",
-                    "visible": false,
-                    "options": {
-                      "color": "#858584",
+                      "color": "#e48b32",
                       "size": "normal"
                     }
                   }
@@ -825,14 +805,14 @@
                 "cameraIndex": -1,
                 "orbitFov": 90,
                 "cameraPosition": [
-                  -1.8500699782694954,
-                  7.011086708298296,
-                  1.242658129232472
+                  -6.727041865994047,
+                  2.355436018508927,
+                  2.147880092680842
                 ],
                 "cameraTarget": [
-                  -1.8500616023620478,
-                  -1.3642052306829584,
-                  1.2426580219902124
+                  -3.7210648202842043,
+                  -1.3642070902259735,
+                  0.3369128279007849
                 ]
               },
               "controlsHeight": 225
