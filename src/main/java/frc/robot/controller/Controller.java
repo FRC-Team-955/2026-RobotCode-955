@@ -136,11 +136,14 @@ public class Controller implements Periodic {
         }
     }
 
-    public Command rumble(double value, double timeSeconds) {
+    public Command rumble(double value) {
         return Commands.startEnd(
-                () -> io.setRumble(value),
+                () -> {
+                    System.out.println("Rumbling controller");
+                    io.setRumble(value);
+                },
                 () -> io.setRumble(0)
-        ).withTimeout(timeSeconds);
+        );
     }
 
     public Trigger a() {

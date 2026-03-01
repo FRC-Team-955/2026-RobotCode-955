@@ -92,8 +92,8 @@ public class HubShiftTracker implements Periodic {
             Util.error("Duplicate HubShiftTracker created");
         }
 
-        new Trigger(() -> lastShift != shiftInfo.currentShift())
-                .onTrue(controller.rumble(0.5, 2.0));
+        new Trigger(() -> shiftInfo.remainingTime() < 3.0)
+                .whileTrue(controller.rumble(0.5));
     }
 
     @Override
@@ -107,7 +107,6 @@ public class HubShiftTracker implements Periodic {
             shiftTimer.reset();
         }
 
-        lastShift = shiftInfo.currentShift();
         shiftInfo = getShiftedShiftInfo();
         Logger.recordOutput("HubShiftTracker/CurrentShift", shiftInfo.currentShift());
         Logger.recordOutput("HubShiftTracker/RemainingTime", shiftInfo.remainingTime());
