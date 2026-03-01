@@ -22,6 +22,7 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
@@ -75,7 +76,8 @@ public class HubShiftTracker implements Periodic {
 
     @Getter
     private ShiftInfo shiftInfo = getShiftedShiftInfo();
-    private ShiftEnum lastShift = null;
+
+    private final Alert gameDataBrokenAlert = new Alert("Game data is broken. Please manually enter who wins in auto.", Alert.AlertType.kError);
 
     private static HubShiftTracker instance;
 
@@ -117,6 +119,8 @@ public class HubShiftTracker implements Periodic {
     }
 
     private Alliance getFirstActiveAlliance() {
+        gameDataBrokenAlert.set(false);
+
         var alliance = DriverStation.getAlliance().orElse(Alliance.Blue);
 
         // Return override value
@@ -138,6 +142,7 @@ public class HubShiftTracker implements Periodic {
         }
 
         // Return default value
+        gameDataBrokenAlert.set(true);
         return alliance == Alliance.Blue ? Alliance.Red : Alliance.Blue;
     }
 
