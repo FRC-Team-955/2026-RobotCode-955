@@ -70,8 +70,12 @@ public class GamePieceVision implements Periodic {
                     continue;
                 }
                 var robotPose = new Pose3d(robotPose2d.get());
+
+                // Based on https://github.com/Mechanical-Advantage/RobotCode2026Public/blob/main/src/main/java/org/littletonrobotics/frc2026/ObjectDetection.java#L105
+                // Copyright (c) 2025-2026 Littleton Robotics
+                // http://github.com/Mechanical-Advantage
                 Translation2d pitchYawTranslation =
-                        new Translation2d(Math.tan(observation.yawRad() * targetMultiplier), Math.tan(-observation.pitchRad() * targetMultiplier))
+                        new Translation2d(Math.tan(observation.yawRad() * txtyMultiplier.get()), Math.tan(-observation.pitchRad() * txtyMultiplier.get()))
                                 .rotateBy(new Rotation2d(-metadata.robotToCamera.getRotation().getX()));
                 targetXYPoints.add(pitchYawTranslation);
                 double targetYaw = Math.atan(pitchYawTranslation.getX());
@@ -81,6 +85,7 @@ public class GamePieceVision implements Periodic {
                         (-metadata.robotToCamera.getZ() + (FieldConstants.fuelDiameter / 2))
                                 / Math.tan(-metadata.robotToCamera.getRotation().getY() + targetPitch)
                                 / Math.cos(targetYaw);
+
                 Pose2d robotToCameraPose2d = new Pose3d(metadata.robotToCamera.getTranslation(), metadata.robotToCamera.getRotation()).toPose2d();
                 Transform2d robotToCameraTransform2d = new Transform2d(robotToCameraPose2d.getTranslation(), robotToCameraPose2d.getRotation());
 
