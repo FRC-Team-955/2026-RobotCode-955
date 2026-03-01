@@ -5,7 +5,6 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Timer;
 import frc.lib.Util;
 import frc.lib.subsystem.Periodic;
-import frc.robot.BuildConstants;
 import frc.robot.FieldConstants;
 import frc.robot.RobotState;
 import lombok.Getter;
@@ -75,14 +74,8 @@ public class GamePieceVision implements Periodic {
                 // Based on https://github.com/Mechanical-Advantage/RobotCode2026Public/blob/main/src/main/java/org/littletonrobotics/frc2026/ObjectDetection.java#L105
                 // Copyright (c) 2025-2026 Littleton Robotics
                 // http://github.com/Mechanical-Advantage
-                double yawRad = BuildConstants.mode == BuildConstants.Mode.SIM
-                        ? observation.yawRad()
-                        : observation.yawRad() * txtyMultiplier.get();
-                double pitchRad = -(BuildConstants.mode == BuildConstants.Mode.SIM
-                        ? observation.pitchRad()
-                        : observation.pitchRad() * txtyMultiplier.get());
                 Translation2d pitchYawTranslation =
-                        new Translation2d(Math.tan(yawRad), Math.tan(pitchRad))
+                        new Translation2d(Math.tan(observation.yawRad()), Math.tan(-observation.pitchRad()))
                                 .rotateBy(new Rotation2d(-metadata.robotToCamera.getRotation().getX()));
                 targetXYPoints.add(pitchYawTranslation);
                 double targetYaw = Math.atan(pitchYawTranslation.getX());
