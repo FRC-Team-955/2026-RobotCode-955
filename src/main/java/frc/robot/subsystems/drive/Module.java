@@ -36,6 +36,7 @@ public class Module {
     private final Alert driveDisconnectedAlert;
     private final Alert turnDisconnectedAlert;
     private final Alert turnEncoderDisconnectedAlert;
+    private final Alert absolutePIDModeAlert
 
     public Module(ModuleIO io, int index) {
         this.io = io;
@@ -44,6 +45,7 @@ public class Module {
         driveDisconnectedAlert = new Alert("Disconnected drive motor on module " + index + ".", AlertType.kError);
         turnDisconnectedAlert = new Alert("Disconnected turn motor on module " + index + ".", AlertType.kError);
         turnEncoderDisconnectedAlert = new Alert("Disconnected turn encoder on module " + index + ".", AlertType.kError);
+        absolutePIDModeAlert = new Alert("Absolute PID mode is enabled.", Alert.AlertType.kWarning);
     }
 
     public void updateAndProcessInputs() {
@@ -56,6 +58,7 @@ public class Module {
         driveDisconnectedAlert.set(!inputs.driveConnected);
         turnDisconnectedAlert.set(!inputs.turnConnected);
         turnEncoderDisconnectedAlert.set(!inputs.turnAbsoluteEncoderConnected);
+        absolutePIDModeAlert.set(OperatorDashboard.get().absolutePIDMode.get());
     }
 
     public void runSetpoint(SwerveModuleState state) {

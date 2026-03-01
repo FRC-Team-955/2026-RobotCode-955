@@ -69,7 +69,6 @@ public class OperatorDashboard implements Periodic {
     private final Alert disabledCANrangeAlert = new Alert("CANrange is disabled.", Alert.AlertType.kWarning);
     private final Alert smudgesNotZeroAlert = new Alert("Smudges are not zero.", Alert.AlertType.kWarning);
     private final Alert disableShiftTrackingAlert = new Alert("Disable shift tracking is enabled.", Alert.AlertType.kWarning);
-    private final Alert absolutePIDModeAlert = new Alert("Absolute PID mode is enabled.", Alert.AlertType.kWarning);
 
     private final Debouncer lowBatteryDebouncer = new Debouncer(10.0, Debouncer.DebounceType.kRising);
 
