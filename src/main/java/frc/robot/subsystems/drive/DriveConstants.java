@@ -82,10 +82,10 @@ public class DriveConstants {
         case REAL, REPLAY -> new ModuleConfig(
                 new LoggedTunablePIDF("Drive/DriveGains")
                         .withS(0.19, StaticFeedforwardSignValue.UseVelocitySign)
-                        .withV(0.125)
+                        .withV(0.109)
                         .withA(0.005),
                 new LoggedTunablePIDF("Drive/TurnGains")
-                        .withP(5)
+                        .withP(10.0)
                         .withD(0.04),
                 true,
                 false,
