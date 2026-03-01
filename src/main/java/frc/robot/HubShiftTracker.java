@@ -29,8 +29,11 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.Util;
 import frc.lib.subsystem.Periodic;
 import frc.robot.controller.Controller;
+import frc.robot.shooting.ShootingKinematics;
 import lombok.Getter;
 import org.littletonrobotics.junction.Logger;
+
+import java.util.function.DoubleSupplier;
 
 /**
  * https://github.com/Mechanical-Advantage/RobotCode2026Public/blob/main/src/main/java/org/littletonrobotics/frc2026/util/HubShiftUtil.java
@@ -38,6 +41,7 @@ import org.littletonrobotics.junction.Logger;
 public class HubShiftTracker implements Periodic {
     private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
     private static final Controller controller = Controller.get();
+    private static final ShootingKinematics shootingKinematics = ShootingKinematics.get();
 
     public enum ShiftEnum {
         TRANSITION,
@@ -60,8 +64,8 @@ public class HubShiftTracker implements Periodic {
     private static final double minFuelCountDelay = 1.0;
     private static final double maxFuelCountDelay = 2.0;
     private static final double shiftEndFuelCountExtension = 3.0;
-    private static final double approachingActiveFudge = -1 * minFuelCountDelay;
-    private static final double endingActiveFudge = shiftEndFuelCountExtension + -1 * maxFuelCountDelay;
+    private static final DoubleSupplier approachingActiveFudgeSupplier = () -> -1 * (minFuelCountDelay + shootingKinematics.getShootingParameters().timeOfFlightSeconds().orElse(0.0));
+    private static final DoubleSupplier endingActiveFudgeSupplier = () -> shiftEndFuelCountExtension + -1 * (maxFuelCountDelay + shootingKinematics.getShootingParameters().timeOfFlightSeconds().orElse(0.0));
 
     private static final double autoEndTime = 20.0;
     private static final boolean[] activeSchedule = {true, true, false, true, false, true};
@@ -108,6 +112,9 @@ public class HubShiftTracker implements Periodic {
         Logger.recordOutput("HubShiftTracker/CurrentShift", shiftInfo.currentShift());
         Logger.recordOutput("HubShiftTracker/RemainingTime", shiftInfo.remainingTime());
         Logger.recordOutput("HubShiftTracker/Active", shiftInfo.active());
+
+        ShiftInfo officialShiftInfo = getOfficialShiftInfo();
+        Logger.recordOutput("HubShiftTracker/OfficialActive", officialShiftInfo.active());
     }
 
     private Alliance getFirstActiveAlliance() {
@@ -194,8 +201,7 @@ public class HubShiftTracker implements Periodic {
             active = currentSchedule[currentShiftIndex];
             currentShift = shiftsEnums[currentShiftIndex];
         }
-        ShiftInfo shiftInfo = new ShiftInfo(currentShift, stateTimeElapsed, stateTimeRemaining, active);
-        return shiftInfo;
+        return new ShiftInfo(currentShift, stateTimeElapsed, stateTimeRemaining, active);
     }
 
     private ShiftInfo getOfficialShiftInfo() {
@@ -204,6 +210,13 @@ public class HubShiftTracker implements Periodic {
 
     private ShiftInfo getShiftedShiftInfo() {
         boolean[] shiftSchedule = getSchedule();
+
+        double endingActiveFudge = endingActiveFudgeSupplier.getAsDouble();
+        Logger.recordOutput("HubShiftTracker/EndingActiveFudge", endingActiveFudge);
+
+        double approachingActiveFudge = approachingActiveFudgeSupplier.getAsDouble();
+        Logger.recordOutput("HubShiftTracker/ApproachingActiveFudge", approachingActiveFudge);
+
         if (shiftSchedule[1]) {
             // Starting active
             double[] shiftedShiftStartTimes = {

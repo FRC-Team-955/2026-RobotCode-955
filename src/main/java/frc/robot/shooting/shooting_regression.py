@@ -15,7 +15,8 @@ DEBUG_SHOT_ROBOT_RADIAL_VELOCITY_RANGE = 5
 
 MAGNUS_EFFECT_ENABLED = False
 
-fig, ax = plt.subplots(subplot_kw=dict(projection="3d"))
+if DEBUG_SHOT:
+    fig, ax = plt.subplots(subplot_kw=dict(projection="3d"))
 
 # All length quantities are in meters
 
@@ -35,8 +36,9 @@ z_initial_base = bottom_of_frame_rails_to_center_of_wheels + wheel_radius + bott
 
 # TODO FIX HEIGHT
 hubz = 72 * 2.54 / 100
-# Add some clearance to the top of the hub edge (15.5 + clearance)
-hub_edgez = hubz + (15.5 + 5) * 2.54 / 100 + fuel_radius
+# 72 inches is the height of the edge
+# For clearance, add the fuel radius + 10 inches
+hub_edgez = hubz + 10 * 2.54 / 100 + fuel_radius
 hub_edgex_offset = -24 * 2.54 / 100
 
 dt = 0.005
@@ -237,8 +239,9 @@ def calculate_shooting_params_kinematics(distance, robot_radial_vel):
 def optimize_shot(distance, robot_radial_vel):
     hubx = distance
     hub_edgex = hubx + hub_edgex_offset
-    ax.scatter(hubx, 0, hubz, c="red")
-    ax.scatter(hub_edgex, 0, hub_edgez, c="red")
+    if DEBUG_SHOT:
+        ax.scatter(hubx, 0, hubz, c="red")
+        ax.scatter(hub_edgex, 0, hub_edgez, c="red")
 
     v_initial, angle_initial = calculate_shooting_params_kinematics(distance, robot_radial_vel)
 
@@ -294,12 +297,16 @@ def optimize_shot(distance, robot_radial_vel):
         print(f"Optimization failed.")
         print(f"\tdistance = {distance}, robot_radial_vel = {robot_radial_vel}")
         print(f"\tres = {res}")
-        return None, None
+        return None, None, None
 
     v_final, angle_final = res.x
 
+    steps = len(calculate_trajectory_iterative(v_final, angle_final, robot_radial_vel)[0])
+    tof = t[steps - 1]
+
     if DEBUG_SHOT:
         print(res)
+        print(f"tof: {tof}")
         # ax.plot(*calculate_trajectory_kinematics(v_initial, angle_initial, robot_radial_vel), label="Simple Kinematics (Initial)")
         # ax.plot(*calculate_trajectory_kinematics(v_final, angle_final, robot_radial_vel), label="Simple Kinematics (Final)")
         # ax.plot(*calculate_trajectory_iterative(v_initial, angle_initial, robot_radial_vel), label="Iterative Simulation (Initial)")
@@ -308,7 +315,7 @@ def optimize_shot(distance, robot_radial_vel):
             label="Iterative Simulation (Final)" if not DEBUG_RANGE else None
         )
 
-    return v_final, angle_final
+    return v_final, angle_final, tof
 
 if DEBUG_SHOT:
     if DEBUG_RANGE:
@@ -338,12 +345,13 @@ else:
             progress_count = f"{counter}/{len(worker_distance_velocity_pairs)}"
             progress_percent = round(float(counter) / float(len(worker_distance_velocity_pairs)) * 100)
 
-            v, angle = optimize_shot(distance, velocity)
-            if v is None and angle is None:
+            v, angle, tof = optimize_shot(distance, velocity)
+            if v is None and angle is None and tof is None:
                 print(
                     f"[{worker_index}] {progress_count} FAILED (distance = {distance}, velocity = {velocity})")
                 continue
-            shots.append(((distance, velocity), (v, angle)))
+            # the two tuples need to be the same length for numpy to be happy
+            shots.append(((distance, velocity, 0), (v, angle, tof)))
             print(f"[{worker_index}] {progress_count}\t{progress_percent}%")
 
         end_time_worker = time()
@@ -399,74 +407,94 @@ else:
         X = (all_shots[:, 0, 0], all_shots[:, 0, 1])
         y_vel = all_shots[:, 1, 0]
         y_angle = all_shots[:, 1, 1]
+        y_tof = all_shots[:, 1, 2]
 
-        print(X, y_vel, y_angle)
+        print("X", X)
+        print("y_vel", y_vel)
+        print("y_angle", y_angle)
+        print("y_tof", y_tof)
 
-        def f(X, i0, i1, i2, i3, i4, i5, i6):  # i7, i8, i9):
+        def f(X, i0, i1, i2, i3, i4, i5):  # , i6, i7, i8, i9):
+            x = X[0]
+            y = X[1]
             return (
                     i0 +
-                    i1 * X[0] +
-                    i2 * X[1] +
-                    i3 * X[0] * X[1] +
-                    i4 * X[0] ** 2 +
-                    i5 * X[1] ** 2 +
-                    i6 * X[0] ** 2 * X[1] ** 2  # +
-                # i7 * X[0] ** 3 +
-                # i8 * X[1] ** 3 +
-                # i9 * X[0] ** 3 * X[1] ** 3
+                    + i1 * x
+                    + i2 * y
+                    + i3 * x * y
+                    + i4 * x * x
+                    + i5 * y * y
+                # + i6 * x * x * y * y
+                # + i7 * x * x * x
+                # + i8 * y * y * y
+                # + i9 * x * x * x * y * y * y
             )
 
-        vel_coeff, vel_cov = curve_fit(f, X, y_vel)
-        vel_equation = (
-            f"{vel_coeff[0]}"
-            f" + {vel_coeff[1]} * x"
-            f" + {vel_coeff[2]} * y"
-            f" + {vel_coeff[3]} * x * y"
-            f" + {vel_coeff[4]} * x * x"
-            f" + {vel_coeff[5]} * y * y"
-            f" + {vel_coeff[6]} * x * x * y * y"
-            # f" + {vel_coeff[7]} * x * x * x"
-            # f" + {vel_coeff[8]} * y * y * y"
-            # f" + {vel_coeff[9]} * x * x * x * y * y * y"
-        )
-        print(f"vel: {vel_equation}")
-        print(vel_cov)
+        def make_regression(X, y):
+            coeff, cov = curve_fit(f, X, y)
+            equation = (
+                f"{coeff[0]}"
+                f" + {coeff[1]} * x"
+                f" + {coeff[2]} * y"
+                f" + {coeff[3]} * x * y"
+                f" + {coeff[4]} * x * x"
+                f" + {coeff[5]} * y * y"
+                # f" + {coeff[6]} * x * x * y * y"
+                # f" + {coeff[7]} * x * x * x"
+                # f" + {coeff[8]} * y * y * y"
+                # f" + {coeff[9]} * x * x * x * y * y * y"
+            )
+            print(cov)
+            print(equation)
+            return coeff, equation
+
+        fig, (ax1, ax2, ax3) = plt.subplots(1, 3, subplot_kw=dict(projection="3d"))
+
+        print()
+        print("vel")
+        vel_coeff, vel_equation = make_regression(X, y_vel)
 
         X_reg = np.meshgrid(np.linspace(0, 10, 50), np.linspace(-6, 6, 50))
-        ax.plot_surface(
+        ax1.plot_surface(
             X_reg[0],
             X_reg[1],
             f(X_reg, *vel_coeff),
             label="Velocity regression"
         )
-        ax.scatter(X[0], X[1], y_vel, label="Velocity data", c="g")
+        ax1.scatter(X[0], X[1], y_vel, label="Velocity data")
+        ax1.set(xlabel="Distance", ylabel="Radial velocity", zlabel="Velocity")
+        ax1.legend()
 
-        angle_coeff, angle_cov = curve_fit(f, X, y_angle)
-        angle_equation = (
-            f"{angle_coeff[0]}"
-            f" + {angle_coeff[1]} * x"
-            f" + {angle_coeff[2]} * y"
-            f" + {angle_coeff[3]} * x * y"
-            f" + {angle_coeff[4]} * x * x"
-            f" + {angle_coeff[5]} * y * y"
-            f" + {angle_coeff[6]} * x * x * y * y"
-            # f" + {angle_coeff[7]} * x * x * x"
-            # f" + {angle_coeff[8]} * y * y * y"
-            # f" + {angle_coeff[9]} * x * x * x * y * y * y"
-        )
-        print(f"angle: {angle_equation}")
-        print(angle_cov)
+        print()
+        print("angle")
+        angle_coeff, angle_equation = make_regression(X, y_angle)
 
-        ax.plot_surface(
+        ax2.plot_surface(
             X_reg[0],
             X_reg[1],
             f(X_reg, *angle_coeff),
             label="Angle regression"
         )
-        ax.scatter(X[0], X[1], y_angle, label="Angle data", c="y")
+        ax2.scatter(X[0], X[1], y_angle, label="Angle data")
+        ax2.set(xlabel="Distance", ylabel="Radial velocity", zlabel="Angle")
+        ax2.legend()
+
+        print()
+        print("tof")
+        tof_coeff, tof_equation = make_regression(X, y_tof)
+
+        ax3.plot_surface(
+            X_reg[0],
+            X_reg[1],
+            f(X_reg, *tof_coeff),
+            label="ToF regression"
+        )
+        ax3.scatter(X[0], X[1], y_tof, label="ToF data")
+        ax3.set(xlabel="Distance", ylabel="Radial velocity", zlabel="ToF")
+        ax3.legend()
 
         with open(dirname(realpath(__file__)) + "/ShootingRegression.java", "w") as f:
-            f.write("""package frc.robot;
+            f.write("""package frc.robot.shooting;
 
 /** GENERATED BY shooting_regression.py DO NOT EDIT BY HAND */
 public class ShootingRegression {
@@ -476,18 +504,19 @@ public class ShootingRegression {
         return """ + vel_equation + """;
     }
 
-    public static double calculateHoodAngleRad(double distanceMeters, double radialRobotVelocityMetersPerSec) {
+    /** Calculate shot angle **from the horizontal**. Note that hood angle is from the vertical. */
+    public static double calculateAngleRad(double distanceMeters, double radialRobotVelocityMetersPerSec) {
         double x = distanceMeters;
         double y = radialRobotVelocityMetersPerSec;
-        // Hood angle for vertical shot is 0°
-        // Shooting sim angle for vertical shot is 90°
-        // Shooting sim angle for 15° from vertical is 75°
-        // Therefore, hood angle = 90° - shooting sim angle
-        return Math.PI / 2.0 - (""" + angle_equation + """);
+        return """ + angle_equation + """;
+    }
+
+    public static double calculateToFSeconds(double distanceMeters, double radialRobotVelocityMetersPerSec) {
+        double x = distanceMeters;
+        double y = radialRobotVelocityMetersPerSec;
+        return """ + tof_equation + """;
     }
 }
 """)
 
-        ax.set(label="X", ylabel="Y", zlabel="Z")
-        ax.legend()
         plt.show()

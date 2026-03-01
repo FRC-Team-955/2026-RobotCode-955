@@ -5,16 +5,19 @@ public class ShootingRegression {
     public static double calculateVelocityMetersPerSec(double distanceMeters, double radialRobotVelocityMetersPerSec) {
         double x = distanceMeters;
         double y = radialRobotVelocityMetersPerSec;
-        return 6.648753258939372 + 0.10688477714695434 * x + -0.12431566390300404 * y + -0.06888533841020121 * x * y + 0.05417523533442376 * x * x + 0.05716514765468613 * y * y + -0.0005382931675358387 * x * x * y * y;
+        return 6.383824254336132 + 0.13268783246824992 * x + -0.26797974199950136 * y + -0.05048667740792717 * x * y + 0.05356371692419852 * x * x + 0.041218400581809395 * y * y;
     }
 
-    public static double calculateHoodAngleRad(double distanceMeters, double radialRobotVelocityMetersPerSec) {
+    /** Calculate shot angle **from the horizontal**. Note that hood angle is from the vertical. */
+    public static double calculateAngleRad(double distanceMeters, double radialRobotVelocityMetersPerSec) {
         double x = distanceMeters;
         double y = radialRobotVelocityMetersPerSec;
-        // Hood angle for vertical shot is 0°
-        // Shooting sim angle for vertical shot is 90°
-        // Shooting sim angle for 15° from vertical is 75°
-        // Therefore, hood angle = 90° - shooting sim angle
-        return Math.PI / 2.0 - (1.6036291388689314 + -0.19724795245538537 * x + 0.14655515677175784 * y + -0.009294488738627803 * x * y + 0.015243039052398051 * x * x + 0.005285208224518302 * y * y + -2.8222378721088437e-05 * x * x * y * y);
+        return 1.6885778065891985 + -0.2918614020072098 * x + 0.14691577675952172 * y + -0.009471664701915499 * x * y + 0.02737300907582399 * x * x + 0.005377560298736751 * y * y;
+    }
+
+    public static double calculateToFSeconds(double distanceMeters, double radialRobotVelocityMetersPerSec) {
+        double x = distanceMeters;
+        double y = radialRobotVelocityMetersPerSec;
+        return 1.2078144085482374 + -0.20299379443850193 * x + -0.007083632343521283 * y + 0.0015956184651148618 * x * y + 0.0333283744894027 * x * x + -0.00027356848680938314 * y * y;
     }
 }

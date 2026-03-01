@@ -10,6 +10,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import frc.lib.SlewRateLimiter2d;
 import frc.lib.network.LoggedTunableNumber;
+import frc.robot.FieldConstants;
 import frc.robot.RobotState;
 import frc.robot.controller.Controller;
 import frc.robot.shooting.ShootingKinematics;
@@ -38,7 +39,8 @@ public class DriveJoystickGoal extends DriveGoal {
     private static final LoggedTunableNumber headingOverrideSetpointResetTime = new LoggedTunableNumber("Drive/DriveJoystick/HeadingOverrideSetpointResetTimeSeconds", 0.25);
     private static final LoggedTunableNumber headingOverrideThresholdDegrees = new LoggedTunableNumber("Drive/DriveJoystick/HeadingOverrideThresholdDegrees", 30.0);
 
-    private static final LoggedTunableNumber aimMaxLinearVelocityMetersPerSec = new LoggedTunableNumber("Drive/DriveJoystick/Aim/MaxLinearVelocity", 2);
+    private static final LoggedTunableNumber aimMaxLinearVelocityMetersPerSec = new LoggedTunableNumber("Drive/DriveJoystick/Aim/MaxLinearVelocity", 2.0);
+    private static final LoggedTunableNumber aimDistanceForMaxVelocity = new LoggedTunableNumber("Drive/DriveJoystick/Aim/DistanceForMaxVelocity", 3.0);
     private static final LoggedTunableNumber aimMaxLinearAccelerationMetersPerSecPerSec = new LoggedTunableNumber("Drive/DriveJoystick/Aim/MaxLinearAcceleration", 5);
 
     private static final RobotState robotState = RobotState.get();
@@ -85,6 +87,7 @@ public class DriveJoystickGoal extends DriveGoal {
         //////////////////////////////////////////////////////////////////////
 
         Mode mode = modeSupplier.get();
+        Logger.recordOutput("Drive/DriveJoystick/Mode", mode);
 
         Rotation2d linearDirection = controller.getDriveLinearDirection();
         double linearMagnitude = controller.getDriveLinearMagnitude();
@@ -106,7 +109,7 @@ public class DriveJoystickGoal extends DriveGoal {
                     Logger.recordOutput("Drive/AssistRunning", true);
 
                     // First convert to robot relative
-                    Rotation2d linearDirectionRobotRelative = linearDirection.rotateBy(robotState.getRotation().unaryMinus());
+                    Rotation2d linearDirectionRobotRelative = linearDirection.rotateBy(robotState.getRotation());
 
                     double yDist = new Transform2d(
                             robotState.getPose(),
@@ -115,9 +118,9 @@ public class DriveJoystickGoal extends DriveGoal {
 
                     // Adjust Y (left/right) to go towards game piece
                     // Note that there is a negative sign
-                    linearDirection = new Rotation2d(linearDirectionRobotRelative.getCos(), -assistPID.calculate(yDist, 0))
+                    linearDirection = new Rotation2d(linearDirectionRobotRelative.getCos(), assistPID.calculate(yDist, 0))
                             // Rotate back to field relative
-                            .rotateBy(robotState.getRotation());
+                            .rotateBy(robotState.getRotation().unaryMinus());
                 }
             }
         }
@@ -125,8 +128,11 @@ public class DriveJoystickGoal extends DriveGoal {
         Translation2d linearSetpoint;
         if (mode == Mode.Aim || mode == Mode.AimAndAssist) {
             // Limit linear velocity and acceleration while aiming
+            double maxVelocity = robotState.getTranslation().getDistance(FieldConstants.Hub.topCenterPoint.toTranslation2d()) / aimDistanceForMaxVelocity.get() * aimMaxLinearVelocityMetersPerSec.get();
+            Logger.recordOutput("Drive/DriveJoystick/MaxVelocityAiming", maxVelocity);
+
             linearSetpoint = new Translation2d(
-                    linearMagnitude * aimMaxLinearVelocityMetersPerSec.get(),
+                    linearMagnitude * maxVelocity,
                     linearDirection
             );
             linearSetpoint = aimLinearAccelerationLimiter.calculate(linearSetpoint);
@@ -148,10 +154,11 @@ public class DriveJoystickGoal extends DriveGoal {
         if (
                 headingOverrideEnabledDebouncer.calculate(
                         (
-                                // Stop heading override if we are running and rotate too much on our own
                                 !runningHeadingOverride ||
+                                        // Stop heading override if we are running and rotate too much on our own
+                                        // This means that we should keep running if different is *less* than threshold
                                         Math.abs(robotState.getRotation().getRadians() - headingOverride.getSetpoint())
-                                                > Units.degreesToRadians(headingOverrideThresholdDegrees.get())
+                                                < Units.degreesToRadians(headingOverrideThresholdDegrees.get())
                         ) && controller.getDriveAngularMagnitude() == 0.0
                 ) ||
                         mode == Mode.Aim ||
@@ -190,7 +197,9 @@ public class DriveJoystickGoal extends DriveGoal {
 
             angularSetpoint = controller.getDriveAngularMagnitude() * joystickMaxAngularSpeedRadPerSec;
         }
-        //Logger.recordOutput("Drive/DriveJoystick/HeadingOverrideRunning", runningHeadingOverride);
+        Logger.recordOutput("Drive/DriveJoystick/HeadingOverrideRunning", runningHeadingOverride);
+        Logger.recordOutput("Drive/DriveJoystick/HeadingOverrideSetpoint", headingOverride.getSetpoint());
+        Logger.recordOutput("Drive/DriveJoystick/HeadingOverrideMeasurement", robotState.getRotation().getRadians());
 
         if (
                 (mode == Mode.Aim || mode == Mode.AimAndAssist || mode == Mode.StopWithX) &&

@@ -3,6 +3,7 @@ package frc.robot.subsystems.superstructure;
 import com.ctre.phoenix6.signals.MeasurementHealthValue;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import frc.robot.SimManager;
 import frc.robot.shooting.ShootingKinematics;
@@ -59,7 +60,7 @@ public class SuperstructureIOSim extends SuperstructureIO {
         ) {
             if (
                     Timer.getTimestamp() - lastShotTimestamp > ballShootDelay &&
-                            simManager.intakeSimulation.obtainGamePieceFromIntake()
+                            (simManager.intakeSimulation.obtainGamePieceFromIntake() || DriverStation.isTeleopEnabled())
             ) {
                 lastShotTimestamp = Timer.getTimestamp();
 
@@ -77,6 +78,8 @@ public class SuperstructureIOSim extends SuperstructureIO {
                         // reverse the hood
                         Radians.of(Math.PI / 2.0 + hood.getPositionRad())
                 );
+                Logger.recordOutput("ShootingKinematics/ProjectileVelocity", gamePiece.getVelocity3dMPS());
+                Logger.recordOutput("ShootingKinematics/ProjectileSpeedRobotRelative", Units.rotationsPerMinuteToRadiansPerSecond(flywheel.getVelocityRPM()) * FlywheelConstants.flywheelRadiusMeters);
                 SimulatedArena.getInstance().addGamePieceProjectile(gamePiece);
             }
         }

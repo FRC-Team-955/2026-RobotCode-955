@@ -82,10 +82,10 @@ public class DriveConstants {
         case REAL, REPLAY -> new ModuleConfig(
                 new LoggedTunablePIDF("Drive/DriveGains")
                         .withS(0.19, StaticFeedforwardSignValue.UseVelocitySign)
-                        .withV(0.125)
+                        .withV(0.109)
                         .withA(0.005),
                 new LoggedTunablePIDF("Drive/TurnGains")
-                        .withP(5)
+                        .withP(10.0)
                         .withD(0.04),
                 true,
                 false,
@@ -132,10 +132,10 @@ public class DriveConstants {
             // to the absolute encoder offset parameter in the IO layer constructor.
             // Module order: FL, FR, BL, BR
             case REAL -> new ModuleIO[]{
-                    new ModuleIOTalonFXSparkMaxCANcoder(0, 2, 1, 9, -1.64),
-                    new ModuleIOTalonFXSparkMaxCANcoder(1, 4, 7, 10, -2.965),
-                    new ModuleIOTalonFXSparkMaxCANcoder(2, 6, 5, 11, -0.594),
-                    new ModuleIOTalonFXSparkMaxCANcoder(3, 8, 3, 12, 2.753),
+                    new ModuleIOTalonFXSparkMaxCANcoder(0, 2, 1, 9, -1.609),
+                    new ModuleIOTalonFXSparkMaxCANcoder(1, 4, 7, 10, 3.12),
+                    new ModuleIOTalonFXSparkMaxCANcoder(2, 6, 5, 11, -0.589),
+                    new ModuleIOTalonFXSparkMaxCANcoder(3, 8, 3, 12, 2.755),
             };
             case SIM -> new ModuleIO[]{
                     new ModuleIOSim(0),

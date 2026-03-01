@@ -42,16 +42,16 @@ public class AprilTagVisionConstants {
     @RequiredArgsConstructor
     enum Camera {
         // BrainpanCam - ThriftyCam
-        BrainPanCam(
+        BrainpanCam(
                 new Transform3d(
-                        Units.inchesToMeters(-12.225210), Units.inchesToMeters(4.754484), Units.inchesToMeters(7.773574),
+                        Units.inchesToMeters(-11.441561), Units.inchesToMeters(4.404409), Units.inchesToMeters(7.451625),
                         // Rotation order matters
-                        new Rotation3d(0.0, Units.degreesToRadians(-24.034439), 0.0)
-                                .rotateBy(new Rotation3d(0.0, 0.0, Units.degreesToRadians(180 - 18.329104)))
+                        new Rotation3d(0.0, Units.degreesToRadians(-30.0), 0.0)
+                                .rotateBy(new Rotation3d(0.0, 0.0, Units.degreesToRadians(180 - 10.0)))
                 ),
                 (cam) -> switch (BuildConstants.mode) {
-                    case REAL -> new AprilTagVisionIOPhotonVision("BrainPanCam");
-                    case SIM -> new AprilTagVisionIOPhotonVisionSim("BrainPanCam", cam.robotToCamera);
+                    case REAL -> new AprilTagVisionIOPhotonVision("BrainpanCam");
+                    case SIM -> new AprilTagVisionIOPhotonVisionSim("BrainpanCam", cam.robotToCamera);
                     case REPLAY -> new AprilTagVisionIO();
                 },
                 // Relatively stable, even at long distance
@@ -61,7 +61,6 @@ public class AprilTagVisionConstants {
         ShooterCam(
                 new Transform3d(
                         Units.inchesToMeters(-11.668592), Units.inchesToMeters(-13.462841), Units.inchesToMeters(7.136914),
-//                        new Rotation3d(new Quaternion(-0.947, -0.032, 0.224, -0.229))
                         // Rotation order matters
                         new Rotation3d(0.0, Units.degreesToRadians(-30.0), 0.0)
                                 .rotateBy(new Rotation3d(0.0, 0.0, Units.degreesToRadians(-180.0 + 25.0)))
@@ -76,21 +75,21 @@ public class AprilTagVisionConstants {
                 1.0
         ),
         // HopperCam - OV2311
-//        YellowCam(
-//                new Transform3d(
-//                        Units.inchesToMeters(-5.549223), Units.inchesToMeters(12.125000), Units.inchesToMeters(20.060018),
-//                        // Rotation order matters
-//                        new Rotation3d(0.0, Units.degreesToRadians(-35), 0.0)
-//                ),
-//                (cam) -> switch (BuildConstants.mode) {
-//                    case REAL -> new AprilTagVisionIOPhotonVision("YellowCam");
-//                    case SIM -> new AprilTagVisionIOPhotonVisionSim("YellowCam", cam.robotToCamera);
-//                    case REPLAY -> new AprilTagVisionIO();
-//                },
-//                // Trust more at close distance, less at long distance
-//                2.0,
-//                1.0
-//        ),
+        //        YellowCam(
+        //                new Transform3d(
+        //                        Units.inchesToMeters(-5.549223), Units.inchesToMeters(12.125000), Units.inchesToMeters(20.060018),
+        //                        // Rotation order matters
+        //                        new Rotation3d(0.0, Units.degreesToRadians(-35), 0.0)
+        //                ),
+        //                (cam) -> switch (BuildConstants.mode) {
+        //                    case REAL -> new AprilTagVisionIOPhotonVision("YellowCam");
+        //                    case SIM -> new AprilTagVisionIOPhotonVisionSim("YellowCam", cam.robotToCamera);
+        //                    case REPLAY -> new AprilTagVisionIO();
+        //                },
+        //                // Trust more at close distance, less at long distance
+        //                2.0,
+        //                1.0
+        //        ),
         ;
 
         final Transform3d robotToCamera;

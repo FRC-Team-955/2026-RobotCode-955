@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj.util.Color8Bit;
 import frc.lib.Util;
 import frc.lib.subsystem.Periodic;
 import frc.robot.Constants;
+import frc.robot.HubShiftTracker;
 import frc.robot.OperatorDashboard;
 import frc.robot.autos.AutoManager;
 import frc.robot.shooting.ShootingKinematics;
@@ -105,7 +106,7 @@ public class LEDs implements Periodic {
             } else if (autoManager.getClosestAutoStartingPose().isPresent() && operatorDashboard.autoChosen.get()) {
                 LEDPatterns.autoPlacementProgress(autoManager::getPlacementProgress).applyTo(buffer);
             } else {
-            LEDPatterns.autoReady.applyTo(buffer);
+                LEDPatterns.autoReady.applyTo(buffer);
             }
         } else if (DriverStation.isEnabled()) {
             boolean endgame = DriverStation.isTeleop() &&
@@ -123,10 +124,13 @@ public class LEDs implements Periodic {
 
                 LEDPattern superstructurePattern = switch (superstructure.getGoal()) {
                     case IDLE -> null;
-                    case SHOOT -> shootingKinematics.isValidShootingParameters() &&
-                            shootingKinematics.isShootingParametersMet()
+                    case SHOOT -> shootingKinematics.isShootingParametersMet()
                             ? LEDPatterns.shooting
-                            : LEDPatterns.aiming;
+                            : (
+                            shootingKinematics.isShiftMet()
+                                    ? LEDPatterns.aiming
+                                    : LEDPatterns.waitingForShift
+                    );
                     case EJECT -> LEDPatterns.eject;
                     case HOME_HOOD -> LEDPatterns.homing;
                 };
@@ -138,6 +142,8 @@ public class LEDs implements Periodic {
                     superintakePattern.applyTo(buffer);
                 } else if (superstructurePattern != null) {
                     superstructurePattern.applyTo(buffer);
+                } else if (HubShiftTracker.get().getShiftInfo().remainingTime() < 3.0) {
+                    LEDPatterns.hubSwitch.applyTo(buffer);
                 } else {
                     LEDPatterns.idle.applyTo(buffer);
                 }

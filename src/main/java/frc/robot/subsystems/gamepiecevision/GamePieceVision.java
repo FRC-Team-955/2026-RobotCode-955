@@ -63,7 +63,6 @@ public class GamePieceVision implements Periodic {
             Camera metadata = cam.getKey();
             CameraData data = cam.getValue();
 
-
             // Process observations
             for (var observation : data.inputs.targetObservations) {
                 var robotPose2d = robotState.getPoseAtTimestamp(observation.timestampSeconds());
@@ -72,7 +71,7 @@ public class GamePieceVision implements Periodic {
                 }
                 var robotPose = new Pose3d(robotPose2d.get());
                 Translation2d pitchYawTranslation =
-                        new Translation2d(Math.tan(observation.yawRad()), Math.tan(-observation.pitchRad()))
+                        new Translation2d(Math.tan(observation.yawRad() * targetMultiplier), Math.tan(-observation.pitchRad() * targetMultiplier))
                                 .rotateBy(new Rotation2d(-metadata.robotToCamera.getRotation().getX()));
                 targetXYPoints.add(pitchYawTranslation);
                 double targetYaw = Math.atan(pitchYawTranslation.getX());
@@ -93,16 +92,12 @@ public class GamePieceVision implements Periodic {
                                 .transformBy(new Transform2d(new Translation2d(cameraToFuelNorm, 0), Rotation2d.kZero));
                 Pose3d fuelPose = new Pose3d(fieldToFuel).plus(new Transform3d(0, 0, FieldConstants.fuelDiameter / 2.0, new Rotation3d()));
 
-
-                //
-
                 newlySeenTargets.put(
                         fuelPose.getTranslation().toTranslation2d(),
                         observation.timestampSeconds()
                 );
             }
         }
-        // robotPose.transformBy(new Transform3d(robotToTarget, new Rotation3d()))
 
         // Handle newly seen targets
         for (var target : newlySeenTargets.keySet()) {
@@ -114,10 +109,6 @@ public class GamePieceVision implements Periodic {
 
         // Remove expired coral
         targetsToLastSeen.values().removeIf(lastSeen -> Timer.getTimestamp() - lastSeen > expireTimeSeconds);
-
-        // For now, just sort by distance
-        // In the future, we should find the biggest group of targets
-
 
         List<List<Translation2d>> clusters = new ArrayList<>();
 
@@ -144,11 +135,6 @@ public class GamePieceVision implements Periodic {
             }
         }
 
-        //bestTargets = targetsToLastSeen.keySet().stream().sorted((a, b) -> {
-        //    double aDist = a.getDistance(robotState.getTranslation());
-        //    double bDist = b.getDistance(robotState.getTranslation());
-        //    return Double.compare(aDist, bDist);
-        //}).toList();
         bestTargets = clusters.stream()
                 .max(Comparator.comparing(List::size))
                 .orElse(List.of())
@@ -156,12 +142,9 @@ public class GamePieceVision implements Periodic {
                 .sorted(Comparator.comparingDouble(t -> t.getDistance(robotState.getTranslation())))
                 .toList();
 
-
         Logger.recordOutput("GamePieceVision/TargetXYPoints", targetXYPoints.toArray(Translation2d[]::new));
         Logger.recordOutput("GamePieceVision/BestTargets", bestTargets.toArray(Translation2d[]::new));
     }
-    // Log results
-
 
     @Override
     public void periodicAfterCommands() {

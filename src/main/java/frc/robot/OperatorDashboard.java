@@ -47,7 +47,7 @@ public class OperatorDashboard implements Periodic {
     public final LoggedNetworkNumberExt hoodSmudgeDegrees = new LoggedNetworkNumberExt(prefix + "HoodSmudgeDegrees", 0.0);
     public final LoggedNetworkBooleanExt lostAuto = new LoggedNetworkBooleanExt(prefix + "LostAuto", false);
     public final LoggedNetworkBooleanExt wonAuto = new LoggedNetworkBooleanExt(prefix + "WonAuto", false);
-    public final LoggedNetworkBooleanExt disableShiftTracking = new LoggedNetworkBooleanExt(prefix + "DisableShiftTracking", false);
+    public final LoggedNetworkBooleanExt disableShiftTracking = new LoggedNetworkBooleanExt(prefix + "DisableShiftTracking", BuildConstants.mode == BuildConstants.Mode.SIM);
 
     @Getter
     private ScoringMode selectedScoringMode = ScoringMode.ShootAndPassAutomatic;
