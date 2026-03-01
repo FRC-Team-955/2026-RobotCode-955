@@ -47,22 +47,13 @@ public class ShootingKinematics implements Periodic {
     private static final InterpolatingDoubleTreeMap velocityToRPM = new InterpolatingDoubleTreeMap();
 
     static {
-        velocityToRPM.put(ShootingRegression.calculateVelocityMetersPerSec(1.5, 0.0), 1800.0);
-        velocityToRPM.put(ShootingRegression.calculateVelocityMetersPerSec(1.75, 0.0), 1900.0);
-        velocityToRPM.put(ShootingRegression.calculateVelocityMetersPerSec(2.0, 0.0), 2000.0);
-        velocityToRPM.put(ShootingRegression.calculateVelocityMetersPerSec(2.25, 0.0), 2000.0);
-        velocityToRPM.put(ShootingRegression.calculateVelocityMetersPerSec(2.5, 0.0), 2000.0);
-        velocityToRPM.put(ShootingRegression.calculateVelocityMetersPerSec(2.75, 0.0), 2000.0);
-        velocityToRPM.put(ShootingRegression.calculateVelocityMetersPerSec(3.0, 0.0), 2000.0);
-        velocityToRPM.put(ShootingRegression.calculateVelocityMetersPerSec(3.25, 0.0), 2100.0);
-        velocityToRPM.put(ShootingRegression.calculateVelocityMetersPerSec(3.5, 0.0), 2100.0);
-        velocityToRPM.put(ShootingRegression.calculateVelocityMetersPerSec(3.75, 0.0), 2200.0);
-        velocityToRPM.put(ShootingRegression.calculateVelocityMetersPerSec(4.0, 0.0), 2200.0);
-        velocityToRPM.put(ShootingRegression.calculateVelocityMetersPerSec(4.25, 0.0), 2200.0);
-        velocityToRPM.put(ShootingRegression.calculateVelocityMetersPerSec(4.5, 0.0), 2300.0);
-        velocityToRPM.put(ShootingRegression.calculateVelocityMetersPerSec(4.75, 0.0), 2400.0);
-        velocityToRPM.put(ShootingRegression.calculateVelocityMetersPerSec(5.0, 0.0), 2400.0);
-        velocityToRPM.put(ShootingRegression.calculateVelocityMetersPerSec(5.25, 0.0), 2500.0);
+        velocityToRPM.put(6.69, 1800.0);
+        velocityToRPM.put(6.87, 1900.0);
+        velocityToRPM.put(7.2, 2000.0);
+        velocityToRPM.put(7.32, 2050.0);
+        velocityToRPM.put(7.62, 2150.0);
+        velocityToRPM.put(8.13, 2500.0); // ???? retune
+
     }
 
     private static final RobotState robotState = RobotState.get();
@@ -83,6 +74,7 @@ public class ShootingKinematics implements Periodic {
 
     public static synchronized ShootingKinematics get() {
         if (instance == null) {
+
             instance = new ShootingKinematics();
         }
 
@@ -103,7 +95,7 @@ public class ShootingKinematics implements Periodic {
             shootingParameters = getShootingParametersManual();
         }
         shootingParameters = new ShootingParameters(
-                shootingParameters.velocityRPM() + operatorDashboard.flywheelSmudgeRPM.get(),
+                0 * shootingParameters.velocityRPM() + operatorDashboard.flywheelSmudgeRPM.get(),
                 shootingParameters.angleRad() + operatorDashboard.hoodSmudgeDegrees.get(),
                 shootingParameters.headingRad(),
                 shootingParameters.timeOfFlightSeconds(),
@@ -198,7 +190,7 @@ public class ShootingKinematics implements Periodic {
         FuelExitToHub fuelExitToHub = getFuelExitToHub();
 
         double xyDist = fuelExitToHub.transform().getTranslation().toTranslation2d().getNorm();
-        // Logger.recordOutput("ShootingKinematics/XYDist", xyDist);
+        Logger.recordOutput("ShootingKinematics/XYDist", xyDist);
 
         // 1. Compute velocity and angle from regression and rotate shooting vector into field coordinates
         // Note that using fuel exit pose instead of robot pose automatically takes care
@@ -250,7 +242,7 @@ public class ShootingKinematics implements Periodic {
         double v = Math.sqrt(vx * vx + vy * vy + vz * vz);
         double phi = Math.asin(vz / v);
         double theta = Math.atan2(vy, vx);
-        //Logger.recordOutput("ShootingKinematics/Velocity", v);
+        Logger.recordOutput("ShootingKinematics/ShootingParameters/VelocityMetersPerSec", v);
         //Logger.recordOutput("ShootingKinematics/Phi", phi);
         //Logger.recordOutput("ShootingKinematics/Theta", theta);
 
