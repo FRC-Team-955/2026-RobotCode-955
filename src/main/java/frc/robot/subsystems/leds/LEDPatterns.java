@@ -1,12 +1,11 @@
 package frc.robot.subsystems.leds;
 
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.LEDPattern;
-import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.util.Color;
 
 import java.util.function.DoubleSupplier;
 
+import static edu.wpi.first.units.Units.Hertz;
 import static edu.wpi.first.units.Units.Seconds;
 
 /**
@@ -43,31 +42,6 @@ public class LEDPatterns {
         };
     }
 
-    /** Based on 749's 2024 code */
-    private static LEDPattern wave(Color backgroundColor, Color waveColor, double periodSeconds) {
-        double lengthMultiplier = 3.0;
-        double sinMultiplier = 2.0 / lengthMultiplier;
-        double periodMicros = periodSeconds * 1_000_000.0;
-
-        return (reader, writer) -> {
-            int length = reader.getLength();
-            double extendedLength = lengthMultiplier * length;
-
-            double percent = RobotController.getTime() % periodMicros / periodMicros;
-            long offset = Math.round(percent * extendedLength);
-            for (int i = 0; i < length; i++) {
-                double localPercent = (i - offset) % (extendedLength) / length;
-
-                double interp = Math.sin(sinMultiplier * Math.PI * localPercent);
-
-                double r = MathUtil.interpolate(backgroundColor.red, waveColor.red, interp);
-                double g = MathUtil.interpolate(backgroundColor.green, waveColor.green, interp);
-                double b = MathUtil.interpolate(backgroundColor.blue, waveColor.blue, interp);
-                writer.setLED(i, new Color(r, g, b));
-            }
-        };
-    }
-
     public static LEDPattern autoPlacementProgress(DoubleSupplier progressSupplier) {
         return LEDPattern.solid(Color.kGreen).mask(LEDPattern.progressMaskLayer(progressSupplier));
     }
@@ -79,7 +53,12 @@ public class LEDPatterns {
     public static final LEDPattern autoNotChosen = LEDPattern.solid(Color.kBlue).blink(Seconds.of(1));
     public static final LEDPattern badAutoPlacement = LEDPattern.solid(Color.kYellow).blink(Seconds.of(0.5));
     public static final LEDPattern visionDisconnected = LEDPattern.solid(Color.kRed).blink(Seconds.of(0.5));
-    public static final LEDPattern autoReady = wave(Color.kRed, new Color(255, 0, 128), 2.0);
+    public static final LEDPattern autoReady = LEDPattern.gradient(
+            LEDPattern.GradientType.kContinuous,
+            Color.kRed,
+            new Color(255, 0, 128)
+    ).scrollAtRelativeSpeed(Hertz.of(2));
+
     // Enabled
     public static final LEDPattern endgame = LEDPattern.solid(Color.kPurple).blink(Seconds.of(0.5));
     public static final LEDPattern eject = LEDPattern.solid(Color.kRed).blink(Seconds.of(0.1));
@@ -89,5 +68,9 @@ public class LEDPatterns {
     public static final LEDPattern waitingForShift = LEDPattern.solid(Color.kPink).blink(Seconds.of(0.1));
     public static final LEDPattern homing = LEDPattern.solid(Color.kBlue);
     public static final LEDPattern idle = LEDPattern.kOff;
-    public static final LEDPattern hubSwitch = wave(Color.kRed, Color.kCyan, 2.0);
+    public static final LEDPattern hubSwitch = LEDPattern.gradient(
+            LEDPattern.GradientType.kContinuous,
+            Color.kRed,
+            Color.kBlue
+    ).scrollAtRelativeSpeed(Hertz.of(2));
 }
