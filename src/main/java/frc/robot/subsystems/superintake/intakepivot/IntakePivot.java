@@ -11,6 +11,7 @@ import frc.lib.network.LoggedTunableNumber;
 import frc.lib.subsystem.Periodic;
 import frc.robot.Constants;
 import frc.robot.OperatorDashboard;
+import frc.robot.RobotState;
 import frc.robot.subsystems.superintake.intakepivot.IntakePivotIO.IntakePivotCurrentLimitMode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +27,7 @@ public class IntakePivot implements Periodic {
     private static final LoggedTunableNumber stowSetpointDegrees = new LoggedTunableNumber("Superintake/IntakePivot/Goal/StowDegrees", 70.0);
 
     private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
+    private static final RobotState robotState = RobotState.get();
 
     private final IntakePivotIO io = createIO();
     private final MotorIOInputsAutoLogged inputs = new MotorIOInputsAutoLogged();
@@ -102,8 +104,11 @@ public class IntakePivot implements Periodic {
             // See the comments above the lookaheadState and goalState variables for why we effectively calculate two profiles
 
             double setpointRad = goal.setpointRad.getAsDouble();
+            if (robotState.isInTrench()) {
+                setpointRad = Math.min(setpointRad, maxPositionUnderTrench);
+            }
             setpointRad = MathUtil.clamp(setpointRad, minPositionRad, maxPositionRad);
-//            Logger.recordOutput("Superintake/IntakePivot/OriginalSetpointRad", setpointRad);
+            Logger.recordOutput("Superintake/IntakePivot/OriginalSetpointRad", setpointRad);
             TrapezoidProfile.State wantedState = new TrapezoidProfile.State(setpointRad, 0.0);
 
             if (lastSetpointRad == null || setpointRad != lastSetpointRad) {
