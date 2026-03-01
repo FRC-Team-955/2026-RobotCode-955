@@ -34,7 +34,6 @@ import static frc.robot.subsystems.drive.DriveConstants.moduleConfig;
  * constants from Phoenix. Simulation is always based on voltage control.
  */
 public class ModuleIOSim extends ModuleIO {
-
     private final SwerveModuleSimulation moduleSimulation;
     private final SimulatedMotorController.GenericMotorController driveMotor;
     private final SimulatedMotorController.GenericMotorController turnMotor;
@@ -88,6 +87,7 @@ public class ModuleIOSim extends ModuleIO {
         inputs.turnConnected = true;
         inputs.turnAbsoluteEncoderConnected = true;
         inputs.turnPositionRad = moduleSimulation.getSteerAbsoluteFacing().getRadians();
+        inputs.turnAbsolutePositionRad = inputs.turnPositionRad;
         inputs.turnVelocityRadPerSec = moduleSimulation.getSteerAbsoluteEncoderSpeed().in(RadiansPerSecond);
         inputs.turnAppliedVolts = turnAppliedVolts;
         inputs.turnCurrentAmps = Math.abs(moduleSimulation.getSteerMotorStatorCurrent().in(Amps));
