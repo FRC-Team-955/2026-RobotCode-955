@@ -36,7 +36,7 @@ public class Module {
     private final Alert driveDisconnectedAlert;
     private final Alert turnDisconnectedAlert;
     private final Alert turnEncoderDisconnectedAlert;
-    private final Alert absolutePIDModeAlert
+    private final Alert absolutePIDModeAlert;
 
     public Module(ModuleIO io, int index) {
         this.io = io;
