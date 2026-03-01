@@ -3,7 +3,6 @@ package frc.robot.shooting;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.geometry.*;
-import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
@@ -20,6 +19,7 @@ import org.littletonrobotics.junction.Logger;
 
 import java.util.OptionalDouble;
 import java.util.function.DoubleFunction;
+import java.util.function.DoubleUnaryOperator;
 
 import static frc.robot.subsystems.drive.DriveConstants.driveConfig;
 
@@ -44,16 +44,21 @@ public class ShootingKinematics implements Periodic {
     );
     public static final Rotation2d fuelExitRotation = Rotation2d.k180deg;
 
-    private static final InterpolatingDoubleTreeMap velocityToRPM = new InterpolatingDoubleTreeMap();
+    //private static final InterpolatingDoubleTreeMap velocityToRPM = new InterpolatingDoubleTreeMap();
+    private static final DoubleUnaryOperator velocityToRPM;
 
     static {
-        velocityToRPM.put(6.69, 1800.0);
-        velocityToRPM.put(6.87, 1900.0);
-        velocityToRPM.put(7.2, 2000.0);
-        velocityToRPM.put(7.32, 2050.0);
-        velocityToRPM.put(7.62, 2150.0);
-        velocityToRPM.put(8.13, 2500.0); // ???? retune
-
+        // https://www.desmos.com/calculator/0ow99dd1u0
+        velocityToRPM = (x) -> 366.65817 * x - 672.63778;
+        //velocityToRPM.put(6.8, 1850.0);
+        //velocityToRPM.put(7.02, 1900.0);
+        //velocityToRPM.put(7.22, 1950.0);
+        //velocityToRPM.put(7.45, 2050.0);
+        //velocityToRPM.put(7.64, 2100.0);
+        //velocityToRPM.put(7.94, 2250.0);
+        //velocityToRPM.put(8.26, 2350.0);
+        //velocityToRPM.put(8.40, 2450.0);
+        //velocityToRPM.put(9.10, 2650.0);
     }
 
     private static final RobotState robotState = RobotState.get();
@@ -249,7 +254,8 @@ public class ShootingKinematics implements Periodic {
         return new ShootingParameters(
                 BuildConstants.mode == BuildConstants.Mode.SIM
                         ? Units.radiansPerSecondToRotationsPerMinute(v / FlywheelConstants.flywheelRadiusMeters)
-                        : velocityToRPM.get(v),
+                        //: velocityToRPM.get(v),
+                        : velocityToRPM.applyAsDouble(v),
                 phi,
                 theta,
                 OptionalDouble.of(toF),
