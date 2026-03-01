@@ -48,6 +48,7 @@ public class OperatorDashboard implements Periodic {
     public final LoggedNetworkBooleanExt lostAuto = new LoggedNetworkBooleanExt(prefix + "LostAuto", false);
     public final LoggedNetworkBooleanExt wonAuto = new LoggedNetworkBooleanExt(prefix + "WonAuto", false);
     public final LoggedNetworkBooleanExt disableShiftTracking = new LoggedNetworkBooleanExt(prefix + "DisableShiftTracking", BuildConstants.mode == BuildConstants.Mode.SIM);
+    public final LoggedNetworkBooleanExt absolutePIDMode = new LoggedNetworkBooleanExt(prefix + "AbsolutePIDMode", false);
 
     @Getter
     private ScoringMode selectedScoringMode = ScoringMode.ShootAndPassAutomatic;
@@ -68,6 +69,7 @@ public class OperatorDashboard implements Periodic {
     private final Alert disabledCANrangeAlert = new Alert("CANrange is disabled.", Alert.AlertType.kWarning);
     private final Alert smudgesNotZeroAlert = new Alert("Smudges are not zero.", Alert.AlertType.kWarning);
     private final Alert disableShiftTrackingAlert = new Alert("Disable shift tracking is enabled.", Alert.AlertType.kWarning);
+    private final Alert absolutePIDModeAlert = new Alert("Absolute PID mode is enabled.", Alert.AlertType.kWarning);
 
     private final Debouncer lowBatteryDebouncer = new Debouncer(10.0, Debouncer.DebounceType.kRising);
 
