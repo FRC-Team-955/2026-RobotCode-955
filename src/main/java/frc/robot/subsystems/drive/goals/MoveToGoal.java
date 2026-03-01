@@ -76,6 +76,12 @@ public class MoveToGoal extends DriveGoal {
         Pose2d currentPose = robotState.getPose();
 
         Pose2d goalPose = poseSupplier.get();
+        if (constraints.aiming()) {
+            goalPose = new Pose2d(
+                    goalPose.getTranslation(),
+                    Rotation2d.fromRadians(shootingKinematics.getShootingParameters().headingRad())
+            );
+        }
         Logger.recordOutput("Drive/MoveTo/Goal", goalPose);
 
         double distanceToGoal = currentPose.getTranslation().getDistance(goalPose.getTranslation());

@@ -65,7 +65,7 @@ public class PlanetaryAuto {
 
                 // shoot
                 Commands.parallel(
-                        AutoHelpers.finalWaypointWithAimingForever(trenchShootingPosition::getTranslation, defaultMoveToConstraints),
+                        AutoHelpers.finalWaypoint(() -> trenchShootingPosition, defaultMoveToConstraints.withAiming(true)),
                         superstructure.setGoal(Superstructure.Goal.SHOOT)
                 ).withTimeout(5),
                 superstructure.setGoal(Superstructure.Goal.IDLE).until(() -> true),
@@ -84,7 +84,7 @@ public class PlanetaryAuto {
 
                 // shoot
                 Commands.parallel(
-                        AutoHelpers.finalWaypointWithAimingForever(trenchShootingPosition::getTranslation, defaultMoveToConstraints),
+                        AutoHelpers.finalWaypoint(() -> trenchShootingPosition, defaultMoveToConstraints.withAiming(true)),
                         superstructure.setGoal(Superstructure.Goal.SHOOT)
                 ).withTimeout(5)
         );

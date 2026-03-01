@@ -47,26 +47,6 @@ public class AutoHelpers {
                 ));
     }
 
-    public static Command intermediateWaypointWithAiming(Supplier<Translation2d> translationSupplier, DriveConstants.MoveToConstraints constraints) {
-        Supplier<Pose2d> poseSupplier =
-                () -> new Pose2d(
-                        AllianceFlipUtil.apply(translationSupplier.get()),
-                        Rotation2d.fromRadians(shootingKinematics.getShootingParameters().headingRad())
-                );
-        return drive
-                .moveTo(
-                        poseSupplier,
-                        constraints
-                                .withFullSpeed(true)
-                                .withAiming(true)
-                )
-                .until(() -> robotState.isAtPoseWithTolerance(
-                        poseSupplier.get(),
-                        intermediateLinearTolerance,
-                        intermediateAngularTolerance
-                ));
-    }
-
     public static Command finalWaypoint(Supplier<Pose2d> poseSupplier, DriveConstants.MoveToConstraints constraints) {
         return drive
                 .moveTo(
@@ -78,36 +58,6 @@ public class AutoHelpers {
                         moveToConfig.linearPositionToleranceMeters().get(),
                         moveToConfig.angularPositionToleranceRad().get()
                 ));
-    }
-
-    public static Command finalWaypointWithAiming(Supplier<Translation2d> translationSupplier, DriveConstants.MoveToConstraints constraints) {
-        Supplier<Pose2d> poseSupplier =
-                () -> new Pose2d(
-                        AllianceFlipUtil.apply(translationSupplier.get()),
-                        Rotation2d.fromRadians(shootingKinematics.getShootingParameters().headingRad())
-                );
-        return drive
-                .moveTo(
-                        poseSupplier,
-                        constraints
-                                .withAiming(true)
-                )
-                .until(() -> robotState.isAtPoseWithTolerance(
-                        poseSupplier.get(),
-                        moveToConfig.linearPositionToleranceMeters().get(),
-                        moveToConfig.angularPositionToleranceRad().get()
-                ));
-    }
-
-    public static Command finalWaypointWithAimingForever(Supplier<Translation2d> translationSupplier, DriveConstants.MoveToConstraints constraints) {
-        return drive.moveTo(
-                () -> new Pose2d(
-                        AllianceFlipUtil.apply(translationSupplier.get()),
-                        Rotation2d.fromRadians(shootingKinematics.getShootingParameters().headingRad())
-                ),
-                constraints
-                        .withAiming(true)
-        );
     }
 
     public static Pose2d yDistanceInterpolation(
@@ -167,19 +117,6 @@ public class AutoHelpers {
     ) {
         return finalWaypoint(
                 () -> xDistanceToStartInterpolation(start, end, heading, xDistanceToStartInterpolation),
-                constraints
-        );
-    }
-
-    public static Command yDistanceInterpolatingWaypointWithAiming(
-            Translation2d start,
-            Translation2d end,
-            Rotation2d heading,
-            double yDistanceToStartInterpolation,
-            DriveConstants.MoveToConstraints constraints
-    ) {
-        return finalWaypointWithAiming(
-                () -> yDistanceInterpolation(start, end, heading, yDistanceToStartInterpolation).getTranslation(),
                 constraints
         );
     }
