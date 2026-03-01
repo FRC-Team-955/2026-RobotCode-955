@@ -96,8 +96,6 @@ public class Hood implements Periodic {
         } else if (goal == Goal.HOME) {
             io.setVoltageRequest(-2.0);
         } else {
-            // See the comments above the lookaheadState and goalState variables for why we effectively calculate two profiles
-
             double setpointRad = goal.setpointRad.getAsDouble();
             if (robotState.isInTrench()) {
                 setpointRad = Math.min(setpointRad, maxPositionUnderTrench);
