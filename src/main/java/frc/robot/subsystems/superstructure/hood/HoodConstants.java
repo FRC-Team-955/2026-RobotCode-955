@@ -2,14 +2,11 @@ package frc.robot.subsystems.superstructure.hood;
 
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import frc.lib.network.LoggedTunablePIDF;
 import frc.robot.BuildConstants;
 
 public class HoodConstants {
-    static final TrapezoidProfile.Constraints constraints = new TrapezoidProfile.Constraints(3, 15);
-
     static final double minPositionRad = Units.degreesToRadians(15.0);
     static final double maxPositionRad = Units.degreesToRadians(45.0);
     static final double initialPositionRad = minPositionRad;
@@ -32,7 +29,8 @@ public class HoodConstants {
                 .withP(5)
                 .withG(0, GravityTypeValue.Arm_Cosine);
         case SIM -> new LoggedTunablePIDF("Superstructure/Hood/Gains")
-                .withP(18.9);
+                .withP(30)
+                .withG(0.3, GravityTypeValue.Arm_Cosine);
     };
 
     static HoodIO createIO() {

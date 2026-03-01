@@ -2,14 +2,12 @@ package frc.robot.subsystems.superstructure.hood;
 
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.lib.Util;
 import frc.lib.motor.MotorIOInputsAutoLogged;
 import frc.lib.network.LoggedTunableNumber;
 import frc.lib.subsystem.Periodic;
-import frc.robot.Constants;
 import frc.robot.OperatorDashboard;
 import frc.robot.RobotState;
 import frc.robot.shooting.ShootingKinematics;
@@ -54,13 +52,6 @@ public class Hood implements Periodic {
             io.setCurrentLimit(currentLimitMode);
         }
     }
-
-    private final TrapezoidProfile profile = new TrapezoidProfile(constraints);
-    private Double lastSetpointRad = null;
-    // goalState is just for logging the profile we want to follow.
-    // lookaheadState is shifted some seconds into the future, and is used for PID setpoint.
-    private TrapezoidProfile.State goalState = new TrapezoidProfile.State();
-    private TrapezoidProfile.State lookaheadState = new TrapezoidProfile.State();
 
     private final Alert motorDisconnectedAlert = new Alert("Hood motor is disconnected.", Alert.AlertType.kError);
 
@@ -111,23 +102,9 @@ public class Hood implements Periodic {
             if (robotState.isInTrench()) {
                 setpointRad = Math.min(setpointRad, maxPositionUnderTrench);
             }
-            Logger.recordOutput("Superstructure/Hood/OriginalSetpointRad", setpointRad);
             setpointRad = MathUtil.clamp(setpointRad, minPositionRad, maxPositionRad);
-            TrapezoidProfile.State wantedState = new TrapezoidProfile.State(setpointRad, 0.0);
-
-            if (lastSetpointRad == null || setpointRad != lastSetpointRad) {
-                // Setpoint changed - shift setpoint profile into the future
-                lookaheadState = profile.calculate(profileLookaheadTimeSec.get(), lookaheadState, wantedState);
-            }
-            lastSetpointRad = setpointRad;
-
-            goalState = profile.calculate(Constants.loopPeriod, goalState, wantedState);
-            Logger.recordOutput("Superstructure/Hood/ProfileSetpointRad", goalState.position);
-
-            lookaheadState = profile.calculate(Constants.loopPeriod, lookaheadState, wantedState);
-            Logger.recordOutput("Superstructure/Hood/LookaheadSetpointRad", lookaheadState.position);
-
-            io.setPositionRequest(lookaheadState.position);
+            Logger.recordOutput("Superstructure/Hood/SetpointRad", setpointRad);
+            io.setPositionRequest(setpointRad);
         }
     }
 
