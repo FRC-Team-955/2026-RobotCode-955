@@ -47,12 +47,17 @@ public class LEDPatterns {
     }
 
     // All modes
-    public static final LEDPattern lowBattery = LEDPattern.solid(Color.kRed).blink(Seconds.of(1.0 / 3.0));
+    public static final LEDPattern lowBattery = LEDPattern.gradient(LEDPattern.GradientType.kDiscontinuous, Color.kRed, Color.kYellow).blink(Seconds.of(1.0 / 3.0));
 
     // Disabled
     public static final LEDPattern autoNotChosen = LEDPattern.solid(Color.kBlue).blink(Seconds.of(1));
     public static final LEDPattern badAutoPlacement = LEDPattern.solid(Color.kYellow).blink(Seconds.of(0.5));
-    public static final LEDPattern visionDisconnected = LEDPattern.solid(Color.kRed).blink(Seconds.of(0.5));
+    public static final LEDPattern visionDisconnected = LEDPattern.gradient(
+            LEDPattern.GradientType.kContinuous,
+            Color.kRed,
+            Color.kBlack,
+            Color.kBlack
+    ).scrollAtRelativeSpeed(Hertz.of(1));
     public static final LEDPattern autoReady = LEDPattern.gradient(
             LEDPattern.GradientType.kContinuous,
             Color.kRed,
