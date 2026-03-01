@@ -94,7 +94,7 @@ public class Hood implements Periodic {
         if (DriverStation.isDisabled()) {
             io.setVoltageRequest(0.0);
         } else if (goal == Goal.HOME) {
-            io.setVoltageRequest(-2.0);
+            io.setVoltageRequest(-0.5);
         } else {
             double setpointRad = goal.setpointRad.getAsDouble();
             if (robotState.isInTrench()) {
