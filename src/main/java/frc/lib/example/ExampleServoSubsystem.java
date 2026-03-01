@@ -1,17 +1,20 @@
 package frc.lib.example;
 
+import com.ctre.phoenix6.signals.NeutralModeValue;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import frc.lib.PIDF;
+import frc.lib.Util;
 import frc.lib.motor.MotorIO;
 import frc.lib.motor.MotorIOInputsAutoLogged;
 import frc.lib.motor.RequestType;
 import frc.lib.network.LoggedTunableNumber;
 import frc.lib.subsystem.Periodic;
+import frc.robot.Constants;
 import frc.robot.OperatorDashboard;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -24,11 +27,10 @@ import java.util.function.DoubleSupplier;
 import static frc.lib.example.ExampleServoSubsystemConstants.*;
 
 public class ExampleServoSubsystem implements Periodic {
-    private static final PIDF.Tunable gainsTunable = gains.tunable("ExampleServoSubsystem/Gains");
     private static final LoggedTunableNumber deploySetpointDegrees = new LoggedTunableNumber("ExampleServoSubsystem/Goal/Deploy", -45.0);
     private static final LoggedTunableNumber profileLookaheadTimeSec = new LoggedTunableNumber("ExampleServoSubsystem/ProfileLookaheadTimeSec", 0.15);
 
-    private final OperatorDashboard operatorDashboard = OperatorDashboard.get();
+    private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
 
     private final MotorIO io = createIO();
     private final MotorIOInputsAutoLogged inputs = new MotorIOInputsAutoLogged();
@@ -57,16 +59,18 @@ public class ExampleServoSubsystem implements Periodic {
 
     private static ExampleServoSubsystem instance;
 
-    public static ExampleServoSubsystem get() {
-        if (instance == null)
-            synchronized (ExampleServoSubsystem.class) {
-                instance = new ExampleServoSubsystem();
-            }
+    public static synchronized ExampleServoSubsystem get() {
+        if (instance == null) {
+            instance = new ExampleServoSubsystem();
+        }
 
         return instance;
     }
 
     private ExampleServoSubsystem() {
+        if (instance != null) {
+            Util.error("Duplicate ExampleServoSubsystem created");
+        }
     }
 
     @Override
@@ -78,10 +82,12 @@ public class ExampleServoSubsystem implements Periodic {
 
         // Apply network inputs
         if (operatorDashboard.coastOverride.hasChanged()) {
-            io.setBrakeMode(!operatorDashboard.coastOverride.get());
+            io.setNeutralMode(operatorDashboard.coastOverride.get() ? NeutralModeValue.Coast : NeutralModeValue.Brake);
         }
 
-        gainsTunable.ifChanged(io::setPositionPIDF);
+        if (gains.hasChanged()) {
+            io.setPositionPIDF(gains);
+        }
     }
 
     @Override
@@ -93,7 +99,8 @@ public class ExampleServoSubsystem implements Periodic {
             // See the comments above the lookaheadState and goalState variables for why we effectively calculate two profiles
 
             double setpointRad = goal.setpointRad.getAsDouble();
-            Logger.recordOutput("ExampleServoSubsystem/OriginalSetpointRad", setpointRad);
+            setpointRad = MathUtil.clamp(setpointRad, minPositionRad, maxPositionRad);
+            //            Logger.recordOutput("ExampleServoSubsystem/OriginalSetpointRad", setpointRad);
             TrapezoidProfile.State wantedState = new TrapezoidProfile.State(setpointRad, 0.0);
 
             if (lastSetpointRad == null || setpointRad != lastSetpointRad) {
@@ -102,10 +109,10 @@ public class ExampleServoSubsystem implements Periodic {
             }
             lastSetpointRad = setpointRad;
 
-            goalState = profile.calculate(0.02, goalState, wantedState);
+            goalState = profile.calculate(Constants.loopPeriod, goalState, wantedState);
             Logger.recordOutput("ExampleServoSubsystem/ProfileSetpointRad", goalState.position);
 
-            lookaheadState = profile.calculate(0.02, lookaheadState, wantedState);
+            lookaheadState = profile.calculate(Constants.loopPeriod, lookaheadState, wantedState);
             Logger.recordOutput("ExampleServoSubsystem/LookaheadSetpointRad", lookaheadState.position);
 
             io.setRequest(RequestType.PositionRad, lookaheadState.position);
@@ -122,7 +129,7 @@ public class ExampleServoSubsystem implements Periodic {
     @AutoLogOutput(key = "ExampleServoSubsystem/AtGoal")
     public boolean atGoal() {
         double value = goal.setpointRad.getAsDouble();
-        return Math.abs(inputs.positionRad - value) <= tolerances.positionToleranceRad();
+        return Math.abs(inputs.positionRad - value) <= positionToleranceRad;
     }
 
     public Command waitUntilAtGoal() {

@@ -1,13 +1,15 @@
 package frc.lib.motor;
 
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
+import com.revrobotics.ResetMode;
 import com.revrobotics.spark.*;
-import com.revrobotics.spark.config.ClosedLoopConfig;
 import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.filter.Debouncer;
-import frc.lib.PIDF;
+import frc.lib.network.LoggedTunablePIDF;
 
 import java.util.function.DoubleSupplier;
 
@@ -25,28 +27,25 @@ public class MotorIOSparkMax extends MotorIO {
     // Connection debouncers
     private final Debouncer connectedDebounce = new Debouncer(0.5);
 
-    private SimpleMotorFeedforward velocityFeedforward;
-
     public MotorIOSparkMax(
             int canID,
             boolean inverted,
-            boolean brakeMode,
+            SparkBaseConfig.IdleMode idleMode,
             int currentLimitAmps,
             double gearRatio,
-            PIDF positionGains,
-            PIDF velocityGains
+            LoggedTunablePIDF positionGains,
+            LoggedTunablePIDF velocityGains,
+            double initialPositionRad
     ) {
         spark = new SparkMax(canID, SparkLowLevel.MotorType.kBrushless);
         encoder = spark.getEncoder();
         controller = spark.getClosedLoopController();
 
-        velocityFeedforward = velocityGains.toSimpleFF();
-
         // Configure drive motor
         config = new SparkMaxConfig();
         config
                 .inverted(inverted)
-                .idleMode(brakeMode ? SparkBaseConfig.IdleMode.kBrake : SparkBaseConfig.IdleMode.kCoast)
+                .idleMode(idleMode)
                 .smartCurrentLimit(currentLimitAmps)
                 .voltageCompensation(12.0);
         config
@@ -57,9 +56,11 @@ public class MotorIOSparkMax extends MotorIO {
                 .uvwAverageDepth(2);
         config
                 .closedLoop
-                .feedbackSensor(ClosedLoopConfig.FeedbackSensor.kPrimaryEncoder);
-        positionGains.applySparkWithoutFeedforward(config.closedLoop, ClosedLoopSlot.kSlot0); // position = slot0
-        velocityGains.applySparkWithoutFeedforward(config.closedLoop, ClosedLoopSlot.kSlot1); // velocity = slot1
+                .feedbackSensor(FeedbackSensor.kPrimaryEncoder);
+        if (positionGains != null)
+            positionGains.applySpark(config.closedLoop, ClosedLoopSlot.kSlot0); // position = slot0
+        if (velocityGains != null)
+            velocityGains.applySpark(config.closedLoop, ClosedLoopSlot.kSlot1); // velocity = slot1
         config
                 .signals
                 .primaryEncoderPositionAlwaysOn(true)
@@ -70,10 +71,10 @@ public class MotorIOSparkMax extends MotorIO {
                 .outputCurrentPeriodMs(20);
         tryUntilOk(5, () -> spark.configure(
                 config,
-                SparkBase.ResetMode.kResetSafeParameters,
-                SparkBase.PersistMode.kPersistParameters
+                ResetMode.kResetSafeParameters,
+                PersistMode.kPersistParameters
         ));
-        tryUntilOk(5, () -> encoder.setPosition(0.0));
+        tryUntilOk(5, () -> encoder.setPosition(initialPositionRad));
     }
 
     @Override
@@ -92,38 +93,56 @@ public class MotorIOSparkMax extends MotorIO {
     }
 
     @Override
-    public void setPositionPIDF(PIDF newGains) {
+    public void setPositionPIDF(LoggedTunablePIDF newGains) {
         System.out.println("Setting motor position gains");
         var newConfig = new SparkMaxConfig();
-        newGains.applySparkWithoutFeedforward(newConfig.closedLoop, ClosedLoopSlot.kSlot0);
+        newGains.applySpark(newConfig.closedLoop, ClosedLoopSlot.kSlot0); // position = slot0
         tryUntilOkAsync(5, () -> spark.configure(
                 newConfig,
-                SparkBase.ResetMode.kNoResetSafeParameters,
-                SparkBase.PersistMode.kPersistParameters
+                ResetMode.kNoResetSafeParameters,
+                PersistMode.kPersistParameters
         ));
     }
 
     @Override
-    public void setVelocityPIDF(PIDF newGains) {
+    public void setVelocityPIDF(LoggedTunablePIDF newGains) {
         System.out.println("Setting motor velocity gains");
-        velocityFeedforward = newGains.toSimpleFF();
         var newConfig = new SparkMaxConfig();
-        newGains.applySparkWithoutFeedforward(newConfig.closedLoop, ClosedLoopSlot.kSlot0);
+        newGains.applySpark(newConfig.closedLoop, ClosedLoopSlot.kSlot1); // velocity = slot1
         tryUntilOkAsync(5, () -> spark.configure(
                 newConfig,
-                SparkBase.ResetMode.kNoResetSafeParameters,
-                SparkBase.PersistMode.kPersistParameters
+                ResetMode.kNoResetSafeParameters,
+                PersistMode.kPersistParameters
         ));
     }
 
     @Override
-    public void setBrakeMode(boolean enable) {
-        System.out.println("Setting motor brake mode to " + enable);
-        var newConfig = new SparkMaxConfig().idleMode(enable ? SparkBaseConfig.IdleMode.kBrake : SparkBaseConfig.IdleMode.kCoast);
+    public void setNeutralMode(NeutralModeValue neutralMode) {
+        System.out.println("Setting motor neutral mode to " + neutralMode);
+        var newConfig = new SparkMaxConfig()
+                .idleMode(switch (neutralMode) {
+                    case Coast -> SparkBaseConfig.IdleMode.kCoast;
+                    case Brake -> SparkBaseConfig.IdleMode.kBrake;
+                });
         tryUntilOkAsync(5, () -> spark.configure(
                 newConfig,
-                SparkBase.ResetMode.kNoResetSafeParameters,
-                SparkBase.PersistMode.kPersistParameters
+                ResetMode.kNoResetSafeParameters,
+                PersistMode.kPersistParameters
+        ));
+    }
+
+    // This is not included in MotorIO because it should not be used by subsystem code directly
+    // If you need to use this, make a custom IO layer that either subclasses or nests this IO layer
+    // and take an enum as the argument instead of raw current limit
+    // We do this because wanted current limit varies based on which motor we are using
+    public void setCurrentLimit(int currentLimitAmps) {
+        System.out.println("Setting motor current limit to " + currentLimitAmps);
+        var newConfig = new SparkMaxConfig()
+                .smartCurrentLimit(currentLimitAmps);
+        tryUntilOkAsync(5, () -> spark.configure(
+                newConfig,
+                ResetMode.kNoResetSafeParameters,
+                PersistMode.kPersistParameters
         ));
     }
 
@@ -131,21 +150,34 @@ public class MotorIOSparkMax extends MotorIO {
     public void setRequest(RequestType type, double value) {
         switch (type) {
             case VoltageVolts -> spark.setVoltage(value);
-            case PositionRad -> controller.setReference(
+            case PositionRad -> controller.setSetpoint(
                     value,
                     SparkBase.ControlType.kPosition,
                     ClosedLoopSlot.kSlot0 // position = slot0
             );
-            case VelocityRadPerSec -> {
-                var ffVolts = velocityFeedforward.calculate(value);
-                controller.setReference(
-                        value,
-                        SparkBase.ControlType.kVelocity,
-                        ClosedLoopSlot.kSlot1,  // velocity = slot1
-                        ffVolts,
-                        SparkClosedLoopController.ArbFFUnits.kVoltage
-                );
-            }
+            case VelocityRadPerSec -> controller.setSetpoint(
+                    value,
+                    SparkBase.ControlType.kVelocity,
+                    ClosedLoopSlot.kSlot1  // velocity = slot1
+            );
         }
+    }
+
+    @Override
+    public void setEncoderPosition(double positionRad) {
+        System.out.println("Setting encoder position to " + positionRad);
+        tryUntilOkAsync(5, () -> encoder.setPosition(positionRad));
+    }
+
+    /**
+     * NOTE: BLOCKS THE MAIN THREAD!!! ONLY CALL ON STARTUP!!!!
+     */
+    public void setFollow(MotorIOSparkMax leader, MotorAlignmentValue alignment) {
+        config.follow(leader.spark, alignment == MotorAlignmentValue.Opposed);
+        tryUntilOk(5, () -> spark.configure(
+                config,
+                ResetMode.kResetSafeParameters,
+                PersistMode.kPersistParameters
+        ));
     }
 }

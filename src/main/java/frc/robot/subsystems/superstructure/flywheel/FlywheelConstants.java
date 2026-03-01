@@ -1,44 +1,41 @@
 package frc.robot.subsystems.superstructure.flywheel;
 
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
+import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
-import frc.lib.PIDF;
-import frc.lib.motor.MotorIO;
-import frc.lib.motor.MotorIOSim;
-import frc.lib.motor.MotorIOSparkMax;
-import frc.lib.motor.RequestTolerances;
+import frc.lib.network.LoggedTunablePIDF;
 import frc.robot.BuildConstants;
 
 public class FlywheelConstants {
-    static final double flywheelRadiusMeters = Units.inchesToMeters(2.0);
-
-    static final RequestTolerances tolerances = RequestTolerances.defaults();
+    public static final double flywheelRadiusMeters = Units.inchesToMeters(2.0);
 
     static final double gearRatio = 1;
-    static final PIDF velocityGains = switch (BuildConstants.mode) {
-        case REAL, REPLAY -> PIDF.zero();
-        case SIM -> PIDF.ofSV(0.0, 0.02);
+
+    static final LoggedTunablePIDF velocityGains = switch (BuildConstants.mode) {
+        case REAL, REPLAY -> new LoggedTunablePIDF("Superstructure/Flywheel/Gains")
+                .withS(0.27, StaticFeedforwardSignValue.UseVelocitySign)
+                .withV(0.02)
+                .withP(0.01);
+        case SIM -> new LoggedTunablePIDF("Superstructure/Flywheel/Gains")
+                .withS(0.2, StaticFeedforwardSignValue.UseVelocitySign)
+                .withV(0.019)
+                .withP(0.01);
     };
 
-    static MotorIO createIO() {
+    static FlywheelIO createIO() {
         return switch (BuildConstants.mode) {
-            case REAL -> new MotorIOSparkMax(
-                    -1,
-                    true,
-                    true,
-                    40,
-                    gearRatio,
-                    PIDF.zero(),
-                    velocityGains
+            case REAL -> new FlywheelIOTalonFX(
+                    16,
+                    19,
+                    false,
+                    MotorAlignmentValue.Opposed
             );
-            case SIM -> new MotorIOSim(
-                    gearRatio,
-                    0.01,
-                    DCMotor.getKrakenX60(2),
-                    PIDF.zero(),
-                    velocityGains
+            case SIM -> new FlywheelIOSim(
+                    0.001,
+                    DCMotor.getKrakenX60(2)
             );
-            case REPLAY -> new MotorIO();
+            case REPLAY -> new FlywheelIO();
         };
     }
 }

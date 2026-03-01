@@ -2,7 +2,7 @@ import java.time.LocalDateTime
 
 plugins {
     id "java"
-    id "edu.wpi.first.GradleRIO" version "2025.3.2"
+    id "edu.wpi.first.GradleRIO" version "2026.2.1"
     id "com.peterabeles.gversion" version "1.10"
     id "io.freefair.lombok" version "8.6"
 }
@@ -237,7 +237,7 @@ boolean isNewer(String versionA, String versionB) {
     def parseVersion = { String version ->
         if (version.startsWith('v')) version = version.substring(1)
         def parts = version.split("\\.")
-        return [major: parts[0].toInteger(), minor: parts[1].toInteger(), patch: parts[2].toInteger()]
+        return [major: parts[0].toInteger(), minor: parts[1].toInteger(), patch: parts[2].split("-")[0].toInteger()]
     }
 
     def vA = parseVersion(versionA)
@@ -280,6 +280,7 @@ tasks.register("updateVendordeps") {
                     }
                 } catch (Exception e) {
                     println("Failed to update ${file.name}: ${e.message}")
+                    throw e
                 }
             }
         }

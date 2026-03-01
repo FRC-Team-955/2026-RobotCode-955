@@ -1,6 +1,7 @@
 package frc.robot.subsystems.drive;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import frc.robot.SimManager;
 import org.ironmaple.simulation.drivesims.GyroSimulation;
 
 import java.util.Arrays;
@@ -8,7 +9,7 @@ import java.util.Arrays;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 
 public class GyroIOSim extends GyroIO {
-    private final GyroSimulation gyroSimulation = ModuleIOSim.driveSimulation.getGyroSimulation();
+    private final GyroSimulation gyroSimulation = SimManager.get().driveSimulation.getGyroSimulation();
 
     public GyroIOSim() {
     }
@@ -17,7 +18,7 @@ public class GyroIOSim extends GyroIO {
     public void updateInputs(GyroIOInputs inputs) {
         inputs.connected = true;
         inputs.yawPositionRad = gyroSimulation.getGyroReading().getRadians();
-        inputs.yawVelocityRadPerSec = gyroSimulation.getMeasuredAngularVelocity().in(RadiansPerSecond);
+        inputs.angularVelocityZRadPerSec = gyroSimulation.getMeasuredAngularVelocity().in(RadiansPerSecond);
 
         inputs.odometryYawTimestamps = ModuleIOSim.getSimulationOdometryTimeStamps();
         inputs.odometryYawPositionsRad = Arrays.stream(gyroSimulation.getCachedGyroReadings())

@@ -63,11 +63,12 @@ public class SparkUtil {
         for (int i = 0; i < maxAttempts; i++) {
             var error = command.get();
             if (error == REVLibError.kOk) {
-                break;
+                return;
             } else {
                 sparkStickyFault = true;
             }
         }
+        System.out.println("SparkUtil tryUntilOk failure");
     }
 
     /**

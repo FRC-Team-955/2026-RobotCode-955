@@ -13,7 +13,8 @@
 
 package frc.robot.subsystems.drive;
 
-import frc.lib.PIDF;
+import com.ctre.phoenix6.signals.MagnetHealthValue;
+import frc.lib.network.LoggedTunablePIDF;
 import org.littletonrobotics.junction.AutoLog;
 
 public class ModuleIO {
@@ -34,6 +35,7 @@ public class ModuleIO {
         public double turnTemperatureCelsius = 0.0;
 
         public boolean turnAbsoluteEncoderConnected = false;
+        public MagnetHealthValue turnAbsoluteEncoderMagnetHealth = MagnetHealthValue.Magnet_Invalid;
         public double turnAbsolutePositionRad = 0.0;
 
         public double[] odometryTimestamps = new double[]{};
@@ -51,14 +53,14 @@ public class ModuleIO {
      * Change PIDF gains. IO layers should not rely on this method being called, and
      * should default to the gains in the constants
      */
-    public void setDrivePIDF(PIDF newGains) {
+    public void setDrivePIDF(LoggedTunablePIDF newGains) {
     }
 
     /**
      * Change PIDF gains. IO layers should not rely on this method being called, and
      * should default to the gains in the constants
      */
-    public void setTurnPIDF(PIDF newGains) {
+    public void setTurnRelativePIDF(LoggedTunablePIDF newGains) {
     }
 
     /**

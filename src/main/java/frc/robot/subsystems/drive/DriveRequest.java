@@ -8,6 +8,7 @@ public record DriveRequest(Type type, ChassisSpeeds value) {
         /** vxMetersPerSecond will be treated as the characterization voltage and given to all modules */
         CHARACTERIZATION,
         STOP,
+        STOP_WITH_X
     }
 
     public static DriveRequest chassisSpeeds(ChassisSpeeds speeds) {
@@ -21,4 +22,9 @@ public record DriveRequest(Type type, ChassisSpeeds value) {
     public static DriveRequest stop() {
         return new DriveRequest(Type.STOP, new ChassisSpeeds());
     }
+
+    public static DriveRequest stopWithX() {
+        return new DriveRequest(Type.STOP_WITH_X, new ChassisSpeeds());
+    }
+
 }

@@ -2,6 +2,8 @@ package frc.robot.subsystems.superstructure.spindexer;
 
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Timer;
+import frc.lib.Util;
 import frc.lib.motor.MotorIO;
 import frc.lib.motor.MotorIOInputsAutoLogged;
 import frc.lib.motor.RequestType;
@@ -18,10 +20,10 @@ import java.util.function.DoubleSupplier;
 import static frc.robot.subsystems.superstructure.spindexer.SpindexerConstants.createIO;
 
 public class Spindexer implements Periodic {
-    private static final LoggedTunableNumber feedVoltage = new LoggedTunableNumber("Superstructure/Spindexer/Goal/FeedVoltage", 3.0);
-    private static final LoggedTunableNumber ejectVoltage = new LoggedTunableNumber("Superstructure/Spindexer/Goal/EjectVoltage", -3.0);
+    private static final LoggedTunableNumber feedVoltage = new LoggedTunableNumber("Superstructure/Spindexer/Goal/FeedVoltage", 6.0);
+    private static final LoggedTunableNumber ejectVoltage = new LoggedTunableNumber("Superstructure/Spindexer/Goal/EjectVoltage", -12.0);
 
-    private final OperatorDashboard operatorDashboard = OperatorDashboard.get();
+    private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
 
     private final MotorIO io = createIO();
     private final MotorIOInputsAutoLogged inputs = new MotorIOInputsAutoLogged();
@@ -29,7 +31,7 @@ public class Spindexer implements Periodic {
     @RequiredArgsConstructor
     public enum Goal {
         IDLE(() -> 0, RequestType.VoltageVolts),
-        FEED(feedVoltage::get, RequestType.VoltageVolts),
+        FEED(() -> Timer.getTimestamp() % 3.0 < 0.3 ? ejectVoltage.get() : feedVoltage.get(), RequestType.VoltageVolts),
         EJECT(ejectVoltage::get, RequestType.VoltageVolts),
         ;
 
@@ -46,16 +48,18 @@ public class Spindexer implements Periodic {
 
     private static Spindexer instance;
 
-    public static Spindexer get() {
-        if (instance == null)
-            synchronized (Spindexer.class) {
-                instance = new Spindexer();
-            }
+    public static synchronized Spindexer get() {
+        if (instance == null) {
+            instance = new Spindexer();
+        }
 
         return instance;
     }
 
     private Spindexer() {
+        if (instance != null) {
+            Util.error("Duplicate Spindexer created");
+        }
     }
 
     @Override
@@ -64,11 +68,6 @@ public class Spindexer implements Periodic {
         Logger.processInputs("Inputs/Superstructure/Spindexer", inputs);
 
         motorDisconnectedAlert.set(!inputs.connected);
-
-        // Apply network inputs
-        if (operatorDashboard.coastOverride.hasChanged()) {
-            io.setBrakeMode(!operatorDashboard.coastOverride.get());
-        }
     }
 
     @Override

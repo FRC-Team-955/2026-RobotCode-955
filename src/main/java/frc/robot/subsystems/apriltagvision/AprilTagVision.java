@@ -13,7 +13,6 @@
 
 package frc.robot.subsystems.apriltagvision;
 
-import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
@@ -26,18 +25,22 @@ import org.littletonrobotics.junction.Logger;
 
 import java.util.*;
 
+import static frc.robot.FieldConstants.aprilTagLayout;
 import static frc.robot.subsystems.apriltagvision.AprilTagVisionConstants.*;
 
 public class AprilTagVision implements Periodic {
-    private final RobotState robotState = RobotState.get();
+    private static final RobotState robotState = RobotState.get();
 
-    private final EnumMap<Camera, CameraData> cameras = Util.createEnumMap(Camera.class, Camera.values(), (cam) -> new CameraData(
-            new AprilTagVisionIOInputsAutoLogged(),
-            cam.createIO(),
-            new Alert("AprilTag vision camera " + cam.name() + " is disconnected.", AlertType.kError)
-    ));
+    private final EnumMap<Camera, CameraData> cameras = Util.createEnumMap(Camera.class,
+            Camera.values(), (cam) ->
+                    new CameraData(
+                            new AprilTagVisionIOInputsAutoLogged(),
+                            cam.createIO(),
+                            new Alert("AprilTag vision camera " + cam.name() + " is disconnected.", AlertType.kError)
+                    ));
 
     private int[] tagIdFilter = {};
+
 
     public Command setTagIdFilter(int[] tagIds) {
         return Commands.runOnce(() -> tagIdFilter = tagIds);
@@ -45,16 +48,18 @@ public class AprilTagVision implements Periodic {
 
     private static AprilTagVision instance;
 
-    public static AprilTagVision get() {
-        if (instance == null)
-            synchronized (AprilTagVision.class) {
-                instance = new AprilTagVision();
-            }
+    public static synchronized AprilTagVision get() {
+        if (instance == null) {
+            instance = new AprilTagVision();
+        }
 
         return instance;
     }
 
     private AprilTagVision() {
+        if (instance != null) {
+            Util.error("Duplicate AprilTagVision created");
+        }
     }
 
     @Override
@@ -99,7 +104,16 @@ public class AprilTagVision implements Periodic {
 
             List<SingleTagPoseObservation> singleTagPoseObservations = new LinkedList<>();
             for (var observation : data.inputs.bestTargetObservations) {
+                if (enableExtrinsicCalibration) {
+                    // use https://quaternions.online/ to visualize resulting rotation and convert to euler angles
+                    // use YZX rotation order in euler angles (yaw, then pitch, then roll - aka Tait-Bryan angles)
+                    Transform3d tagToCam = observation.cameraToTarget().inverse();
+                    Transform3d robotToCam = tagToRobot.inverse().plus(tagToCam);
+                    Logger.recordOutput("AprilTagVision/" + metadata.name() + "/ExtrinsicCalibration/Tag" + observation.tagID(), robotToCam);
+                }
+
                 Optional<Pose3d> tagPoseOptional = aprilTagLayout.getTagPose(observation.tagID());
+
                 if (tagPoseOptional.isEmpty()) {
                     Util.error("Couldn't find tag with ID " + observation.tagID());
                     continue;
@@ -189,9 +203,12 @@ public class AprilTagVision implements Periodic {
                 // If trig is present, distance to tag is small enough, and isn't too different from
                 // 3d solve, use trig
                 if (observation.poseEstimateTrigPresent() &&
-                        observation.tagDistance() < distanceFromTagForTrigMeters &&
-                        poseEstimate3dSolve2d.getTranslation().getDistance(observation.poseEstimateTrig().getTranslation()) < trig3dSolveMaxDiffMeters &&
-                        Math.abs(poseEstimate3dSolve2d.getRotation().minus(observation.poseEstimateTrig().getRotation()).getRadians()) < trig3dSolveMaxDiffRad
+                        observation.tagDistance() <
+                                distanceFromTagForTrigMeters &&
+                        poseEstimate3dSolve2d.getTranslation()
+                                .getDistance(observation.poseEstimateTrig().getTranslation()) < trig3dSolveMaxDiffMeters &&
+                        Math.abs(poseEstimate3dSolve2d.getRotation()
+                                .minus(observation.poseEstimateTrig().getRotation()).getRadians()) < trig3dSolveMaxDiffRad
                 ) {
                     genericPoseObservations.add(new GenericPoseObservation(
                             observation.timestamp(),
@@ -260,14 +277,15 @@ public class AprilTagVision implements Periodic {
 
                 // Calculate standard deviations
                 double stdDevFactor = Math.pow(observation.averageTagDistance(), metadata.distancePower) / observation.tagCount();
-                double linearStdDev = observation.linearStdDevBaseline * stdDevFactor * metadata.stddevMultiplier;
-                double angularStdDev = observation.angularStdDevBaseline * stdDevFactor * metadata.stddevMultiplier;
+                double linearStdDev = observation.linearStdDevBaseline * stdDevFactor * metadata.stdDevMultiplier;
+                double angularStdDev = observation.angularStdDevBaseline * stdDevFactor * metadata.stdDevMultiplier;
 
                 // Send vision observation
                 robotState.addVisionMeasurement(
                         observation.poseEstimate().toPose2d(),
                         observation.timestamp(),
-                        VecBuilder.fill(linearStdDev, linearStdDev, angularStdDev)
+                        linearStdDev,
+                        angularStdDev
                 );
             }
 
@@ -303,6 +321,15 @@ public class AprilTagVision implements Periodic {
                         .map(cam -> robotPose.transformBy(cam.robotToCamera))
                         .toArray(Pose3d[]::new)
         );
+
+    }
+
+    public boolean anyCamerasDisconnected() {
+        for (Map.Entry<Camera, CameraData> cam : cameras.entrySet()) {
+            CameraData data = cam.getValue();
+            return !data.inputs.connected;
+        }
+        return false;
     }
 
     private record SingleTagPoseObservation(

@@ -1,50 +1,42 @@
 package frc.robot.subsystems.superintake.intakepivot;
 
+import com.ctre.phoenix6.signals.GravityTypeValue;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
-import frc.lib.PIDF;
-import frc.lib.motor.MotorIO;
-import frc.lib.motor.MotorIOArmSim;
-import frc.lib.motor.MotorIOSparkMax;
-import frc.lib.motor.RequestTolerances;
+import frc.lib.network.LoggedTunablePIDF;
 import frc.robot.BuildConstants;
 
 public class IntakePivotConstants {
-    static final RequestTolerances tolerances = RequestTolerances.defaults();
+    static final TrapezoidProfile.Constraints constraints = new TrapezoidProfile.Constraints(5, 15);
 
-    static final TrapezoidProfile.Constraints constraints = new TrapezoidProfile.Constraints(1, 3);
+    static final double minPositionRad = Units.degreesToRadians(16.827716);
+    static final double maxPositionRad = Units.degreesToRadians(95.554559);
+    static final double initialPositionRad = minPositionRad;
+    static final double maxPositionUnderTrench = Units.degreesToRadians(20.0);
 
-    static final double gearRatio = 120;
-    static final PIDF gains = switch (BuildConstants.mode) {
-        case REAL, REPLAY -> PIDF.zero();
-        case SIM -> PIDF.ofPDSG(20.0, 0.0, 0.0, 2.65);
+    static final double gearRatio = 150;
+
+    static final LoggedTunablePIDF gains = switch (BuildConstants.mode) {
+        case REAL, REPLAY -> new LoggedTunablePIDF("Superintake/IntakePivot/Gains")
+                .withP(15.0)
+                .withG(0.0, GravityTypeValue.Arm_Cosine);
+        case SIM -> new LoggedTunablePIDF("Superintake/IntakePivot/Gains")
+                .withP(20.0)
+                .withG(2.65, GravityTypeValue.Arm_Cosine);
     };
 
-    static MotorIO createIO() {
+    static IntakePivotIO createIO() {
         return switch (BuildConstants.mode) {
-            case REAL -> new MotorIOSparkMax(
-                    -1,
-                    true,
-                    true,
-                    40,
-                    gearRatio,
-                    gains,
-                    PIDF.zero()
+            case REAL -> new IntakePivotIOTalonFX(
+                    14,
+                    false
             );
-            case SIM -> new MotorIOArmSim(
-                    DCMotor.getNEO(1),
-                    gearRatio,
-                    1.4,
-                    0.3,
-                    Units.degreesToRadians(-90),
-                    Units.degreesToRadians(90),
-                    true,
-                    Units.degreesToRadians(80),
-                    0.001,
-                    gains
+            case SIM -> new IntakePivotIOSim(
+                    0.0768892879,
+                    DCMotor.getKrakenX60(1)
             );
-            case REPLAY -> new MotorIO();
+            case REPLAY -> new IntakePivotIO();
         };
     }
 }

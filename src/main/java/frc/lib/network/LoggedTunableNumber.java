@@ -25,26 +25,26 @@ public class LoggedTunableNumber {
     }
 
     // FIXME: If you need these methods, you should update hasChanged to work if not in tuning mode
-//    /** Updates the default value, which is used if no value in NT is found. */
-//    public void setDefault(double defaultValue) {
-//        if (Constants.tuningMode) {
-//            inner.setDefault(defaultValue);
-//        } else {
-//            this.valueIfNotTuningMode = defaultValue;
-//        }
-//    }
-//
-//    /**
-//     * Publishes a new value. Note that the value will not be returned by
-//     * {@link #get()} until the next cycle.
-//     */
-//    public void set(double value) {
-//        if (Constants.tuningMode) {
-//            inner.set(value);
-//        } else {
-//            valueIfNotTuningMode = value;
-//        }
-//    }
+    //    /** Updates the default value, which is used if no value in NT is found. */
+    //    public void setDefault(double defaultValue) {
+    //        if (Constants.tuningMode) {
+    //            inner.setDefault(defaultValue);
+    //        } else {
+    //            this.valueIfNotTuningMode = defaultValue;
+    //        }
+    //    }
+    //
+    //    /**
+    //     * Publishes a new value. Note that the value will not be returned by
+    //     * {@link #get()} until the next cycle.
+    //     */
+    //    public void set(double value) {
+    //        if (Constants.tuningMode) {
+    //            inner.set(value);
+    //        } else {
+    //            valueIfNotTuningMode = value;
+    //        }
+    //    }
 
     /** Returns the current value. */
     @SuppressWarnings("DataFlowIssue") // inner is guaranteed not to be null if tuning mode is true

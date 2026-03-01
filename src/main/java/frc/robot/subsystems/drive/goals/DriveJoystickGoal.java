@@ -1,75 +1,222 @@
 package frc.robot.subsystems.drive.goals;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.filter.Debouncer;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.Timer;
+import frc.lib.SlewRateLimiter2d;
 import frc.lib.network.LoggedTunableNumber;
-import frc.robot.Controller;
+import frc.robot.FieldConstants;
 import frc.robot.RobotState;
+import frc.robot.controller.Controller;
+import frc.robot.shooting.ShootingKinematics;
 import frc.robot.subsystems.drive.DriveGoal;
 import frc.robot.subsystems.drive.DriveRequest;
+import frc.robot.subsystems.gamepiecevision.GamePieceVision;
 import lombok.RequiredArgsConstructor;
 import org.littletonrobotics.junction.Logger;
 
-import static frc.robot.subsystems.drive.DriveTuning.headingOverrideGainsTunable;
+import java.util.Optional;
+import java.util.function.Supplier;
+
+import static frc.robot.subsystems.drive.DriveConstants.*;
+
 
 @RequiredArgsConstructor
 public class DriveJoystickGoal extends DriveGoal {
+    public enum Mode {
+        Normal,
+        StopWithX,
+        Aim,
+        Assist,
+        AimAndAssist,
+    }
+
     private static final LoggedTunableNumber headingOverrideSetpointResetTime = new LoggedTunableNumber("Drive/DriveJoystick/HeadingOverrideSetpointResetTimeSeconds", 0.25);
-    private static final LoggedTunableNumber headingOverrideThresholdDegrees = new LoggedTunableNumber("Drive/DriveJoystick/HeadingOverrideThresholdDegrees", 15.0);
+    private static final LoggedTunableNumber headingOverrideThresholdDegrees = new LoggedTunableNumber("Drive/DriveJoystick/HeadingOverrideThresholdDegrees", 30.0);
+
+    private static final LoggedTunableNumber aimDistanceForNearMaxVelocity = new LoggedTunableNumber("Drive/DriveJoystick/Aim/DistanceForNearMaxVelocity", 1.0);
+    private static final LoggedTunableNumber aimDistanceForFarMaxVelocity = new LoggedTunableNumber("Drive/DriveJoystick/Aim/DistanceForFarMaxVelocity", 4.0);
+    private static final LoggedTunableNumber aimNearMaxLinearVelocityMetersPerSec = new LoggedTunableNumber("Drive/DriveJoystick/Aim/NearMaxLinearVelocity", 0.5);
+    private static final LoggedTunableNumber aimFarMaxLinearVelocityMetersPerSec = new LoggedTunableNumber("Drive/DriveJoystick/Aim/FarMaxLinearVelocity", 1.5);
+    private static final LoggedTunableNumber aimMaxLinearAccelerationMetersPerSecPerSec = new LoggedTunableNumber("Drive/DriveJoystick/Aim/MaxLinearAcceleration", 5);
 
     private static final RobotState robotState = RobotState.get();
     private static final Controller controller = Controller.get();
+    private static final ShootingKinematics shootingKinematics = ShootingKinematics.get();
 
-    private final PIDController headingOverride = headingOverrideGainsTunable.getOrOriginal().toPIDWrapRadians();
-    private final Timer headingOverrideSetpointResetTimer = new Timer();
-    private boolean shouldRunHeadingOverride = false;
+    private static final GamePieceVision gamePieceVision = GamePieceVision.get();
+
+    private static final Supplier<Optional<Translation2d>> assistTranslationSupplier = () -> gamePieceVision.getBestTargets().stream().findFirst();
+
+    private final Supplier<Mode> modeSupplier;
+
+    private final PIDController headingOverride = headingOverrideGains
+            .toPIDWrapRadians(
+                    moveToConfig.angularPositionToleranceRad().get(),
+                    moveToConfig.angularVelocityToleranceRadPerSec().get()
+            );
+    private final Debouncer headingOverrideEnabledDebouncer = new Debouncer(headingOverrideSetpointResetTime.get(), Debouncer.DebounceType.kRising);
+    private boolean runningHeadingOverride = false;
+
+    private final SlewRateLimiter2d aimLinearAccelerationLimiter = new SlewRateLimiter2d(aimMaxLinearAccelerationMetersPerSecPerSec.get(), robotState.getMeasuredChassisSpeedsFieldRelative());
+
+    private final PIDController assistPID = assistGains.toPID();
+
+    private Rotation2d lastLinearDirection = new Rotation2d();
 
     @Override
     public DriveRequest getRequest() {
-        headingOverrideGainsTunable.ifChanged(gains -> gains.applyPID(headingOverride));
+        if (headingOverrideGains.hasChanged()) {
+            headingOverrideGains.applyPID(headingOverride);
+        }
+        if (headingOverrideSetpointResetTime.hasChanged()) {
+            headingOverrideEnabledDebouncer.setDebounceTime(headingOverrideSetpointResetTime.get());
+        }
+
+        if (aimMaxLinearAccelerationMetersPerSecPerSec.hasChanged()) {
+            aimLinearAccelerationLimiter.setLimit(aimMaxLinearAccelerationMetersPerSecPerSec.get());
+        }
+
+        if (assistGains.hasChanged()) {
+            assistGains.applyPID(assistPID);
+        }
 
         //////////////////////////////////////////////////////////////////////
 
-        ChassisSpeeds joystickSetpoint = controller.getDriveSetpointRobotRelative(robotState.getRotation());
+        Mode mode = modeSupplier.get();
+        Logger.recordOutput("Drive/DriveJoystick/Mode", mode);
 
-        if (joystickSetpoint.omegaRadiansPerSecond == 0.0) {
-            // Once joystick omega is 0, wait X seconds before getting robot rotation
-            // and then start heading override
-            if (!shouldRunHeadingOverride) {
-                if (!headingOverrideSetpointResetTimer.isRunning()) {
-                    // Omega just became 0 - start timer
-                    headingOverrideSetpointResetTimer.restart();
-                } else if (headingOverrideSetpointResetTimer.hasElapsed(headingOverrideSetpointResetTime.get())) {
-                    // Now time to set PID setpoint and start overriding heading
-                    headingOverride.reset();
-                    headingOverride.setSetpoint(robotState.getRotation().getRadians());
-                    shouldRunHeadingOverride = true;
+        Rotation2d linearDirection = controller.getDriveLinearDirection();
+        double linearMagnitude = controller.getDriveLinearMagnitude();
+        // Keep going in last direction if command is 0
+        if (linearMagnitude == 0.0) {
+            linearDirection = lastLinearDirection;
+        } else {
+            lastLinearDirection = linearDirection;
+        }
+
+        if (mode == Mode.Assist || mode == Mode.AimAndAssist) {
+            // Adjust linear direction in Y axis while assisting
+            Logger.recordOutput("Drive/AssistRunning", false);
+            var optionalAssistTranslation = assistTranslationSupplier.get();
+            if (optionalAssistTranslation.isPresent()) {
+                Translation2d assistTranslation = optionalAssistTranslation.get();
+                Logger.recordOutput("Drive/AssistTranslation", assistTranslation);
+
+                if (controller.shouldAssist(robotState.getPose(), assistTranslation)) {
+                    Logger.recordOutput("Drive/AssistRunning", true);
+
+                    double yDist = new Transform2d(
+                            robotState.getPose(),
+                            new Pose2d(assistTranslation, robotState.getRotation())
+                    ).getY();
+
+                    linearDirection = linearDirection.rotateBy(Rotation2d.fromRadians(assistPID.calculate(-yDist, 0)));
                 }
             }
+        }
 
-            if (shouldRunHeadingOverride) {
-                // Stop heading override if we rotate too much on our own
-                if (Math.abs(robotState.getRotation().getRadians() - headingOverride.getSetpoint()) > Units.degreesToRadians(headingOverrideThresholdDegrees.get())) {
+        Translation2d linearSetpoint;
+        if (mode == Mode.Aim || mode == Mode.AimAndAssist) {
+            // Limit linear velocity and acceleration while aiming
+            double distance = robotState.getTranslation().getDistance(FieldConstants.Hub.topCenterPoint.toTranslation2d());
+            double maxVelocity = MathUtil.interpolate(
+                    aimNearMaxLinearVelocityMetersPerSec.get(),
+                    aimFarMaxLinearVelocityMetersPerSec.get(),
+                    (distance - aimDistanceForNearMaxVelocity.get()) /
+                            (aimDistanceForFarMaxVelocity.get() - aimDistanceForNearMaxVelocity.get())
+            );
+            Logger.recordOutput("Drive/DriveJoystick/MaxVelocityAiming", maxVelocity);
+
+            linearSetpoint = new Translation2d(
+                    linearMagnitude * maxVelocity,
+                    linearDirection
+            );
+            linearSetpoint = aimLinearAccelerationLimiter.calculate(linearSetpoint);
+        } else {
+            linearSetpoint = new Translation2d(
+                    linearMagnitude * driveConfig.maxVelocityMetersPerSec(),
+                    linearDirection
+            );
+            // Reset with latest speeds
+            aimLinearAccelerationLimiter.reset(robotState.getMeasuredChassisSpeedsFieldRelative());
+        }
+
+        if (mode == Mode.Aim || mode == Mode.AimAndAssist) {
+            // Set heading override setpoint for aiming
+            headingOverride.setSetpoint(shootingKinematics.getShootingParameters().headingRad());
+        }
+
+        double angularSetpoint;
+        if (
+                headingOverrideEnabledDebouncer.calculate(
+                        (
+                                !runningHeadingOverride ||
+                                        // Stop heading override if we are running and rotate too much on our own
+                                        // This means that we should keep running if different is *less* than threshold
+                                        Math.abs(robotState.getRotation().getRadians() - headingOverride.getSetpoint())
+                                                < Units.degreesToRadians(headingOverrideThresholdDegrees.get())
+                        ) && controller.getDriveAngularMagnitude() == 0.0
+                ) ||
+                        mode == Mode.Aim ||
+                        mode == Mode.AimAndAssist
+        ) {
+            if (!runningHeadingOverride) {
+                // Set PID setpoint
+                headingOverride.reset();
+                if (mode != Mode.Aim && mode != Mode.AimAndAssist) {
+                    // Aiming setpoint is set above
                     headingOverride.setSetpoint(robotState.getRotation().getRadians());
-                    headingOverrideSetpointResetTimer.stop();
-                    shouldRunHeadingOverride = false;
-                } else {
-                    joystickSetpoint = new ChassisSpeeds(
-                            joystickSetpoint.vxMetersPerSecond,
-                            joystickSetpoint.vyMetersPerSecond,
-                            headingOverride.calculate(robotState.getRotation().getRadians())
-                    );
                 }
+                runningHeadingOverride = true;
+            }
+
+            angularSetpoint = headingOverride.calculate(robotState.getRotation().getRadians());
+
+            boolean headingOverrideAtSetpoint = headingOverride.atSetpoint();
+            //Logger.recordOutput("Drive/DriveJoystick/HeadingOverrideAtSetpoint", headingOverrideAtSetpoint);
+            if (headingOverrideAtSetpoint) {
+                angularSetpoint = 0.0;
+            }
+
+            if (mode == Mode.Aim || mode == Mode.AimAndAssist) {
+                // Note that this is after setpoint checking so thqt
+                // even if we are at the setpoint, the feedforward is
+                // still applied
+                angularSetpoint += shootingKinematics.rotationAboutHubRadiansPerSec(linearSetpoint);
+            } else {
+                // limit to drive linear magnitude when not aiming
+                // drive linear magnitude is between 0 and 1
+                angularSetpoint *= linearMagnitude;
             }
         } else {
-            headingOverride.setSetpoint(robotState.getRotation().getRadians());
-            headingOverrideSetpointResetTimer.stop();
-            shouldRunHeadingOverride = false;
-        }
-        Logger.recordOutput("Drive/DriveJoystick/HeadingOverrideRunning", shouldRunHeadingOverride);
+            runningHeadingOverride = false;
 
-        return DriveRequest.chassisSpeeds(joystickSetpoint);
+            angularSetpoint = controller.getDriveAngularMagnitude() * joystickMaxAngularSpeedRadPerSec;
+        }
+        Logger.recordOutput("Drive/DriveJoystick/HeadingOverrideRunning", runningHeadingOverride);
+        Logger.recordOutput("Drive/DriveJoystick/HeadingOverrideSetpoint", headingOverride.getSetpoint());
+        Logger.recordOutput("Drive/DriveJoystick/HeadingOverrideMeasurement", robotState.getRotation().getRadians());
+
+        if (
+                (mode == Mode.Aim || mode == Mode.AimAndAssist || mode == Mode.StopWithX) &&
+                        linearSetpoint.getNorm() == 0.0 &&
+                        angularSetpoint == 0.0
+        ) {
+            return DriveRequest.stopWithX();
+        } else {
+            return DriveRequest.chassisSpeeds(ChassisSpeeds.fromFieldRelativeSpeeds(
+                    linearSetpoint.getX(),
+                    linearSetpoint.getY(),
+                    angularSetpoint,
+                    robotState.getRotation()
+            ));
+        }
     }
 }

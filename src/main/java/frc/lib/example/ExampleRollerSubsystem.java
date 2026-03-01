@@ -1,10 +1,11 @@
 package frc.lib.example;
 
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import frc.lib.PIDF;
+import frc.lib.Util;
 import frc.lib.motor.MotorIO;
 import frc.lib.motor.MotorIOInputsAutoLogged;
 import frc.lib.motor.RequestType;
@@ -22,11 +23,9 @@ import java.util.function.DoubleSupplier;
 import static frc.lib.example.ExampleRollerSubsystemConstants.*;
 
 public class ExampleRollerSubsystem implements Periodic {
-    private static final PIDF.Tunable positionGainsTunable = positionGains.tunable("ExampleRollerSubsystem/Position");
-    private static final PIDF.Tunable velocityGainsTunable = velocityGains.tunable("ExampleRollerSubsystem/Velocity");
     private static final LoggedTunableNumber runAtVoltage = new LoggedTunableNumber("ExampleRollerSubsystem/Goal/RunAtVoltage", 3.0);
 
-    private final OperatorDashboard operatorDashboard = OperatorDashboard.get();
+    private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
 
     private final MotorIO io = createIO();
     private final MotorIOInputsAutoLogged inputs = new MotorIOInputsAutoLogged();
@@ -52,16 +51,18 @@ public class ExampleRollerSubsystem implements Periodic {
 
     private static ExampleRollerSubsystem instance;
 
-    public static ExampleRollerSubsystem get() {
-        if (instance == null)
-            synchronized (ExampleRollerSubsystem.class) {
-                instance = new ExampleRollerSubsystem();
-            }
+    public static synchronized ExampleRollerSubsystem get() {
+        if (instance == null) {
+            instance = new ExampleRollerSubsystem();
+        }
 
         return instance;
     }
 
     private ExampleRollerSubsystem() {
+        if (instance != null) {
+            Util.error("Duplicate ExampleRollerSubsystem created");
+        }
     }
 
     @Override
@@ -73,11 +74,15 @@ public class ExampleRollerSubsystem implements Periodic {
 
         // Apply network inputs
         if (operatorDashboard.coastOverride.hasChanged()) {
-            io.setBrakeMode(!operatorDashboard.coastOverride.get());
+            io.setNeutralMode(operatorDashboard.coastOverride.get() ? NeutralModeValue.Coast : NeutralModeValue.Brake);
         }
 
-        positionGainsTunable.ifChanged(io::setPositionPIDF);
-        velocityGainsTunable.ifChanged(io::setVelocityPIDF);
+        if (positionGains.hasChanged()) {
+            io.setPositionPIDF(positionGains);
+        }
+        if (velocityGains.hasChanged()) {
+            io.setVelocityPIDF(velocityGains);
+        }
     }
 
     @Override
@@ -86,7 +91,7 @@ public class ExampleRollerSubsystem implements Periodic {
         if (DriverStation.isDisabled()) {
             io.setRequest(RequestType.VoltageVolts, 0);
         } else {
-            Logger.recordOutput("ExampleRollerSubsystem/RequestType", goal.type);
+            //            Logger.recordOutput("ExampleRollerSubsystem/RequestType", goal.type);
             double value = goal.value.getAsDouble();
             Logger.recordOutput("ExampleRollerSubsystem/RequestValue", value);
             io.setRequest(goal.type, value);
@@ -104,12 +109,9 @@ public class ExampleRollerSubsystem implements Periodic {
     public boolean atGoal() {
         double value = goal.value.getAsDouble();
         return switch (goal.type) {
-            case PositionRad -> Math.abs(inputs.positionRad - value) <= tolerances.positionToleranceRad();
+            case VelocityRadPerSec -> Math.abs(inputs.velocityRadPerSec - value) <= velocityToleranceRadPerSec;
 
-            case VelocityRadPerSec ->
-                    Math.abs(inputs.velocityRadPerSec - value) <= tolerances.velocityToleranceRadPerSec();
-
-            case VoltageVolts -> Math.abs(inputs.appliedVolts - value) <= tolerances.voltageToleranceVolts();
+            case PositionRad, VoltageVolts -> false;
         };
     }
 
