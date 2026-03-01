@@ -1,5 +1,6 @@
 package frc.robot.subsystems.drive.goals;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -39,8 +40,10 @@ public class DriveJoystickGoal extends DriveGoal {
     private static final LoggedTunableNumber headingOverrideSetpointResetTime = new LoggedTunableNumber("Drive/DriveJoystick/HeadingOverrideSetpointResetTimeSeconds", 0.25);
     private static final LoggedTunableNumber headingOverrideThresholdDegrees = new LoggedTunableNumber("Drive/DriveJoystick/HeadingOverrideThresholdDegrees", 30.0);
 
-    private static final LoggedTunableNumber aimMaxLinearVelocityMetersPerSec = new LoggedTunableNumber("Drive/DriveJoystick/Aim/MaxLinearVelocity", 2.0);
-    private static final LoggedTunableNumber aimDistanceForMaxVelocity = new LoggedTunableNumber("Drive/DriveJoystick/Aim/DistanceForMaxVelocity", 3.0);
+    private static final LoggedTunableNumber aimDistanceForNearMaxVelocity = new LoggedTunableNumber("Drive/DriveJoystick/Aim/DistanceForNearMaxVelocity", 1.0);
+    private static final LoggedTunableNumber aimDistanceForFarMaxVelocity = new LoggedTunableNumber("Drive/DriveJoystick/Aim/DistanceForFarMaxVelocity", 4.0);
+    private static final LoggedTunableNumber aimNearMaxLinearVelocityMetersPerSec = new LoggedTunableNumber("Drive/DriveJoystick/Aim/NearMaxLinearVelocity", 0.5);
+    private static final LoggedTunableNumber aimFarMaxLinearVelocityMetersPerSec = new LoggedTunableNumber("Drive/DriveJoystick/Aim/FarMaxLinearVelocity", 1.5);
     private static final LoggedTunableNumber aimMaxLinearAccelerationMetersPerSecPerSec = new LoggedTunableNumber("Drive/DriveJoystick/Aim/MaxLinearAcceleration", 5);
 
     private static final RobotState robotState = RobotState.get();
@@ -128,7 +131,13 @@ public class DriveJoystickGoal extends DriveGoal {
         Translation2d linearSetpoint;
         if (mode == Mode.Aim || mode == Mode.AimAndAssist) {
             // Limit linear velocity and acceleration while aiming
-            double maxVelocity = robotState.getTranslation().getDistance(FieldConstants.Hub.topCenterPoint.toTranslation2d()) / aimDistanceForMaxVelocity.get() * aimMaxLinearVelocityMetersPerSec.get();
+            double distance = robotState.getTranslation().getDistance(FieldConstants.Hub.topCenterPoint.toTranslation2d());
+            double maxVelocity = MathUtil.interpolate(
+                    aimNearMaxLinearVelocityMetersPerSec.get(),
+                    aimFarMaxLinearVelocityMetersPerSec.get(),
+                    (distance - aimDistanceForNearMaxVelocity.get()) /
+                            (aimDistanceForFarMaxVelocity.get() - aimDistanceForNearMaxVelocity.get())
+            );
             Logger.recordOutput("Drive/DriveJoystick/MaxVelocityAiming", maxVelocity);
 
             linearSetpoint = new Translation2d(
