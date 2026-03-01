@@ -152,7 +152,7 @@ public class ModuleIOTalonFXSparkMaxCANcoder extends ModuleIO {
                 .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
                 .positionWrappingEnabled(true)
                 .positionWrappingInputRange(0.0, 2 * Math.PI);
-            moduleConfig.turnRelativeGains().applySpark(turnConfig.closedLoop, ClosedLoopSlot.kSlot0);
+        moduleConfig.turnRelativeGains().applySpark(turnConfig.closedLoop, ClosedLoopSlot.kSlot0);
         turnConfig
                 .signals
                 .primaryEncoderPositionAlwaysOn(true)
