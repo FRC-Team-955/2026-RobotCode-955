@@ -62,6 +62,8 @@ public class LEDPatterns {
             LEDPattern.GradientType.kContinuous,
             Color.kRed,
             Color.kRed,
+            Color.kRed,
+            Color.kRed,
             new Color(255, 0, 128)
     ).scrollAtRelativeSpeed(Hertz.of(2));
 
