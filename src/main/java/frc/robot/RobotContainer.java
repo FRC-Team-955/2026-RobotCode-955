@@ -90,7 +90,7 @@ public class RobotContainer {
                 ));
 
         controller.leftTrigger()
-                .whileTrue(Commands.parallel(
+                .toggleOnTrue(Commands.parallel(
                         drive.driveJoystick(() -> {
                             if (operatorDashboard.manualAiming.get() && operatorDashboard.disableAssist.get()) {
                                 return DriveJoystickGoal.Mode.StopWithX;
