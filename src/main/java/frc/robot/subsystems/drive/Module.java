@@ -90,8 +90,8 @@ public class Module {
         io.setDrivePIDF(newGains);
     }
 
-    public void setTurnPIDF(LoggedTunablePIDF newGains) {
-        io.setTurnPIDF(newGains);
+    public void setTurnRelativePIDF(LoggedTunablePIDF newGains) {
+        io.setTurnRelativePIDF(newGains);
     }
 
     public void setBrakeMode(boolean enable) {

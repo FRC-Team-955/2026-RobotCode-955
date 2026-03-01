@@ -60,7 +60,7 @@ public class ModuleIO {
      * Change PIDF gains. IO layers should not rely on this method being called, and
      * should default to the gains in the constants
      */
-    public void setTurnPIDF(LoggedTunablePIDF newGains) {
+    public void setTurnRelativePIDF(LoggedTunablePIDF newGains) {
     }
 
     /**

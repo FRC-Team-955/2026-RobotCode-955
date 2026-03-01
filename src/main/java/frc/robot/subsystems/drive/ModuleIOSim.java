@@ -42,7 +42,7 @@ public class ModuleIOSim extends ModuleIO {
     private boolean driveClosedLoop = false;
     private boolean turnClosedLoop = false;
     private PIDController driveController = moduleConfig.driveGains().toPID();
-    private PIDController turnController = moduleConfig.turnGains().toPIDWrapRadians();
+    private PIDController turnController = moduleConfig.turnRelativeGains().toPIDWrapRadians();
     private SimpleMotorFeedforward driveFF = moduleConfig.driveGains().toSimpleFF();
     private double driveFFVolts = 0.0;
     private double driveAppliedVolts = 0.0;
@@ -110,8 +110,8 @@ public class ModuleIOSim extends ModuleIO {
     }
 
     @Override
-    public void setTurnPIDF(LoggedTunablePIDF newGains) {
-        System.out.println("Setting turn gains");
+    public void setTurnRelativePIDF(LoggedTunablePIDF newGains) {
+        System.out.println("Setting relative turn gains");
         turnController = newGains.toPIDWrapRadians();
     }
 

@@ -126,7 +126,7 @@ public class ModuleIOTalonFXCANcoder extends ModuleIO {
         // Configure turn motor
         turnConfig = new TalonFXConfiguration();
         turnConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-        turnConfig.Slot0 = Slot0Configs.from(moduleConfig.turnGains().toPhoenix());
+        turnConfig.Slot0 = Slot0Configs.from(moduleConfig.turnRelativeGains().toPhoenix());
         turnConfig.Feedback.FeedbackRemoteSensorID = cancoderCanID;
         turnConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
         turnConfig.Feedback.RotorToSensorRatio = gearRatioConfigs[index].turnGearRatio();
@@ -241,7 +241,7 @@ public class ModuleIOTalonFXCANcoder extends ModuleIO {
     }
 
     @Override
-    public void setTurnPIDF(LoggedTunablePIDF newGains) {
+    public void setTurnRelativePIDF(LoggedTunablePIDF newGains) {
         System.out.println("Setting turn gains");
         turnConfig.Slot0 = Slot0Configs.from(newGains.toPhoenix());
         tryUntilOkAsync(5, () -> turnTalon.getConfigurator().apply(turnConfig, 0.25));

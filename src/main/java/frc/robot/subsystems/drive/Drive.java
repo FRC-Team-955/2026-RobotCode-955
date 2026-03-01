@@ -238,9 +238,9 @@ public class Drive extends CommandBasedSubsystem {
                 module.setDrivePIDF(moduleConfig.driveGains());
             }
         }
-        if (moduleConfig.turnGains().hasChanged()) {
+        if (moduleConfig.turnRelativeGains().hasChanged()) {
             for (var module : modules) {
-                module.setTurnPIDF(moduleConfig.turnGains());
+                module.setTurnRelativePIDF(moduleConfig.turnRelativeGains());
             }
         }
     }

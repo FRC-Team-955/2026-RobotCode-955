@@ -152,7 +152,7 @@ public class ModuleIOTalonFXSparkMaxCANcoder extends ModuleIO {
                 .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
                 .positionWrappingEnabled(true)
                 .positionWrappingInputRange(0.0, 2 * Math.PI);
-        moduleConfig.turnGains().applySpark(turnConfig.closedLoop, ClosedLoopSlot.kSlot0);
+            moduleConfig.turnRelativeGains().applySpark(turnConfig.closedLoop, ClosedLoopSlot.kSlot0);
         turnConfig
                 .signals
                 .primaryEncoderPositionAlwaysOn(true)
@@ -265,8 +265,8 @@ public class ModuleIOTalonFXSparkMaxCANcoder extends ModuleIO {
     }
 
     @Override
-    public void setTurnPIDF(LoggedTunablePIDF newGains) {
-        System.out.println("Setting turn gains");
+    public void setTurnRelativePIDF(LoggedTunablePIDF newGains) {
+        System.out.println("Setting relative turn gains");
         var newConfig = new SparkMaxConfig();
         newGains.applySpark(newConfig.closedLoop, ClosedLoopSlot.kSlot0);
         SparkUtil.tryUntilOkAsync(5, () -> turnSpark.configure(

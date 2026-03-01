@@ -144,7 +144,7 @@ public class ModuleIOSparkMaxCANcoder extends ModuleIO {
                 .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
                 .positionWrappingEnabled(true)
                 .positionWrappingInputRange(0.0, 2 * Math.PI);
-        moduleConfig.turnGains().applySpark(turnConfig.closedLoop, ClosedLoopSlot.kSlot0);
+        moduleConfig.turnRelativeGains().applySpark(turnConfig.closedLoop, ClosedLoopSlot.kSlot0);
         turnConfig
                 .signals
                 .primaryEncoderPositionAlwaysOn(true)
@@ -244,7 +244,7 @@ public class ModuleIOSparkMaxCANcoder extends ModuleIO {
     }
 
     @Override
-    public void setTurnPIDF(LoggedTunablePIDF newGains) {
+    public void setTurnRelativePIDF(LoggedTunablePIDF newGains) {
         System.out.println("Setting turn gains");
         var newConfig = new SparkMaxConfig();
         newGains.applySpark(newConfig.closedLoop, ClosedLoopSlot.kSlot0);

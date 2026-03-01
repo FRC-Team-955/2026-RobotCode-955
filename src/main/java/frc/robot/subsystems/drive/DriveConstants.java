@@ -84,9 +84,12 @@ public class DriveConstants {
                         .withS(0.19, StaticFeedforwardSignValue.UseVelocitySign)
                         .withV(0.109)
                         .withA(0.005),
-                new LoggedTunablePIDF("Drive/TurnGains")
+                new LoggedTunablePIDF("Drive/TurnRelativeGains")
                         .withP(10.0)
                         .withD(0.04),
+                new LoggedTunablePIDF("Drive/TurnAbsoluteGains")
+                        .withP(0.0)
+                        .withD(0.0),
                 true,
                 false,
                 false,
@@ -97,9 +100,12 @@ public class DriveConstants {
                 new LoggedTunablePIDF("Drive/DriveGains")
                         .withS(0.04075, StaticFeedforwardSignValue.UseClosedLoopSign)
                         .withV(0.14117),
-                new LoggedTunablePIDF("Drive/TurnGains")
+                new LoggedTunablePIDF("Drive/TurnRelativeGains")
                         .withP(10.0)
                         .withD(0.07),
+                new LoggedTunablePIDF("Drive/TurnAbsoluteGains")
+                        .withP(0.0)
+                        .withD(0.0),
                 true,
                 false,
                 false,
@@ -198,7 +204,8 @@ public class DriveConstants {
 
     record ModuleConfig(
             LoggedTunablePIDF driveGains,
-            LoggedTunablePIDF turnGains,
+            LoggedTunablePIDF turnRelativeGains,
+            LoggedTunablePIDF turnAbsoluteGains,
             boolean turnInverted,
             boolean driveInverted,
             boolean encoderInverted,
