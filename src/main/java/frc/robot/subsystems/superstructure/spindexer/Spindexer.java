@@ -20,7 +20,7 @@ import java.util.function.DoubleSupplier;
 import static frc.robot.subsystems.superstructure.spindexer.SpindexerConstants.createIO;
 
 public class Spindexer implements Periodic {
-    private static final LoggedTunableNumber feedVoltage = new LoggedTunableNumber("Superstructure/Spindexer/Goal/FeedVoltage", 6.7);
+    private static final LoggedTunableNumber feedVoltage = new LoggedTunableNumber("Superstructure/Spindexer/Goal/FeedVoltage", 6.0);
     private static final LoggedTunableNumber ejectVoltage = new LoggedTunableNumber("Superstructure/Spindexer/Goal/EjectVoltage", -12.0);
 
     private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
@@ -31,7 +31,7 @@ public class Spindexer implements Periodic {
     @RequiredArgsConstructor
     public enum Goal {
         IDLE(() -> 0, RequestType.VoltageVolts),
-        FEED(() -> Timer.getTimestamp() % 3.0 < 0.1 ? -feedVoltage.get() : feedVoltage.get(), RequestType.VoltageVolts),
+        FEED(() -> Timer.getTimestamp() % 3.0 < 0.3 ? ejectVoltage.get() : feedVoltage.get(), RequestType.VoltageVolts),
         EJECT(ejectVoltage::get, RequestType.VoltageVolts),
         ;
 
