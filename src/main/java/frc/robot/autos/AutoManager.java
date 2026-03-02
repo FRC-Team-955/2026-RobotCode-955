@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.AllianceFlipUtil;
 import frc.lib.Util;
+import frc.robot.FieldConstants;
 import frc.robot.RobotState;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -42,6 +43,7 @@ public class AutoManager {
         autoChooser.addOption("DepotAuto", DepotAuto.build());
         autoChooser.addOption("PlanetaryAuto", PlanetaryAuto.build());
         autoChooser.addOption("PlanetaryRightAuto", PlanetaryRightAuto.build());
+        autoChooser.addOption("CenterAuto", CenterAuto.build());
     }
 
     public Command getSelectedAuto() {
@@ -55,24 +57,29 @@ public class AutoManager {
         Pose2d rightStartPose = RightSideAuto.getStartingPose();
         Pose2d planetaryStartPose = AllianceFlipUtil.apply(new Pose2d(3.88, 7.3, Rotation2d.fromDegrees(90)));
         Pose2d planetaryRightStartPose = AllianceFlipUtil.apply(new Pose2d(3.88, 0.91, Rotation2d.fromDegrees(-90)));
+        Pose2d centerStartPose = AllianceFlipUtil.apply(new Pose2d(1.5, FieldConstants.LinesHorizontal.center, Rotation2d.kZero));
 
         double distanceToLeft = currentPose.getTranslation().getDistance(leftStartPose.getTranslation());
         double distanceToRight = currentPose.getTranslation().getDistance(rightStartPose.getTranslation());
         double distanceToPlanetary = currentPose.getTranslation().getDistance(planetaryStartPose.getTranslation());
         double distanceToPlanetaryRight = currentPose.getTranslation().getDistance(planetaryRightStartPose.getTranslation());
+        double distanceToCenter = currentPose.getTranslation().getDistance(centerStartPose.getTranslation());
 
-        if (distanceToLeft <= distanceToRight) {
-            if (distanceToPlanetary <= distanceToLeft) {
-                return Optional.of(planetaryStartPose);
-            } else {
-                return Optional.of(leftStartPose);
-            }
+        double minDistance = Math.min(distanceToLeft,
+                Math.min(distanceToRight,
+                        Math.min(distanceToPlanetary,
+                                Math.min(distanceToPlanetaryRight, distanceToCenter))));
+
+        if (minDistance == distanceToLeft) {
+            return Optional.of(leftStartPose);
+        } else if (minDistance == distanceToRight) {
+            return Optional.of(rightStartPose);
+        } else if (minDistance == distanceToPlanetary) {
+            return Optional.of(planetaryStartPose);
+        } else if (minDistance == distanceToPlanetaryRight) {
+            return Optional.of(planetaryRightStartPose);
         } else {
-            if  (distanceToRight <= distanceToPlanetaryRight) {
-                return Optional.of(rightStartPose);
-            } else {
-                return Optional.of(planetaryRightStartPose);
-            }
+            return Optional.of(centerStartPose);
         }
     }
 
