@@ -97,6 +97,10 @@ public class GamePieceVision implements Periodic {
                                 .transformBy(new Transform2d(new Translation2d(cameraToFuelNorm, 0), Rotation2d.kZero));
                 Pose3d fuelPose = new Pose3d(fieldToFuel).plus(new Transform3d(0, 0, FieldConstants.fuelDiameter / 2.0, new Rotation3d()));
 
+                if (fuelPose.getTranslation().getDistance(robotPose.getTranslation()) > 5.0) {
+                    continue;
+                }
+
                 newlySeenTargets.put(
                         fuelPose.getTranslation().toTranslation2d(),
                         observation.timestampSeconds()
