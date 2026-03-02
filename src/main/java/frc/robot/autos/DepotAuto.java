@@ -17,13 +17,20 @@ import frc.robot.subsystems.superstructure.Superstructure;
 
 import java.util.function.Supplier;
 
-public class DepotAuto {
+public class DepotAuto extends Auto {
     private static final RobotState robotState = RobotState.get();
     private static final ShootingKinematics shootingKinematics = ShootingKinematics.get();
 
     private static final Drive drive = Drive.get();
     private static final Superintake superintake = Superintake.get();
     private static final Superstructure superstructure = Superstructure.get();
+
+    public DepotAuto() {
+        super(
+                new Pose2d(3.5, 5.5, Rotation2d.kCW_Pi_2),
+                build()
+        );
+    }
 
     private static Command waypoint(Translation2d translation2d) {
         Supplier<Pose2d> poseSupplier = () -> new Pose2d(
@@ -41,7 +48,6 @@ public class DepotAuto {
 
     public static Command build() {
         return CommandsExt.eagerSequence(
-                robotState.setPose(() -> AllianceFlipUtil.apply(new Pose2d(3.5, 5.5, Rotation2d.fromDegrees(-90)))),
                 Commands.race(
                         waypoint(FieldConstants.Depot.depotCenter.toTranslation2d()),
                         superintake.setGoal(Superintake.Goal.INTAKE),

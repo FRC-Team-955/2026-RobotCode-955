@@ -2,12 +2,11 @@ package frc.robot.autos;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.AllianceFlipUtil;
 import frc.lib.Util;
-import frc.robot.FieldConstants;
+import frc.lib.commands.CommandsExt;
 import frc.robot.RobotState;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -15,7 +14,7 @@ import java.util.Optional;
 
 public class AutoManager {
     private static final RobotState robotState = RobotState.get();
-    public final LoggedDashboardChooser<Command> autoChooser = new LoggedDashboardChooser<>("Auto Choices");
+    public final LoggedDashboardChooser<Auto> autoChooser = new LoggedDashboardChooser<>("Auto Choices");
 
     public static final double READY_THRESHOLD_METERS = 0.1;
     public static final double MAX_DISTANCE_METERS = 3.0;
@@ -47,7 +46,11 @@ public class AutoManager {
     }
 
     public Command getSelectedAuto() {
-        return autoChooser.get();
+        Auto selectedAuto = autoChooser.get();
+        return CommandsExt.eagerSequence(
+                robotState.setPose(() -> AllianceFlipUtil.apply(selectedAuto.startingPose)),
+                selectedAuto.command
+        );
     }
 
     public Optional<Pose2d> getClosestAutoStartingPose() {
