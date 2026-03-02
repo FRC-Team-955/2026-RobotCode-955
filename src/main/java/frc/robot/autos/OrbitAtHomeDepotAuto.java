@@ -14,13 +14,13 @@ import frc.robot.subsystems.superstructure.Superstructure;
 
 import static frc.robot.subsystems.drive.DriveConstants.defaultMoveToConstraints;
 
-public class PlanetaryAuto {
+public class OrbitAtHomeDepotAuto {
     private static final RobotState robotState = RobotState.get();
 
     private static final Superintake superintake = Superintake.get();
     private static final Superstructure superstructure = Superstructure.get();
 
-    private static final Pose2d trenchShootingPosition = new Pose2d(3.88, 7.3, Rotation2d.kCCW_90deg);
+    private static final Pose2d trenchShootingPosition = new Pose2d(3.88, 7.38, Rotation2d.kCCW_90deg);
     private static final double exitTrenchX = 6.34;
 
     public static Command build() {
@@ -36,19 +36,12 @@ public class PlanetaryAuto {
                         exitTrenchX,
                         trenchShootingPosition.getY(),
                         trenchShootingPosition.getRotation()
-                ), AutoHelpers.trenchConstraints),
-
-                // spin and prepare to intake
-                AutoHelpers.intermediateWaypoint(() -> new Pose2d(
-                        6.75,
-                        6.7,
-                        Rotation2d.kCW_90deg
                 ), defaultMoveToConstraints),
 
                 // intake, go to neturalzone
                 superintake.setGoal(Superintake.Goal.INTAKE).until(() -> true),
                 AutoHelpers.yDistanceInterpolatingWaypoint(
-                        new Translation2d(FieldConstants.LinesVertical.center, 7.7),
+                        new Translation2d(FieldConstants.LinesVertical.center, 7.0),
                         new Translation2d(FieldConstants.LinesVertical.center, 6.4),
                         Rotation2d.kCW_90deg,
                         2,
@@ -63,6 +56,13 @@ public class PlanetaryAuto {
                 ), AutoHelpers.intakeConstraints),
                 superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
 
+                // avoid scattering balls
+                AutoHelpers.intermediateWaypoint(() -> new Pose2d(
+                        FieldConstants.LinesVertical.center - 0.5,
+                        trenchShootingPosition.getY(),
+                        trenchShootingPosition.getRotation()
+                ), defaultMoveToConstraints),
+
                 //move to entrance to trench
                 AutoHelpers.intermediateWaypoint(() -> new Pose2d(
                         6.1,
@@ -71,14 +71,14 @@ public class PlanetaryAuto {
                 ), defaultMoveToConstraints),
 
                 // go through trench to shooting position
-                AutoHelpers.intermediateWaypoint(() -> trenchShootingPosition, AutoHelpers.trenchConstraints),
+                AutoHelpers.intermediateWaypoint(() -> trenchShootingPosition, defaultMoveToConstraints),
 
                 // shoot
                 Commands.parallel(
                         superintake.setGoal(Superintake.Goal.INTAKE),
                         superstructure.setGoal(Superstructure.Goal.SHOOT),
                         AutoHelpers.finalWaypoint(() -> trenchShootingPosition, defaultMoveToConstraints.withAiming(true))
-                ).withTimeout(5),
+                ).withTimeout(4.5),
                 superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
                 superstructure.setGoal(Superstructure.Goal.IDLE).until(() -> true),
 
@@ -87,7 +87,7 @@ public class PlanetaryAuto {
                         exitTrenchX,
                         trenchShootingPosition.getY(),
                         trenchShootingPosition.getRotation()
-                ), AutoHelpers.trenchConstraints),
+                ), defaultMoveToConstraints),
 
                 // intake
                 AutoHelpers.intakeFromLeftNeutralZone(
@@ -107,7 +107,7 @@ public class PlanetaryAuto {
                 superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
 
                 // go through trench to shooting position
-                AutoHelpers.intermediateWaypoint(() -> trenchShootingPosition, AutoHelpers.trenchConstraints),
+                AutoHelpers.intermediateWaypoint(() -> trenchShootingPosition, defaultMoveToConstraints),
 
                 // shoot
                 Commands.parallel(

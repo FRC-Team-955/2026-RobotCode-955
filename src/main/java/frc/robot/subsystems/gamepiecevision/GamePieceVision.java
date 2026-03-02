@@ -144,9 +144,14 @@ public class GamePieceVision implements Periodic {
             }
         }
 
-        bestTargets = clusters.stream()
-                .max(Comparator.comparing(List::size))
-                .orElse(List.of())
+        //bestTargets = clusters.stream()
+        //        .max(Comparator.comparing(List::size))
+        //        .orElse(List.of())
+        //        .stream()
+        //        .sorted(Comparator.comparingDouble(t -> t.getDistance(robotState.getTranslation())))
+        //        .toList();
+        bestTargets = targetsToLastSeen
+                .keySet()
                 .stream()
                 .sorted(Comparator.comparingDouble(t -> t.getDistance(robotState.getTranslation())))
                 .toList();

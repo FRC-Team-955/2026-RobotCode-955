@@ -36,7 +36,7 @@ public class PlanetaryRightAuto {
                         exitTrenchX,
                         trenchShootingPosition.getY(),
                         trenchShootingPosition.getRotation()
-                ), AutoHelpers.trenchConstraints),
+                ), defaultMoveToConstraints),
 
                 // spin and prepare to intake
                 AutoHelpers.intermediateWaypoint(() -> new Pose2d(
@@ -71,7 +71,7 @@ public class PlanetaryRightAuto {
                 ), defaultMoveToConstraints),
 
                 // go through trench to shooting position
-                AutoHelpers.intermediateWaypoint(() -> trenchShootingPosition, AutoHelpers.trenchConstraints),
+                AutoHelpers.intermediateWaypoint(() -> trenchShootingPosition, defaultMoveToConstraints),
 
                 // shoot
                 Commands.parallel(
@@ -87,7 +87,7 @@ public class PlanetaryRightAuto {
                         exitTrenchX,
                         trenchShootingPosition.getY(),
                         trenchShootingPosition.getRotation()
-                ), AutoHelpers.trenchConstraints),
+                ), defaultMoveToConstraints),
 
                 // intake
                 AutoHelpers.intakeFromRightNeutralZone(
@@ -108,7 +108,7 @@ public class PlanetaryRightAuto {
                 superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
 
                 // go through trench to shooting position
-                AutoHelpers.intermediateWaypoint(() -> trenchShootingPosition, AutoHelpers.trenchConstraints),
+                AutoHelpers.intermediateWaypoint(() -> trenchShootingPosition, defaultMoveToConstraints),
 
                 // shoot
                 Commands.parallel(

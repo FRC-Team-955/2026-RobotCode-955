@@ -41,7 +41,7 @@ public class AutoManager {
         autoChooser.addOption("LeftSideAuto", LeftSideAuto.build());
         autoChooser.addOption("RightSideAuto", RightSideAuto.build());
         autoChooser.addOption("DepotAuto", DepotAuto.build());
-        autoChooser.addOption("PlanetaryAuto", PlanetaryAuto.build());
+        autoChooser.addOption("Orbit at Home Depot", OrbitAtHomeDepotAuto.build());
         autoChooser.addOption("PlanetaryRightAuto", PlanetaryRightAuto.build());
         autoChooser.addOption("CenterAuto", CenterAuto.build());
     }

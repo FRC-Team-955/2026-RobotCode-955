@@ -54,20 +54,20 @@ public class DriveConstants {
 
     public static final MoveToConstraints defaultMoveToConstraints = new MoveToConstraints(
             new LoggedTunableNumber("Drive/MoveTo/MaxLinearVelocity", driveConfig.maxVelocityMetersPerSec()),
-            new LoggedTunableNumber("Drive/MoveTo/MaxLinearAcceleration", 15.0),
-            new LoggedTunableNumber("Drive/MoveTo/MaxAngularVelocity", 6),
+            new LoggedTunableNumber("Drive/MoveTo/MaxLinearAcceleration", 20.0),
+            new LoggedTunableNumber("Drive/MoveTo/MaxAngularVelocity", 9),
             new LoggedTunableNumber("Drive/MoveTo/MaxAngularAcceleration", 30.0),
             false,
             false
     );
 
     public static final MoveToConfig moveToConfig = new MoveToConfig(
-            new LoggedTunablePIDF("Drive/MoveTo/Linear").withP(3.5).withD(0.05),
-            new LoggedTunableNumber("Drive/MoveTo/LinearPositionTolerance", 0.02),
-            new LoggedTunableNumber("Drive/MoveTo/LinearVelocityToleranceMeters", 0.1),
-            new LoggedTunablePIDF("Drive/MoveTo/Angular").withP(4.5).withD(0.05),
-            new LoggedTunableNumber("Drive/MoveTo/AngularPositionTolerance", Units.degreesToRadians(2)),
-            new LoggedTunableNumber("Drive/MoveTo/AngularVelocityTolerance", Units.degreesToRadians(10))
+            new LoggedTunablePIDF("Drive/MoveTo/Linear").withP(3.5).withD(0.02),
+            new LoggedTunableNumber("Drive/MoveTo/LinearPositionTolerance", 0.05),
+            new LoggedTunableNumber("Drive/MoveTo/LinearVelocityToleranceMeters", 0.2),
+            new LoggedTunablePIDF("Drive/MoveTo/Angular").withP(3.5).withD(0.02),
+            new LoggedTunableNumber("Drive/MoveTo/AngularPositionTolerance", Units.degreesToRadians(5)),
+            new LoggedTunableNumber("Drive/MoveTo/AngularVelocityTolerance", Units.degreesToRadians(20))
     );
 
     public static final double joystickMaxAngularSpeedRadPerSec = Math.min(Units.degreesToRadians(500), maxAngularVelocityRadPerSec);

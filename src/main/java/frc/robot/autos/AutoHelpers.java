@@ -36,9 +36,6 @@ public class AutoHelpers {
     private static final Drive drive = Drive.get();
     private static final Superintake superintake = Superintake.get();
 
-    public static final DriveConstants.MoveToConstraints trenchConstraints = defaultMoveToConstraints;
-    // .withMaxLinearVelocityMetersPerSec(new LoggedTunableNumber("AutoHelpers/Trench/MaxLinearVelocity", 1.5));
-
     public static Command intermediateWaypoint(Supplier<Pose2d> poseSupplier, DriveConstants.MoveToConstraints constraints) {
         return drive
                 .moveTo(
@@ -156,8 +153,7 @@ public class AutoHelpers {
     }
 
     private static final double neutralZoneXMin = FieldConstants.LinesVertical.neutralZoneNear + driveConfig.bumperLengthMeters() / 2.0;
-    // Allow going over center line a little bit
-    private static final double neutralZoneXMax = FieldConstants.LinesVertical.center;
+    private static final double neutralZoneXMax = FieldConstants.LinesVertical.center - 0.2;
 
     public static Command intakeFromLeftNeutralZone(Supplier<Pose2d> poseSupplierIfNoGamePieces) {
         return intakeFromNeutralZone(
