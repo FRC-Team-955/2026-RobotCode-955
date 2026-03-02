@@ -41,6 +41,7 @@ public class AutoManager {
         autoChooser.addOption("RightSideAuto", RightSideAuto.build());
         autoChooser.addOption("DepotAuto", DepotAuto.build());
         autoChooser.addOption("PlanetaryAuto", PlanetaryAuto.build());
+        autoChooser.addOption("PlanetaryRightAuto", PlanetaryRightAuto.build());
     }
 
     public Command getSelectedAuto() {
@@ -53,10 +54,12 @@ public class AutoManager {
         Pose2d leftStartPose = LeftSideAuto.getStartingPose();
         Pose2d rightStartPose = RightSideAuto.getStartingPose();
         Pose2d planetaryStartPose = AllianceFlipUtil.apply(new Pose2d(3.88, 7.3, Rotation2d.fromDegrees(90)));
+        Pose2d planetaryRightStartPose = AllianceFlipUtil.apply(new Pose2d(3.88, 0.91, Rotation2d.fromDegrees(-90)));
 
         double distanceToLeft = currentPose.getTranslation().getDistance(leftStartPose.getTranslation());
         double distanceToRight = currentPose.getTranslation().getDistance(rightStartPose.getTranslation());
         double distanceToPlanetary = currentPose.getTranslation().getDistance(planetaryStartPose.getTranslation());
+        double distanceToPlanetaryRight = currentPose.getTranslation().getDistance(planetaryRightStartPose.getTranslation());
 
         if (distanceToLeft <= distanceToRight) {
             if (distanceToPlanetary <= distanceToLeft) {
@@ -65,7 +68,11 @@ public class AutoManager {
                 return Optional.of(leftStartPose);
             }
         } else {
-            return Optional.of(rightStartPose);
+            if  (distanceToRight <= distanceToPlanetaryRight) {
+                return Optional.of(rightStartPose);
+            } else {
+                return Optional.of(planetaryRightStartPose);
+            }
         }
     }
 
