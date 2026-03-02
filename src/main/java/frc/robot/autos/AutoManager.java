@@ -55,27 +55,27 @@ public class AutoManager {
 
         Pose2d leftStartPose = LeftSideAuto.getStartingPose();
         Pose2d rightStartPose = RightSideAuto.getStartingPose();
-        Pose2d planetaryStartPose = AllianceFlipUtil.apply(new Pose2d(3.88, 7.3, Rotation2d.fromDegrees(90)));
+        Pose2d OrbitAtHomeDepotStartPose = AllianceFlipUtil.apply(new Pose2d(3.88, 7.3, Rotation2d.fromDegrees(90)));
         Pose2d planetaryRightStartPose = AllianceFlipUtil.apply(new Pose2d(3.88, 0.91, Rotation2d.fromDegrees(-90)));
         Pose2d centerStartPose = CenterAuto.getStartingPose();
 
         double distanceToLeft = currentPose.getTranslation().getDistance(leftStartPose.getTranslation());
         double distanceToRight = currentPose.getTranslation().getDistance(rightStartPose.getTranslation());
-        double distanceToPlanetary = currentPose.getTranslation().getDistance(planetaryStartPose.getTranslation());
+        double distanceToOrbitAtHomeDepot = currentPose.getTranslation().getDistance(OrbitAtHomeDepotStartPose.getTranslation());
         double distanceToPlanetaryRight = currentPose.getTranslation().getDistance(planetaryRightStartPose.getTranslation());
         double distanceToCenter = currentPose.getTranslation().getDistance(centerStartPose.getTranslation());
 
         double minDistance = Math.min(distanceToLeft,
                 Math.min(distanceToRight,
-                        Math.min(distanceToPlanetary,
+                        Math.min(distanceToOrbitAtHomeDepot,
                                 Math.min(distanceToPlanetaryRight, distanceToCenter))));
 
         if (minDistance == distanceToLeft) {
             return Optional.of(leftStartPose);
         } else if (minDistance == distanceToRight) {
             return Optional.of(rightStartPose);
-        } else if (minDistance == distanceToPlanetary) {
-            return Optional.of(planetaryStartPose);
+        } else if (minDistance == distanceToOrbitAtHomeDepot) {
+            return Optional.of(OrbitAtHomeDepotStartPose);
         } else if (minDistance == distanceToPlanetaryRight) {
             return Optional.of(planetaryRightStartPose);
         } else {
