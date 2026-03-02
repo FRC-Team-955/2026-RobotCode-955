@@ -25,6 +25,10 @@ public class CenterAuto {
     private static final Pose2d depotPosition = new Pose2d(1.0, FieldConstants.Depot.depotCenter.getY(), Rotation2d.k180deg);
     private static final Pose2d depotIntakePosition = new Pose2d(0.3, FieldConstants.Depot.depotCenter.getY(), Rotation2d.k180deg);
 
+    public static Pose2d getStartingPose() {
+        return AllianceFlipUtil.apply(startingPosition);
+    }
+
     public static Command build() {
         return CommandsExt.eagerSequence(
                 // Set starting pose
@@ -33,52 +37,46 @@ public class CenterAuto {
                 // Move forward to shooting position
                 AutoHelpers.finalWaypoint(() -> shootingPosition, defaultMoveToConstraints),
 
-                // Shoot for 5 sec
+                // Shoot for 1.5 sec
                 Commands.parallel(
                         superintake.setGoal(Superintake.Goal.INTAKE),
                         superstructure.setGoal(Superstructure.Goal.SHOOT),
                         AutoHelpers.finalWaypoint(() -> shootingPosition, defaultMoveToConstraints.withAiming(true))
-                ).withTimeout(2),
-                superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
-                superstructure.setGoal(Superstructure.Goal.IDLE).until(() -> true),
+                ).withTimeout(1.5),
 
-                // Go to the outpost
-                AutoHelpers.finalWaypoint(() -> outpostPosition, defaultMoveToConstraints),
-
-                // Wait at outpost for 3 sec
-                Commands.waitSeconds(3),
+                // Go to the outpost and wait at outpost for ~3 sec while intaking
+                Commands.parallel(
+                        superintake.setGoal(Superintake.Goal.INTAKE),
+                        superstructure.setGoal(Superstructure.Goal.SHOOT),
+                        AutoHelpers.finalWaypoint(() -> outpostPosition, defaultMoveToConstraints)
+                ).withTimeout(4),
 
                 // Move back to shooting position
-                AutoHelpers.finalWaypoint(() -> shootingPosition, defaultMoveToConstraints),
-
-                // Shoot for 5 sec
                 Commands.parallel(
                         superintake.setGoal(Superintake.Goal.INTAKE),
                         superstructure.setGoal(Superstructure.Goal.SHOOT),
                         AutoHelpers.finalWaypoint(() -> shootingPosition, defaultMoveToConstraints.withAiming(true))
-                ).withTimeout(5),
-                superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
-                superstructure.setGoal(Superstructure.Goal.IDLE).until(() -> true),
+                ).withTimeout(1.5),
+
+                // Shoot for ~1.5 sec
+                Commands.parallel(
+                        superintake.setGoal(Superintake.Goal.INTAKE),
+                        superstructure.setGoal(Superstructure.Goal.SHOOT),
+                        AutoHelpers.finalWaypoint(() -> shootingPosition, defaultMoveToConstraints.withAiming(true))
+                ).withTimeout(1.5 ),
 
                 // Go to the depot while intaking
                 Commands.parallel(
                         superintake.setGoal(Superintake.Goal.INTAKE),
+                        superstructure.setGoal(Superstructure.Goal.SHOOT),
                         Commands.sequence(
                                 AutoHelpers.finalWaypoint(() -> depotPosition, AutoHelpers.intakeConstraints),
                                 AutoHelpers.finalWaypoint(() -> depotIntakePosition, AutoHelpers.intakeConstraints)
                         )
                 ).withTimeout(3),
-                //superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
-
-                //// Make sure we go back
-                //AutoHelpers.intermediateWaypoint(() -> new Pose2d(
-                //        FieldConstants.LinesVertical.center,
-                //        FieldConstants.LinesHorizontal.center,
-                //        Rotation2d.k180deg
-                //), defaultMoveToConstraints),
 
                 // Go back to shooting position
-                AutoHelpers.finalWaypoint(() -> shootingPosition, defaultMoveToConstraints),
+                AutoHelpers.finalWaypoint(() -> shootingPosition, defaultMoveToConstraints.withAiming(true)),
 
                 // Shoot
                 Commands.parallel(
