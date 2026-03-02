@@ -2,8 +2,10 @@ package frc.robot.autos;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.lib.AllianceFlipUtil;
 import frc.lib.Util;
 import frc.robot.RobotState;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -50,12 +52,18 @@ public class AutoManager {
 
         Pose2d leftStartPose = LeftSideAuto.getStartingPose();
         Pose2d rightStartPose = RightSideAuto.getStartingPose();
+        Pose2d planetaryStartPose = AllianceFlipUtil.apply(new Pose2d(3.88, 7.3, Rotation2d.fromDegrees(90)));
 
         double distanceToLeft = currentPose.getTranslation().getDistance(leftStartPose.getTranslation());
         double distanceToRight = currentPose.getTranslation().getDistance(rightStartPose.getTranslation());
+        double distanceToPlanetary = currentPose.getTranslation().getDistance(planetaryStartPose.getTranslation());
 
         if (distanceToLeft <= distanceToRight) {
-            return Optional.of(leftStartPose);
+            if (distanceToPlanetary <= distanceToLeft) {
+                return Optional.of(planetaryStartPose);
+            } else {
+                return Optional.of(leftStartPose);
+            }
         } else {
             return Optional.of(rightStartPose);
         }
