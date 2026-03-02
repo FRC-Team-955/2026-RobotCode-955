@@ -20,8 +20,8 @@ public class PlanetaryAuto {
     private static final Superintake superintake = Superintake.get();
     private static final Superstructure superstructure = Superstructure.get();
 
-    private static final Pose2d trenchShootingPosition = new Pose2d(3.88, 7.3, Rotation2d.fromDegrees(90));
-    private static final double exitTrenchX = 6.25;
+    private static final Pose2d trenchShootingPosition = new Pose2d(3.88, 7.3, Rotation2d.kCCW_90deg);
+    private static final double exitTrenchX = 6.34;
 
     public static Command build() {
         return CommandsExt.eagerSequence(
@@ -42,7 +42,7 @@ public class PlanetaryAuto {
                 AutoHelpers.intermediateWaypoint(() -> new Pose2d(
                         6.75,
                         6.7,
-                        Rotation2d.fromDegrees(-90)
+                        Rotation2d.kCW_90deg
                 ), defaultMoveToConstraints),
 
                 // intake, go to neturalzone
@@ -50,7 +50,7 @@ public class PlanetaryAuto {
                 AutoHelpers.yDistanceInterpolatingWaypoint(
                         new Translation2d(FieldConstants.LinesVertical.center, 7.7),
                         new Translation2d(FieldConstants.LinesVertical.center, 6.4),
-                        Rotation2d.fromDegrees(-90),
+                        Rotation2d.kCW_90deg,
                         2,
                         defaultMoveToConstraints
                 ),
@@ -59,7 +59,7 @@ public class PlanetaryAuto {
                 AutoHelpers.finalWaypoint(() -> new Pose2d(
                         FieldConstants.LinesVertical.center,
                         4.7,
-                        Rotation2d.fromDegrees(-90)
+                        Rotation2d.kCW_90deg
                 ), AutoHelpers.intakeConstraints),
                 superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
 
@@ -91,11 +91,10 @@ public class PlanetaryAuto {
 
                 // intake
                 AutoHelpers.intakeFromLeftNeutralZone(
-                        () -> AutoHelpers.yDistanceInterpolation(
-                                new Translation2d(7.5, 7.6),
-                                new Translation2d(7.5, 4.0),
-                                Rotation2d.fromDegrees(-90.0),
-                                2
+                        () -> new Pose2d(
+                                7.7,
+                                5.9,
+                                Rotation2d.kCW_90deg
                         )
                 ).withTimeout(3),
 

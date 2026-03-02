@@ -36,8 +36,8 @@ public class AutoHelpers {
     private static final Drive drive = Drive.get();
     private static final Superintake superintake = Superintake.get();
 
-    public static final DriveConstants.MoveToConstraints trenchConstraints = defaultMoveToConstraints
-            .withMaxLinearVelocityMetersPerSec(new LoggedTunableNumber("AutoHelpers/Trench/MaxLinearVelocity", 2));
+    public static final DriveConstants.MoveToConstraints trenchConstraints = defaultMoveToConstraints;
+    // .withMaxLinearVelocityMetersPerSec(new LoggedTunableNumber("AutoHelpers/Trench/MaxLinearVelocity", 1.5));
 
     public static Command intermediateWaypoint(Supplier<Pose2d> poseSupplier, DriveConstants.MoveToConstraints constraints) {
         return drive
@@ -128,7 +128,7 @@ public class AutoHelpers {
     }
 
     public static final DriveConstants.MoveToConstraints intakeConstraints = defaultMoveToConstraints
-            .withMaxLinearVelocityMetersPerSec(new LoggedTunableNumber("AutoHelpers/Intake/MaxLinearVelocity", 3))
+            .withMaxLinearVelocityMetersPerSec(new LoggedTunableNumber("AutoHelpers/Intake/MaxLinearVelocity", 2))
             .withMaxAngularAccelerationRadPerSecPerSec(new LoggedTunableNumber("AutoHelpers/Intake/MaxAngularAcceleration", 40.0));
 
     private static Command intakeFromNeutralZone(
@@ -164,7 +164,7 @@ public class AutoHelpers {
                 new Bounds(
                         neutralZoneXMin,
                         neutralZoneXMax,
-                        FieldConstants.LinesHorizontal.center + driveConfig.bumperLengthMeters() / 2.0,
+                        FieldConstants.LinesHorizontal.center,
                         FieldConstants.fieldWidth - driveConfig.bumperLengthMeters() / 2.0
                 ),
                 poseSupplierIfNoGamePieces
@@ -177,7 +177,7 @@ public class AutoHelpers {
                         neutralZoneXMin,
                         neutralZoneXMax,
                         0.0 + driveConfig.bumperLengthMeters() / 2.0,
-                        FieldConstants.LinesHorizontal.center - driveConfig.bumperLengthMeters() / 2.0
+                        FieldConstants.LinesHorizontal.center
                 ),
                 poseSupplierIfNoGamePieces
         );
