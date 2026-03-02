@@ -11,7 +11,7 @@ DEBUG_SHOT_DISTANCE = 1
 DEBUG_SHOT_ROBOT_RADIAL_VELOCITY = 0
 DEBUG_RANGE = True
 DEBUG_SHOT_DISTANCE_RANGE = 6
-DEBUG_SHOT_ROBOT_RADIAL_VELOCITY_RANGE = 5
+DEBUG_SHOT_ROBOT_RADIAL_VELOCITY_RANGE = 6
 
 MAGNUS_EFFECT_ENABLED = False
 
@@ -264,7 +264,7 @@ def optimize_shot(distance, robot_radial_vel):
                 if some_z > max_z:
                     max_z = some_z
             # Target a certain max z based on distance
-            max_z = abs(max_z - (1 / 2) * hubx)
+            max_z = abs(max_z - (2 + hubx * 0.1))
             # Reduce significance
             max_z /= 2
         else:
