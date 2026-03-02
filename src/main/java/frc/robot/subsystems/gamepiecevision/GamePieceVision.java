@@ -119,27 +119,21 @@ public class GamePieceVision implements Periodic {
         // Remove expired coral
         targetsToLastSeen.values().removeIf(lastSeen -> Timer.getTimestamp() - lastSeen > expireTimeSeconds);
 
-        List<List<Translation2d>> clusters = new ArrayList<>();
+        List<FuelCluster> clusters = new ArrayList<>();
 
         for (Translation2d fuel : targetsToLastSeen.keySet()) {
             boolean addedToCluster = false;
 
-            for (List<Translation2d> cluster : clusters) {
-                for (Translation2d clusterFuel : cluster) {
-                    if (fuel.getDistance(clusterFuel) < clusterGroupingDistanceMeters) {
-                        cluster.add(fuel);
-                        addedToCluster = true;
-                        break;
-                    }
-                }
-                if (addedToCluster) {
+            for (FuelCluster cluster : clusters) {
+                if (cluster.addIfWithin(fuel, clusterGroupingDistanceMeters)) {
+                    addedToCluster = true;
                     break;
                 }
             }
 
             if (!addedToCluster) {
-                List<Translation2d> newCluster = new ArrayList<>();
-                newCluster.add(fuel);
+                FuelCluster newCluster = new FuelCluster();
+                newCluster.addFuel(fuel);
                 clusters.add(newCluster);
             }
         }
@@ -186,6 +180,32 @@ public class GamePieceVision implements Periodic {
             GamePieceVisionIO io,
             Alert disconnectedAlert
     ) {
+    }
+
+    public static class FuelCluster {
+        private List<Translation2d> cluster = new ArrayList<>();
+
+        public void addFuel(Translation2d fuel) {cluster.add(fuel);}
+
+        public int size() {return cluster.size();}
+
+        public boolean addIfWithin(Translation2d fuel, double maxDist) {
+            for (Translation2d clusterFuel : cluster) {
+                if (fuel.getDistance(clusterFuel) < maxDist) {
+                    cluster.add(fuel);
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public Translation2d avgLocation() {
+            Translation2d average = new Translation2d();
+            for (Translation2d fuel : cluster) {
+                average.plus(fuel);
+            }
+            return average.div(cluster.size());
+        }
     }
 }
 
