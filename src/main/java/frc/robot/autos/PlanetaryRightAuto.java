@@ -21,15 +21,16 @@ public class PlanetaryRightAuto {
     private static final Superstructure superstructure = Superstructure.get();
 
     private static final Pose2d trenchShootingPosition = new Pose2d(3.88, 0.7, Rotation2d.fromDegrees(-90));
+    private static final Pose2d startingPosition = new Pose2d(3.88, trenchShootingPosition.getY(), trenchShootingPosition.getRotation());
     private static final double exitTrenchX = 6.25;
+
+        public static Pose2d getStartingPose() {
+            return AllianceFlipUtil.apply(startingPosition);
+        }
 
     public static Command build() {
         return CommandsExt.eagerSequence(
-                robotState.setPose(() -> AllianceFlipUtil.apply(new Pose2d(
-                        3.88,
-                        trenchShootingPosition.getY(),
-                        trenchShootingPosition.getRotation()
-                ))),
+                robotState.setPose(() -> AllianceFlipUtil.apply(startingPosition)),
 
                 // move out of trench
                 AutoHelpers.intermediateWaypoint(() -> new Pose2d(
