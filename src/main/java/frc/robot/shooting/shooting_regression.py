@@ -25,7 +25,7 @@ fuel_mass = 0.2150028  # kg - note, this is the average weight according to the 
 fuel_radius = (15 / 100) / 2
 
 # KEEP SYNCED WITH DriveConstants.java
-wheel_radius = 1.935948620917915 * 2.54 / 100
+wheel_radius = 1.945 * 2.54 / 100
 bottom_of_frame_rails_to_center_of_wheels = -0.247776 * 2.54 / 100
 
 # KEEP SYNCED WITH ShootingKinematics.java
