@@ -65,7 +65,7 @@ public class LEDPatterns {
             Color.kRed,
             Color.kRed,
             new Color(255, 0, 128)
-    ).scrollAtRelativeSpeed(Hertz.of(2));
+    ).scrollAtRelativeSpeed(Hertz.of(1));
 
     // Enabled
     public static final LEDPattern eject = LEDPattern.solid(Color.kRed).blink(Seconds.of(0.1));
