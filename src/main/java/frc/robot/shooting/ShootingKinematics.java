@@ -44,21 +44,23 @@ public class ShootingKinematics implements Periodic {
     );
     public static final Rotation2d fuelExitRotation = Rotation2d.k180deg;
 
-    //private static final InterpolatingDoubleTreeMap velocityToRPM = new InterpolatingDoubleTreeMap();
     private static final DoubleUnaryOperator velocityToRPM;
+    //private static final InterpolatingDoubleTreeMap velocityToRPMMap = new InterpolatingDoubleTreeMap();
 
     static {
+        //velocityToRPMMap.put(6.8, 1850.0);
+        //velocityToRPMMap.put(7.02, 1900.0);
+        //velocityToRPMMap.put(7.22, 1950.0);
+        //velocityToRPMMap.put(7.45, 2050.0);
+        //velocityToRPMMap.put(7.64, 2100.0);
+        //velocityToRPMMap.put(7.94, 2250.0);
+        //velocityToRPMMap.put(8.26, 2350.0);
+        //velocityToRPMMap.put(8.40, 2450.0);
+        //velocityToRPMMap.put(9.10, 2650.0);
+        //velocityToRPM = (x) -> velocityToRPMMap.get(x);
+
         // https://www.desmos.com/calculator/0ow99dd1u0
         velocityToRPM = (x) -> 366.65817 * x - 672.63778;
-        //velocityToRPM.put(6.8, 1850.0);
-        //velocityToRPM.put(7.02, 1900.0);
-        //velocityToRPM.put(7.22, 1950.0);
-        //velocityToRPM.put(7.45, 2050.0);
-        //velocityToRPM.put(7.64, 2100.0);
-        //velocityToRPM.put(7.94, 2250.0);
-        //velocityToRPM.put(8.26, 2350.0);
-        //velocityToRPM.put(8.40, 2450.0);
-        //velocityToRPM.put(9.10, 2650.0);
     }
 
     private static final RobotState robotState = RobotState.get();
@@ -254,7 +256,6 @@ public class ShootingKinematics implements Periodic {
         return new ShootingParameters(
                 BuildConstants.mode == BuildConstants.Mode.SIM
                         ? Units.radiansPerSecondToRotationsPerMinute(v / FlywheelConstants.flywheelRadiusMeters)
-                        //: velocityToRPM.get(v),
                         : velocityToRPM.applyAsDouble(v),
                 phi,
                 theta,
