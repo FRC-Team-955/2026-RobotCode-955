@@ -20,11 +20,14 @@ import frc.robot.subsystems.superintake.Superintake;
 
 import java.util.function.Supplier;
 
-import static frc.robot.subsystems.drive.DriveConstants.*;
+import static frc.robot.subsystems.drive.DriveConstants.defaultMoveToConstraints;
+import static frc.robot.subsystems.drive.DriveConstants.driveConfig;
 
 public class AutoHelpers {
-    private static final double intermediateLinearTolerance = 0.6;
+    private static final double intermediateLinearTolerance = 1;
     private static final double intermediateAngularTolerance = Units.degreesToRadians(45);
+    private static final double finalLinearTolerance = 0.1;
+    private static final double finalAngularTolerance = Units.degreesToRadians(10);
 
     private static final RobotState robotState = RobotState.get();
     private static final ShootingKinematics shootingKinematics = ShootingKinematics.get();
@@ -33,12 +36,15 @@ public class AutoHelpers {
     private static final Drive drive = Drive.get();
     private static final Superintake superintake = Superintake.get();
 
+    public static final DriveConstants.MoveToConstraints trenchConstraints = defaultMoveToConstraints
+            .withMaxLinearVelocityMetersPerSec(new LoggedTunableNumber("AutoHelpers/Trench/MaxLinearVelocity", 2));
+
     public static Command intermediateWaypoint(Supplier<Pose2d> poseSupplier, DriveConstants.MoveToConstraints constraints) {
         return drive
                 .moveTo(
                         () -> AllianceFlipUtil.apply(poseSupplier.get()),
                         constraints
-                                .withFullSpeed(true)
+                        //.withFullSpeed(true)
                 )
                 .until(() -> robotState.isAtPoseWithTolerance(
                         AllianceFlipUtil.apply(poseSupplier.get()),
@@ -55,8 +61,8 @@ public class AutoHelpers {
                 )
                 .until(() -> robotState.isAtPoseWithTolerance(
                         AllianceFlipUtil.apply(poseSupplier.get()),
-                        moveToConfig.linearPositionToleranceMeters().get(),
-                        moveToConfig.angularPositionToleranceRad().get()
+                        finalLinearTolerance,
+                        finalAngularTolerance
                 ));
     }
 
@@ -122,9 +128,8 @@ public class AutoHelpers {
     }
 
     public static final DriveConstants.MoveToConstraints intakeConstraints = defaultMoveToConstraints
-            .withMaxLinearVelocityMetersPerSec(new LoggedTunableNumber("AutoHelpers/Intake/MaxLinearVelocity", 2))
+            .withMaxLinearVelocityMetersPerSec(new LoggedTunableNumber("AutoHelpers/Intake/MaxLinearVelocity", 3))
             .withMaxAngularAccelerationRadPerSecPerSec(new LoggedTunableNumber("AutoHelpers/Intake/MaxAngularAcceleration", 40.0));
-
 
     private static Command intakeFromNeutralZone(
             Bounds bounds,
