@@ -21,15 +21,16 @@ public class OrbitAtHomeDepotAuto {
     private static final Superstructure superstructure = Superstructure.get();
 
     private static final Pose2d trenchShootingPosition = new Pose2d(3.88, 7.38, Rotation2d.kCCW_90deg);
+    private static final Pose2d startingPosition = new Pose2d(3.88, trenchShootingPosition.getY(), trenchShootingPosition.getRotation());
     private static final double exitTrenchX = 6.34;
+
+    public static Pose2d getStartingPose() {
+        return AllianceFlipUtil.apply(startingPosition);
+    }
 
     public static Command build() {
         return CommandsExt.eagerSequence(
-                robotState.setPose(() -> AllianceFlipUtil.apply(new Pose2d(
-                        3.88,
-                        trenchShootingPosition.getY(),
-                        trenchShootingPosition.getRotation()
-                ))),
+                robotState.setPose(() -> AllianceFlipUtil.apply(startingPosition)),
 
                 // move out of trench
                 AutoHelpers.intermediateWaypoint(() -> new Pose2d(
