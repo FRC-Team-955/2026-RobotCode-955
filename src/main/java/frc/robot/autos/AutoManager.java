@@ -56,7 +56,7 @@ public class AutoManager {
         Pose2d leftStartPose = LeftSideAuto.getStartingPose();
         Pose2d rightStartPose = RightSideAuto.getStartingPose();
         Pose2d OrbitAtHomeDepotStartPose = OrbitAtHomeDepotAuto.getStartingPose();
-        Pose2d planetaryRightStartPose = AllianceFlipUtil.apply(new Pose2d(3.88, 0.91, Rotation2d.fromDegrees(-90)));
+        Pose2d planetaryRightStartPose = PlanetaryRightAuto.getStartingPose();
         Pose2d centerStartPose = CenterAuto.getStartingPose();
 
         double distanceToLeft = currentPose.getTranslation().getDistance(leftStartPose.getTranslation());
