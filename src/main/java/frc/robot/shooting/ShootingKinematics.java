@@ -31,6 +31,7 @@ public class ShootingKinematics implements Periodic {
     private static final LoggedTunableNumber phaseDelay = new LoggedTunableNumber("ShootingKinematics/PhaseDelay", 0.03);
     private static final LoggedTunableNumber robotVelocityScalar = new LoggedTunableNumber("ShootingKinematics/RobotVelocityScalar (DEBUG ONLY)", 1);
     private static final LoggedTunableNumber headingToleranceDeg = new LoggedTunableNumber("ShootingKinematics/HeadingToleranceDegrees", 5.0);
+    private static final LoggedTunableNumber headingVelocityToleranceDegPerSec = new LoggedTunableNumber("ShootingKinematics/HeadingVelocityToleranceDegreesPerSec", 30.0);
     public static final LoggedTunableNumber velocityToleranceRPM = new LoggedTunableNumber("ShootingKinematics/VelocityToleranceRPM", 100);
     public static final LoggedTunableNumber hoodToleranceDeg = new LoggedTunableNumber("ShootingKinematics/HoodToleranceDegrees", 3.0);
 
@@ -125,13 +126,20 @@ public class ShootingKinematics implements Periodic {
         boolean headingMet = operatorDashboard.manualAiming.get() || Math.abs(robotState.getPose().getRotation().getRadians() - shootingParameters.headingRad()) <= Units.degreesToRadians(headingToleranceDeg.get());
         Logger.recordOutput("ShootingKinematics/HeadingMet", headingMet);
 
+        boolean headingVelocityMet = operatorDashboard.manualAiming.get() ||
+                Math.abs(
+                        robotState.getMeasuredChassisSpeedsFieldRelative().omegaRadiansPerSecond -
+                                rotationAboutHubRadiansPerSec(robotState.getMeasuredChassisSpeedsFieldRelative())
+                ) <= Units.degreesToRadians(headingVelocityToleranceDegPerSec.get());
+        Logger.recordOutput("ShootingKinematics/HeadingVelocityMet", headingVelocityMet);
+
         boolean velocityMet = Math.abs(flywheel.getVelocityRPM() - shootingParameters.velocityRPM()) <= velocityToleranceRPM.get();
         Logger.recordOutput("ShootingKinematics/VelocityMet", velocityMet);
 
         boolean angleMet = Math.abs(hood.getShotAngleRad() - shootingParameters.angleRad()) <= Units.degreesToRadians(hoodToleranceDeg.get());
         Logger.recordOutput("ShootingKinematics/AngleMet", angleMet);
 
-        shootingParametersMet = shiftMet && headingMet && velocityMet && angleMet;
+        shootingParametersMet = shiftMet && headingMet && headingVelocityMet && velocityMet && angleMet;
     }
 
     private static final LoggedTunableNumber shootHubManualFlywheelRPM = new LoggedTunableNumber("ShootingKinematics/ShootHubManual/FlywheelRPM", 2000.0);
@@ -292,8 +300,10 @@ public class ShootingKinematics implements Periodic {
         );
     }
 
-    // Robot velocity centered at the shooter relative to the hub (positive x is towards hub, positive y is CLOCKWISE)
-    // robotSpeeds field relative
+    /**
+     * Robot velocity centered at the shooter relative to the hub (positive x is towards hub, positive y is CLOCKWISE)
+     * robotSpeeds field relative
+     */
     private Translation2d robotVelocityHubRelative(Translation2d robotSpeeds) {
         FuelExitToHub fuelExitToHub = getFuelExitToHub();
         return robotSpeeds.rotateBy(fuelExitRotation.minus(fuelExitToHub.angle()));
@@ -304,7 +314,15 @@ public class ShootingKinematics implements Periodic {
         FuelExitToHub fuelExitToHub = getFuelExitToHub();
 
         // CW positive for hubRelative, so need to negate into CCW positive
+        // tangential velocity in m/s / radius of circle = rotation about circle rad/sec
         return -hubRelative.getY() / fuelExitToHub.transform.getTranslation().toTranslation2d().getNorm();
+    }
+
+    public double rotationAboutHubRadiansPerSec(ChassisSpeeds fieldRelativeSpeeds) {
+        return rotationAboutHubRadiansPerSec(new Translation2d(
+                fieldRelativeSpeeds.vxMetersPerSecond,
+                fieldRelativeSpeeds.vyMetersPerSecond
+        ));
     }
 
     public Translation2d getCenterOfRotationForAiming() {
