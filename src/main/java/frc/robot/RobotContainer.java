@@ -1,5 +1,6 @@
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
@@ -8,6 +9,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.CANLogger;
+import frc.robot.autos.Auto;
 import frc.robot.autos.AutoManager;
 import frc.robot.controller.Controller;
 import frc.robot.shooting.ShootingKinematics;
@@ -50,7 +52,7 @@ public class RobotContainer {
     public final Superstructure superstructure = Superstructure.get();
 
     public RobotContainer() {
-        //autoManager.autoChooser.addOption("Characterization", Commands.deferredProxy(characterizationChooser::get));
+        autoManager.autoChooser.addOption("Characterization", new Auto(new Pose2d(), Commands.deferredProxy(characterizationChooser::get)));
         addCharacterizations();
         setDefaultCommands();
         configureBindings();
