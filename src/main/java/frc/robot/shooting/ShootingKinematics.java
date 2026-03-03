@@ -317,6 +317,10 @@ public class ShootingKinematics implements Periodic {
     }
 
     public double rotationAboutHubRadiansPerSec(Translation2d fieldRelativeMetersPerSec) {
+        if (shootingParameters.isPass()) {
+            return 0.0;
+        }
+
         Translation2d hubRelative = robotVelocityHubRelative(fieldRelativeMetersPerSec);
         FuelExitToHub fuelExitToHub = getFuelExitToHub();
 
