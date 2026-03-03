@@ -63,6 +63,7 @@ public class LEDPatterns {
     public static final LEDPattern hotMotors = LEDPattern.gradient(
             LEDPattern.GradientType.kDiscontinuous,
             Color.kRed,
+            Color.kOrange,
             Color.kYellow
     ).mask(
             LEDPattern.solid(Color.kWhite)
