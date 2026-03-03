@@ -4,6 +4,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.lib.SlewRateLimiter2d;
@@ -76,12 +77,20 @@ public class MoveToGoal extends DriveGoal {
         Pose2d currentPose = robotState.getPose();
 
         Pose2d goalPose = poseSupplier.get();
+
         if (constraints.aiming()) {
+            // When we rotate around a different center of rotation, XY error increases, and rotation/translation fight each other and act weird
+            // To fix this, offset the XY setpoint by the center of rotation
+            Transform2d centerOfRotationTransform = new Transform2d(shootingKinematics.getCenterOfRotationForAiming(), new Rotation2d());
+
+            currentPose = currentPose.transformBy(centerOfRotationTransform);
+
             goalPose = new Pose2d(
                     goalPose.getTranslation(),
                     Rotation2d.fromRadians(shootingKinematics.getShootingParameters().headingRad())
-            );
+            ).transformBy(centerOfRotationTransform);
         }
+
         Logger.recordOutput("Drive/MoveTo/Goal", goalPose);
 
         double distanceToGoal = currentPose.getTranslation().getDistance(goalPose.getTranslation());
