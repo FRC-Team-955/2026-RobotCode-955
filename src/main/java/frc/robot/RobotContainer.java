@@ -23,6 +23,8 @@ import frc.robot.subsystems.superintake.Superintake;
 import frc.robot.subsystems.superstructure.Superstructure;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
+import java.util.function.BooleanSupplier;
+
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
  * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
@@ -84,10 +86,11 @@ public class RobotContainer {
     private void configureBindings() {
         controller.y().onTrue(robotState.resetRotation());
 
+        BooleanSupplier shouldNotAssist = () -> operatorDashboard.disableAssist.get() || robotState.isInTrench();
         controller.rightTrigger()
                 .and(controller.leftTrigger().negate())
                 .whileTrue(Commands.parallel(
-                        drive.driveJoystick(() -> operatorDashboard.disableAssist.get() ? DriveJoystickGoal.Mode.Normal : DriveJoystickGoal.Mode.Assist),
+                        drive.driveJoystick(() -> shouldNotAssist.getAsBoolean() ? DriveJoystickGoal.Mode.Normal : DriveJoystickGoal.Mode.Assist),
                         superintake.setGoal(Superintake.Goal.INTAKE)
                 ));
 
@@ -95,11 +98,11 @@ public class RobotContainer {
                 .and(() -> controller.getDriveAngularMagnitude() == 0.0)
                 .toggleOnTrue(Commands.parallel(
                         drive.driveJoystick(() -> {
-                            if (operatorDashboard.manualAiming.get() && operatorDashboard.disableAssist.get()) {
+                            if (operatorDashboard.manualAiming.get() && shouldNotAssist.getAsBoolean()) {
                                 return DriveJoystickGoal.Mode.StopWithX;
                             } else if (operatorDashboard.manualAiming.get()) {
                                 return DriveJoystickGoal.Mode.Assist;
-                            } else if (operatorDashboard.disableAssist.get()) {
+                            } else if (shouldNotAssist.getAsBoolean()) {
                                 return DriveJoystickGoal.Mode.Aim;
                             } else {
                                 return DriveJoystickGoal.Mode.AimAndAssist;
