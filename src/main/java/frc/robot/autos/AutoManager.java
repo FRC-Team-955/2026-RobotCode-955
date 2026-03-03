@@ -4,9 +4,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import frc.lib.AllianceFlipUtil;
 import frc.lib.Util;
-import frc.lib.commands.CommandsExt;
 import frc.robot.RobotState;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -52,10 +50,7 @@ public class AutoManager {
             return Commands.none();
         }
 
-        return CommandsExt.eagerSequence(
-                robotState.setPose(() -> AllianceFlipUtil.apply(selectedAuto.startingPose)),
-                selectedAuto.command
-        );
+        return selectedAuto.command;
     }
 
     public Optional<Pose2d> getSelectedAutoStartingPose() {
