@@ -20,7 +20,7 @@ public class OrbitAtHomeDepotAuto {
     private static final Superintake superintake = Superintake.get();
     private static final Superstructure superstructure = Superstructure.get();
 
-    private static final Pose2d trenchShootingPosition = new Pose2d(3.88, 7.38, Rotation2d.kCCW_90deg);
+    private static final Pose2d trenchShootingPosition = new Pose2d(3.8, 7.38, Rotation2d.kCCW_90deg);
     private static final Pose2d startingPosition = new Pose2d(3.88, trenchShootingPosition.getY(), trenchShootingPosition.getRotation());
     private static final double exitTrenchX = 6.34;
 
