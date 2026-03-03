@@ -14,7 +14,7 @@ public class DriveConstants {
 
     public static final LoggedTunablePIDF choreoFeedbackXY = new LoggedTunablePIDF("Drive/ChoreoFeedbackXY").withP(3.5);
     public static final LoggedTunablePIDF choreoFeedbackOmega = new LoggedTunablePIDF("Drive/ChoreoFeedbackOmega").withP(3);
-    public static final LoggedTunablePIDF headingOverrideGains = new LoggedTunablePIDF("Drive/HeadingOverrideGains").withP(4);
+    public static final LoggedTunablePIDF headingOverrideGains = new LoggedTunablePIDF("Drive/HeadingOverrideGains").withP(5);
     public static final LoggedTunablePIDF assistGains = new LoggedTunablePIDF("Drive/AssistY").withP(0.5);
 
     public static final boolean disableDriving = false;
@@ -62,10 +62,10 @@ public class DriveConstants {
     );
 
     public static final MoveToConfig moveToConfig = new MoveToConfig(
-            new LoggedTunablePIDF("Drive/MoveTo/Linear").withP(3.5).withD(0.02),
+            new LoggedTunablePIDF("Drive/MoveTo/Linear").withP(4.0).withD(0.02),
             new LoggedTunableNumber("Drive/MoveTo/LinearPositionTolerance", 0.05),
             new LoggedTunableNumber("Drive/MoveTo/LinearVelocityToleranceMeters", 0.2),
-            new LoggedTunablePIDF("Drive/MoveTo/Angular").withP(3.5).withD(0.02),
+            new LoggedTunablePIDF("Drive/MoveTo/Angular").withP(4.0).withD(0.02),
             new LoggedTunableNumber("Drive/MoveTo/AngularPositionTolerance", Units.degreesToRadians(5)),
             new LoggedTunableNumber("Drive/MoveTo/AngularVelocityTolerance", Units.degreesToRadians(20))
     );

@@ -48,7 +48,7 @@ public class OperatorDashboard implements Periodic {
     public final LoggedNetworkBooleanExt lostAuto = new LoggedNetworkBooleanExt(prefix + "LostAuto", false);
     public final LoggedNetworkBooleanExt wonAuto = new LoggedNetworkBooleanExt(prefix + "WonAuto", false);
     public final LoggedNetworkBooleanExt disableShiftTracking = new LoggedNetworkBooleanExt(prefix + "DisableShiftTracking", BuildConstants.mode == BuildConstants.Mode.SIM);
-    public final LoggedNetworkBooleanExt driveTurnAbsolutePID = new LoggedNetworkBooleanExt(prefix + "DriveTurnAbsolutePID", true);
+    public final LoggedNetworkBooleanExt driveTurnAbsolutePID = new LoggedNetworkBooleanExt(prefix + "DriveTurnAbsolutePID", false);
     public final LoggedNetworkBooleanExt hoodEStop = new LoggedNetworkBooleanExt(prefix + "HoodEStop", false);
 
     @Getter
