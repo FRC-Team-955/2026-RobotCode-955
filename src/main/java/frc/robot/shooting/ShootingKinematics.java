@@ -2,6 +2,7 @@ package frc.robot.shooting;
 
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
+import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.numbers.N3;
@@ -78,6 +79,8 @@ public class ShootingKinematics implements Periodic {
     @Getter
     private boolean shiftMet = false;
 
+    private final Debouncer velocityMetDebouncer = new Debouncer(0.08, Debouncer.DebounceType.kFalling);
+
     private static ShootingKinematics instance;
 
     public static synchronized ShootingKinematics get() {
@@ -113,8 +116,13 @@ public class ShootingKinematics implements Periodic {
         Logger.recordOutput("ShootingKinematics/ShootingParameters/TimeOfFlightSeconds", shootingParameters.timeOfFlightSeconds().orElse(-1.0));
         Logger.recordOutput("ShootingKinematics/ShootingParameters/IsPass", shootingParameters.isPass());
 
+        double headingVelocitySetpoint = rotationAboutHubRadiansPerSec(robotState.getMeasuredChassisSpeedsFieldRelative());
+        double headingVelocityMeasurement = robotState.getMeasuredChassisSpeedsFieldRelative().omegaRadiansPerSecond;
+
         Logger.recordOutput("ShootingKinematics/ShootingParameters/HeadingRad", shootingParameters.headingRad());
         Logger.recordOutput("ShootingKinematics/ShootingParameters/HeadingRadMeasured", robotState.getPose().getRotation().getRadians());
+        Logger.recordOutput("ShootingKinematics/ShootingParameters/HeadingVelocityRadPerSec", headingVelocitySetpoint);
+        Logger.recordOutput("ShootingKinematics/ShootingParameters/HeadingVelocityRadPerSecMeasured", headingVelocityMeasurement);
         Logger.recordOutput("ShootingKinematics/ShootingParameters/VelocityRPM", shootingParameters.velocityRPM());
         Logger.recordOutput("ShootingKinematics/ShootingParameters/VelocityRPMMeasured", flywheel.getVelocityRPM());
         Logger.recordOutput("ShootingKinematics/ShootingParameters/AngleRad", shootingParameters.angleRad());
@@ -123,23 +131,22 @@ public class ShootingKinematics implements Periodic {
         shiftMet = shootingParameters.isPass() || operatorDashboard.disableShiftTracking.get() || hubShiftTracker.getShiftInfo().active();
         Logger.recordOutput("ShootingKinematics/ShiftMet", shiftMet);
 
-        boolean headingMet = operatorDashboard.manualAiming.get() || Math.abs(robotState.getPose().getRotation().getRadians() - shootingParameters.headingRad()) <= Units.degreesToRadians(headingToleranceDeg.get());
+        boolean headingMet = operatorDashboard.manualAiming.get() ||
+                Math.abs(robotState.getPose().getRotation().getRadians() - shootingParameters.headingRad()) <= Units.degreesToRadians(headingToleranceDeg.get());
         Logger.recordOutput("ShootingKinematics/HeadingMet", headingMet);
 
         boolean headingVelocityMet = operatorDashboard.manualAiming.get() ||
-                Math.abs(
-                        robotState.getMeasuredChassisSpeedsFieldRelative().omegaRadiansPerSecond -
-                                rotationAboutHubRadiansPerSec(robotState.getMeasuredChassisSpeedsFieldRelative())
-                ) <= Units.degreesToRadians(headingVelocityToleranceDegPerSec.get());
+                Math.abs(headingVelocityMeasurement - headingVelocitySetpoint) <= Units.degreesToRadians(headingVelocityToleranceDegPerSec.get());
         Logger.recordOutput("ShootingKinematics/HeadingVelocityMet", headingVelocityMet);
 
-        boolean velocityMet = Math.abs(flywheel.getVelocityRPM() - shootingParameters.velocityRPM()) <= velocityToleranceRPM.get();
+        boolean velocityMet = velocityMetDebouncer.calculate(Math.abs(flywheel.getVelocityRPM() - shootingParameters.velocityRPM()) <= velocityToleranceRPM.get());
         Logger.recordOutput("ShootingKinematics/VelocityMet", velocityMet);
 
         boolean angleMet = Math.abs(hood.getShotAngleRad() - shootingParameters.angleRad()) <= Units.degreesToRadians(hoodToleranceDeg.get());
         Logger.recordOutput("ShootingKinematics/AngleMet", angleMet);
 
         shootingParametersMet = shiftMet && headingMet && headingVelocityMet && velocityMet && angleMet;
+        Logger.recordOutput("ShootingKinematics/ShootingParametersMet", shootingParametersMet);
     }
 
     private static final LoggedTunableNumber shootHubManualFlywheelRPM = new LoggedTunableNumber("ShootingKinematics/ShootHubManual/FlywheelRPM", 2000.0);
