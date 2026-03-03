@@ -5,7 +5,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public abstract class Auto {
+public class Auto {
     public final Pose2d startingPose;
     public final Command command;
 }
