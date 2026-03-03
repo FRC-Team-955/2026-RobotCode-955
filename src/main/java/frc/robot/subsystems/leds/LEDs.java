@@ -112,11 +112,11 @@ public class LEDs implements Periodic {
         } else if (lowBattery) {
             LEDPatterns.lowBattery.applyTo(buffer);
         } else if (DriverStation.isDisabled()) {
-            if (operatorDashboard.autoChosen.get() && autoManager.getClosestAutoStartingPose().isPresent() && !autoManager.isAtAutoStartingPose()) {
-                LEDPatterns.autoPlacementProgress(autoManager::getPlacementProgress).applyTo(buffer);
-            } else {
-                LEDPatterns.autoReady.applyTo(buffer);
-            }
+            //if (operatorDashboard.autoChosen.get() && autoManager.getSelectedAutoStartingPose().isPresent() && !autoManager.isAtAutoStartingPose()) {
+            //    LEDPatterns.autoPlacementProgress(autoManager::getPlacementProgress).applyTo(buffer);
+            //} else {
+            LEDPatterns.autoReady.applyTo(buffer);
+            //}
         } else if (DriverStation.isEnabled()) {
             LEDPattern superintakePattern = switch (superintake.getGoal()) {
                 case IDLE -> null;

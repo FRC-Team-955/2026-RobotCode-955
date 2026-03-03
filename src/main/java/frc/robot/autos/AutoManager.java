@@ -10,33 +10,17 @@ import frc.lib.commands.CommandsExt;
 import frc.robot.RobotState;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
-import java.util.List;
 import java.util.Optional;
 
 public class AutoManager {
     private static final RobotState robotState = RobotState.get();
-    public final LoggedDashboardChooser<Auto> autoChooser = new LoggedDashboardChooser<>("Auto Choices");
 
     public static final double READY_THRESHOLD_METERS = 0.1;
     public static final double MAX_DISTANCE_METERS = 3.0;
     public static final double READY_THRESHOLD_RADIANS = Math.toRadians(5);
     public static final double MAX_ROTATION_ERROR_RADIANS = Math.toRadians(180);
 
-    private static final LeftSideAuto leftSideAuto = new LeftSideAuto();
-    private static final RightSideAuto rightSideAuto = new RightSideAuto();
-    private static final DepotAuto depotAuto = new DepotAuto();
-    private static final OrbitAtHomeDepotAuto orbitAtHomeDepotAuto = new OrbitAtHomeDepotAuto();
-    private static final PlanetaryRightAuto planetaryRightAuto = new PlanetaryRightAuto();
-    private static final CenterAuto centerAuto = new CenterAuto();
-
-    private static final List<Auto> allAutos = List.of(
-            leftSideAuto,
-            rightSideAuto,
-            depotAuto,
-            orbitAtHomeDepotAuto,
-            planetaryRightAuto,
-            centerAuto
-    );
+    private final LoggedDashboardChooser<Auto> autoChooser = new LoggedDashboardChooser<>("Auto Choices");
 
     private static AutoManager instance;
 
@@ -53,64 +37,45 @@ public class AutoManager {
             Util.error("Duplicate AutoManager created");
         }
 
-        autoChooser.addOption("None", new Auto(new Pose2d(), Commands.none()));
-        autoChooser.addOption("LeftSideAuto", leftSideAuto);
-        autoChooser.addOption("RightSideAuto", rightSideAuto);
-        autoChooser.addOption("DepotAuto", depotAuto);
-        autoChooser.addOption("Orbit at Home Depot", orbitAtHomeDepotAuto);
-        autoChooser.addOption("PlanetaryRightAuto", planetaryRightAuto);
-        autoChooser.addOption("CenterAuto", centerAuto);
+        autoChooser.addOption("None", null);
+        autoChooser.addOption("LeftSideAuto", new LeftSideAuto());
+        autoChooser.addOption("RightSideAuto", new RightSideAuto());
+        autoChooser.addOption("Orbit at Home Depot", new OrbitAtHomeDepotAuto());
+        autoChooser.addOption("PlanetaryRightAuto", new PlanetaryRightAuto());
+        autoChooser.addOption("AuraAuto", new AuraAuto());
     }
 
-    public Command getSelectedAuto() {
+    public Command getSelectedAutoCommand() {
         Auto selectedAuto = autoChooser.get();
+
+        if (selectedAuto == null) {
+            return Commands.none();
+        }
+
         return CommandsExt.eagerSequence(
                 robotState.setPose(() -> AllianceFlipUtil.apply(selectedAuto.startingPose)),
                 selectedAuto.command
         );
     }
 
-    public Optional<Pose2d> getClosestAutoStartingPose() {
-        Pose2d currentPose = robotState.getPose();
+    public Optional<Pose2d> getSelectedAutoStartingPose() {
+        Auto selectedAuto = autoChooser.get();
 
-        Auto closestAuto = null;
-        double minDistance = Double.MAX_VALUE;
-
-        for (Auto auto : allAutos) {
-            double distance = currentPose.getTranslation().getDistance(auto.startingPose.getTranslation());
-            if (distance < minDistance) {
-                minDistance = distance;
-                closestAuto = auto;
-            }
+        if (selectedAuto == null) {
+            return Optional.empty();
         }
 
-        return closestAuto != null ? Optional.of(closestAuto.startingPose) : Optional.empty();
+        return Optional.of(selectedAuto.startingPose);
     }
 
-    public Command getClosestAuto() {
-        Pose2d currentPose = robotState.getPose();
-
-        Pose2d leftStartPose = leftSideAuto.startingPose;
-        Pose2d rightStartPose = rightSideAuto.startingPose;
-
-        double distanceToLeft = currentPose.getTranslation().getDistance(leftStartPose.getTranslation());
-        double distanceToRight = currentPose.getTranslation().getDistance(rightStartPose.getTranslation());
-
-        if (distanceToLeft <= distanceToRight) {
-            return leftSideAuto.command;
-        } else {
-            return rightSideAuto.command;
-        }
-    }
-
-    public Optional<Double> getDistanceToAutoStart() {
-        return getClosestAutoStartingPose()
+    private Optional<Double> getDistanceToAutoStart() {
+        return getSelectedAutoStartingPose()
                 .map(startPose -> robotState.getPose().getTranslation()
                         .getDistance(startPose.getTranslation()));
     }
 
-    public Optional<Double> getRotationErrorToAutoStart() {
-        return getClosestAutoStartingPose()
+    private Optional<Double> getRotationErrorToAutoStart() {
+        return getSelectedAutoStartingPose()
                 .map(startPose -> {
                     double currentRotation = robotState.getPose().getRotation().getRadians();
                     double targetRotation = startPose.getRotation().getRadians();

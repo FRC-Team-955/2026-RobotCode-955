@@ -5,37 +5,29 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import frc.lib.AllianceFlipUtil;
 import frc.lib.commands.CommandsExt;
 import frc.robot.FieldConstants;
-import frc.robot.RobotState;
 import frc.robot.subsystems.superintake.Superintake;
 import frc.robot.subsystems.superstructure.Superstructure;
 
 import static frc.robot.subsystems.drive.DriveConstants.defaultMoveToConstraints;
 
 public class PlanetaryRightAuto extends Auto {
-    public PlanetaryRightAuto() {
-        super(getStartingPose(), build());
-    }
-
-    private static final RobotState robotState = RobotState.get();
-
     private static final Superintake superintake = Superintake.get();
     private static final Superstructure superstructure = Superstructure.get();
 
     private static final Pose2d trenchShootingPosition = new Pose2d(3.88, 0.7, Rotation2d.fromDegrees(-90));
-    private static final Pose2d startingPosition = new Pose2d(3.88, trenchShootingPosition.getY(), trenchShootingPosition.getRotation());
     private static final double exitTrenchX = 6.25;
 
-        public static Pose2d getStartingPose() {
-            return AllianceFlipUtil.apply(startingPosition);
-        }
+    public PlanetaryRightAuto() {
+        super(
+                new Pose2d(3.88, trenchShootingPosition.getY(), trenchShootingPosition.getRotation()),
+                build()
+        );
+    }
 
     public static Command build() {
         return CommandsExt.eagerSequence(
-                robotState.setPose(() -> AllianceFlipUtil.apply(startingPosition)),
-
                 // move out of trench
                 AutoHelpers.intermediateWaypoint(() -> new Pose2d(
                         exitTrenchX,

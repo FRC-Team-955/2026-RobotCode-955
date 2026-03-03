@@ -27,9 +27,10 @@ import static frc.robot.subsystems.drive.DriveConstants.maxAngularVelocityRadPer
 import static frc.robot.subsystems.drive.DriveConstants.moveToConfig;
 
 public final class RightSideAuto extends Auto {
-    public RightSideAuto() {
-        super(getStartingPose(), build());
-    }
+    private static final Drive drive = Drive.get();
+    private static final RobotState robotState = RobotState.get();
+    private static final Superintake superintake = Superintake.get();
+    private static final Superstructure superstructure = Superstructure.get();
 
     private static final List<Pose2d> baseWaypoints = List.of(
             new Pose2d(3.5, 2.5, Rotation2d.fromDegrees(90)),
@@ -44,7 +45,7 @@ public final class RightSideAuto extends Auto {
             new Pose2d(2.5, 0.6, Rotation2d.fromDegrees(-180))
     );
 
-    public static final DriveConstants.MoveToConstraints RightSideAutoMoveToConstraints = new DriveConstants.MoveToConstraints(
+    private static final DriveConstants.MoveToConstraints rightSideAutoMoveToConstraints = new DriveConstants.MoveToConstraints(
             new LoggedTunableNumber("RightSideAuto/MoveTo/MaxLinearVelocity", 0.5),
             new LoggedTunableNumber("RightSideAuto/MoveTo/MaxLinearAcceleration", 15.0),
             new LoggedTunableNumber("RightSideAuto/MoveTo/MaxAngularVelocity", maxAngularVelocityRadPerSec),
@@ -55,16 +56,11 @@ public final class RightSideAuto extends Auto {
 
     private static final int INTERPOLATION_START_INDEX = baseWaypoints.size();
 
-    private static final Drive drive = Drive.get();
-    private static final RobotState robotState = RobotState.get();
-    private static final Superintake superintake = Superintake.get();
-    private static final Superstructure superstructure = Superstructure.get();
-
-    public static Pose2d getStartingPose() {
-        return AllianceFlipUtil.apply(baseWaypoints.get(0));
+    public RightSideAuto() {
+        super(baseWaypoints.get(0), build());
     }
 
-    public static Command build() {
+    private static Command build() {
         List<Pose2d> poses = baseWaypoints.stream()
                 .map(AllianceFlipUtil::apply)
                 .toList();
@@ -193,7 +189,7 @@ public final class RightSideAuto extends Auto {
         Command driveMoveToWithAiming = drive.moveTo(() -> {
             Pose2d goal = currentGoal.get();
             return new Pose2d(goal.getTranslation(), Rotation2d.fromRadians(ShootingKinematics.get().getShootingParameters().headingRad()));
-        }, RightSideAutoMoveToConstraints);
+        }, rightSideAutoMoveToConstraints);
 
         return Commands.sequence(
                 setInitialPose,

@@ -5,37 +5,29 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import frc.lib.AllianceFlipUtil;
 import frc.lib.commands.CommandsExt;
 import frc.robot.FieldConstants;
-import frc.robot.RobotState;
 import frc.robot.subsystems.superintake.Superintake;
 import frc.robot.subsystems.superstructure.Superstructure;
 
 import static frc.robot.subsystems.drive.DriveConstants.defaultMoveToConstraints;
 
 public class OrbitAtHomeDepotAuto extends Auto {
-    public OrbitAtHomeDepotAuto() {
-        super(getStartingPose(), build());
-    }
-
-    private static final RobotState robotState = RobotState.get();
-
     private static final Superintake superintake = Superintake.get();
     private static final Superstructure superstructure = Superstructure.get();
 
     private static final Pose2d trenchShootingPosition = new Pose2d(3.8, 7.38, Rotation2d.kCCW_90deg);
-    private static final Pose2d startingPosition = new Pose2d(3.88, trenchShootingPosition.getY(), trenchShootingPosition.getRotation());
     private static final double exitTrenchX = 6.34;
 
-    public static Pose2d getStartingPose() {
-        return AllianceFlipUtil.apply(startingPosition);
+    public OrbitAtHomeDepotAuto() {
+        super(
+                new Pose2d(3.88, trenchShootingPosition.getY(), trenchShootingPosition.getRotation()),
+                build()
+        );
     }
 
-    public static Command build() {
+    private static Command build() {
         return CommandsExt.eagerSequence(
-                robotState.setPose(() -> AllianceFlipUtil.apply(startingPosition)),
-
                 // move out of trench
                 AutoHelpers.intermediateWaypoint(() -> new Pose2d(
                         exitTrenchX,

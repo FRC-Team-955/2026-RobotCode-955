@@ -12,7 +12,6 @@ import frc.lib.Bounds;
 import frc.lib.network.LoggedTunableNumber;
 import frc.robot.FieldConstants;
 import frc.robot.RobotState;
-import frc.robot.shooting.ShootingKinematics;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.DriveConstants;
 import frc.robot.subsystems.gamepiecevision.GamePieceVision;
@@ -30,7 +29,6 @@ public class AutoHelpers {
     private static final double finalAngularTolerance = Units.degreesToRadians(10);
 
     private static final RobotState robotState = RobotState.get();
-    private static final ShootingKinematics shootingKinematics = ShootingKinematics.get();
     private static final GamePieceVision gamePieceVision = GamePieceVision.get();
 
     private static final Drive drive = Drive.get();
