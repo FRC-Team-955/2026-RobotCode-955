@@ -99,8 +99,8 @@ test {
 // AdvantageKit log replay from the command line. Set the
 // value to "true" to enable the sim GUI by default (this
 // is the standard WPILib behavior).
-wpi.sim.addGui().defaultEnabled = true
-wpi.sim.addDriverstation()
+wpi.sim.addGui().defaultEnabled = System.getenv("REPLAYENABLED") == null
+wpi.sim.addDriverstation().defaultEnabled = System.getenv("REPLAYENABLED") == null
 
 // Setting up my Jar File. In this case, adding all libraries into the main jar ('fat jar')
 // in order to make them all available at runtime. Also adding the manifest so WPILib
