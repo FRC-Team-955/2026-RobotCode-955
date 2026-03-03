@@ -114,6 +114,8 @@ public class SimManager {
                 SimulatedArena.getInstance().resetFieldForAuto();
                 DriverStationSim.setAllianceStationId(initial == DriverStation.Alliance.Blue ? AllianceStationID.Blue1 : AllianceStationID.Red1);
                 DriverStationSim.notifyNewData();
+
+                intakeSimulation.setGamePiecesCount(8);
             }));
 
             DriverStationSim.setAllianceStationId(AllianceStationID.Blue1);
