@@ -67,7 +67,7 @@ public class LEDPatterns {
     ).mask(
             LEDPattern.solid(Color.kWhite)
                     .mask(LEDPattern.progressMaskLayer(() -> {
-                        double t = 4.0 * Timer.getTimestamp();
+                        double t = 6.0 * Timer.getTimestamp();
                         // https://www.desmos.com/calculator/e4r4fj5iur
                         return (Math.cos(t) - 3.0 * Math.sin(t) * Math.sin(t) + 6.0) / 6.0;
                     }))
