@@ -45,6 +45,7 @@ public class Robot extends LoggedRobot {
     private final RobotContainer robotContainer;
     private Command autonomousCommand;
     private double autonomousStart;
+    private Command testCommand;
 
     private static List<Periodic> periodics;
 
@@ -269,5 +270,25 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void teleopPeriodic() {
+    }
+
+    @Override
+    public void testInit() {
+        testCommand = robotContainer.getTestCommand();
+
+        if (testCommand != null) {
+            CommandScheduler.getInstance().schedule(testCommand);
+            System.out.println("********** Test started **********");
+        }
+    }
+
+    @Override
+    public void testExit() {
+        // We want this to run before the command scheduler, so it goes in testExit
+        if (testCommand != null && testCommand.isScheduled()) {
+            testCommand.cancel();
+            testCommand = null;
+            System.out.println("********** Test cancelled **********");
+        }
     }
 }
