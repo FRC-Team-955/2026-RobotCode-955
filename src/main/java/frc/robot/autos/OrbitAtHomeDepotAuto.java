@@ -72,7 +72,7 @@ public class OrbitAtHomeDepotAuto extends Auto {
 
                 // shoot
                 Commands.parallel(
-                        superintake.setGoal(Superintake.Goal.INTAKE),
+                        superintake.intakeShootAlternate(),
                         superstructure.setGoal(Superstructure.Goal.SHOOT),
                         AutoHelpers.finalWaypoint(() -> trenchShootingPosition, defaultMoveToConstraints.withAiming(true))
                 ).withTimeout(4.5),
@@ -108,7 +108,7 @@ public class OrbitAtHomeDepotAuto extends Auto {
 
                 // shoot
                 Commands.parallel(
-                        superintake.setGoal(Superintake.Goal.INTAKE),
+                        superintake.intakeShootAlternate(),
                         superstructure.setGoal(Superstructure.Goal.SHOOT),
                         AutoHelpers.finalWaypoint(() -> trenchShootingPosition, defaultMoveToConstraints.withAiming(true))
                 ).withTimeout(5)

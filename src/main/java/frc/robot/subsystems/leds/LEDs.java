@@ -120,7 +120,7 @@ public class LEDs implements Periodic {
         } else if (DriverStation.isEnabled()) {
             LEDPattern superintakePattern = switch (superintake.getGoal()) {
                 case IDLE -> null;
-                case INTAKE -> LEDPatterns.intaking;
+                case INTAKE, SHOOT -> LEDPatterns.intaking;
                 case EJECT -> LEDPatterns.eject;
                 case HOME_INTAKE_PIVOT -> LEDPatterns.homing;
             };

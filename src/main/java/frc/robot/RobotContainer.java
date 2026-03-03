@@ -104,7 +104,7 @@ public class RobotContainer {
                                 return DriveJoystickGoal.Mode.AimAndAssist;
                             }
                         }),
-                        superintake.setGoal(Superintake.Goal.INTAKE),
+                        superintake.intakeShootAlternate(),
                         superstructure.setGoal(Superstructure.Goal.SHOOT)
                 ));
 

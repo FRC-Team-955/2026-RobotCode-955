@@ -2,6 +2,7 @@ package frc.robot.subsystems.superintake;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.Util;
+import frc.lib.commands.CommandsExt;
 import frc.lib.subsystem.CommandBasedSubsystem;
 import frc.robot.subsystems.superintake.intakepivot.IntakePivot;
 import frc.robot.subsystems.superintake.intakerollers.IntakeRollers;
@@ -19,6 +20,7 @@ public class Superintake extends CommandBasedSubsystem {
     public enum Goal {
         IDLE,
         INTAKE,
+        SHOOT,
         EJECT,
         HOME_INTAKE_PIVOT,
     }
@@ -74,6 +76,10 @@ public class Superintake extends CommandBasedSubsystem {
                 intakePivot.setGoal(IntakePivot.Goal.DEPLOY);
                 intakeRollers.setGoal(IntakeRollers.Goal.INTAKE);
             }
+            case SHOOT -> {
+                intakePivot.setGoal(IntakePivot.Goal.STOW);
+                intakeRollers.setGoal(IntakeRollers.Goal.INTAKE);
+            }
             case EJECT -> {
                 intakePivot.setGoal(IntakePivot.Goal.DEPLOY);
                 intakeRollers.setGoal(IntakeRollers.Goal.EJECT);
@@ -83,5 +89,12 @@ public class Superintake extends CommandBasedSubsystem {
                 intakeRollers.setGoal(IntakeRollers.Goal.AGITATE);
             }
         }
+    }
+
+    public Command intakeShootAlternate() {
+        return CommandsExt.repeatingEagerSequence(
+                setGoal(Goal.INTAKE).withTimeout(1),
+                setGoal(Goal.SHOOT).withTimeout(1)
+        );
     }
 }
