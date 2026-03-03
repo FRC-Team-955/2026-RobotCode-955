@@ -24,12 +24,13 @@ import static frc.robot.subsystems.leds.LEDConstants.length;
 
 public class LEDs implements Periodic {
     private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
-    private static final Superintake superintake = Superintake.get();
-    private static final Superstructure superstructure = Superstructure.get();
     private static final ShootingKinematics shootingKinematics = ShootingKinematics.get();
     private static final AutoManager autoManager = AutoManager.get();
     private static final AprilTagVision aprilTagVision = AprilTagVision.get();
     private static final GamePieceVision gamePieceVision = GamePieceVision.get();
+
+    private static final Superintake superintake = Superintake.get();
+    private static final Superstructure superstructure = Superstructure.get();
 
     // See createAndStartStartupNotifier for why this is static
     private static final LEDsIO io = createIO();
@@ -94,13 +95,22 @@ public class LEDs implements Periodic {
 
     @Override
     public void periodicAfterCommands() {
+        boolean somethingIsReallyWrong =
+                aprilTagVision.anyCamerasDisconnected()
+                        || gamePieceVision.anyCamerasDisconnected()
+                        || superstructure.hood.isEmergencyStopped();
         boolean lowBattery = operatorDashboard.isBatteryVoltageAlertActive();
-        boolean cameraError = aprilTagVision.anyCamerasDisconnected() || gamePieceVision.anyCamerasDisconnected();
 
-        if (lowBattery) {
+        if (somethingIsReallyWrong) {
+            LEDPatterns.somethingIsReallyWrong.applyTo(buffer);
+        } else if (
+                superintake.intakeRollers.highTemperatureAlert.get() ||
+                        superstructure.flywheel.highTemperatureAlert.get() ||
+                        superstructure.hood.highTemperatureAlert.get()
+        ) {
+            LEDPatterns.hotMotors.applyTo(buffer);
+        } else if (lowBattery) {
             LEDPatterns.lowBattery.applyTo(buffer);
-        } else if (cameraError) {
-            LEDPatterns.visionDisconnected.applyTo(buffer);
         } else if (DriverStation.isDisabled()) {
             if (operatorDashboard.autoChosen.get() && autoManager.getClosestAutoStartingPose().isPresent() && !autoManager.isAtAutoStartingPose()) {
                 LEDPatterns.autoPlacementProgress(autoManager::getPlacementProgress).applyTo(buffer);

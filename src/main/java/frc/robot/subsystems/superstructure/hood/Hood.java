@@ -2,11 +2,11 @@ package frc.robot.subsystems.superstructure.hood;
 
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.lib.Util;
 import frc.lib.motor.MotorIOInputsAutoLogged;
-import frc.lib.network.LoggedTunableNumber;
 import frc.lib.subsystem.Periodic;
 import frc.robot.OperatorDashboard;
 import frc.robot.RobotState;
@@ -22,8 +22,6 @@ import java.util.function.DoubleSupplier;
 import static frc.robot.subsystems.superstructure.hood.HoodConstants.*;
 
 public class Hood implements Periodic {
-    private static final LoggedTunableNumber profileLookaheadTimeSec = new LoggedTunableNumber("Superstructure/Hood/ProfileLookaheadTimeSec", 0.15);
-
     private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
     private static final ShootingKinematics shootingKinematics = ShootingKinematics.get();
     private static final RobotState robotState = RobotState.get();
@@ -53,7 +51,13 @@ public class Hood implements Periodic {
         }
     }
 
+    @Getter
+    private boolean emergencyStopped = false;
+    private final Debouncer emergencyStopDebouncer = new Debouncer(1.0, Debouncer.DebounceType.kRising);
+
     private final Alert motorDisconnectedAlert = new Alert("Hood motor is disconnected.", Alert.AlertType.kError);
+    public final Alert highTemperatureAlert = new Alert("Hood motor temperature is high.", Alert.AlertType.kWarning);
+    private final Alert emergencyStoppedAlert = new Alert("Hood is E-stopped!", Alert.AlertType.kError);
 
     private static Hood instance;
 
@@ -77,9 +81,27 @@ public class Hood implements Periodic {
         Logger.processInputs("Inputs/Superstructure/Hood", inputs);
 
         motorDisconnectedAlert.set(!inputs.connected);
+        highTemperatureAlert.set(inputs.temperatureCelsius > 50);
+
+        if (!emergencyStopped) {
+            if (emergencyStopDebouncer.calculate(inputs.currentAmps >= 20) || operatorDashboard.hoodEStop.get()) {
+                io.setVoltageRequest(0.0);
+                io.setNeutralMode(NeutralModeValue.Coast);
+                emergencyStopped = true;
+                operatorDashboard.hoodEStop.set(true);
+            }
+        } else {
+            if (!operatorDashboard.hoodEStop.get()) {
+                // Let operator turn off e-stop
+                io.setNeutralMode(NeutralModeValue.Brake);
+                emergencyStopped = false;
+                operatorDashboard.hoodEStop.set(false);
+            }
+        }
+        emergencyStoppedAlert.set(emergencyStopped);
 
         // Apply network inputs
-        if (operatorDashboard.coastOverride.hasChanged()) {
+        if (!emergencyStopped && operatorDashboard.coastOverride.hasChanged()) {
             io.setNeutralMode(operatorDashboard.coastOverride.get() ? NeutralModeValue.Coast : NeutralModeValue.Brake);
         }
 
@@ -91,7 +113,13 @@ public class Hood implements Periodic {
     @Override
     public void periodicAfterCommands() {
         Logger.recordOutput("Superstructure/Hood/Goal", goal);
-        if (DriverStation.isDisabled()) {
+
+        // Turn off E-stop when homing
+        if (goal == Goal.HOME) {
+            emergencyStopped = false;
+        }
+
+        if (DriverStation.isDisabled() || emergencyStopped) {
             io.setVoltageRequest(0.0);
         } else if (goal == Goal.HOME) {
             io.setVoltageRequest(-0.5);

@@ -44,7 +44,8 @@ public class IntakeRollers implements Periodic {
     @Getter
     private Goal goal = Goal.AGITATE;
 
-    private final Alert motorDisconnectedAlert = new Alert("IntakeRollers motor is disconnected.", Alert.AlertType.kError);
+    private final Alert motorDisconnectedAlert = new Alert("Intake rollers motor is disconnected.", Alert.AlertType.kError);
+    public final Alert highTemperatureAlert = new Alert("Intake rollers motor temperature is high.", Alert.AlertType.kWarning);
 
     private static IntakeRollers instance;
 
@@ -68,6 +69,7 @@ public class IntakeRollers implements Periodic {
         Logger.processInputs("Inputs/Superintake/IntakeRollers", inputs);
 
         motorDisconnectedAlert.set(!inputs.connected);
+        highTemperatureAlert.set(inputs.temperatureCelsius > 50);
     }
 
     @Override

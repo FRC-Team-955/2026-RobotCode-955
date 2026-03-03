@@ -10,7 +10,7 @@ import frc.lib.network.LoggedTunablePIDF;
 import static frc.robot.subsystems.superstructure.hood.HoodConstants.*;
 
 public class HoodIOSparkMax extends HoodIO {
-    private static final int normalCurrentLimitAmps = 40;
+    private static final int normalCurrentLimitAmps = 30;
     private static final int homingCurrentLimitAmps = 10;
 
     private final MotorIOSparkMax motor;

@@ -63,7 +63,7 @@ public class IntakePivot implements Periodic {
     private TrapezoidProfile.State goalState = new TrapezoidProfile.State();
     private TrapezoidProfile.State lookaheadState = new TrapezoidProfile.State();
 
-    private final Alert motorDisconnectedAlert = new Alert("IntakePivot motor is disconnected.", Alert.AlertType.kError);
+    private final Alert motorDisconnectedAlert = new Alert("Intake pivot motor is disconnected.", Alert.AlertType.kError);
 
     private static IntakePivot instance;
 

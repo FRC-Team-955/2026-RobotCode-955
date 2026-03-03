@@ -1,6 +1,7 @@
 package frc.robot.subsystems.leds;
 
 import edu.wpi.first.wpilibj.LEDPattern;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.util.Color;
 
 import java.util.function.DoubleSupplier;
@@ -47,17 +48,34 @@ public class LEDPatterns {
     }
 
     // All modes
-    public static final LEDPattern lowBattery = LEDPattern.gradient(LEDPattern.GradientType.kDiscontinuous, Color.kRed, Color.kYellow).blink(Seconds.of(1.0 / 3.0));
+    public static final LEDPattern lowBattery = LEDPattern.gradient(
+            LEDPattern.GradientType.kDiscontinuous,
+            Color.kRed,
+            Color.kYellow
+    );
+    public static final LEDPattern somethingIsReallyWrong = LEDPattern.gradient(
+                    LEDPattern.GradientType.kContinuous,
+                    Color.kRed,
+                    Color.kBlack
+            )
+            .scrollAtRelativeSpeed(Hertz.of(5))
+            .breathe(Seconds.of(1.0));
+    public static final LEDPattern hotMotors = LEDPattern.gradient(
+            LEDPattern.GradientType.kDiscontinuous,
+            Color.kRed,
+            Color.kYellow
+    ).mask(
+            LEDPattern.solid(Color.kWhite)
+                    .mask(LEDPattern.progressMaskLayer(() -> {
+                        double t = 4.0 * Timer.getTimestamp();
+                        // https://www.desmos.com/calculator/e4r4fj5iur
+                        return (Math.cos(t) - 3.0 * Math.sin(t) * Math.sin(t) + 6.0) / 6.0;
+                    }))
+    );
 
     // Disabled
     public static final LEDPattern autoNotChosen = LEDPattern.solid(Color.kBlue).blink(Seconds.of(1));
     public static final LEDPattern badAutoPlacement = LEDPattern.solid(Color.kYellow).blink(Seconds.of(0.5));
-    public static final LEDPattern visionDisconnected = LEDPattern.gradient(
-            LEDPattern.GradientType.kContinuous,
-            Color.kRed,
-            Color.kBlack,
-            Color.kBlack
-    ).scrollAtRelativeSpeed(Hertz.of(1));
     public static final LEDPattern autoReady = LEDPattern.gradient(
             LEDPattern.GradientType.kContinuous,
             Color.kRed,
@@ -68,13 +86,13 @@ public class LEDPatterns {
     ).scrollAtRelativeSpeed(Hertz.of(1));
 
     // Enabled
-    public static final LEDPattern eject = LEDPattern.solid(Color.kRed).blink(Seconds.of(0.1));
+    public static final LEDPattern idle = LEDPattern.kOff;
+    public static final LEDPattern eject = LEDPattern.solid(Color.kPurple).blink(Seconds.of(0.1));
     public static final LEDPattern aiming = LEDPattern.solid(Color.kYellow);
     public static final LEDPattern shooting = LEDPattern.solid(Color.kGreen);
     public static final LEDPattern intaking = LEDPattern.solid(Color.kYellow).blink(Seconds.of(0.1));
     public static final LEDPattern waitingForShift = LEDPattern.solid(Color.kPink).blink(Seconds.of(0.1));
     public static final LEDPattern homing = LEDPattern.solid(Color.kBlue);
-    public static final LEDPattern idle = LEDPattern.kOff;
     public static final LEDPattern hubSwitch = LEDPattern.gradient(
             LEDPattern.GradientType.kContinuous,
             Color.kRed,

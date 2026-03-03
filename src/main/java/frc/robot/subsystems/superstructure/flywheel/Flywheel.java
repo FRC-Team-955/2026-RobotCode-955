@@ -44,6 +44,7 @@ public class Flywheel implements Periodic {
 
     private final Alert leaderMotorDisconnectedAlert = new Alert("Flywheel leader motor is disconnected.", Alert.AlertType.kError);
     private final Alert followerMotorDisconnectedAlert = new Alert("Flywheel follower motor is disconnected.", Alert.AlertType.kError);
+    public final Alert highTemperatureAlert = new Alert("Flywheel motor temperature is high.", Alert.AlertType.kWarning);
 
     private static Flywheel instance;
 
@@ -68,6 +69,7 @@ public class Flywheel implements Periodic {
 
         leaderMotorDisconnectedAlert.set(!inputs.leader.connected);
         followerMotorDisconnectedAlert.set(!inputs.follower.connected);
+        highTemperatureAlert.set(Math.max(inputs.leader.temperatureCelsius, inputs.follower.temperatureCelsius) > 50);
 
         if (velocityGains.hasChanged()) {
             io.setVelocityPIDF(velocityGains);
