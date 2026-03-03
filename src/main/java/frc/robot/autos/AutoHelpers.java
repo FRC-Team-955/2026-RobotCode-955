@@ -16,6 +16,7 @@ import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.DriveConstants;
 import frc.robot.subsystems.gamepiecevision.GamePieceVision;
 import frc.robot.subsystems.superintake.Superintake;
+import frc.robot.subsystems.superstructure.Superstructure;
 
 import java.util.function.Supplier;
 
@@ -33,6 +34,11 @@ public class AutoHelpers {
 
     private static final Drive drive = Drive.get();
     private static final Superintake superintake = Superintake.get();
+    private static final Superstructure superstructure = Superstructure.get();
+
+    public static final DriveConstants.MoveToConstraints shootingConstraints = defaultMoveToConstraints
+            .withMaxLinearVelocityMetersPerSec(new LoggedTunableNumber("AutoHelpers/Intake/MaxLinearVelocity", 1.0))
+            .withAiming(true);
 
     public static Command intermediateWaypoint(Supplier<Pose2d> poseSupplier, DriveConstants.MoveToConstraints constraints) {
         return drive
@@ -44,7 +50,11 @@ public class AutoHelpers {
                 .until(() -> robotState.isAtPoseWithTolerance(
                         AllianceFlipUtil.apply(poseSupplier.get()),
                         intermediateLinearTolerance,
-                        intermediateAngularTolerance
+                        // if we are aiming, the rotation from the pose supplier
+                        // is not the rotation that move to will target
+                        constraints.aiming()
+                                ? Double.MAX_VALUE
+                                : intermediateAngularTolerance
                 ));
     }
 
@@ -57,7 +67,11 @@ public class AutoHelpers {
                 .until(() -> robotState.isAtPoseWithTolerance(
                         AllianceFlipUtil.apply(poseSupplier.get()),
                         finalLinearTolerance,
-                        finalAngularTolerance
+                        // if we are aiming, the rotation from the pose supplier
+                        // is not the rotation that move to will target
+                        constraints.aiming()
+                                ? Double.MAX_VALUE
+                                : intermediateAngularTolerance
                 ));
     }
 
@@ -126,54 +140,72 @@ public class AutoHelpers {
             .withMaxLinearVelocityMetersPerSec(new LoggedTunableNumber("AutoHelpers/Intake/MaxLinearVelocity", 2))
             .withMaxAngularAccelerationRadPerSecPerSec(new LoggedTunableNumber("AutoHelpers/Intake/MaxAngularAcceleration", 40.0));
 
-    private static Command intakeFromNeutralZone(
-            Bounds bounds,
-            Supplier<Pose2d> poseSupplierIfNoGamePieces
-    ) {
-        return Commands.parallel(
-                drive.moveTo(
-                        () -> {
-                            for (var target : gamePieceVision.getBestTargets()) {
-                                if (AllianceFlipUtil.apply(bounds).contains(target)) {
-                                    return new Pose2d(
-                                            target,
-                                            // Point towards target
-                                            target.minus(robotState.getTranslation()).getAngle()
-                                    );
-                                }
-                            }
-                            return AllianceFlipUtil.apply(poseSupplierIfNoGamePieces.get());
-                        },
-                        intakeConstraints
-                ),
-                superintake.setGoal(Superintake.Goal.INTAKE)
-        );
+    private static Pose2d getIntakePose(Bounds bounds, Pose2d ifNoGamePieces) {
+        for (var target : gamePieceVision.getBestTargets()) {
+            if (AllianceFlipUtil.apply(bounds).contains(target)) {
+                return new Pose2d(
+                        target,
+                        // Point towards target
+                        target.minus(robotState.getTranslation()).getAngle()
+                ).transformBy(new Transform2d(
+                        // Move align pose towards robot so that it doesn't try to move
+                        // such that the center of the robot is at the target
+                        -(0.1 + driveConfig.bumperLengthMeters() / 2.0),
+                        0.0,
+                        new Rotation2d()
+                ));
+            }
+        }
+        return AllianceFlipUtil.apply(ifNoGamePieces);
     }
 
     private static final double neutralZoneXMin = FieldConstants.LinesVertical.neutralZoneNear + driveConfig.bumperLengthMeters() / 2.0;
     private static final double neutralZoneXMax = FieldConstants.LinesVertical.center - 0.2;
 
     public static Command intakeFromLeftNeutralZone(Supplier<Pose2d> poseSupplierIfNoGamePieces) {
-        return intakeFromNeutralZone(
-                new Bounds(
-                        neutralZoneXMin,
-                        neutralZoneXMax,
-                        FieldConstants.LinesHorizontal.center,
-                        FieldConstants.fieldWidth - driveConfig.bumperLengthMeters() / 2.0
+        return Commands.parallel(
+                drive.moveTo(
+                        () -> getIntakePose(new Bounds(
+                                neutralZoneXMin,
+                                neutralZoneXMax,
+                                FieldConstants.LinesHorizontal.center,
+                                FieldConstants.fieldWidth - driveConfig.bumperLengthMeters() / 2.0
+                        ), poseSupplierIfNoGamePieces.get()),
+                        intakeConstraints
                 ),
-                poseSupplierIfNoGamePieces
+                superintake.setGoal(Superintake.Goal.INTAKE)
         );
     }
 
     public static Command intakeFromRightNeutralZone(Supplier<Pose2d> poseSupplierIfNoGamePieces) {
-        return intakeFromNeutralZone(
-                new Bounds(
-                        neutralZoneXMin,
-                        neutralZoneXMax,
-                        0.0 + driveConfig.bumperLengthMeters() / 2.0,
-                        FieldConstants.LinesHorizontal.center
+        return Commands.parallel(
+                drive.moveTo(
+                        () -> getIntakePose(new Bounds(
+                                neutralZoneXMin,
+                                neutralZoneXMax,
+                                0.0 + driveConfig.bumperLengthMeters() / 2.0,
+                                FieldConstants.LinesHorizontal.center
+                        ), poseSupplierIfNoGamePieces.get()),
+                        intakeConstraints
                 ),
-                poseSupplierIfNoGamePieces
+                superintake.setGoal(Superintake.Goal.INTAKE)
+        );
+    }
+
+    public static Command intakeFromDepotWhileShooting(DriveConstants.MoveToConstraints constraints) {
+        Pose2d ifNoGamePieces = new Pose2d(0.2 + driveConfig.bumperLengthMeters() / 2.0, FieldConstants.Depot.depotCenter.getY(), Rotation2d.k180deg);
+        return Commands.parallel(
+                drive.moveTo(
+                        () -> getIntakePose(new Bounds(
+                                driveConfig.bumperLengthMeters() / 2.0,
+                                FieldConstants.Depot.depth,
+                                FieldConstants.Depot.rightCorner.getY(),
+                                FieldConstants.Depot.leftCorner.getY()
+                        ), ifNoGamePieces),
+                        constraints.withAiming(true)
+                ),
+                superintake.setGoal(Superintake.Goal.INTAKE),
+                superstructure.setGoal(Superstructure.Goal.SHOOT)
         );
     }
 }
