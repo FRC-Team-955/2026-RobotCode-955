@@ -13,7 +13,11 @@ import frc.robot.subsystems.superstructure.Superstructure;
 
 import static frc.robot.subsystems.drive.DriveConstants.defaultMoveToConstraints;
 
-public class CenterAuto {
+public class CenterAuto extends Auto {
+    public CenterAuto() {
+        super(getStartingPose(), build());
+    }
+
     private static final RobotState robotState = RobotState.get();
 
     private static final Superintake superintake = Superintake.get();

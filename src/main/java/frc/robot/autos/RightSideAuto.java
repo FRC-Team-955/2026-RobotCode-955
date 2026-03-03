@@ -26,8 +26,9 @@ import java.util.function.BooleanSupplier;
 import static frc.robot.subsystems.drive.DriveConstants.maxAngularVelocityRadPerSec;
 import static frc.robot.subsystems.drive.DriveConstants.moveToConfig;
 
-public final class RightSideAuto {
-    private RightSideAuto() {
+public final class RightSideAuto extends Auto {
+    public RightSideAuto() {
+        super(getStartingPose(), build());
     }
 
     private static final List<Pose2d> baseWaypoints = List.of(

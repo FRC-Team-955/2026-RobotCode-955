@@ -3,12 +3,14 @@ package frc.robot.autos;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.AllianceFlipUtil;
 import frc.lib.Util;
 import frc.lib.commands.CommandsExt;
 import frc.robot.RobotState;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
+import java.util.List;
 import java.util.Optional;
 
 public class AutoManager {
@@ -19,6 +21,22 @@ public class AutoManager {
     public static final double MAX_DISTANCE_METERS = 3.0;
     public static final double READY_THRESHOLD_RADIANS = Math.toRadians(5);
     public static final double MAX_ROTATION_ERROR_RADIANS = Math.toRadians(180);
+
+    private static final LeftSideAuto leftSideAuto = new LeftSideAuto();
+    private static final RightSideAuto rightSideAuto = new RightSideAuto();
+    private static final DepotAuto depotAuto = new DepotAuto();
+    private static final OrbitAtHomeDepotAuto orbitAtHomeDepotAuto = new OrbitAtHomeDepotAuto();
+    private static final PlanetaryRightAuto planetaryRightAuto = new PlanetaryRightAuto();
+    private static final CenterAuto centerAuto = new CenterAuto();
+
+    private static final List<Auto> allAutos = List.of(
+            leftSideAuto,
+            rightSideAuto,
+            depotAuto,
+            orbitAtHomeDepotAuto,
+            planetaryRightAuto,
+            centerAuto
+    );
 
     private static AutoManager instance;
 
@@ -35,13 +53,13 @@ public class AutoManager {
             Util.error("Duplicate AutoManager created");
         }
 
-        //autoChooser.addOption("None", Commands.none());
-        //autoChooser.addOption("LeftSideAuto", LeftSideAuto.build());
-        //autoChooser.addOption("RightSideAuto", RightSideAuto.build());
-        //autoChooser.addOption("DepotAuto", DepotAuto.build());
-        //autoChooser.addOption("Orbit at Home Depot", OrbitAtHomeDepotAuto.build());
-        //autoChooser.addOption("PlanetaryRightAuto", PlanetaryRightAuto.build());
-        //autoChooser.addOption("CenterAuto", CenterAuto.build());
+        //autoChooser.addOption("None", new Auto(new Pose2d(), Commands.none()));
+        autoChooser.addOption("LeftSideAuto", leftSideAuto);
+        autoChooser.addOption("RightSideAuto", rightSideAuto);
+        autoChooser.addOption("DepotAuto", depotAuto);
+        autoChooser.addOption("Orbit at Home Depot", orbitAtHomeDepotAuto);
+        autoChooser.addOption("PlanetaryRightAuto", planetaryRightAuto);
+        autoChooser.addOption("CenterAuto", centerAuto);
     }
 
     public Command getSelectedAuto() {
@@ -55,49 +73,33 @@ public class AutoManager {
     public Optional<Pose2d> getClosestAutoStartingPose() {
         Pose2d currentPose = robotState.getPose();
 
-        Pose2d leftStartPose = LeftSideAuto.getStartingPose();
-        Pose2d rightStartPose = RightSideAuto.getStartingPose();
-        Pose2d OrbitAtHomeDepotStartPose = OrbitAtHomeDepotAuto.getStartingPose();
-        Pose2d planetaryRightStartPose = PlanetaryRightAuto.getStartingPose();
-        Pose2d centerStartPose = CenterAuto.getStartingPose();
+        Auto closestAuto = null;
+        double minDistance = Double.MAX_VALUE;
 
-        double distanceToLeft = currentPose.getTranslation().getDistance(leftStartPose.getTranslation());
-        double distanceToRight = currentPose.getTranslation().getDistance(rightStartPose.getTranslation());
-        double distanceToOrbitAtHomeDepot = currentPose.getTranslation().getDistance(OrbitAtHomeDepotStartPose.getTranslation());
-        double distanceToPlanetaryRight = currentPose.getTranslation().getDistance(planetaryRightStartPose.getTranslation());
-        double distanceToCenter = currentPose.getTranslation().getDistance(centerStartPose.getTranslation());
-
-        double minDistance = Math.min(distanceToLeft,
-                Math.min(distanceToRight,
-                        Math.min(distanceToOrbitAtHomeDepot,
-                                Math.min(distanceToPlanetaryRight, distanceToCenter))));
-
-        if (minDistance == distanceToLeft) {
-            return Optional.of(leftStartPose);
-        } else if (minDistance == distanceToRight) {
-            return Optional.of(rightStartPose);
-        } else if (minDistance == distanceToOrbitAtHomeDepot) {
-            return Optional.of(OrbitAtHomeDepotStartPose);
-        } else if (minDistance == distanceToPlanetaryRight) {
-            return Optional.of(planetaryRightStartPose);
-        } else {
-            return Optional.of(centerStartPose);
+        for (Auto auto : allAutos) {
+            double distance = currentPose.getTranslation().getDistance(auto.startingPose.getTranslation());
+            if (distance < minDistance) {
+                minDistance = distance;
+                closestAuto = auto;
+            }
         }
+
+        return closestAuto != null ? Optional.of(closestAuto.startingPose) : Optional.empty();
     }
 
     public Command getClosestAuto() {
         Pose2d currentPose = robotState.getPose();
 
-        Pose2d leftStartPose = LeftSideAuto.getStartingPose();
-        Pose2d rightStartPose = RightSideAuto.getStartingPose();
+        Pose2d leftStartPose = leftSideAuto.startingPose;
+        Pose2d rightStartPose = rightSideAuto.startingPose;
 
         double distanceToLeft = currentPose.getTranslation().getDistance(leftStartPose.getTranslation());
         double distanceToRight = currentPose.getTranslation().getDistance(rightStartPose.getTranslation());
 
         if (distanceToLeft <= distanceToRight) {
-            return LeftSideAuto.build();
+            return leftSideAuto.command;
         } else {
-            return RightSideAuto.build();
+            return rightSideAuto.command;
         }
     }
 
