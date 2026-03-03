@@ -238,7 +238,8 @@ public class RobotState implements Periodic {
         Translation2d t = getTranslation();
         boolean inNeutralZone = t.getX() > FieldConstants.LinesVertical.neutralZoneNear + adjustmentMeters &&
                 t.getX() < FieldConstants.LinesVertical.neutralZoneFar - adjustmentMeters;
-        boolean inAllianceZone = t.getX() < FieldConstants.LinesVertical.allianceZone - adjustmentMeters;
+        boolean inAllianceZone = t.getX() < FieldConstants.LinesVertical.allianceZone - adjustmentMeters ||
+                t.getX() > FieldConstants.LinesVertical.oppAllianceZone + adjustmentMeters;
         boolean inLeftTrench = t.getY() > FieldConstants.LinesHorizontal.leftTrenchOpenEnd - adjustmentMeters;
         boolean inRightTrench = t.getY() < FieldConstants.LinesHorizontal.rightTrenchOpenStart + adjustmentMeters;
         return !inNeutralZone && !inAllianceZone && (inLeftTrench || inRightTrench);
