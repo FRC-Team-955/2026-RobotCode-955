@@ -38,11 +38,11 @@ public class AutoManager {
         }
 
         autoChooser.addOption("None", null);
-        autoChooser.addOption("LeftSideAuto", new LeftSideAuto());
-        autoChooser.addOption("RightSideAuto", new RightSideAuto());
+        //autoChooser.addOption("LeftSideAuto", new LeftSideAuto());
+        //autoChooser.addOption("RightSideAuto", new RightSideAuto());
         autoChooser.addOption("Orbit at Home Depot", new OrbitAtHomeDepotAuto());
-        autoChooser.addOption("PlanetaryRightAuto", new PlanetaryRightAuto());
-        autoChooser.addOption("AuraAuto", new AuraAuto());
+        autoChooser.addOption("Orbit at the outpost", new OrbitAtTheOutpostAuto());
+        autoChooser.addOption("Aura", new AuraAuto());
     }
 
     public Command getSelectedAutoCommand() {

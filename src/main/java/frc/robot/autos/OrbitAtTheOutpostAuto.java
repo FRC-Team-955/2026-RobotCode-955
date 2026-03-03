@@ -12,14 +12,14 @@ import frc.robot.subsystems.superstructure.Superstructure;
 
 import static frc.robot.subsystems.drive.DriveConstants.defaultMoveToConstraints;
 
-public class PlanetaryRightAuto extends Auto {
+public class OrbitAtTheOutpostAuto extends Auto {
     private static final Superintake superintake = Superintake.get();
     private static final Superstructure superstructure = Superstructure.get();
 
     private static final Pose2d trenchShootingPosition = new Pose2d(3.88, 0.7, Rotation2d.fromDegrees(-90));
     private static final double exitTrenchX = 6.25;
 
-    public PlanetaryRightAuto() {
+    public OrbitAtTheOutpostAuto() {
         super(
                 new Pose2d(3.88, trenchShootingPosition.getY(), trenchShootingPosition.getRotation()),
                 build()
