@@ -81,7 +81,7 @@ public class MoveToGoal extends DriveGoal {
         if (constraints.aiming()) {
             // When we rotate around a different center of rotation, XY error increases, and rotation/translation fight each other and act weird
             // To fix this, offset the XY setpoint by the center of rotation
-            Transform2d centerOfRotationTransform = new Transform2d(shootingKinematics.getCenterOfRotationForAiming(), new Rotation2d());
+            Transform2d centerOfRotationTransform = new Transform2d();//new Transform2d(shootingKinematics.getCenterOfRotationForAiming(), new Rotation2d());
 
             currentPose = currentPose.transformBy(centerOfRotationTransform);
 
@@ -119,9 +119,9 @@ public class MoveToGoal extends DriveGoal {
                         angularVelocityRadPerSec,
                         currentPose.getRotation() // Move to is absolute, don't flip
                 ),
-                constraints.aiming()
+                /*constraints.aiming()
                         ? Optional.of(shootingKinematics.getCenterOfRotationForAiming())
-                        : Optional.empty()
+                        : */Optional.empty()
         );
     }
 
