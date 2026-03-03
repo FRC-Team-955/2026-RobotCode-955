@@ -50,7 +50,7 @@ public class RobotContainer {
     public final Superstructure superstructure = Superstructure.get();
 
     public RobotContainer() {
-        autoManager.autoChooser.addOption("Characterization", Commands.deferredProxy(characterizationChooser::get));
+        //autoManager.autoChooser.addOption("Characterization", Commands.deferredProxy(characterizationChooser::get));
         addCharacterizations();
         setDefaultCommands();
         configureBindings();

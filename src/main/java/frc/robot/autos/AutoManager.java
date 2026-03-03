@@ -3,7 +3,6 @@ package frc.robot.autos;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.AllianceFlipUtil;
 import frc.lib.Util;
 import frc.lib.commands.CommandsExt;
@@ -36,13 +35,13 @@ public class AutoManager {
             Util.error("Duplicate AutoManager created");
         }
 
-        autoChooser.addOption("None", Commands.none());
-        autoChooser.addOption("LeftSideAuto", LeftSideAuto.build());
-        autoChooser.addOption("RightSideAuto", RightSideAuto.build());
-        autoChooser.addOption("DepotAuto", DepotAuto.build());
-        autoChooser.addOption("Orbit at Home Depot", OrbitAtHomeDepotAuto.build());
-        autoChooser.addOption("PlanetaryRightAuto", PlanetaryRightAuto.build());
-        autoChooser.addOption("CenterAuto", CenterAuto.build());
+        //autoChooser.addOption("None", Commands.none());
+        //autoChooser.addOption("LeftSideAuto", LeftSideAuto.build());
+        //autoChooser.addOption("RightSideAuto", RightSideAuto.build());
+        //autoChooser.addOption("DepotAuto", DepotAuto.build());
+        //autoChooser.addOption("Orbit at Home Depot", OrbitAtHomeDepotAuto.build());
+        //autoChooser.addOption("PlanetaryRightAuto", PlanetaryRightAuto.build());
+        //autoChooser.addOption("CenterAuto", CenterAuto.build());
     }
 
     public Command getSelectedAuto() {
