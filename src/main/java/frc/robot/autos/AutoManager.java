@@ -53,7 +53,7 @@ public class AutoManager {
             Util.error("Duplicate AutoManager created");
         }
 
-        //autoChooser.addOption("None", new Auto(new Pose2d(), Commands.none()));
+        autoChooser.addOption("None", new Auto(new Pose2d(), Commands.none()));
         autoChooser.addOption("LeftSideAuto", leftSideAuto);
         autoChooser.addOption("RightSideAuto", rightSideAuto);
         autoChooser.addOption("DepotAuto", depotAuto);
