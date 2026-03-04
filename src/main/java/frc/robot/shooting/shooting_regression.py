@@ -245,7 +245,12 @@ def optimize_shot(distance, robot_radial_vel):
 
     v_initial, angle_initial = calculate_shooting_params_kinematics(distance, robot_radial_vel)
 
+    shots_simmed = 0
+
     def cost_fun(x):
+        nonlocal shots_simmed
+        shots_simmed += 1
+
         # if x[1] < deg_to_rad(15.0) or x[1] > deg_to_rad(45.0):
         #     return 999
 
@@ -300,7 +305,7 @@ def optimize_shot(distance, robot_radial_vel):
         print(f"Optimization failed.")
         print(f"\tdistance = {distance}, robot_radial_vel = {robot_radial_vel}")
         print(f"\tres = {res}")
-        return None, None, None
+        return None, None, None, None
 
     v_final, angle_final = res.x
 
@@ -319,7 +324,7 @@ def optimize_shot(distance, robot_radial_vel):
             label="Iterative Simulation (Final)" if not DEBUG_RANGE else None
         )
 
-    return v_final, angle_final, tof
+    return v_final, angle_final, tof, shots_simmed
 
 if DEBUG_SHOT:
     if DEBUG_RANGE:
@@ -340,6 +345,7 @@ else:
 
         shots = []
         counter = 0
+        all_shots_simmed = 0
 
         print(f"[{worker_index}] Starting")
         start_time_worker = time()
@@ -349,19 +355,21 @@ else:
             progress_count = f"{counter}/{len(worker_distance_velocity_pairs)}"
             progress_percent = round(float(counter) / float(len(worker_distance_velocity_pairs)) * 100)
 
-            v, angle, tof = optimize_shot(distance, velocity)
+            v, angle, tof, shots_simmed = optimize_shot(distance, velocity)
             if v is None and angle is None and tof is None:
                 print(
                     f"[{worker_index}] {progress_count} FAILED (distance = {distance}, velocity = {velocity})")
                 continue
             # the two tuples need to be the same length for numpy to be happy
+            all_shots_simmed += shots_simmed
             shots.append(((distance, velocity, 0), (v, angle, tof)))
-            print(f"[{worker_index}] {progress_count}\t{progress_percent}%")
+            print(f"[{worker_index}] {progress_count}\t{progress_percent}% ({shots_simmed})")
 
         end_time_worker = time()
-        print(f"[{worker_index}] Done, took {end_time_worker - start_time_worker} seconds")
+        print(
+            f"[{worker_index}] Done, took {end_time_worker - start_time_worker} seconds and {all_shots_simmed} simulations")
 
-        return shots
+        return shots, all_shots_simmed
 
         # counter = 0
 
@@ -376,6 +384,7 @@ else:
                 distance_velocity_pairs.append((distance, velocity))
 
         all_shots = []
+        all_shots_simmed = 0
         workers = 8
         min_per_worker = floor(len(distance_velocity_pairs) / workers)
 
@@ -397,12 +406,14 @@ else:
 
         with Pool(workers) as p:
             args = map(get_distance_velocity_pairs_for_worker, range(workers))
-            for computed_shots in p.map(shot_compute_worker, args):
+            for (computed_shots, shots_simmed) in p.map(shot_compute_worker, args):
                 all_shots += computed_shots
+                all_shots_simmed += shots_simmed
 
         end_time = time()
         print(f"Took {end_time - start_time} seconds")
         print(f"Of {len(distance_velocity_pairs)} shots, {len(all_shots)} succeeded.")
+        print(f"{all_shots_simmed} simulations run.")
 
         all_shots = np.array(all_shots)
 
