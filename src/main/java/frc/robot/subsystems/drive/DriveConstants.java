@@ -62,7 +62,7 @@ public class DriveConstants {
     );
 
     public static final MoveToConfig moveToConfig = new MoveToConfig(
-            new LoggedTunablePIDF("Drive/MoveTo/Linear").withP(4.0).withD(0.02),
+            new LoggedTunablePIDF("Drive/MoveTo/Linear").withP(3.0).withD(0.02),
             new LoggedTunableNumber("Drive/MoveTo/LinearPositionTolerance", 0.05),
             new LoggedTunableNumber("Drive/MoveTo/LinearVelocityToleranceMeters", 0.2),
             new LoggedTunablePIDF("Drive/MoveTo/Angular").withP(4.0).withD(0.02),
