@@ -64,7 +64,7 @@ public class OrbitAtHomeDepotAuto extends Auto {
                 //move to entrance to trench
                 AutoHelpers.intermediateWaypoint(() -> new Pose2d(
                         6.1,
-                        trenchShootingPosition.getY(),
+                        7.5,
                         trenchShootingPosition.getRotation()
                 ), defaultMoveToConstraints),
 
