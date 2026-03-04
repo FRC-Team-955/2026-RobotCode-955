@@ -218,9 +218,9 @@ public class DriveJoystickGoal extends DriveGoal {
                             angularSetpoint,
                             robotState.getRotation()
                     ),
-                    mode == Mode.Aim || mode == Mode.AimAndAssist
+                    /*mode == Mode.Aim || mode == Mode.AimAndAssist
                             ? Optional.of(shootingKinematics.getCenterOfRotationForAiming())
-                            : Optional.empty()
+                            :*/ Optional.empty()
             );
         }
     }
