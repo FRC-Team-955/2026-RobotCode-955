@@ -9,7 +9,7 @@ import frc.lib.network.LoggedTunablePIDF;
 import static frc.robot.subsystems.superintake.intakepivot.IntakePivotConstants.*;
 
 public class IntakePivotIOTalonFX extends IntakePivotIO {
-    private static final int normalCurrentLimitAmps = 80;
+    private static final int normalCurrentLimitAmps = 40;
     private static final int homingCurrentLimitAmps = 20;
 
     private final MotorIOTalonFX motor;
