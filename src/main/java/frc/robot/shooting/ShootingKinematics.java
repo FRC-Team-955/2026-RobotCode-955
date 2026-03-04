@@ -30,7 +30,8 @@ public class ShootingKinematics implements Periodic {
 
     private static final LoggedTunableNumber phaseDelay = new LoggedTunableNumber("ShootingKinematics/PhaseDelay", 0.03);
     private static final LoggedTunableNumber robotVelocityScalar = new LoggedTunableNumber("ShootingKinematics/RobotVelocityScalar (DEBUG ONLY)", 1);
-    private static final LoggedTunableNumber headingToleranceDeg = new LoggedTunableNumber("ShootingKinematics/HeadingToleranceDegrees", 15.0);
+    private static final LoggedTunableNumber headingToleranceDeg = new LoggedTunableNumber("ShootingKinematics/HeadingToleranceDegrees", 10.0);
+    private static final LoggedTunableNumber headingTolerancePassingDeg = new LoggedTunableNumber("ShootingKinematics/HeadingTolerancePassingDegrees", 20.0);
     private static final LoggedTunableNumber headingVelocityToleranceDegPerSec = new LoggedTunableNumber("ShootingKinematics/HeadingVelocityToleranceDegreesPerSec", 30.0);
     public static final LoggedTunableNumber velocityToleranceRPM = new LoggedTunableNumber("ShootingKinematics/VelocityToleranceRPM", 100);
     public static final LoggedTunableNumber hoodToleranceDeg = new LoggedTunableNumber("ShootingKinematics/HoodToleranceDegrees", 3.0);
@@ -131,7 +132,11 @@ public class ShootingKinematics implements Periodic {
 
         boolean headingMet = operatorDashboard.manualAiming.get() ||
                 Math.abs(robotState.getPose().getRotation().getRadians() - shootingParameters.headingRad())
-                        <= Units.degreesToRadians(headingToleranceDeg.get());
+                        <= Units.degreesToRadians(
+                        shootingParameters.isPass()
+                                ? headingTolerancePassingDeg.get()
+                                : headingToleranceDeg.get()
+                );
         Logger.recordOutput("ShootingKinematics/HeadingMet", headingMet);
 
         boolean headingVelocityMet = operatorDashboard.manualAiming.get() ||
