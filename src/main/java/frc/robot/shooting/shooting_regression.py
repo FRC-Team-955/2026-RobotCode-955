@@ -240,8 +240,8 @@ def optimize_shot(distance, robot_radial_vel):
     hubx = distance
     hub_edgex = hubx + hub_edgex_offset
     if DEBUG_SHOT:
-        ax.scatter(hubx, 0, hubz, c="red")
-        ax.scatter(hub_edgex, 0, hub_edgez, c="red")
+        ax.scatter(0, 0, hubz, c="red")
+        ax.scatter(hub_edgex_offset, 0, hub_edgez, c="red")
 
     v_initial, angle_initial = calculate_shooting_params_kinematics(distance, robot_radial_vel)
 
@@ -310,8 +310,9 @@ def optimize_shot(distance, robot_radial_vel):
         # ax.plot(*calculate_trajectory_kinematics(v_initial, angle_initial, robot_radial_vel), label="Simple Kinematics (Initial)")
         # ax.plot(*calculate_trajectory_kinematics(v_final, angle_final, robot_radial_vel), label="Simple Kinematics (Final)")
         # ax.plot(*calculate_trajectory_iterative(v_initial, angle_initial, robot_radial_vel), label="Iterative Simulation (Initial)")
+        x, y, z = calculate_trajectory_iterative(v_final, angle_final, robot_radial_vel)
         ax.plot(
-            *calculate_trajectory_iterative(v_final, angle_final, robot_radial_vel),
+            x - hubx, y, z,
             label="Iterative Simulation (Final)" if not DEBUG_RANGE else None
         )
 
