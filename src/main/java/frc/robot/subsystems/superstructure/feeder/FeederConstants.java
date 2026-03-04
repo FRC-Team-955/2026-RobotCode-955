@@ -15,7 +15,7 @@ public class FeederConstants {
             case REAL -> new MotorIOSparkMax(
                     11,
                     true,
-                    SparkBaseConfig.IdleMode.kCoast,
+                    SparkBaseConfig.IdleMode.kBrake,
                     40,
                     gearRatio,
                     null,

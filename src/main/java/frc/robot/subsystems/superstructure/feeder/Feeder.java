@@ -1,5 +1,6 @@
 package frc.robot.subsystems.superstructure.feeder;
 
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.lib.Util;
@@ -67,6 +68,11 @@ public class Feeder implements Periodic {
         Logger.processInputs("Inputs/Superstructure/Feeder", inputs);
 
         motorDisconnectedAlert.set(!inputs.connected);
+
+        // Apply network inputs
+        if (operatorDashboard.coastOverride.hasChanged()) {
+            io.setNeutralMode(operatorDashboard.coastOverride.get() ? NeutralModeValue.Coast : NeutralModeValue.Brake);
+        }
     }
 
     @Override
