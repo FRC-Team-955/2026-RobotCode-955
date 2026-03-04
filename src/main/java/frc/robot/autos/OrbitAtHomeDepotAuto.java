@@ -16,12 +16,13 @@ public class OrbitAtHomeDepotAuto extends Auto {
     private static final Superintake superintake = Superintake.get();
     private static final Superstructure superstructure = Superstructure.get();
 
+    private static final double startingPositionY = 7.55;
     private static final Pose2d trenchShootingPosition = new Pose2d(3.8, 7.38, Rotation2d.kCCW_90deg);
     private static final double exitTrenchX = 6.34;
 
     public OrbitAtHomeDepotAuto() {
         super(
-                new Pose2d(3.88, trenchShootingPosition.getY(), trenchShootingPosition.getRotation()),
+                new Pose2d(3.88, startingPositionY, Rotation2d.kCW_90deg),
                 build()
         );
     }
@@ -31,8 +32,8 @@ public class OrbitAtHomeDepotAuto extends Auto {
                 // move out of trench
                 AutoHelpers.intermediateWaypoint(() -> new Pose2d(
                         exitTrenchX,
-                        trenchShootingPosition.getY(),
-                        trenchShootingPosition.getRotation()
+                        startingPositionY,
+                        Rotation2d.kCW_90deg
                 ), defaultMoveToConstraints),
 
                 // intake, go to neturalzone
