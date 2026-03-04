@@ -367,7 +367,8 @@ else:
 
         end_time_worker = time()
         print(
-            f"[{worker_index}] Done, took {end_time_worker - start_time_worker} seconds and {all_shots_simmed} simulations")
+            f"[{worker_index}] Done, took {end_time_worker - start_time_worker} seconds and {all_shots_simmed} simulations"
+        )
 
         return shots, all_shots_simmed
 
