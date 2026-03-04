@@ -52,7 +52,7 @@ public class DriveJoystickGoal extends DriveGoal {
 
     private static final GamePieceVision gamePieceVision = GamePieceVision.get();
 
-    private static final Supplier<Optional<Translation2d>> assistTranslationSupplier = () -> gamePieceVision.getBestTargets().stream().findFirst();
+    private static final Supplier<Optional<Translation2d>> assistTranslationSupplier = () -> gamePieceVision.getBestTargetsInBounds(Optional.empty()).stream().findFirst();
 
     private final Supplier<Mode> modeSupplier;
 

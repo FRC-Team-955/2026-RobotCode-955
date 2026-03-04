@@ -19,6 +19,7 @@ import frc.robot.subsystems.gamepiecevision.GamePieceVision;
 import frc.robot.subsystems.superintake.Superintake;
 import frc.robot.subsystems.superstructure.Superstructure;
 
+import java.util.Optional;
 import java.util.function.Supplier;
 
 import static frc.robot.subsystems.drive.DriveConstants.defaultMoveToConstraints;
@@ -145,7 +146,7 @@ public class AutoHelpers {
     private static final LinearFilter targetYFilter = LinearFilter.movingAverage(10);
 
     private static Pose2d getIntakePose(Bounds bounds, Pose2d ifNoGamePieces) {
-        for (var target : gamePieceVision.getBestTargets()) {
+        for (var target : gamePieceVision.getBestTargetsInBounds(Optional.of(bounds))) {
             if (AllianceFlipUtil.apply(bounds).contains(target)) {
                 Translation2d targetFiltered = new Translation2d(
                         targetXFilter.calculate(target.getX()),
@@ -158,7 +159,7 @@ public class AutoHelpers {
                 ).transformBy(new Transform2d(
                         // Move align pose towards robot so that it doesn't try to move
                         // such that the center of the robot is at the target
-                        -(0.1 + driveConfig.bumperLengthMeters() / 2.0),
+                        -(driveConfig.bumperLengthMeters() / 2.0),
                         0.0,
                         new Rotation2d()
                 ));

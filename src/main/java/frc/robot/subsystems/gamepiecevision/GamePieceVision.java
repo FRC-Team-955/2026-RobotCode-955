@@ -3,11 +3,11 @@ package frc.robot.subsystems.gamepiecevision;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Timer;
+import frc.lib.Bounds;
 import frc.lib.Util;
 import frc.lib.subsystem.Periodic;
 import frc.robot.FieldConstants;
 import frc.robot.RobotState;
-import lombok.Getter;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.*;
@@ -26,8 +26,6 @@ public class GamePieceVision implements Periodic {
                     ));
 
     private final Map<Translation2d, Double> targetsToLastSeen = new HashMap<>();
-    @Getter
-    private List<Translation2d> bestTargets = List.of();
 
     private static GamePieceVision instance;
 
@@ -119,35 +117,13 @@ public class GamePieceVision implements Periodic {
         // Remove expired coral
         targetsToLastSeen.values().removeIf(lastSeen -> Timer.getTimestamp() - lastSeen > expireTimeSeconds);
 
-        List<FuelCluster> clusters = new LinkedList<>();
 
-        for (Translation2d fuel : targetsToLastSeen.keySet()) {
-            if (fuel.getDistance(robotState.getTranslation()) > 2.0) {
-                continue;
-            }
-
-            boolean addedToCluster = false;
-
-            for (FuelCluster cluster : clusters) {
-                if (cluster.addIfWithin(fuel, clusterGroupingDistanceMeters)) {
-                    addedToCluster = true;
-                    break;
-                }
-            }
-
-            if (!addedToCluster) {
-                FuelCluster newCluster = new FuelCluster(new LinkedList<>());
-                newCluster.addFuel(fuel);
-                clusters.add(newCluster);
-            }
-        }
-
-        bestTargets = clusters
-                .stream()
-                .sorted(Comparator.comparing(FuelCluster::size))
-                .map(FuelCluster::avgLocation)
-                .flatMap(Optional::stream)
-                .toList();
+        //bestTargets = clusters
+        //        .stream()
+        //        .sorted(Comparator.comparing(FuelCluster::size))
+        //        .map(FuelCluster::avgLocation)
+        //        .flatMap(Optional::stream)
+        //        .toList();
         //bestTargets = clusters
         //        .stream()
         //        .max(Comparator.comparing(FuelCluster::size))
@@ -162,7 +138,7 @@ public class GamePieceVision implements Periodic {
 
         Logger.recordOutput("GamePieceVision/TargetXYPoints", targetXYPoints.toArray(Translation2d[]::new));
         Logger.recordOutput("GamePieceVision/AllTargets", targetsToLastSeen.keySet().toArray(Translation2d[]::new));
-        Logger.recordOutput("GamePieceVision/BestTargets", bestTargets.toArray(Translation2d[]::new));
+        //Logger.recordOutput("GamePieceVision/BestTargets", bestTargets.toArray(Translation2d[]::new));
     }
 
     @Override
@@ -183,6 +159,42 @@ public class GamePieceVision implements Periodic {
             return !data.inputs.connected;
         }
         return false;
+    }
+
+    public List<Translation2d> getBestTargetsInBounds(Optional<Bounds> bounds) {
+        List<FuelCluster> clusters = new LinkedList<>();
+
+        for (Translation2d fuel : targetsToLastSeen.keySet()) {
+            if (bounds.isPresent() && !bounds.get().contains(fuel)) {
+                continue;
+            }
+
+            if (fuel.getDistance(robotState.getTranslation()) > 2.0) {
+                continue;
+            }
+
+            boolean addedToCluster = false;
+
+            for (FuelCluster cluster : clusters) {
+                if (cluster.addIfWithin(fuel, clusterGroupingDistanceMeters)) {
+                    addedToCluster = true;
+                    break;
+                }
+            }
+
+            if (!addedToCluster) {
+                FuelCluster newCluster = new FuelCluster(new LinkedList<>());
+                newCluster.addFuel(fuel);
+                clusters.add(newCluster);
+            }
+        }
+
+        return clusters
+                .stream()
+                .sorted(Comparator.comparingDouble(FuelCluster::size))
+                .map(c -> c.cluster)
+                .flatMap(Collection::stream)
+                .toList();
     }
 
     private record CameraData(
