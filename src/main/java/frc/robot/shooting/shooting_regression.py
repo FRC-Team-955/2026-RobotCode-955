@@ -251,6 +251,9 @@ def optimize_shot(distance, robot_radial_vel):
 
         x, y, z = calculate_trajectory_iterative(x[0], x[1], robot_radial_vel)
 
+        if DEBUG_SHOT and not DEBUG_RANGE:
+            ax.plot(x - hubx, y, z, linestyle="dotted")
+
         # Find X distance to hub
         x_dist = abs(x[-1] - hubx)
         if x_dist < fuel_radius:
