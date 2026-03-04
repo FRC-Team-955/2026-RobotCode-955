@@ -26,8 +26,9 @@ public class HoodConstants {
     static final double gearRatio = 6.0 * (220.0 / 20.0);
     static final LoggedTunablePIDF gains = switch (BuildConstants.mode) {
         case REAL, REPLAY -> new LoggedTunablePIDF("Superstructure/Hood/Gains")
-                .withP(5)
-                .withG(0, GravityTypeValue.Arm_Cosine);
+                .withP(2)
+                .withD(0.05)
+                .withG(.2, GravityTypeValue.Arm_Cosine);
         case SIM -> new LoggedTunablePIDF("Superstructure/Hood/Gains")
                 .withP(30)
                 .withG(0.3, GravityTypeValue.Arm_Cosine);

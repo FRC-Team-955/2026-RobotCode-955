@@ -83,7 +83,7 @@ public class LEDPatterns {
             Color.kRed,
             Color.kRed,
             Color.kRed,
-            new Color(255, 0, 128)
+            Color.kWhite
     ).scrollAtRelativeSpeed(Hertz.of(1));
 
     // Enabled
