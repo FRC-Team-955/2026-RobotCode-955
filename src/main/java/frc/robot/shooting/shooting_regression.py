@@ -360,8 +360,8 @@ else:
                 print(
                     f"[{worker_index}] {progress_count} FAILED (distance = {distance}, velocity = {velocity})")
                 continue
-            # the two tuples need to be the same length for numpy to be happy
             all_shots_simmed += shots_simmed
+            # the two tuples need to be the same length for numpy to be happy, so add the extra 0
             shots.append(((distance, velocity, 0), (v, angle, tof)))
             print(f"[{worker_index}] {progress_count}\t{progress_percent}% ({shots_simmed})")
 
