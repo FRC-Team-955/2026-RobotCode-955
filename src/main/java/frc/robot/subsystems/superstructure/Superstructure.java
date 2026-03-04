@@ -48,6 +48,7 @@ public class Superstructure extends CommandBasedSubsystem {
     public enum Goal {
         IDLE,
         SHOOT,
+        SHOOT_FORCE,
         EJECT,
         HOME_HOOD,
     }
@@ -113,12 +114,12 @@ public class Superstructure extends CommandBasedSubsystem {
                 feeder.setGoal(Feeder.Goal.IDLE);
                 spindexer.setGoal(Spindexer.Goal.IDLE);
             }
-            case SHOOT -> {
-                if (operatorDashboard.disableCANrange.get() || hasFuelDebouncer.calculate(inputs.canrangeDistanceMeters < hasFuelThresholdMeters.get())) {
-                    flywheel.setGoal(Flywheel.Goal.SHOOT);
-                } else {
-                    flywheel.setGoal(Flywheel.Goal.IDLE);
-                }
+            case SHOOT, SHOOT_FORCE -> {
+                //if (operatorDashboard.disableCANrange.get() || hasFuelDebouncer.calculate(inputs.canrangeDistanceMeters < hasFuelThresholdMeters.get())) {
+                flywheel.setGoal(Flywheel.Goal.SHOOT);
+                //} else {
+                //flywheel.setGoal(Flywheel.Goal.IDLE);
+                //}
 
                 boolean shouldShoot = (
                         shootingKinematics.isShootingParametersMet() ||
@@ -127,7 +128,7 @@ public class Superstructure extends CommandBasedSubsystem {
                         shootingKinematics.isShootingParametersMet() &&
                                 operatorDashboard.disableCANrange.get()
                 );
-                if (shouldShoot) {
+                if (goal == Goal.SHOOT_FORCE || shouldShoot) {
                     feeder.setGoal(Feeder.Goal.FEED);
                     spindexer.setGoal(Spindexer.Goal.FEED);
                 } else {

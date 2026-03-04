@@ -134,6 +134,7 @@ public class LEDs implements Periodic {
                                 ? LEDPatterns.aiming
                                 : LEDPatterns.waitingForShift
                 );
+                case SHOOT_FORCE -> LEDPatterns.shootingForced;
                 case EJECT -> LEDPatterns.eject;
                 case HOME_HOOD -> LEDPatterns.homing;
             };

@@ -91,6 +91,11 @@ public class LEDPatterns {
     public static final LEDPattern eject = LEDPattern.solid(Color.kPurple).blink(Seconds.of(0.1));
     public static final LEDPattern aiming = LEDPattern.solid(Color.kYellow);
     public static final LEDPattern shooting = LEDPattern.solid(Color.kGreen);
+    public static final LEDPattern shootingForced = LEDPattern.gradient(
+            LEDPattern.GradientType.kContinuous,
+            Color.kGreen,
+            Color.kBlack
+    ).scrollAtRelativeSpeed(Hertz.of(1));
     public static final LEDPattern intaking = LEDPattern.solid(Color.kYellow).blink(Seconds.of(0.1));
     public static final LEDPattern waitingForShift = LEDPattern.solid(Color.kPink).blink(Seconds.of(0.1));
     public static final LEDPattern homing = LEDPattern.solid(Color.kBlue);
