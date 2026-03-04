@@ -1,5 +1,6 @@
 package frc.robot.autos;
 
+import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -140,13 +141,20 @@ public class AutoHelpers {
             .withMaxLinearVelocityMetersPerSec(new LoggedTunableNumber("AutoHelpers/Intake/MaxLinearVelocity", 2))
             .withMaxAngularAccelerationRadPerSecPerSec(new LoggedTunableNumber("AutoHelpers/Intake/MaxAngularAcceleration", 40.0));
 
+    private static final LinearFilter targetXFilter = LinearFilter.movingAverage(10);
+    private static final LinearFilter targetYFilter = LinearFilter.movingAverage(10);
+
     private static Pose2d getIntakePose(Bounds bounds, Pose2d ifNoGamePieces) {
         for (var target : gamePieceVision.getBestTargets()) {
             if (AllianceFlipUtil.apply(bounds).contains(target)) {
+                Translation2d targetFiltered = new Translation2d(
+                        targetXFilter.calculate(target.getX()),
+                        targetYFilter.calculate(target.getY())
+                );
                 return new Pose2d(
-                        target,
+                        targetFiltered,
                         // Point towards target
-                        target.minus(robotState.getTranslation()).getAngle()
+                        targetFiltered.minus(robotState.getTranslation()).getAngle()
                 ).transformBy(new Transform2d(
                         // Move align pose towards robot so that it doesn't try to move
                         // such that the center of the robot is at the target

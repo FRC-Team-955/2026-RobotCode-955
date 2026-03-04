@@ -28,8 +28,8 @@ public class GamePieceVisionConstants {
     static final double clusterGroupingDistanceMeters = 0.3;
     static final double diagFOVRad = 2 * Math.atan(Math.tan(horizontalFOVRad / 2) * Math.sqrt(1 + Math.pow(0.75, 2)));
     static final double pixelsToRad = camWidth / horizontalFOVRad;
-    static final double minDistanceForSameCoralMeters = 1;
-    static final double expireTimeSeconds = 0.06;
+    static final double minDistanceForSameCoralMeters = 0.4;
+    static final double expireTimeSeconds = 0.1;
 
     @RequiredArgsConstructor
     enum Camera {

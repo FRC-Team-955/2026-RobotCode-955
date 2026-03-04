@@ -97,7 +97,7 @@ public class GamePieceVision implements Periodic {
                                 .transformBy(new Transform2d(new Translation2d(cameraToFuelNorm, 0), Rotation2d.kZero));
                 Pose3d fuelPose = new Pose3d(fieldToFuel).plus(new Transform3d(0, 0, FieldConstants.fuelDiameter / 2.0, new Rotation3d()));
 
-                if (fuelPose.getTranslation().getDistance(robotPose.getTranslation()) > 5.0) {
+                if (fuelPose.getTranslation().getDistance(robotPose.getTranslation()) > 3.0) {
                     continue;
                 }
 
@@ -119,9 +119,13 @@ public class GamePieceVision implements Periodic {
         // Remove expired coral
         targetsToLastSeen.values().removeIf(lastSeen -> Timer.getTimestamp() - lastSeen > expireTimeSeconds);
 
-        List<FuelCluster> clusters = new ArrayList<>();
+        List<FuelCluster> clusters = new LinkedList<>();
 
         for (Translation2d fuel : targetsToLastSeen.keySet()) {
+            if (fuel.getDistance(robotState.getTranslation()) > 2.0) {
+                continue;
+            }
+
             boolean addedToCluster = false;
 
             for (FuelCluster cluster : clusters) {
@@ -132,23 +136,29 @@ public class GamePieceVision implements Periodic {
             }
 
             if (!addedToCluster) {
-                FuelCluster newCluster = new FuelCluster();
+                FuelCluster newCluster = new FuelCluster(new LinkedList<>());
                 newCluster.addFuel(fuel);
                 clusters.add(newCluster);
             }
         }
 
-        //bestTargets = clusters.stream()
-        //        .max(Comparator.comparing(List::size))
-        //        .orElse(List.of())
+        bestTargets = clusters
+                .stream()
+                .sorted(Comparator.comparing(FuelCluster::size))
+                .map(FuelCluster::avgLocation)
+                .flatMap(Optional::stream)
+                .toList();
+        //bestTargets = clusters
+        //        .stream()
+        //        .max(Comparator.comparing(FuelCluster::size))
+        //        .map(FuelCluster::avgLocation)
+        //        .stream()
+        //        .toList();
+        //bestTargets = targetsToLastSeen
+        //        .keySet()
         //        .stream()
         //        .sorted(Comparator.comparingDouble(t -> t.getDistance(robotState.getTranslation())))
         //        .toList();
-        bestTargets = targetsToLastSeen
-                .keySet()
-                .stream()
-                .sorted(Comparator.comparingDouble(t -> t.getDistance(robotState.getTranslation())))
-                .toList();
 
         Logger.recordOutput("GamePieceVision/TargetXYPoints", targetXYPoints.toArray(Translation2d[]::new));
         Logger.recordOutput("GamePieceVision/AllTargets", targetsToLastSeen.keySet().toArray(Translation2d[]::new));
@@ -182,12 +192,14 @@ public class GamePieceVision implements Periodic {
     ) {
     }
 
-    public static class FuelCluster {
-        private List<Translation2d> cluster = new ArrayList<>();
+    private record FuelCluster(List<Translation2d> cluster) {
+        public void addFuel(Translation2d fuel) {
+            cluster.add(fuel);
+        }
 
-        public void addFuel(Translation2d fuel) {cluster.add(fuel);}
-
-        public int size() {return cluster.size();}
+        public int size() {
+            return cluster.size();
+        }
 
         public boolean addIfWithin(Translation2d fuel, double maxDist) {
             for (Translation2d clusterFuel : cluster) {
@@ -199,12 +211,20 @@ public class GamePieceVision implements Periodic {
             return false;
         }
 
-        public Translation2d avgLocation() {
-            Translation2d average = new Translation2d();
-            for (Translation2d fuel : cluster) {
-                average.plus(fuel);
+        public Optional<Translation2d> avgLocation() {
+            if (cluster.isEmpty()) {
+                return Optional.empty();
             }
-            return average.div(cluster.size());
+            double x = 0.0;
+            double y = 0.0;
+            for (Translation2d fuel : cluster) {
+                x += fuel.getX();
+                y += fuel.getY();
+            }
+            return Optional.of(new Translation2d(
+                    x / (double) size(),
+                    y / (double) size()
+            ));
         }
     }
 }
