@@ -46,7 +46,8 @@ public class MotorIOTalonFX extends MotorIO {
             int canID,
             boolean inverted,
             NeutralModeValue neutralMode,
-            int currentLimitAmps,
+            int statorCurrentLimitAmps,
+            int supplyCurrentLimitAmps,
             double gearRatio,
             LoggedTunablePIDF positionGains,
             LoggedTunablePIDF velocityGains,
@@ -59,10 +60,12 @@ public class MotorIOTalonFX extends MotorIO {
         config.MotorOutput.Inverted = inverted
                 ? InvertedValue.Clockwise_Positive
                 : InvertedValue.CounterClockwise_Positive;
-        config.CurrentLimits.StatorCurrentLimit = currentLimitAmps;
+        config.CurrentLimits.StatorCurrentLimit = statorCurrentLimitAmps;
         config.CurrentLimits.StatorCurrentLimitEnable = true;
-        config.TorqueCurrent.PeakForwardTorqueCurrent = currentLimitAmps;
-        config.TorqueCurrent.PeakReverseTorqueCurrent = -currentLimitAmps;
+        config.CurrentLimits.SupplyCurrentLimit = supplyCurrentLimitAmps;
+        config.CurrentLimits.SupplyCurrentLimitEnable = true;
+        config.TorqueCurrent.PeakForwardTorqueCurrent = statorCurrentLimitAmps;
+        config.TorqueCurrent.PeakReverseTorqueCurrent = -statorCurrentLimitAmps;
         config.Feedback.SensorToMechanismRatio = gearRatio;
         if (positionGains != null) config.Slot0 = Slot0Configs.from(positionGains.toPhoenix());
         if (velocityGains != null) config.Slot1 = Slot1Configs.from(velocityGains.toPhoenix());

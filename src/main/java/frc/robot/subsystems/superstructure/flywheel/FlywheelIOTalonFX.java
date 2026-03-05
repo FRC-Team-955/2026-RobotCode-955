@@ -10,7 +10,8 @@ import static frc.robot.subsystems.superstructure.flywheel.FlywheelConstants.gea
 import static frc.robot.subsystems.superstructure.flywheel.FlywheelConstants.velocityGains;
 
 public class FlywheelIOTalonFX extends FlywheelIO {
-    private static final int currentLimitAmps = 100;
+    private static final int statorCurrentLimitAmps = 100;
+    private static final int supplyCurrentLimitAmps = 50;
 
     private final MotorIOTalonFX leader;
     private final MotorIOTalonFX follower;
@@ -25,7 +26,8 @@ public class FlywheelIOTalonFX extends FlywheelIO {
                 leaderCanID,
                 leaderInverted,
                 NeutralModeValue.Coast,
-                currentLimitAmps,
+                statorCurrentLimitAmps,
+                supplyCurrentLimitAmps,
                 gearRatio,
                 null,
                 velocityGains,
@@ -36,7 +38,8 @@ public class FlywheelIOTalonFX extends FlywheelIO {
                 followerCanID,
                 false,
                 NeutralModeValue.Coast,
-                currentLimitAmps,
+                statorCurrentLimitAmps,
+                supplyCurrentLimitAmps,
                 gearRatio,
                 null,
                 null,
