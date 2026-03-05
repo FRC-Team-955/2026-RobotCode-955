@@ -414,12 +414,51 @@
                 }
               }
             ]
+          },
+          {
+            "title": "Goals",
+            "x": 1664.0,
+            "y": 512.0,
+            "width": 256.0,
+            "height": 256.0,
+            "type": "List Layout",
+            "properties": {
+              "label_position": "TOP"
+            },
+            "children": [
+              {
+                "title": "Superintake",
+                "x": 256.0,
+                "y": 512.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Large Text Display",
+                "properties": {
+                  "topic": "/AdvantageKit/RealOutputs/Superintake/Goal",
+                  "period": 0.06,
+                  "data_type": "string"
+                }
+              },
+              {
+                "title": "Superstructure",
+                "x": 256.0,
+                "y": 640.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Large Text Display",
+                "properties": {
+                  "topic": "/AdvantageKit/RealOutputs/Superstructure/Goal",
+                  "period": 0.06,
+                  "data_type": "string"
+                }
+              }
+            ]
           }
         ],
         "containers": [
           {
             "title": "CoastOverride",
-            "x": 1536.0,
+            "x": 1280.0,
             "y": 384.0,
             "width": 128.0,
             "height": 128.0,
@@ -602,7 +641,7 @@
           },
           {
             "title": "AngleMet",
-            "x": 1024.0,
+            "x": 896.0,
             "y": 512.0,
             "width": 128.0,
             "height": 128.0,
@@ -619,7 +658,7 @@
           },
           {
             "title": "HeadingMet",
-            "x": 1152.0,
+            "x": 1024.0,
             "y": 512.0,
             "width": 128.0,
             "height": 128.0,
@@ -636,7 +675,7 @@
           },
           {
             "title": "HeadingVelocityMet",
-            "x": 1280.0,
+            "x": 1152.0,
             "y": 512.0,
             "width": 128.0,
             "height": 128.0,
@@ -653,7 +692,7 @@
           },
           {
             "title": "ShiftMet",
-            "x": 1408.0,
+            "x": 1280.0,
             "y": 512.0,
             "width": 128.0,
             "height": 128.0,
@@ -670,7 +709,7 @@
           },
           {
             "title": "ShootingParametersMet",
-            "x": 896.0,
+            "x": 768.0,
             "y": 640.0,
             "width": 640.0,
             "height": 128.0,
@@ -687,7 +726,7 @@
           },
           {
             "title": "VelocityMet",
-            "x": 896.0,
+            "x": 768.0,
             "y": 512.0,
             "width": 128.0,
             "height": 128.0,
@@ -734,6 +773,121 @@
               "topic": "/Tuning/OperatorDashboard/HoodEStop",
               "period": 0.06,
               "data_type": "boolean"
+            }
+          },
+          {
+            "title": "photonvision-blue_Port_1182_Output_MJPEG_Server",
+            "x": 1408.0,
+            "y": 0.0,
+            "width": 256.0,
+            "height": 256.0,
+            "type": "Camera Stream",
+            "properties": {
+              "topic": "/CameraPublisher/photonvision-blue_Port_1182_Output_MJPEG_Server",
+              "period": 0.06,
+              "rotation_turns": 0
+            }
+          },
+          {
+            "title": "photonvision-red_Port_1182_Output_MJPEG_Server",
+            "x": 1408.0,
+            "y": 256.0,
+            "width": 256.0,
+            "height": 256.0,
+            "type": "Camera Stream",
+            "properties": {
+              "topic": "/CameraPublisher/photonvision-red_Port_1182_Output_MJPEG_Server",
+              "period": 0.06,
+              "rotation_turns": 0
+            }
+          },
+          {
+            "title": "photonvision-red_Port_1184_Output_MJPEG_Server",
+            "x": 1408.0,
+            "y": 512.0,
+            "width": 256.0,
+            "height": 256.0,
+            "type": "Camera Stream",
+            "properties": {
+              "topic": "/CameraPublisher/photonvision-red_Port_1184_Output_MJPEG_Server",
+              "period": 0.06,
+              "rotation_turns": 0
+            }
+          },
+          {
+            "title": "Active",
+            "x": 128.0,
+            "y": 768.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/AdvantageKit/RealOutputs/HubShiftTracker/Active",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4283215696,
+              "false_color": 4294198070,
+              "true_icon": "Checkmark",
+              "false_icon": "X"
+            }
+          },
+          {
+            "title": "Timestamp",
+            "x": 0.0,
+            "y": 768.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/Timestamp",
+              "period": 0.06,
+              "data_type": "int",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "CurrentShift",
+            "x": 256.0,
+            "y": 768.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Large Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/RealOutputs/HubShiftTracker/CurrentShift",
+              "period": 0.06,
+              "data_type": "string"
+            }
+          },
+          {
+            "title": "RemainingTime",
+            "x": 512.0,
+            "y": 768.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Match Time",
+            "properties": {
+              "topic": "/AdvantageKit/RealOutputs/HubShiftTracker/RemainingTime",
+              "period": 0.06,
+              "data_type": "double",
+              "time_display_mode": "Minutes and Seconds",
+              "red_start_time": 20,
+              "yellow_start_time": 30
+            }
+          },
+          {
+            "title": "MatchTime",
+            "x": 768.0,
+            "y": 768.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Match Time",
+            "properties": {
+              "topic": "/AdvantageKit/DriverStation/MatchTime",
+              "period": 0.06,
+              "data_type": "double",
+              "time_display_mode": "Minutes and Seconds",
+              "red_start_time": 20,
+              "yellow_start_time": 30
             }
           }
         ]
