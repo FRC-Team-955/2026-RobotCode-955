@@ -19,7 +19,7 @@ public class LEDPatterns {
      * the breathe algorithm ourselves. This is based off of 749's 2024 code.
      */
     public static LEDPattern startup() {
-        Color color1 = Color.kRed;
+        Color color1 = Color.kWhite;
         Color color2 = Color.kBlack;
         double period = 1.0;
 
@@ -59,7 +59,7 @@ public class LEDPatterns {
                     Color.kBlack
             )
             .scrollAtRelativeSpeed(Hertz.of(5))
-            .breathe(Seconds.of(1.0));
+            .breathe(Seconds.of(0.5));
     public static final LEDPattern hotMotors = LEDPattern.gradient(
             LEDPattern.GradientType.kDiscontinuous,
             Color.kRed,
@@ -77,14 +77,7 @@ public class LEDPatterns {
     // Disabled
     public static final LEDPattern autoNotChosen = LEDPattern.solid(Color.kBlue).blink(Seconds.of(1));
     public static final LEDPattern badAutoPlacement = LEDPattern.solid(Color.kYellow).blink(Seconds.of(0.5));
-    public static final LEDPattern autoReady = LEDPattern.gradient(
-            LEDPattern.GradientType.kContinuous,
-            Color.kRed,
-            Color.kRed,
-            Color.kRed,
-            Color.kRed,
-            Color.kWhite
-    ).scrollAtRelativeSpeed(Hertz.of(1));
+    public static final LEDPattern autoReady = LEDPattern.solid(Color.kRed).breathe(Seconds.of(1));
 
     // Enabled
     public static final LEDPattern idle = LEDPattern.kOff;
