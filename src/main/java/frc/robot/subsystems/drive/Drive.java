@@ -127,7 +127,12 @@ public class Drive extends CommandBasedSubsystem {
         // Sanity check in case gyro is connected but not giving timestamps
         if (gyroInputs.connected && !disableGyro && hasGyroYawPositionRadForSample) {
             // Use the real gyro angle
+            Rotation2d prevRawGyroRotation = rawGyroRotation;
             rawGyroRotation = new Rotation2d(getGyroYawPositionRad.getAsDouble());
+            // If gyro rotation jumps due to a disconnection, power cycle, and reconnection, discard
+            if (Math.abs(rawGyroRotation.minus(prevRawGyroRotation).getRadians()) > odometryGyroRotationDeltaDiscardRad) {
+                discardSample = true;
+            }
         } else {
             // Use the angle delta from the kinematics and module deltas
             Twist2d twist = robotState.getKinematics().toTwist2d(moduleDeltas);
