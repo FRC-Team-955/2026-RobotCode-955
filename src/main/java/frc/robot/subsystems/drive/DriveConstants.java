@@ -22,7 +22,7 @@ public class DriveConstants {
     static final boolean useHighFrequencyOdometry = true;
 
     static final double odometryPositionDeltaDiscardMeters = Units.inchesToMeters(8);
-    static final double odometryGyroRotationDeltaDiscardRad = Units.degreesToRadians(45);
+    static final double odometryGyroRotationDeltaDiscardRad = Units.degreesToRadians(20);
 
     public static final DriveConfig driveConfig = new DriveConfig(
             // TO TUNE WHEEL RADIUS: Place robot on carpet and use wheel radius characterization auto.
