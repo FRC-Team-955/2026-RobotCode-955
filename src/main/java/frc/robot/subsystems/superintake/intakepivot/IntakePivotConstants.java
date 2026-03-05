@@ -1,6 +1,7 @@
 package frc.robot.subsystems.superintake.intakepivot;
 
 import com.ctre.phoenix6.signals.GravityTypeValue;
+import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
@@ -15,12 +16,13 @@ public class IntakePivotConstants {
     static final double initialPositionRad = minPositionRad;
     static final double maxPositionUnderTrench = Units.degreesToRadians(20.0);
 
-    static final double gearRatio = 150;
+    static final double gearRatio = 5.0 * 5.0 * 2.0;
 
     static final LoggedTunablePIDF gains = switch (BuildConstants.mode) {
         case REAL, REPLAY -> new LoggedTunablePIDF("Superintake/IntakePivot/Gains")
-                .withP(20.0)
-                .withG(0.0, GravityTypeValue.Arm_Cosine);
+                .withP(8.0)
+                .withG(0.5, GravityTypeValue.Arm_Cosine)
+                .withS(0.0, StaticFeedforwardSignValue.UseClosedLoopSign);
         case SIM -> new LoggedTunablePIDF("Superintake/IntakePivot/Gains")
                 .withP(20.0)
                 .withG(2.65, GravityTypeValue.Arm_Cosine);

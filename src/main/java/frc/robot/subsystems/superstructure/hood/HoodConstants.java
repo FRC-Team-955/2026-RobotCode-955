@@ -1,6 +1,7 @@
 package frc.robot.subsystems.superstructure.hood;
 
 import com.ctre.phoenix6.signals.GravityTypeValue;
+import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 import frc.lib.network.LoggedTunablePIDF;
@@ -23,12 +24,13 @@ public class HoodConstants {
         return Math.PI / 2.0 - originalAngleRad;
     }
 
-    static final double gearRatio = 6.0 * (220.0 / 20.0);
+    static final double gearRatio = 5.0 * 2.0 * (220.0 / 20.0);
     static final LoggedTunablePIDF gains = switch (BuildConstants.mode) {
         case REAL, REPLAY -> new LoggedTunablePIDF("Superstructure/Hood/Gains")
-                .withP(2)
-                .withD(0.05)
-                .withG(.2, GravityTypeValue.Arm_Cosine);
+                .withP(2.0)
+                .withD(0.0)
+                .withG(0.2, GravityTypeValue.Arm_Cosine)
+                .withS(0.1, StaticFeedforwardSignValue.UseClosedLoopSign);
         case SIM -> new LoggedTunablePIDF("Superstructure/Hood/Gains")
                 .withP(30)
                 .withG(0.3, GravityTypeValue.Arm_Cosine);
