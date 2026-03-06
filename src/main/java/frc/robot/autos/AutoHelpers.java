@@ -145,7 +145,7 @@ public class AutoHelpers {
     private static final LinearFilter targetXFilter = LinearFilter.movingAverage(10);
     private static final LinearFilter targetYFilter = LinearFilter.movingAverage(10);
 
-    private static Pose2d getIntakePose(Bounds bounds, Pose2d ifNoGamePieces) {
+    public static Pose2d getIntakePose(Bounds bounds, Pose2d ifNoGamePieces) {
         for (var target : gamePieceVision.getBestTargetsInBounds(Optional.of(bounds))) {
             if (AllianceFlipUtil.apply(bounds).contains(target)) {
                 Translation2d targetFiltered = new Translation2d(
