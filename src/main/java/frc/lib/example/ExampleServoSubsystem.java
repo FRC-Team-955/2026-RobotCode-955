@@ -95,6 +95,10 @@ public class ExampleServoSubsystem implements Periodic {
         Logger.recordOutput("ExampleServoSubsystem/Goal", goal);
         if (DriverStation.isDisabled()) {
             io.setRequest(RequestType.VoltageVolts, 0);
+
+            // Reset states to current position
+            goalState = new TrapezoidProfile.State(inputs.positionRad, 0.0);
+            lookaheadState = goalState;
         } else {
             // See the comments above the lookaheadState and goalState variables for why we effectively calculate two profiles
 

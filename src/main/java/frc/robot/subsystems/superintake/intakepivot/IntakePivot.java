@@ -98,6 +98,10 @@ public class IntakePivot implements Periodic {
         Logger.recordOutput("Superintake/IntakePivot/Goal", goal);
         if (DriverStation.isDisabled()) {
             io.setVoltageRequest(0.0);
+
+            // Reset states to current position
+            goalState = new TrapezoidProfile.State(inputs.positionRad, 0.0);
+            lookaheadState = goalState;
         } else if (goal == Goal.HOME) {
             io.setVoltageRequest(-2.0);
         } else {
