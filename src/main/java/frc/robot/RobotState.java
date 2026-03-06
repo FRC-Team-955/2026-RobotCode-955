@@ -10,7 +10,6 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -21,7 +20,6 @@ import frc.robot.subsystems.drive.DriveConstants;
 import lombok.Getter;
 import lombok.Setter;
 import org.littletonrobotics.junction.AutoLogOutput;
-import org.littletonrobotics.junction.Logger;
 
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -101,6 +99,7 @@ public class RobotState implements Periodic {
 
     @Override
     public void periodicBeforeCommands() {
+        /*
         // Increase uncertainty if we are moving
         final double chassisSpeedsLinearFactor = 0.06;
         poseUncertaintyLinearXMeters += Constants.loopPeriod * chassisSpeedsLinearFactor * Math.abs(measuredChassisSpeedsFieldRelative.vxMetersPerSecond);
@@ -156,6 +155,7 @@ public class RobotState implements Periodic {
                 new Pose2d(t, r.plus(new Rotation2d(poseUncertaintyAngularRad))),
                 new Pose2d(t, r.minus(new Rotation2d(poseUncertaintyAngularRad)))
         );
+         */
 
         SmartDashboard.putData("Field2d", field2d);
         field2d.setRobotPose(getPose());

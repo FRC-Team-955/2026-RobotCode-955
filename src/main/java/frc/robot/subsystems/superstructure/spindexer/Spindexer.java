@@ -75,9 +75,9 @@ public class Spindexer implements Periodic {
         if (DriverStation.isDisabled()) {
             io.setRequest(RequestType.VoltageVolts, 0);
         } else {
-            Logger.recordOutput("Superstructure/Spindexer/RequestType", goal.type);
+            //Logger.recordOutput("Superstructure/Spindexer/RequestType", goal.type);
             double value = goal.value.getAsDouble();
-            Logger.recordOutput("Superstructure/Spindexer/RequestValue", value);
+            //Logger.recordOutput("Superstructure/Spindexer/RequestValue", value);
             io.setRequest(goal.type, value);
         }
     }

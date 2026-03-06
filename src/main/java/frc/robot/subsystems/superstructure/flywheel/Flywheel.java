@@ -83,7 +83,7 @@ public class Flywheel implements Periodic {
             io.setStopRequest();
         } else {
             double value = Units.rotationsPerMinuteToRadiansPerSecond(goal.setpointRPM.getAsDouble());
-            Logger.recordOutput("Superstructure/Flywheel/RequestValue", value);
+            //Logger.recordOutput("Superstructure/Flywheel/RequestValue", value);
             io.setVelocityRequest(value);
         }
     }

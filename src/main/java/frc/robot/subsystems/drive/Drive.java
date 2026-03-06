@@ -224,12 +224,12 @@ public class Drive extends CommandBasedSubsystem {
         robotState.setMeasuredChassisSpeedsFieldRelative(measuredChassisSpeedsFieldRelative);
 
         // Update filtered acceleration
-        Translation2d filteredAccelerationMetersPerSecPerSec = new Translation2d(
-                accelerationXFilter.calculate(accelerometerInputs.accelerationXMetersPerSecPerSec),
-                accelerationYFilter.calculate(accelerometerInputs.accelerationYMetersPerSecPerSec)
-        ).rotateBy(robotState.getRotation());
-        robotState.setFilteredAccelerationMetersPerSecPerSec(filteredAccelerationMetersPerSecPerSec);
-        Logger.recordOutput("Drive/FilteredAccelerationMetersPerSecPerSec", filteredAccelerationMetersPerSecPerSec);
+        //Translation2d filteredAccelerationMetersPerSecPerSec = new Translation2d(
+        //        accelerationXFilter.calculate(accelerometerInputs.accelerationXMetersPerSecPerSec),
+        //        accelerationYFilter.calculate(accelerometerInputs.accelerationYMetersPerSecPerSec)
+        //).rotateBy(robotState.getRotation());
+        //robotState.setFilteredAccelerationMetersPerSecPerSec(filteredAccelerationMetersPerSecPerSec);
+        //Logger.recordOutput("Drive/FilteredAccelerationMetersPerSecPerSec", filteredAccelerationMetersPerSecPerSec);
 
         // Apply network inputs
         if (operatorDashboard.coastOverride.hasChanged()) {
@@ -283,7 +283,7 @@ public class Drive extends CommandBasedSubsystem {
         // Closed loop control
         else if (request.type() == DriveRequest.Type.CHASSIS_SPEEDS) {
             Translation2d centerOfRotation = request.centerOfRotation().orElse(Translation2d.kZero);
-            Logger.recordOutput("Drive/RequestCenterOfRotation", centerOfRotation);
+            //Logger.recordOutput("Drive/RequestCenterOfRotation", centerOfRotation);
 
             ChassisSpeeds rawSpeeds = request.value();
             Logger.recordOutput("Drive/ModuleStates/Setpoints", robotState.getKinematics().toSwerveModuleStates(rawSpeeds, centerOfRotation));

@@ -129,7 +129,7 @@ public class Hood implements Periodic {
                 setpointRad = Math.min(setpointRad, maxPositionUnderTrench);
             }
             setpointRad = MathUtil.clamp(setpointRad, minPositionRad, maxPositionRad);
-            Logger.recordOutput("Superstructure/Hood/SetpointRad", setpointRad);
+            //Logger.recordOutput("Superstructure/Hood/SetpointRad", setpointRad);
             io.setPositionRequest(setpointRad);
         }
     }

@@ -80,7 +80,7 @@ public class IntakeRollers implements Periodic {
         } else {
             //            Logger.recordOutput("Superintake/IntakeRollers/RequestType", goal.type);
             double value = goal.value.getAsDouble();
-            Logger.recordOutput("Superintake/IntakeRollers/RequestValue", value);
+            //Logger.recordOutput("Superintake/IntakeRollers/RequestValue", value);
             io.setRequest(goal.type, value);
         }
     }

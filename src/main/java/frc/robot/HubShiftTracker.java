@@ -113,8 +113,8 @@ public class HubShiftTracker implements Periodic {
         Logger.recordOutput("HubShiftTracker/RemainingTime", shiftInfo.remainingTime());
         Logger.recordOutput("HubShiftTracker/Active", shiftInfo.active());
 
-        ShiftInfo officialShiftInfo = getOfficialShiftInfo();
-        Logger.recordOutput("HubShiftTracker/OfficialActive", officialShiftInfo.active());
+        //ShiftInfo officialShiftInfo = getOfficialShiftInfo();
+        //Logger.recordOutput("HubShiftTracker/OfficialActive", officialShiftInfo.active());
     }
 
     private Alliance getFirstActiveAlliance() {

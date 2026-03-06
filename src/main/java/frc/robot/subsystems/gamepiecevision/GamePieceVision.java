@@ -1,22 +1,19 @@
 package frc.robot.subsystems.gamepiecevision;
 
-import edu.wpi.first.math.geometry.*;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.Alert;
-import edu.wpi.first.wpilibj.Timer;
 import frc.lib.Bounds;
 import frc.lib.Util;
 import frc.lib.subsystem.Periodic;
-import frc.robot.FieldConstants;
 import frc.robot.RobotState;
-import frc.robot.subsystems.drive.goals.FullSpeedCharacterizationGoal;
 import frc.robot.subsystems.gamepiecevision.multiobjecttracking.DBSCAN;
-import frc.robot.subsystems.gamepiecevision.multiobjecttracking.MultiFuelTracking.FuelCluster;
-import lombok.Getter;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.*;
 
-import static frc.robot.subsystems.gamepiecevision.GamePieceVisionConstants.*;
+import static frc.robot.subsystems.gamepiecevision.GamePieceVisionConstants.Camera;
+import static frc.robot.subsystems.gamepiecevision.GamePieceVisionConstants.clusterGroupingDistanceMeters;
 
 public class GamePieceVision implements Periodic {
     private static final RobotState robotState = RobotState.get();
@@ -62,6 +59,7 @@ public class GamePieceVision implements Periodic {
             data.disconnectedAlert.set(!data.inputs.connected);
         }
 
+        /*
         Map<Translation2d, Double> newlySeenTargets = new HashMap<>();
         List<Translation2d> targetXYPoints = new LinkedList<>();
 
@@ -183,6 +181,7 @@ public class GamePieceVision implements Periodic {
         Logger.recordOutput("GamePieceVision/TargetXYPoints", targetXYPoints.toArray(Translation2d[]::new));
         Logger.recordOutput("GamePieceVision/AllTargets", targetsToLastSeen.keySet().toArray(Translation2d[]::new));
         //Logger.recordOutput("GamePieceVision/BestTargets", bestTargets.toArray(Translation2d[]::new));
+         */
     }
 
     @Override
@@ -269,7 +268,7 @@ public class GamePieceVision implements Periodic {
 
         public double weight() {
             if (avgLocation().isPresent()) {
-                return ((double) size()) / ( avgLocation().get().getNorm() + 1);
+                return ((double) size()) / (avgLocation().get().getNorm() + 1);
             } else {
                 return 0;
             }

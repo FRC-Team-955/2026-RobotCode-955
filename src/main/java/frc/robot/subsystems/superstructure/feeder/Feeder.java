@@ -81,9 +81,9 @@ public class Feeder implements Periodic {
         if (DriverStation.isDisabled()) {
             io.setRequest(RequestType.VoltageVolts, 0);
         } else {
-            Logger.recordOutput("Superstructure/Feeder/RequestType", goal.type);
+            //Logger.recordOutput("Superstructure/Feeder/RequestType", goal.type);
             double value = goal.value.getAsDouble();
-            Logger.recordOutput("Superstructure/Feeder/RequestValue", value);
+            //Logger.recordOutput("Superstructure/Feeder/RequestValue", value);
             io.setRequest(goal.type, value);
         }
     }

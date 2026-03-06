@@ -14,7 +14,6 @@ import frc.robot.subsystems.apriltagvision.AprilTagVision;
 import frc.robot.subsystems.gamepiecevision.GamePieceVision;
 import frc.robot.subsystems.superintake.Superintake;
 import frc.robot.subsystems.superstructure.Superstructure;
-import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.mechanism.LoggedMechanism2d;
 import org.littletonrobotics.junction.mechanism.LoggedMechanismLigament2d;
 import org.littletonrobotics.junction.mechanism.LoggedMechanismRoot2d;
@@ -156,6 +155,7 @@ public class LEDs implements Periodic {
         io.setData(buffer);
 
         // Update mechanism
+        /*
         for (int i = 0; i < buffer.getLength(); i++) {
             // https://github.com/FRC-Team-955/2024-RobotCode-749/blob/kotlin-old/src/main/java/frc/robot/subsystems/leds/LEDs.kt#L88
             //            System.out.print("\u001b[38;2;" + buffer.getRed(i) + ";" + buffer.getGreen(i) + ";" + buffer.getBlue(i) + "m■\u001b[0m");
@@ -167,5 +167,6 @@ public class LEDs implements Periodic {
         }
         //        System.out.println();
         Logger.recordOutput("LEDs/Mechanism", mechanism);
+         */
     }
 }

@@ -90,7 +90,7 @@ public class DriveJoystickGoal extends DriveGoal {
         //////////////////////////////////////////////////////////////////////
 
         Mode mode = modeSupplier.get();
-        Logger.recordOutput("Drive/DriveJoystick/Mode", mode);
+        //Logger.recordOutput("Drive/DriveJoystick/Mode", mode);
 
         Rotation2d linearDirection = controller.getDriveLinearDirection();
         double linearMagnitude = controller.getDriveLinearMagnitude();
@@ -103,14 +103,14 @@ public class DriveJoystickGoal extends DriveGoal {
 
         if (mode == Mode.Assist || mode == Mode.AimAndAssist) {
             // Adjust linear direction in Y axis while assisting
-            Logger.recordOutput("Drive/AssistRunning", false);
+            //Logger.recordOutput("Drive/AssistRunning", false);
             var optionalAssistTranslation = assistTranslationSupplier.get();
             if (optionalAssistTranslation.isPresent()) {
                 Translation2d assistTranslation = optionalAssistTranslation.get();
                 Logger.recordOutput("Drive/AssistTranslation", assistTranslation);
 
                 if (controller.shouldAssist(robotState.getPose(), assistTranslation)) {
-                    Logger.recordOutput("Drive/AssistRunning", true);
+                    //Logger.recordOutput("Drive/AssistRunning", true);
 
                     double yDist = new Transform2d(
                             robotState.getPose(),
@@ -132,7 +132,7 @@ public class DriveJoystickGoal extends DriveGoal {
                     (distance - aimDistanceForNearMaxVelocity.get()) /
                             (aimDistanceForFarMaxVelocity.get() - aimDistanceForNearMaxVelocity.get())
             );
-            Logger.recordOutput("Drive/DriveJoystick/MaxVelocityAiming", maxVelocity);
+            //Logger.recordOutput("Drive/DriveJoystick/MaxVelocityAiming", maxVelocity);
 
             linearSetpoint = new Translation2d(
                     linearMagnitude * maxVelocity,
@@ -200,9 +200,9 @@ public class DriveJoystickGoal extends DriveGoal {
 
             angularSetpoint = controller.getDriveAngularMagnitude() * joystickMaxAngularSpeedRadPerSec;
         }
-        Logger.recordOutput("Drive/DriveJoystick/HeadingOverrideRunning", runningHeadingOverride);
-        Logger.recordOutput("Drive/DriveJoystick/HeadingOverrideSetpoint", headingOverride.getSetpoint());
-        Logger.recordOutput("Drive/DriveJoystick/HeadingOverrideMeasurement", robotState.getRotation().getRadians());
+        //Logger.recordOutput("Drive/DriveJoystick/HeadingOverrideRunning", runningHeadingOverride);
+        //Logger.recordOutput("Drive/DriveJoystick/HeadingOverrideSetpoint", headingOverride.getSetpoint());
+        //Logger.recordOutput("Drive/DriveJoystick/HeadingOverrideMeasurement", robotState.getRotation().getRadians());
 
         if (
                 (mode == Mode.Aim || mode == Mode.AimAndAssist || mode == Mode.StopWithX) &&
