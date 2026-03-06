@@ -17,7 +17,7 @@ public class IntakeRollersConstants {
                     true,
                     NeutralModeValue.Coast,
                     80,
-                    40,
+                    30,
                     gearRatio,
                     null,
                     null,
