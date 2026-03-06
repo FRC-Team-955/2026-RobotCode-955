@@ -13,7 +13,6 @@ import org.littletonrobotics.junction.Logger;
 import java.util.*;
 
 import static frc.robot.subsystems.gamepiecevision.GamePieceVisionConstants.Camera;
-import static frc.robot.subsystems.gamepiecevision.GamePieceVisionConstants.clusterGroupingDistanceMeters;
 
 public class GamePieceVision implements Periodic {
     private static final RobotState robotState = RobotState.get();
@@ -205,6 +204,7 @@ public class GamePieceVision implements Periodic {
     }
 
     public List<Translation2d> getBestTargetsInBounds(Optional<Bounds> bounds) {
+        /*
         List<FuelCluster> clusters = new LinkedList<>();
 
         for (Translation2d fuel : targetsToLastSeen.keySet()) {
@@ -238,6 +238,8 @@ public class GamePieceVision implements Periodic {
                 .map(c -> c.cluster)
                 .flatMap(Collection::stream)
                 .toList();
+         */
+        return List.of();
     }
 
     private record CameraData(

@@ -89,8 +89,8 @@ public class OrbitAtTheOutpostAuto extends Auto {
                 // intake
                 AutoHelpers.intakeFromRightNeutralZone(
                         () -> new Pose2d(
-                                7.7,
-                                2.1,
+                                7.1,
+                                3.9,
                                 Rotation2d.kCCW_90deg
                         )
                 ).withTimeout(3),

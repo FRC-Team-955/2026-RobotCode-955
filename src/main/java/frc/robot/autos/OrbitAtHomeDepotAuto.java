@@ -90,8 +90,8 @@ public class OrbitAtHomeDepotAuto extends Auto {
                 // intake
                 AutoHelpers.intakeFromLeftNeutralZone(
                         () -> new Pose2d(
-                                7.7,
-                                5.9,
+                                7.1,
+                                4.2,
                                 Rotation2d.kCW_90deg
                         )
                 ).withTimeout(3),
