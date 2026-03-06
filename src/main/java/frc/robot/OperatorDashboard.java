@@ -39,6 +39,7 @@ public class OperatorDashboard implements Periodic {
     // Toggles and overrides
     public final LoggedNetworkBooleanExt coastOverride = new LoggedNetworkBooleanExt(prefix + "CoastOverride", false);
     public final LoggedNetworkBooleanExt autoChosen = new LoggedNetworkBooleanExt(prefix + "AutoChosen", false);
+    public final LoggedNetworkBooleanExt recordingStarted = new LoggedNetworkBooleanExt(prefix + "RecordingStarted", false);
     public final LoggedNetworkBooleanExt fixedHood = new LoggedNetworkBooleanExt(prefix + "FixedHood", false);
     public final LoggedNetworkBooleanExt manualAiming = new LoggedNetworkBooleanExt(prefix + "ManualAiming", false);
     public final LoggedNetworkBooleanExt disableAssist = new LoggedNetworkBooleanExt(prefix + "DisableAssist", false);
@@ -60,6 +61,7 @@ public class OperatorDashboard implements Periodic {
     public final Alert hoodNotHomedAlert = new Alert("Hood has not been homed!", Alert.AlertType.kError);
     private final Alert coastOverrideAlert = new Alert("Coast override is enabled.", Alert.AlertType.kWarning);
     private final Alert autoNotChosenAlert = new Alert("Auto is not chosen!", Alert.AlertType.kError);
+    private final Alert recordingNotStartedAlert = new Alert("Recording is not started!", Alert.AlertType.kWarning);
     private final Alert autoNotAlignedAlert = new Alert("Robot is not aligned for auto!", Alert.AlertType.kError);
     @SuppressWarnings("FieldCanBeLocal")
     private final Alert constantSetAlert = new Alert("Constants are set.", Alert.AlertType.kInfo);
@@ -112,6 +114,7 @@ public class OperatorDashboard implements Periodic {
         // So subsystem toggles are handled in their respective subsystems
         coastOverrideAlert.set(coastOverride.get());
         autoNotChosenAlert.set(!autoChosen.get());
+        recordingNotStartedAlert.set(!recordingStarted.get());
         autoNotAlignedAlert.set(DriverStation.isDisabled() && !autoManager.isAtAutoStartingPose());
         batteryVoltageAlert.set(lowBatteryDebouncer.calculate(RobotController.getBatteryVoltage() <= 11.8));
         fixedHoodAlert.set(fixedHood.get());
