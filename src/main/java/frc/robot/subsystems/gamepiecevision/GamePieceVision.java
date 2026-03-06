@@ -8,6 +8,10 @@ import frc.lib.Util;
 import frc.lib.subsystem.Periodic;
 import frc.robot.FieldConstants;
 import frc.robot.RobotState;
+import frc.robot.subsystems.drive.goals.FullSpeedCharacterizationGoal;
+import frc.robot.subsystems.gamepiecevision.multiobjecttracking.DBSCAN;
+import frc.robot.subsystems.gamepiecevision.multiobjecttracking.MultiFuelTracking.FuelCluster;
+import lombok.Getter;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.*;
@@ -28,6 +32,10 @@ public class GamePieceVision implements Periodic {
     private final Map<Translation2d, Double> targetsToLastSeen = new HashMap<>();
 
     private static GamePieceVision instance;
+
+    private DBSCAN dbscan = new DBSCAN(new ArrayList<Translation2d>(), 4, 0.5);
+
+    private Optional<Translation2d> lastTarget = Optional.empty();
 
     public static synchronized GamePieceVision get() {
         if (instance == null) {
@@ -117,7 +125,27 @@ public class GamePieceVision implements Periodic {
         // Remove expired coral
         targetsToLastSeen.values().removeIf(lastSeen -> Timer.getTimestamp() - lastSeen > expireTimeSeconds);
 
-
+        ArrayList<FuelCluster> clusterList = new ArrayList<FuelCluster>();
+        Translation2d bestTarget = null;
+        if (targetsToLastSeen.size() > 2) {
+            double bestWeight  = 0;
+            dbscan.setInputValues(targetsToLastSeen.keySet());
+            ArrayList<ArrayList<Translation2d>> dbscanResults = dbscan.performClustering();
+            for (ArrayList<Translation2d> cluster : dbscanResults) {
+                FuelCluster fuelCluster = new FuelCluster(cluster);
+                clusterList.add(fuelCluster);
+                double weight = fuelCluster.weight();
+                if (lastTarget.isPresent() & fuelCluster.avgLocation().isPresent()) {
+                    weight += 2 / (fuelCluster.avgLocation().get().getDistance(lastTarget.get()) + 1);
+                }
+                if (weight > bestWeight) {
+                    bestWeight = weight;
+                    bestTarget = fuelCluster.avgLocation().get();
+                }
+            }
+        }
+        lastTarget = Optional.ofNullable(bestTarget);
+        Logger.recordOutput("GamePieceVision/BestCluster", bestTarget);
         //bestTargets = clusters
         //        .stream()
         //        .sorted(Comparator.comparing(FuelCluster::size))
@@ -223,20 +251,23 @@ public class GamePieceVision implements Periodic {
             return false;
         }
 
+        public double weight() {
+            if (avgLocation().isPresent()) {
+                return ((double) size()) / ( avgLocation().get().getNorm() + 1);
+            } else {
+                return 0;
+            }
+        }
+
         public Optional<Translation2d> avgLocation() {
             if (cluster.isEmpty()) {
                 return Optional.empty();
             }
-            double x = 0.0;
-            double y = 0.0;
+            Translation2d average = new Translation2d();
             for (Translation2d fuel : cluster) {
-                x += fuel.getX();
-                y += fuel.getY();
+                average = average.plus(fuel);
             }
-            return Optional.of(new Translation2d(
-                    x / (double) size(),
-                    y / (double) size()
-            ));
+            return Optional.of(average.div(cluster.size()));
         }
     }
 }

@@ -73,6 +73,7 @@ public class ShootingKinematics implements Periodic {
 
     @Getter
     private ShootingParameters shootingParameters = new ShootingParameters(0, 0, 0, OptionalDouble.empty(), false);
+    private double shootingVelocity = 0;
     @Getter
     private boolean shootingParametersMet = false;
     @Getter
@@ -84,7 +85,6 @@ public class ShootingKinematics implements Periodic {
 
     public static synchronized ShootingKinematics get() {
         if (instance == null) {
-
             instance = new ShootingKinematics();
         }
 
@@ -270,17 +270,17 @@ public class ShootingKinematics implements Periodic {
         double vy = robotShotFieldRelative.getY();
 
         // 4. Now calculate phi, theta, and shooting magnitude from 3d shooting vector
-        double v = Math.sqrt(vx * vx + vy * vy + vz * vz);
-        double phi = Math.asin(vz / v);
+        shootingVelocity = Math.sqrt(vx * vx + vy * vy + vz * vz);
+        double phi = Math.asin(vz / shootingVelocity);
         double theta = Math.atan2(vy, vx);
-        Logger.recordOutput("ShootingKinematics/ShootingParameters/VelocityMetersPerSec", v);
+        Logger.recordOutput("ShootingKinematics/ShootingParameters/VelocityMetersPerSec", shootingVelocity);
         //Logger.recordOutput("ShootingKinematics/Phi", phi);
         //Logger.recordOutput("ShootingKinematics/Theta", theta);
 
         return new ShootingParameters(
                 BuildConstants.mode == BuildConstants.Mode.SIM
-                        ? Units.radiansPerSecondToRotationsPerMinute(v / FlywheelConstants.flywheelRadiusMeters)
-                        : velocityToRPM.applyAsDouble(v),
+                        ? Units.radiansPerSecondToRotationsPerMinute(shootingVelocity / FlywheelConstants.flywheelRadiusMeters)
+                        : velocityToRPM.applyAsDouble(shootingVelocity),
                 phi,
                 theta,
                 OptionalDouble.of(toF),
@@ -325,6 +325,7 @@ public class ShootingKinematics implements Periodic {
         return robotSpeeds.rotateBy(fuelExitRotation.minus(fuelExitToHub.angle()));
     }
 
+    // Rotation around hub from velocity, can add to drive rotation for aiming feedforward
     public double rotationAboutHubRadiansPerSec(Translation2d fieldRelativeMetersPerSec) {
         if (shootingParameters.isPass()) {
             return 0.0;
@@ -337,6 +338,15 @@ public class ShootingKinematics implements Periodic {
         // tangential velocity in m/s / radius of circle = rotation about circle rad/sec
         return -hubRelative.getY() / fuelExitToHub.transform.getTranslation().toTranslation2d().getNorm();
     }
+    /*
+    // Estimated rotation due to tangential acceleration, add to drive for aiming feedforward
+    public double rotationFeedforwardAcceleration(Translation2d fieldRelativeMetersPerSecSquared, Translation2d robotSpeeds) {
+        Translation2d shootingParameters2dHubRelative = robotVelocityHubRelative(new Translation2d(shootingVelocity, shootingParameters.headingRad()));
+        Translation2d robotVelocityHubRelative = robotVelocityHubRelative(robotSpeeds);
+        // Again, positive Y is CLOCKWISE
+        double tangentialAcceleration = robotVelocityHubRelative(fieldRelativeMetersPerSecSquared).getY();
+    }
+     */
 
     public double rotationAboutHubRadiansPerSec(ChassisSpeeds fieldRelativeSpeeds) {
         return rotationAboutHubRadiansPerSec(new Translation2d(
