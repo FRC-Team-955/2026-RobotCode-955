@@ -38,8 +38,8 @@ public class OrbitAtTheOutpostAuto extends Auto {
                 // intake, go to neturalzone
                 superintake.setGoal(Superintake.Goal.INTAKE).until(() -> true),
                 AutoHelpers.yDistanceInterpolatingWaypoint(
-                        new Translation2d(FieldConstants.LinesVertical.center, 0.51),
-                        new Translation2d(FieldConstants.LinesVertical.center, 1.81),
+                        new Translation2d(FieldConstants.LinesVertical.center + 0.3, 0.51),
+                        new Translation2d(FieldConstants.LinesVertical.center + 0.3, 1.81),
                         Rotation2d.kCCW_90deg,
                         2,
                         defaultMoveToConstraints
@@ -47,7 +47,7 @@ public class OrbitAtTheOutpostAuto extends Auto {
 
                 //move to netruazone middle
                 AutoHelpers.finalWaypoint(() -> new Pose2d(
-                        FieldConstants.LinesVertical.center,
+                        FieldConstants.LinesVertical.center + 0.3,
                         3.51,
                         Rotation2d.kCCW_90deg
                 ), AutoHelpers.intakeConstraints),
@@ -96,8 +96,8 @@ public class OrbitAtTheOutpostAuto extends Auto {
                 //).withTimeout(3),
                 superintake.setGoal(Superintake.Goal.INTAKE).until(() -> true),
                 AutoHelpers.yDistanceInterpolatingWaypoint(
-                        new Translation2d(FieldConstants.LinesVertical.center, 0.51),
-                        new Translation2d(FieldConstants.LinesVertical.center, 3.3),
+                        new Translation2d(FieldConstants.LinesVertical.center - 1.0, 0.51),
+                        new Translation2d(FieldConstants.LinesVertical.center - 1.0, 1.81),
                         Rotation2d.kCCW_90deg,
                         2,
                         defaultMoveToConstraints
@@ -105,8 +105,8 @@ public class OrbitAtTheOutpostAuto extends Auto {
 
                 //move to netruazone middle
                 AutoHelpers.finalWaypoint(() -> new Pose2d(
-                        FieldConstants.LinesVertical.center,
-                        5.8,
+                        FieldConstants.LinesVertical.center - 1.0,
+                        3.51,
                         Rotation2d.kCCW_90deg
                 ), AutoHelpers.intakeConstraints),
                 superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
