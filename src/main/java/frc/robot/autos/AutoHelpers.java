@@ -39,7 +39,8 @@ public class AutoHelpers {
     private static final Superstructure superstructure = Superstructure.get();
 
     public static final DriveConstants.MoveToConstraints shootingConstraints = defaultMoveToConstraints
-            .withMaxLinearVelocityMetersPerSec(new LoggedTunableNumber("AutoHelpers/Intake/MaxLinearVelocity", 1.0))
+            .withMaxLinearVelocityMetersPerSec(new LoggedTunableNumber("AutoHelpers/Shoot/MaxLinearVelocity", 1.0))
+            .withMaxLinearAccelerationMetersPerSecPerSec(new LoggedTunableNumber("AutoHelpers/Shoot/MaxLinearAcceleration", 5))
             .withAiming(true);
 
     public static Command intermediateWaypoint(Supplier<Pose2d> poseSupplier, DriveConstants.MoveToConstraints constraints) {

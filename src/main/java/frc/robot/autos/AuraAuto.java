@@ -5,7 +5,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import frc.lib.Bounds;
 import frc.lib.commands.CommandsExt;
 import frc.robot.FieldConstants;
 import frc.robot.subsystems.drive.Drive;
@@ -14,6 +13,7 @@ import frc.robot.subsystems.superstructure.Superstructure;
 
 import static frc.robot.autos.AutoHelpers.intakeConstraints;
 import static frc.robot.autos.AutoHelpers.shootingConstraints;
+import static frc.robot.subsystems.drive.DriveConstants.defaultMoveToConstraints;
 import static frc.robot.subsystems.drive.DriveConstants.driveConfig;
 
 public class AuraAuto extends Auto {
@@ -60,7 +60,7 @@ public class AuraAuto extends Auto {
                         ),
                         superintake.setGoal(Superintake.Goal.INTAKE)
                 ),
-                superintake.setGoal(Superintake.Goal.INTAKE).until(() -> true),
+                superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
 
                 // Move, intake, and shoot towards depot
                 //AutoHelpers.intakeFromDepotWhileShooting(shootingConstraints)
@@ -73,26 +73,53 @@ public class AuraAuto extends Auto {
                         new Translation2d(2.5, FieldConstants.LinesHorizontal.center),
                         Rotation2d.kCW_90deg,
                         1.0,
-                        shootingConstraints.withAiming(true)
+                        shootingConstraints
                 ),
 
-                drive.moveTo(
-                        () -> AutoHelpers.getIntakePose(
-                                new Bounds(
-                                        driveConfig.bumperLengthMeters() / 2.0,
-                                        1.4,
-                                        driveConfig.bumperWidthMeters() / 2.0,
-                                        1.8
-                                ),
-                                AutoHelpers.yDistanceInterpolation(
-                                        new Translation2d(2.5, 1.0),
-                                        new Translation2d(1.0, 1.0),
-                                        new Rotation2d(),
-                                        2.0
-                                )
+                Commands.race(
+                        AutoHelpers.yDistanceInterpolatingWaypoint(
+                                new Translation2d(2.5, 1.0),
+                                new Translation2d(1.0, 1.0),
+                                new Rotation2d(),
+                                2.0,
+                                shootingConstraints
                         ),
-                        shootingConstraints
+                        superintake.intakeShootAlternate()
+                ),
+
+                superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
+                superstructure.setGoal(Superstructure.Goal.IDLE).until(() -> true),
+                AutoHelpers.finalWaypoint(
+                        () -> new Pose2d(0.5, 0.7, Rotation2d.kCCW_90deg),
+                        defaultMoveToConstraints
+                ),
+                Commands.waitSeconds(2.5),
+                Commands.parallel(
+                        AutoHelpers.finalWaypoint(
+                                () -> new Pose2d(1.5, 1.45, Rotation2d.kCCW_90deg),
+                                shootingConstraints
+                        ),
+                        superintake.intakeShootAlternate(),
+                        superstructure.setGoal(Superstructure.Goal.SHOOT)
                 )
+
+                //drive.moveTo(
+                //        () -> AutoHelpers.getIntakePose(
+                //                new Bounds(
+                //                        driveConfig.bumperLengthMeters() / 2.0,
+                //                        1.4,
+                //                        driveConfig.bumperWidthMeters() / 2.0,
+                //                        1.8
+                //                ),
+                //                AutoHelpers.yDistanceInterpolation(
+                //                        new Translation2d(2.5, 1.0),
+                //                        new Translation2d(1.0, 1.0),
+                //                        new Rotation2d(),
+                //                        2.0
+                //                )
+                //        ),
+                //        shootingConstraints
+                //)
 
                 //// Move forward to shooting position
                 //AutoHelpers.finalWaypoint(() -> shootingPosition, defaultMoveToConstraints),
