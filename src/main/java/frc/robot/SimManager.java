@@ -4,6 +4,7 @@ import edu.wpi.first.hal.AllianceStationID;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.simulation.DriverStationSim;
@@ -11,12 +12,14 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import frc.lib.Util;
 import frc.robot.subsystems.drive.DriveConstants;
+import org.dyn4j.dynamics.Settings;
 import org.ironmaple.simulation.IntakeSimulation;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.COTS;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
 import org.ironmaple.simulation.drivesims.configs.SwerveModuleSimulationConfig;
+import org.ironmaple.simulation.seasonspecific.rebuilt2026.RebuiltFuelOnField;
 import org.littletonrobotics.junction.Logger;
 import org.photonvision.estimation.TargetModel;
 import org.photonvision.simulation.VisionSystemSim;
@@ -197,6 +200,202 @@ public class SimManager {
 
             gamePieceVisionSystem.update(driveSimulation.getSimulatedDriveTrainPose());
             gamePieceVisionSystemUpdated = true;
+        }
+    }
+
+    public static class CustomArena extends SimulatedArena {
+        protected boolean isInEfficiencyMode = true;
+
+        protected static Translation2d centerPieceBottomRightCorner = new Translation2d(7.35737, 1.724406);
+        protected static Translation2d redDepotBottomRightCorner = new Translation2d(0.02, 5.53);
+        protected static Translation2d blueDepotBottomRightCorner = new Translation2d(16.0274, 1.646936);
+
+        /** the obstacles on the 2026 competition field */
+        public static final class RebuiltFieldObstaclesMap extends FieldMap {
+            private static final double FIELD_WIDTH = 16.54;
+
+            public RebuiltFieldObstaclesMap(boolean AddRampCollider) {
+                super.addBorderLine(new Translation2d(0, 0), new Translation2d(0, 8.052));
+
+                // red wall
+                super.addBorderLine(new Translation2d(16.540988, 0), new Translation2d(16.540988, 8.052));
+
+                // upper walls
+                super.addBorderLine(new Translation2d(16.540988, 8.052), new Translation2d(0, 8.052));
+
+                // lower walls
+                super.addBorderLine(new Translation2d(0, 0), new Translation2d(16.540988, 0));
+
+                // Trench Walls (47 inch height, 12 inch width)
+                double trenchWallDistX =
+                        Inches.of(120.0).in(Meters) + Inches.of(47.0 / 2).in(Meters);
+
+                double trenchWallDistY = Inches.of(73.0).in(Meters)
+                        + Inches.of(47.0 / 2).in(Meters)
+                        + Inches.of(6).in(Meters);
+
+                super.addRectangularObstacle(
+                        Inches.of(53).in(Meters),
+                        Inches.of(12).in(Meters),
+                        new Pose2d(8.27 - trenchWallDistX, 4.035 - trenchWallDistY, Rotation2d.kZero));
+                super.addRectangularObstacle(
+                        Inches.of(53).in(Meters),
+                        Inches.of(12).in(Meters),
+                        new Pose2d(8.27 + trenchWallDistX, 4.035 - trenchWallDistY, Rotation2d.kZero));
+                super.addRectangularObstacle(
+                        Inches.of(53).in(Meters),
+                        Inches.of(12).in(Meters),
+                        new Pose2d(8.27 - trenchWallDistX, 4.035 + trenchWallDistY, Rotation2d.kZero));
+                super.addRectangularObstacle(
+                        Inches.of(53).in(Meters),
+                        Inches.of(12).in(Meters),
+                        new Pose2d(8.27 - trenchWallDistX, 4.035 - trenchWallDistY, Rotation2d.kZero));
+
+                //    // poles of the tower
+                //    super.addRectangularObstacle(
+                //            Inches.of(2).in(Meters),
+                //            Inches.of(47).in(Meters),
+                //            new Pose2d(new Translation2d(Inches.of(42), Inches.of(159)), new Rotation2d()));
+                //
+                //    super.addRectangularObstacle(
+                //            Inches.of(2).in(Meters),
+                //            Inches.of(47).in(Meters),
+                //            new Pose2d(new Translation2d(Inches.of(651 - 42), Inches.of(170)), new Rotation2d()));
+                //
+                //    // Colliders to describe the hub plus ramps
+                //    if (AddRampCollider) {
+                //        super.addRectangularObstacle(
+                //                Inches.of(47).in(Meters),
+                //                Inches.of(217).in(Meters),
+                //                new Pose2d(RebuiltHub.blueHubPose.toTranslation2d(), new Rotation2d()));
+                //
+                //        super.addRectangularObstacle(
+                //                Inches.of(47).in(Meters),
+                //                Inches.of(217).in(Meters),
+                //                new Pose2d(RebuiltHub.redHubPose.toTranslation2d(), new Rotation2d()));
+                //    }
+                //
+                //    // Colliders to describe just the hub
+                //    else {
+                //        super.addRectangularObstacle(
+                //                Inches.of(47).in(Meters),
+                //                Inches.of(47).in(Meters),
+                //                new Pose2d(RebuiltHub.blueHubPose.toTranslation2d(), new Rotation2d()));
+                //
+                //        super.addRectangularObstacle(
+                //                Inches.of(47).in(Meters),
+                //                Inches.of(47).in(Meters),
+                //                new Pose2d(RebuiltHub.redHubPose.toTranslation2d(), new Rotation2d()));
+                //    }
+            }
+        }
+
+        /**
+         *
+         *
+         * <h2>Creates an Arena for the 2026 FRC game rebuilt </h2>
+         *
+         * <p>This will create an Arena with the ramp areas marked as inaccessible. If you would like to change that use
+         * {@link #CustomArena(boolean)}. Additionally due to performance issues the arena will not spawn all fuel by
+         * default. If you would like to change this use {@link #setEfficiencyMode(boolean)}
+         */
+        public CustomArena() {
+            this(true);
+        }
+
+        /**
+         *
+         *
+         * <h2>Creates an Arena for the 2026 FRC game rebuilt </h2>
+         *
+         * <p>Due to the nature of maple sim they can not be fully simulated and so either must be non existent or treated
+         * as full colliders. This behavior can be changed with the AddRampCollider variable. Additionally due to
+         * performance issues the arena will not spawn all fuel by default. If you would like to change this use
+         * {@link #setEfficiencyMode(boolean)}
+         *
+         * @param AddRampCollider Whether or not the ramps should be added as colliders.
+         */
+        public CustomArena(boolean AddRampCollider) {
+            super(new RebuiltFieldObstaclesMap(AddRampCollider));
+
+            Settings settings = physicsWorld.getSettings();
+
+            // settings.setVelocityConstraintSolverIterations(3);
+            // settings.setPositionConstraintSolverIterations(2);
+            settings.setMinimumAtRestTime(0.02);
+
+            physicsWorld.setSettings(settings);
+        }
+
+        @Override
+        public void placeGamePiecesOnField() {
+            for (int x = 0; x < 12; x += 1) {
+                for (int y = 0; y < 30; y += isInEfficiencyMode ? 3 : 1) {
+                    addGamePiece(new RebuiltFuelOnField(centerPieceBottomRightCorner.plus(
+                            new Translation2d(Inches.of(5.991 * x), Inches.of(5.95 * y)))));
+                }
+            }
+
+            boolean isOnBlue = !DriverStation.getAlliance().isEmpty()
+                    && DriverStation.getAlliance().get() == DriverStation.Alliance.Blue;
+
+            if (isOnBlue || !isInEfficiencyMode) {
+                for (int x = 0; x < 4; x++) {
+                    for (int y = 0; y < 6; y++) {
+                        addGamePiece(new RebuiltFuelOnField(blueDepotBottomRightCorner.plus(
+                                new Translation2d(Inches.of(5.991 * x), Inches.of(5.95 * y)))));
+                    }
+                }
+            }
+
+            if (!isOnBlue || !isInEfficiencyMode) {
+                for (int x = 0; x < 4; x++) {
+                    for (int y = 0; y < 6; y++) {
+                        addGamePiece(new RebuiltFuelOnField(redDepotBottomRightCorner.plus(
+                                new Translation2d(Inches.of(5.991 * x), Inches.of(5.95 * y)))));
+                    }
+                }
+            }
+
+            setupValueForMatchBreakdown("CurrentFuelInOutpost");
+            setupValueForMatchBreakdown("TotalFuelInOutpost");
+            setupValueForMatchBreakdown("TotalFuelInHub");
+            setupValueForMatchBreakdown("WastedFuel");
+        }
+
+        @Override
+        public void simulationSubTick(int tickNum) {
+            super.simulationSubTick(tickNum);
+        }
+
+        /**
+         *
+         *
+         * <h2>Determines wether the arena is in efficiency mode </h2>
+         *
+         * <h3>For changes too take effect call {@link #resetFieldForAuto()}. </h3>
+         *
+         * <p>Efficiency mode reduces the amount of game pieces on the field too increase performance. MapleSim was not
+         * designed with 400 game pieces in mind and so can struggle with the large number of game pieces present in
+         * rebuilt.
+         *
+         * @param efficiencyMode Wether efficiency mode should be on or off.
+         */
+        public void setEfficiencyMode(boolean efficiencyMode) {
+            isInEfficiencyMode = efficiencyMode;
+        }
+
+        /**
+         *
+         *
+         * <h2>Returns wether or not the arena is in Efficiency mode </h2>
+         * <p>
+         * For more information see {@link #setEfficiencyMode(boolean)}
+         *
+         * @return Wether or not the Arena is in efficiency mode.
+         */
+        public boolean getEfficiencyMode() {
+            return isInEfficiencyMode;
         }
     }
 }
