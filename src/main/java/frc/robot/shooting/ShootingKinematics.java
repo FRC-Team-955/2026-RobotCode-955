@@ -80,7 +80,7 @@ public class ShootingKinematics implements Periodic {
     @Getter
     private boolean shiftMet = false;
 
-    private final Debouncer velocityMetDebouncer = new Debouncer(0.08, Debouncer.DebounceType.kFalling);
+    private final Debouncer velocityMetDebouncer = new Debouncer(0.15, Debouncer.DebounceType.kFalling);
 
     private static ShootingKinematics instance;
 
