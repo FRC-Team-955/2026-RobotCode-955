@@ -74,7 +74,6 @@ public class ShootingKinematics implements Periodic {
 
     @Getter
     private ShootingParameters shootingParameters = new ShootingParameters(0, 0, 0, OptionalDouble.empty(), false);
-    private double shootingVelocity = 0;
     @Getter
     private boolean shootingParametersMet = false;
     @Getter
@@ -284,8 +283,8 @@ public class ShootingKinematics implements Periodic {
         double vy = robotShotFieldRelative.getY();
 
         // 4. Now calculate phi, theta, and shooting magnitude from 3d shooting vector
-        shootingVelocity = Math.sqrt(vx * vx + vy * vy + vz * vz);
-        double phi = Math.asin(vz / shootingVelocity);
+        double v = Math.sqrt(vx * vx + vy * vy + vz * vz);
+        double phi = Math.asin(vz / v);
         double theta = Math.atan2(vy, vx);
         //Logger.recordOutput("ShootingKinematics/ShootingParameters/VelocityMetersPerSec", shootingVelocity);
         //Logger.recordOutput("ShootingKinematics/Phi", phi);
@@ -293,8 +292,8 @@ public class ShootingKinematics implements Periodic {
 
         return new ShootingParameters(
                 BuildConstants.mode == BuildConstants.Mode.SIM
-                        ? Units.radiansPerSecondToRotationsPerMinute(shootingVelocity / FlywheelConstants.flywheelRadiusMeters)
-                        : velocityToRPM.applyAsDouble(shootingVelocity),
+                        ? Units.radiansPerSecondToRotationsPerMinute(v / FlywheelConstants.flywheelRadiusMeters)
+                        : velocityToRPM.applyAsDouble(v),
                 phi,
                 theta,
                 OptionalDouble.of(toF),
