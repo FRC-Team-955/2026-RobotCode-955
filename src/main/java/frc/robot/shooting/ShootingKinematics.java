@@ -1,5 +1,6 @@
 package frc.robot.shooting;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.filter.Debouncer;
@@ -131,8 +132,10 @@ public class ShootingKinematics implements Periodic {
         Logger.recordOutput("ShootingKinematics/ShiftMet", shiftMet);
 
         boolean headingMet = operatorDashboard.manualAiming.get() ||
-                Math.abs(robotState.getPose().getRotation().getRadians() - shootingParameters.headingRad())
-                        <= Units.degreesToRadians(
+                Math.abs(
+                        MathUtil.angleModulus(robotState.getPose().getRotation().getRadians())
+                                - MathUtil.angleModulus(shootingParameters.headingRad())
+                ) <= Units.degreesToRadians(
                         shootingParameters.isPass()
                                 ? headingTolerancePassingDeg.get()
                                 : headingToleranceDeg.get()
