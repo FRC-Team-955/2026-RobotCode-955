@@ -38,8 +38,8 @@ public class OrbitAtTheOutpostAuto extends Auto {
                 // intake, go to neturalzone
                 superintake.setGoal(Superintake.Goal.INTAKE).until(() -> true),
                 AutoHelpers.yDistanceInterpolatingWaypoint(
-                        new Translation2d(FieldConstants.LinesVertical.center + 0.3, 0.51),
-                        new Translation2d(FieldConstants.LinesVertical.center + 0.3, 1.81),
+                        new Translation2d(FieldConstants.LinesVertical.center + OrbitAtHomeDepotAuto.firstPassYOffset, 0.51),
+                        new Translation2d(FieldConstants.LinesVertical.center + OrbitAtHomeDepotAuto.firstPassYOffset, 1.81),
                         Rotation2d.kCCW_90deg,
                         2,
                         defaultMoveToConstraints
@@ -47,7 +47,7 @@ public class OrbitAtTheOutpostAuto extends Auto {
 
                 //move to netruazone middle
                 AutoHelpers.finalWaypoint(() -> new Pose2d(
-                        FieldConstants.LinesVertical.center + 0.3,
+                        FieldConstants.LinesVertical.center + OrbitAtHomeDepotAuto.firstPassYOffset,
                         3.51,
                         Rotation2d.kCCW_90deg
                 ), AutoHelpers.intakeConstraints),
@@ -56,7 +56,7 @@ public class OrbitAtTheOutpostAuto extends Auto {
                 // avoid scattering balls
                 AutoHelpers.intermediateWaypoint(() -> new Pose2d(
                         FieldConstants.LinesVertical.center - 0.5,
-                        trenchShootingPosition.getY(),
+                        trenchShootingPosition.getY() + 0.5,
                         trenchShootingPosition.getRotation()
                 ), defaultMoveToConstraints),
 
@@ -96,8 +96,8 @@ public class OrbitAtTheOutpostAuto extends Auto {
                 //).withTimeout(3),
                 superintake.setGoal(Superintake.Goal.INTAKE).until(() -> true),
                 AutoHelpers.yDistanceInterpolatingWaypoint(
-                        new Translation2d(FieldConstants.LinesVertical.center - 1.0, 0.51),
-                        new Translation2d(FieldConstants.LinesVertical.center - 1.0, 1.81),
+                        new Translation2d(FieldConstants.LinesVertical.center - OrbitAtHomeDepotAuto.secondPassYOffset, 0.51),
+                        new Translation2d(FieldConstants.LinesVertical.center - OrbitAtHomeDepotAuto.secondPassYOffset, 1.81),
                         Rotation2d.kCCW_90deg,
                         2,
                         defaultMoveToConstraints
@@ -105,11 +105,18 @@ public class OrbitAtTheOutpostAuto extends Auto {
 
                 //move to netruazone middle
                 AutoHelpers.finalWaypoint(() -> new Pose2d(
-                        FieldConstants.LinesVertical.center - 1.0,
+                        FieldConstants.LinesVertical.center - OrbitAtHomeDepotAuto.secondPassYOffset,
                         3.51,
                         Rotation2d.kCCW_90deg
                 ), AutoHelpers.intakeConstraints),
                 superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
+
+                // avoid scattering balls
+                AutoHelpers.intermediateWaypoint(() -> new Pose2d(
+                        7.5,
+                        trenchShootingPosition.getY() + 0.5,
+                        trenchShootingPosition.getRotation()
+                ), defaultMoveToConstraints),
 
                 // move to entrance to trench
                 AutoHelpers.intermediateWaypoint(() -> new Pose2d(
