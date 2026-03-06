@@ -18,7 +18,7 @@ public class OrbitAtHomeDepotAuto extends Auto {
 
     private static final double startingPositionY = 7.55;
     private static final Pose2d trenchShootingPosition = new Pose2d(3.6, 7.4, Rotation2d.kCCW_90deg);
-    private static final double exitTrenchX = 6.34;
+    public static final double exitTrenchX = 6.34;
 
     public OrbitAtHomeDepotAuto() {
         super(
@@ -69,7 +69,7 @@ public class OrbitAtHomeDepotAuto extends Auto {
                 ), defaultMoveToConstraints),
 
                 // go through trench to shooting position
-                AutoHelpers.intermediateWaypoint(() -> trenchShootingPosition, defaultMoveToConstraints),
+                AutoHelpers.finalWaypoint(() -> trenchShootingPosition, defaultMoveToConstraints),
 
                 // shoot
                 Commands.parallel(
@@ -98,14 +98,14 @@ public class OrbitAtHomeDepotAuto extends Auto {
 
                 // move to entrance to trench
                 AutoHelpers.intermediateWaypoint(() -> new Pose2d(
-                        6.5,
+                        7.0,
                         7.45,
                         trenchShootingPosition.getRotation()
                 ), defaultMoveToConstraints),
                 superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
 
                 // go through trench to shooting position
-                AutoHelpers.intermediateWaypoint(() -> trenchShootingPosition, defaultMoveToConstraints),
+                AutoHelpers.finalWaypoint(() -> trenchShootingPosition, defaultMoveToConstraints),
 
                 // shoot
                 Commands.parallel(
