@@ -88,13 +88,29 @@ public class OrbitAtHomeDepotAuto extends Auto {
                 ), defaultMoveToConstraints),
 
                 // intake
-                AutoHelpers.intakeFromLeftNeutralZone(
-                        () -> new Pose2d(
-                                7.1,
-                                4.2,
-                                Rotation2d.kCW_90deg
-                        )
-                ).withTimeout(3),
+                superintake.setGoal(Superintake.Goal.INTAKE).until(() -> true),
+                AutoHelpers.yDistanceInterpolatingWaypoint(
+                        new Translation2d(FieldConstants.LinesVertical.center, 7.0),
+                        new Translation2d(FieldConstants.LinesVertical.center, 4.8),
+                        Rotation2d.kCW_90deg,
+                        2,
+                        defaultMoveToConstraints
+                ),
+
+                //move to netruazone middle
+                AutoHelpers.finalWaypoint(() -> new Pose2d(
+                        FieldConstants.LinesVertical.center,
+                        2.5,
+                        Rotation2d.kCW_90deg
+                ), AutoHelpers.intakeConstraints),
+                superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
+                //AutoHelpers.intakeFromLeftNeutralZone(
+                //        () -> new Pose2d(
+                //                7.1,
+                //                4.2,
+                //                Rotation2d.kCW_90deg
+                //        )
+                //).withTimeout(3),
 
                 // move to entrance to trench
                 AutoHelpers.intermediateWaypoint(() -> new Pose2d(
@@ -102,7 +118,6 @@ public class OrbitAtHomeDepotAuto extends Auto {
                         7.45,
                         trenchShootingPosition.getRotation()
                 ), defaultMoveToConstraints),
-                superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
 
                 // go through trench to shooting position
                 AutoHelpers.finalWaypoint(() -> trenchShootingPosition, defaultMoveToConstraints),
