@@ -106,7 +106,7 @@ public class ShootingKinematics implements Periodic {
         }
         shootingParameters = new ShootingParameters(
                 shootingParameters.velocityRPM() + operatorDashboard.flywheelSmudgeRPM.get(),
-                shootingParameters.angleRad() + operatorDashboard.hoodSmudgeDegrees.get(),
+                shootingParameters.angleRad() + Units.degreesToRadians(operatorDashboard.hoodSmudgeDegrees.get()),
                 shootingParameters.headingRad(),
                 shootingParameters.timeOfFlightSeconds(),
                 shootingParameters.isPass()
