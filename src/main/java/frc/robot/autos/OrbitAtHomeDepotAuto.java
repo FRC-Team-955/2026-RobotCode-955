@@ -22,7 +22,7 @@ public class OrbitAtHomeDepotAuto extends Auto {
 
     public OrbitAtHomeDepotAuto() {
         super(
-                new Pose2d(3.88, startingPositionY, Rotation2d.kCW_90deg),
+                new Pose2d(4.35, startingPositionY, Rotation2d.kCW_90deg),
                 build()
         );
     }

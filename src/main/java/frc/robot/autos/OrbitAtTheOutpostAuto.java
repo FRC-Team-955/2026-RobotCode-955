@@ -21,7 +21,7 @@ public class OrbitAtTheOutpostAuto extends Auto {
 
     public OrbitAtTheOutpostAuto() {
         super(
-                new Pose2d(3.88, startingPositionY, Rotation2d.kCCW_90deg),
+                new Pose2d(4.35, startingPositionY, Rotation2d.kCCW_90deg),
                 build()
         );
     }
