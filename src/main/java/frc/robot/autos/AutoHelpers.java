@@ -102,7 +102,7 @@ public class AutoHelpers {
             double yDistanceToStartInterpolation,
             DriveConstants.MoveToConstraints constraints
     ) {
-        return finalWaypoint(
+        return intermediateWaypoint(
                 () -> yDistanceInterpolation(start, end, heading, yDistanceToStartInterpolation),
                 constraints
         );
@@ -133,7 +133,7 @@ public class AutoHelpers {
             double xDistanceToStartInterpolation,
             DriveConstants.MoveToConstraints constraints
     ) {
-        return finalWaypoint(
+        return intermediateWaypoint(
                 () -> xDistanceToStartInterpolation(start, end, heading, xDistanceToStartInterpolation),
                 constraints
         );

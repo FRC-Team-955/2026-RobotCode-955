@@ -64,7 +64,7 @@ public class OrbitAtHomeDepotAuto extends Auto {
                 //move to entrance to trench
                 AutoHelpers.intermediateWaypoint(() -> new Pose2d(
                         7.0,
-                        7.5,
+                        startingPositionY,
                         trenchShootingPosition.getRotation()
                 ), defaultMoveToConstraints),
 
@@ -115,7 +115,7 @@ public class OrbitAtHomeDepotAuto extends Auto {
                 // move to entrance to trench
                 AutoHelpers.intermediateWaypoint(() -> new Pose2d(
                         7.0,
-                        7.45,
+                        startingPositionY,
                         trenchShootingPosition.getRotation()
                 ), defaultMoveToConstraints),
 

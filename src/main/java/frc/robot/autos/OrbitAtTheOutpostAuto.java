@@ -63,7 +63,7 @@ public class OrbitAtTheOutpostAuto extends Auto {
                 //move to entrance to trench
                 AutoHelpers.intermediateWaypoint(() -> new Pose2d(
                         7.0,//6.1 og 6.7 worked
-                        0.8, //og trench shooting work
+                        startingPositionY, //og trench shooting work
                         trenchShootingPosition.getRotation()
                 ), defaultMoveToConstraints),
 
@@ -114,7 +114,7 @@ public class OrbitAtTheOutpostAuto extends Auto {
                 // move to entrance to trench
                 AutoHelpers.intermediateWaypoint(() -> new Pose2d(
                         7.0,//6.1 og 6.7 worked
-                        0.5, //og trench shooting work
+                        startingPositionY, //og trench shooting work
                         trenchShootingPosition.getRotation()
                 ), defaultMoveToConstraints),
 
