@@ -15,9 +15,11 @@ package frc.robot.subsystems.drive;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import frc.lib.network.LoggedTunablePIDF;
@@ -34,10 +36,12 @@ public class Module {
     private final int index;
 
     private PIDController turnAbsolutePID = moduleConfig.turnAbsoluteGains().toPIDWrapRadians();
+    private final Debouncer turnAbsoluteRelativeDifferenceDebouncer = new Debouncer(1.0, Debouncer.DebounceType.kRising);
 
     private final Alert driveDisconnectedAlert;
     private final Alert turnDisconnectedAlert;
     private final Alert turnEncoderDisconnectedAlert;
+    private final Alert turnEncoderDisparityAlert;
 
     public Module(ModuleIO io, int index) {
         this.io = io;
@@ -46,6 +50,7 @@ public class Module {
         driveDisconnectedAlert = new Alert("Disconnected drive motor on module " + index + ".", AlertType.kError);
         turnDisconnectedAlert = new Alert("Disconnected turn motor on module " + index + ".", AlertType.kError);
         turnEncoderDisconnectedAlert = new Alert("Disconnected turn encoder on module " + index + ".", AlertType.kError);
+        turnEncoderDisparityAlert = new Alert("Absolute and relative turn encoders on module " + index + " are not matching up.", AlertType.kError);
     }
 
     public void updateAndProcessInputs() {
@@ -58,6 +63,12 @@ public class Module {
         driveDisconnectedAlert.set(!inputs.driveConnected);
         turnDisconnectedAlert.set(!inputs.turnConnected);
         turnEncoderDisconnectedAlert.set(!inputs.turnAbsoluteEncoderConnected);
+        turnEncoderDisparityAlert.set(turnAbsoluteRelativeDifferenceDebouncer.calculate(
+                Math.abs(
+                        MathUtil.angleModulus(inputs.turnAbsolutePositionRad)
+                                - MathUtil.angleModulus(inputs.turnPositionRad)
+                ) > Units.degreesToRadians(3.0)
+        ));
     }
 
     public void runSetpoint(SwerveModuleState state) {
