@@ -33,7 +33,7 @@ public class GamePieceVision implements Periodic {
 
     private static GamePieceVision instance;
 
-    private DBSCAN dbscan = new DBSCAN(new ArrayList<Translation2d>(), 4, 0.5);
+    private DBSCAN dbscan = new DBSCAN(new ArrayList<Translation2d>(), 3, 0.5);
 
     private Optional<Translation2d> lastTarget = Optional.empty();
 
@@ -127,25 +127,41 @@ public class GamePieceVision implements Periodic {
 
         ArrayList<FuelCluster> clusterList = new ArrayList<FuelCluster>();
         Translation2d bestTarget = null;
+        double bestWeight  = 0;
+        int largestSize = 0;
+        ArrayList<ArrayList<Translation2d>> dbscanResults = new ArrayList<ArrayList<Translation2d>> ();
         if (targetsToLastSeen.size() > 2) {
-            double bestWeight  = 0;
             dbscan.setInputValues(targetsToLastSeen.keySet());
-            ArrayList<ArrayList<Translation2d>> dbscanResults = dbscan.performClustering();
-            for (ArrayList<Translation2d> cluster : dbscanResults) {
-                FuelCluster fuelCluster = new FuelCluster(cluster);
-                clusterList.add(fuelCluster);
-                double weight = fuelCluster.weight();
-                if (lastTarget.isPresent() & fuelCluster.avgLocation().isPresent()) {
-                    weight += 2 / (fuelCluster.avgLocation().get().getDistance(lastTarget.get()) + 1);
-                }
-                if (weight > bestWeight) {
-                    bestWeight = weight;
-                    bestTarget = fuelCluster.avgLocation().get();
-                }
+            dbscanResults = dbscan.performClustering();
+        }
+        if (dbscanResults.isEmpty()) {
+            for (Translation2d target : targetsToLastSeen.keySet()) {
+                ArrayList<Translation2d> singleTarget = new ArrayList<Translation2d>();
+                singleTarget.add(target);
+                dbscanResults.add(singleTarget);
+            }
+        }
+
+        for (ArrayList<Translation2d> cluster : dbscanResults) {
+            FuelCluster fuelCluster = new FuelCluster(cluster);
+            clusterList.add(fuelCluster);
+            double weight = fuelCluster.weight();
+            if (lastTarget.isPresent() & fuelCluster.avgLocation().isPresent()) {
+                weight += 2 / (fuelCluster.avgLocation().get().getDistance(lastTarget.get()) + 1);
+            }
+            if (weight > bestWeight) {
+                bestWeight = weight;
+                bestTarget = fuelCluster.avgLocation().get();
+            }
+            if (fuelCluster.size() > largestSize) {
+                largestSize = fuelCluster.size();
             }
         }
         lastTarget = Optional.ofNullable(bestTarget);
         Logger.recordOutput("GamePieceVision/BestCluster", bestTarget);
+        Logger.recordOutput("GamePieceVision/BestWeight", bestWeight);
+        Logger.recordOutput("GamePieceVision/NumClusters", dbscanResults.size());
+        Logger.recordOutput("GamePieceVision/LargestCluster", largestSize);
         //bestTargets = clusters
         //        .stream()
         //        .sorted(Comparator.comparing(FuelCluster::size))
