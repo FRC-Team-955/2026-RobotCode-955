@@ -22,7 +22,6 @@ import frc.robot.subsystems.superstructure.Superstructure;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 import java.util.function.BooleanSupplier;
-import java.util.function.Function;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -83,35 +82,62 @@ public class RobotContainer {
     private void configureBindings() {
         controller.y().onTrue(robotState.resetRotation());
 
+        Trigger intake = controller.rightTrigger();
+        Trigger shoot = controller.leftTrigger();
+        Trigger shootForce = controller.leftBumper();
+
         BooleanSupplier shouldNotAssist = () -> operatorDashboard.disableAssist.get() || robotState.isInTrench();
-        controller.rightTrigger()
-                .and(controller.leftTrigger().negate())
+        intake
+                .and(shoot.negate())
                 .whileTrue(Commands.parallel(
                         drive.driveJoystick(() -> shouldNotAssist.getAsBoolean() ? DriveJoystickGoal.Mode.Normal : DriveJoystickGoal.Mode.Assist),
                         superintake.setGoal(Superintake.Goal.INTAKE)
                 ));
 
-        Function<Superstructure.Goal, Command> shootCommandBuilder = (superstructureGoal) -> Commands.parallel(
-                drive.driveJoystick(() -> {
-                    if (operatorDashboard.manualAiming.get() && shouldNotAssist.getAsBoolean()) {
-                        return DriveJoystickGoal.Mode.StopWithX;
-                    } else if (operatorDashboard.manualAiming.get()) {
-                        return DriveJoystickGoal.Mode.Assist;
-                    } else if (shouldNotAssist.getAsBoolean()) {
-                        return DriveJoystickGoal.Mode.Aim;
-                    } else {
-                        return DriveJoystickGoal.Mode.AimAndAssist;
-                    }
-                }),
-                superintake.setGoal(Superintake.Goal.INTAKE),
-                superstructure.setGoal(superstructureGoal)
-        );
-        controller.leftTrigger()
+        shoot
+                .and(intake.negate())
                 .and(() -> controller.getDriveAngularMagnitude() == 0.0)
-                .toggleOnTrue(shootCommandBuilder.apply(Superstructure.Goal.SHOOT));
-        controller.leftBumper()
+                .whileTrue(Commands.parallel(
+                        drive.driveJoystick(() -> {
+                            if (operatorDashboard.manualAiming.get()) {
+                                return DriveJoystickGoal.Mode.StopWithX;
+                            } else {
+                                return DriveJoystickGoal.Mode.Aim;
+                            }
+                        }),
+                        superstructure.setGoal(Superstructure.Goal.SHOOT)
+                ));
+        shootForce
+                .and(intake.negate())
                 .and(() -> controller.getDriveAngularMagnitude() == 0.0)
-                .toggleOnTrue(shootCommandBuilder.apply(Superstructure.Goal.SHOOT_FORCE));
+                .whileTrue(Commands.parallel(
+                        drive.driveJoystick(() -> {
+                            if (operatorDashboard.manualAiming.get()) {
+                                return DriveJoystickGoal.Mode.StopWithX;
+                            } else {
+                                return DriveJoystickGoal.Mode.Aim;
+                            }
+                        }),
+                        superstructure.setGoal(Superstructure.Goal.SHOOT_FORCE)
+                ));
+        shoot
+                .and(intake)
+                .and(() -> controller.getDriveAngularMagnitude() == 0.0)
+                .whileTrue(Commands.parallel(
+                        drive.driveJoystick(() -> {
+                            if (operatorDashboard.manualAiming.get() && shouldNotAssist.getAsBoolean()) {
+                                return DriveJoystickGoal.Mode.StopWithX;
+                            } else if (operatorDashboard.manualAiming.get()) {
+                                return DriveJoystickGoal.Mode.Assist;
+                            } else if (shouldNotAssist.getAsBoolean()) {
+                                return DriveJoystickGoal.Mode.Aim;
+                            } else {
+                                return DriveJoystickGoal.Mode.AimAndAssist;
+                            }
+                        }),
+                        superintake.setGoal(Superintake.Goal.INTAKE),
+                        superstructure.setGoal(Superstructure.Goal.SHOOT)
+                ));
 
         controller.x()
                 .whileTrue(Commands.parallel(
