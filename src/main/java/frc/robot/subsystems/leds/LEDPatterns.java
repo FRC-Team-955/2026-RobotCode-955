@@ -87,7 +87,7 @@ public class LEDPatterns {
     public static final LEDPattern shootingForced = LEDPattern.gradient(
             LEDPattern.GradientType.kContinuous,
             Color.kGreen,
-            Color.kBlack
+            Color.kRed
     ).scrollAtRelativeSpeed(Hertz.of(1));
     public static final LEDPattern intaking = LEDPattern.solid(Color.kYellow).blink(Seconds.of(0.1));
     public static final LEDPattern waitingForShift = LEDPattern.solid(Color.kPink).blink(Seconds.of(0.1));
