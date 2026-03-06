@@ -91,7 +91,7 @@ public class DBSCAN {
      * @param inputValue Input value for which neighbours are to be determined
      * @return List of neighbours for a given input value
      */
-    private ArrayList<Translation2d> getNeighbours(final Translation2d inputValue) throws Exception {
+    private ArrayList<Translation2d> getNeighbours(final Translation2d inputValue) {
         ArrayList<Translation2d> neighbours = new ArrayList<Translation2d>();
         for(int i=0; i<inputValues.size(); i++) {
             Translation2d candidate = inputValues.get(i);
@@ -128,19 +128,6 @@ public class DBSCAN {
      * @return Collection of clusters identified as part of the clustering process
      */
     public ArrayList<ArrayList<Translation2d>> performClustering() {
-
-        if (inputValues == null) {
-            throw new Exception("DBSCAN: List of input values is null.");
-        }
-
-        if (inputValues.isEmpty()) {
-            throw new Exception("DBSCAN: List of input values is empty.");
-        }
-
-        if (inputValues.size() < 2) {
-            throw new Exception("DBSCAN: Less than two input values cannot be clustered. Number of input values: " + inputValues.size());
-        }
-
         ArrayList<ArrayList<Translation2d>> resultList = new ArrayList<ArrayList<Translation2d>>();
         visitedPoints.clear();
 
