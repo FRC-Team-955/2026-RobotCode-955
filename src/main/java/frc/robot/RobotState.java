@@ -234,14 +234,22 @@ public class RobotState implements Periodic {
     @AutoLogOutput(key = "RobotState/IsInTrench")
     public boolean isInTrench() {
         // make each bounding box larger so that the hood has time to move down before going under the trench
-        double adjustmentMeters = 0.25 + Math.abs(getMeasuredChassisSpeedsFieldRelative().vxMetersPerSecond) * 0.5;
+        double adjustmentMetersPositiveX = 0.35 + Math.max(0.0, getMeasuredChassisSpeedsFieldRelative().vxMetersPerSecond) * 0.5;
+        double adjustmentMetersNegativeX = 0.35 + Math.min(0.0, getMeasuredChassisSpeedsFieldRelative().vxMetersPerSecond) * -0.5;
         Translation2d t = getTranslation();
-        boolean inNeutralZone = t.getX() > FieldConstants.LinesVertical.neutralZoneNear + adjustmentMeters &&
-                t.getX() < FieldConstants.LinesVertical.neutralZoneFar - adjustmentMeters;
-        boolean inAllianceZone = t.getX() < FieldConstants.LinesVertical.allianceZone - adjustmentMeters ||
-                t.getX() > FieldConstants.LinesVertical.oppAllianceZone + adjustmentMeters;
-        boolean inLeftTrench = t.getY() > FieldConstants.LinesHorizontal.leftTrenchOpenEnd - adjustmentMeters;
-        boolean inRightTrench = t.getY() < FieldConstants.LinesHorizontal.rightTrenchOpenStart + adjustmentMeters;
+        //Logger.recordOutput(
+        //        "RobotState/TrenchChecks",
+        //        new Pose2d(new Translation2d(FieldConstants.LinesVertical.neutralZoneNear + adjustmentMetersNegativeX, 0.6), new Rotation2d()),
+        //        new Pose2d(new Translation2d(FieldConstants.LinesVertical.neutralZoneFar - adjustmentMetersPositiveX, 0.6), new Rotation2d()),
+        //        new Pose2d(new Translation2d(FieldConstants.LinesVertical.allianceZone - adjustmentMetersPositiveX, 0.6), new Rotation2d()),
+        //        new Pose2d(new Translation2d(FieldConstants.LinesVertical.oppAllianceZone + adjustmentMetersNegativeX, 0.6), new Rotation2d())
+        //);
+        boolean inNeutralZone = t.getX() > FieldConstants.LinesVertical.neutralZoneNear + adjustmentMetersNegativeX &&
+                t.getX() < FieldConstants.LinesVertical.neutralZoneFar - adjustmentMetersPositiveX;
+        boolean inAllianceZone = t.getX() < FieldConstants.LinesVertical.allianceZone - adjustmentMetersPositiveX ||
+                t.getX() > FieldConstants.LinesVertical.oppAllianceZone + adjustmentMetersNegativeX;
+        boolean inLeftTrench = t.getY() > FieldConstants.LinesHorizontal.leftTrenchOpenEnd;
+        boolean inRightTrench = t.getY() < FieldConstants.LinesHorizontal.rightTrenchOpenStart;
         return !inNeutralZone && !inAllianceZone && (inLeftTrench || inRightTrench);
     }
 }

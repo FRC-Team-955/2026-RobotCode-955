@@ -6,10 +6,12 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj.Alert;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.Util;
 import frc.lib.network.LoggedTunableNumber;
 import frc.lib.subsystem.CommandBasedSubsystem;
+import frc.robot.FieldConstants;
 import frc.robot.OperatorDashboard;
 import frc.robot.RobotState;
 import frc.robot.shooting.ShootingKinematics;
@@ -26,9 +28,12 @@ import static frc.robot.subsystems.superstructure.SuperstructureConstants.robotT
 
 public class Superstructure extends CommandBasedSubsystem {
     // https://v6.docs.ctr-electronics.com/en/stable/docs/application-notes/tuning-canrange.html
-    private static final LoggedTunableNumber hasFuelThresholdMeters = new LoggedTunableNumber("Superstructure/HasFuelThresholdMeters", 0.33);
+    private static final LoggedTunableNumber hasFuelThresholdMeters = new LoggedTunableNumber("Superstructure/HasFuelThresholdMeters", 0.5);
+    private static final LoggedTunableNumber hasFuelDebounceSeconds = new LoggedTunableNumber("Superstructure/HasFuelDebounceSeconds", 1.0);
     private static final LoggedTunableNumber commitToShotThresholdMeters = new LoggedTunableNumber("Superstructure/CommitToShotThresholdMeters", 0.15);
     private static final LoggedTunableNumber commitToShotTimeSeconds = new LoggedTunableNumber("Superstructure/CommitToShotTimeSeconds", 0.1);
+    private static final LoggedTunableNumber antiJamStartSeconds = new LoggedTunableNumber("Superstructure/AntiJamStartSeconds", 2.0);
+    private static final LoggedTunableNumber antiJamTimeSeconds = new LoggedTunableNumber("Superstructure/AntiJamTimeSeconds", 0.3);
 
     private static final RobotState robotState = RobotState.get();
     private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
@@ -71,8 +76,11 @@ public class Superstructure extends CommandBasedSubsystem {
                 .until(this::shouldGoalEnd);
     }
 
-    private final Debouncer hasFuelDebouncer = new Debouncer(3.0, Debouncer.DebounceType.kFalling);
-    private final Debouncer commitToShotDebouncer = new Debouncer(commitToShotTimeSeconds.get(), Debouncer.DebounceType.kFalling);
+    private final Debouncer hasFuelDebouncer = new Debouncer(hasFuelDebounceSeconds.get(), Debouncer.DebounceType.kFalling);
+    private double lastStartedShot = 0.0;
+
+    @Getter
+    private boolean hasFuel = false;
 
     private final Alert canrangeDisconnectedAlert = new Alert("CANrange is disconnected.", Alert.AlertType.kError);
 
@@ -99,9 +107,12 @@ public class Superstructure extends CommandBasedSubsystem {
 
         canrangeDisconnectedAlert.set(!inputs.canrangeConnected);
 
-        if (commitToShotTimeSeconds.hasChanged()) {
-            commitToShotDebouncer.setDebounceTime(commitToShotTimeSeconds.get());
+        if (hasFuelDebounceSeconds.hasChanged()) {
+            hasFuelDebouncer.setDebounceTime(hasFuelDebounceSeconds.get());
         }
+
+        hasFuel = !operatorDashboard.disableCANrange.get() &&
+                hasFuelDebouncer.calculate(inputs.canrangeDistanceMeters < hasFuelThresholdMeters.get());
     }
 
     @Override
@@ -115,22 +126,26 @@ public class Superstructure extends CommandBasedSubsystem {
                 spindexer.setGoal(Spindexer.Goal.IDLE);
             }
             case SHOOT, SHOOT_FORCE -> {
-                //if (operatorDashboard.disableCANrange.get() || hasFuelDebouncer.calculate(inputs.canrangeDistanceMeters < hasFuelThresholdMeters.get())) {
                 flywheel.setGoal(Flywheel.Goal.SHOOT);
-                //} else {
-                //flywheel.setGoal(Flywheel.Goal.IDLE);
-                //}
 
-                boolean shouldShoot = (
-                        shootingKinematics.isShootingParametersMet() ||
-                                commitToShotDebouncer.calculate(inputs.canrangeDistanceMeters < commitToShotThresholdMeters.get())
-                ) || (
-                        shootingKinematics.isShootingParametersMet() &&
-                                operatorDashboard.disableCANrange.get()
-                );
+                boolean needsToCommitToShot = !operatorDashboard.disableCANrange.get() &&
+                        Timer.getTimestamp() - lastStartedShot < commitToShotTimeSeconds.get();
+                //Logger.recordOutput("Superstructure/NeedsToCommitToShot", needsToCommitToShot);
+                boolean shouldShoot = shootingKinematics.isShootingParametersMet() || needsToCommitToShot;
                 if (goal == Goal.SHOOT_FORCE || shouldShoot) {
                     feeder.setGoal(Feeder.Goal.FEED);
-                    spindexer.setGoal(Spindexer.Goal.FEED);
+
+                    if (hasFuel &&
+                            Timer.getTimestamp() - lastStartedShot > antiJamStartSeconds.get() &&
+                            Timer.getTimestamp() - lastStartedShot < antiJamStartSeconds.get() + antiJamTimeSeconds.get()) {
+                        spindexer.setGoal(Spindexer.Goal.EJECT);
+                    } else {
+                        spindexer.setGoal(Spindexer.Goal.FEED);
+                    }
+
+                    if (inputs.canrangeDistanceMeters < commitToShotThresholdMeters.get() && !needsToCommitToShot) {
+                        lastStartedShot = Timer.getTimestamp();
+                    }
                 } else {
                     feeder.setGoal(Feeder.Goal.IDLE);
                     spindexer.setGoal(Spindexer.Goal.IDLE);
@@ -154,7 +169,7 @@ public class Superstructure extends CommandBasedSubsystem {
                 new Pose3d(robotState.getPose())
                         .transformBy(robotToCANrange)
                         .transformBy(new Transform3d(
-                                new Translation3d(inputs.canrangeDistanceMeters, 0.0, 0.0),
+                                new Translation3d(inputs.canrangeDistanceMeters + FieldConstants.fuelDiameter / 2.0, 0.0, 0.0),
                                 new Rotation3d()
                         ))
         );

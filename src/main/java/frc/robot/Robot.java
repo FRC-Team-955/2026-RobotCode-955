@@ -23,7 +23,6 @@ import frc.lib.LoggedTracer;
 import frc.lib.subsystem.Periodic;
 import frc.robot.subsystems.leds.LEDs;
 import org.ironmaple.simulation.SimulatedArena;
-import org.ironmaple.simulation.seasonspecific.rebuilt2026.Arena2026Rebuilt;
 import org.littletonrobotics.junction.AutoLogOutputManager;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
@@ -55,7 +54,8 @@ public class Robot extends LoggedRobot {
         if (BuildConstants.mode == BuildConstants.Mode.SIM) {
             // Setup arena BEFORE any of our robot code tries to use it
             // Otherwise, literally everything in maple-sim breaks
-            SimulatedArena.overrideInstance(new Arena2026Rebuilt(false));
+            //SimulatedArena.overrideInstance(new Arena2026Rebuilt(false));
+            SimulatedArena.overrideInstance(new SimManager.CustomArena(false));
         }
 
         @SuppressWarnings("resource")
