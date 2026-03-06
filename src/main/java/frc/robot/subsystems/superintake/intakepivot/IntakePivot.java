@@ -105,7 +105,11 @@ public class IntakePivot implements Periodic {
 
             double setpointRad = goal.setpointRad.getAsDouble();
             if (robotState.isInTrench()) {
-                setpointRad = Math.min(setpointRad, maxPositionUnderTrench);
+                if (getPositionRad() < tresholdForLoweringUnderTrench) {
+                    setpointRad = Math.min(setpointRad, maxPositionUnderTrench);
+                } else {
+                    setpointRad = maxPositionRad;
+                }
             }
             setpointRad = MathUtil.clamp(setpointRad, minPositionRad, maxPositionRad);
             Logger.recordOutput("Superintake/IntakePivot/OriginalSetpointRad", setpointRad);
