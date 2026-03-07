@@ -96,7 +96,6 @@ public class RobotContainer {
 
         shoot
                 .and(intake.negate())
-                .and(() -> controller.getDriveAngularMagnitude() == 0.0)
                 .whileTrue(Commands.parallel(
                         drive.driveJoystick(() -> {
                             if (operatorDashboard.manualAiming.get()) {
@@ -109,7 +108,6 @@ public class RobotContainer {
                 ));
         shootForce
                 .and(intake.negate())
-                .and(() -> controller.getDriveAngularMagnitude() == 0.0)
                 .whileTrue(Commands.parallel(
                         drive.driveJoystick(() -> {
                             if (operatorDashboard.manualAiming.get()) {
@@ -122,7 +120,6 @@ public class RobotContainer {
                 ));
         shoot
                 .and(intake)
-                .and(() -> controller.getDriveAngularMagnitude() == 0.0)
                 .whileTrue(Commands.parallel(
                         drive.driveJoystick(() -> {
                             if (operatorDashboard.manualAiming.get() && shouldNotAssist.getAsBoolean()) {
