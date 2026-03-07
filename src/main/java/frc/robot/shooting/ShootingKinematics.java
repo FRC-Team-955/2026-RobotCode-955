@@ -51,19 +51,15 @@ public class ShootingKinematics implements Periodic {
     //private static final InterpolatingDoubleTreeMap velocityToRPMMap = new InterpolatingDoubleTreeMap();
 
     static {
-        //velocityToRPMMap.put(6.8, 1850.0);
-        //velocityToRPMMap.put(7.02, 1900.0);
-        //velocityToRPMMap.put(7.22, 1950.0);
-        //velocityToRPMMap.put(7.45, 2050.0);
-        //velocityToRPMMap.put(7.64, 2100.0);
-        //velocityToRPMMap.put(7.94, 2250.0);
-        //velocityToRPMMap.put(8.26, 2350.0);
-        //velocityToRPMMap.put(8.40, 2450.0);
-        //velocityToRPMMap.put(9.10, 2650.0);
+        //velocityToRPMMap.put(6.78, 1800.0);
+        //velocityToRPMMap.put(7.58, 2100.0);
+        //velocityToRPMMap.put(8.37, 2348.0);
+        //velocityToRPMMap.put(9.07, 2602.0);
+        ///*velocityToRPMMap.put(9.45, 2995.0); PROBABLY BAD */
         //velocityToRPM = (x) -> velocityToRPMMap.get(x);
 
-        // https://www.desmos.com/calculator/0ow99dd1u0
-        velocityToRPM = (x) -> 366.65817 * x - 672.63778;
+        // https://www.desmos.com/calculator/tov3h2vpch
+        velocityToRPM = (x) -> 346.45508 * x - 541.81792;
     }
 
     private static final RobotState robotState = RobotState.get();
