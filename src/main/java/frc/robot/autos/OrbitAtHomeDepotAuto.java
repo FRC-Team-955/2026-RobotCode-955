@@ -59,7 +59,7 @@ public class OrbitAtHomeDepotAuto extends Auto {
                 // avoid scattering balls
                 AutoHelpers.intermediateWaypoint(() -> new Pose2d(
                         FieldConstants.LinesVertical.center - 0.5,
-                        trenchShootingPosition.getY() - 0.3,
+                        trenchShootingPosition.getY() - 0.15,
                         trenchShootingPosition.getRotation()
                 ), defaultMoveToConstraints),
 
@@ -117,7 +117,7 @@ public class OrbitAtHomeDepotAuto extends Auto {
                 // avoid scattering balls
                 AutoHelpers.intermediateWaypoint(() -> new Pose2d(
                         7.5,
-                        trenchShootingPosition.getY() - 0.3,
+                        trenchShootingPosition.getY() - 0.15,
                         trenchShootingPosition.getRotation()
                 ), defaultMoveToConstraints),
 
