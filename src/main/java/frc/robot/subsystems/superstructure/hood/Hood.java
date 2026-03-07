@@ -55,6 +55,10 @@ public class Hood implements Periodic {
     private boolean emergencyStopped = false;
     private final Debouncer emergencyStopDebouncer = new Debouncer(2.0, Debouncer.DebounceType.kRising);
 
+    @Getter
+    private boolean atVelocityThresholdForHoming = false;
+    private final Debouncer homingVelocityDebouncer = new Debouncer(0.1, Debouncer.DebounceType.kRising);
+
     private final Alert motorDisconnectedAlert = new Alert("Hood motor is disconnected.", Alert.AlertType.kError);
     public final Alert highTemperatureAlert = new Alert("Hood motor temperature is high.", Alert.AlertType.kWarning);
     private final Alert emergencyStoppedAlert = new Alert("Hood is E-stopped!", Alert.AlertType.kError);
@@ -100,6 +104,8 @@ public class Hood implements Periodic {
         }
         emergencyStoppedAlert.set(emergencyStopped);
 
+        atVelocityThresholdForHoming = homingVelocityDebouncer.calculate(goal == Goal.HOME && Math.abs(inputs.velocityRadPerSec) < 0.1);
+
         // Apply network inputs
         if (!emergencyStopped && operatorDashboard.coastOverride.hasChanged()) {
             io.setNeutralMode(operatorDashboard.coastOverride.get() ? NeutralModeValue.Coast : NeutralModeValue.Brake);
@@ -140,10 +146,6 @@ public class Hood implements Periodic {
 
     public double getShotAngleRad() {
         return convertBetweenShotAngleAndHoodAngleRad(getPositionRad());
-    }
-
-    public boolean isCurrentAtThresholdForHoming() {
-        return inputs.currentAmps >= 10.0;
     }
 
     public void finishHoming() {
