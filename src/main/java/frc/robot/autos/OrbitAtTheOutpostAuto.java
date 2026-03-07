@@ -43,14 +43,14 @@ public class OrbitAtTheOutpostAuto extends Auto {
                         Rotation2d.kCCW_90deg,
                         2,
                         defaultMoveToConstraints
-                ),
+                ).withTimeout(3),
 
                 //move to netruazone middle
                 AutoHelpers.finalWaypoint(() -> new Pose2d(
                         FieldConstants.LinesVertical.center + OrbitAtHomeDepotAuto.firstPassYOffset,
                         3.51,
                         Rotation2d.kCCW_90deg
-                ), AutoHelpers.intakeConstraints),
+                ), AutoHelpers.intakeConstraints).withTimeout(3),
                 superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
 
                 // avoid scattering balls
@@ -58,7 +58,7 @@ public class OrbitAtTheOutpostAuto extends Auto {
                         FieldConstants.LinesVertical.center - 1.5,
                         trenchShootingPosition.getY() - 0.15,
                         trenchShootingPosition.getRotation()
-                ), defaultMoveToConstraints),
+                ), defaultMoveToConstraints).withTimeout(3),
 
                 //move to entrance to trench
                 AutoHelpers.intermediateWaypoint(() -> new Pose2d(
