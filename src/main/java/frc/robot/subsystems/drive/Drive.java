@@ -4,6 +4,7 @@ import choreo.trajectory.SwerveSample;
 import choreo.trajectory.Trajectory;
 import edu.wpi.first.hal.FRCNetComm;
 import edu.wpi.first.hal.HAL;
+import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -47,6 +48,9 @@ public class Drive extends CommandBasedSubsystem {
 
     private final LinearFilter accelerationXFilter = LinearFilter.movingAverage(4);
     private final LinearFilter accelerationYFilter = LinearFilter.movingAverage(4);
+
+    private final Debouncer gyroDebouncer = new Debouncer(2.0, Debouncer.DebounceType.kRising);
+    private boolean gyroDebounced = false;
 
     @Getter
     private DriveGoal goal = new IdleGoal();
@@ -125,12 +129,17 @@ public class Drive extends CommandBasedSubsystem {
 
         // Update gyro angle
         // Sanity check in case gyro is connected but not giving timestamps
-        if (gyroInputs.connected && !disableGyro && hasGyroYawPositionRadForSample) {
+        boolean prevGyroDebounced = gyroDebounced;
+        gyroDebounced = gyroDebouncer.calculate(gyroInputs.connected);
+        //Logger.recordOutput("Drive/GyroConnectedDebounced", gyroDebounced);
+        // Update gyro alert
+        gyroDisconnectedAlert.set(!gyroDebounced);
+        if (gyroDebounced && !disableGyro && hasGyroYawPositionRadForSample) {
             // Use the real gyro angle
             Rotation2d prevRawGyroRotation = rawGyroRotation;
             rawGyroRotation = new Rotation2d(getGyroYawPositionRad.getAsDouble());
             // If gyro rotation jumps due to a disconnection, power cycle, and reconnection, discard
-            if (Math.abs(rawGyroRotation.minus(prevRawGyroRotation).getRadians()) > odometryGyroRotationDeltaDiscardRad) {
+            if (Math.abs(rawGyroRotation.minus(prevRawGyroRotation).getRadians()) > odometryGyroRotationDeltaDiscardRad || (!prevGyroDebounced && gyroDebounced)) {
                 discardSample = true;
             }
         } else {
@@ -175,9 +184,6 @@ public class Drive extends CommandBasedSubsystem {
         for (var module : modules) {
             module.periodicBeforeCommands();
         }
-
-        // Update gyro alert
-        gyroDisconnectedAlert.set(!gyroInputs.connected);
 
         // Odometry
         if (useHighFrequencyOdometry) {
