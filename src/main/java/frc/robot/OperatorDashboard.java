@@ -62,7 +62,7 @@ public class OperatorDashboard implements Periodic {
     private final Alert coastOverrideAlert = new Alert("Coast override is enabled.", Alert.AlertType.kWarning);
     private final Alert autoNotChosenAlert = new Alert("Auto is not chosen!", Alert.AlertType.kError);
     private final Alert recordingNotStartedAlert = new Alert("Recording is not started!", Alert.AlertType.kWarning);
-    private final Alert autoNotAlignedAlert = new Alert("Robot is not aligned for auto!", Alert.AlertType.kError);
+    //private final Alert autoNotAlignedAlert = new Alert("Robot is not aligned for auto!", Alert.AlertType.kError);
     @SuppressWarnings("FieldCanBeLocal")
     private final Alert constantSetAlert = new Alert("Constants are set.", Alert.AlertType.kInfo);
     private final Alert batteryVoltageAlert = new Alert("Battery is below 12 volts!", Alert.AlertType.kError);
@@ -115,7 +115,7 @@ public class OperatorDashboard implements Periodic {
         coastOverrideAlert.set(coastOverride.get());
         autoNotChosenAlert.set(!autoChosen.get());
         recordingNotStartedAlert.set(!recordingStarted.get());
-        autoNotAlignedAlert.set(DriverStation.isDisabled() && !autoManager.isAtAutoStartingPose());
+        //autoNotAlignedAlert.set(DriverStation.isDisabled() && !autoManager.isAtAutoStartingPose());
         batteryVoltageAlert.set(lowBatteryDebouncer.calculate(RobotController.getBatteryVoltage() <= 11.8));
         fixedHoodAlert.set(fixedHood.get());
         manualAimingAlert.set(manualAiming.get());
