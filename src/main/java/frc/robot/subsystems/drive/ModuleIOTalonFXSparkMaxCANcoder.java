@@ -206,11 +206,7 @@ public class ModuleIOTalonFXSparkMaxCANcoder extends ModuleIO {
         );
         ParentDevice.optimizeBusUtilizationForAll(driveTalon, cancoder);
 
-        //if (index == 1) {
-        //    turnEncoder.setPosition(0.0);
-        //} else {
         SparkCANcoderHelper.resetTurnSpark(turnEncoder, turnAbsolutePosition, cancoderCanID);
-        //}
     }
 
     @Override
