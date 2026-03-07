@@ -19,7 +19,7 @@ import java.util.function.DoubleSupplier;
 import static frc.robot.subsystems.superintake.intakerollers.IntakeRollersConstants.createIO;
 
 public class IntakeRollers implements Periodic {
-    private static final LoggedTunableNumber agitateVoltage = new LoggedTunableNumber("Superintake/IntakeRollers/Goal/AgitateVoltage", 2.0);
+    private static final LoggedTunableNumber idleVoltage = new LoggedTunableNumber("Superintake/IntakeRollers/Goal/IdleVoltage", 0.0);
     private static final LoggedTunableNumber intakeVoltage = new LoggedTunableNumber("Superintake/IntakeRollers/Goal/IntakeVoltage", 12.0);
     private static final LoggedTunableNumber ejectVoltage = new LoggedTunableNumber("Superintake/IntakeRollers/Goal/EjectVoltage", -12.0);
 
@@ -30,7 +30,7 @@ public class IntakeRollers implements Periodic {
 
     @RequiredArgsConstructor
     public enum Goal {
-        AGITATE(agitateVoltage::get, RequestType.VoltageVolts),
+        IDLE(idleVoltage::get, RequestType.VoltageVolts),
         INTAKE(intakeVoltage::get, RequestType.VoltageVolts),
         EJECT(ejectVoltage::get, RequestType.VoltageVolts),
         ;
@@ -42,7 +42,7 @@ public class IntakeRollers implements Periodic {
 
     @Setter
     @Getter
-    private Goal goal = Goal.AGITATE;
+    private Goal goal = Goal.IDLE;
 
     private final Alert motorDisconnectedAlert = new Alert("Intake rollers motor is disconnected.", Alert.AlertType.kError);
     public final Alert highTemperatureAlert = new Alert("Intake rollers motor temperature is high.", Alert.AlertType.kWarning);
