@@ -157,8 +157,8 @@ public class RobotState implements Periodic {
         );
          */
 
-        SmartDashboard.putData("Field2d", field2d);
         field2d.setRobotPose(getPose());
+        SmartDashboard.putData("Field2d", field2d);
     }
 
     public void applyOdometryUpdate(
