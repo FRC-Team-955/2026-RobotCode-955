@@ -234,8 +234,8 @@ public class RobotState implements Periodic {
     @AutoLogOutput(key = "RobotState/IsInTrench")
     public boolean isInTrench() {
         // make each bounding box larger so that the hood has time to move down before going under the trench
-        double adjustmentMetersPositiveX = 0.35 + Math.max(0.0, getMeasuredChassisSpeedsFieldRelative().vxMetersPerSecond) * 0.5;
-        double adjustmentMetersNegativeX = 0.35 + Math.min(0.0, getMeasuredChassisSpeedsFieldRelative().vxMetersPerSecond) * -0.5;
+        double adjustmentMetersPositiveX = 0.55 + Math.max(0.0, getMeasuredChassisSpeedsFieldRelative().vxMetersPerSecond) * 0.5;
+        double adjustmentMetersNegativeX = 0.55 + Math.min(0.0, getMeasuredChassisSpeedsFieldRelative().vxMetersPerSecond) * -0.5;
         Translation2d t = getTranslation();
         //Logger.recordOutput(
         //        "RobotState/TrenchChecks",
