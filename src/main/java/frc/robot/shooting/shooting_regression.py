@@ -272,7 +272,7 @@ def optimize_shot(distance, robot_radial_vel):
                 if some_z > max_z:
                     max_z = some_z
             # Target a certain max z based on distance
-            max_z = abs(max_z - (2.8 + hubx * 0.1))
+            max_z = abs(max_z - (2 + hubx * 0.1))
             # Reduce significance
             max_z /= 2
         else:
