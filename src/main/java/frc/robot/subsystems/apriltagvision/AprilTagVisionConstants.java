@@ -13,10 +13,9 @@
 
 package frc.robot.subsystems.apriltagvision;
 
-import edu.wpi.first.apriltag.AprilTagFieldLayout;
-import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import frc.robot.BuildConstants;
 import lombok.RequiredArgsConstructor;
@@ -24,9 +23,6 @@ import lombok.RequiredArgsConstructor;
 import java.util.function.Function;
 
 public class AprilTagVisionConstants {
-    // AprilTag layout
-    public static final AprilTagFieldLayout aprilTagLayout = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
-
     // Basic filtering thresholds
     static final double maxAmbiguity = 0.3;
     static final double maxZError = 0.2;
@@ -44,49 +40,75 @@ public class AprilTagVisionConstants {
     static final double trig3dSolveMaxDiffMeters = 0.2;
     static final double trig3dSolveMaxDiffRad = 0.15;
 
+    // use https://quaternions.online/ to visualize resulting rotation and convert to euler angles
+    // use YZX rotation order in euler angles (yaw, then pitch, then roll - aka Tait-Bryan angles)
+    static final boolean enableExtrinsicCalibration = false;
+    static final Transform3d tagToRobot = new Transform3d(
+            new Translation3d(
+                    Units.inchesToMeters(-30.0625),
+                    Units.inchesToMeters(13.75),
+                    Units.inchesToMeters(-12.0 - (1.0 / 32.0))
+            ),
+            new Rotation3d(0.0, 0.0, Units.degreesToRadians(180.0))
+    );
+
     @RequiredArgsConstructor
     enum Camera {
-        StationCam(
+        // BrainpanCam - ThriftyCam
+        BrainpanCam(
                 new Transform3d(
-                        Units.inchesToMeters(-6.625), Units.inchesToMeters(-9.125), Units.inchesToMeters(27.25),
+                        Units.inchesToMeters(-11.441561), Units.inchesToMeters(4.404409), Units.inchesToMeters(7.451625),
                         // Rotation order matters
-                        new Rotation3d(0.0, Units.degreesToRadians(-15), 0.0)
-                                .rotateBy(new Rotation3d(0.0, 0.0, Units.degreesToRadians(-30)))
+                        new Rotation3d(0.0, Units.degreesToRadians(-30.0), 0.0)
+                                .rotateBy(new Rotation3d(0.0, 0.0, Units.degreesToRadians(180 - 10.0)))
                 ),
                 (cam) -> switch (BuildConstants.mode) {
-                    case REAL -> new AprilTagVisionIOPhotonVision("StationCam");
-                    case SIM -> new AprilTagVisionIOPhotonVisionSim("StationCam", cam.robotToCamera);
+                    case REAL -> new AprilTagVisionIOPhotonVision("BrainpanCam");
+                    case SIM -> new AprilTagVisionIOPhotonVisionSim("BrainpanCam", cam.robotToCamera);
                     case REPLAY -> new AprilTagVisionIO();
                 },
                 // Relatively stable, even at long distance
                 2.0,
                 1.0
         ),
-        ReefCam(
+        ShooterCam(
                 new Transform3d(
-                        // -7.75 x without elevator slant
-                        Units.inchesToMeters(-7.5), Units.inchesToMeters(10.25), Units.inchesToMeters(24.75),
+                        Units.inchesToMeters(-11.668592), Units.inchesToMeters(-13.462841), Units.inchesToMeters(7.136914),
                         // Rotation order matters
-                        new Rotation3d(Units.degreesToRadians(20), 0.0, 0.0)
-                                // 35 pitch without elevator slant
-                                .rotateBy(new Rotation3d(0.0, Units.degreesToRadians(30), 0.0))
-                                .rotateBy(new Rotation3d(0.0, 0.0, Units.degreesToRadians(-153.5)))
+                        new Rotation3d(0.0, Units.degreesToRadians(-30.0), 0.0)
+                                .rotateBy(new Rotation3d(0.0, 0.0, Units.degreesToRadians(-180.0 + 25.0)))
                 ),
                 (cam) -> switch (BuildConstants.mode) {
-                    case REAL -> new AprilTagVisionIOPhotonVision("ReefCam");
-                    case SIM -> new AprilTagVisionIOPhotonVisionSim("ReefCam", cam.robotToCamera);
+                    case REAL -> new AprilTagVisionIOPhotonVision("ShooterCam");
+                    case SIM -> new AprilTagVisionIOPhotonVisionSim("ShooterCam", cam.robotToCamera);
                     case REPLAY -> new AprilTagVisionIO();
                 },
-                // Trust more at close distance, less at long distance
-                2.5,
-                0.5
+                // Relatively stable, even at long distance
+                2.0,
+                1.0
         ),
+        // HopperCam - OV2311
+        //        YellowCam(
+        //                new Transform3d(
+        //                        Units.inchesToMeters(-5.549223), Units.inchesToMeters(12.125000), Units.inchesToMeters(20.060018),
+        //                        // Rotation order matters
+        //                        new Rotation3d(0.0, Units.degreesToRadians(-35), 0.0)
+        //                ),
+        //                (cam) -> switch (BuildConstants.mode) {
+        //                    case REAL -> new AprilTagVisionIOPhotonVision("YellowCam");
+        //                    case SIM -> new AprilTagVisionIOPhotonVisionSim("YellowCam", cam.robotToCamera);
+        //                    case REPLAY -> new AprilTagVisionIO();
+        //                },
+        //                // Trust more at close distance, less at long distance
+        //                2.0,
+        //                1.0
+        //        ),
         ;
 
         final Transform3d robotToCamera;
         private final Function<Camera, AprilTagVisionIO> createIO;
         final double distancePower;
-        final double stddevMultiplier;
+        final double stdDevMultiplier;
 
         AprilTagVisionIO createIO() {
             return createIO.apply(this);

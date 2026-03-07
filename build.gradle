@@ -2,7 +2,7 @@ import java.time.LocalDateTime
 
 plugins {
     id "java"
-    id "edu.wpi.first.GradleRIO" version "2025.3.2"
+    id "edu.wpi.first.GradleRIO" version "2026.2.1"
     id "com.peterabeles.gversion" version "1.10"
     id "io.freefair.lombok" version "8.6"
 }
@@ -99,8 +99,8 @@ test {
 // AdvantageKit log replay from the command line. Set the
 // value to "true" to enable the sim GUI by default (this
 // is the standard WPILib behavior).
-wpi.sim.addGui().defaultEnabled = true
-wpi.sim.addDriverstation()
+wpi.sim.addGui().defaultEnabled = System.getenv("REPLAYENABLED") == null
+wpi.sim.addDriverstation().defaultEnabled = System.getenv("REPLAYENABLED") == null
 
 // Setting up my Jar File. In this case, adding all libraries into the main jar ('fat jar')
 // in order to make them all available at runtime. Also adding the manifest so WPILib
@@ -237,7 +237,7 @@ boolean isNewer(String versionA, String versionB) {
     def parseVersion = { String version ->
         if (version.startsWith('v')) version = version.substring(1)
         def parts = version.split("\\.")
-        return [major: parts[0].toInteger(), minor: parts[1].toInteger(), patch: parts[2].toInteger()]
+        return [major: parts[0].toInteger(), minor: parts[1].toInteger(), patch: parts[2].split("-")[0].toInteger()]
     }
 
     def vA = parseVersion(versionA)
@@ -280,6 +280,7 @@ tasks.register("updateVendordeps") {
                     }
                 } catch (Exception e) {
                     println("Failed to update ${file.name}: ${e.message}")
+                    throw e
                 }
             }
         }

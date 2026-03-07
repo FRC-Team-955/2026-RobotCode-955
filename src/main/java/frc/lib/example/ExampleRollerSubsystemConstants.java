@@ -1,24 +1,23 @@
 package frc.lib.example;
 
+import com.revrobotics.spark.config.SparkBaseConfig;
 import edu.wpi.first.math.system.plant.DCMotor;
-import frc.lib.PIDF;
+import edu.wpi.first.math.util.Units;
 import frc.lib.motor.MotorIO;
 import frc.lib.motor.MotorIOSim;
 import frc.lib.motor.MotorIOSparkMax;
-import frc.lib.motor.RequestTolerances;
+import frc.lib.network.LoggedTunablePIDF;
 import frc.robot.BuildConstants;
 
 public class ExampleRollerSubsystemConstants {
-    static final RequestTolerances tolerances = RequestTolerances.defaults();
+    static final double velocityToleranceRadPerSec = Units.rotationsPerMinuteToRadiansPerSecond(10);
 
     static final double gearRatio = 5;
-    static final PIDF positionGains = switch (BuildConstants.mode) {
-        case REAL, REPLAY -> PIDF.zero();
-        case SIM -> PIDF.zero();
+    static final LoggedTunablePIDF positionGains = switch (BuildConstants.mode) {
+        case REAL, REPLAY, SIM -> new LoggedTunablePIDF("ExampleRollerSubsystem/Position");
     };
-    static final PIDF velocityGains = switch (BuildConstants.mode) {
-        case REAL, REPLAY -> PIDF.zero();
-        case SIM -> PIDF.zero();
+    static final LoggedTunablePIDF velocityGains = switch (BuildConstants.mode) {
+        case REAL, REPLAY, SIM -> new LoggedTunablePIDF("ExampleRollerSubsystem/Velocity");
     };
 
     static MotorIO createIO() {
@@ -26,18 +25,20 @@ public class ExampleRollerSubsystemConstants {
             case REAL -> new MotorIOSparkMax(
                     -1,
                     true,
-                    true,
+                    SparkBaseConfig.IdleMode.kCoast,
                     40,
                     gearRatio,
                     positionGains,
-                    velocityGains
+                    velocityGains,
+                    0.0
             );
             case SIM -> new MotorIOSim(
                     gearRatio,
                     0.01,
                     DCMotor.getNEO(1),
                     positionGains,
-                    velocityGains
+                    velocityGains,
+                    0.0
             );
             case REPLAY -> new MotorIO();
         };

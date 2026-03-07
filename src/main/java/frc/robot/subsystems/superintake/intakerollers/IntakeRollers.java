@@ -2,6 +2,7 @@ package frc.robot.subsystems.superintake.intakerollers;
 
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
+import frc.lib.Util;
 import frc.lib.motor.MotorIO;
 import frc.lib.motor.MotorIOInputsAutoLogged;
 import frc.lib.motor.RequestType;
@@ -18,17 +19,18 @@ import java.util.function.DoubleSupplier;
 import static frc.robot.subsystems.superintake.intakerollers.IntakeRollersConstants.createIO;
 
 public class IntakeRollers implements Periodic {
+    private static final LoggedTunableNumber idleVoltage = new LoggedTunableNumber("Superintake/IntakeRollers/Goal/IdleVoltage", 0.0);
     private static final LoggedTunableNumber intakeVoltage = new LoggedTunableNumber("Superintake/IntakeRollers/Goal/IntakeVoltage", 12.0);
     private static final LoggedTunableNumber ejectVoltage = new LoggedTunableNumber("Superintake/IntakeRollers/Goal/EjectVoltage", -12.0);
 
-    private final OperatorDashboard operatorDashboard = OperatorDashboard.get();
+    private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
 
     private final MotorIO io = createIO();
     private final MotorIOInputsAutoLogged inputs = new MotorIOInputsAutoLogged();
 
     @RequiredArgsConstructor
     public enum Goal {
-        IDLE(() -> 0.0, RequestType.VoltageVolts),
+        IDLE(idleVoltage::get, RequestType.VoltageVolts),
         INTAKE(intakeVoltage::get, RequestType.VoltageVolts),
         EJECT(ejectVoltage::get, RequestType.VoltageVolts),
         ;
@@ -42,20 +44,23 @@ public class IntakeRollers implements Periodic {
     @Getter
     private Goal goal = Goal.IDLE;
 
-    private final Alert motorDisconnectedAlert = new Alert("IntakeRollers motor is disconnected.", Alert.AlertType.kError);
+    private final Alert motorDisconnectedAlert = new Alert("Intake rollers motor is disconnected.", Alert.AlertType.kError);
+    public final Alert highTemperatureAlert = new Alert("Intake rollers motor temperature is high.", Alert.AlertType.kWarning);
 
     private static IntakeRollers instance;
 
-    public static IntakeRollers get() {
-        if (instance == null)
-            synchronized (IntakeRollers.class) {
-                instance = new IntakeRollers();
-            }
+    public static synchronized IntakeRollers get() {
+        if (instance == null) {
+            instance = new IntakeRollers();
+        }
 
         return instance;
     }
 
     private IntakeRollers() {
+        if (instance != null) {
+            Util.error("Duplicate IntakeRollers created");
+        }
     }
 
     @Override
@@ -64,11 +69,7 @@ public class IntakeRollers implements Periodic {
         Logger.processInputs("Inputs/Superintake/IntakeRollers", inputs);
 
         motorDisconnectedAlert.set(!inputs.connected);
-
-        // Apply network inputs
-        if (operatorDashboard.coastOverride.hasChanged()) {
-            io.setBrakeMode(!operatorDashboard.coastOverride.get());
-        }
+        highTemperatureAlert.set(inputs.temperatureCelsius > 50);
     }
 
     @Override
@@ -77,9 +78,9 @@ public class IntakeRollers implements Periodic {
         if (DriverStation.isDisabled()) {
             io.setRequest(RequestType.VoltageVolts, 0);
         } else {
-            Logger.recordOutput("Superintake/IntakeRollers/RequestType", goal.type);
+            //            Logger.recordOutput("Superintake/IntakeRollers/RequestType", goal.type);
             double value = goal.value.getAsDouble();
-            Logger.recordOutput("Superintake/IntakeRollers/RequestValue", value);
+            //Logger.recordOutput("Superintake/IntakeRollers/RequestValue", value);
             io.setRequest(goal.type, value);
         }
     }

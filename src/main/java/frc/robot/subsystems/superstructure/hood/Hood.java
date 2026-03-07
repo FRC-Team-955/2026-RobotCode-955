@@ -1,23 +1,20 @@
 package frc.robot.subsystems.superstructure.hood;
 
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.math.util.Units;
+import com.ctre.phoenix6.signals.NeutralModeValue;
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
-import frc.lib.PIDF;
-import frc.lib.motor.MotorIO;
+import frc.lib.Util;
 import frc.lib.motor.MotorIOInputsAutoLogged;
-import frc.lib.motor.RequestType;
-import frc.lib.network.LoggedTunableNumber;
 import frc.lib.subsystem.Periodic;
 import frc.robot.OperatorDashboard;
-import frc.robot.ShootingKinematics;
+import frc.robot.RobotState;
+import frc.robot.shooting.ShootingKinematics;
+import frc.robot.subsystems.superstructure.hood.HoodIO.HoodCurrentLimitMode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.function.DoubleSupplier;
@@ -25,28 +22,17 @@ import java.util.function.DoubleSupplier;
 import static frc.robot.subsystems.superstructure.hood.HoodConstants.*;
 
 public class Hood implements Periodic {
-    private static final PIDF.Tunable gainsTunable = gains.tunable("Superstructure/Hood/Gains");
-    private static final LoggedTunableNumber profileLookaheadTimeSec = new LoggedTunableNumber("Superstructure/Hood/ProfileLookaheadTimeSec", 0.15);
-    private static final LoggedTunableNumber stowSetpointDegrees = new LoggedTunableNumber("Superstructure/Hood/Goal/StowDegrees", -45.0);
-    private static final LoggedTunableNumber shootHubManualSetpointDegrees = new LoggedTunableNumber("Superstructure/Hood/Goal/ShootHubManualDegrees", -45.0);
-    private static final LoggedTunableNumber shootTowerManualSetpointDegrees = new LoggedTunableNumber("Superstructure/Hood/Goal/ShootTowerManualDegrees", -45.0);
-    private static final LoggedTunableNumber passManualSetpointDegrees = new LoggedTunableNumber("Superstructure/Hood/Goal/PassManualDegrees", -45.0);
-    private static final LoggedTunableNumber ejectSetpointDegrees = new LoggedTunableNumber("Superstructure/Hood/Goal/EjectDegrees", -45.0);
-
-    private final OperatorDashboard operatorDashboard = OperatorDashboard.get();
+    private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
     private static final ShootingKinematics shootingKinematics = ShootingKinematics.get();
+    private static final RobotState robotState = RobotState.get();
 
-    private final MotorIO io = createIO();
+    private final HoodIO io = createIO();
     private final MotorIOInputsAutoLogged inputs = new MotorIOInputsAutoLogged();
 
     @RequiredArgsConstructor
     public enum Goal {
-        STOW(() -> Units.degreesToRadians(stowSetpointDegrees.get())),
-        SHOOT_AND_PASS_AUTOMATIC(() -> shootingKinematics.getShootingParameters().hoodAngleRad()),
-        SHOOT_HUB_MANUAL(() -> Units.degreesToRadians(shootHubManualSetpointDegrees.get())),
-        SHOOT_TOWER_MANUAL(() -> Units.degreesToRadians(shootTowerManualSetpointDegrees.get())),
-        PASS_MANUAL(() -> Units.degreesToRadians(passManualSetpointDegrees.get())),
-        EJECT(() -> Units.degreesToRadians(ejectSetpointDegrees.get())),
+        SHOOT(() -> convertBetweenShotAngleAndHoodAngleRad(shootingKinematics.getShootingParameters().angleRad())),
+        HOME(null),
         ;
 
         private final DoubleSupplier setpointRad;
@@ -54,29 +40,39 @@ public class Hood implements Periodic {
 
     @Setter
     @Getter
-    private Goal goal = Goal.STOW;
+    private Goal goal = Goal.SHOOT;
 
-    private final TrapezoidProfile profile = new TrapezoidProfile(constraints);
-    private Double lastSetpointRad = null;
-    // goalState is just for logging the profile we want to follow.
-    // lookaheadState is shifted some seconds into the future, and is used for PID setpoint.
-    private TrapezoidProfile.State goalState = new TrapezoidProfile.State();
-    private TrapezoidProfile.State lookaheadState = new TrapezoidProfile.State();
+    private HoodCurrentLimitMode currentLimitMode = HoodCurrentLimitMode.NORMAL;
+
+    public void setCurrentLimitMode(HoodCurrentLimitMode newCurrentLimitMode) {
+        if (currentLimitMode != newCurrentLimitMode) {
+            currentLimitMode = newCurrentLimitMode;
+            io.setCurrentLimit(currentLimitMode);
+        }
+    }
+
+    @Getter
+    private boolean emergencyStopped = false;
+    private final Debouncer emergencyStopDebouncer = new Debouncer(2.0, Debouncer.DebounceType.kRising);
 
     private final Alert motorDisconnectedAlert = new Alert("Hood motor is disconnected.", Alert.AlertType.kError);
+    public final Alert highTemperatureAlert = new Alert("Hood motor temperature is high.", Alert.AlertType.kWarning);
+    private final Alert emergencyStoppedAlert = new Alert("Hood is E-stopped!", Alert.AlertType.kError);
 
     private static Hood instance;
 
-    public static Hood get() {
-        if (instance == null)
-            synchronized (Hood.class) {
-                instance = new Hood();
-            }
+    public static synchronized Hood get() {
+        if (instance == null) {
+            instance = new Hood();
+        }
 
         return instance;
     }
 
     private Hood() {
+        if (instance != null) {
+            Util.error("Duplicate Hood created");
+        }
     }
 
     @Override
@@ -85,40 +81,56 @@ public class Hood implements Periodic {
         Logger.processInputs("Inputs/Superstructure/Hood", inputs);
 
         motorDisconnectedAlert.set(!inputs.connected);
+        highTemperatureAlert.set(inputs.temperatureCelsius > 50);
+
+        if (!emergencyStopped) {
+            if (emergencyStopDebouncer.calculate(inputs.currentAmps >= 20) || operatorDashboard.hoodEStop.get()) {
+                io.setVoltageRequest(0.0);
+                io.setNeutralMode(NeutralModeValue.Coast);
+                emergencyStopped = true;
+                operatorDashboard.hoodEStop.set(true);
+            }
+        } else {
+            if (!operatorDashboard.hoodEStop.get()) {
+                // Let operator turn off e-stop
+                io.setNeutralMode(NeutralModeValue.Brake);
+                emergencyStopped = false;
+                operatorDashboard.hoodEStop.set(false);
+            }
+        }
+        emergencyStoppedAlert.set(emergencyStopped);
 
         // Apply network inputs
-        if (operatorDashboard.coastOverride.hasChanged()) {
-            io.setBrakeMode(!operatorDashboard.coastOverride.get());
+        if (!emergencyStopped && operatorDashboard.coastOverride.hasChanged()) {
+            io.setNeutralMode(operatorDashboard.coastOverride.get() ? NeutralModeValue.Coast : NeutralModeValue.Brake);
         }
 
-        gainsTunable.ifChanged(io::setPositionPIDF);
+        if (gains.hasChanged()) {
+            io.setPositionPIDF(gains);
+        }
     }
 
     @Override
     public void periodicAfterCommands() {
         Logger.recordOutput("Superstructure/Hood/Goal", goal);
-        if (DriverStation.isDisabled()) {
-            io.setRequest(RequestType.VoltageVolts, 0);
+
+        // Turn off E-stop when homing
+        if (goal == Goal.HOME) {
+            emergencyStopped = false;
+        }
+
+        if (DriverStation.isDisabled() || emergencyStopped) {
+            io.setVoltageRequest(0.0);
+        } else if (goal == Goal.HOME) {
+            io.setVoltageRequest(-0.5);
         } else {
-            // See the comments above the lookaheadState and goalState variables for why we effectively calculate two profiles
-
             double setpointRad = goal.setpointRad.getAsDouble();
-            Logger.recordOutput("Superstructure/Hood/OriginalSetpointRad", setpointRad);
-            TrapezoidProfile.State wantedState = new TrapezoidProfile.State(setpointRad, 0.0);
-
-            if (lastSetpointRad == null || setpointRad != lastSetpointRad) {
-                // Setpoint changed - shift setpoint profile into the future
-                lookaheadState = profile.calculate(profileLookaheadTimeSec.get(), lookaheadState, wantedState);
+            if (robotState.isInTrench()) {
+                setpointRad = Math.min(setpointRad, maxPositionUnderTrench);
             }
-            lastSetpointRad = setpointRad;
-
-            goalState = profile.calculate(0.02, goalState, wantedState);
-            Logger.recordOutput("Superstructure/Hood/ProfileSetpointRad", goalState.position);
-
-            lookaheadState = profile.calculate(0.02, lookaheadState, wantedState);
-            Logger.recordOutput("Superstructure/Hood/LookaheadSetpointRad", lookaheadState.position);
-
-            io.setRequest(RequestType.PositionRad, lookaheadState.position);
+            setpointRad = MathUtil.clamp(setpointRad, minPositionRad, maxPositionRad);
+            //Logger.recordOutput("Superstructure/Hood/SetpointRad", setpointRad);
+            io.setPositionRequest(setpointRad);
         }
     }
 
@@ -126,13 +138,16 @@ public class Hood implements Periodic {
         return inputs.positionRad;
     }
 
-    @AutoLogOutput(key = "Superstructure/Hood/AtGoal")
-    public boolean atGoal() {
-        double value = goal.setpointRad.getAsDouble();
-        return Math.abs(inputs.positionRad - value) <= tolerances.positionToleranceRad();
+    public double getShotAngleRad() {
+        return convertBetweenShotAngleAndHoodAngleRad(getPositionRad());
     }
 
-    public Command waitUntilAtGoal() {
-        return Commands.waitUntil(this::atGoal);
+    public boolean isCurrentAtThresholdForHoming() {
+        return inputs.currentAmps >= 10.0;
+    }
+
+    public void finishHoming() {
+        io.setEncoderPositionToInitial();
+        operatorDashboard.hoodNotHomedAlert.set(false);
     }
 }

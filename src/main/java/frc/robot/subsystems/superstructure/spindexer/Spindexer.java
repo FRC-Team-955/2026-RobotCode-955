@@ -2,6 +2,7 @@ package frc.robot.subsystems.superstructure.spindexer;
 
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
+import frc.lib.Util;
 import frc.lib.motor.MotorIO;
 import frc.lib.motor.MotorIOInputsAutoLogged;
 import frc.lib.motor.RequestType;
@@ -18,10 +19,10 @@ import java.util.function.DoubleSupplier;
 import static frc.robot.subsystems.superstructure.spindexer.SpindexerConstants.createIO;
 
 public class Spindexer implements Periodic {
-    private static final LoggedTunableNumber feedVoltage = new LoggedTunableNumber("Superstructure/Spindexer/Goal/FeedVoltage", 3.0);
-    private static final LoggedTunableNumber ejectVoltage = new LoggedTunableNumber("Superstructure/Spindexer/Goal/EjectVoltage", -3.0);
+    private static final LoggedTunableNumber feedVoltage = new LoggedTunableNumber("Superstructure/Spindexer/Goal/FeedVoltage", 12.0);
+    private static final LoggedTunableNumber ejectVoltage = new LoggedTunableNumber("Superstructure/Spindexer/Goal/EjectVoltage", -12.0);
 
-    private final OperatorDashboard operatorDashboard = OperatorDashboard.get();
+    private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
 
     private final MotorIO io = createIO();
     private final MotorIOInputsAutoLogged inputs = new MotorIOInputsAutoLogged();
@@ -46,16 +47,18 @@ public class Spindexer implements Periodic {
 
     private static Spindexer instance;
 
-    public static Spindexer get() {
-        if (instance == null)
-            synchronized (Spindexer.class) {
-                instance = new Spindexer();
-            }
+    public static synchronized Spindexer get() {
+        if (instance == null) {
+            instance = new Spindexer();
+        }
 
         return instance;
     }
 
     private Spindexer() {
+        if (instance != null) {
+            Util.error("Duplicate Spindexer created");
+        }
     }
 
     @Override
@@ -64,11 +67,6 @@ public class Spindexer implements Periodic {
         Logger.processInputs("Inputs/Superstructure/Spindexer", inputs);
 
         motorDisconnectedAlert.set(!inputs.connected);
-
-        // Apply network inputs
-        if (operatorDashboard.coastOverride.hasChanged()) {
-            io.setBrakeMode(!operatorDashboard.coastOverride.get());
-        }
     }
 
     @Override
@@ -77,9 +75,9 @@ public class Spindexer implements Periodic {
         if (DriverStation.isDisabled()) {
             io.setRequest(RequestType.VoltageVolts, 0);
         } else {
-            Logger.recordOutput("Superstructure/Spindexer/RequestType", goal.type);
+            //Logger.recordOutput("Superstructure/Spindexer/RequestType", goal.type);
             double value = goal.value.getAsDouble();
-            Logger.recordOutput("Superstructure/Spindexer/RequestValue", value);
+            //Logger.recordOutput("Superstructure/Spindexer/RequestValue", value);
             io.setRequest(goal.type, value);
         }
     }
