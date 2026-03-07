@@ -102,7 +102,7 @@ public class OrbitAtHomeDepotAuto extends Auto {
                 //move to netruazone middle
                 AutoHelpers.finalWaypoint(() -> new Pose2d(
                         FieldConstants.LinesVertical.center - secondPassYOffset,
-                        4.7,
+                        3.7,
                         Rotation2d.kCW_90deg
                 ), AutoHelpers.intakeConstraints),
                 superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
