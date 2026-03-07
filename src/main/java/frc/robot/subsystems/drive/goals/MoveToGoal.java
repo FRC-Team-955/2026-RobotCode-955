@@ -77,6 +77,7 @@ public class MoveToGoal extends DriveGoal {
         Pose2d currentPose = robotState.getPose();
 
         Pose2d goalPose = poseSupplier.get();
+        robotState.setMoveToGoal(Optional.of(goalPose));
 
         if (constraints.aiming()) {
             // When we rotate around a different center of rotation, XY error increases, and rotation/translation fight each other and act weird

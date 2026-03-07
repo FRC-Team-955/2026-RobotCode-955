@@ -11,6 +11,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.FieldObject2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -40,6 +41,14 @@ public class RobotState implements Periodic {
     );
 
     private final Field2d field2d = new Field2d();
+
+    @Setter
+    private Supplier<Optional<Pose2d>> autoStartPoseSupplier = Optional::empty;
+    private final FieldObject2d autoStartPoseObject = field2d.getObject("AutoStart");
+
+    @Setter
+    private Optional<Pose2d> moveToGoal = Optional.empty();
+    private final FieldObject2d moveToGoalObject = field2d.getObject("MoveTo");
 
     @Getter
     @Setter
@@ -157,7 +166,20 @@ public class RobotState implements Periodic {
         );
          */
 
+        moveToGoal = Optional.empty();
+    }
+
+    @Override
+    public void periodicAfterCommands() {
         field2d.setRobotPose(getPose());
+        autoStartPoseSupplier.get().ifPresentOrElse(
+                autoStartPoseObject::setPose,
+                autoStartPoseObject::setPoses
+        );
+        moveToGoal.ifPresentOrElse(
+                moveToGoalObject::setPose,
+                moveToGoalObject::setPoses
+        );
         SmartDashboard.putData("Field2d", field2d);
     }
 
