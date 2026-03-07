@@ -31,8 +31,8 @@ public class AprilTagVisionConstants {
     // (Adjusted automatically based on distance and # of tags)
     static final double linearStdDevBaselineTrigMeters = 0.1;
     static final double angularStdDevBaselineTrigRad = Units.degreesToRadians(30);
-    static final double linearStdDevBaseline3dSolveMeters = 0.3;
-    static final double angularStdDevBaseline3dSolveRad = Units.degreesToRadians(60);
+    static final double linearStdDevBaseline3dSolveMeters = 0.1;
+    static final double angularStdDevBaseline3dSolveRad = Units.degreesToRadians(10);
 
     // Distance from a tag for trig estimation to be used
     static final double distanceFromTagForTrigMeters = 1.5;
@@ -68,7 +68,7 @@ public class AprilTagVisionConstants {
                     case REPLAY -> new AprilTagVisionIO();
                 },
                 // Relatively stable, even at long distance
-                2.0,
+                1.5,
                 1.0
         ),
         ShooterCam(
@@ -84,7 +84,7 @@ public class AprilTagVisionConstants {
                     case REPLAY -> new AprilTagVisionIO();
                 },
                 // Relatively stable, even at long distance
-                2.0,
+                1.5,
                 1.0
         ),
         // HopperCam - OV2311

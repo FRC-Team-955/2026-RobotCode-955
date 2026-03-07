@@ -13,7 +13,9 @@
 
 package frc.robot.subsystems.apriltagvision;
 
-import edu.wpi.first.math.geometry.*;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -131,6 +133,7 @@ public class AprilTagVision implements Periodic {
                 //////////////////////////////// Trig ////////////////////////////////
                 boolean poseEstimateTrigPresent = false;
                 Pose2d poseEstimateTrig = new Pose2d();
+                /*
                 Optional<Rotation2d> headingSampleOptional = robotState.getPoseAtTimestamp(observation.timestamp()).map(Pose2d::getRotation);
                 if (headingSampleOptional.isPresent()) {
                     // https://github.com/PhotonVision/photonvision/blob/0ef7c803f91a387a1a95377bf64338509218a240/photon-lib/src/main/java/org/photonvision/PhotonPoseEstimator.java#L496
@@ -162,6 +165,7 @@ public class AprilTagVision implements Periodic {
                     poseEstimateTrigPresent = true;
                     poseEstimateTrig = new Pose2d(fieldToCameraTranslation.plus(camToRobotTranslation), headingSample);
                 }
+             */
 
                 singleTagPoseObservations.add(new SingleTagPoseObservation(
                         observation.timestamp(),
