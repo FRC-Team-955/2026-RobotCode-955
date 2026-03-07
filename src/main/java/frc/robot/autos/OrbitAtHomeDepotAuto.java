@@ -57,7 +57,7 @@ public class OrbitAtHomeDepotAuto extends Auto {
                 superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
 
                 // avoid scattering balls
-                AutoHelpers.intermediateWaypoint(() -> new Pose2d(
+                AutoHelpers.finalWaypoint(() -> new Pose2d(
                         FieldConstants.LinesVertical.center - 0.5,
                         trenchShootingPosition.getY() - 0.15,
                         trenchShootingPosition.getRotation()
@@ -117,7 +117,7 @@ public class OrbitAtHomeDepotAuto extends Auto {
                 // avoid scattering balls
                 AutoHelpers.intermediateWaypoint(() -> new Pose2d(
                         7.5,
-                        trenchShootingPosition.getY() - 0.15,
+                        trenchShootingPosition.getY() + 0.15,
                         trenchShootingPosition.getRotation()
                 ), defaultMoveToConstraints),
 

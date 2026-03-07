@@ -111,10 +111,18 @@ public class OrbitAtTheOutpostAuto extends Auto {
                 ), AutoHelpers.intakeConstraints),
                 superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
 
+                AutoHelpers.yDistanceInterpolatingWaypoint(
+                        new Translation2d(6.0, 3.5),
+                        new Translation2d(6.0, trenchShootingPosition.getY()),
+                        Rotation2d.kCCW_90deg,
+                        2,
+                        defaultMoveToConstraints
+                ),
+
                 // avoid scattering balls
                 AutoHelpers.intermediateWaypoint(() -> new Pose2d(
                         7.5,
-                        trenchShootingPosition.getY() + 0.15,
+                        trenchShootingPosition.getY() + 0.1,
                         trenchShootingPosition.getRotation()
                 ), defaultMoveToConstraints),
 
@@ -134,6 +142,10 @@ public class OrbitAtTheOutpostAuto extends Auto {
                         superstructure.setGoal(Superstructure.Goal.SHOOT),
                         AutoHelpers.finalWaypoint(() -> trenchShootingPosition, defaultMoveToConstraints.withAiming(true))
                 ).withTimeout(5)
+
+                //Commands.parallel(
+                //        AutoHelpers.finalWaypoint( () -> new Pose2d(0.55, 0.85, Rotation2d.k180deg), defaultMoveToConstraints.withAiming(false))
+                //).withTimeout
         );
     }
 }
