@@ -113,22 +113,22 @@ public class OrbitAtTheOutpostAuto extends Auto {
 
                 AutoHelpers.yDistanceInterpolatingWaypoint(
                         new Translation2d(6.0, 3.5),
-                        new Translation2d(6.0, trenchShootingPosition.getY()),
-                        Rotation2d.kCCW_90deg,
+                        new Translation2d(6.0, trenchShootingPosition.getY() - 0.33),
+                        Rotation2d.kCW_90deg,
                         2,
                         defaultMoveToConstraints
                 ),
 
-                // avoid scattering balls
-                AutoHelpers.intermediateWaypoint(() -> new Pose2d(
-                        7.5,
-                        trenchShootingPosition.getY() + 0.1,
-                        trenchShootingPosition.getRotation()
-                ), defaultMoveToConstraints),
+                //// avoid scattering balls
+                //AutoHelpers.intermediateWaypoint(() -> new Pose2d(
+                //        7.5,
+                //        trenchShootingPosition.getY() + 0.1,
+                //        trenchShootingPosition.getRotation()
+                //), defaultMoveToConstraints),
 
                 // move to entrance to trench
                 AutoHelpers.intermediateWaypoint(() -> new Pose2d(
-                        7.0,//6.1 og 6.7 worked
+                        6.0,//6.1 og 6.7 worked
                         startingPositionY, //og trench shooting work
                         trenchShootingPosition.getRotation()
                 ), defaultMoveToConstraints),

@@ -106,6 +106,15 @@ public class OrbitAtHomeDepotAuto extends Auto {
                         Rotation2d.kCW_90deg
                 ), AutoHelpers.intakeConstraints),
                 superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
+
+                AutoHelpers.yDistanceInterpolatingWaypoint(
+                        new Translation2d(6.0, 4.5),
+                        new Translation2d(6.0, trenchShootingPosition.getY() + 0.33),
+                        Rotation2d.kCCW_90deg,
+                        2,
+                        defaultMoveToConstraints
+                ),
+
                 //AutoHelpers.intakeFromLeftNeutralZone(
                 //        () -> new Pose2d(
                 //                7.1,
@@ -115,15 +124,15 @@ public class OrbitAtHomeDepotAuto extends Auto {
                 //).withTimeout(3),
 
                 // avoid scattering balls
-                AutoHelpers.intermediateWaypoint(() -> new Pose2d(
-                        7.5,
-                        trenchShootingPosition.getY() + 0.15,
-                        trenchShootingPosition.getRotation()
-                ), defaultMoveToConstraints),
+                //AutoHelpers.intermediateWaypoint(() -> new Pose2d(
+                //        7.5,
+                //        trenchShootingPosition.getY() + 0.15,
+                //        trenchShootingPosition.getRotation()
+                //), defaultMoveToConstraints),
 
                 // move to entrance to trench
                 AutoHelpers.intermediateWaypoint(() -> new Pose2d(
-                        7.0,
+                        6.0,
                         startingPositionY,
                         trenchShootingPosition.getRotation()
                 ), defaultMoveToConstraints),
