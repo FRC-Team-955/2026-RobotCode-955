@@ -122,7 +122,7 @@ public class ShootingKinematics implements Periodic {
         //Logger.recordOutput("ShootingKinematics/ShootingParameters/HeadingRadMeasured", robotState.getPose().getRotation().getRadians());
         //Logger.recordOutput("ShootingKinematics/ShootingParameters/HeadingVelocityRadPerSec", headingVelocitySetpoint);
         //Logger.recordOutput("ShootingKinematics/ShootingParameters/HeadingVelocityRadPerSecMeasured", headingVelocityMeasurement);
-        //Logger.recordOutput("ShootingKinematics/ShootingParameters/VelocityRPM", shootingParameters.velocityRPM());
+        Logger.recordOutput("ShootingKinematics/ShootingParameters/VelocityRPM", shootingParameters.velocityRPM());
         //Logger.recordOutput("ShootingKinematics/ShootingParameters/VelocityRPMMeasured", superstructure.flywheel.getVelocityRPM());
         //Logger.recordOutput("ShootingKinematics/ShootingParameters/AngleRad", shootingParameters.angleRad());
         //Logger.recordOutput("ShootingKinematics/ShootingParameters/AngleRadMeasured", superstructure.hood.getShotAngleRad());
@@ -286,7 +286,7 @@ public class ShootingKinematics implements Periodic {
         double v = Math.sqrt(vx * vx + vy * vy + vz * vz);
         double phi = Math.asin(vz / v);
         double theta = Math.atan2(vy, vx);
-        //Logger.recordOutput("ShootingKinematics/ShootingParameters/VelocityMetersPerSec", shootingVelocity);
+        Logger.recordOutput("ShootingKinematics/ShootingParameters/VelocityMetersPerSec", v);
         //Logger.recordOutput("ShootingKinematics/Phi", phi);
         //Logger.recordOutput("ShootingKinematics/Theta", theta);
 
