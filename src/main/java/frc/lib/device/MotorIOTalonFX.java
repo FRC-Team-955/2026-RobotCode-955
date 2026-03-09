@@ -1,4 +1,4 @@
-package frc.lib.motor;
+package frc.lib.device;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
