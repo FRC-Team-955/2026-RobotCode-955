@@ -32,8 +32,13 @@ public class AprilTagVisionIOPhotonVisionSim extends AprilTagVisionIOPhotonVisio
         cameraProperties.setFPS(30);
         cameraProperties.setAvgLatencyMs(45);
         cameraProperties.setLatencyStdDevMs(10);
+
         PhotonCameraSim cameraSim = new PhotonCameraSim(camera, cameraProperties);
         cameraSim.setMaxSightRange(5.0);
+        // Disable rendering of camera streams for debugging/dashboard display
+        cameraSim.enableRawStream(false);
+        cameraSim.enableProcessedStream(false);
+
         simManager.aprilTagVisionSystem.addCamera(cameraSim, robotToCamera);
     }
 

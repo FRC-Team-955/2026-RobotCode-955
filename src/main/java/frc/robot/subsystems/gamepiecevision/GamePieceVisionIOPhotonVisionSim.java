@@ -19,8 +19,13 @@ public class GamePieceVisionIOPhotonVisionSim extends GamePieceVisionIOPhotonVis
         cameraProperties.setFPS(30);
         cameraProperties.setAvgLatencyMs(45);
         cameraProperties.setLatencyStdDevMs(10);
+
         PhotonCameraSim cameraSim = new PhotonCameraSim(camera, cameraProperties);
         cameraSim.setMaxSightRange(3.0);
+        // Disable rendering of camera streams for debugging/dashboard display
+        cameraSim.enableRawStream(false);
+        cameraSim.enableProcessedStream(false);
+
         simManager.gamePieceVisionSystem.addCamera(cameraSim, robotToCamera);
     }
 
