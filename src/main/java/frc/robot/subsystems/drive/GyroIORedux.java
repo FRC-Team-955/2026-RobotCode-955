@@ -29,6 +29,7 @@ public class GyroIORedux extends GyroIO {
         canandgyroSettings.setStatusFramePeriod(otherFramePeriodSeconds);
         canandgyroSettings.setAngularPositionFramePeriod(otherFramePeriodSeconds);
         canandgyro.setSettings(canandgyroSettings, 0.25, 5);
+        canandgyro.setYaw(0.0);
         yawTimestampQueue = HighFrequencySamplingThread.get().makeTimestampQueue();
         yawPositionQueue = HighFrequencySamplingThread.get().registerGenericSignal(canandgyro::getYaw);
     }
@@ -38,7 +39,7 @@ public class GyroIORedux extends GyroIO {
         inputs.connected = canandgyro.isConnected();
         inputs.temperatureCelsius = canandgyro.getTemperature();
 
-        inputs.yawPositionRad = canandgyro.getYaw();
+        inputs.yawPositionRad = Units.rotationsToRadians(canandgyro.getYaw());
         inputs.orientation = canandgyro.getRotation3d();
 
         inputs.angularVelocityXRadPerSec = Units.rotationsToRadians(canandgyro.getAngularVelocityRoll());
