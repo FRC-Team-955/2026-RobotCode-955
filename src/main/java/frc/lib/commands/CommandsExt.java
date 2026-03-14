@@ -50,4 +50,8 @@ public class CommandsExt {
     public static CommandComposition eagerSequence(Command... commands) {
         return new EagerSequentialCommandGroup(commands);
     }
+
+    public static Command repeatingEagerSequence(Command... commands) {
+        return eagerSequence(commands).repeatedly();
+    }
 }

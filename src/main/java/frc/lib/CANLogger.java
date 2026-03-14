@@ -1,34 +1,35 @@
 package frc.lib;
 
-import com.ctre.phoenix6.CANBus;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Timer;
 import frc.lib.subsystem.Periodic;
 import frc.robot.BuildConstants;
-import frc.robot.Constants;
 import org.littletonrobotics.junction.Logger;
+
+import static frc.robot.Constants.canivoreBus;
 
 public class CANLogger implements Periodic {
     private final Timer roboRIOCANErrorTimer = new Timer();
     private final Timer canivoreErrorTimer = new Timer();
-    private final CANBus canivore = new CANBus(Constants.CANivore.busName);
 
     private final Alert roboRIOCANErrorAlert = new Alert("roboRIO CAN errors detected.", Alert.AlertType.kError);
     private final Alert canivoreErrorAlert = new Alert("CANivore errors detected.", Alert.AlertType.kError);
 
     private static CANLogger instance;
 
-    public static CANLogger get() {
-        if (instance == null)
-            synchronized (CANLogger.class) {
-                instance = new CANLogger();
-            }
+    public static synchronized CANLogger get() {
+        if (instance == null) {
+            instance = new CANLogger();
+        }
 
         return instance;
     }
 
     private CANLogger() {
+        if (instance != null) {
+            Util.error("Duplicate CANLogger created");
+        }
     }
 
     @Override
@@ -42,7 +43,7 @@ public class CANLogger implements Periodic {
 
         // Check and log CANivore status
         if (BuildConstants.mode == BuildConstants.Mode.REAL) {
-            var canivoreStatus = canivore.getStatus();
+            var canivoreStatus = canivoreBus.getStatus();
             Logger.recordOutput("CANivore/Status", canivoreStatus.Status.getName());
             Logger.recordOutput("CANivore/Utilization", canivoreStatus.BusUtilization);
             Logger.recordOutput("CANivore/OffCount", canivoreStatus.BusOffCount);

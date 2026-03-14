@@ -1,7 +1,9 @@
 package frc.robot.subsystems.superstructure.feeder;
 
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
+import frc.lib.Util;
 import frc.lib.motor.MotorIO;
 import frc.lib.motor.MotorIOInputsAutoLogged;
 import frc.lib.motor.RequestType;
@@ -18,10 +20,10 @@ import java.util.function.DoubleSupplier;
 import static frc.robot.subsystems.superstructure.feeder.FeederConstants.createIO;
 
 public class Feeder implements Periodic {
-    private static final LoggedTunableNumber feedVoltage = new LoggedTunableNumber("Superstructure/Feeder/Goal/FeedVoltage", 3.0);
-    private static final LoggedTunableNumber ejectVoltage = new LoggedTunableNumber("Superstructure/Feeder/Goal/EjectVoltage", -3.0);
+    private static final LoggedTunableNumber feedVoltage = new LoggedTunableNumber("Superstructure/Feeder/Goal/FeedVoltage", 12.0);
+    private static final LoggedTunableNumber ejectVoltage = new LoggedTunableNumber("Superstructure/Feeder/Goal/EjectVoltage", -12.0);
 
-    private final OperatorDashboard operatorDashboard = OperatorDashboard.get();
+    private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
 
     private final MotorIO io = createIO();
     private final MotorIOInputsAutoLogged inputs = new MotorIOInputsAutoLogged();
@@ -46,16 +48,18 @@ public class Feeder implements Periodic {
 
     private static Feeder instance;
 
-    public static Feeder get() {
-        if (instance == null)
-            synchronized (Feeder.class) {
-                instance = new Feeder();
-            }
+    public static synchronized Feeder get() {
+        if (instance == null) {
+            instance = new Feeder();
+        }
 
         return instance;
     }
 
     private Feeder() {
+        if (instance != null) {
+            Util.error("Duplicate Feeder created");
+        }
     }
 
     @Override
@@ -67,7 +71,7 @@ public class Feeder implements Periodic {
 
         // Apply network inputs
         if (operatorDashboard.coastOverride.hasChanged()) {
-            io.setBrakeMode(!operatorDashboard.coastOverride.get());
+            io.setNeutralMode(operatorDashboard.coastOverride.get() ? NeutralModeValue.Coast : NeutralModeValue.Brake);
         }
     }
 
@@ -77,9 +81,9 @@ public class Feeder implements Periodic {
         if (DriverStation.isDisabled()) {
             io.setRequest(RequestType.VoltageVolts, 0);
         } else {
-            Logger.recordOutput("Superstructure/Feeder/RequestType", goal.type);
+            //Logger.recordOutput("Superstructure/Feeder/RequestType", goal.type);
             double value = goal.value.getAsDouble();
-            Logger.recordOutput("Superstructure/Feeder/RequestValue", value);
+            //Logger.recordOutput("Superstructure/Feeder/RequestValue", value);
             io.setRequest(goal.type, value);
         }
     }

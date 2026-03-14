@@ -21,19 +21,19 @@ import com.ctre.phoenix6.CANBus;
  * (log replay from a file).
  */
 public final class Constants {
+    public static final double loopPeriod = 0.02;
+
+    public static final CANBus canivoreBus = new CANBus("*"); // the canivore is called electrical_problem, but using * is better because it will select any canivore it sees
+    public static final boolean isCANFD = switch (BuildConstants.mode) {
+        case REAL -> canivoreBus.isNetworkFD();
+        case SIM, REPLAY -> false;
+    };
+
     public static final class Simulation {
         /**
          * If true, replay will run as fast as your computer can go and log to a log file instead of
          * NetworkTables. You will have to open the log file to see anything.
          */
         public static final boolean replayRunAsFastAsPossible = true;
-    }
-
-    public static final class CANivore {
-        public static final String busName = "*"; // the canivore is called electrical_problem, but using * is better because it will select any canivore it sees
-        public static final boolean isCANFD = switch (BuildConstants.mode) {
-            case REAL -> new CANBus(busName).isNetworkFD();
-            case SIM, REPLAY -> false;
-        };
     }
 }

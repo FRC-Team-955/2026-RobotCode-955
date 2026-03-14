@@ -14,25 +14,34 @@
 package frc.robot.subsystems.drive;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
-import frc.lib.PIDF;
+import frc.lib.network.LoggedTunablePIDF;
+import frc.robot.OperatorDashboard;
 import org.littletonrobotics.junction.Logger;
 
-import static frc.robot.subsystems.drive.DriveConstants.disableDriving;
-import static frc.robot.subsystems.drive.DriveConstants.driveConfig;
+import static frc.robot.subsystems.drive.DriveConstants.*;
 
 public class Module {
+    private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
+
     private final ModuleIO io;
     private final ModuleIOInputsAutoLogged inputs = new ModuleIOInputsAutoLogged();
     private final int index;
 
+    private PIDController turnAbsolutePID = moduleConfig.turnAbsoluteGains().toPIDWrapRadians();
+    private final Debouncer turnAbsoluteRelativeDifferenceDebouncer = new Debouncer(1.0, Debouncer.DebounceType.kRising);
+
     private final Alert driveDisconnectedAlert;
     private final Alert turnDisconnectedAlert;
     private final Alert turnEncoderDisconnectedAlert;
+    private final Alert turnEncoderDisparityAlert;
 
     public Module(ModuleIO io, int index) {
         this.io = io;
@@ -41,6 +50,7 @@ public class Module {
         driveDisconnectedAlert = new Alert("Disconnected drive motor on module " + index + ".", AlertType.kError);
         turnDisconnectedAlert = new Alert("Disconnected turn motor on module " + index + ".", AlertType.kError);
         turnEncoderDisconnectedAlert = new Alert("Disconnected turn encoder on module " + index + ".", AlertType.kError);
+        turnEncoderDisparityAlert = new Alert("Absolute and relative turn encoders on module " + index + " are not matching up.", AlertType.kError);
     }
 
     public void updateAndProcessInputs() {
@@ -53,6 +63,12 @@ public class Module {
         driveDisconnectedAlert.set(!inputs.driveConnected);
         turnDisconnectedAlert.set(!inputs.turnConnected);
         turnEncoderDisconnectedAlert.set(!inputs.turnAbsoluteEncoderConnected);
+        turnEncoderDisparityAlert.set(turnAbsoluteRelativeDifferenceDebouncer.calculate(
+                Math.abs(
+                        MathUtil.angleModulus(inputs.turnAbsolutePositionRad)
+                                - MathUtil.angleModulus(inputs.turnPositionRad)
+                ) > Units.degreesToRadians(3.0)
+        ));
     }
 
     public void runSetpoint(SwerveModuleState state) {
@@ -66,7 +82,7 @@ public class Module {
         if (Math.abs(state.speedMetersPerSecond) < 1e-4 && Math.abs(getTurnAngle().minus(state.angle).getRadians()) < 0.1) {
             io.setTurnOpenLoop(0.0);
         } else {
-            io.setTurnClosedLoop(state.angle.getRadians());
+            setTurnClosedLoop(state.angle.getRadians());
         }
     }
 
@@ -75,7 +91,15 @@ public class Module {
      */
     public void runCharacterization(double output) {
         io.setDriveOpenLoop(output);
-        io.setTurnClosedLoop(0.0);
+        setTurnClosedLoop(0.0);
+    }
+
+    private void setTurnClosedLoop(double positionRad) {
+        if (operatorDashboard.driveTurnAbsolutePID.get()) {
+            io.setTurnOpenLoop(turnAbsolutePID.calculate(inputs.turnAbsolutePositionRad, positionRad));
+        } else {
+            io.setTurnClosedLoop(positionRad);
+        }
     }
 
     /**
@@ -86,12 +110,16 @@ public class Module {
         io.setTurnOpenLoop(0.0);
     }
 
-    public void setDrivePIDF(PIDF newGains) {
+    public void setDrivePIDF(LoggedTunablePIDF newGains) {
         io.setDrivePIDF(newGains);
     }
 
-    public void setTurnPIDF(PIDF newGains) {
-        io.setTurnPIDF(newGains);
+    public void setTurnRelativePIDF(LoggedTunablePIDF newGains) {
+        io.setTurnRelativePIDF(newGains);
+    }
+
+    public void setTurnAbsolutePIDF(LoggedTunablePIDF newGains) {
+        turnAbsolutePID = newGains.toPIDWrapRadians();
     }
 
     public void setBrakeMode(boolean enable) {
@@ -103,7 +131,11 @@ public class Module {
      * Returns the current turn angle of the module.
      */
     public Rotation2d getTurnAngle() {
-        return new Rotation2d(MathUtil.angleModulus(inputs.turnPositionRad));
+        return new Rotation2d(MathUtil.angleModulus(
+                operatorDashboard.driveTurnAbsolutePID.get()
+                        ? inputs.turnAbsolutePositionRad
+                        : inputs.turnPositionRad
+        ));
     }
 
     public double getDrivePositionRad() {

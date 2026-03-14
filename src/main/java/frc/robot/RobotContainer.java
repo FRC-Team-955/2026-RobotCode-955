@@ -1,7 +1,6 @@
 package frc.robot;
 
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
@@ -9,17 +8,20 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.CANLogger;
+import frc.robot.autos.AutoManager;
+import frc.robot.controller.Controller;
+import frc.robot.shooting.ShootingKinematics;
 import frc.robot.subsystems.apriltagvision.AprilTagVision;
 import frc.robot.subsystems.drive.Drive;
-import frc.robot.subsystems.drive.ModuleIOSim;
+import frc.robot.subsystems.drive.goals.DriveJoystickGoal;
 import frc.robot.subsystems.drive.goals.WheelRadiusCharacterizationGoal;
 import frc.robot.subsystems.gamepiecevision.GamePieceVision;
 import frc.robot.subsystems.leds.LEDs;
 import frc.robot.subsystems.superintake.Superintake;
 import frc.robot.subsystems.superstructure.Superstructure;
-import org.ironmaple.simulation.SimulatedArena;
-import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeAlgaeOnFly;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
+
+import java.util.function.BooleanSupplier;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -29,7 +31,6 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
  */
 public class RobotContainer {
     // Dashboard inputs
-    private final LoggedDashboardChooser<Command> autoChooser = new LoggedDashboardChooser<>("Auto Choices");
     private final LoggedDashboardChooser<Command> characterizationChooser = new LoggedDashboardChooser<>("Characterization Choices");
 
     public final RobotState robotState = RobotState.get();
@@ -38,6 +39,8 @@ public class RobotContainer {
     public final CANLogger canLogger = CANLogger.get();
     public final RobotMechanism robotMechanism = RobotMechanism.get();
     public final ShootingKinematics shootingKinematics = ShootingKinematics.get();
+    public final AutoManager autoManager = AutoManager.get();
+    public final HubShiftTracker hubShiftTracker = HubShiftTracker.get();
 
     /* Subsystems */
     public final Drive drive = Drive.get();
@@ -49,19 +52,9 @@ public class RobotContainer {
     public final Superstructure superstructure = Superstructure.get();
 
     public RobotContainer() {
-        addAutos();
         addCharacterizations();
         setDefaultCommands();
         configureBindings();
-
-        new Trigger(() -> DriverStation.isTeleopEnabled() && DriverStation.getMatchTime() > 0 && DriverStation.getMatchTime() < 30)
-                .onTrue(controller.rumble(0.5, 2.0));
-    }
-
-    private void addAutos() {
-        autoChooser.addOption("None", Commands.none());
-
-        autoChooser.addOption("Characterization", Commands.deferredProxy(characterizationChooser::get));
     }
 
     private void addCharacterizations() {
@@ -75,9 +68,9 @@ public class RobotContainer {
     }
 
     private void setDefaultCommands() {
-        drive.setDefaultCommand(drive.driveJoystick());
+        drive.setDefaultCommand(drive.driveJoystick(() -> DriveJoystickGoal.Mode.Normal));
         superintake.setDefaultCommand(superintake.setGoal(Superintake.Goal.IDLE).ignoringDisable(true));
-        superstructure.setDefaultCommand(superstructure.setGoal(() -> DriverStation.isEnabled() ? Superstructure.Goal.SPINUP : Superstructure.Goal.IDLE).ignoringDisable(true));
+        superstructure.setDefaultCommand(superstructure.setGoal(Superstructure.Goal.IDLE).ignoringDisable(true));
     }
 
     /**
@@ -89,36 +82,83 @@ public class RobotContainer {
     private void configureBindings() {
         controller.y().onTrue(robotState.resetRotation());
 
-        var shouldAutoAim = new Trigger(() -> operatorDashboard.getSelectedScoringMode() == OperatorDashboard.ScoringMode.ShootAndPassAutomatic);
-        controller.leftTrigger()
-                .and(shouldAutoAim)
+        Trigger intake = controller.rightTrigger();
+        Trigger shoot = controller.leftTrigger();
+        Trigger shootForce = controller.leftBumper();
+
+        BooleanSupplier shouldNotAssist = () -> operatorDashboard.disableAssist.get() || robotState.isInTrench();
+        intake
+                .and(shoot.negate())
                 .whileTrue(Commands.parallel(
-                        drive.driveJoystickWithAiming(),
+                        drive.driveJoystick(() -> shouldNotAssist.getAsBoolean() ? DriveJoystickGoal.Mode.Normal : DriveJoystickGoal.Mode.Assist),
+                        superintake.setGoal(Superintake.Goal.INTAKE)
+                ));
+
+        shoot
+                .and(intake.negate())
+                .whileTrue(Commands.parallel(
+                        drive.driveJoystick(() -> {
+                            if (operatorDashboard.manualAiming.get()) {
+                                return DriveJoystickGoal.Mode.StopWithX;
+                            } else {
+                                return DriveJoystickGoal.Mode.Aim;
+                            }
+                        }),
                         superstructure.setGoal(Superstructure.Goal.SHOOT)
                 ));
-        controller.leftTrigger()
-                .and(shouldAutoAim.negate())
-                .whileTrue(superstructure.setGoal(Superstructure.Goal.SHOOT));
+        shootForce
+                .and(intake.negate())
+                .whileTrue(Commands.parallel(
+                        drive.driveJoystick(() -> {
+                            if (operatorDashboard.manualAiming.get()) {
+                                return DriveJoystickGoal.Mode.StopWithX;
+                            } else {
+                                return DriveJoystickGoal.Mode.Aim;
+                            }
+                        }),
+                        superstructure.setGoal(Superstructure.Goal.SHOOT_FORCE)
+                ));
+        shoot
+                .and(intake)
+                .whileTrue(Commands.parallel(
+                        drive.driveJoystick(() -> {
+                            if (operatorDashboard.manualAiming.get() && shouldNotAssist.getAsBoolean()) {
+                                return DriveJoystickGoal.Mode.StopWithX;
+                            } else if (operatorDashboard.manualAiming.get()) {
+                                return DriveJoystickGoal.Mode.Assist;
+                            } else if (shouldNotAssist.getAsBoolean()) {
+                                return DriveJoystickGoal.Mode.Aim;
+                            } else {
+                                return DriveJoystickGoal.Mode.AimAndAssist;
+                            }
+                        }),
+                        superintake.setGoal(Superintake.Goal.INTAKE),
+                        superstructure.setGoal(Superstructure.Goal.SHOOT)
+                ));
 
-        controller.rightTrigger()
-                .whileTrue(superintake.setGoal(Superintake.Goal.INTAKE));
+        controller.x()
+                .whileTrue(Commands.parallel(
+                        superintake.setGoal(Superintake.Goal.EJECT),
+                        superstructure.setGoal(Superstructure.Goal.EJECT)
+                ));
 
-        controller.leftTrigger().whileTrue(Commands.repeatingSequence(
-                Commands.runOnce(() -> {
-                    if (!shootingKinematics.isValidShootingParameters()) return;
-                    SimulatedArena.getInstance().addGamePieceProjectile(new ReefscapeAlgaeOnFly(
-                            ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose().getTranslation(),
-                            ShootingKinematics.fuelExitTransform.getTranslation().toTranslation2d(),
-                            ModuleIOSim.driveSimulation.getDriveTrainSimulatedChassisSpeedsFieldRelative(),
-                            //Rotation2d.fromRadians(shootingKinematics.getShootingParameters().headingRad()),
-                            ModuleIOSim.driveSimulation.getSimulatedDriveTrainPose().getRotation(),
-                            Units.Meters.of(ShootingKinematics.fuelExitTransform.getTranslation().getZ()),
-                            Units.MetersPerSecond.of(shootingKinematics.getShootingParameters().velocityMetersPerSec()),
-                            Units.Radians.of(shootingKinematics.getShootingParameters().hoodAngleRad())
-                    ).disableBecomesGamePieceOnFieldAfterTouchGround());
-                }),
-                Commands.waitSeconds(0.1)
-        ));
+        new Trigger(operatorDashboard.homeIntakePivot::get)
+                .onTrue(Commands.runOnce(() -> operatorDashboard.homeIntakePivot.set(false)).ignoringDisable(true));
+        new Trigger(operatorDashboard.homeIntakePivot::get)
+                .and(DriverStation::isEnabled)
+                .onTrue(superintake.setGoal(Superintake.Goal.HOME_INTAKE_PIVOT));
+        new Trigger(operatorDashboard.homeIntakePivot::get)
+                .and(DriverStation::isDisabled)
+                .onTrue(Commands.runOnce(superintake.intakePivot::finishHoming).ignoringDisable(true));
+
+        new Trigger(operatorDashboard.homeHood::get)
+                .onTrue(Commands.runOnce(() -> operatorDashboard.homeHood.set(false)).ignoringDisable(true));
+        new Trigger(operatorDashboard.homeHood::get)
+                .and(DriverStation::isEnabled)
+                .onTrue(superstructure.setGoal(Superstructure.Goal.HOME_HOOD));
+        new Trigger(operatorDashboard.homeHood::get)
+                .and(DriverStation::isDisabled)
+                .onTrue(Commands.runOnce(superstructure.hood::finishHoming).ignoringDisable(true));
     }
 
     /**
@@ -127,6 +167,10 @@ public class RobotContainer {
      * @return the command to run in autonomous
      */
     public Command getAutonomousCommand() {
-        return autoChooser.get();
+        return autoManager.getSelectedAutoCommand();
+    }
+
+    public Command getTestCommand() {
+        return characterizationChooser.get();
     }
 }
