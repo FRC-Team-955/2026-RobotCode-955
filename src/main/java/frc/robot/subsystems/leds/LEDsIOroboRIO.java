@@ -6,7 +6,7 @@ import edu.wpi.first.wpilibj.AddressableLEDBuffer;
 import static frc.robot.subsystems.leds.LEDConstants.length;
 
 public class LEDsIOroboRIO extends LEDsIO {
-    private final AddressableLED leds = new AddressableLED(9);
+    private final AddressableLED leds = new AddressableLED(0);
 
     public LEDsIOroboRIO() {
         leds.setLength(length);
