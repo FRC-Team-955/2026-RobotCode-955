@@ -1,4 +1,4 @@
-package frc.lib.device;
+package frc.lib.motor;
 
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.controller.PIDController;

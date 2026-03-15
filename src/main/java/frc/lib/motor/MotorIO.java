@@ -1,16 +1,18 @@
-package frc.lib.device;
+package frc.lib.motor;
 
 import com.ctre.phoenix6.signals.NeutralModeValue;
-import frc.lib.motor.MotorIOInputsAutoLogged;
 import frc.lib.network.LoggedTunablePIDF;
 import org.littletonrobotics.junction.AutoLog;
 
 public class MotorIO {
-    private final String name;
-    private final MotorIOInputsAutoLogged inputs = new MotorIOInputsAutoLogged();
-
-    private MotorIO(String name) {
-        this.name = name;
+    @AutoLog
+    public static class MotorIOInputs {
+        public boolean connected = false;
+        public double positionRad = 0.0;
+        public double velocityRadPerSec = 0.0;
+        public double appliedVolts = 0.0;
+        public double currentAmps = 0.0;
+        public double temperatureCelsius = 0.0;
     }
 
     public void updateInputs(MotorIOInputs inputs) {
@@ -45,15 +47,5 @@ public class MotorIO {
      * so that the motor does not attempt to move to an invalid position
      */
     public void setEncoderPosition(double positionRad) {
-    }
-
-    @AutoLog
-    public static class MotorIOInputs {
-        public boolean connected = false;
-        public double positionRad = 0.0;
-        public double velocityRadPerSec = 0.0;
-        public double appliedVolts = 0.0;
-        public double currentAmps = 0.0;
-        public double temperatureCelsius = 0.0;
     }
 }

@@ -1,4 +1,4 @@
-package frc.lib.device;
+package frc.lib.motor;
 
 public enum RequestType {
     VoltageVolts,
