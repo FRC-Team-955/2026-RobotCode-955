@@ -98,19 +98,6 @@
             }
           },
           {
-            "title": "AutoChosen",
-            "x": 256.0,
-            "y": 256.0,
-            "width": 128.0,
-            "height": 128.0,
-            "type": "Toggle Switch",
-            "properties": {
-              "topic": "/Tuning/OperatorDashboard/AutoChosen",
-              "period": 0.06,
-              "data_type": "boolean"
-            }
-          },
-          {
             "title": "Field2d",
             "x": 384.0,
             "y": 0.0,
@@ -146,6 +133,58 @@
               "red_start_time": 20,
               "yellow_start_time": 30
             }
+          },
+          {
+            "title": "Intake",
+            "x": 512.0,
+            "y": 384.0,
+            "width": 384.0,
+            "height": 128.0,
+            "type": "Large Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/Inputs/Superintake/IntakePivot/PositionRad",
+              "period": 0.06,
+              "data_type": "double"
+            }
+          },
+          {
+            "title": "AutoChosen",
+            "x": 256.0,
+            "y": 256.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Toggle Switch",
+            "properties": {
+              "topic": "/Tuning/OperatorDashboard/AutoChosen",
+              "period": 0.06,
+              "data_type": "boolean"
+            }
+          },
+          {
+            "title": "RecordingStarted",
+            "x": 256.0,
+            "y": 384.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Toggle Switch",
+            "properties": {
+              "topic": "/Tuning/OperatorDashboard/RecordingStarted",
+              "period": 0.06,
+              "data_type": "boolean"
+            }
+          },
+          {
+            "title": "Hood",
+            "x": 512.0,
+            "y": 512.0,
+            "width": 384.0,
+            "height": 128.0,
+            "type": "Large Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/Inputs/Superstructure/Hood/PositionRad",
+              "period": 0.06,
+              "data_type": "double"
+            }
           }
         ]
       }
@@ -166,19 +205,6 @@
             },
             "children": [
               {
-                "title": "Superintake",
-                "x": 256.0,
-                "y": 512.0,
-                "width": 128.0,
-                "height": 128.0,
-                "type": "Large Text Display",
-                "properties": {
-                  "topic": "/AdvantageKit/RealOutputs/Superintake/Goal",
-                  "period": 0.06,
-                  "data_type": "string"
-                }
-              },
-              {
                 "title": "Superstructure",
                 "x": 256.0,
                 "y": 640.0,
@@ -187,6 +213,19 @@
                 "type": "Large Text Display",
                 "properties": {
                   "topic": "/AdvantageKit/RealOutputs/Superstructure/Goal",
+                  "period": 0.06,
+                  "data_type": "string"
+                }
+              },
+              {
+                "title": "Superintake",
+                "x": 256.0,
+                "y": 512.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Large Text Display",
+                "properties": {
+                  "topic": "/AdvantageKit/RealOutputs/Superintake/Goal",
                   "period": 0.06,
                   "data_type": "string"
                 }
@@ -246,16 +285,15 @@
           },
           {
             "title": "Timestamp",
-            "x": 0.0,
-            "y": 384.0,
+            "x": 1152.0,
+            "y": 768.0,
             "width": 128.0,
             "height": 128.0,
-            "type": "Text Display",
+            "type": "Large Text Display",
             "properties": {
               "topic": "/AdvantageKit/Timestamp",
               "period": 0.06,
-              "data_type": "int",
-              "show_submit_button": false
+              "data_type": "int"
             }
           },
           {
@@ -268,7 +306,8 @@
             "properties": {
               "topic": "/CameraPublisher/photonvision-blue_Port_1182_Output_MJPEG_Server",
               "period": 0.06,
-              "rotation_turns": 0
+              "rotation_turns": 0,
+              "fps": 10
             }
           },
           {
@@ -281,7 +320,8 @@
             "properties": {
               "topic": "/CameraPublisher/photonvision-red_Port_1182_Output_MJPEG_Server",
               "period": 0.06,
-              "rotation_turns": 0
+              "rotation_turns": 0,
+              "fps": 10
             }
           },
           {
@@ -294,7 +334,8 @@
             "properties": {
               "topic": "/CameraPublisher/photonvision-red_Port_1184_Output_MJPEG_Server",
               "period": 0.06,
-              "rotation_turns": 0
+              "rotation_turns": 0,
+              "fps": 10
             }
           },
           {
@@ -359,6 +400,19 @@
               "divisions": 5,
               "inverted": false,
               "orientation": "horizontal"
+            }
+          },
+          {
+            "title": "MatchNumber",
+            "x": 1280.0,
+            "y": 768.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Large Text Display",
+            "properties": {
+              "topic": "/FMSInfo/MatchNumber",
+              "period": 0.06,
+              "data_type": "int"
             }
           }
         ]
@@ -618,27 +672,13 @@
           },
           {
             "title": "VelocityMetersPerSec",
-            "x": 1152.0,
+            "x": 1024.0,
             "y": 256.0,
             "width": 256.0,
             "height": 128.0,
             "type": "Text Display",
             "properties": {
               "topic": "/AdvantageKit/RealOutputs/ShootingKinematics/ShootingParameters/VelocityMetersPerSec",
-              "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": false
-            }
-          },
-          {
-            "title": "XYDist",
-            "x": 1024.0,
-            "y": 256.0,
-            "width": 128.0,
-            "height": 128.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "/AdvantageKit/RealOutputs/ShootingKinematics/XYDist",
               "period": 0.06,
               "data_type": "double",
               "show_submit_button": false
@@ -803,33 +843,8 @@
             "properties": {
               "topic": "/CameraPublisher/photonvision-blue_Port_1182_Output_MJPEG_Server",
               "period": 0.06,
-              "rotation_turns": 0
-            }
-          },
-          {
-            "title": "photonvision-red_Port_1182_Output_MJPEG_Server",
-            "x": 1408.0,
-            "y": 256.0,
-            "width": 256.0,
-            "height": 256.0,
-            "type": "Camera Stream",
-            "properties": {
-              "topic": "/CameraPublisher/photonvision-red_Port_1182_Output_MJPEG_Server",
-              "period": 0.06,
-              "rotation_turns": 0
-            }
-          },
-          {
-            "title": "photonvision-red_Port_1184_Output_MJPEG_Server",
-            "x": 1408.0,
-            "y": 512.0,
-            "width": 256.0,
-            "height": 256.0,
-            "type": "Camera Stream",
-            "properties": {
-              "topic": "/CameraPublisher/photonvision-red_Port_1184_Output_MJPEG_Server",
-              "period": 0.06,
-              "rotation_turns": 0
+              "rotation_turns": 0,
+              "fps": 10
             }
           },
           {
@@ -851,16 +866,15 @@
           },
           {
             "title": "Timestamp",
-            "x": 0.0,
+            "x": 1408.0,
             "y": 768.0,
             "width": 128.0,
             "height": 128.0,
-            "type": "Text Display",
+            "type": "Large Text Display",
             "properties": {
               "topic": "/AdvantageKit/Timestamp",
               "period": 0.06,
-              "data_type": "int",
-              "show_submit_button": false
+              "data_type": "int"
             }
           },
           {
@@ -906,6 +920,61 @@
               "time_display_mode": "Minutes and Seconds",
               "red_start_time": 20,
               "yellow_start_time": 30
+            }
+          },
+          {
+            "title": "photonvision-red_Port_1182_Output_MJPEG_Server",
+            "x": 1408.0,
+            "y": 256.0,
+            "width": 256.0,
+            "height": 256.0,
+            "type": "Camera Stream",
+            "properties": {
+              "topic": "/CameraPublisher/photonvision-red_Port_1182_Output_MJPEG_Server",
+              "period": 0.06,
+              "rotation_turns": 0,
+              "fps": 10
+            }
+          },
+          {
+            "title": "photonvision-red_Port_1184_Output_MJPEG_Server",
+            "x": 1408.0,
+            "y": 512.0,
+            "width": 256.0,
+            "height": 256.0,
+            "type": "Camera Stream",
+            "properties": {
+              "topic": "/CameraPublisher/photonvision-red_Port_1184_Output_MJPEG_Server",
+              "period": 0.06,
+              "rotation_turns": 0,
+              "fps": 10
+            }
+          },
+          {
+            "title": "MatchNumber",
+            "x": 1536.0,
+            "y": 768.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Large Text Display",
+            "properties": {
+              "topic": "/FMSInfo/MatchNumber",
+              "period": 0.06,
+              "data_type": "int"
+            }
+          },
+          {
+            "title": "VelocityRPM",
+            "x": 1280.0,
+            "y": 256.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/RealOutputs/ShootingKinematics/ShootingParameters/VelocityRPM",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
             }
           }
         ]
