@@ -236,12 +236,14 @@ def calculate_shooting_params_kinematics(distance, robot_radial_vel):
 
     return v, angle
 
-def optimize_shot(distance, robot_radial_vel):
+def optimize_shot(distance, robot_radial_vel, FIXED_ANGLE=None):
     hubx = distance
     hub_edgex = hubx + hub_edgex_offset
     if DEBUG_SHOT:
         ax.scatter(0, 0, hubz, c="red")
         ax.scatter(hub_edgex_offset, 0, hub_edgez, c="red")
+    if FIXED_ANGLE is not None:
+        FIXED_HOOD_ANGLE = deg_to_rad(FIXED_ANGLE)
 
     v_initial, angle_initial = calculate_shooting_params_kinematics(distance, robot_radial_vel)
 
