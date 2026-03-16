@@ -1,5 +1,8 @@
 package frc.robot.autos;
 
+import choreo.Choreo;
+import choreo.trajectory.SwerveSample;
+import choreo.trajectory.Trajectory;
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -10,6 +13,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.AllianceFlipUtil;
 import frc.lib.Bounds;
+import frc.lib.Util;
 import frc.lib.network.LoggedTunableNumber;
 import frc.robot.FieldConstants;
 import frc.robot.RobotState;
@@ -37,6 +41,7 @@ public class AutoHelpers {
     private static final Drive drive = Drive.get();
     private static final Superintake superintake = Superintake.get();
     private static final Superstructure superstructure = Superstructure.get();
+    private static final Choreo.TrajectoryCache trajectoryCache = new Choreo.TrajectoryCache();
 
     public static final DriveConstants.MoveToConstraints shootingConstraints = defaultMoveToConstraints
             .withMaxLinearVelocityMetersPerSec(new LoggedTunableNumber("AutoHelpers/Shoot/MaxLinearVelocity", 1.0))
@@ -77,6 +82,34 @@ public class AutoHelpers {
                                 : intermediateAngularTolerance
                 ));
     }
+
+
+    @SuppressWarnings("unchecked")
+    public static Command trajectory(String name) {
+        // Basically copied from AutoFactory
+        Optional<? extends Trajectory<?>> optTrajectory = trajectoryCache.loadTrajectory(name);
+        if (optTrajectory.isPresent()) {
+            return drive.followTrajectory((Trajectory<SwerveSample>) optTrajectory.get());
+        } else {
+            Util.error("Trajectory " + name + " is not present");
+            //noinspection Convert2Diamond
+            return drive.idle();
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public static Command trajectory(String name, final int splitIndex) {
+        // Basically copied from AutoFactory
+        Optional<? extends Trajectory<?>> optTrajectory = trajectoryCache.loadTrajectory(name, splitIndex);
+        if (optTrajectory.isPresent()) {
+            return drive.followTrajectory((Trajectory<SwerveSample>) optTrajectory.get());
+        } else {
+            Util.error("Trajectory " + name + " is not present");
+            //noinspection Convert2Diamond
+            return drive.idle();
+        }
+    }
+
 
     public static Pose2d yDistanceInterpolation(
             Translation2d start,
