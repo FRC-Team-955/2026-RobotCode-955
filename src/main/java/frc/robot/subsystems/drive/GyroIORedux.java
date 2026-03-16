@@ -8,8 +8,6 @@ import frc.lib.HighFrequencySamplingThread;
 
 import java.util.Queue;
 
-import static frc.lib.ReduxUtil.tryUntilOk;
-
 /**
  * IO implementation for Canandgyro
  */
@@ -36,12 +34,9 @@ public class GyroIORedux extends GyroIO {
         canandgyroSettings.setAccelerationFramePeriod(otherFramePeriodSeconds);
         canandgyroSettings.setAngularPositionFramePeriod(otherFramePeriodSeconds);
 
-        // Idk which way is better
-        //tryUntilOk(5, () -> canandgyro.setSettings(canandgyroSettings, 0.25));
         canandgyro.setSettings(canandgyroSettings, 0.25, 5);
-        tryUntilOk(5, () -> canandgyro.setYaw(0.0));
-        //canandgyro.setYaw(0.0);
-
+        canandgyro.setYaw(0.0, 0.25, 5);
+        
         yawTimestampQueue = HighFrequencySamplingThread.get().makeTimestampQueue();
         yawPositionQueue = HighFrequencySamplingThread.get().registerGenericSignal(canandgyro::getYaw);
     }
