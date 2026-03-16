@@ -21,7 +21,6 @@ public class OrbitGoingToHomeDepotAuto extends Auto {
     private static final Pose2d trenchShootingPosition = new Pose2d(3.6, 7.4, Rotation2d.kCCW_90deg);
     public static final double exitTrenchX = 6.34;
     public static final double firstPassYOffset = 0.25;
-    public static final double secondPassYOffset = 1.0;
 
     public OrbitGoingToHomeDepotAuto() {
         super(
