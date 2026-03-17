@@ -6,9 +6,9 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.Util;
-import frc.lib.motor.MotorIO;
-import frc.lib.motor.MotorIOInputsAutoLogged;
-import frc.lib.motor.RequestType;
+import frc.lib.device.MotorIO;
+import frc.lib.device.RequestType;
+import frc.lib.device.MotorIOInputsAutoLogged;
 import frc.lib.network.LoggedTunableNumber;
 import frc.lib.subsystem.Periodic;
 import frc.robot.OperatorDashboard;
@@ -67,7 +67,7 @@ public class ExampleRollerSubsystem implements Periodic {
 
     @Override
     public void periodicBeforeCommands() {
-        io.updateInputs(inputs);
+        io.updateAndProcessInputs(inputs);
         Logger.processInputs("Inputs/ExampleRollerSubsystem", inputs);
 
         motorDisconnectedAlert.set(!inputs.connected);

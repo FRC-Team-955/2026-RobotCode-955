@@ -1,6 +1,6 @@
 package frc.robot.subsystems.superintake.intakepivot;
 
-import frc.lib.motor.MotorIO.MotorIOInputs;
+import frc.lib.device.MotorIO.MotorIOInputs;
 import frc.lib.network.LoggedTunablePIDF;
 
 public class IntakePivotIO {

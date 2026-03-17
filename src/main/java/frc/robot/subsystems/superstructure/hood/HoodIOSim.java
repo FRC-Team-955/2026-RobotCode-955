@@ -3,9 +3,9 @@ package frc.robot.subsystems.superstructure.hood;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
-import frc.lib.motor.MotorIO.MotorIOInputs;
-import frc.lib.motor.MotorIOArmSim;
-import frc.lib.motor.RequestType;
+import frc.lib.device.MotorIO.MotorIOInputs;
+import frc.lib.device.MotorIOArmSim;
+import frc.lib.device.RequestType;
 import frc.lib.network.LoggedTunablePIDF;
 
 import static frc.robot.subsystems.superstructure.hood.HoodConstants.*;

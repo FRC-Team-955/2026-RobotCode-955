@@ -2,8 +2,8 @@ package frc.robot.subsystems.superstructure.flywheel;
 
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-import frc.lib.motor.MotorIOTalonFX;
-import frc.lib.motor.RequestType;
+import frc.lib.device.MotorIOTalonFX;
+import frc.lib.device.RequestType;
 import frc.lib.network.LoggedTunablePIDF;
 
 import static frc.robot.subsystems.superstructure.flywheel.FlywheelConstants.gearRatio;
@@ -45,7 +45,7 @@ public class FlywheelIOTalonFX extends FlywheelIO {
                 null,
                 0.0
         );
-        follower.setFollow(leader, followerAlignment);
+        follower.setFollowRequest(leader, followerAlignment);
     }
 
     @Override

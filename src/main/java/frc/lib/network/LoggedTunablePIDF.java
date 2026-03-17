@@ -1,14 +1,11 @@
 package frc.lib.network;
 
-import com.ctre.phoenix6.configs.SlotConfigs;
+import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
 import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.config.ClosedLoopConfig;
-import edu.wpi.first.math.controller.ArmFeedforward;
-import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 
 /**
  * Units (velocity control additions are in brackets):
@@ -79,7 +76,8 @@ public class LoggedTunablePIDF {
         return this;
     }
 
-    public void applySpark(ClosedLoopConfig config, ClosedLoopSlot slot) {
+    public void applySpark(ClosedLoopConfig config) {
+        ClosedLoopSlot slot = ClosedLoopSlot.kSlot0;
         // We do spark unit conversions on controller so no need for unit conversions
         if (kP != null) config.p(kP.get(), slot);
         if (kI != null) config.i(kI.get(), slot);
@@ -101,8 +99,8 @@ public class LoggedTunablePIDF {
         }
     }
 
-    public SlotConfigs toPhoenix() {
-        SlotConfigs configs = new SlotConfigs();
+    public Slot0Configs toPhoenix() {
+        Slot0Configs configs = new Slot0Configs();
 
         // See top level javadoc for LoggedTunablePIDF units
         // Phoenix unit is rotations
@@ -181,32 +179,6 @@ public class LoggedTunablePIDF {
         var pid = toPIDWrapRadians();
         pid.setTolerance(errorTolerance, errorDerivativeTolerance);
         return pid;
-    }
-
-    public SimpleMotorFeedforward toSimpleFF() {
-        return new SimpleMotorFeedforward(
-                this.kS != null ? this.kS.get() : 0.0,
-                this.kV != null ? this.kV.get() : 0.0,
-                this.kA != null ? this.kA.get() : 0.0
-        );
-    }
-
-    public ArmFeedforward toArmFF() {
-        return new ArmFeedforward(
-                this.kS != null ? this.kS.get() : 0.0,
-                this.kG != null ? this.kG.get() : 0.0,
-                this.kV != null ? this.kV.get() : 0.0,
-                this.kA != null ? this.kA.get() : 0.0
-        );
-    }
-
-    public ElevatorFeedforward toElevatorFF() {
-        return new ElevatorFeedforward(
-                this.kS != null ? this.kS.get() : 0.0,
-                this.kG != null ? this.kG.get() : 0.0,
-                this.kV != null ? this.kV.get() : 0.0,
-                this.kA != null ? this.kA.get() : 0.0
-        );
     }
 
     public boolean hasChanged() {

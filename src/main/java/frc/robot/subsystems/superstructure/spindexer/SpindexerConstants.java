@@ -2,9 +2,9 @@ package frc.robot.subsystems.superstructure.spindexer;
 
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.system.plant.DCMotor;
-import frc.lib.motor.MotorIO;
-import frc.lib.motor.MotorIOSim;
-import frc.lib.motor.MotorIOTalonFX;
+import frc.lib.device.MotorIO;
+import frc.lib.device.MotorIOSim;
+import frc.lib.device.MotorIOTalonFX;
 import frc.robot.BuildConstants;
 
 public class SpindexerConstants {

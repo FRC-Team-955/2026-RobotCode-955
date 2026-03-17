@@ -1,6 +1,6 @@
 package frc.robot.subsystems.superstructure.flywheel;
 
-import frc.lib.motor.MotorIOInputsAutoLogged;
+import frc.lib.device.MotorIOInputsAutoLogged;
 import frc.lib.network.LoggedTunablePIDF;
 import org.littletonrobotics.junction.AutoLog;
 

@@ -2,9 +2,9 @@ package frc.robot.subsystems.superstructure.hood;
 
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.revrobotics.spark.config.SparkBaseConfig;
-import frc.lib.motor.MotorIO.MotorIOInputs;
-import frc.lib.motor.MotorIOSparkMax;
-import frc.lib.motor.RequestType;
+import frc.lib.device.MotorIO.MotorIOInputs;
+import frc.lib.device.MotorIOSparkMax;
+import frc.lib.device.RequestType;
 import frc.lib.network.LoggedTunablePIDF;
 
 import static frc.robot.subsystems.superstructure.hood.HoodConstants.*;
