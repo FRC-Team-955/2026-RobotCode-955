@@ -29,9 +29,9 @@ public class GamePieceVision implements Periodic {
 
     private static GamePieceVision instance;
 
-    private DBSCAN dbscan = new DBSCAN(new ArrayList<Translation2d>(), 3, 0.5);
+    private final DBSCAN dbscan = new DBSCAN(new ArrayList<Translation2d>(), 3, 0.5);
 
-    private Optional<Translation2d> lastTarget = Optional.empty();
+    private final Optional<Translation2d> lastTarget = Optional.empty();
 
     public static synchronized GamePieceVision get() {
         if (instance == null) {

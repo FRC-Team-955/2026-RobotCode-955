@@ -36,7 +36,7 @@ public class GyroIORedux extends GyroIO {
 
         canandgyro.setSettings(canandgyroSettings, 0.25, 5);
         canandgyro.setYaw(0.0, 0.25, 5);
-        
+
         yawTimestampQueue = HighFrequencySamplingThread.get().makeTimestampQueue();
         yawPositionQueue = HighFrequencySamplingThread.get().registerGenericSignal(canandgyro::getYaw);
     }

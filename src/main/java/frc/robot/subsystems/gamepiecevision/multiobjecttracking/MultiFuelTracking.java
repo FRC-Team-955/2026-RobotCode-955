@@ -11,14 +11,14 @@ public class MultiFuelTracking {
     public static final double CREATION_DISTANCE_METERS = 0.5;
     public static final double DELETION_DISTANCE_METERS = 0.5;
 
-    private HashMap<Integer, FuelObservation> fuelObservations = new HashMap<Integer, FuelObservation>();
+    private final HashMap<Integer, FuelObservation> fuelObservations = new HashMap<Integer, FuelObservation>();
 
     //public Translation2d calculate(List<FuelCluster> clusters) {}
 
     private double[][] distanceMatrix(List<FuelObservation> currentObservations, List<Translation2d> newObservations) {
         int currentSize = currentObservations.size();
         int newSize = newObservations.size();
-        int totalSize = currentSize+newSize;
+        int totalSize = currentSize + newSize;
 
         // In this matrix, rows = current observations, columns = new observations
         // This forms a 2x2 square block matrix, upper left is distances, upper right is the weight required to mark a ball as disappeared,
@@ -52,7 +52,7 @@ public class MultiFuelTracking {
     }
 
     public static class FuelObservation {
-        private List<Translation2d> recentPoses = new ArrayList<>();
+        private final List<Translation2d> recentPoses = new ArrayList<>();
         private final static int MAX_STORAGE_SIZE = 5;
         private final static int DECAY_TIME_FRAMES = 5;
         private static int ID = 0;
@@ -83,7 +83,7 @@ public class MultiFuelTracking {
         public Translation2d getPose() {
             Translation2d avg = new Translation2d();
             for (Translation2d pose : recentPoses) {
-                avg =  avg.plus(pose);
+                avg = avg.plus(pose);
             }
             return avg.div(recentPoses.size());
         }
@@ -94,11 +94,15 @@ public class MultiFuelTracking {
     }
 
     public static class FuelCluster {
-        private List<Translation2d> cluster = new ArrayList<>();
+        private final List<Translation2d> cluster = new ArrayList<>();
 
-        public void addFuel(Translation2d fuel) {cluster.add(fuel);}
+        public void addFuel(Translation2d fuel) {
+            cluster.add(fuel);
+        }
 
-        public int size() {return cluster.size();}
+        public int size() {
+            return cluster.size();
+        }
 
         public double weight() {
             return ((double) size()) / avgLocation().getNorm();
