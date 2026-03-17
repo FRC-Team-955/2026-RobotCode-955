@@ -1,8 +1,8 @@
 package frc.robot.subsystems.superstructure.flywheel;
 
 import edu.wpi.first.math.system.plant.DCMotor;
-import frc.lib.motor.MotorIOSim;
-import frc.lib.motor.RequestType;
+import frc.lib.device.MotorIOSim;
+import frc.lib.device.RequestType;
 import frc.lib.network.LoggedTunablePIDF;
 
 public class FlywheelIOSim extends FlywheelIO {

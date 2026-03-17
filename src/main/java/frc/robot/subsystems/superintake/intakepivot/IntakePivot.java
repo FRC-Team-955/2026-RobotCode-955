@@ -6,7 +6,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.lib.Util;
-import frc.lib.motor.MotorIOInputsAutoLogged;
+import frc.lib.device.MotorIOInputsAutoLogged;
 import frc.lib.network.LoggedTunableNumber;
 import frc.lib.subsystem.Periodic;
 import frc.robot.Constants;

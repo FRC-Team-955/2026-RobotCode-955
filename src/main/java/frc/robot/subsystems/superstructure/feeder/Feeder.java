@@ -4,9 +4,9 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.lib.Util;
-import frc.lib.motor.MotorIO;
-import frc.lib.motor.MotorIOInputsAutoLogged;
-import frc.lib.motor.RequestType;
+import frc.lib.device.MotorIO;
+import frc.lib.device.RequestType;
+import frc.lib.device.MotorIOInputsAutoLogged;
 import frc.lib.network.LoggedTunableNumber;
 import frc.lib.subsystem.Periodic;
 import frc.robot.OperatorDashboard;
@@ -64,7 +64,7 @@ public class Feeder implements Periodic {
 
     @Override
     public void periodicBeforeCommands() {
-        io.updateInputs(inputs);
+        io.updateAndProcessInputs(inputs);
         Logger.processInputs("Inputs/Superstructure/Feeder", inputs);
 
         motorDisconnectedAlert.set(!inputs.connected);

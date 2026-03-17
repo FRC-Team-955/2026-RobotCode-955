@@ -1,7 +1,7 @@
 package frc.robot.subsystems.superstructure.hood;
 
 import com.ctre.phoenix6.signals.NeutralModeValue;
-import frc.lib.motor.MotorIO.MotorIOInputs;
+import frc.lib.device.MotorIO.MotorIOInputs;
 import frc.lib.network.LoggedTunablePIDF;
 
 public class HoodIO {
@@ -27,7 +27,7 @@ public class HoodIO {
     }
 
     /**
-     * Enable or disable brake mode on the motor.
+     * Enable or disable brake mode on the device.
      */
     public void setNeutralMode(NeutralModeValue neutralMode) {
     }

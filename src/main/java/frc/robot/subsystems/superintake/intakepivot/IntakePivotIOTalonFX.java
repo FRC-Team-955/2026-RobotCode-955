@@ -1,9 +1,9 @@
 package frc.robot.subsystems.superintake.intakepivot;
 
 import com.ctre.phoenix6.signals.NeutralModeValue;
-import frc.lib.motor.MotorIO.MotorIOInputs;
-import frc.lib.motor.MotorIOTalonFX;
-import frc.lib.motor.RequestType;
+import frc.lib.device.MotorIO.MotorIOInputs;
+import frc.lib.device.MotorIOTalonFX;
+import frc.lib.device.RequestType;
 import frc.lib.network.LoggedTunablePIDF;
 
 import static frc.robot.subsystems.superintake.intakepivot.IntakePivotConstants.*;

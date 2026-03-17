@@ -2,9 +2,9 @@ package frc.robot.subsystems.superintake.intakepivot;
 
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
-import frc.lib.motor.MotorIO.MotorIOInputs;
-import frc.lib.motor.MotorIOArmSim;
-import frc.lib.motor.RequestType;
+import frc.lib.device.MotorIO.MotorIOInputs;
+import frc.lib.device.MotorIOArmSim;
+import frc.lib.device.RequestType;
 import frc.lib.network.LoggedTunablePIDF;
 
 import static frc.robot.subsystems.superintake.intakepivot.IntakePivotConstants.*;

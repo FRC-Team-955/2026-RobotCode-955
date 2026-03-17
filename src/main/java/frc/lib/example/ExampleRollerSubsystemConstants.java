@@ -3,9 +3,9 @@ package frc.lib.example;
 import com.revrobotics.spark.config.SparkBaseConfig;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
-import frc.lib.motor.MotorIO;
-import frc.lib.motor.MotorIOSim;
-import frc.lib.motor.MotorIOSparkMax;
+import frc.lib.device.MotorIO;
+import frc.lib.device.MotorIOSim;
+import frc.lib.device.MotorIOSparkMax;
 import frc.lib.network.LoggedTunablePIDF;
 import frc.robot.BuildConstants;
 
