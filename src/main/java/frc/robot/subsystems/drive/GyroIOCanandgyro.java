@@ -11,7 +11,7 @@ import java.util.Queue;
 /**
  * IO implementation for Canandgyro
  */
-public class GyroIORedux extends GyroIO {
+public class GyroIOCanandgyro extends GyroIO {
     private final Canandgyro canandgyro;
 
     private final Queue<Double> yawPositionQueue;
@@ -23,7 +23,7 @@ public class GyroIORedux extends GyroIO {
     private final Debouncer connectedDebouncer = new Debouncer(0.5);
 
 
-    public GyroIORedux(int canID) {
+    public GyroIOCanandgyro(int canID) {
         canandgyro = new Canandgyro(canID);
 
         var canandgyroSettings = new CanandgyroSettings();
@@ -46,8 +46,7 @@ public class GyroIORedux extends GyroIO {
         inputs.connected = connectedDebouncer.calculate(canandgyro.isConnected());
         inputs.temperatureCelsius = canandgyro.getTemperature();
 
-        inputs.yawPositionRad = Units.rotationsToRadians(canandgyro.getYaw());
-        //getMultiTurn?
+        inputs.yawPositionRad = Units.rotationsToRadians(canandgyro.getMultiturnYaw());
         inputs.orientation = canandgyro.getRotation3d();
 
         inputs.angularVelocityXRadPerSec = Units.rotationsToRadians(canandgyro.getAngularVelocityRoll());
