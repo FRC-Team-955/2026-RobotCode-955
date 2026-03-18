@@ -25,7 +25,7 @@ public class MechanismSim {
     public void update(TalonFXSimState talonSim) {
         // https://v6.docs.ctr-electronics.com/en/latest/docs/api-reference/simulation/simulation-intro.html
 
-        // use the device voltage to calculate new position and velocity
+        // use the motor voltage to calculate new position and velocity
         // using WPILib's DCMotorSim class for physics simulation
         iterate.accept(talonSim.getMotorVoltage());
 
