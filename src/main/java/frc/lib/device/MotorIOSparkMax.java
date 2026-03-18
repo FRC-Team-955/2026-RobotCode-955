@@ -37,7 +37,7 @@ public class MotorIOSparkMax extends MotorIO {
         encoder = spark.getEncoder();
         controller = spark.getClosedLoopController();
 
-        // Configure drive device
+        // Configure motor
         this.config = config.getInner();
         tryUntilOk(5, () -> spark.configure(
                 this.config,

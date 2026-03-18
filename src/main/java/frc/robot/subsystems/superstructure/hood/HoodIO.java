@@ -27,7 +27,7 @@ public class HoodIO {
     }
 
     /**
-     * Enable or disable brake mode on the device.
+     * Enable or disable brake mode on the motor.
      */
     public void setNeutralMode(NeutralModeValue neutralMode) {
     }
