@@ -6,13 +6,21 @@ import edu.wpi.first.wpilibj.Alert;
 import frc.lib.network.LoggedTunablePIDF;
 
 public class Motor extends Device<MotorIO, MotorIOInputsAutoLogged> {
+    private final LoggedTunablePIDF gains;
+
     private boolean emergencyStopped = false;
 
     private final Alert highTemperatureAlert;
     private final Alert emergencyStoppedAlert;
 
-    public Motor(String name, MotorIO io) {
-        super(name, io, new MotorIOInputsAutoLogged());
+    public Motor(String name, MotorIO.Builder ioBuilder) {
+        this(name, null, ioBuilder);
+    }
+
+    public Motor(String name, LoggedTunablePIDF gains, MotorIO.Builder ioBuilder) {
+        super(name, ioBuilder.build(gains), new MotorIOInputsAutoLogged());
+
+        this.gains = gains;
 
         highTemperatureAlert = new Alert(name + " temperature is high.", Alert.AlertType.kWarning);
         emergencyStoppedAlert = new Alert(name + " is emergency stopped.", Alert.AlertType.kError);
@@ -23,6 +31,11 @@ public class Motor extends Device<MotorIO, MotorIOInputsAutoLogged> {
         super.updateAndProcessInputs();
 
         highTemperatureAlert.set(getTemperatureCelsius() > 50.0);
+
+        if (gains != null && gains.hasChanged()) {
+            System.out.println("Setting gains of " + name);
+            io.setGains(gains);
+        }
     }
 
     @Override
@@ -93,11 +106,6 @@ public class Motor extends Device<MotorIO, MotorIOInputsAutoLogged> {
     public void setFollowRequest(Motor leader, MotorAlignmentValue alignment) {
         System.out.println("Making " + name + " follow " + leader.name);
         io.setFollowRequest(leader.io, alignment);
-    }
-
-    public void setGains(LoggedTunablePIDF newGains) {
-        System.out.println("Setting gains of " + name);
-        io.setGains(newGains);
     }
 
     public void setNeutralMode(NeutralModeValue neutralMode) {
