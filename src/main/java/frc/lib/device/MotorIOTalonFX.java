@@ -59,7 +59,9 @@ public class MotorIOTalonFX extends MotorIO {
      */
     public static MotorIO.Builder builder(int canID, TalonFXConfiguration config) {
         return gains -> {
-            config.Slot0 = gains.toPhoenix();
+            if (gains != null) {
+                config.Slot0 = gains.toPhoenix();
+            }
             return new MotorIOTalonFX(canID, config);
         };
     }

@@ -34,7 +34,9 @@ public class MotorIOSparkMax extends MotorIO {
     public static MotorIO.Builder builder(int canID, CtrlSparkMaxConfig config) {
         return gains -> {
             SparkMaxConfig innerConfig = config.getInner();
-            gains.applySpark(innerConfig.closedLoop);
+            if (gains != null) {
+                gains.applySpark(innerConfig.closedLoop);
+            }
             return new MotorIOSparkMax(canID, innerConfig);
         };
     }
