@@ -53,7 +53,7 @@ public class MotorIOSparkMax extends MotorIO {
                 ResetMode.kResetSafeParameters,
                 PersistMode.kPersistParameters
         ));
-        tryUntilOk(5, () -> encoder.setPosition(initialPositionRad));
+        tryUntilOk(5, () -> encoder.setPosition(0.0));
     }
 
     @Override
@@ -134,10 +134,5 @@ public class MotorIOSparkMax extends MotorIO {
                 ResetMode.kNoResetSafeParameters,
                 PersistMode.kPersistParameters
         ));
-    }
-
-    @Override
-    public void setEncoderPosition(double positionRad) {
-        tryUntilOkAsync(5, () -> encoder.setPosition(positionRad));
     }
 }

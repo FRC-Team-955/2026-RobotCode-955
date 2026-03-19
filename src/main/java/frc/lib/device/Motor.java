@@ -9,6 +9,9 @@ import org.jetbrains.annotations.Nullable;
 public class Motor extends Device<MotorIO, MotorIOInputsAutoLogged> {
     private final @Nullable LoggedTunablePIDF gains;
 
+    /** Added to raw position to get wanted position. See getPositionRad, setPositionRequest, and setEncoderPosition for more info. */
+    private double positionOffsetRad = 0.0;
+
     private boolean emergencyStopped = false;
 
     private final Alert highTemperatureAlert;
@@ -45,7 +48,8 @@ public class Motor extends Device<MotorIO, MotorIOInputsAutoLogged> {
     }
 
     public double getPositionRad() {
-        return inputs.positionRad;
+        // raw + offset = wanted
+        return inputs.positionRad + positionOffsetRad;
     }
 
     public double getVelocityRadPerSec() {
@@ -91,7 +95,8 @@ public class Motor extends Device<MotorIO, MotorIOInputsAutoLogged> {
 
     public void setPositionRequest(double setpointRad) {
         if (!emergencyStopped) {
-            io.setPositionRequest(setpointRad);
+            // raw = wanted - offset
+            io.setPositionRequest(setpointRad - positionOffsetRad);
         }
     }
 
@@ -114,13 +119,22 @@ public class Motor extends Device<MotorIO, MotorIOInputsAutoLogged> {
         io.setNeutralMode(neutralMode);
     }
 
-    /**
-     * NOTE: The position will not instantly change!! Keep this in mind!
-     * You may want to add a delay before returning to closed loop control
-     * so that the motor does not attempt to move to an invalid position
-     */
     public void setEncoderPosition(double positionRad) {
         System.out.println("Setting " + name + " encoder position to " + positionRad);
-        io.setEncoderPosition(positionRad);
+        // offset = wanted - raw
+        positionOffsetRad = positionRad - inputs.positionRad;
+    }
+
+    /**
+     * Intended to be used like this:
+     * <pre>
+     *     private final Motor motor = new Motor(
+     *         ...
+     *     ).withInitialEncoderPosition(...);
+     * </pre>
+     */
+    public Motor withInitialEncoderPosition(double positionRad) {
+        setEncoderPosition(positionRad);
+        return this;
     }
 }

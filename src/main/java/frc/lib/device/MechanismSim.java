@@ -20,7 +20,6 @@ public class MechanismSim {
     private final DoubleConsumer iterate;
     private final DoubleSupplier mechanismPositionRad;
     private final DoubleSupplier mechanismVelocityRadPerSec;
-    private final DoubleConsumer setMechanismPositionRad;
 
     public void update(TalonFXSimState talonSim) {
         // https://v6.docs.ctr-electronics.com/en/latest/docs/api-reference/simulation/simulation-intro.html
@@ -74,8 +73,7 @@ public class MechanismSim {
                         motorSim.update(Constants.loopPeriod);
                     },
                     motorSim::getAngularPositionRad,
-                    motorSim::getAngularVelocityRadPerSec,
-                    motorSim::setAngle
+                    motorSim::getAngularVelocityRadPerSec
             );
         };
     }
@@ -108,8 +106,7 @@ public class MechanismSim {
                         armSim.update(Constants.loopPeriod);
                     },
                     armSim::getAngleRads,
-                    armSim::getVelocityRadPerSec,
-                    mechanismPositionRad -> armSim.setState(mechanismPositionRad, 0.0)
+                    armSim::getVelocityRadPerSec
             );
         };
     }

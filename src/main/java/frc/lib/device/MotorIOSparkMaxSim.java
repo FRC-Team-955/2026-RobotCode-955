@@ -23,9 +23,4 @@ public class MotorIOSparkMaxSim extends MotorIOSparkMax {
 
         super.updateInputs(inputs);
     }
-
-    @Override
-    public void setEncoderPosition(double positionRad) {
-        super.setEncoderPosition(positionRad);
-    }
 }
