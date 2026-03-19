@@ -4,9 +4,10 @@ import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.wpilibj.Alert;
 import frc.lib.network.LoggedTunablePIDF;
+import org.jetbrains.annotations.Nullable;
 
 public class Motor extends Device<MotorIO, MotorIOInputsAutoLogged> {
-    private final LoggedTunablePIDF gains;
+    private final @Nullable LoggedTunablePIDF gains;
 
     private boolean emergencyStopped = false;
 
@@ -17,7 +18,7 @@ public class Motor extends Device<MotorIO, MotorIOInputsAutoLogged> {
         this(name, null, ioBuilder);
     }
 
-    public Motor(String name, LoggedTunablePIDF gains, MotorIO.Builder ioBuilder) {
+    public Motor(String name, @Nullable LoggedTunablePIDF gains, MotorIO.Builder ioBuilder) {
         super(name, ioBuilder.build(gains), new MotorIOInputsAutoLogged());
 
         this.gains = gains;
