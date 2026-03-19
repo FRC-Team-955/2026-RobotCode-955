@@ -108,10 +108,19 @@ public class Motor extends Device<MotorIO, MotorIOInputsAutoLogged> {
 
     /**
      * NOTE: BLOCKS THE MAIN THREAD!!! ONLY CALL ON STARTUP!!!!
+     * <p>
+     * /**
+     * Intended to be used like this:
+     * <pre>
+     *     private final Motor motor = new Motor(
+     *         ...
+     *     ).withFollowRequest(...);
+     * </pre>
      */
-    public void setFollowRequest(Motor leader, MotorAlignmentValue alignment) {
+    public Motor withFollowRequest(Motor leader, MotorAlignmentValue alignment) {
         System.out.println("Making " + name + " follow " + leader.name);
         io.setFollowRequest(leader.io, alignment);
+        return this;
     }
 
     public void setNeutralMode(NeutralModeValue neutralMode) {
