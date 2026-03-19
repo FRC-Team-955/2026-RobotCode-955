@@ -24,9 +24,4 @@ public class MotorIOTalonFXSim extends MotorIOTalonFX {
 
         super.updateInputs(inputs);
     }
-
-    @Override
-    public void setEncoderPosition(double positionRad) {
-        super.setEncoderPosition(positionRad);
-    }
 }
