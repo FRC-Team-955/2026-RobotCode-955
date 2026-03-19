@@ -28,17 +28,24 @@ public class MotorIOSparkMax extends MotorIO {
     // Connection debouncers
     private final Debouncer connectedDebounce = new Debouncer(0.5);
 
-    public MotorIOSparkMax(
-            int canID,
-            CtrlSparkMaxConfig config,
-            double initialPositionRad
-    ) {
+    /**
+     * DO NOT configure gains. Gain configuration will be handled through the Motor class.
+     */
+    public static MotorIO.Builder builder(int canID, CtrlSparkMaxConfig config) {
+        return gains -> {
+            SparkMaxConfig innerConfig = config.getInner();
+            gains.applySpark(innerConfig.closedLoop);
+            return new MotorIOSparkMax(canID, innerConfig);
+        };
+    }
+
+    private MotorIOSparkMax(int canID, SparkMaxConfig config) {
         spark = new SparkMax(canID, SparkLowLevel.MotorType.kBrushless);
         encoder = spark.getEncoder();
         controller = spark.getClosedLoopController();
 
         // Configure motor
-        this.config = config.getInner();
+        this.config = config;
         tryUntilOk(5, () -> spark.configure(
                 this.config,
                 ResetMode.kResetSafeParameters,

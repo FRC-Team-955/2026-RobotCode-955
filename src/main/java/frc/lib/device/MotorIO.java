@@ -29,5 +29,8 @@ public abstract class MotorIO extends DeviceIO<MotorIOInputsAutoLogged> {
 
     public abstract void setNeutralMode(NeutralModeValue neutralMode);
 
-    public abstract void setEncoderPosition(double positionRad);
+    @FunctionalInterface
+    public interface Builder {
+        MotorIO build(LoggedTunablePIDF gains);
+    }
 }

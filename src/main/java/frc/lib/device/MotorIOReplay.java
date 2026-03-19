@@ -5,6 +5,10 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import frc.lib.network.LoggedTunablePIDF;
 
 public class MotorIOReplay extends MotorIO {
+    public static MotorIO.Builder builder() {
+        return ignored -> new MotorIOReplay();
+    }
+
     @Override
     public void updateInputs(MotorIOInputsAutoLogged inputs) {
     }
@@ -31,9 +35,5 @@ public class MotorIOReplay extends MotorIO {
 
     @Override
     public void setNeutralMode(NeutralModeValue neutralMode) {
-    }
-
-    @Override
-    public void setEncoderPosition(double positionRad) {
     }
 }
