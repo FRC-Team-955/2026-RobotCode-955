@@ -20,10 +20,10 @@ import org.littletonrobotics.junction.Logger;
 import java.util.function.DoubleSupplier;
 
 public class Spindexer implements Periodic {
-    private static final LoggedTunableNumber idleVoltage = new LoggedTunableNumber(" Spindexer/Goal/IdleVoltage", 0.0);
+    private static final LoggedTunableNumber idleVoltage = new LoggedTunableNumber("Spindexer/Goal/IdleVoltage", 0.0);
 
-    private static final LoggedTunableNumber feedVoltage = new LoggedTunableNumber(" Spindexer/Goal/FeedVoltage", 12.0);
-    private static final LoggedTunableNumber ejectVoltage = new LoggedTunableNumber(" Spindexer/Goal/EjectVoltage", -12.0);
+    private static final LoggedTunableNumber feedVoltage = new LoggedTunableNumber("Spindexer/Goal/FeedVoltage", 12.0);
+    private static final LoggedTunableNumber ejectVoltage = new LoggedTunableNumber("Spindexer/Goal/EjectVoltage", -12.0);
     private static final double gearRatio = 5;
     private static final TalonFXConfiguration motorConfig = new TalonFXConfiguration()
             .withMotorOutput(new MotorOutputConfigs()
