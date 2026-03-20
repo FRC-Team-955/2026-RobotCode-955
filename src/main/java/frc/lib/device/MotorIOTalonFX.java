@@ -71,7 +71,7 @@ public class MotorIOTalonFX extends MotorIO {
 
         this.config = config;
         tryUntilOk(5, () -> talon.getConfigurator().apply(config, 0.25));
-        tryUntilOk(5, () -> talon.setPosition(0.0, 0.25));
+        tryUntilOk(5, () -> talon.setPosition(Units.radiansToRotations(initialPositionRad), 0.25));
 
         position = talon.getPosition();
         velocity = talon.getVelocity();
@@ -138,5 +138,10 @@ public class MotorIOTalonFX extends MotorIO {
     public void setNeutralMode(NeutralModeValue neutralMode) {
         config.MotorOutput.NeutralMode = neutralMode;
         tryUntilOkAsync(5, () -> talon.getConfigurator().apply(config, 0.25));
+    }
+
+    @Override
+    public void setEncoderPosition(double positionRad) {
+        tryUntilOkAsync(5, () -> talon.setPosition(Units.radiansToRotations(positionRad), 0.25));
     }
 }
