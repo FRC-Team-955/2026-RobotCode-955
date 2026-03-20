@@ -3,13 +3,14 @@ package frc.lib.device;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.sim.TalonFXSimState;
 import edu.wpi.first.math.system.plant.DCMotor;
+import frc.robot.SimManager;
 
 public class MotorIOTalonFXSim extends MotorIOTalonFX {
     private final TalonFXSimState talonSim;
     private final MechanismSim mechanismSim;
 
-    public MotorIOTalonFXSim(int canID, TalonFXConfiguration config, double initialPositionRad, MechanismSim.Builder mechanismSimBuilder) {
-        super(canID, config, initialPositionRad);
+    public MotorIOTalonFXSim(TalonFXConfiguration config, double initialPositionRad, MechanismSim.Builder mechanismSimBuilder) {
+        super(SimManager.getNewCANId(), config, initialPositionRad);
 
         talonSim = talon.getSimState();
         talonSim.setMotorType(TalonFXSimState.MotorType.KrakenX60);
@@ -27,6 +28,8 @@ public class MotorIOTalonFXSim extends MotorIOTalonFX {
 
     @Override
     public void setEncoderPosition(double positionRad) {
+        mechanismSim.setMechanismPositionRad.accept(positionRad);
+
         super.setEncoderPosition(positionRad);
     }
 }

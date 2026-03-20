@@ -14,12 +14,12 @@ public class Motor extends Device<MotorIO, MotorIOInputsAutoLogged> {
     private final Alert highTemperatureAlert;
     private final Alert emergencyStoppedAlert;
 
-    public Motor(String name, MotorIO.Builder ioBuilder) {
-        this(name, null, ioBuilder);
+    public Motor(String name, MotorIO io) {
+        this(name, null, io);
     }
 
-    public Motor(String name, @Nullable LoggedTunablePIDF gains, MotorIO.Builder ioBuilder) {
-        super(name, ioBuilder.build(gains), new MotorIOInputsAutoLogged());
+    public Motor(String name, @Nullable LoggedTunablePIDF gains, MotorIO io) {
+        super(name, io, new MotorIOInputsAutoLogged());
 
         this.gains = gains;
 
@@ -104,18 +104,13 @@ public class Motor extends Device<MotorIO, MotorIOInputsAutoLogged> {
     /**
      * NOTE: BLOCKS THE MAIN THREAD!!! ONLY CALL ON STARTUP!!!!
      * <p>
-     * /**
-     * Intended to be used like this:
-     * <pre>
-     *     private final Motor motor = new Motor(
-     *         ...
-     *     ).withFollowRequest(...);
-     * </pre>
+     * NOTE 2: Emergency stopping will break following. More thought needs to be
+     * put into this for it to work. TODO: maybe just rewrite the whole MotorIO to be
+     * more follower friendly idk
      */
-    public Motor withFollowRequest(Motor leader, MotorAlignmentValue alignment) {
+    public void setFollowRequest(Motor leader, MotorAlignmentValue alignment) {
         System.out.println("Making " + name + " follow " + leader.name);
         io.setFollowRequest(leader.io, alignment);
-        return this;
     }
 
     public void setNeutralMode(NeutralModeValue neutralMode) {
@@ -127,6 +122,9 @@ public class Motor extends Device<MotorIO, MotorIOInputsAutoLogged> {
      * NOTE: The position will not instantly change!! Keep this in mind!
      * You may want to add a delay before returning to closed loop control
      * so that the motor does not attempt to move to an invalid position
+     * <p>
+     * TODO: maybe just add a Timer in the Motor class so this happens for all motors;
+     * only allow setting position request if a certain delay has been reached
      */
     public void setEncoderPosition(double positionRad) {
         System.out.println("Setting " + name + " encoder position to " + positionRad);

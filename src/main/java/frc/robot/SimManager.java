@@ -204,6 +204,12 @@ public class SimManager {
         }
     }
 
+    private static int nextCANId = 1;
+
+    public static int getNewCANId() {
+        return nextCANId++;
+    }
+
     public static class CustomArena extends SimulatedArena {
         protected boolean isInEfficiencyMode = true;
 
