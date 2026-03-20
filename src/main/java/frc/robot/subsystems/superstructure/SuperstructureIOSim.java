@@ -9,7 +9,6 @@ import frc.robot.SimManager;
 import frc.robot.shooting.ShootingKinematics;
 import frc.robot.subsystems.superintake.IntakeRollers;
 import frc.robot.subsystems.superintake.intakepivot.IntakePivot;
-import frc.robot.subsystems.superstructure.feeder.Feeder;
 import frc.robot.subsystems.superstructure.flywheel.Flywheel;
 import frc.robot.subsystems.superstructure.flywheel.FlywheelConstants;
 import frc.robot.subsystems.superstructure.hood.Hood;
