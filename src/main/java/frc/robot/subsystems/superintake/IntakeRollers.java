@@ -34,9 +34,9 @@ public class IntakeRollers implements Periodic {
                     .withSensorToMechanismRatio(gearRatio)
             );
 
-    private static final LoggedTunableNumber idleVoltage = new LoggedTunableNumber(" IntakeRollers/Goal/IdleVoltage", 0.0);
-    private static final LoggedTunableNumber intakeVoltage = new LoggedTunableNumber(" IntakeRollers/Goal/IntakeVoltage", 12.0);
-    private static final LoggedTunableNumber ejectVoltage = new LoggedTunableNumber(" IntakeRollers/Goal/EjectVoltage", -12.0);
+    private static final LoggedTunableNumber idleVoltage = new LoggedTunableNumber("IntakeRollers/Goal/IdleVoltage", 0.0);
+    private static final LoggedTunableNumber intakeVoltage = new LoggedTunableNumber("IntakeRollers/Goal/IntakeVoltage", 12.0);
+    private static final LoggedTunableNumber ejectVoltage = new LoggedTunableNumber("IntakeRollers/Goal/EjectVoltage", -12.0);
 
     private final Motor motor = new Motor("IntakeRollers", switch (BuildConstants.mode) {
         case REAL -> new MotorIOTalonFX(15, motorConfig, 0.0);
