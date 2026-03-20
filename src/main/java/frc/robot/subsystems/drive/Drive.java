@@ -45,12 +45,13 @@ public class Drive extends CommandBasedSubsystem {
 
     private final AccelerometerIO accelerometerIO = createAccelerometerIO();
     private final AccelerometerIOInputsAutoLogged accelerometerInputs = new AccelerometerIOInputsAutoLogged();
-
+    private ChassisSpeeds limitedSpeeds = new ChassisSpeeds();
     private final LinearFilter accelerationXFilter = LinearFilter.movingAverage(4);
     private final LinearFilter accelerationYFilter = LinearFilter.movingAverage(4);
 
     private final Debouncer gyroDebouncer = new Debouncer(2.0, Debouncer.DebounceType.kRising);
     private boolean gyroDebounced = false;
+    private ChassisSpeeds currentVel = new ChassisSpeeds();
 
     @Getter
     private DriveGoal goal = new IdleGoal();
@@ -124,6 +125,7 @@ public class Drive extends CommandBasedSubsystem {
             // can handle one wheel position isn't changing. The issue is when one wheel changes drastically
             if (Math.abs(moduleDeltas[moduleIndex].distanceMeters) > odometryPositionDeltaDiscardMeters) {
                 discardSample = true;
+
             }
         }
 
@@ -289,15 +291,19 @@ public class Drive extends CommandBasedSubsystem {
         // Closed loop control
         else if (request.type() == DriveRequest.Type.CHASSIS_SPEEDS) {
             Translation2d centerOfRotation = request.centerOfRotation().orElse(Translation2d.kZero);
-            //Logger.recordOutput("Drive/RequestCenterOfRotation", centerOfRotation);
+            Logger.recordOutput("Drive/RequestCenterOfRotation", centerOfRotation);
 
             ChassisSpeeds rawSpeeds = request.value();
-            Logger.recordOutput("Drive/ModuleStates/Setpoints", robotState.getKinematics().toSwerveModuleStates(rawSpeeds, centerOfRotation));
+            Logger.recordOutput("Drive/ChassisSpeeds/rawSpeeds", rawSpeeds);
+
+            ChassisSpeeds limitedSpeeds = limitAcceleration(rawSpeeds);
+            Logger.recordOutput("Drive/ChassisSpeeds/Limited", limitedSpeeds);
+            Logger.recordOutput("Drive/ModuleStates/Setpoints", robotState.getKinematics().toSwerveModuleStates(limitedSpeeds, centerOfRotation));
 
             // Discretize - use larger dt than actual to reduce translational skew when rotating and translating at the same time
             // See https://www.chiefdelphi.com/t/whitepaper-swerve-drive-skew-and-second-order-kinematics/416964/5
             // and https://github.com/frc1678/C2024-Public/blob/main/src/main/java/com/team1678/frc2024/subsystems/Drive.java#L406
-            ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(rawSpeeds, Constants.loopPeriod * 4.0);
+            ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(limitedSpeeds, Constants.loopPeriod * 4.0);
 
             // Convert to module states and desaturate
             SwerveModuleState[] setpointStates = robotState.getKinematics().toSwerveModuleStates(discreteSpeeds, centerOfRotation);
@@ -322,7 +328,7 @@ public class Drive extends CommandBasedSubsystem {
             Logger.recordOutput("Drive/ChassisSpeeds/SetpointOptimized", robotState.getKinematics().toChassisSpeeds(setpointStates));
         } else if (request.type() == DriveRequest.Type.CHARACTERIZATION) {
             for (var module : modules) {
-                module.runCharacterization(request.value().vxMetersPerSecond);
+                module.runCharacterization(limitedSpeeds.vxMetersPerSecond);
             }
         } else {
             Util.error("Unknown request type: " + request.type());
@@ -399,4 +405,60 @@ public class Drive extends CommandBasedSubsystem {
     public Command slipCurrentCharacterization() {
         return startIdle(() -> goal = new SlipCurrentCharacterizationGoal());
     }
+
+
+    private ChassisSpeeds limitAcceleration(ChassisSpeeds wantedSpeeds) {
+
+        //double wantedVx = wantedSpeeds.vxMetersPerSecond;
+        //double wantedVy = wantedSpeeds.vyMetersPerSecond;
+        //double wantedOmega = wantedSpeeds.omegaRadiansPerSecond;
+
+        var wantedAccel = wantedSpeeds.minus(currentVel).div(Constants.loopPeriod);
+        double vxRatio = currentVel.vxMetersPerSecond / driveConfig.maxVelocityMetersPerSec();
+        double vyRatio = currentVel.vyMetersPerSecond / driveConfig.maxVelocityMetersPerSec();
+        double omegaRatio = currentVel.omegaRadiansPerSecond / maxAngularVelocityRadPerSec;
+        //var maxForwardAccel = currentVel.div
+        //        (driveConfig.maxVelocityMetersPerSec());
+
+        double accelScalarVx = 1.0 - vxRatio;
+        double accelScalarVy = 1.0 - vyRatio;
+        double accelScalarOmega = 1.0 - omegaRatio;
+        double ifAccVx = isAccelerating(wantedAccel.vxMetersPerSecond, currentVel.vxMetersPerSecond)
+                ? maxForwardAcceleration.get() * accelScalarVx : maxForwardAcceleration.get();
+        double ifAccVy = isAccelerating(wantedAccel.vyMetersPerSecond, currentVel.vyMetersPerSecond)
+                ? maxForwardAcceleration.get() * accelScalarVy : maxForwardAcceleration.get();
+
+        double ifAccOmega = isAccelerating(wantedAccel.omegaRadiansPerSecond, currentVel.omegaRadiansPerSecond)
+                ? maxForwardAcceleration.get() * accelScalarOmega : maxForwardAcceleration.get();
+
+
+        wantedAccel = new ChassisSpeeds(
+                Math.copySign(Math.min(Math.abs(wantedAccel.vxMetersPerSecond),
+                        Math.min(ifAccVx, maxSkidAcceleration.get())), wantedAccel.vxMetersPerSecond),
+                Math.copySign(Math.min(Math.abs(wantedAccel.vyMetersPerSecond),
+                        Math.min(ifAccVy, maxSkidAcceleration.get())), wantedAccel.vyMetersPerSecond),
+                Math.copySign(Math.min(Math.abs(wantedAccel.omegaRadiansPerSecond),
+                        Math.min(ifAccOmega, maxSkidAcceleration.get())), wantedAccel.omegaRadiansPerSecond));
+
+
+        var limitedSpeed = wantedAccel.times(Constants.loopPeriod).plus(currentVel);
+
+        Logger.recordOutput("Drive/Acceleration/CurrentVel", currentVel);
+
+        currentVel = limitedSpeed;
+
+        Logger.recordOutput("Drive/Acceleration/WantedAcc", wantedAccel);
+
+        return limitedSpeed;
+
+    }
+
+
+    private boolean isAccelerating(double wantedAccel, double currentVel) {
+
+        return wantedAccel * currentVel >= 0;
+
+    }
+
 }
+
