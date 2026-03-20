@@ -28,7 +28,7 @@ public class IntakeRollers implements Periodic {
             )
             .withCurrentLimits(new CurrentLimitsConfigs()
                     .withStatorCurrentLimit(80)
-                    .withSupplyCurrentLimit(80)
+                    .withSupplyCurrentLimit(30)
             )
             .withFeedback(new FeedbackConfigs()
                     .withSensorToMechanismRatio(gearRatio)
