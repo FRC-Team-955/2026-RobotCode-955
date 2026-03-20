@@ -5,7 +5,6 @@ import frc.lib.Util;
 import frc.lib.commands.CommandsExt;
 import frc.lib.subsystem.CommandBasedSubsystem;
 import frc.robot.subsystems.superintake.intakepivot.IntakePivot;
-import frc.robot.subsystems.superintake.intakerollers.IntakeRollers;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.littletonrobotics.junction.Logger;
