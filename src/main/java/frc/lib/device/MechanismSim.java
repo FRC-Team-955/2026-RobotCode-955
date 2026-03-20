@@ -20,7 +20,7 @@ public class MechanismSim {
     private final DoubleConsumer iterate;
     private final DoubleSupplier mechanismPositionRad;
     private final DoubleSupplier mechanismVelocityRadPerSec;
-    private final DoubleConsumer setMechanismPositionRad;
+    public final DoubleConsumer setMechanismPositionRad;
 
     public void update(TalonFXSimState talonSim) {
         // https://v6.docs.ctr-electronics.com/en/latest/docs/api-reference/simulation/simulation-intro.html

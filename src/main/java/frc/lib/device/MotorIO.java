@@ -3,7 +3,6 @@ package frc.lib.device;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import frc.lib.network.LoggedTunablePIDF;
-import org.jetbrains.annotations.Nullable;
 import org.littletonrobotics.junction.AutoLog;
 
 public abstract class MotorIO extends DeviceIO<MotorIOInputsAutoLogged> {
@@ -30,8 +29,5 @@ public abstract class MotorIO extends DeviceIO<MotorIOInputsAutoLogged> {
 
     public abstract void setNeutralMode(NeutralModeValue neutralMode);
 
-    @FunctionalInterface
-    public interface Builder {
-        MotorIO build(@Nullable LoggedTunablePIDF gains);
-    }
+    public abstract void setEncoderPosition(double positionRad);
 }
