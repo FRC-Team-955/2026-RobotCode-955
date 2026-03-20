@@ -291,7 +291,7 @@ public class ShootingKinematics implements Periodic {
         //Logger.recordOutput("ShootingKinematics/Theta", theta);
 
         return new ShootingParameters(
-                BuildConstants.mode == BuildConstants.Mode.SIM
+                BuildConstants.isSim
                         ? Units.radiansPerSecondToRotationsPerMinute(v / FlywheelConstants.flywheelRadiusMeters)
                         : velocityToRPM.applyAsDouble(v),
                 phi,
