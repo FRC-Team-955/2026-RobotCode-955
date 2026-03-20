@@ -18,7 +18,6 @@ import frc.robot.shooting.ShootingKinematics;
 import frc.robot.subsystems.superstructure.feeder.Feeder;
 import frc.robot.subsystems.superstructure.flywheel.Flywheel;
 import frc.robot.subsystems.superstructure.hood.Hood;
-import frc.robot.subsystems.superstructure.spindexer.Spindexer;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.littletonrobotics.junction.Logger;
