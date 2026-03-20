@@ -99,7 +99,7 @@ public class SimManager {
             Util.error("Duplicate SimManager created");
         }
 
-        if (BuildConstants.mode != BuildConstants.Mode.SIM) {
+        if (!BuildConstants.isSim) {
             Util.error("SimManager created when not in sim");
         } else {
             aprilTagVisionSystem.addAprilTags(aprilTagLayout);

@@ -21,7 +21,7 @@ import lombok.Getter;
 import static frc.robot.subsystems.drive.DriveConstants.*;
 
 public class Controller implements Periodic {
-    private final ControllerIO io = BuildConstants.mode == BuildConstants.Mode.SIM
+    private final ControllerIO io = BuildConstants.isSim
             ? new ControllerIOXbox(new CommandXboxController(0))
             : new ControllerIOPS5(new CommandPS5Controller(0));
 

@@ -50,10 +50,10 @@ public class Robot extends LoggedRobot {
     public Robot() {
         super(Constants.loopPeriod);
 
-        // Stop Rev Logger
+        // Stop REV logger
         StatusLogger.disableAutoLogging();
 
-        if (BuildConstants.mode == BuildConstants.Mode.SIM) {
+        if (BuildConstants.isSim) {
             // Setup arena BEFORE any of our robot code tries to use it
             // Otherwise, literally everything in maple-sim breaks
             //SimulatedArena.overrideInstance(new Arena2026Rebuilt(false));
@@ -193,7 +193,7 @@ public class Robot extends LoggedRobot {
     public void robotPeriodic() {
         LoggedTracer.reset();
 
-        if (BuildConstants.mode == BuildConstants.Mode.SIM) {
+        if (BuildConstants.isSim) {
             SimManager.get().periodicBeforeNormalCode();
             LoggedTracer.record("Simulation");
         }
