@@ -23,14 +23,6 @@ public class Feeder implements Periodic {
     private static final CtrlSparkMaxConfig motorConfig = new CtrlSparkMaxConfig()
             .withInverted(true).withNeutralMode(NeutralModeValue.Brake).withCurrentLimit(40).withGearRatio(gearRatio);
 
-
-    //.idleMode(SparkBaseConfig.IdleMode.kBrake).smartCurrentLimit(40)
-    //.voltageCompensation(12.0).
-    //encoder.positionConversionFactor(2 * Math.PI / gearRatio) // Rotor Rotations -> Wheel Radians
-    //.velocityConversionFactor((2 * Math.PI) / 60.0 / gearRatio) // Rotor RPM -> Wheel Rad/Sec
-    //.uvwMeasurementPeriod(10)
-    //.uvwAverageDepth(2);
-
     private final Motor motor = new Motor("Feeder", switch (BuildConstants.mode) {
         case REAL -> new MotorIOSparkMax(11, motorConfig, 0.0);
         case SIM -> new MotorIOSparkMaxSim(motorConfig, 0.0, MechanismSim.roller(gearRatio, 0.01));
