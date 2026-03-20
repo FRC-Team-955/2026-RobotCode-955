@@ -55,13 +55,13 @@ public class Flywheel implements Periodic {
             .withSlot0(velocityGains.toPhoenix()
             );
 
-    private final Motor leader = new Motor("Flywheel/Leader", switch (BuildConstants.mode) {
+    private final Motor leader = new Motor("Flywheel/Leader", velocityGains, switch (BuildConstants.mode) {
         case REAL -> new MotorIOTalonFX(16, motorConfig, 0.0);
         case SIM -> new MotorIOTalonFXSim(motorConfig, 0.0, MechanismSim.roller(gearRatio, 0.001));
         case REPLAY -> new MotorIOReplay();
     });
 
-    private final Motor follower = new Motor("Flywheel/Follower", switch (BuildConstants.mode) {
+    private final Motor follower = new Motor("Flywheel/Follower", null, switch (BuildConstants.mode) {
         case REAL -> new MotorIOTalonFX(19, motorConfig, 0.0);
         case SIM -> new MotorIOTalonFXSim(motorConfig, 0.0, MechanismSim.roller(gearRatio, 0.001));
         case REPLAY -> new MotorIOReplay();
