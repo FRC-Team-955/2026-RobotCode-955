@@ -13,8 +13,8 @@ import frc.lib.Util;
 import frc.lib.network.LoggedTunableNumber;
 import frc.lib.subsystem.Periodic;
 import frc.robot.*;
+import frc.robot.subsystems.superstructure.Flywheel;
 import frc.robot.subsystems.superstructure.Superstructure;
-import frc.robot.subsystems.superstructure.flywheel.FlywheelConstants;
 import lombok.Getter;
 import org.littletonrobotics.junction.Logger;
 
