@@ -85,8 +85,6 @@ public class Hood implements Periodic {
     private boolean atVelocityThresholdForHoming = false;
     private final Debouncer homingVelocityDebouncer = new Debouncer(0.1, Debouncer.DebounceType.kRising);
 
-    private final Alert motorDisconnectedAlert = new Alert("Hood motor is disconnected.", Alert.AlertType.kError);
-    public final Alert highTemperatureAlert = new Alert("Hood motor temperature is high.", Alert.AlertType.kWarning);
     private final Alert emergencyStoppedAlert = new Alert("Hood is E-stopped!", Alert.AlertType.kError);
 
     private static Hood instance;
@@ -107,8 +105,6 @@ public class Hood implements Periodic {
 
     @Override
     public void periodicBeforeCommands() {
-        motorDisconnectedAlert.set(!motor.isConnected());
-        highTemperatureAlert.set(motor.getTemperatureCelsius() > 50);
 
         if (!emergencyStopped) {
             if (emergencyStopDebouncer.calculate(motor.getStatorCurrentAmps() >= 20) || operatorDashboard.hoodEStop.get()) {
