@@ -13,7 +13,6 @@ import frc.robot.subsystems.superstructure.feeder.Feeder;
 import frc.robot.subsystems.superstructure.flywheel.Flywheel;
 import frc.robot.subsystems.superstructure.flywheel.FlywheelConstants;
 import frc.robot.subsystems.superstructure.hood.Hood;
-import frc.robot.subsystems.superstructure.spindexer.Spindexer;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.seasonspecific.rebuilt2026.RebuiltFuelOnFly;
 import org.littletonrobotics.junction.Logger;
