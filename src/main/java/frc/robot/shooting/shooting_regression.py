@@ -262,7 +262,8 @@ def optimize_shot(distance, robot_radial_vel, FIXED_ANGLE=None):
             ax.plot(x - hubx, y, z, linestyle="dotted")
 
         # Find X distance to hub
-        x_dist = abs(x[-1] - hubx)
+        # Adjust wanted X based on distance to hub
+        x_dist = abs(x[-1] - (hubx + ((hubx - 3.0) * 0.1)))
         if x_dist < fuel_radius:
             x_dist = 0
 
