@@ -102,7 +102,7 @@ public class LEDs implements Periodic {
         setLEDPatterns();
 
         LEDPattern hubPattern = HubShiftTracker.get().getShiftInfo().active() ?
-                LEDPattern.solid(Color.kGreen)
+                LEDPattern.solid(Color.kDarkBlue)
                 : LEDPattern.solid(Color.kWhite);
         hubPattern.applyTo(thirdHalfView);
 
