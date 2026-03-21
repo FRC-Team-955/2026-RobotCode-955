@@ -19,6 +19,7 @@ import org.littletonrobotics.junction.mechanism.LoggedMechanism2d;
 import org.littletonrobotics.junction.mechanism.LoggedMechanismLigament2d;
 import org.littletonrobotics.junction.mechanism.LoggedMechanismRoot2d;
 
+import static edu.wpi.first.units.Units.Seconds;
 import static frc.robot.subsystems.leds.LEDConstants.createIO;
 import static frc.robot.subsystems.leds.LEDConstants.length;
 
@@ -102,7 +103,13 @@ public class LEDs implements Periodic {
         setLEDPatterns();
 
         if (HubShiftTracker.get().getShiftInfo().remainingTime() < 5.0) {
-            hubPattern = LEDPatterns.hubSwitch;
+
+            hubPattern = HubShiftTracker.get().getShiftInfo().active() ?
+                    LEDPatterns.active.blink
+                            (Seconds.of(Math.max(0.05, HubShiftTracker.get().getShiftInfo().remainingTime() / 25.0)))
+                    : LEDPatterns.
+                    inactive.blink(Seconds.of(Math.max(0.05, HubShiftTracker.get().getShiftInfo().remainingTime() / 25.0)))
+            ;
         } else {
             hubPattern = HubShiftTracker.get().getShiftInfo().active() ?
                     LEDPatterns.active
