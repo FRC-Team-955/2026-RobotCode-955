@@ -18,6 +18,7 @@ import org.littletonrobotics.junction.mechanism.LoggedMechanism2d;
 import org.littletonrobotics.junction.mechanism.LoggedMechanismLigament2d;
 import org.littletonrobotics.junction.mechanism.LoggedMechanismRoot2d;
 
+import static edu.wpi.first.units.Units.Seconds;
 import static frc.robot.subsystems.leds.LEDConstants.createIO;
 import static frc.robot.subsystems.leds.LEDConstants.length;
 
@@ -179,13 +180,7 @@ public class LEDs implements Periodic {
         if (blink) {
             double t = MathUtil.clamp(remaining / HUB_BLINK_START_SECONDS, 0.0, 1.0);
             double period = HUB_BLINK_MIN_PERIOD + t * (HUB_BLINK_MAX_PERIOD - HUB_BLINK_MIN_PERIOD);
-            double phase = Timer.getFPGATimestamp() % period;
-            boolean on = phase < (period * 0.5);
-            if (on) {
-                hubPattern.applyTo(rightHalfView);
-            } else {
-                LEDPatterns.idle.applyTo(rightHalfView);
-            }
+            hubPattern.blink(Seconds.of(period)).applyTo(rightHalfView);
         } else {
             hubPattern.applyTo(rightHalfView);
         }
