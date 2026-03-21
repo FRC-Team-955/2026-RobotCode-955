@@ -85,11 +85,18 @@ public class AutoHelpers {
 
 
     @SuppressWarnings("unchecked")
-    public static Command trajectory(String name) {
+    public static Command trajectory(String name, Supplier<Pose2d> poseSupplier) {
         // Basically copied from AutoFactory
         Optional<? extends Trajectory<?>> optTrajectory = trajectoryCache.loadTrajectory(name);
         if (optTrajectory.isPresent()) {
-            return drive.followTrajectory((Trajectory<SwerveSample>) optTrajectory.get());
+            return drive.followTrajectory((Trajectory<SwerveSample>) optTrajectory.get()).until(() ->
+
+                    robotState.isAtPoseWithTolerance(
+                            AllianceFlipUtil.apply(poseSupplier.get()),
+                            finalLinearTolerance,
+                            // if we are aiming, the rotation from the pose supplier
+                            // is not the rotation that move to will target
+                            finalAngularTolerance));
         } else {
             Util.error("Trajectory " + name + " is not present");
             //noinspection Convert2Diamond
@@ -97,18 +104,18 @@ public class AutoHelpers {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    public static Command trajectory(String name, final int splitIndex) {
-        // Basically copied from AutoFactory
-        Optional<? extends Trajectory<?>> optTrajectory = trajectoryCache.loadTrajectory(name, splitIndex);
-        if (optTrajectory.isPresent()) {
-            return drive.followTrajectory((Trajectory<SwerveSample>) optTrajectory.get());
-        } else {
-            Util.error("Trajectory " + name + " is not present");
-            //noinspection Convert2Diamond
-            return drive.idle();
-        }
-    }
+    //@SuppressWarnings("unchecked")
+    //public static Command trajectory(String name, final int splitIndex) {
+    //    // Basically copied from AutoFactory
+    //    Optional<? extends Trajectory<?>> optTrajectory = trajectoryCache.loadTrajectory(name, splitIndex);
+    //    if (optTrajectory.isPresent()) {
+    //        return drive.followTrajectory((Trajectory<SwerveSample>) optTrajectory.get());
+    //    } else {
+    //        Util.error("Trajectory " + name + " is not present");
+    //        //noinspection Convert2Diamond
+    //        return drive.idle();
+    //    }
+    //}
 
 
     public static Pose2d yDistanceInterpolation(

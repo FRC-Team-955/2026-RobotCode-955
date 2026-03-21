@@ -117,6 +117,11 @@ public class OrbitAtHomeDepotAuto extends Auto {
                         Rotation2d.kCW_90deg
                 ), AutoHelpers.intakeConstraints),
 
+                AutoHelpers.trajectory(
+                        "NewPath_copy7",
+                        () ->
+                                new Pose2d(5.8, 4.3, Rotation2d.kCCW_90deg)
+                ),
                 superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
 
 
