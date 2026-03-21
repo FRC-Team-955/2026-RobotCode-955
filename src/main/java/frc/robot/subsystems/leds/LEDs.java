@@ -1,13 +1,14 @@
 package frc.robot.subsystems.leds;
 
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import frc.lib.Util;
 import frc.lib.subsystem.Periodic;
+import frc.robot.Constants;
 import frc.robot.HubShiftTracker;
 import frc.robot.OperatorDashboard;
+import frc.robot.autos.AutoManager;
 import frc.robot.shooting.ShootingKinematics;
 import frc.robot.subsystems.apriltagvision.AprilTagVision;
 import frc.robot.subsystems.gamepiecevision.GamePieceVision;
@@ -18,13 +19,13 @@ import org.littletonrobotics.junction.mechanism.LoggedMechanism2d;
 import org.littletonrobotics.junction.mechanism.LoggedMechanismLigament2d;
 import org.littletonrobotics.junction.mechanism.LoggedMechanismRoot2d;
 
-import static edu.wpi.first.units.Units.Seconds;
 import static frc.robot.subsystems.leds.LEDConstants.createIO;
 import static frc.robot.subsystems.leds.LEDConstants.length;
 
 public class LEDs implements Periodic {
     private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
     private static final ShootingKinematics shootingKinematics = ShootingKinematics.get();
+    private static final AutoManager autoManager = AutoManager.get();
     private static final AprilTagVision aprilTagVision = AprilTagVision.get();
     private static final GamePieceVision gamePieceVision = GamePieceVision.get();
 
@@ -35,17 +36,9 @@ public class LEDs implements Periodic {
     private static final LEDsIO io = createIO();
 
     private final AddressableLEDBuffer buffer = new AddressableLEDBuffer(length);
-    private final int mid = length / 2;
-    private final AddressableLEDBufferView leftHalfView = new AddressableLEDBufferView(buffer, 0, mid - 1);
-    private final AddressableLEDBufferView rightHalfView = new AddressableLEDBufferView(buffer, mid, length - 1);
-
-    private final int quarterSize = Math.max(1, mid / 2);
-    private final AddressableLEDBufferView firstQuarterView = new AddressableLEDBufferView(buffer, 0, quarterSize - 1);
-    private final AddressableLEDBufferView secondQuarterView = new AddressableLEDBufferView(buffer, quarterSize, mid - 1);
-
-    private static final double HUB_BLINK_START_SECONDS = 5.0;
-    private static final double HUB_BLINK_MIN_PERIOD = 0.5;
-    private static final double HUB_BLINK_MAX_PERIOD = 1.5;
+    private final AddressableLEDBufferView firstHalfView = new AddressableLEDBufferView(buffer, 0, length / 4 - 1);
+    private final AddressableLEDBufferView secondHalfView = new AddressableLEDBufferView(buffer, length / 4, length / 2 - 1);
+    private final AddressableLEDBufferView thirdHalfView = new AddressableLEDBufferView(buffer, length / 2, length - 1);
 
     private final LoggedMechanism2d mechanism = new LoggedMechanism2d(1.5, 2.1, new Color8Bit(Color.kBlack));
     private final LoggedMechanismLigament2d[] ligaments = new LoggedMechanismLigament2d[length];
@@ -99,12 +92,42 @@ public class LEDs implements Periodic {
         callback.run();
         Notifier notifier = new Notifier(callback);
         // update at 50Hz until robot code takes over
-        notifier.startPeriodic(0.02);
+        notifier.startPeriodic(Constants.loopPeriod);
         return notifier;
     }
 
     @Override
     public void periodicAfterCommands() {
+
+        setLEDPatterns();
+
+        LEDPattern hubPattern = HubShiftTracker.get().getShiftInfo().active() ?
+                LEDPattern.solid(Color.kGreen)
+                : LEDPattern.solid(Color.kWhite);
+        hubPattern.applyTo(thirdHalfView);
+
+        setDataUpdateMechanism();
+
+    }
+
+    // Update mechanism
+    private void setDataUpdateMechanism() {
+        io.setData(buffer);
+        for (int i = 0; i < buffer.getLength(); i++) {
+            // https://github.com/FRC-Team-955/2024-RobotCode-749/blob/kotlin-old/src/main/java/frc/robot/subsystems/leds/LEDs.kt#L88
+            //            System.out.print("\u001b[38;2;" + buffer.getRed(i) + ";" + buffer.getGreen(i) + ";" + buffer.getBlue(i) + "m■\u001b[0m");
+            ligaments[i].setColor(new Color8Bit(
+                    buffer.getRed(i),
+                    buffer.getGreen(i),
+                    buffer.getBlue(i)
+            ));
+        }
+        //        System.out.println();
+        Logger.recordOutput("LEDs/Mechanism", mechanism);
+
+    }
+
+    private void setLEDPatterns() {
         boolean somethingIsReallyWrong =
                 aprilTagVision.anyCamerasDisconnected()
                         || gamePieceVision.anyCamerasDisconnected()
@@ -113,91 +136,69 @@ public class LEDs implements Periodic {
 
         if (somethingIsReallyWrong) {
             LEDPatterns.somethingIsReallyWrong.applyTo(buffer);
-            updateMechanismAndLog();
             return;
         }
-
-        if (superintake.intakeRollers.highTemperatureAlert.get() ||
-                superstructure.flywheel.highTemperatureAlert.get() ||
-                superstructure.hood.highTemperatureAlert.get()) {
+        if (
+                superintake.intakeRollers.highTemperatureAlert.get() ||
+                        superstructure.flywheel.highTemperatureAlert.get() ||
+                        superstructure.hood.highTemperatureAlert.get()
+        ) {
             LEDPatterns.hotMotors.applyTo(buffer);
-            updateMechanismAndLog();
             return;
         }
-
         if (DriverStation.isDisabled()) {
+            //if (operatorDashboard.autoChosen.get() && autoManager.getSelectedAutoStartingPose().isPresent() && !autoManager.isAtAutoStartingPose()) {
+            //    LEDPatterns.autoPlacementProgress(autoManager::getPlacementProgress).applyTo(buffer);
+            //} else {
             LEDPatterns.autoReady.applyTo(buffer);
-            updateMechanismAndLog();
             return;
+            //}
         }
+        if (DriverStation.isEnabled()) {
+            LEDPattern superintakePattern = switch (superintake.getGoal()) {
+                case IDLE -> null;
+                case INTAKE, SHOOT -> LEDPatterns.intaking;
+                case EJECT -> LEDPatterns.eject;
+                case HOME_INTAKE_PIVOT -> LEDPatterns.homing;
+            };
 
-        // Enabled: determine patterns for superintake and superstructure
-        LEDPattern superintakePattern = switch (superintake.getGoal()) {
-            case IDLE -> null;
-            case INTAKE, SHOOT -> LEDPatterns.intaking;
-            case EJECT -> LEDPatterns.eject;
-            case HOME_INTAKE_PIVOT -> LEDPatterns.homing;
-        };
+            LEDPattern superstructurePattern = switch (superstructure.getGoal()) {
+                case IDLE -> null;
+                case SHOOT -> shootingKinematics.isShootingParametersMet()
+                        ? LEDPatterns.shooting
+                        : (
+                        shootingKinematics.isShiftMet()
+                                ? LEDPatterns.aiming
+                                : LEDPatterns.waitingForShift
+                );
+                case SHOOT_FORCE -> LEDPatterns.shootingForced;
+                case EJECT -> LEDPatterns.eject;
+                case HOME_HOOD -> LEDPatterns.homing;
+            };
 
-        LEDPattern superstructurePattern = switch (superstructure.getGoal()) {
-            case IDLE -> null;
-            case SHOOT -> shootingKinematics.isShootingParametersMet()
-                    ? LEDPatterns.shooting
-                    : (shootingKinematics.isShiftMet() ? LEDPatterns.aiming : LEDPatterns.waitingForShift);
-            case SHOOT_FORCE -> LEDPatterns.shootingForced;
-            case EJECT -> LEDPatterns.eject;
-            case HOME_HOOD -> LEDPatterns.homing;
-        };
-
-        int activeCount = 0;
-        if (superintakePattern != null) activeCount++;
-        if (superstructurePattern != null) activeCount++;
-
-        var shiftInfo = HubShiftTracker.get().getShiftInfo();
-
-
-        if (!lowBattery) {
-            if (activeCount >= 2) {
-                superintakePattern.applyTo(firstQuarterView);
-                superstructurePattern.applyTo(secondQuarterView);
-            } else if (activeCount == 1) {
-                if (superintakePattern != null) {
-                    superintakePattern.applyTo(leftHalfView);
-                } else {
-                    superstructurePattern.applyTo(leftHalfView);
-                }
-            } else {
-                LEDPatterns.idle.applyTo(leftHalfView);
+            if (superintakePattern != null && superstructurePattern != null) {
+                superintakePattern.applyTo(firstHalfView);
+                superstructurePattern.applyTo(secondHalfView);
             }
-        } else {
-            LEDPatterns.lowBattery.applyTo(leftHalfView);
+            if (superintakePattern != null) {
+                superintakePattern.applyTo(buffer);
+                return;
+            }
+            if (superstructurePattern != null) {
+                superstructurePattern.applyTo(buffer);
+                return;
+            }
+            if (HubShiftTracker.get().getShiftInfo().remainingTime() < 5.0) {
+                LEDPatterns.hubSwitch.applyTo(buffer);
+                return;
+            }
+            if (lowBattery) {
+                LEDPatterns.lowBattery.applyTo(buffer);
+            }
         }
 
-        double remaining = shiftInfo.remainingTime();
-        LEDPattern hubPattern = shiftInfo.active() ? LEDPatterns.hubActive : LEDPatterns.HubInactive;
 
-        boolean blink = remaining <= HUB_BLINK_START_SECONDS;
-        if (blink) {
-            double t = MathUtil.clamp(remaining / HUB_BLINK_START_SECONDS, 0.0, 1.0);
-            double period = HUB_BLINK_MIN_PERIOD + t * (HUB_BLINK_MAX_PERIOD - HUB_BLINK_MIN_PERIOD);
-            hubPattern.blink(Seconds.of(period)).applyTo(rightHalfView);
-        } else {
-            hubPattern.applyTo(rightHalfView);
-        }
-
-        updateMechanismAndLog();
     }
 
-    // Extracted to keep periodic concise
-    private void updateMechanismAndLog() {
-        io.setData(buffer);
-        for (int i = 0; i < buffer.getLength(); i++) {
-            ligaments[i].setColor(new Color8Bit(
-                    buffer.getRed(i),
-                    buffer.getGreen(i),
-                    buffer.getBlue(i)
-            ));
-        }
-        Logger.recordOutput("LEDs/Mechanism", mechanism);
-    }
 }
+
