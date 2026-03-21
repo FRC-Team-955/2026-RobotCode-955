@@ -53,7 +53,7 @@ public class ShootingKinematics implements Periodic {
     static {
         // Measured using tracker
         //velocityToRPMMap.put(8.796, 2558.45);
-        //velocityToRPMMap.put(6.687, 2155.14);
+        //velocityToRPMMap.put(7.2, 2142);
 
         // Manually tuned shots
         //velocityToRPMMap.put(6.8, 1850.0);
@@ -68,9 +68,9 @@ public class ShootingKinematics implements Periodic {
 
         //velocityToRPM = (x) -> velocityToRPMMap.get(x);
 
-        // https://www.desmos.com/calculator/uqmn5c86yp
+        // https://www.desmos.com/calculator/dyilhk2xa0
         // Measured using tracker
-        velocityToRPM = (x) -> 191.23281 * x + 876.36619;
+        velocityToRPM = (x) -> 260.88346 * x + 263.7191;
         // Manually tuned shots
         //velocityToRPM = (x) -> 366.65817 * x - 672.63778;
     }
