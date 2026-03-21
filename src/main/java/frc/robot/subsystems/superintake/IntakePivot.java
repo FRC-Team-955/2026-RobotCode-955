@@ -1,4 +1,4 @@
-package frc.robot.subsystems.superintake.intakepivot;
+package frc.robot.subsystems.superintake;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.Debouncer;
