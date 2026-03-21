@@ -28,7 +28,7 @@ public class PhoenixUtil {
             var error = command.get();
             if (error.isOK()) return;
         }
-        System.out.println("PhoenixUtil tryUntilOk failure");
+        Util.error("PhoenixUtil tryUntilOk failure");
     }
 
     /**

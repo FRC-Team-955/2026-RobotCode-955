@@ -1,14 +1,12 @@
 package frc.lib.network;
 
-import com.ctre.phoenix6.configs.SlotConfigs;
+import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
 import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.config.ClosedLoopConfig;
-import edu.wpi.first.math.controller.ArmFeedforward;
-import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Units (velocity control additions are in brackets):
@@ -28,15 +26,15 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward;
  */
 public class LoggedTunablePIDF {
     private final String name;
-    private LoggedTunableNumber kP;
-    private LoggedTunableNumber kI;
-    private LoggedTunableNumber kD;
-    private LoggedTunableNumber kS;
-    private LoggedTunableNumber kV;
-    private LoggedTunableNumber kA;
-    private LoggedTunableNumber kG;
-    private GravityTypeValue gravityType;
-    private StaticFeedforwardSignValue staticFeedforwardSign;
+    private @Nullable LoggedTunableNumber kP;
+    private @Nullable LoggedTunableNumber kI;
+    private @Nullable LoggedTunableNumber kD;
+    private @Nullable LoggedTunableNumber kS;
+    private @Nullable LoggedTunableNumber kV;
+    private @Nullable LoggedTunableNumber kA;
+    private @Nullable LoggedTunableNumber kG;
+    private @Nullable GravityTypeValue gravityType;
+    private @Nullable StaticFeedforwardSignValue staticFeedforwardSign;
 
     public LoggedTunablePIDF(String name) {
         this.name = name;
@@ -79,7 +77,8 @@ public class LoggedTunablePIDF {
         return this;
     }
 
-    public void applySpark(ClosedLoopConfig config, ClosedLoopSlot slot) {
+    public void applySpark(ClosedLoopConfig config) {
+        ClosedLoopSlot slot = ClosedLoopSlot.kSlot0;
         // We do spark unit conversions on controller so no need for unit conversions
         if (kP != null) config.p(kP.get(), slot);
         if (kI != null) config.i(kI.get(), slot);
@@ -87,7 +86,7 @@ public class LoggedTunablePIDF {
         if (kS != null) config.feedForward.kS(kS.get(), slot);
         if (kV != null) config.feedForward.kV(kV.get(), slot);
         if (kA != null) config.feedForward.kA(kA.get(), slot);
-        if (kG != null) {
+        if (kG != null && gravityType != null) {
             switch (gravityType) {
                 case Elevator_Static -> config.feedForward.kG(kG.get(), slot);
                 case Arm_Cosine -> {
@@ -101,8 +100,8 @@ public class LoggedTunablePIDF {
         }
     }
 
-    public SlotConfigs toPhoenix() {
-        SlotConfigs configs = new SlotConfigs();
+    public Slot0Configs toPhoenix() {
+        Slot0Configs configs = new Slot0Configs();
 
         // See top level javadoc for LoggedTunablePIDF units
         // Phoenix unit is rotations
@@ -181,32 +180,6 @@ public class LoggedTunablePIDF {
         var pid = toPIDWrapRadians();
         pid.setTolerance(errorTolerance, errorDerivativeTolerance);
         return pid;
-    }
-
-    public SimpleMotorFeedforward toSimpleFF() {
-        return new SimpleMotorFeedforward(
-                this.kS != null ? this.kS.get() : 0.0,
-                this.kV != null ? this.kV.get() : 0.0,
-                this.kA != null ? this.kA.get() : 0.0
-        );
-    }
-
-    public ArmFeedforward toArmFF() {
-        return new ArmFeedforward(
-                this.kS != null ? this.kS.get() : 0.0,
-                this.kG != null ? this.kG.get() : 0.0,
-                this.kV != null ? this.kV.get() : 0.0,
-                this.kA != null ? this.kA.get() : 0.0
-        );
-    }
-
-    public ElevatorFeedforward toElevatorFF() {
-        return new ElevatorFeedforward(
-                this.kS != null ? this.kS.get() : 0.0,
-                this.kG != null ? this.kG.get() : 0.0,
-                this.kV != null ? this.kV.get() : 0.0,
-                this.kA != null ? this.kA.get() : 0.0
-        );
     }
 
     public boolean hasChanged() {

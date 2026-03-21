@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.CANLogger;
+import frc.lib.device.DeviceManager;
 import frc.robot.autos.AutoManager;
 import frc.robot.controller.Controller;
 import frc.robot.shooting.ShootingKinematics;
@@ -33,6 +34,7 @@ public class RobotContainer {
     // Dashboard inputs
     private final LoggedDashboardChooser<Command> characterizationChooser = new LoggedDashboardChooser<>("Characterization Choices");
 
+    public final DeviceManager deviceManager = DeviceManager.getInstance();
     public final RobotState robotState = RobotState.get();
     public final OperatorDashboard operatorDashboard = OperatorDashboard.get();
     public final Controller controller = Controller.get();
