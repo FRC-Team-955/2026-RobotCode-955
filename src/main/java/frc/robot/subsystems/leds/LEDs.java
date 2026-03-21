@@ -115,10 +115,10 @@ public class LEDs implements Periodic {
                         LEDPatterns.active
                         : LEDPatterns.inactive;
             }
+            hubPattern.applyTo(thirdHalfView);
+
         }
 
-
-        hubPattern.applyTo(thirdHalfView);
 
         setDataUpdateMechanism();
 
