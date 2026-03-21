@@ -38,6 +38,10 @@ public class LEDs implements Periodic {
     private final AddressableLEDBufferView leftHalfView = new AddressableLEDBufferView(buffer, 0, mid - 1);
     private final AddressableLEDBufferView rightHalfView = new AddressableLEDBufferView(buffer, mid, length - 1);
 
+    private final int quarterSize = Math.max(1, mid / 2);
+    private final AddressableLEDBufferView firstQuarterView = new AddressableLEDBufferView(buffer, 0, quarterSize - 1);
+    private final AddressableLEDBufferView secondQuarterView = new AddressableLEDBufferView(buffer, quarterSize, mid - 1);
+
     private static final double HUB_BLINK_START_SECONDS = 5.0;
     private static final double HUB_BLINK_MIN_PERIOD = 0.5;
     private static final double HUB_BLINK_MAX_PERIOD = 1.5;
@@ -150,27 +154,22 @@ public class LEDs implements Periodic {
 
         var shiftInfo = HubShiftTracker.get().getShiftInfo();
 
-        AddressableLEDBufferView hubView = rightHalfView;
-        AddressableLEDBufferView nonHubView = leftHalfView;
 
         if (!lowBattery) {
             if (activeCount >= 2) {
-                int half = (mid) / 2;
-                AddressableLEDBufferView firstQuarter = new AddressableLEDBufferView(buffer, 0, half - 1);
-                AddressableLEDBufferView secondQuarter = new AddressableLEDBufferView(buffer, half, mid - 1);
-                (superintakePattern != null ? superintakePattern : LEDPatterns.idle).applyTo(firstQuarter);
-                (superstructurePattern != null ? superstructurePattern : LEDPatterns.idle).applyTo(secondQuarter);
+                (superintakePattern != null ? superintakePattern : LEDPatterns.idle).applyTo(firstQuarterView);
+                (superstructurePattern != null ? superstructurePattern : LEDPatterns.idle).applyTo(secondQuarterView);
             } else if (activeCount == 1) {
                 if (superintakePattern != null) {
-                    superintakePattern.applyTo(nonHubView);
+                    superintakePattern.applyTo(leftHalfView);
                 } else {
-                    (superstructurePattern != null ? superstructurePattern : LEDPatterns.idle).applyTo(nonHubView);
+                    (superstructurePattern != null ? superstructurePattern : LEDPatterns.idle).applyTo(leftHalfView);
                 }
             } else {
-                LEDPatterns.idle.applyTo(nonHubView);
+                LEDPatterns.idle.applyTo(leftHalfView);
             }
         } else {
-            LEDPatterns.lowBattery.applyTo(nonHubView);
+            LEDPatterns.lowBattery.applyTo(leftHalfView);
         }
 
         double remaining = shiftInfo.remainingTime();
@@ -183,12 +182,12 @@ public class LEDs implements Periodic {
             double phase = Timer.getFPGATimestamp() % period;
             boolean on = phase < (period * 0.5);
             if (on) {
-                hubPattern.applyTo(hubView);
+                hubPattern.applyTo(rightHalfView);
             } else {
-                LEDPatterns.idle.applyTo(hubView);
+                LEDPatterns.idle.applyTo(rightHalfView);
             }
         } else {
-            hubPattern.applyTo(hubView);
+            hubPattern.applyTo(rightHalfView);
         }
 
         updateMechanismAndLog();
