@@ -158,13 +158,13 @@ public class LEDs implements Periodic {
 
         if (!lowBattery) {
             if (activeCount >= 2) {
-                (superintakePattern != null ? superintakePattern : LEDPatterns.idle).applyTo(firstQuarterView);
-                (superstructurePattern != null ? superstructurePattern : LEDPatterns.idle).applyTo(secondQuarterView);
+                superintakePattern.applyTo(firstQuarterView);
+                superstructurePattern.applyTo(secondQuarterView);
             } else if (activeCount == 1) {
                 if (superintakePattern != null) {
                     superintakePattern.applyTo(leftHalfView);
                 } else {
-                    (superstructurePattern != null ? superstructurePattern : LEDPatterns.idle).applyTo(leftHalfView);
+                    superstructurePattern.applyTo(leftHalfView);
                 }
             } else {
                 LEDPatterns.idle.applyTo(leftHalfView);
