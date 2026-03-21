@@ -38,7 +38,7 @@ public class LEDs implements Periodic {
     private final AddressableLEDBufferView leftHalfView = new AddressableLEDBufferView(buffer, 0, mid - 1);
     private final AddressableLEDBufferView rightHalfView = new AddressableLEDBufferView(buffer, mid, length - 1);
 
-    private static final double HUB_BLINK_START_SECONDS = 8.0;
+    private static final double HUB_BLINK_START_SECONDS = 5.0;
     private static final double HUB_BLINK_MIN_PERIOD = 0.12;
     private static final double HUB_BLINK_MAX_PERIOD = 1.2;
 
@@ -108,7 +108,6 @@ public class LEDs implements Periodic {
 
         if (somethingIsReallyWrong) {
             LEDPatterns.somethingIsReallyWrong.applyTo(buffer);
-            io.setData(buffer);
             updateMechanismAndLog();
             return;
         }
@@ -117,21 +116,12 @@ public class LEDs implements Periodic {
                 superstructure.flywheel.highTemperatureAlert.get() ||
                 superstructure.hood.highTemperatureAlert.get()) {
             LEDPatterns.hotMotors.applyTo(buffer);
-            io.setData(buffer);
-            updateMechanismAndLog();
-            return;
-        }
-
-        if (lowBattery) {
-            LEDPatterns.lowBattery.applyTo(buffer);
-            io.setData(buffer);
             updateMechanismAndLog();
             return;
         }
 
         if (DriverStation.isDisabled()) {
             LEDPatterns.autoReady.applyTo(buffer);
-            io.setData(buffer);
             updateMechanismAndLog();
             return;
         }
@@ -163,20 +153,24 @@ public class LEDs implements Periodic {
         AddressableLEDBufferView hubView = rightHalfView;
         AddressableLEDBufferView nonHubView = leftHalfView;
 
-        if (activeCount >= 2) {
-            int half = (mid) / 2;
-            AddressableLEDBufferView firstQuarter = new AddressableLEDBufferView(buffer, 0, half - 1);
-            AddressableLEDBufferView secondQuarter = new AddressableLEDBufferView(buffer, half, mid - 1);
-            (superintakePattern != null ? superintakePattern : LEDPatterns.idle).applyTo(firstQuarter);
-            (superstructurePattern != null ? superstructurePattern : LEDPatterns.idle).applyTo(secondQuarter);
-        } else if (activeCount == 1) {
-            if (superintakePattern != null) {
-                superintakePattern.applyTo(nonHubView);
+        if (!lowBattery) {
+            if (activeCount >= 2) {
+                int half = (mid) / 2;
+                AddressableLEDBufferView firstQuarter = new AddressableLEDBufferView(buffer, 0, half - 1);
+                AddressableLEDBufferView secondQuarter = new AddressableLEDBufferView(buffer, half, mid - 1);
+                (superintakePattern != null ? superintakePattern : LEDPatterns.idle).applyTo(firstQuarter);
+                (superstructurePattern != null ? superstructurePattern : LEDPatterns.idle).applyTo(secondQuarter);
+            } else if (activeCount == 1) {
+                if (superintakePattern != null) {
+                    superintakePattern.applyTo(nonHubView);
+                } else {
+                    (superstructurePattern != null ? superstructurePattern : LEDPatterns.idle).applyTo(nonHubView);
+                }
             } else {
-                (superstructurePattern != null ? superstructurePattern : LEDPatterns.idle).applyTo(nonHubView);
+                LEDPatterns.idle.applyTo(nonHubView);
             }
         } else {
-            LEDPatterns.idle.applyTo(nonHubView);
+            LEDPatterns.lowBattery.applyTo(nonHubView);
         }
 
         double remaining = shiftInfo.remainingTime();
@@ -197,12 +191,12 @@ public class LEDs implements Periodic {
             hubPattern.applyTo(hubView);
         }
 
-        io.setData(buffer);
         updateMechanismAndLog();
     }
 
     // Extracted to keep periodic concise
     private void updateMechanismAndLog() {
+        io.setData(buffer);
         for (int i = 0; i < buffer.getLength(); i++) {
             ligaments[i].setColor(new Color8Bit(
                     buffer.getRed(i),
