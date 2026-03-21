@@ -96,6 +96,8 @@ public class LEDPatterns {
     public static final LEDPattern hubSwitch = LEDPattern.rainbow(255, 255).
             blink(Seconds.of(Math.max(0.05, HubShiftTracker.get().getShiftInfo().remainingTime() / 25.0))
             );
+    public static final LEDPattern active = LEDPattern.solid(Color.kDarkBlue);
+    public static final LEDPattern inactive = LEDPattern.solid(Color.kWhite);
 
 
 }

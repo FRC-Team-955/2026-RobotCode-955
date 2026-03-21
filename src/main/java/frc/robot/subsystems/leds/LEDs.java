@@ -34,7 +34,7 @@ public class LEDs implements Periodic {
 
     // See createAndStartStartupNotifier for why this is static
     private static final LEDsIO io = createIO();
-
+    private static LEDPattern hubPattern;
     private final AddressableLEDBuffer buffer = new AddressableLEDBuffer(length);
     private final AddressableLEDBufferView firstHalfView = new AddressableLEDBufferView(buffer, 0, length / 4 - 1);
     private final AddressableLEDBufferView secondHalfView = new AddressableLEDBufferView(buffer, length / 4, length / 2 - 1);
@@ -101,9 +101,15 @@ public class LEDs implements Periodic {
 
         setLEDPatterns();
 
-        LEDPattern hubPattern = HubShiftTracker.get().getShiftInfo().active() ?
-                LEDPattern.solid(Color.kDarkBlue)
-                : LEDPattern.solid(Color.kWhite);
+        if (HubShiftTracker.get().getShiftInfo().remainingTime() < 5.0) {
+            hubPattern = LEDPatterns.hubSwitch;
+        } else {
+            hubPattern = HubShiftTracker.get().getShiftInfo().active() ?
+                    LEDPatterns.active
+                    : LEDPatterns.inactive;
+        }
+
+
         hubPattern.applyTo(thirdHalfView);
 
         setDataUpdateMechanism();
@@ -188,10 +194,7 @@ public class LEDs implements Periodic {
                 superstructurePattern.applyTo(buffer);
                 return;
             }
-            if (HubShiftTracker.get().getShiftInfo().remainingTime() < 5.0) {
-                LEDPatterns.hubSwitch.applyTo(buffer);
-                return;
-            }
+
             if (lowBattery) {
                 LEDPatterns.lowBattery.applyTo(buffer);
             }
