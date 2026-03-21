@@ -74,11 +74,6 @@ public class DriveConstants {
     public static final double joystickMaxAngularSpeedRadPerSec = Math.min(Units.degreesToRadians(500), maxAngularVelocityRadPerSec);
     public static final double joystickDriveDeadband = 0.05;
 
-    // Acceleration limiting constants
-    public static final LoggedTunableNumber maxForwardAcceleration = new LoggedTunableNumber("Drive/Acceleration/MaxForward", 25.0);
-    public static final LoggedTunableNumber maxSideAcceleration = new LoggedTunableNumber("Drive/Acceleration/MaxSide", 2);
-    public static final LoggedTunableNumber maxSkidAcceleration = new LoggedTunableNumber("Drive/Acceleration/MaxSkid", 15.0);
-
     static final ModuleConfig moduleConfig = switch (BuildConstants.mode) {
         // TO TUNE DRIVE GAINS: Use go forward at 1 m/s characterization auto and tune until you get 1 m/s.
         // After that, move to 2 m/s and make sure you get 2 m/s, and do the same thing for 3 m/s and 4 m/s.
