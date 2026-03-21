@@ -127,6 +127,9 @@ public class Robot extends LoggedRobot {
         periodics = List.of(
                 // Order matters! Execution order is ascending (that is, the first one listed will execute first)
 
+                // Update all devices
+                robotContainer.deviceManager,
+
                 // Start with hub shift tracker
                 robotContainer.hubShiftTracker,
 
