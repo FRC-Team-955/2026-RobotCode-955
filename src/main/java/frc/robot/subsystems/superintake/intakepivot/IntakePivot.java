@@ -1,18 +1,26 @@
 package frc.robot.subsystems.superintake.intakepivot;
 
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
+import com.ctre.phoenix6.configs.FeedbackConfigs;
+import com.ctre.phoenix6.configs.MotorOutputConfigs;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.signals.GravityTypeValue;
+import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.lib.Util;
-import frc.lib.device.MotorIOInputsAutoLogged;
+import frc.lib.device.*;
 import frc.lib.network.LoggedTunableNumber;
+import frc.lib.network.LoggedTunablePIDF;
 import frc.lib.subsystem.Periodic;
+import frc.robot.BuildConstants;
 import frc.robot.Constants;
 import frc.robot.OperatorDashboard;
 import frc.robot.RobotState;
-import frc.robot.subsystems.superintake.intakepivot.IntakePivotIO.IntakePivotCurrentLimitMode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -20,17 +28,56 @@ import org.littletonrobotics.junction.Logger;
 
 import java.util.function.DoubleSupplier;
 
-import static frc.robot.subsystems.superintake.intakepivot.IntakePivotConstants.*;
-
 public class IntakePivot implements Periodic {
-    private static final LoggedTunableNumber profileLookaheadTimeSec = new LoggedTunableNumber("Superintake/IntakePivot/ProfileLookaheadTimeSec", 0.15);
-    private static final LoggedTunableNumber stowSetpointDegrees = new LoggedTunableNumber("Superintake/IntakePivot/Goal/StowDegrees", 70.0);
+    private static final LoggedTunableNumber profileLookaheadTimeSec = new LoggedTunableNumber("IntakePivot/ProfileLookaheadTimeSec", 0.15);
+    private static final LoggedTunableNumber stowSetpointDegrees = new LoggedTunableNumber("IntakePivot/Goal/StowDegrees", 70.0);
+
+    private static final TrapezoidProfile.Constraints constraints = new TrapezoidProfile.Constraints(5, 15);
+
+    private static final double minPositionRad = Units.degreesToRadians(16.827716);
+    private static final double maxPositionRad = Units.degreesToRadians(95.554559);
+    private static final double initialPositionRad = minPositionRad;
+    private static final double maxPositionUnderTrench = Units.degreesToRadians(20.0);
+    private static final double tresholdForLoweringUnderTrench = minPositionRad + Units.degreesToRadians(45.0);
+
+
+    static final double gearRatio = 5.0 * 5.0 * 2.0;
+    private static final TalonFXConfiguration motorConfig = new TalonFXConfiguration()
+            .withMotorOutput(new MotorOutputConfigs()
+                    .withInverted(InvertedValue.Clockwise_Positive)
+                    .withNeutralMode(NeutralModeValue.Coast)
+            )
+            .withCurrentLimits(new CurrentLimitsConfigs()
+                    .withStatorCurrentLimit(30)
+                    .withSupplyCurrentLimit(30)
+            )
+            .withFeedback(new FeedbackConfigs()
+                    .withSensorToMechanismRatio(gearRatio)
+            );
+
+
+    static final LoggedTunablePIDF gains = switch (BuildConstants.mode) {
+        case REAL, REPLAY -> new LoggedTunablePIDF("IntakePivot/Gains")
+                .withP(8.0)
+                .withG(0.5, GravityTypeValue.Arm_Cosine)
+                .withS(0.0, StaticFeedforwardSignValue.UseClosedLoopSign);
+        case SIM -> new LoggedTunablePIDF("IntakePivot/Gains")
+                .withP(20.0)
+                .withG(2.65, GravityTypeValue.Arm_Cosine);
+    };
+
+
+    private final Motor motor = new Motor("IntakePivot", gains, switch (BuildConstants.mode) {
+        case REAL -> new MotorIOTalonFX(14, motorConfig, initialPositionRad);
+        case SIM -> new MotorIOTalonFXSim(motorConfig, initialPositionRad, MechanismSim.arm(
+                gearRatio, 0.0768892879, Units.inchesToMeters(10), minPositionRad,
+                maxPositionRad,
+                true));
+        case REPLAY -> new MotorIOReplay();
+    });
 
     private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
     private static final RobotState robotState = RobotState.get();
-
-    private final IntakePivotIO io = createIO();
-    private final MotorIOInputsAutoLogged inputs = new MotorIOInputsAutoLogged();
 
 
     @RequiredArgsConstructor
@@ -47,14 +94,6 @@ public class IntakePivot implements Periodic {
     @Getter
     private Goal goal = Goal.STOW;
 
-    private IntakePivotCurrentLimitMode currentLimitMode = IntakePivotCurrentLimitMode.NORMAL;
-
-    public void setCurrentLimitMode(IntakePivotCurrentLimitMode newCurrentLimitMode) {
-        if (currentLimitMode != newCurrentLimitMode) {
-            currentLimitMode = newCurrentLimitMode;
-            io.setCurrentLimit(currentLimitMode);
-        }
-    }
 
     private final TrapezoidProfile profile = new TrapezoidProfile(constraints);
     private Double lastSetpointRad = null;
@@ -63,7 +102,6 @@ public class IntakePivot implements Periodic {
     private TrapezoidProfile.State goalState = new TrapezoidProfile.State();
     private TrapezoidProfile.State lookaheadState = new TrapezoidProfile.State();
 
-    private final Alert motorDisconnectedAlert = new Alert("Intake pivot motor is disconnected.", Alert.AlertType.kError);
 
     private static IntakePivot instance;
 
@@ -82,28 +120,16 @@ public class IntakePivot implements Periodic {
     }
 
     @Override
-    public void periodicBeforeCommands() {
-        io.updateInputs(inputs);
-        Logger.processInputs("Inputs/Superintake/IntakePivot", inputs);
-
-        motorDisconnectedAlert.set(!inputs.connected);
-
-        if (gains.hasChanged()) {
-            io.setPositionPIDF(gains);
-        }
-    }
-
-    @Override
     public void periodicAfterCommands() {
-        Logger.recordOutput("Superintake/IntakePivot/Goal", goal);
+        Logger.recordOutput("IntakePivot/Goal", goal);
         if (DriverStation.isDisabled()) {
-            io.setVoltageRequest(0.0);
+            motor.setVoltageRequest(0.0);
 
             // Reset states to current position
-            goalState = new TrapezoidProfile.State(inputs.positionRad, 0.0);
+            goalState = new TrapezoidProfile.State(motor.getPositionRad(), 0.0);
             lookaheadState = goalState;
         } else if (goal == Goal.HOME) {
-            io.setVoltageRequest(-2.0);
+            motor.setVoltageRequest(-2.0);
         } else {
             // See the comments above the lookaheadState and goalState variables for why we effectively calculate two profiles
 
@@ -131,20 +157,20 @@ public class IntakePivot implements Periodic {
             lookaheadState = profile.calculate(Constants.loopPeriod, lookaheadState, wantedState);
             //Logger.recordOutput("Superintake/IntakePivot/LookaheadSetpointRad", lookaheadState.position);
 
-            io.setPositionRequest(lookaheadState.position);
+            motor.setPositionRequest(lookaheadState.position);
         }
     }
 
     public double getPositionRad() {
-        return inputs.positionRad;
+        return motor.getPositionRad();
     }
 
     public boolean isCurrentAtThresholdForHoming() {
-        return inputs.currentAmps >= 10.0;
+        return motor.getStatorCurrentAmps() >= 10.0;
     }
 
     public void finishHoming() {
-        io.setEncoderPositionToInitial();
+        motor.setEncoderPosition(initialPositionRad);
         operatorDashboard.intakePivotNotHomedAlert.set(false);
     }
 }
