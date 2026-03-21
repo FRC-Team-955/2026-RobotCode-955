@@ -4,7 +4,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.Util;
 import frc.lib.commands.CommandsExt;
 import frc.lib.subsystem.CommandBasedSubsystem;
-import frc.robot.subsystems.superintake.intakepivot.IntakePivot;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.littletonrobotics.junction.Logger;
