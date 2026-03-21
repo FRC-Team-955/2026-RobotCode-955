@@ -39,8 +39,8 @@ public class LEDs implements Periodic {
     private final AddressableLEDBufferView rightHalfView = new AddressableLEDBufferView(buffer, mid, length - 1);
 
     private static final double HUB_BLINK_START_SECONDS = 5.0;
-    private static final double HUB_BLINK_MIN_PERIOD = 0.12;
-    private static final double HUB_BLINK_MAX_PERIOD = 1.2;
+    private static final double HUB_BLINK_MIN_PERIOD = 0.5;
+    private static final double HUB_BLINK_MAX_PERIOD = 1.5;
 
     private final LoggedMechanism2d mechanism = new LoggedMechanism2d(1.5, 2.1, new Color8Bit(Color.kBlack));
     private final LoggedMechanismLigament2d[] ligaments = new LoggedMechanismLigament2d[length];
