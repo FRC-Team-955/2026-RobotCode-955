@@ -50,6 +50,14 @@ public class RobotState implements Periodic {
     private Optional<Pose2d> moveToGoal = Optional.empty();
     private final FieldObject2d moveToGoalObject = field2d.getObject("MoveTo");
 
+    @Setter
+    private Optional<Pose2d[]> trajectory = Optional.empty();
+    private final FieldObject2d trajectoryObject = field2d.getObject("Trajectory");
+
+    @Setter
+    private Optional<Pose2d> trajectorySample = Optional.empty();
+    private final FieldObject2d trajectorySampleObject = field2d.getObject("TrajectorySample");
+
     @Getter
     @Setter
     private ChassisSpeeds measuredChassisSpeedsRobotRelative = new ChassisSpeeds();
@@ -180,6 +188,14 @@ public class RobotState implements Periodic {
                 moveToGoalObject::setPose,
                 moveToGoalObject::setPoses
         );
+        trajectory.ifPresentOrElse(
+                trajectoryObject::setPoses,
+                trajectoryObject::setPoses
+        );
+        trajectorySample.ifPresentOrElse(
+                trajectorySampleObject::setPose,
+                trajectorySampleObject::setPoses
+        );
         SmartDashboard.putData("Field2d", field2d);
     }
 
@@ -227,7 +243,7 @@ public class RobotState implements Periodic {
 
     public void setPose(Pose2d pose) {
         poseEstimator.resetPose(pose);
-        if (BuildConstants.mode == BuildConstants.Mode.SIM) {
+        if (BuildConstants.isSim) {
             SimManager.get().driveSimulation.setSimulationWorldPose(pose);
         }
     }

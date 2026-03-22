@@ -79,7 +79,7 @@ public class AutoHelpers {
                         // is not the rotation that move to will target
                         constraints.aiming()
                                 ? Double.MAX_VALUE
-                                : intermediateAngularTolerance
+                                : finalAngularTolerance
                 ));
     }
 

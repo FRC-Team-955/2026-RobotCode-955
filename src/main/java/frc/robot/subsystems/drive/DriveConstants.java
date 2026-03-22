@@ -57,9 +57,7 @@ public class DriveConstants {
             new LoggedTunableNumber("Drive/MoveTo/MaxLinearVelocity", driveConfig.maxVelocityMetersPerSec()),
             new LoggedTunableNumber("Drive/MoveTo/MaxLinearAcceleration", 20.0),
             new LoggedTunableNumber("Drive/MoveTo/MaxAngularVelocity", 9),
-            new LoggedTunableNumber("Drive/MoveTo/MaxAngularAcceleration", 30.0),
-            false,
-            false
+            new LoggedTunableNumber("Drive/MoveTo/MaxAngularAcceleration", 30.0)
     );
 
     public static final MoveToConfig moveToConfig = new MoveToConfig(
@@ -67,11 +65,12 @@ public class DriveConstants {
             new LoggedTunableNumber("Drive/MoveTo/LinearPositionTolerance", 0.05),
             new LoggedTunableNumber("Drive/MoveTo/LinearVelocityToleranceMeters", 0.2),
             new LoggedTunablePIDF("Drive/MoveTo/Angular").withP(4.0).withD(0.02),
-            new LoggedTunableNumber("Drive/MoveTo/AngularPositionTolerance", Units.degreesToRadians(5)),
-            new LoggedTunableNumber("Drive/MoveTo/AngularVelocityTolerance", Units.degreesToRadians(20))
+            new LoggedTunableNumber("Drive/MoveTo/AngularPositionTolerance", Units.degreesToRadians(2)),
+            new LoggedTunableNumber("Drive/MoveTo/AngularVelocityTolerance", Units.degreesToRadians(10))
     );
 
-    public static final double joystickMaxAngularSpeedRadPerSec = Math.min(Units.degreesToRadians(500), maxAngularVelocityRadPerSec);
+    /** Must be below maxAngularVelocityRadPerSec */
+    public static final double joystickMaxAngularSpeedRadPerSec = Units.degreesToRadians(300);
     public static final double joystickDriveDeadband = 0.05;
 
     static final ModuleConfig moduleConfig = switch (BuildConstants.mode) {
@@ -175,9 +174,7 @@ public class DriveConstants {
             LoggedTunableNumber maxLinearVelocityMetersPerSec,
             LoggedTunableNumber maxLinearAccelerationMetersPerSecPerSec,
             LoggedTunableNumber maxAngularVelocityRadPerSec,
-            LoggedTunableNumber maxAngularAccelerationRadPerSecPerSec,
-            boolean aiming,
-            boolean fullSpeed
+            LoggedTunableNumber maxAngularAccelerationRadPerSecPerSec
     ) {
     }
 

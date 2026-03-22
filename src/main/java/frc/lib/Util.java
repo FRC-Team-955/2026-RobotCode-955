@@ -20,7 +20,7 @@ public class Util {
     private static final Set<String> loggedErrors = new HashSet<>();
 
     public static void error(String msg) {
-        if (BuildConstants.mode == BuildConstants.Mode.SIM) {
+        if (BuildConstants.isSim) {
             throw new RuntimeException(msg);
         } else {
             if (!loggedErrors.contains(msg)) {
