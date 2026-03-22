@@ -22,6 +22,7 @@ public class OrbitAtHomeDepotAuto extends Auto {
     public static final double firstPassYOffset = 0.25;
     public static final double secondPassYOffset = 1.0;
 
+
     public OrbitAtHomeDepotAuto() {
         super(
                 new Pose2d(4.35, startingPositionY, Rotation2d.kCW_90deg),
@@ -54,18 +55,28 @@ public class OrbitAtHomeDepotAuto extends Auto {
                         4.7,
                         Rotation2d.kCW_90deg
                 ), AutoHelpers.intakeConstraints).withTimeout(3),
+
+
                 superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
 
                 // avoid scattering balls
-                AutoHelpers.finalWaypoint(() -> new Pose2d(
-                        FieldConstants.LinesVertical.center - 1.5,
-                        trenchShootingPosition.getY() - 0.15,
-                        trenchShootingPosition.getRotation()
-                ), defaultMoveToConstraints).withTimeout(3),
+                //AutoHelpers.finalWaypoint(() -> new Pose2d(
+                //        FieldConstants.LinesVertical.center - 1.5,
+                //        trenchShootingPosition.getY() - 0.15,
+                //        trenchShootingPosition.getRotation()
+                //), defaultMoveToConstraints).withTimeout(3),
+                AutoHelpers.yDistanceInterpolatingWaypoint(
+                        new Translation2d(6.0, 4.5),
+                        new Translation2d(6.0, startingPositionY),
+                        Rotation2d.kCCW_90deg,
+                        1.75,
+                        defaultMoveToConstraints
+                ),
+
 
                 //move to entrance to trench
                 AutoHelpers.intermediateWaypoint(() -> new Pose2d(
-                        7.0,
+                        6.0,
                         startingPositionY,
                         trenchShootingPosition.getRotation()
                 ), defaultMoveToConstraints),
@@ -105,13 +116,20 @@ public class OrbitAtHomeDepotAuto extends Auto {
                         3.7,
                         Rotation2d.kCW_90deg
                 ), AutoHelpers.intakeConstraints),
+
+                AutoHelpers.trajectory(
+                        "NewPath_copy7",
+                        () ->
+                                new Pose2d(5.8, 4.3, Rotation2d.kCCW_90deg)
+                ),
                 superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
+
 
                 AutoHelpers.yDistanceInterpolatingWaypoint(
                         new Translation2d(6.0, 4.5),
-                        new Translation2d(6.0, trenchShootingPosition.getY() + 0.33),
+                        new Translation2d(6.0, startingPositionY),
                         Rotation2d.kCCW_90deg,
-                        2,
+                        1.75,
                         defaultMoveToConstraints
                 ),
 
