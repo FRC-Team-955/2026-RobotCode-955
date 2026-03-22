@@ -57,9 +57,7 @@ public class DriveConstants {
             new LoggedTunableNumber("Drive/MoveTo/MaxLinearVelocity", driveConfig.maxVelocityMetersPerSec()),
             new LoggedTunableNumber("Drive/MoveTo/MaxLinearAcceleration", 20.0),
             new LoggedTunableNumber("Drive/MoveTo/MaxAngularVelocity", 9),
-            new LoggedTunableNumber("Drive/MoveTo/MaxAngularAcceleration", 30.0),
-            false,
-            false
+            new LoggedTunableNumber("Drive/MoveTo/MaxAngularAcceleration", 30.0)
     );
 
     public static final MoveToConfig moveToConfig = new MoveToConfig(
