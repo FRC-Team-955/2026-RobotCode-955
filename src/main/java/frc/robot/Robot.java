@@ -51,6 +51,9 @@ public class Robot extends LoggedRobot {
 
     public Robot() {
         super(Constants.loopPeriod);
+        
+        // Stop Rev Logger
+        StatusLogger.disableAutoLogging();
 
         if (BuildConstants.mode == BuildConstants.Mode.SIM) {
             // Setup arena BEFORE any of our robot code tries to use it
@@ -104,9 +107,6 @@ public class Robot extends LoggedRobot {
                 }
             }
         }
-
-        // Stop Rev Logger
-        StatusLogger.disableAutoLogging();
 
         // Start AdvantageKit logger
         Logger.start();
