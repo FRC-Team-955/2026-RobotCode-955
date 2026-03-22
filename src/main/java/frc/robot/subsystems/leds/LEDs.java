@@ -102,7 +102,7 @@ public class LEDs implements Periodic {
 
         setLEDPatterns();
         if (DriverStation.isEnabled()) {
-            if (HubShiftTracker.get().getShiftInfo().remainingTime() < 5.0) {
+            if (HubShiftTracker.get().getShiftInfo().remainingTime() < 10.0) {
 
                 hubPattern = HubShiftTracker.get().getShiftInfo().active() ?
                         LEDPatterns.active.blink
