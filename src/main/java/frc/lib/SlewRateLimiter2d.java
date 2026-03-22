@@ -139,4 +139,8 @@ public class SlewRateLimiter2d {
     public void setLimit(double rateLimit) {
         m_rateLimit = rateLimit;
     }
+
+    public double getLimit() {
+        return m_rateLimit;
+    }
 }
