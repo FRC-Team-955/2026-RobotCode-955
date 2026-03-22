@@ -59,19 +59,19 @@ public class OrbitAtHomeDepotAuto extends Auto {
 
                 superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
 
-                // avoid scattering balls
-                //AutoHelpers.finalWaypoint(() -> new Pose2d(
-                //        FieldConstants.LinesVertical.center - 1.5,
-                //        trenchShootingPosition.getY() - 0.15,
-                //        trenchShootingPosition.getRotation()
-                //), defaultMoveToConstraints).withTimeout(3),
+                //   avoid scattering balls
+                //  AutoHelpers.finalWaypoint(() -> new Pose2d(
+                //          FieldConstants.LinesVertical.center - 1.5,
+                //          trenchShootingPosition.getY() - 0.15,
+                //          trenchShootingPosition.getRotation()
+                //  ), defaultMoveToConstraints).withTimeout(3),
                 AutoHelpers.yDistanceInterpolatingWaypoint(
-                        new Translation2d(6.5, 4.5),
-                        new Translation2d(6.5, startingPositionY),
+                        new Translation2d(6.0, 5.0),
+                        new Translation2d(6.0, startingPositionY),
                         Rotation2d.kCCW_90deg,
                         1.75,
-                        defaultMoveToConstraints
-                ),
+                        defaultMoveToConstraints),
+                //),
 
 
                 //move to entrance to trench
