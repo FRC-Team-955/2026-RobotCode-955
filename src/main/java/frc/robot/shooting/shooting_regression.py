@@ -22,6 +22,9 @@ if DEBUG_SHOT:
 def inches_to_meters(inches):
     return inches * 2.54 / 100
 
+rad_to_deg = np.degrees
+deg_to_rad = np.radians
+
 # All length quantities are in meters
 
 fuel_mass = 0.2150028  # kg - note, this is the average weight according to the range in the game manual
@@ -37,6 +40,10 @@ bottom_of_frame_rails_to_shooter_height = inches_to_meters(12.861380)
 shooter_radius_to_center_of_ball_exit = inches_to_meters(4.602756)
 
 z_initial_base = bottom_of_frame_rails_to_center_of_wheels + wheel_radius + bottom_of_frame_rails_to_shooter_height
+
+# From horizontal
+min_angle_allowed = deg_to_rad(45.0)
+max_angle_allowed = deg_to_rad(75.0)
 
 hub_base_z = inches_to_meters(56.5)
 hub_base_x = inches_to_meters(11.914689)  # Half of inner radius of base
@@ -111,9 +118,6 @@ g = 9.81
 ρ = 1.2041  # air, kg/m³, https://en.wikipedia.org/wiki/Density_of_air#Dry_air
 A = np.pi * fuel_radius ** 2
 C_D = 0.47  # https://en.wikipedia.org/wiki/Drag_coefficient#/media/File:14ilf1l.svg
-
-rad_to_deg = np.degrees
-deg_to_rad = np.radians
 
 def polar_velocity_to_components(vel, pitch, yaw=0.0):
     vz = vel * np.sin(pitch)
@@ -307,8 +311,17 @@ def optimize_shot(distance, robot_radial_vel):
         nonlocal shots_simmed
         shots_simmed += 1
 
-        # if x[1] < deg_to_rad(15.0) or x[1] > deg_to_rad(45.0):
-        #     return 999
+        # Check angle
+        # print(x[1], min_angle_allowed, max_angle_allowed)
+        if x[1] < min_angle_allowed:
+            angle = min_angle_allowed - x[1]
+        elif x[1] > max_angle_allowed:
+            angle = x[1] - max_angle_allowed
+        else:
+            angle = 0.0
+        # VERY IMPORTANT
+        # Causes optimization to fail though
+        angle *= 0.0  # 30.0
 
         x, y, z = calculate_trajectory_iterative(x[0], x[1], robot_radial_vel, x0)
 
@@ -348,7 +361,11 @@ def optimize_shot(distance, robot_radial_vel):
         else:
             z_dist = 0
 
-        return x_dist + max_z + z_dist
+        return angle + x_dist + max_z + z_dist
+
+    # cost_fun debug
+    # angle = np.linspace(0.0, np.pi / 2, 200)
+    # ax.plot(angle, [cost_fun([10, angle]) for angle in angle])
 
     res = minimize(
         cost_fun,
