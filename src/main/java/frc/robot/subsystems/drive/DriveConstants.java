@@ -67,8 +67,8 @@ public class DriveConstants {
             new LoggedTunableNumber("Drive/MoveTo/LinearPositionTolerance", 0.05),
             new LoggedTunableNumber("Drive/MoveTo/LinearVelocityToleranceMeters", 0.2),
             new LoggedTunablePIDF("Drive/MoveTo/Angular").withP(4.0).withD(0.02),
-            new LoggedTunableNumber("Drive/MoveTo/AngularPositionTolerance", Units.degreesToRadians(5)),
-            new LoggedTunableNumber("Drive/MoveTo/AngularVelocityTolerance", Units.degreesToRadians(20))
+            new LoggedTunableNumber("Drive/MoveTo/AngularPositionTolerance", Units.degreesToRadians(2)),
+            new LoggedTunableNumber("Drive/MoveTo/AngularVelocityTolerance", Units.degreesToRadians(10))
     );
 
     /** Must be below maxAngularVelocityRadPerSec */
@@ -176,9 +176,7 @@ public class DriveConstants {
             LoggedTunableNumber maxLinearVelocityMetersPerSec,
             LoggedTunableNumber maxLinearAccelerationMetersPerSecPerSec,
             LoggedTunableNumber maxAngularVelocityRadPerSec,
-            LoggedTunableNumber maxAngularAccelerationRadPerSecPerSec,
-            boolean aiming,
-            boolean fullSpeed
+            LoggedTunableNumber maxAngularAccelerationRadPerSecPerSec
     ) {
     }
 
