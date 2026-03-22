@@ -27,8 +27,10 @@ public class Controller implements Periodic {
 
     @Getter
     private Rotation2d driveLinearDirection = new Rotation2d();
+    /** Between 0 and 1 */
     @Getter
     private double driveLinearMagnitude = 0.0;
+    /** Between 0 and 1 */
     @Getter
     private double driveAngularMagnitude = 0.0;
 
@@ -129,6 +131,14 @@ public class Controller implements Periodic {
             //Logger.recordOutput("Controller/Drive/Assist/Running", false);
             return false;
         }
+    }
+
+    public double getDriveLinearVelocityMetersPerSec() {
+        return driveLinearMagnitude * driveConfig.maxVelocityMetersPerSec();
+    }
+
+    public double getDriveAngularVelocityRadPerSec() {
+        return driveAngularMagnitude * joystickMaxAngularSpeedRadPerSec;
     }
 
     public Command rumble(double value) {

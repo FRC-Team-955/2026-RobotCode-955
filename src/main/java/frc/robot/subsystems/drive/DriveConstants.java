@@ -71,7 +71,8 @@ public class DriveConstants {
             new LoggedTunableNumber("Drive/MoveTo/AngularVelocityTolerance", Units.degreesToRadians(20))
     );
 
-    public static final double joystickMaxAngularSpeedRadPerSec = Math.min(Units.degreesToRadians(500), maxAngularVelocityRadPerSec);
+    /** Must be below maxAngularVelocityRadPerSec */
+    public static final double joystickMaxAngularSpeedRadPerSec = Units.degreesToRadians(300);
     public static final double joystickDriveDeadband = 0.05;
 
     static final ModuleConfig moduleConfig = switch (BuildConstants.mode) {
