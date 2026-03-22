@@ -42,8 +42,7 @@ import edu.wpi.first.math.MathUtil;
  * edu.wpi.first.math.trajectory.TrapezoidProfile} instead.
  */
 public class SlewRateLimiter {
-    private double m_positiveRateLimit;
-    private double m_negativeRateLimit;
+    private double m_rateLimit;
     private double m_prevVal;
     private double m_prevTime;
 
@@ -51,15 +50,12 @@ public class SlewRateLimiter {
      * Creates a new SlewRateLimiter with the given positive and negative rate limits and initial
      * value.
      *
-     * @param positiveRateLimit The rate-of-change limit in the positive direction, in units per
-     *                          second. This is expected to be positive.
-     * @param negativeRateLimit The rate-of-change limit in the negative direction, in units per
-     *                          second. This is expected to be negative.
-     * @param initialValue      The initial value of the input.
+     * @param rateLimit    The rate-of-change limit in the positive direction, in units per
+     *                     second. This is expected to be positive.
+     * @param initialValue The initial value of the input.
      */
-    public SlewRateLimiter(double positiveRateLimit, double negativeRateLimit, double initialValue) {
-        m_positiveRateLimit = positiveRateLimit;
-        m_negativeRateLimit = negativeRateLimit;
+    public SlewRateLimiter(double rateLimit, double initialValue) {
+        m_rateLimit = rateLimit;
         m_prevVal = initialValue;
         m_prevTime = MathSharedStore.getTimestamp();
     }
@@ -71,11 +67,7 @@ public class SlewRateLimiter {
      * @param rateLimit The rate-of-change limit, in units per second.
      */
     public SlewRateLimiter(double rateLimit) {
-        this(rateLimit, -rateLimit, 0);
-    }
-
-    public SlewRateLimiter(double rateLimit, double initialValue) {
-        this(rateLimit, -rateLimit, initialValue);
+        this(rateLimit, 0);
     }
 
     /**
@@ -88,11 +80,11 @@ public class SlewRateLimiter {
     public double calculate(double input) {
         double currentTime = MathSharedStore.getTimestamp();
         double elapsedTime = currentTime - m_prevTime;
-        m_prevVal +=
-                MathUtil.clamp(
-                        input - m_prevVal,
-                        m_negativeRateLimit * elapsedTime,
-                        m_positiveRateLimit * elapsedTime);
+        m_prevVal += MathUtil.clamp(
+                input - m_prevVal,
+                -m_rateLimit * elapsedTime,
+                m_rateLimit * elapsedTime
+        );
         m_prevTime = currentTime;
         return m_prevVal;
     }
@@ -117,19 +109,6 @@ public class SlewRateLimiter {
     }
 
     /**
-     * Sets the rate-of-change limit to the given positive and negative rate limits.
-     *
-     * @param positiveRateLimit The rate-of-change limit in the positive direction, in units per
-     *                          second. This is expected to be positive.
-     * @param negativeRateLimit The rate-of-change limit in the negative direction, in units per
-     *                          second. This is expected to be negative.
-     */
-    public void setLimit(double positiveRateLimit, double negativeRateLimit) {
-        m_positiveRateLimit = positiveRateLimit;
-        m_negativeRateLimit = negativeRateLimit;
-    }
-
-    /**
      * Sets the rate-of-change limit to the given positive rate limit and negative rate limit of
      * -rateLimit.
      *
@@ -137,7 +116,10 @@ public class SlewRateLimiter {
      *                  expected to be positive.
      */
     public void setLimit(double rateLimit) {
-        m_positiveRateLimit = rateLimit;
-        m_negativeRateLimit = -rateLimit;
+        m_rateLimit = rateLimit;
+    }
+
+    public double getLimit() {
+        return m_rateLimit;
     }
 }

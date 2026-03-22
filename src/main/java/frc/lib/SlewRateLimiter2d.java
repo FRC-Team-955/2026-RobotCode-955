@@ -156,4 +156,8 @@ public class SlewRateLimiter2d {
         m_positiveRateLimit = rateLimit;
         m_negativeRateLimit = -rateLimit;
     }
+
+    public double getLimit() {
+        return m_rateLimit;
+    }
 }
