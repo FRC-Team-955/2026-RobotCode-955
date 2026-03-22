@@ -75,6 +75,9 @@ def wanted_hub_z(distance):
     x = wanted_hub_x(distance)
     return hub_z(x) + hub_clearance_z
 
+def wanted_max_z(distance):
+    return 2.0 + (distance - 0.5) * 0.18
+
 if DEBUG_SHOT:
     ax.scatter(-hub_edge_x, hub_edge_z_with_clearance, c="red")
     ax.plot(
@@ -329,7 +332,7 @@ def optimize_shot(distance, robot_radial_vel):
         # Find max Z
         max_z = np.max(z)
         # Target a certain max z based on distance
-        max_z = abs(max_z - (2.0 + (distance - 0.5) * 0.15))
+        max_z = abs(max_z - wanted_max_z(distance))
         # Reduce significance
         max_z /= 2
 
