@@ -66,7 +66,7 @@ public class OrbitAtHomeDepotAuto extends Auto {
                 //          trenchShootingPosition.getRotation()
                 //  ), defaultMoveToConstraints).withTimeout(3),
                 AutoHelpers.yDistanceInterpolatingWaypoint(
-                        new Translation2d(6.0, 4.75),
+                        new Translation2d(6.0, 5.0),
                         new Translation2d(6.0, startingPositionY),
                         Rotation2d.kCCW_90deg,
                         1.75,
