@@ -13,6 +13,7 @@
 
 package frc.robot;
 
+import com.revrobotics.util.StatusLogger;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
@@ -103,6 +104,9 @@ public class Robot extends LoggedRobot {
                 }
             }
         }
+
+        // Stop Rev Logger
+        StatusLogger.disableAutoLogging();
 
         // Start AdvantageKit logger
         Logger.start();
