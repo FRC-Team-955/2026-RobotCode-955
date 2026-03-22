@@ -47,8 +47,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
  * exceed given rate limit.
  */
 public class SlewRateLimiter2d {
-    private double m_positiveRateLimit;
-    private double m_negativeRateLimit;
+    private double m_rateLimit;
     private Translation2d m_prevVal;
     private double m_prevTime;
 
@@ -58,13 +57,10 @@ public class SlewRateLimiter2d {
      *
      * @param positiveRateLimit The rate-of-change limit in the positive direction, in units per
      *                          second. This is expected to be positive.
-     * @param negativeRateLimit The rate-of-change limit in the negative direction, in units per
-     *                          second. This is expected to be negative.
      * @param initialValue      The initial value of the input.
      */
-    public SlewRateLimiter2d(double positiveRateLimit, double negativeRateLimit, Translation2d initialValue) {
-        m_positiveRateLimit = positiveRateLimit;
-        m_negativeRateLimit = negativeRateLimit;
+    public SlewRateLimiter2d(double positiveRateLimit, Translation2d initialValue) {
+        m_rateLimit = positiveRateLimit;
         m_prevVal = initialValue;
         m_prevTime = MathSharedStore.getTimestamp();
     }
@@ -76,11 +72,11 @@ public class SlewRateLimiter2d {
      * @param rateLimit The rate-of-change limit, in units per second.
      */
     public SlewRateLimiter2d(double rateLimit) {
-        this(rateLimit, -rateLimit, new Translation2d());
+        this(rateLimit, new Translation2d());
     }
 
     public SlewRateLimiter2d(double rateLimit, ChassisSpeeds initialValue) {
-        this(rateLimit, -rateLimit, new Translation2d(initialValue.vxMetersPerSecond, initialValue.vyMetersPerSecond));
+        this(rateLimit, new Translation2d(initialValue.vxMetersPerSecond, initialValue.vyMetersPerSecond));
     }
 
     /**
@@ -93,18 +89,7 @@ public class SlewRateLimiter2d {
     public Translation2d calculate(Translation2d input) {
         double currentTime = MathSharedStore.getTimestamp();
         double elapsedTime = currentTime - m_prevTime;
-        Translation2d wantedChange = input.minus(m_prevVal);
-        double norm =
-                MathUtil.clamp(
-                        wantedChange.getNorm(),
-                        m_negativeRateLimit * elapsedTime,
-                        m_positiveRateLimit * elapsedTime
-                );
-        Translation2d realChange = norm == 0.0 // if 0, then Rotation2d will throw a warning
-                ? new Translation2d()
-                : new Translation2d(norm, wantedChange.getAngle());
-        m_prevVal = m_prevVal.plus(realChange);
-
+        m_prevVal = MathUtil.slewRateLimit(m_prevVal, input, elapsedTime, m_rateLimit);
         m_prevTime = currentTime;
         return m_prevVal;
     }
@@ -141,8 +126,7 @@ public class SlewRateLimiter2d {
      *                          second. This is expected to be negative.
      */
     public void setLimit(double positiveRateLimit, double negativeRateLimit) {
-        m_positiveRateLimit = positiveRateLimit;
-        m_negativeRateLimit = negativeRateLimit;
+        m_rateLimit = positiveRateLimit;
     }
 
     /**
@@ -153,8 +137,7 @@ public class SlewRateLimiter2d {
      *                  expected to be positive.
      */
     public void setLimit(double rateLimit) {
-        m_positiveRateLimit = rateLimit;
-        m_negativeRateLimit = -rateLimit;
+        m_rateLimit = rateLimit;
     }
 
     public double getLimit() {
