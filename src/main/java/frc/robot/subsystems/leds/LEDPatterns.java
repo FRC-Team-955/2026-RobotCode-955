@@ -92,9 +92,11 @@ public class LEDPatterns {
     public static final LEDPattern intaking = LEDPattern.solid(Color.kYellow).blink(Seconds.of(0.1));
     public static final LEDPattern waitingForShift = LEDPattern.solid(Color.kPink).blink(Seconds.of(0.1));
     public static final LEDPattern homing = LEDPattern.solid(Color.kBlue);
-    public static final LEDPattern hubSwitch = LEDPattern.gradient(
-            LEDPattern.GradientType.kContinuous,
-            Color.kRed,
-            Color.kBlue
-    ).scrollAtRelativeSpeed(Hertz.of(2));
+
+
+    public static final LEDPattern active = LEDPattern.solid(Color.kDarkBlue);
+    public static final LEDPattern inactive = LEDPattern.solid(Color.kWhite);
+
+
 }
+

@@ -75,7 +75,7 @@ public class SuperstructureIOSim extends SuperstructureIO {
                         // which puts it in the opposite corner of the robot. Instead, just
                         // reverse the hood
                         Radians.of(Math.PI / 2.0 + hood.getPositionRad())
-                );
+                ).disableBecomesGamePieceOnFieldAfterTouchGround();
                 Logger.recordOutput("ShootingKinematics/ProjectileVelocity", gamePiece.getVelocity3dMPS());
                 Logger.recordOutput("ShootingKinematics/ProjectileSpeedRobotRelative", Units.rotationsPerMinuteToRadiansPerSecond(flywheel.getVelocityRPM()) * FlywheelConstants.flywheelRadiusMeters);
                 SimulatedArena.getInstance().addGamePieceProjectile(gamePiece);

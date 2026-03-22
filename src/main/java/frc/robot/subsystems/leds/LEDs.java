@@ -14,10 +14,12 @@ import frc.robot.subsystems.apriltagvision.AprilTagVision;
 import frc.robot.subsystems.gamepiecevision.GamePieceVision;
 import frc.robot.subsystems.superintake.Superintake;
 import frc.robot.subsystems.superstructure.Superstructure;
+import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.mechanism.LoggedMechanism2d;
 import org.littletonrobotics.junction.mechanism.LoggedMechanismLigament2d;
 import org.littletonrobotics.junction.mechanism.LoggedMechanismRoot2d;
 
+import static edu.wpi.first.units.Units.Seconds;
 import static frc.robot.subsystems.leds.LEDConstants.createIO;
 import static frc.robot.subsystems.leds.LEDConstants.length;
 
@@ -33,10 +35,11 @@ public class LEDs implements Periodic {
 
     // See createAndStartStartupNotifier for why this is static
     private static final LEDsIO io = createIO();
-
+    private static LEDPattern hubPattern;
     private final AddressableLEDBuffer buffer = new AddressableLEDBuffer(length);
-    private final AddressableLEDBufferView firstHalfView = new AddressableLEDBufferView(buffer, 0, length / 2 - 1);
-    private final AddressableLEDBufferView secondHalfView = new AddressableLEDBufferView(buffer, length / 2, length - 1);
+    private final AddressableLEDBufferView firstHalfView = new AddressableLEDBufferView(buffer, 0, length / 4 - 1);
+    private final AddressableLEDBufferView secondHalfView = new AddressableLEDBufferView(buffer, length / 4, length / 2 - 1);
+    private final AddressableLEDBufferView thirdHalfView = new AddressableLEDBufferView(buffer, length / 2, length - 1);
 
     private final LoggedMechanism2d mechanism = new LoggedMechanism2d(1.5, 2.1, new Color8Bit(Color.kBlack));
     private final LoggedMechanismLigament2d[] ligaments = new LoggedMechanismLigament2d[length];
@@ -86,14 +89,59 @@ public class LEDs implements Periodic {
             pattern.applyTo(buffer);
             io.setData(buffer);
         };
-        callback.run(); // run it once, before the notifier starts
+        // run it once immediately
+        callback.run();
         Notifier notifier = new Notifier(callback);
+        // update at 50Hz until robot code takes over
         notifier.startPeriodic(Constants.loopPeriod);
         return notifier;
     }
 
     @Override
     public void periodicAfterCommands() {
+
+        setLEDPatterns();
+        if (DriverStation.isEnabled()) {
+            if (HubShiftTracker.get().getShiftInfo().remainingTime() < 5.0) {
+
+                hubPattern = HubShiftTracker.get().getShiftInfo().active() ?
+                        LEDPatterns.active.blink
+                                (Seconds.of(Math.max(0.05, HubShiftTracker.get().getShiftInfo().remainingTime() / 25.0)))
+                        : LEDPatterns.
+                        inactive.blink(Seconds.of(Math.max(0.05, HubShiftTracker.get().getShiftInfo().remainingTime() / 25.0)))
+                ;
+            } else {
+                hubPattern = HubShiftTracker.get().getShiftInfo().active() ?
+                        LEDPatterns.active
+                        : LEDPatterns.inactive;
+            }
+            hubPattern.applyTo(thirdHalfView);
+
+        }
+
+
+        setDataUpdateMechanism();
+
+    }
+
+    // Update mechanism
+    private void setDataUpdateMechanism() {
+        io.setData(buffer);
+        for (int i = 0; i < buffer.getLength(); i++) {
+            // https://github.com/FRC-Team-955/2024-RobotCode-749/blob/kotlin-old/src/main/java/frc/robot/subsystems/leds/LEDs.kt#L88
+            //            System.out.print("\u001b[38;2;" + buffer.getRed(i) + ";" + buffer.getGreen(i) + ";" + buffer.getBlue(i) + "m■\u001b[0m");
+            ligaments[i].setColor(new Color8Bit(
+                    buffer.getRed(i),
+                    buffer.getGreen(i),
+                    buffer.getBlue(i)
+            ));
+        }
+        //        System.out.println();
+        Logger.recordOutput("LEDs/Mechanism", mechanism);
+
+    }
+
+    private void setLEDPatterns() {
         boolean somethingIsReallyWrong =
                 aprilTagVision.anyCamerasDisconnected()
                         || gamePieceVision.anyCamerasDisconnected()
@@ -102,21 +150,25 @@ public class LEDs implements Periodic {
 
         if (somethingIsReallyWrong) {
             LEDPatterns.somethingIsReallyWrong.applyTo(buffer);
-        } else if (
+            return;
+        }
+        if (
                 superintake.intakeRollers.highTemperatureAlert.get() ||
                         superstructure.flywheel.highTemperatureAlert.get() ||
                         superstructure.hood.highTemperatureAlert.get()
         ) {
             LEDPatterns.hotMotors.applyTo(buffer);
-        } else if (lowBattery) {
-            LEDPatterns.lowBattery.applyTo(buffer);
-        } else if (DriverStation.isDisabled()) {
+            return;
+        }
+        if (DriverStation.isDisabled()) {
             //if (operatorDashboard.autoChosen.get() && autoManager.getSelectedAutoStartingPose().isPresent() && !autoManager.isAtAutoStartingPose()) {
             //    LEDPatterns.autoPlacementProgress(autoManager::getPlacementProgress).applyTo(buffer);
             //} else {
             LEDPatterns.autoReady.applyTo(buffer);
+            return;
             //}
-        } else if (DriverStation.isEnabled()) {
+        }
+        if (DriverStation.isEnabled()) {
             LEDPattern superintakePattern = switch (superintake.getGoal()) {
                 case IDLE -> null;
                 case INTAKE, SHOOT -> LEDPatterns.intaking;
@@ -141,32 +193,23 @@ public class LEDs implements Periodic {
             if (superintakePattern != null && superstructurePattern != null) {
                 superintakePattern.applyTo(firstHalfView);
                 superstructurePattern.applyTo(secondHalfView);
-            } else if (superintakePattern != null) {
+            }
+            if (superintakePattern != null) {
                 superintakePattern.applyTo(buffer);
-            } else if (superstructurePattern != null) {
+                return;
+            }
+            if (superstructurePattern != null) {
                 superstructurePattern.applyTo(buffer);
-            } else if (HubShiftTracker.get().getShiftInfo().remainingTime() < 3.0) {
-                LEDPatterns.hubSwitch.applyTo(buffer);
-            } else {
-                LEDPatterns.idle.applyTo(buffer);
+                return;
+            }
+
+            if (lowBattery) {
+                LEDPatterns.lowBattery.applyTo(buffer);
             }
         }
 
-        io.setData(buffer);
 
-        // Update mechanism
-        /*
-        for (int i = 0; i < buffer.getLength(); i++) {
-            // https://github.com/FRC-Team-955/2024-RobotCode-749/blob/kotlin-old/src/main/java/frc/robot/subsystems/leds/LEDs.kt#L88
-            //            System.out.print("\u001b[38;2;" + buffer.getRed(i) + ";" + buffer.getGreen(i) + ";" + buffer.getBlue(i) + "m■\u001b[0m");
-            ligaments[i].setColor(new Color8Bit(
-                    buffer.getRed(i),
-                    buffer.getGreen(i),
-                    buffer.getBlue(i)
-            ));
-        }
-        //        System.out.println();
-        Logger.recordOutput("LEDs/Mechanism", mechanism);
-         */
     }
+
 }
+
