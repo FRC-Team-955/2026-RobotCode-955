@@ -6,17 +6,21 @@ from os.path import realpath, dirname
 from scipy.optimize import minimize, curve_fit
 from time import time
 
-DEBUG_SHOT = False
-DEBUG_SHOT_DISTANCE = 1
+DEBUG_SHOT = True
+DEBUG_SHOT_DISTANCE = 0.7
 DEBUG_SHOT_ROBOT_RADIAL_VELOCITY = 0
-DEBUG_RANGE = True
+DEBUG_DISTANCE_RANGE = True
 DEBUG_SHOT_DISTANCE_RANGE = 6
+DEBUG_VELOCITY_RANGE = False
 DEBUG_SHOT_ROBOT_RADIAL_VELOCITY_RANGE = 6
 
 MAGNUS_EFFECT_ENABLED = False
 
 if DEBUG_SHOT:
-    fig, ax = plt.subplots(subplot_kw=dict(projection="3d"))
+    fig, ax = plt.subplots()  # subplot_kw=dict(projection="3d"))
+
+def inches_to_meters(inches):
+    return inches * 2.54 / 100
 
 # All length quantities are in meters
 
@@ -25,24 +29,75 @@ fuel_mass = 0.2150028  # kg - note, this is the average weight according to the 
 fuel_radius = (15 / 100) / 2
 
 # KEEP SYNCED WITH DriveConstants.java
-wheel_radius = 1.945 * 2.54 / 100
-bottom_of_frame_rails_to_center_of_wheels = -0.247776 * 2.54 / 100
+wheel_radius = inches_to_meters(1.945)
+bottom_of_frame_rails_to_center_of_wheels = inches_to_meters(-0.247776)
 
 # KEEP SYNCED WITH ShootingKinematics.java
-bottom_of_frame_rails_to_shooter_height = 12.861380 * 2.54 / 100
-shooter_radius_to_center_of_ball_exit = 4.602756 * 2.54 / 100
+bottom_of_frame_rails_to_shooter_height = inches_to_meters(12.861380)
+shooter_radius_to_center_of_ball_exit = inches_to_meters(4.602756)
 
 z_initial_base = bottom_of_frame_rails_to_center_of_wheels + wheel_radius + bottom_of_frame_rails_to_shooter_height
 
-# TODO FIX HEIGHT
-hubz = 72 * 2.54 / 100
-# 72 inches is the height of the edge
-# For clearance, add the fuel radius + 10 inches
-hub_edgez = hubz + 10 * 2.54 / 100 + fuel_radius
-hub_edgex_offset = -24 * 2.54 / 100
+hub_base_z = inches_to_meters(56.5)
+hub_base_x = inches_to_meters(11.914689)  # Half of inner radius of base
+
+hub_edge_z = inches_to_meters(72.0)
+hub_edge_x = inches_to_meters(20.863618)  # Half of the inner radius of the edge
+
+hub_clearance_z = inches_to_meters(5) + fuel_radius
+hub_edge_z_with_clearance = hub_edge_z + hub_clearance_z
+
+def hub_z(x):
+    # In base
+    if abs(x) < hub_base_x:
+        return hub_base_z
+    # Outside of edge
+    if abs(x) > hub_edge_x:
+        return hub_edge_z
+    # Interpolate
+    return hub_base_z + (abs(x) - hub_base_x) * (hub_edge_z - hub_base_z) / (hub_edge_x - hub_base_x)
+
+def wanted_hub_x(distance):
+    max_dist = 7
+    # cap at max
+    u = min(distance, max_dist)
+    # reverse so that change at long distance is minimal
+    # while change at short distance is large
+    u = max_dist - u
+    # square and copy sign
+    if u < 0:
+        u *= -u
+    else:
+        u *= u
+    return -u * 0.015 + 0.25
+
+def wanted_hub_z(distance):
+    x = wanted_hub_x(distance)
+    return hub_z(x) + hub_clearance_z
+
+if DEBUG_SHOT:
+    ax.scatter(-hub_edge_x, hub_edge_z_with_clearance, c="red")
+    ax.plot(
+        [
+            -hub_edge_x,
+            -hub_base_x,
+            hub_base_x,
+            hub_edge_x,
+        ],
+        [
+            hub_edge_z,
+            hub_base_z,
+            hub_base_z,
+            hub_edge_z,
+        ],
+        c="green"
+    )
+
+    # x = np.linspace(-0.6, 0.6, 50)
+    # ax.plot(x, [hub_z(x) + hub_clearance_z for x in x])
 
 dt = 0.005
-t_final = 2
+t_final = 3
 t = np.linspace(0, t_final, round(t_final / dt))
 
 g = 9.81
@@ -54,11 +109,8 @@ g = 9.81
 A = np.pi * fuel_radius ** 2
 C_D = 0.47  # https://en.wikipedia.org/wiki/Drag_coefficient#/media/File:14ilf1l.svg
 
-def deg_to_rad(deg):
-    return deg / 180.0 * np.pi
-
-def rad_to_deg(rad):
-    return rad / np.pi * 180.0
+rad_to_deg = np.degrees
+deg_to_rad = np.radians
 
 def polar_velocity_to_components(vel, pitch, yaw=0.0):
     vz = vel * np.sin(pitch)
@@ -82,28 +134,26 @@ def norm(v):
 def normalize(v):
     return v / norm(v)
 
-def calculate_trajectory_kinematics(vel, angle, robot_radial_velocity):
+def calculate_trajectory_kinematics(vel, angle, robot_radial_velocity, x0):
     vx, vy, vz = polar_velocity_to_components(vel, angle)
     vx += robot_radial_velocity
 
-    res = (
-        vx * t,
-        vy * t,
-        vz * t + (1 / 2) * -g * t ** 2
-    )
+    x = x0 + vx * t
+    y = vy * t
+    z = vz * t + (1 / 2) * -g * t ** 2
 
     # Only return trajectory until we go into the hub, if possible
     past_hub_on_upwards_arc = False
     for i in range(len(t)):
-        if res[2][i] > hubz:
+        if z[i] > hub_z(x[i]):
             past_hub_on_upwards_arc = True
-        elif res[2][i] < hubz and past_hub_on_upwards_arc:
+        elif z[i] < hub_z(x[i]) and past_hub_on_upwards_arc:
             i_end = i + 1
-            return res[0][:i_end], res[1][:i_end], res[2][:i_end]
+            return x[:i_end], y[:i_end], z[:i_end]
 
-    return res
+    return x, y, z
 
-def calculate_trajectory_iterative(vel, angle, robot_radial_velocity):
+def calculate_trajectory_iterative(vel, angle, robot_radial_velocity, x0):
     vx, vy, vz = polar_velocity_to_components(vel, angle)
     vx += robot_radial_velocity
 
@@ -113,15 +163,16 @@ def calculate_trajectory_iterative(vel, angle, robot_radial_velocity):
     past_hub_on_upwards_arc = False
 
     for i in range(len(t)):
-        # Get last position, velocity, acceleration
         if i > 0:
+            # Get last position, velocity, acceleration
             lx = x[i - 1]
             ly = y[i - 1]
             lz = z[i - 1]
         else:
+            # Get initial position
             # ShootingKinematics.java measures distance including the X offset due to angle
             # so we don't need to include the X offset here
-            lx = 0
+            lx = x0
             # lx = (shooter_radius_to_center_of_ball_exit +
             #      np.cos(np.pi / 2.0 - angle) * -shooter_radius_to_center_of_ball_exit)
             ly = 0
@@ -160,12 +211,12 @@ def calculate_trajectory_iterative(vel, angle, robot_radial_velocity):
         ## - https://www.chiefdelphi.com/t/paper-ballistic-trajectory-with-air-friction-drag-and-magnus/123764
         ### TODO: calculate angular velocity based on initial velocity
         ### TODO: angular velocity drag
-        ω = 10 * normalize(np.array([-lv[1], lv[0], 0]))  # Rotation axis is motion direction rotated by 90° CCW
-        C_L = 1 / (2 + (lv_mag / (lv_mag + 1)))
-        if C_L > C_D:
-            C_L = C_D
-        fm = (1 / 2) * ρ * A * fuel_radius * C_L * lv_mag * cross(ω, lv)
         if MAGNUS_EFFECT_ENABLED:
+            ω = 10 * normalize(np.array([-lv[1], lv[0], 0]))  # Rotation axis is motion direction rotated by 90° CCW
+            C_L = 1 / (2 + (lv_mag / (lv_mag + 1)))
+            if C_L > C_D:
+                C_L = C_D
+            fm = (1 / 2) * ρ * A * fuel_radius * C_L * lv_mag * cross(ω, lv)
             f += fm
             # print(fm)
             # print(normalize(cross(lv_unit, axis_of_rotation)))
@@ -185,10 +236,13 @@ def calculate_trajectory_iterative(vel, angle, robot_radial_velocity):
         y[i] = ly + (lvy + vy) / 2 * dt
         z[i] = lz + (lvz + vz) / 2 * dt
 
+        # We don't currently graph y. Make sure it is always zero
+        assert y[i] == 0.0
+
         # Only return trajectory until we go into the hub, if possible
-        if z[i] > hubz:
+        if z[i] > hub_z(x[i]):
             past_hub_on_upwards_arc = True
-        elif z[i] < hubz and past_hub_on_upwards_arc:
+        elif z[i] < hub_z(x[i]) and past_hub_on_upwards_arc:
             i_end = i + 1
             return x[:i_end], y[:i_end], z[:i_end]
 
@@ -196,13 +250,13 @@ def calculate_trajectory_iterative(vel, angle, robot_radial_velocity):
 
 def calculate_shooting_params_kinematics(distance, robot_radial_vel):
     # https://www.desmos.com/calculator/9npcb4woqc
-    v0 = 0.0742955 * distance ** 2 + 0.185739 * distance + 6.16695
+    v0 = 0.0742955 * distance ** 2 + 0.185739 * distance + 6.16695 + 2
     vr = robot_radial_vel
 
     # print(f"v0 = {v0}, vr = {vr}")
 
     # First compute stationary shooting velocity
-    discriminant = v0 ** 4 - g * (g * distance ** 2 + 2 * hubz * v0 ** 2)
+    discriminant = v0 ** 4 - g * (g * distance ** 2 + 2 * wanted_hub_z(distance) * v0 ** 2)
     if discriminant < 0:
         print("\tDiscriminant is negative")
         exit(1)
@@ -236,14 +290,11 @@ def calculate_shooting_params_kinematics(distance, robot_radial_vel):
 
     return v, angle
 
-def optimize_shot(distance, robot_radial_vel, FIXED_ANGLE=None):
-    hubx = distance
-    hub_edgex = hubx + hub_edgex_offset
-    if DEBUG_SHOT:
-        ax.scatter(0, 0, hubz, c="red")
-        ax.scatter(hub_edgex_offset, 0, hub_edgez, c="red")
-    if FIXED_ANGLE is not None:
-        FIXED_HOOD_ANGLE = deg_to_rad(FIXED_ANGLE)
+def optimize_shot(distance, robot_radial_vel):
+    x0 = -distance
+
+    wanted_x = wanted_hub_x(distance)
+    wanted_z = wanted_hub_z(distance)
 
     v_initial, angle_initial = calculate_shooting_params_kinematics(distance, robot_radial_vel)
 
@@ -256,40 +307,39 @@ def optimize_shot(distance, robot_radial_vel, FIXED_ANGLE=None):
         # if x[1] < deg_to_rad(15.0) or x[1] > deg_to_rad(45.0):
         #     return 999
 
-        x, y, z = calculate_trajectory_iterative(x[0], x[1], robot_radial_vel)
+        x, y, z = calculate_trajectory_iterative(x[0], x[1], robot_radial_vel, x0)
 
-        if DEBUG_SHOT and not DEBUG_RANGE:
-            ax.plot(x - hubx, y, z, linestyle="dotted")
+        if DEBUG_SHOT and not DEBUG_DISTANCE_RANGE and not DEBUG_VELOCITY_RANGE:
+            ax.plot(x, y, z, linestyle="dotted")
 
         # Find X distance to hub
-        # Adjust wanted X based on distance to hub
-        x_dist = abs(x[-1] - (hubx + ((hubx - 3.0) * 0.1)))
-        if x_dist < fuel_radius:
+        # First find when Z distance is smallest
+        closest_i = len(z) - 1
+        for i in range(len(z)):
+            # Only check when in the hub
+            if x[i] < -hub_edge_x:
+                continue
+            if abs(z[i] - wanted_z) < abs(z[closest_i] - wanted_z):
+                closest_i = i
+        # Use this for checking X distance
+        x_dist = abs(x[closest_i] - wanted_x)
+        if x_dist < fuel_radius * 0.5:
             x_dist = 0
 
         # Find max Z
-        # If we are too close, who cares
-        if hubx >= 2:
-            max_z = -1
-            for some_z in z:
-                if some_z > max_z:
-                    max_z = some_z
-            # Target a certain max z based on distance
-            max_z = abs(max_z - (2 + hubx * 0.2))
-            # Reduce significance
-            max_z /= 2
-        else:
-            max_z = 0
+        max_z = np.max(z)
+        # Target a certain max z based on distance
+        max_z = abs(max_z - (2.0 + (distance - 0.5) * 0.15))
+        # Reduce significance
+        max_z /= 2
 
+        # Find Z distance to hub edge
         # Find i where x is closest to edge
-        closest_i = len(x) - 1
-        for i in range(len(x)):
-            if abs(x[i] - hub_edgex) < abs(x[closest_i] - hub_edgex):
-                closest_i = i
+        closest_i = np.argmin(np.abs(x - -hub_edge_x))
         # Get Z distance when X is at the edge
-        if z[closest_i] < hub_edgez:
+        if z[closest_i] < hub_edge_z_with_clearance:
             # If we are below the edge, bad
-            z_dist = abs(z[closest_i] - hub_edgez)
+            z_dist = abs(z[closest_i] - hub_edge_z_with_clearance)
             # Increase significance
             z_dist *= 2
         else:
@@ -312,7 +362,7 @@ def optimize_shot(distance, robot_radial_vel, FIXED_ANGLE=None):
 
     v_final, angle_final = res.x
 
-    steps = len(calculate_trajectory_iterative(v_final, angle_final, robot_radial_vel)[0])
+    steps = len(calculate_trajectory_iterative(v_final, angle_final, robot_radial_vel, x0)[0])
     tof = t[steps - 1]
 
     if DEBUG_SHOT:
@@ -321,24 +371,29 @@ def optimize_shot(distance, robot_radial_vel, FIXED_ANGLE=None):
         # ax.plot(*calculate_trajectory_kinematics(v_initial, angle_initial, robot_radial_vel), label="Simple Kinematics (Initial)")
         # ax.plot(*calculate_trajectory_kinematics(v_final, angle_final, robot_radial_vel), label="Simple Kinematics (Final)")
         # ax.plot(*calculate_trajectory_iterative(v_initial, angle_initial, robot_radial_vel), label="Iterative Simulation (Initial)")
-        x, y, z = calculate_trajectory_iterative(v_final, angle_final, robot_radial_vel)
+        x, y, z = calculate_trajectory_iterative(v_final, angle_final, robot_radial_vel, x0)
         ax.plot(
-            x - hubx, y, z,
-            label="Iterative Simulation (Final)" if not DEBUG_RANGE else None
+            x, z,
+            # label="Iterative Simulation (Final)" if not DEBUG_RANGE else None
         )
 
     return v_final, angle_final, tof, shots_simmed
 
 if DEBUG_SHOT:
-    if DEBUG_RANGE:
-        optimize_shot(DEBUG_SHOT_DISTANCE, DEBUG_SHOT_ROBOT_RADIAL_VELOCITY)
-        for i in range(DEBUG_SHOT_DISTANCE_RANGE + 1):
+    optimize_shot(DEBUG_SHOT_DISTANCE, DEBUG_SHOT_ROBOT_RADIAL_VELOCITY)
+    if DEBUG_DISTANCE_RANGE and DEBUG_VELOCITY_RANGE:
+        for i in range((DEBUG_SHOT_DISTANCE_RANGE + 1) * 2):
             for j in range(DEBUG_SHOT_ROBOT_RADIAL_VELOCITY_RANGE):
-                optimize_shot(DEBUG_SHOT_DISTANCE + i, j - (DEBUG_SHOT_ROBOT_RADIAL_VELOCITY_RANGE / 2))
-    else:
-        optimize_shot(DEBUG_SHOT_DISTANCE, DEBUG_SHOT_ROBOT_RADIAL_VELOCITY)
+                optimize_shot(DEBUG_SHOT_DISTANCE + i / 2, j - (DEBUG_SHOT_ROBOT_RADIAL_VELOCITY_RANGE / 2))
+    elif DEBUG_DISTANCE_RANGE:
+        for i in range((DEBUG_SHOT_DISTANCE_RANGE + 1) * 2):
+            optimize_shot(DEBUG_SHOT_DISTANCE + i / 2, DEBUG_SHOT_ROBOT_RADIAL_VELOCITY)
+    elif DEBUG_VELOCITY_RANGE:
+        for j in range(DEBUG_SHOT_ROBOT_RADIAL_VELOCITY_RANGE):
+            optimize_shot(DEBUG_SHOT_DISTANCE, j - (DEBUG_SHOT_ROBOT_RADIAL_VELOCITY_RANGE / 2))
 
-    ax.set(ylim=[-2, 2], zlim=[0, hubz + 2], xlabel="X (m)", ylabel="Y (m)", zlabel="Z (m)")
+    # ax.set(ylim=[-2, 2], zlim=[0, hubz + 2], xlabel="X (m)", ylabel="Y (m)", zlabel="Z (m)")
+    ax.set(ylim=[0, hub_base_z + 2], xlabel="X (m)", ylabel="Z (m)")
     ax.legend()
 
     plt.show()
@@ -380,7 +435,7 @@ else:
     if __name__ == "__main__":
         distance_velocity_pairs = []
 
-        start_dist = 1
+        start_dist = 0.7
         stop_dist = 7
         max_vel = 4.5
         for distance in np.linspace(start_dist, stop_dist, 50):
