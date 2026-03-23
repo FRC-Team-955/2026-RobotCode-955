@@ -3,11 +3,11 @@ package frc.lib.device;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.wpilibj.Alert;
+import frc.lib.motor.MotorIOInputsAutoLogged;
 import frc.lib.network.LoggedTunablePIDF;
-import org.jetbrains.annotations.Nullable;
 
 public class Motor extends Device<MotorIO, MotorIOInputsAutoLogged> {
-    private final @Nullable LoggedTunablePIDF gains;
+    //private final @Nullable LoggedTunablePIDF gains;
 
     private boolean emergencyStopped = false;
 
@@ -15,17 +15,20 @@ public class Motor extends Device<MotorIO, MotorIOInputsAutoLogged> {
     private final Alert emergencyStoppedAlert;
 
     public Motor(String name, MotorIO io) {
-        this(name, null, io);
-    }
-
-    public Motor(String name, @Nullable LoggedTunablePIDF gains, MotorIO io) {
         super(name, io, new MotorIOInputsAutoLogged());
-
-        this.gains = gains;
 
         highTemperatureAlert = new Alert(name + " temperature is high.", Alert.AlertType.kWarning);
         emergencyStoppedAlert = new Alert(name + " is emergency stopped.", Alert.AlertType.kError);
     }
+
+    //public Motor(String name MotorIO io) {
+    //
+    //
+    //    //this.gains = gains;
+    //
+    //
+    //}
+
 
     @Override
     void updateAndProcessInputs() {
@@ -33,10 +36,10 @@ public class Motor extends Device<MotorIO, MotorIOInputsAutoLogged> {
 
         highTemperatureAlert.set(getTemperatureCelsius() > 50.0);
 
-        if (gains != null && gains.hasChanged()) {
-            System.out.println("Setting gains of " + name);
-            io.setGains(gains);
-        }
+        //if (gains != null && gains.hasChanged()) {
+        //    System.out.println("Setting gains of " + name);
+        //    io.setGains(gains);
+        //}
     }
 
     @Override
@@ -116,6 +119,11 @@ public class Motor extends Device<MotorIO, MotorIOInputsAutoLogged> {
     public void setNeutralMode(NeutralModeValue neutralMode) {
         System.out.println("Setting " + name + " neutral mode to " + neutralMode);
         io.setNeutralMode(neutralMode);
+    }
+
+    public void setGains(LoggedTunablePIDF newGains) {
+        System.out.println("Setting " + name + " gains to " + newGains);
+        io.setGains(newGains);
     }
 
     /**

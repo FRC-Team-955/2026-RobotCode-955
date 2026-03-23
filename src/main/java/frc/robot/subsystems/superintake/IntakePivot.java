@@ -67,7 +67,7 @@ public class IntakePivot implements Periodic {
     };
 
 
-    private final Motor motor = new Motor("IntakePivot", gains, switch (BuildConstants.mode) {
+    private final Motor motor = new Motor("IntakePivot", switch (BuildConstants.mode) {
         case REAL -> new MotorIOTalonFX(14, motorConfig, initialPositionRad);
         case SIM -> new MotorIOTalonFXSim(motorConfig, initialPositionRad, MechanismSim.arm(
                 gearRatio, 0.0768892879, Units.inchesToMeters(10), minPositionRad,
@@ -116,6 +116,13 @@ public class IntakePivot implements Periodic {
     private IntakePivot() {
         if (instance != null) {
             Util.error("Duplicate IntakePivot created");
+        }
+    }
+
+    @Override
+    public void periodicBeforeCommands() {
+        if (gains.hasChanged()) {
+            motor.setGains(gains);
         }
     }
 

@@ -7,6 +7,7 @@ import frc.lib.device.*;
 import frc.lib.network.LoggedTunableNumber;
 import frc.lib.subsystem.Periodic;
 import frc.robot.BuildConstants;
+import frc.robot.OperatorDashboard;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -22,6 +23,7 @@ public class Feeder implements Periodic {
     private static final double gearRatio = 5;
     private static final CtrlSparkMaxConfig motorConfig = new CtrlSparkMaxConfig()
             .withInverted(true).withNeutralMode(NeutralModeValue.Brake).withCurrentLimit(40).withGearRatio(gearRatio);
+    private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
 
     private final Motor motor = new Motor("Feeder", switch (BuildConstants.mode) {
         case REAL -> new MotorIOSparkMax(11, motorConfig, 0.0);
@@ -57,6 +59,13 @@ public class Feeder implements Periodic {
     private Feeder() {
         if (instance != null) {
             Util.error("Duplicate Feeder created");
+        }
+    }
+
+    @Override
+    public void periodicBeforeCommands() {
+        if (operatorDashboard.coastOverride.hasChanged()) {
+            motor.setNeutralMode(operatorDashboard.coastOverride.get() ? NeutralModeValue.Coast : NeutralModeValue.Brake);
         }
     }
 
