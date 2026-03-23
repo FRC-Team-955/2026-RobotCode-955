@@ -127,7 +127,6 @@ class GameTestRunner {
         // Reset field
         SimulatedArena.getInstance().clearGamePieces();
         // Robot is already enabled by simulationInit, start the command
-        test.command().schedule();
 
         Thread.sleep(test.timeLimitMillis());
 
