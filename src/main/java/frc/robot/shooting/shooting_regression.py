@@ -330,6 +330,18 @@ def optimize_shot(distance, robot_radial_vel):
     v = v_initial
     shot_angle = shot_angle_initial
 
+    def get_end_parameters(x, z, direction):
+        # We end below the hub. Interpolate to get the exact x and direction when we hit the hub
+
+        ez = hub_edge_z - z[-1]
+        dz = z[-2] - z[-1]
+        t = ez / dz
+
+        dx = x[-2] - x[-1]
+        # Interpolating direction breaks everything, so just return the last direction (it will be close enough)
+        ddirection = direction[-2] - direction[-1]
+        return x[-1] + t * dx, direction[-1] + t * ddirection
+
     def solve():
         nonlocal i, v, shot_angle, shots_simmed
         while i < max_iterations:
@@ -341,8 +353,7 @@ def optimize_shot(distance, robot_radial_vel):
                                                                                         x0)
             shots_simmed += 1
             steps = len(x)
-            x_1 = x[-1]
-            entry_angle_1 = direction[-1]
+            x_1, entry_angle_1 = get_end_parameters(x, z, direction)
             if DEBUG_SHOT and not DEBUG_DISTANCE_RANGE and not DEBUG_VELOCITY_RANGE and i % (max_iterations / 10) == 0:
                 ax.plot(x_full, z_full, linestyle="dotted", c=(1 - i / max_iterations, i / max_iterations, 0))
 
@@ -356,15 +367,13 @@ def optimize_shot(distance, robot_radial_vel):
             x, y, z, direction, x_full, y_full, z_full = calculate_trajectory_iterative(v + Δv, shot_angle,
                                                                                         robot_radial_vel, x0)
             shots_simmed += 1
-            x_2 = x[-1]
-            entry_angle_2 = direction[-1]
+            x_2, entry_angle_2 = get_end_parameters(x, z, direction)
 
             # Compute guess with angle increment
             x, y, z, direction, x_full, y_full, z_full = calculate_trajectory_iterative(v, shot_angle + Δshot_angle,
                                                                                         robot_radial_vel, x0)
             shots_simmed += 1
-            x_3 = x[-1]
-            entry_angle_3 = direction[-1]
+            x_3, entry_angle_3 = get_end_parameters(x, z, direction)
 
             # Compute matrix
             A_11 = (x_2 - x_1) / Δv
@@ -392,8 +401,7 @@ def optimize_shot(distance, robot_radial_vel):
                                                                                         x0)
             shots_simmed += 1
             steps = len(x)
-            x = x[-1]
-            entry_angle = direction[-1]
+            x, entry_angle = get_end_parameters(x, z, direction)
 
             if (abs(x - wanted_x) > x_tolerance or
                     abs(entry_angle - wanted_entry_angle) > entry_angle_tolerance):
