@@ -77,7 +77,7 @@ dist_to_entry_angle_data = np.array([
 
 def get_wanted_entry_angle(d, rv):
     # Make it a little easier to shoot while moving by adjusting the entry angle based on the radial velocity
-    return 0.01 * rv + np.interp(d, dist_to_entry_angle_data[:, 0], dist_to_entry_angle_data[:, 1])
+    return 0.03 * rv + np.interp(d, dist_to_entry_angle_data[:, 0], dist_to_entry_angle_data[:, 1])
 
 # Entry angle debug
 # ax.scatter(dist_to_entry_angle_data[:, 0], dist_to_entry_angle_data[:, 1])
