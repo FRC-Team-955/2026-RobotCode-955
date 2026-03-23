@@ -1,11 +1,13 @@
 package frc.robot.subsystems.leds;
 
-import edu.wpi.first.wpilibj.*;
+import edu.wpi.first.wpilibj.AddressableLEDBuffer;
+import edu.wpi.first.wpilibj.AddressableLEDBufferView;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.LEDPattern;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import frc.lib.Util;
 import frc.lib.subsystem.Periodic;
-import frc.robot.Constants;
 import frc.robot.HubShiftTracker;
 import frc.robot.OperatorDashboard;
 import frc.robot.autos.AutoManager;
@@ -33,9 +35,7 @@ public class LEDs implements Periodic {
     private static final Superintake superintake = Superintake.get();
     private static final Superstructure superstructure = Superstructure.get();
 
-    // See createAndStartStartupNotifier for why this is static
-    private static final LEDsIO io = createIO();
-    private static LEDPattern hubPattern;
+    private final LEDsIO io = createIO();
     private final AddressableLEDBuffer buffer = new AddressableLEDBuffer(length);
     private final AddressableLEDBufferView firstHalfView = new AddressableLEDBufferView(buffer, 0, length / 4 - 1);
     private final AddressableLEDBufferView secondHalfView = new AddressableLEDBufferView(buffer, length / 4, length / 2 - 1);
@@ -78,30 +78,12 @@ public class LEDs implements Periodic {
         }
     }
 
-    /**
-     * If we don't make this static, LEDs will need to be instantiated, which means that
-     * Superintake, Superstructure, etc etc needs to be instantiated as well.
-     */
-    public static Notifier createAndStartStartupNotifier() {
-        LEDPattern pattern = LEDPatterns.startup();
-        AddressableLEDBuffer buffer = new AddressableLEDBuffer(length);
-        Runnable callback = () -> {
-            pattern.applyTo(buffer);
-            io.setData(buffer);
-        };
-        // run it once immediately
-        callback.run();
-        Notifier notifier = new Notifier(callback);
-        // update at 50Hz until robot code takes over
-        notifier.startPeriodic(Constants.loopPeriod);
-        return notifier;
-    }
-
     @Override
     public void periodicAfterCommands() {
 
         setLEDPatterns();
         if (DriverStation.isEnabled()) {
+            LEDPattern hubPattern;
             if (HubShiftTracker.get().getShiftInfo().remainingTime() < 10.0) {
 
                 hubPattern = HubShiftTracker.get().getShiftInfo().active() ?

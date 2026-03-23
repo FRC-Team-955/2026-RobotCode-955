@@ -15,14 +15,12 @@ package frc.robot;
 
 import com.revrobotics.util.StatusLogger;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.lib.LoggedTracer;
 import frc.lib.subsystem.Periodic;
-import frc.robot.subsystems.leds.LEDs;
 import org.ironmaple.simulation.SimulatedArena;
 import org.littletonrobotics.junction.AutoLogOutputManager;
 import org.littletonrobotics.junction.LogFileUtil;
@@ -51,7 +49,7 @@ public class Robot extends LoggedRobot {
 
     public Robot() {
         super(Constants.loopPeriod);
-        
+
         // Stop Rev Logger
         StatusLogger.disableAutoLogging();
 
@@ -61,9 +59,6 @@ public class Robot extends LoggedRobot {
             //SimulatedArena.overrideInstance(new Arena2026Rebuilt(false));
             SimulatedArena.overrideInstance(new SimManager.CustomArena(false));
         }
-
-        @SuppressWarnings("resource")
-        Notifier ledsStartupNotifier = LEDs.createAndStartStartupNotifier();
 
         AutoLogOutputManager.addPackage("frc");
 
@@ -166,8 +161,6 @@ public class Robot extends LoggedRobot {
                 robotContainer.robotMechanism,
                 robotContainer.leds
         );
-
-        ledsStartupNotifier.stop();
     }
 
     private void logConstantClass(Class<?> clazz, String parentName) {
