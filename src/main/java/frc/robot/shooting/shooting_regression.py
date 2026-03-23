@@ -9,12 +9,12 @@ from time import time
 
 DEBUG_SHOT = False
 DEBUG_SHOT_DISTANCE = 1
-DEBUG_SHOT_ROBOT_RADIAL_VELOCITY = 0
+DEBUG_SHOT_ROBOT_RADIAL_VELOCITY = 2
 
 DEBUG_DISTANCE_RANGE = True
 DEBUG_SHOT_DISTANCE_RANGE = 6
 
-DEBUG_VELOCITY_RANGE = False
+DEBUG_VELOCITY_RANGE = True
 DEBUG_SHOT_ROBOT_RADIAL_VELOCITY_RANGE = 6
 
 MAGNUS_EFFECT_ENABLED = False
@@ -74,11 +74,15 @@ dist_to_entry_angle_data = np.array([
     [6.2, deg_to_rad(-48.4)],
     [8, deg_to_rad(-47)],
 ])
-get_wanted_entry_angle = lambda d: np.interp(d, dist_to_entry_angle_data[:, 0], dist_to_entry_angle_data[:, 1])
+
+def get_wanted_entry_angle(d, rv):
+    # Make it a little easier to shoot while moving by adjusting the entry angle based on the radial velocity
+    return 0.01 * rv + np.interp(d, dist_to_entry_angle_data[:, 0], dist_to_entry_angle_data[:, 1])
+
 # Entry angle debug
 # ax.scatter(dist_to_entry_angle_data[:, 0], dist_to_entry_angle_data[:, 1])
 # distance = np.linspace(0, 10, 200)
-# ax.plot(distance, [get_wanted_entry_angle(d) for d in distance])
+# ax.plot(distance, [get_wanted_entry_angle(d, 0.0) for d in distance])
 # plt.show()
 
 if DEBUG_SHOT:
@@ -311,7 +315,7 @@ def optimize_shot(distance, robot_radial_vel):
     x0 = -distance
 
     wanted_x = 0.0
-    wanted_entry_angle = get_wanted_entry_angle(distance)
+    wanted_entry_angle = get_wanted_entry_angle(distance, robot_radial_vel)
 
     x_tolerance = inches_to_meters(0.5)
     entry_angle_tolerance = deg_to_rad(0.5)
@@ -457,7 +461,12 @@ def optimize_shot(distance, robot_radial_vel):
         _, _, _, _, x_full, y_full, z_full = calculate_trajectory_iterative(v, shot_angle, robot_radial_vel, x0)
         ax.plot(
             x_full, z_full,
-            # label="Iterative Simulation (Final)" if not DEBUG_RANGE else None
+            c=(
+                1 - (robot_radial_vel + 5) / (5 * 2),
+                (robot_radial_vel + 5) / (5 * 2),
+                0
+            ) if DEBUG_DISTANCE_RANGE or DEBUG_VELOCITY_RANGE else None,
+            label=f"{robot_radial_vel}" if DEBUG_DISTANCE_RANGE or DEBUG_VELOCITY_RANGE else None
         )
 
     return v, shot_angle, tof, shots_simmed, i
