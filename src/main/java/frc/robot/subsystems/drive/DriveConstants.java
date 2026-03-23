@@ -28,7 +28,7 @@ public class DriveConstants {
             // TO TUNE WHEEL RADIUS: Place robot on carpet and use wheel radius characterization auto.
             // Output will be in console in AdvantageScope.
             // KEEP SYNCED WITH shooting_regression.py
-            Units.inchesToMeters(1.945),
+            Units.inchesToMeters(1.883),
             Units.inchesToMeters(19.25),
             Units.inchesToMeters(24.25),
             Units.inchesToMeters(36.5),
