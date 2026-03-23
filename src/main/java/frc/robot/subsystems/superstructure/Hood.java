@@ -57,7 +57,7 @@ public class Hood implements Periodic {
             .withGearRatio(gearRatio)
             .withGains(gains);
 
-    private final Motor motor = new Motor("Hood", gains, switch (BuildConstants.mode) {
+    private final Motor motor = new Motor("Hood", switch (BuildConstants.mode) {
         case REAL -> new MotorIOSparkMax(10, motorConfig, initialPositionRad);
         case SIM ->
                 new MotorIOSparkMaxSim(motorConfig, initialPositionRad, MechanismSim.arm(gearRatio, 0.01, Units.inchesToMeters(2), minPositionRad, maxPositionRad, true));
@@ -128,6 +128,9 @@ public class Hood implements Periodic {
         // Apply network inputs
         if (!emergencyStopped && operatorDashboard.coastOverride.hasChanged()) {
             motor.setNeutralMode(operatorDashboard.coastOverride.get() ? NeutralModeValue.Coast : NeutralModeValue.Brake);
+        }
+        if (gains.hasChanged()) {
+            motor.setGains(gains);
         }
     }
 
