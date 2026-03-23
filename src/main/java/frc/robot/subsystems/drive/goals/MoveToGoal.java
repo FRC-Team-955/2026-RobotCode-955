@@ -172,7 +172,7 @@ public class MoveToGoal extends DriveGoal {
         }
 
         if (constraints.aiming()) {
-            angularVelocityRadPerSec += shootingKinematics.rotationAboutHubRadiansPerSec(linearSetpoint);
+            angularVelocityRadPerSec += shootingKinematics.rotationAboutHubRadiansPerSecForDrivebase(linearSetpoint);
         }
 
         return angularVelocityRadPerSec;

@@ -189,7 +189,7 @@ public class DriveJoystickGoal extends DriveGoal {
                 // Note that this is after setpoint checking so thqt
                 // even if we are at the setpoint, the feedforward is
                 // still applied
-                angularSetpoint += shootingKinematics.rotationAboutHubRadiansPerSec(linearSetpoint);
+                angularSetpoint += shootingKinematics.rotationAboutHubRadiansPerSecForDrivebase(linearSetpoint);
             } else {
                 // limit to drive linear magnitude when not aiming
                 // drive linear magnitude is between 0 and 1

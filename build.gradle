@@ -133,6 +133,8 @@ tasks.register("replayWatch", JavaExec) {
 dependencies {
     def akitJson = new groovy.json.JsonSlurper().parseText(new File(projectDir.getAbsolutePath() + "/vendordeps/AdvantageKit.json").text)
     annotationProcessor "org.littletonrobotics.akit:akit-autolog:$akitJson.version"
+
+    compileOnly "org.jetbrains:annotations:26.1.0"
 }
 
 test {
