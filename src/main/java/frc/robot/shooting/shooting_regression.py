@@ -511,9 +511,9 @@ else:
         distance_velocity_pairs = []
 
         start_dist = 0.7
-        stop_dist = 7
+        stop_dist = 7.5
         max_vel = 4.5
-        for distance in np.linspace(start_dist, stop_dist, 50):
+        for distance in np.linspace(start_dist, stop_dist, 70):
             for velocity in [-max_vel, -3.0, -2.25, -1.5, -0.75, 0.0, 0.75, 1.5, 2.25, 3.0, max_vel]:
                 distance_velocity_pairs.append((distance, velocity))
 
@@ -561,7 +561,7 @@ else:
         print("y_angle", y_angle)
         print("y_tof", y_tof)
 
-        def f(X, i0, i1, i2, i3, i4, i5):  # , i6, i7, i8, i9):
+        def f(X, i0, i1, i2, i3, i4, i5, i6, i7):
             x = X[0]
             y = X[1]
             return (
@@ -571,10 +571,8 @@ else:
                     + i3 * x * y
                     + i4 * x * x
                     + i5 * y * y
-                # + i6 * x * x * y * y
-                # + i7 * x * x * x
-                # + i8 * y * y * y
-                # + i9 * x * x * x * y * y * y
+                # + i * x * x * y * y
+                # + i * x * x * x * y * y * y
             )
 
         def make_regression(X, y):
@@ -586,10 +584,8 @@ else:
                 f" + {coeff[3]} * x * y"
                 f" + {coeff[4]} * x * x"
                 f" + {coeff[5]} * y * y"
-                # f" + {coeff[6]} * x * x * y * y"
-                # f" + {coeff[7]} * x * x * x"
-                # f" + {coeff[8]} * y * y * y"
-                # f" + {coeff[9]} * x * x * x * y * y * y"
+                # f" + {coeff[]} * x * x * y * y"
+                # f" + {coeff[]} * x * x * x * y * y * y"
             )
             print(cov)
             print(equation)
