@@ -34,6 +34,7 @@ public class Hood implements Periodic {
 
     @RequiredArgsConstructor
     public enum Goal {
+        STOW(() -> minPositionRad),
         SHOOT(() -> convertBetweenShotAngleAndHoodAngleRad(shootingKinematics.getShootingParameters().angleRad())),
         HOME(null),
         ;

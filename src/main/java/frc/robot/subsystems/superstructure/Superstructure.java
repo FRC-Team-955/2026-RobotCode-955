@@ -124,9 +124,15 @@ public class Superstructure extends CommandBasedSubsystem {
                 flywheel.setGoal(Flywheel.Goal.IDLE);
                 feeder.setGoal(Feeder.Goal.IDLE);
                 spindexer.setGoal(Spindexer.Goal.IDLE);
+                if (goal == Goal.HOME_HOOD) {
+                    hood.setGoal(Hood.Goal.HOME);
+                } else {
+                    hood.setGoal(Hood.Goal.STOW);
+                }
             }
             case SHOOT, SHOOT_FORCE -> {
                 flywheel.setGoal(Flywheel.Goal.SHOOT);
+                hood.setGoal(Hood.Goal.SHOOT);
 
                 boolean needsToCommitToShot = !operatorDashboard.disableCANrange.get() &&
                         Timer.getTimestamp() - lastStartedShot < commitToShotTimeSeconds.get();
@@ -155,13 +161,8 @@ public class Superstructure extends CommandBasedSubsystem {
                 flywheel.setGoal(Flywheel.Goal.EJECT);
                 feeder.setGoal(Feeder.Goal.EJECT);
                 spindexer.setGoal(Spindexer.Goal.EJECT);
+                hood.setGoal(Hood.Goal.STOW);
             }
-        }
-
-        if (goal == Goal.HOME_HOOD) {
-            hood.setGoal(Hood.Goal.HOME);
-        } else {
-            hood.setGoal(Hood.Goal.SHOOT);
         }
 
         Logger.recordOutput(
