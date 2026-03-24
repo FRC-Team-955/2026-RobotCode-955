@@ -120,11 +120,15 @@ public class LEDs implements Periodic {
         }
 
         if (DriverStation.isDisabled()) {
-            //if (operatorDashboard.autoChosen.get() && autoManager.getSelectedAutoStartingPose().isPresent() && !autoManager.isAtAutoStartingPose()) {
-            //    LEDPatterns.autoPlacementProgress(autoManager::getPlacementProgress).applyTo(buffer);
-            //} else {
-            LEDPatterns.autoReady.applyTo(buffer);
-            //}
+            if (lowBattery) {
+                LEDPatterns.lowBattery.applyTo(buffer);
+            } else {
+                //if (operatorDashboard.autoChosen.get() && autoManager.getSelectedAutoStartingPose().isPresent() && !autoManager.isAtAutoStartingPose()) {
+                //    LEDPatterns.autoPlacementProgress(autoManager::getPlacementProgress).applyTo(buffer);
+                //} else {
+                LEDPatterns.autoReady.applyTo(buffer);
+                //}
+            }
             return;
         }
 
