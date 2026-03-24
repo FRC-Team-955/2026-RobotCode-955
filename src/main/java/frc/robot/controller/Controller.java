@@ -4,6 +4,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -14,6 +15,7 @@ import frc.lib.AllianceFlipUtil;
 import frc.lib.Util;
 import frc.lib.subsystem.Periodic;
 import frc.robot.BuildConstants;
+import frc.robot.RobotState;
 import lombok.Getter;
 
 import static frc.robot.subsystems.drive.DriveConstants.*;
@@ -24,6 +26,7 @@ public class Controller implements Periodic {
             : new ControllerIOPS5(new CommandPS5Controller(0));
 
     private final Alert disconnectedAlert = new Alert("Driver controller is not connected!", Alert.AlertType.kError);
+    private static final RobotState robotState = RobotState.get();
 
     @Getter
     private Rotation2d driveLinearDirection = new Rotation2d();
@@ -131,6 +134,20 @@ public class Controller implements Periodic {
             //Logger.recordOutput("Controller/Drive/Assist/Running", false);
             return false;
         }
+    }
+
+    public ChassisSpeeds getFieldRelSpeed() {
+        Translation2d linearSetpoint = new Translation2d(
+                getDriveLinearVelocityMetersPerSec(),
+                getDriveLinearDirection()
+        );
+
+        return ChassisSpeeds.fromFieldRelativeSpeeds(
+                linearSetpoint.getX(),
+                linearSetpoint.getY(),
+                getDriveAngularVelocityRadPerSec(),
+                robotState.getRotation()
+        );
     }
 
     public double getDriveLinearVelocityMetersPerSec() {

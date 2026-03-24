@@ -97,13 +97,13 @@ public class RobotContainer {
         shoot
                 .and(intake.negate())
                 .whileTrue(Commands.parallel(
-                        drive.driveJoystick(() -> {
-                            if (operatorDashboard.manualAiming.get()) {
-                                return DriveJoystickGoal.Mode.StopWithX;
-                            } else {
-                                return DriveJoystickGoal.Mode.Aim;
-                            }
-                        }),
+                        drive.setHeadingOverride(() -> shootingKinematics.getShootingParameters().headingRad()
+
+
+                                , () -> shootingKinematics.rotationAboutHubRadiansPerSecForDrivebase(
+                                        controller.getFieldRelSpeed()
+                                )), drive.setStopWithX()
+                        ,
                         superstructure.setGoal(Superstructure.Goal.SHOOT)
                 ));
         shootForce
