@@ -11,7 +11,6 @@ import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -348,17 +347,7 @@ public class Drive extends CommandBasedSubsystem {
 
             switch (state) {
                 case JOYSTICK_DRIVE -> {
-                    Translation2d linearSetpoint = new Translation2d(
-                            controller.getDriveLinearVelocityMetersPerSec(),
-                            controller.getDriveLinearDirection()
-                    );
-
-                    wantedSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
-                            linearSetpoint.getX(),
-                            linearSetpoint.getY(),
-                            controller.getDriveAngularVelocityRadPerSec(),
-                            robotState.getRotation()
-                    );
+                    wantedSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(controller.getDriveFieldRelativeSpeeds(), robotState.getRotation());
 
                     if (headingOverrideSetpoint.isPresent() || controller.getDriveAngularMagnitude() != 0.0) {
                         joystickDriveHeadingStabilizeTimer.restart();
@@ -504,7 +493,7 @@ public class Drive extends CommandBasedSubsystem {
                                 : OptionalDouble.of(shootingKinematics.getShootingParameters().headingRad()),
                         () -> operatorDashboard.manualAiming.get()
                                 ? OptionalDouble.empty()
-                                : OptionalDouble.of(shootingKinematics.rotationAboutHubRadiansPerSecForDrivebase(controller.getFieldRelSpeed()))
+                                : OptionalDouble.of(shootingKinematics.rotationAboutHubRadiansPerSecForDrivebase(controller.getDriveFieldRelativeSpeeds()))
                 ),
                 setStopWithX()
         );

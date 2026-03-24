@@ -134,26 +134,25 @@ public class Controller implements Periodic {
         }
     }
 
-    public ChassisSpeeds getFieldRelSpeed() {
-        Translation2d linearSetpoint = new Translation2d(
-                getDriveLinearVelocityMetersPerSec(),
-                getDriveLinearDirection()
-        );
-
-        return ChassisSpeeds.fromFieldRelativeSpeeds(
-                linearSetpoint.getX(),
-                linearSetpoint.getY(),
-                getDriveAngularVelocityRadPerSec(),
-                robotState.getRotation()
-        );
-    }
-
     public double getDriveLinearVelocityMetersPerSec() {
         return driveLinearMagnitude * driveConfig.maxVelocityMetersPerSec();
     }
 
     public double getDriveAngularVelocityRadPerSec() {
         return driveAngularMagnitude * joystickMaxAngularSpeedRadPerSec;
+    }
+
+    public ChassisSpeeds getDriveFieldRelativeSpeeds() {
+        Translation2d linearSetpoint = new Translation2d(
+                getDriveLinearVelocityMetersPerSec(),
+                getDriveLinearDirection()
+        );
+
+        return new ChassisSpeeds(
+                linearSetpoint.getX(),
+                linearSetpoint.getY(),
+                getDriveAngularVelocityRadPerSec()
+        );
     }
 
     public Command rumble(double value) {
