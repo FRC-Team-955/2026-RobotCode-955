@@ -7,8 +7,6 @@ import frc.lib.motor.MotorIOInputsAutoLogged;
 import frc.lib.network.LoggedTunablePIDF;
 
 public class Motor extends Device<MotorIO, MotorIOInputsAutoLogged> {
-    //private final @Nullable LoggedTunablePIDF gains;
-
     private boolean emergencyStopped = false;
 
     private final Alert highTemperatureAlert;
@@ -21,25 +19,11 @@ public class Motor extends Device<MotorIO, MotorIOInputsAutoLogged> {
         emergencyStoppedAlert = new Alert(name + " is emergency stopped.", Alert.AlertType.kError);
     }
 
-    //public Motor(String name MotorIO io) {
-    //
-    //
-    //    //this.gains = gains;
-    //
-    //
-    //}
-
-
     @Override
     void updateAndProcessInputs() {
         super.updateAndProcessInputs();
 
         highTemperatureAlert.set(getTemperatureCelsius() > 50.0);
-
-        //if (gains != null && gains.hasChanged()) {
-        //    System.out.println("Setting gains of " + name);
-        //    io.setGains(gains);
-        //}
     }
 
     @Override
