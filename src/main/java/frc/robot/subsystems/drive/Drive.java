@@ -25,6 +25,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.Util;
 import frc.lib.commands.CommandsExt;
 import frc.lib.subsystem.CommandBasedSubsystem;
+import frc.robot.BuildConstants;
 import frc.robot.Constants;
 import frc.robot.OperatorDashboard;
 import frc.robot.RobotState;
@@ -168,7 +169,8 @@ public class Drive extends CommandBasedSubsystem {
         // Sanity check in case gyro is connected but not giving timestamps
         boolean prevGyroDebounced = gyroDebounced;
         gyroDebounced = gyroDebouncer.calculate(gyroInputs.connected);
-        //Logger.recordOutput("Drive/GyroConnectedDebounced", gyroDebounced);
+        if (BuildConstants.isSimOrReplay)
+            Logger.recordOutput("Drive/GyroConnectedDebounced", gyroDebounced);
         // Update gyro alert
         gyroDisconnectedAlert.set(!gyroDebounced);
         if (gyroDebounced && !disableGyro && hasGyroYawPositionRadForSample) {
@@ -243,7 +245,8 @@ public class Drive extends CommandBasedSubsystem {
                     anySampleDiscarded = true;
                 }
             }
-            //Logger.recordOutput("Drive/AnySampleDiscarded", anySampleDiscarded);
+            if (BuildConstants.isSimOrReplay)
+                Logger.recordOutput("Drive/AnySampleDiscarded", anySampleDiscarded);
         } else {
             boolean discardSample = processOdometrySample(
                     Timer.getTimestamp(),
@@ -252,8 +255,8 @@ public class Drive extends CommandBasedSubsystem {
                     true,
                     () -> gyroInputs.yawPositionRad
             );
-
-            //Logger.recordOutput("Drive/SampleDiscarded", discardSample);
+            if (BuildConstants.isSimOrReplay)
+                Logger.recordOutput("Drive/SampleDiscarded", discardSample);
         }
 
         // Chassis speeds
@@ -375,7 +378,8 @@ public class Drive extends CommandBasedSubsystem {
                 );
 
                 boolean atSetpoint = headingOverrideController.atSetpoint();
-                //Logger.recordOutput("Drive/HeadingOverrideAtSetpoint", headingOverrideAtSetpoint);
+                if (BuildConstants.isSimOrReplay)
+                    Logger.recordOutput("Drive/HeadingOverrideAtSetpoint", atSetpoint);
                 if (atSetpoint) {
                     wantedSpeeds.omegaRadiansPerSecond = 0.0;
                 }

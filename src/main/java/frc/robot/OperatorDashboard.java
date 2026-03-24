@@ -108,7 +108,8 @@ public class OperatorDashboard implements Periodic {
         }
 
         handleEnumToggles(scoringModeToggles, selectedScoringMode, selectNew -> selectedScoringMode = selectNew);
-        Logger.recordOutput("OperatorDashboard/SelectedScoringMode", selectedScoringMode);
+        if (BuildConstants.isSimOrReplay)
+            Logger.recordOutput("OperatorDashboard/SelectedScoringMode", selectedScoringMode);
 
         // Note - we only handle alerts for general overrides.
         // So subsystem toggles are handled in their respective subsystems

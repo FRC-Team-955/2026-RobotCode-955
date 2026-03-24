@@ -182,6 +182,7 @@ var makeRunConfig = { String mode, boolean tuningMode ->
                 writer << "    public static final boolean isSim = ${mode == sim};\n"
                 writer << "    public static final boolean isReplay = ${mode == replay};\n"
                 writer << "    public static final boolean isRealOrReplay = ${mode == real || mode == replay};\n"
+                writer << "    public static final boolean isSimOrReplay = ${mode == sim || mode == replay};\n"
                 writer << "\n"
                 writer << "    public enum Mode {\n"
                 writer << "        /**\n"

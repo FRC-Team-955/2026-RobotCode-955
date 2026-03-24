@@ -154,20 +154,27 @@ public class ShootingKinematics implements Periodic {
                 noPhaseDelayParameters.isPass()
         );
 
-        //Logger.recordOutput("ShootingKinematics/ShootingParameters/None/TimeOfFlightSeconds", noPhaseDelayParameters.timeOfFlightSeconds().orElse(-1.0));
-        //Logger.recordOutput("ShootingKinematics/ShootingParameters/None/IsPass", noPhaseDelayParameters.isPass());
+        if (BuildConstants.isSimOrReplay) {
+            Logger.recordOutput("ShootingKinematics/ShootingParameters/None/TimeOfFlightSeconds", noPhaseDelayParameters.timeOfFlightSeconds().orElse(-1.0));
+            Logger.recordOutput("ShootingKinematics/ShootingParameters/None/IsPass", noPhaseDelayParameters.isPass());
+        }
 
         double headingVelocitySetpoint = rotationAboutHubRadiansPerSecForDrivebase(robotState.getMeasuredChassisSpeedsFieldRelative());
         double headingVelocityMeasurement = robotState.getMeasuredChassisSpeedsFieldRelative().omegaRadiansPerSecond;
 
-        //Logger.recordOutput("ShootingKinematics/ShootingParameters/None/HeadingRad", noPhaseDelayParameters.headingRad());
-        //Logger.recordOutput("ShootingKinematics/ShootingParameters/HeadingRadMeasured", robotState.getPose().getRotation().getRadians());
-        //Logger.recordOutput("ShootingKinematics/ShootingParameters/Drivebase/HeadingVelocityRadPerSec", headingVelocitySetpoint);
-        //Logger.recordOutput("ShootingKinematics/ShootingParameters/HeadingVelocityRadPerSecMeasured", headingVelocityMeasurement);
+        if (BuildConstants.isSimOrReplay) {
+            Logger.recordOutput("ShootingKinematics/ShootingParameters/None/HeadingRad", noPhaseDelayParameters.headingRad());
+            Logger.recordOutput("ShootingKinematics/ShootingParameters/HeadingRadMeasured", robotState.getPose().getRotation().getRadians());
+
+            Logger.recordOutput("ShootingKinematics/ShootingParameters/Drivebase/HeadingVelocityRadPerSec", headingVelocitySetpoint);
+            Logger.recordOutput("ShootingKinematics/ShootingParameters/HeadingVelocityRadPerSecMeasured", headingVelocityMeasurement);
+
+            Logger.recordOutput("ShootingKinematics/ShootingParameters/None/AngleRad", noPhaseDelayParameters.angleRad());
+            Logger.recordOutput("ShootingKinematics/ShootingParameters/AngleRadMeasured", superstructure.hood.getShotAngleRad());
+
+            Logger.recordOutput("ShootingKinematics/ShootingParameters/VelocityRPMMeasured", superstructure.flywheel.getVelocityRPM());
+        }
         Logger.recordOutput("ShootingKinematics/ShootingParameters/None/VelocityRPM", noPhaseDelayParameters.velocityRPM());
-        //Logger.recordOutput("ShootingKinematics/ShootingParameters/VelocityRPMMeasured", superstructure.flywheel.getVelocityRPM());
-        //Logger.recordOutput("ShootingKinematics/ShootingParameters/None/AngleRad", noPhaseDelayParameters.angleRad());
-        //Logger.recordOutput("ShootingKinematics/ShootingParameters/AngleRadMeasured", superstructure.hood.getShotAngleRad());
 
         shiftMet = noPhaseDelayParameters.isPass() || operatorDashboard.disableShiftTracking.get() || hubShiftTracker.getShiftInfo().active();
         Logger.recordOutput("ShootingKinematics/ShiftMet", shiftMet);
@@ -263,7 +270,8 @@ public class ShootingKinematics implements Periodic {
                 robotSpeeds.vxMetersPerSecond,
                 robotSpeeds.vyMetersPerSecond
         ));
-        //Logger.recordOutput(key + "RobotSpeedsRotated", robotSpeedsFuelExitRelative);
+        if (BuildConstants.isSimOrReplay)
+            Logger.recordOutput(key + "RobotSpeedsRotated", robotSpeedsFuelExitRelative);
 
         double v0 = ShootingRegression.calculateVelocityMetersPerSec(xyDist, robotSpeedsFuelExitRelative.getX());
         double angle = ShootingRegression.calculateAngleRad(xyDist, robotSpeedsFuelExitRelative.getX());
@@ -272,10 +280,12 @@ public class ShootingKinematics implements Periodic {
         double vx2d = v0 * Math.cos(angle);
         double vz = v0 * Math.sin(angle);
 
-        // Logger.recordOutput(key + "ShotSpeedTargetFieldRelative", v0);
+        if (BuildConstants.isSimOrReplay)
+            Logger.recordOutput(key + "ShotSpeedTargetFieldRelative", v0);
         Translation2d robotShotFieldRelative = new Translation2d(vx2d, fuelExitToHub.angle());
 
-        // Logger.recordOutput(key + "ShotTargetFieldRelative", robotShotFieldRelative);
+        if (BuildConstants.isSimOrReplay)
+            Logger.recordOutput(key + "ShotTargetFieldRelative", robotShotFieldRelative);
 
         // 2. Now subtract tangential robot velocity from initial shooting vector to get final
         // shooting vector
@@ -284,8 +294,8 @@ public class ShootingKinematics implements Periodic {
         Translation2d tangentialRobotVelocityRobotRelative = new Translation2d(0, robotSpeedsFuelExitRelative.rotateBy(fuelExitRotation.unaryMinus()).getY());
         robotShotFieldRelative = robotShotFieldRelative.plus(tangentialRobotVelocityRobotRelative.rotateBy(fuelExitToHub.angle));
 
-        // Logger.recordOutput(key + "TangentialRobotVelocityFieldRelative", tangentialRobotVelocityRobotRelative.rotateBy(fuelExitToHub.angle));
-
+        if (BuildConstants.isSimOrReplay)
+            Logger.recordOutput(key + "TangentialRobotVelocityFieldRelative", tangentialRobotVelocityRobotRelative.rotateBy(fuelExitToHub.angle));
 
         // 3. Account for drivebase angular velocity
         Vector<N3> fuelExitFieldRelative = new Translation3d(
@@ -305,8 +315,10 @@ public class ShootingKinematics implements Periodic {
         double phi = Math.asin(vz / v);
         double theta = Math.atan2(vy, vx);
         Logger.recordOutput(key + "VelocityMetersPerSec", v);
-        //Logger.recordOutput(key + "Phi", phi);
-        //Logger.recordOutput(key + "Theta", theta);
+        if (BuildConstants.isSimOrReplay) {
+            Logger.recordOutput(key + "Phi", phi);
+            Logger.recordOutput(key + "Theta", theta);
+        }
 
         return new ShootingParameters(
                 BuildConstants.isSim

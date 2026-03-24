@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import frc.lib.Util;
 import frc.lib.motor.MotorIOInputsAutoLogged;
 import frc.lib.subsystem.Periodic;
+import frc.robot.BuildConstants;
 import frc.robot.OperatorDashboard;
 import frc.robot.RobotState;
 import frc.robot.shooting.ShootingKinematics;
@@ -142,7 +143,8 @@ public class Hood implements Periodic {
                 setpointRad = Math.min(setpointRad, maxPositionUnderTrench);
             }
             setpointRad = MathUtil.clamp(setpointRad, minPositionRad, maxPositionRad);
-            //Logger.recordOutput("Superstructure/Hood/SetpointRad", setpointRad);
+            if (BuildConstants.isSimOrReplay)
+                Logger.recordOutput("Superstructure/Hood/SetpointRad", setpointRad);
             io.setPositionRequest(setpointRad);
         }
     }

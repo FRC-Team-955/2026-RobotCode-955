@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.Util;
 import frc.lib.network.LoggedTunableNumber;
 import frc.lib.subsystem.CommandBasedSubsystem;
+import frc.robot.BuildConstants;
 import frc.robot.FieldConstants;
 import frc.robot.OperatorDashboard;
 import frc.robot.RobotState;
@@ -136,7 +137,8 @@ public class Superstructure extends CommandBasedSubsystem {
 
                 boolean needsToCommitToShot = !operatorDashboard.disableCANrange.get() &&
                         Timer.getTimestamp() - lastStartedShot < commitToShotTimeSeconds.get();
-                //Logger.recordOutput("Superstructure/NeedsToCommitToShot", needsToCommitToShot);
+                if (BuildConstants.isSimOrReplay)
+                    Logger.recordOutput("Superstructure/NeedsToCommitToShot", needsToCommitToShot);
                 boolean shouldShoot = shootingKinematics.isShootingParametersMet() || needsToCommitToShot;
                 if (goal == Goal.SHOOT_FORCE || shouldShoot) {
                     feeder.setGoal(Feeder.Goal.FEED);

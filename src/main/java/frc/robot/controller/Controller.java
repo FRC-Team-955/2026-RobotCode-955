@@ -17,6 +17,7 @@ import frc.lib.subsystem.Periodic;
 import frc.robot.BuildConstants;
 import frc.robot.RobotState;
 import lombok.Getter;
+import org.littletonrobotics.junction.Logger;
 
 import static frc.robot.subsystems.drive.DriveConstants.*;
 
@@ -71,9 +72,11 @@ public class Controller implements Periodic {
         // right on joystick is positive x - we want negative x for right (CCW is positive)
         double omega = -io.getRightX();
 
-        //Logger.recordOutput("Controller/Drive/Suppliers/X", x);
-        //Logger.recordOutput("Controller/Drive/Suppliers/Y", y);
-        //Logger.recordOutput("Controller/Drive/Suppliers/Omega", omega);
+        if (BuildConstants.isSimOrReplay) {
+            Logger.recordOutput("Controller/Drive/Suppliers/X", x);
+            Logger.recordOutput("Controller/Drive/Suppliers/Y", y);
+            Logger.recordOutput("Controller/Drive/Suppliers/Omega", omega);
+        }
 
         driveLinearMagnitude = MathUtil.clamp(MathUtil.applyDeadband(Math.hypot(x, y), joystickDriveDeadband), -1, 1);
         driveLinearMagnitude = driveLinearMagnitude * driveLinearMagnitude;
@@ -93,28 +96,32 @@ public class Controller implements Periodic {
         }
         // If linear magnitude is 0, just keep the old linear direction
 
-        //Logger.recordOutput("Controller/Drive/LinearMagnitude", driveLinearMagnitude);
-        //Logger.recordOutput("Controller/Drive/LinearDirection", driveLinearDirection);
-        //Logger.recordOutput("Controller/Drive/LinearVelocity", linearVelocity);
-        //Logger.recordOutput("Controller/Drive/AngularMagnitude", driveAngularMagnitude);
+        if (BuildConstants.isSimOrReplay) {
+            Logger.recordOutput("Controller/Drive/LinearMagnitude", driveLinearMagnitude);
+            Logger.recordOutput("Controller/Drive/LinearDirection", driveLinearDirection);
+            Logger.recordOutput("Controller/Drive/AngularMagnitude", driveAngularMagnitude);
+        }
     }
 
     public boolean shouldAssist(Pose2d currentPose, Translation2d assistTranslation) {
-        //Logger.recordOutput("Controller/Drive/Assist/Pose", assistTranslation);
+        if (BuildConstants.isSimOrReplay) Logger.recordOutput("Controller/Drive/Assist/Pose", assistTranslation);
 
         // Get the translation between robot and assist
         Translation2d robotToAssist = assistTranslation.minus(currentPose.getTranslation());
         // Calculate direction from robot to assist
         Rotation2d robotToAssistDirection = robotToAssist.getAngle();
-        //Logger.recordOutput("Controller/Drive/Assist/RobotToAssistDirection", robotToAssistDirection);
+        if (BuildConstants.isSimOrReplay)
+            Logger.recordOutput("Controller/Drive/Assist/RobotToAssistDirection", robotToAssistDirection);
 
         // Get difference between joystick direction and assist direction
         Rotation2d directionDiff = robotToAssistDirection.minus(driveLinearDirection);
-        //Logger.recordOutput("Controller/Drive/Assist/DirectionDifference", directionDiff);
+        if (BuildConstants.isSimOrReplay)
+            Logger.recordOutput("Controller/Drive/Assist/DirectionDifference", directionDiff);
 
         // Get distance to assist pose
         double distanceToAssist = currentPose.getTranslation().getDistance(assistTranslation);
-        //Logger.recordOutput("Controller/Drive/Assist/DistanceToAssist", distanceToAssist);
+        if (BuildConstants.isSimOrReplay)
+            Logger.recordOutput("Controller/Drive/Assist/DistanceToAssist", distanceToAssist);
 
         // If we are:
         if (
@@ -126,10 +133,10 @@ public class Controller implements Periodic {
                         distanceToAssist < assistMaximumDistanceMeters
         ) {
             // then use automatic control.
-            //Logger.recordOutput("Controller/Drive/Assist/Running", true);
+            if (BuildConstants.isSimOrReplay) Logger.recordOutput("Controller/Drive/Assist/Running", true);
             return true;
         } else {
-            //Logger.recordOutput("Controller/Drive/Assist/Running", false);
+            if (BuildConstants.isSimOrReplay) Logger.recordOutput("Controller/Drive/Assist/Running", false);
             return false;
         }
     }

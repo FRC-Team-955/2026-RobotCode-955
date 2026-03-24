@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import frc.lib.Util;
 import frc.lib.network.LoggedTunableNumber;
 import frc.lib.subsystem.Periodic;
+import frc.robot.BuildConstants;
 import frc.robot.OperatorDashboard;
 import frc.robot.shooting.ShootingKinematics;
 import lombok.Getter;
@@ -86,8 +87,8 @@ public class Flywheel implements Periodic {
             io.setStopRequest();
         } else {
             double value = Units.rotationsPerMinuteToRadiansPerSecond(goal.setpointRPM.getAsDouble());
-            //Logger.recordOutput("Superstructure/Flywheel/RequestValue", value);
             io.setVelocityRequest(value);
+            if (BuildConstants.isSimOrReplay) Logger.recordOutput("Superstructure/Flywheel/RequestValue", value);
         }
     }
 

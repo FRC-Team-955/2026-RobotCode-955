@@ -9,6 +9,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.lib.SlewRateLimiter2d;
 import frc.lib.Util;
 import frc.lib.wpilib.SlewRateLimiter;
+import frc.robot.BuildConstants;
 import frc.robot.RobotState;
 import frc.robot.subsystems.drive.DriveConstants;
 import org.jetbrains.annotations.Nullable;
@@ -88,7 +89,7 @@ public class MoveToController {
         Logger.recordOutput("Drive/MoveTo/Goal", goalPose);
 
         double distanceToGoal = currentPose.getTranslation().getDistance(goalPose.getTranslation());
-        //Logger.recordOutput("Drive/MoveTo/DistanceToGoalMeters", distanceToGoal);
+        if (BuildConstants.isSimOrReplay) Logger.recordOutput("Drive/MoveTo/DistanceToGoalMeters", distanceToGoal);
 
         double linearVelocityMetersPerSec = calculateLinearVelocityMetersPerSec(distanceToGoal, constraints);
         Rotation2d angleToGoalRad = goalPose.getTranslation().minus(currentPose.getTranslation()).getAngle();
@@ -101,10 +102,11 @@ public class MoveToController {
         double linearScalar = MathUtil.clamp(1 - angularVelocityRadPerSec / DriveConstants.maxAngularVelocityRadPerSec, 0.50, 1);
 
         linearXYVelocityMetersPerSec = linearAccelLimiter.calculate(linearXYVelocityMetersPerSec);
-        //Logger.recordOutput("Drive/MoveTo/LinearSetpoint", linearXYVelocityMetersPerSec.getNorm());
+        if (BuildConstants.isSimOrReplay)
+            Logger.recordOutput("Drive/MoveTo/LinearSetpoint", linearXYVelocityMetersPerSec.getNorm());
 
         angularVelocityRadPerSec = angularAccelLimiter.calculate(angularVelocityRadPerSec);
-        //Logger.recordOutput("Drive/MoveTo/LinearSetpoint", angularVelocityRadPerSec);
+        if (BuildConstants.isSimOrReplay) Logger.recordOutput("Drive/MoveTo/LinearSetpoint", angularVelocityRadPerSec);
 
         return ChassisSpeeds.fromFieldRelativeSpeeds(
                 linearXYVelocityMetersPerSec.getX() * linearScalar,
@@ -126,10 +128,11 @@ public class MoveToController {
                 -constraints.maxLinearVelocityMetersPerSec().get(),
                 constraints.maxLinearVelocityMetersPerSec().get()
         );
-        //Logger.recordOutput("Drive/MoveTo/LinearSetpointUnlimited", linearVelocityMetersPerSec);
+        if (BuildConstants.isSimOrReplay)
+            Logger.recordOutput("Drive/MoveTo/LinearSetpointUnlimited", linearVelocityMetersPerSec);
 
         boolean linearAtSetpoint = linearController.atSetpoint();
-        //Logger.recordOutput("Drive/MoveTo/LinearAtSetpoint", linearAtSetpoint);
+        if (BuildConstants.isSimOrReplay) Logger.recordOutput("Drive/MoveTo/LinearAtSetpoint", linearAtSetpoint);
         if (linearAtSetpoint) {
             linearVelocityMetersPerSec = 0.0;
         }
@@ -147,10 +150,11 @@ public class MoveToController {
                 -constraints.maxAngularVelocityRadPerSec().get(),
                 constraints.maxAngularVelocityRadPerSec().get()
         );
-        //Logger.recordOutput("Drive/MoveTo/AngularSetpointUnlimited", angularVelocityRadPerSec);
+        if (BuildConstants.isSimOrReplay)
+            Logger.recordOutput("Drive/MoveTo/AngularSetpointUnlimited", angularVelocityRadPerSec);
 
         boolean angularAtSetpoint = angularController.atSetpoint();
-        //Logger.recordOutput("Drive/MoveTo/AngularAtSetpoint", angularAtSetpoint);
+        if (BuildConstants.isSimOrReplay) Logger.recordOutput("Drive/MoveTo/AngularAtSetpoint", angularAtSetpoint);
         if (angularAtSetpoint) {
             angularVelocityRadPerSec = 0.0;
         }

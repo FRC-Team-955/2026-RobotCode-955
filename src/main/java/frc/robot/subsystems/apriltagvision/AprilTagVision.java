@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.Util;
 import frc.lib.subsystem.Periodic;
+import frc.robot.BuildConstants;
 import frc.robot.RobotState;
 import org.littletonrobotics.junction.Logger;
 
@@ -75,7 +76,7 @@ public class AprilTagVision implements Periodic {
             data.disconnectedAlert.set(!data.inputs.connected);
         }
 
-        //Logger.recordOutput("AprilTagVision/TagIdFilter", tagIdFilter);
+        if (BuildConstants.isSimOrReplay) Logger.recordOutput("AprilTagVision/TagIdFilter", tagIdFilter);
 
         // Initialize logging values
         List<Pose3d> allTagPoses = new LinkedList<>();
@@ -294,14 +295,16 @@ public class AprilTagVision implements Periodic {
             }
 
             // Log camera data
-            //String prefix = "AprilTagVision/" + metadata.name() + "/";
-            //Logger.recordOutput(prefix + "TagPoses", tagPoses.toArray(Pose3d[]::new));
-            //Logger.recordOutput(prefix + "SingleTagPoseObservations", singleTagPoseObservations.toArray(SingleTagPoseObservation[]::new));
-            //Logger.recordOutput(prefix + "MultiTagPoseObservations", multiTagPoseObservations.toArray(MultiTagPoseObservation[]::new));
-            //Logger.recordOutput(prefix + "GenericPoseObservations", genericPoseObservations.toArray(GenericPoseObservation[]::new));
-            //Logger.recordOutput(prefix + "RobotPoses", robotPoses.toArray(Pose3d[]::new));
-            //Logger.recordOutput(prefix + "RobotPosesAccepted", robotPosesAccepted.toArray(Pose3d[]::new));
-            //Logger.recordOutput(prefix + "RobotPosesRejected", robotPosesRejected.toArray(Pose3d[]::new));
+            if (BuildConstants.isSimOrReplay) {
+                String prefix = "AprilTagVision/" + metadata.name() + "/";
+                Logger.recordOutput(prefix + "TagPoses", tagPoses.toArray(Pose3d[]::new));
+                Logger.recordOutput(prefix + "SingleTagPoseObservations", singleTagPoseObservations.toArray(SingleTagPoseObservation[]::new));
+                Logger.recordOutput(prefix + "MultiTagPoseObservations", multiTagPoseObservations.toArray(MultiTagPoseObservation[]::new));
+                Logger.recordOutput(prefix + "GenericPoseObservations", genericPoseObservations.toArray(GenericPoseObservation[]::new));
+                Logger.recordOutput(prefix + "RobotPoses", robotPoses.toArray(Pose3d[]::new));
+                Logger.recordOutput(prefix + "RobotPosesAccepted", robotPosesAccepted.toArray(Pose3d[]::new));
+                Logger.recordOutput(prefix + "RobotPosesRejected", robotPosesRejected.toArray(Pose3d[]::new));
+            }
             allTagPoses.addAll(tagPoses);
             allRobotPoses.addAll(robotPoses);
             allRobotPosesAccepted.addAll(robotPosesAccepted);

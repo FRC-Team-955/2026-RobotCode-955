@@ -18,6 +18,7 @@ import frc.robot.subsystems.drive.DriveConstants;
 import lombok.Getter;
 import lombok.Setter;
 import org.littletonrobotics.junction.AutoLogOutput;
+import org.littletonrobotics.junction.Logger;
 
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -268,19 +269,18 @@ public class RobotState implements Periodic {
                 && Math.abs(getMeasuredChassisSpeedsFieldRelative().omegaRadiansPerSecond) < angularToleranceRadPerSec;
     }
 
-    @AutoLogOutput(key = "RobotState/IsInTrench")
     public boolean isInTrench(Translation2d t) {
         // make each bounding box larger so that the hood has time to move down before going under the trench
         double adjustmentMetersPositiveX = 0.55 + Math.max(0.0, getMeasuredChassisSpeedsFieldRelative().vxMetersPerSecond) * 0.5;
         double adjustmentMetersNegativeX = 0.55 + Math.min(0.0, getMeasuredChassisSpeedsFieldRelative().vxMetersPerSecond) * -0.5;
-        //Translation2d t = getTranslation();
-        //Logger.recordOutput(
-        //        "RobotState/TrenchChecks",
-        //        new Pose2d(new Translation2d(FieldConstants.LinesVertical.neutralZoneNear + adjustmentMetersNegativeX, 0.6), new Rotation2d()),
-        //        new Pose2d(new Translation2d(FieldConstants.LinesVertical.neutralZoneFar - adjustmentMetersPositiveX, 0.6), new Rotation2d()),
-        //        new Pose2d(new Translation2d(FieldConstants.LinesVertical.allianceZone - adjustmentMetersPositiveX, 0.6), new Rotation2d()),
-        //        new Pose2d(new Translation2d(FieldConstants.LinesVertical.oppAllianceZone + adjustmentMetersNegativeX, 0.6), new Rotation2d())
-        //);
+        if (BuildConstants.isSimOrReplay)
+            Logger.recordOutput(
+                    "RobotState/TrenchChecks",
+                    new Pose2d(new Translation2d(FieldConstants.LinesVertical.neutralZoneNear + adjustmentMetersNegativeX, 0.6), new Rotation2d()),
+                    new Pose2d(new Translation2d(FieldConstants.LinesVertical.neutralZoneFar - adjustmentMetersPositiveX, 0.6), new Rotation2d()),
+                    new Pose2d(new Translation2d(FieldConstants.LinesVertical.allianceZone - adjustmentMetersPositiveX, 0.6), new Rotation2d()),
+                    new Pose2d(new Translation2d(FieldConstants.LinesVertical.oppAllianceZone + adjustmentMetersNegativeX, 0.6), new Rotation2d())
+            );
         boolean inNeutralZone = t.getX() > FieldConstants.LinesVertical.neutralZoneNear + adjustmentMetersNegativeX &&
                 t.getX() < FieldConstants.LinesVertical.neutralZoneFar - adjustmentMetersPositiveX;
         boolean inAllianceZone = t.getX() < FieldConstants.LinesVertical.allianceZone - adjustmentMetersPositiveX ||
