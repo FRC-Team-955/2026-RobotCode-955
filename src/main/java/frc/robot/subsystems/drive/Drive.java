@@ -528,62 +528,34 @@ public class Drive extends CommandBasedSubsystem {
     }
 
     public class ModifiableDriveCommand extends WrapperCommand {
+        private Supplier<OptionalDouble> targetRad = null;
+        private Function<ChassisSpeeds, OptionalDouble> feedforwardRadPerSec = null;
+        private Boolean wantedStopWithX = null;
+        private DriveConstraints constraints = null;
+
         private ModifiableDriveCommand(Command command) {
             super(command);
         }
 
         public ModifiableDriveCommand withHeadingOverride(Supplier<OptionalDouble> targetRad) {
-            return withHeadingOverride(targetRad, null);
+            this.targetRad = targetRad;
+            return this;
         }
 
         public ModifiableDriveCommand withHeadingOverride(Supplier<OptionalDouble> targetRad, Function<ChassisSpeeds, OptionalDouble> feedforwardRadPerSec) {
-            return new ModifiableDriveCommand(this) {
-                @Override
-                public void initialize() {
-                    headingOverrideSetpointSupplier = targetRad;
-                    headingOverrideFeedforwardSupplier = feedforwardRadPerSec;
-                    super.initialize();
-                }
-
-                @Override
-                public void end(boolean interrupted) {
-                    headingOverrideSetpointSupplier = null;
-                    headingOverrideFeedforwardSupplier = null;
-                    super.end(interrupted);
-                }
-            };
+            this.targetRad = targetRad;
+            this.feedforwardRadPerSec = feedforwardRadPerSec;
+            return this;
         }
 
         public ModifiableDriveCommand withStopWithX() {
-            return new ModifiableDriveCommand(this) {
-                @Override
-                public void initialize() {
-                    stopWithX = true;
-                    super.initialize();
-                }
-
-                @Override
-                public void end(boolean interrupted) {
-                    stopWithX = false;
-                    super.end(interrupted);
-                }
-            };
+            this.wantedStopWithX = true;
+            return this;
         }
 
         public ModifiableDriveCommand withConstraints(DriveConstraints constraints) {
-            return new ModifiableDriveCommand(this) {
-                @Override
-                public void initialize() {
-                    constrainer.start(constraints);
-                    super.initialize();
-                }
-
-                @Override
-                public void end(boolean interrupted) {
-                    constrainer.stop();
-                    super.end(interrupted);
-                }
-            };
+            this.constraints = constraints;
+            return this;
         }
 
         public ModifiableDriveCommand withAiming() {
@@ -597,6 +569,24 @@ public class Drive extends CommandBasedSubsystem {
             )
                     .withStopWithX()
                     .withConstraints(shootingConstraints);
+        }
+
+        @Override
+        public void initialize() {
+            if (targetRad != null) headingOverrideSetpointSupplier = targetRad;
+            if (feedforwardRadPerSec != null) headingOverrideFeedforwardSupplier = feedforwardRadPerSec;
+            if (wantedStopWithX != null) stopWithX = wantedStopWithX;
+            if (constraints != null) constrainer.start(constraints);
+            super.initialize();
+        }
+
+        @Override
+        public void end(boolean interrupted) {
+            headingOverrideSetpointSupplier = null;
+            headingOverrideFeedforwardSupplier = null;
+            stopWithX = false;
+            constrainer.stop();
+            super.end(interrupted);
         }
     }
 
