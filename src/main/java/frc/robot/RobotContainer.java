@@ -19,6 +19,7 @@ import frc.robot.subsystems.superintake.Superintake;
 import frc.robot.subsystems.superstructure.Superstructure;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
+import java.util.OptionalDouble;
 import java.util.function.BooleanSupplier;
 
 /**
@@ -80,35 +81,30 @@ public class RobotContainer {
     private void configureBindings() {
         controller.y().onTrue(robotState.resetRotation());
 
-        Trigger intake = controller.rightTrigger();
         Trigger shoot = controller.leftTrigger();
         Trigger shootForce = controller.leftBumper();
+        Trigger anyShoot = shoot.or(shootForce);
 
         BooleanSupplier shouldNotAssist = () -> operatorDashboard.disableAssist.get() || robotState.isInTrench(robotState.getTranslation());
-        intake
-                .and(shoot.negate())
+        controller.rightTrigger()
+                .or(controller.rightBumper().and(anyShoot))
                 .whileTrue(superintake.setGoal(Superintake.Goal.INTAKE));
-
-
-        shoot
-                .and(intake.negate())
+        controller.rightBumper()
+                .and(anyShoot.negate())
                 .whileTrue(Commands.parallel(
-                        drive.setAim(),
-                        superstructure.setGoal(Superstructure.Goal.SHOOT)
-                ));
-        shootForce
-                .and(intake.negate())
-                .whileTrue(Commands.parallel(
-                        drive.setAim(),
-                        superstructure.setGoal(Superstructure.Goal.SHOOT_FORCE)
-                ));
-        shoot
-                .and(intake)
-                .whileTrue(Commands.parallel(
-                        drive.setAim(),
                         superintake.setGoal(Superintake.Goal.INTAKE),
-                        superstructure.setGoal(Superstructure.Goal.SHOOT)
+                        // Citrus mode: always point in direction of travel
+                        drive.setHeadingOverride(() -> OptionalDouble.of(controller.getDriveLinearDirection().getRadians()))
                 ));
+
+        shoot.whileTrue(Commands.parallel(
+                drive.setAim(),
+                superstructure.setGoal(Superstructure.Goal.SHOOT)
+        ));
+        shootForce.whileTrue(Commands.parallel(
+                drive.setAim(),
+                superstructure.setGoal(Superstructure.Goal.SHOOT_FORCE)
+        ));
 
         controller.x()
                 .whileTrue(Commands.parallel(

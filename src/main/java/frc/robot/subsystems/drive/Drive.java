@@ -468,16 +468,13 @@ public class Drive extends CommandBasedSubsystem {
         return setHeadingOverride(targetRad, OptionalDouble::empty);
     }
 
+    /** Used to ensure that only one heading override setting is active at one time. */
+    private final CommandBasedSubsystem headingOverrideSetting = new CommandBasedSubsystem() {};
+
     /** Doesn't require the Drive subsystem. This is intended to be used in conjunction with another state command */
     public Command setHeadingOverride(Supplier<OptionalDouble> targetRad, Supplier<OptionalDouble> feedforwardRadPerSec) {
-        return Commands.startEnd(
+        return headingOverrideSetting.startEnd(
                 () -> {
-                    // Attempt to catch bugs caused by not requiring the subsystem (which allows multiple instances
-                    // of this command to run at the same time)
-                    if (headingOverrideSetpointSupplier != null || headingOverrideFeedforwardSupplier != null) {
-                        Util.error("Heading override already set when attempting to set");
-                    }
-
                     headingOverrideSetpointSupplier = targetRad;
                     headingOverrideFeedforwardSupplier = feedforwardRadPerSec;
                 },
@@ -488,18 +485,13 @@ public class Drive extends CommandBasedSubsystem {
         );
     }
 
+    /** Used to ensure that only one stop with X setting is active at one time. */
+    private final CommandBasedSubsystem stopWithXSetting = new CommandBasedSubsystem() {};
+
     /** Doesn't require the Drive subsystem. This is intended to be used in conjunction with another state command */
     public Command setStopWithX() {
-        return Commands.startEnd(
-                () -> {
-                    // Attempt to catch bugs caused by not requiring the subsystem (which allows multiple instances
-                    // of this command to run at the same time)
-                    if (shouldStopWithX) {
-                        Util.error("Stop with X already set to true");
-                    }
-
-                    shouldStopWithX = true;
-                },
+        return stopWithXSetting.startEnd(
+                () -> shouldStopWithX = true,
                 () -> shouldStopWithX = false
         );
     }
