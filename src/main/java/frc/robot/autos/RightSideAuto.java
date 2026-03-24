@@ -12,7 +12,7 @@ import frc.robot.FieldConstants;
 import frc.robot.RobotState;
 import frc.robot.shooting.ShootingKinematics;
 import frc.robot.subsystems.drive.Drive;
-import frc.robot.subsystems.drive.DriveConstants;
+import frc.robot.subsystems.drive.constraints.DriveConstraints;
 import frc.robot.subsystems.superintake.Superintake;
 import frc.robot.subsystems.superstructure.Superstructure;
 import org.littletonrobotics.junction.Logger;
@@ -44,7 +44,7 @@ public final class RightSideAuto extends Auto {
             new Pose2d(2.5, 0.6, Rotation2d.fromDegrees(-180))
     );
 
-    private static final DriveConstants.MoveToConstraints rightSideAutoMoveToConstraints = new DriveConstants.MoveToConstraints(
+    private static final DriveConstraints rightSideAutoMoveToConstraints = new DriveConstraints(
             new LoggedTunableNumber("RightSideAuto/MoveTo/MaxLinearVelocity", 0.5),
             new LoggedTunableNumber("RightSideAuto/MoveTo/MaxLinearAcceleration", 15.0),
             new LoggedTunableNumber("RightSideAuto/MoveTo/MaxAngularVelocity", maxAngularVelocityRadPerSec),
@@ -178,7 +178,7 @@ public final class RightSideAuto extends Auto {
                         Commands.waitUntil(() -> ShootingKinematics.get().isShootingParametersMet()),
                         Commands.waitSeconds(2.0)
                 ),
-                drive.setAim(),
+                drive.stop().withAiming(),
                 superstructure.setGoal(Superstructure.Goal.SHOOT)
         ).onlyWhile(DriverStation::isAutonomousEnabled);
 

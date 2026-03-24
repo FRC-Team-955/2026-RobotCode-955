@@ -21,7 +21,7 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.WrapperCommand;
 import frc.lib.Util;
 import frc.lib.commands.CommandsExt;
 import frc.lib.subsystem.CommandBasedSubsystem;
@@ -41,6 +41,7 @@ import org.littletonrobotics.junction.Logger;
 import java.util.Arrays;
 import java.util.OptionalDouble;
 import java.util.function.DoubleSupplier;
+import java.util.function.Function;
 import java.util.function.IntToDoubleFunction;
 import java.util.function.Supplier;
 
@@ -76,10 +77,11 @@ public class Drive extends CommandBasedSubsystem {
 
     private State wantedState = State.STOP;
 
-    private boolean shouldStopWithX = false;
+    private boolean stopWithX = false;
 
     private @Nullable Supplier<OptionalDouble> headingOverrideSetpointSupplier = null;
-    private @Nullable Supplier<OptionalDouble> headingOverrideFeedforwardSupplier = null;
+    /** Takes FIELD RELATIVE wanted speeds and gives a feedfoward in rad/sec */
+    private @Nullable Function<ChassisSpeeds, OptionalDouble> headingOverrideFeedforwardSupplier = null;
     private final PIDController headingOverrideController = headingOverrideGains
             .toPIDWrapRadians(
                     moveToConfig.angularPositionToleranceRad().get(),
@@ -310,7 +312,7 @@ public class Drive extends CommandBasedSubsystem {
 
     @Override
     public void periodicAfterCommands() {
-        Logger.recordOutput("Drive/StopWithXSet", shouldStopWithX);
+        Logger.recordOutput("Drive/StopWithXSet", stopWithX);
         Logger.recordOutput("Drive/HeadingOverrideSet", headingOverrideSetpointSupplier != null);
 
         Logger.recordOutput("Drive/WantedState", wantedState);
@@ -322,7 +324,7 @@ public class Drive extends CommandBasedSubsystem {
         // Stop moving when idle or disabled
         if (state == State.STOP || DriverStation.isDisabled()) {
             // Only attempt to stop with X when enabled
-            if (DriverStation.isEnabled() && shouldStopWithX) {
+            if (DriverStation.isEnabled() && stopWithX) {
                 // Create a list of headings where each heading points from the center
                 // of the robot to the module. Tell the module to point at this angle.
                 // This means that the modules will point towards the center of the
@@ -386,7 +388,10 @@ public class Drive extends CommandBasedSubsystem {
 
                 OptionalDouble feedforward = headingOverrideFeedforwardSupplier == null
                         ? OptionalDouble.empty()
-                        : headingOverrideFeedforwardSupplier.get();
+                        : headingOverrideFeedforwardSupplier.apply(
+                        // DON'T FORGET TO CONVERT TO FIELD RELATIVE
+                        ChassisSpeeds.fromRobotRelativeSpeeds(wantedSpeeds, robotState.getRotation())
+                );
                 if (feedforward.isPresent()) {
                     wantedSpeeds.omegaRadiansPerSecond += feedforward.getAsDouble();
                 }
@@ -456,94 +461,102 @@ public class Drive extends CommandBasedSubsystem {
         return states;
     }
 
-    /** Doesn't require the Drive subsystem. This is intended to be used in conjunction with another state command */
-    public Command setHeadingOverride(Supplier<OptionalDouble> targetRad) {
-        return setHeadingOverride(targetRad, OptionalDouble::empty);
+    public ModifiableDriveCommand stop() {
+        return new ModifiableDriveCommand(startIdle(() -> wantedState = State.STOP));
     }
 
-    /** Used to ensure that only one heading override setting is active at one time. */
-    private final CommandBasedSubsystem headingOverrideSetting = new CommandBasedSubsystem() {};
-
-    /** Doesn't require the Drive subsystem. This is intended to be used in conjunction with another state command */
-    public Command setHeadingOverride(Supplier<OptionalDouble> targetRad, Supplier<OptionalDouble> feedforwardRadPerSec) {
-        return headingOverrideSetting.startEnd(
-                () -> {
-                    headingOverrideSetpointSupplier = targetRad;
-                    headingOverrideFeedforwardSupplier = feedforwardRadPerSec;
-                },
-                () -> {
-                    headingOverrideSetpointSupplier = null;
-                    headingOverrideFeedforwardSupplier = null;
-                }
-        );
-    }
-
-    /** Used to ensure that only one stop with X setting is active at one time. */
-    private final CommandBasedSubsystem stopWithXSetting = new CommandBasedSubsystem() {};
-
-    /** Doesn't require the Drive subsystem. This is intended to be used in conjunction with another state command */
-    public Command setStopWithX() {
-        return stopWithXSetting.startEnd(
-                () -> shouldStopWithX = true,
-                () -> shouldStopWithX = false
-        );
-    }
-
-    public Command setAim() {
-        return Commands.parallel(
-                setHeadingOverride(
-                        () -> operatorDashboard.manualAiming.get()
-                                ? OptionalDouble.empty()
-                                : OptionalDouble.of(shootingKinematics.getShootingParameters().headingRad()),
-                        () -> operatorDashboard.manualAiming.get()
-                                ? OptionalDouble.empty()
-                                : OptionalDouble.of(shootingKinematics.rotationAboutHubRadiansPerSecForDrivebase(controller.getDriveFieldRelativeSpeeds()))
-                ),
-                setStopWithX()
-        );
-    }
-
-    public Command stop() {
-        return startIdle(() -> wantedState = State.STOP);
-    }
-
-    public Command joystickDrive() {
-        return startIdle(() -> {
+    public ModifiableDriveCommand joystickDrive() {
+        return new ModifiableDriveCommand(startIdle(() -> {
             wantedState = State.JOYSTICK_DRIVE;
             joystickDriveHeadingStabilizeTimer.restart();
-        });
+        }));
     }
 
-    public Command moveTo(Supplier<Pose2d> goalPoseSupplier) {
+    public ModifiableDriveCommand moveTo(Supplier<Pose2d> goalPoseSupplier) {
         return moveTo(goalPoseSupplier, defaultMoveToConstraints);
     }
 
-    public Command moveTo(Supplier<Pose2d> goalPoseSupplier, MoveToConstraints constraints) {
-        return startEnd(
+    public ModifiableDriveCommand moveTo(Supplier<Pose2d> goalPoseSupplier, DriveConstraints constraints) {
+        return new ModifiableDriveCommand(startEnd(
                 () -> {
                     wantedState = State.MOVE_TO;
                     moveToController.start(goalPoseSupplier, constraints);
                 },
                 moveToController::stop
-        );
+        ));
     }
 
-    public Command followTrajectory(Trajectory<SwerveSample> trajectory) {
-        return startEndWaitUntil(
+    public ModifiableDriveCommand followTrajectory(Trajectory<SwerveSample> trajectory) {
+        return new ModifiableDriveCommand(startEndWaitUntil(
                 () -> {
                     wantedState = State.FOLLOW_TRAJECTORY;
                     followTrajectoryController.start(trajectory);
                 },
                 followTrajectoryController::stop,
                 followTrajectoryController::isDone
-        );
+        ));
     }
 
-    public Command chassisSpeeds(Supplier<ChassisSpeeds> chassisSpeedsSupplier) {
-        return startIdle(() -> {
+    public ModifiableDriveCommand chassisSpeeds(Supplier<ChassisSpeeds> chassisSpeedsSupplier) {
+        return new ModifiableDriveCommand(startIdle(() -> {
             wantedState = State.CHASSIS_SPEEDS;
             chassisSpeedsSetpointSupplier = chassisSpeedsSupplier;
-        });
+        }));
+    }
+
+    public class ModifiableDriveCommand extends WrapperCommand {
+        private ModifiableDriveCommand(Command command) {
+            super(command);
+        }
+
+        public ModifiableDriveCommand withHeadingOverride(Supplier<OptionalDouble> targetRad) {
+            return withHeadingOverride(targetRad, null);
+        }
+
+        public ModifiableDriveCommand withHeadingOverride(Supplier<OptionalDouble> targetRad, Function<ChassisSpeeds, OptionalDouble> feedforwardRadPerSec) {
+            return new ModifiableDriveCommand(this) {
+                @Override
+                public void initialize() {
+                    headingOverrideSetpointSupplier = targetRad;
+                    headingOverrideFeedforwardSupplier = feedforwardRadPerSec;
+                    super.initialize();
+                }
+
+                @Override
+                public void end(boolean interrupted) {
+                    headingOverrideSetpointSupplier = null;
+                    headingOverrideFeedforwardSupplier = null;
+                    super.end(interrupted);
+                }
+            };
+        }
+
+        public ModifiableDriveCommand withStopWithX() {
+            return new ModifiableDriveCommand(this) {
+                @Override
+                public void initialize() {
+                    stopWithX = true;
+                    super.initialize();
+                }
+
+                @Override
+                public void end(boolean interrupted) {
+                    stopWithX = false;
+                    super.end(interrupted);
+                }
+            };
+        }
+
+        public ModifiableDriveCommand withAiming() {
+            return withHeadingOverride(
+                    () -> operatorDashboard.manualAiming.get()
+                            ? OptionalDouble.empty()
+                            : OptionalDouble.of(shootingKinematics.getShootingParameters().headingRad()),
+                    (speeds) -> operatorDashboard.manualAiming.get()
+                            ? OptionalDouble.empty()
+                            : OptionalDouble.of(shootingKinematics.rotationAboutHubRadiansPerSecForDrivebase(speeds))
+            ).withStopWithX();
+        }
     }
 
     private void runCharacterization(double volts) {

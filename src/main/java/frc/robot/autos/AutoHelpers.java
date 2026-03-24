@@ -18,7 +18,7 @@ import frc.lib.network.LoggedTunableNumber;
 import frc.robot.FieldConstants;
 import frc.robot.RobotState;
 import frc.robot.subsystems.drive.Drive;
-import frc.robot.subsystems.drive.DriveConstants;
+import frc.robot.subsystems.drive.constraints.DriveConstraints;
 import frc.robot.subsystems.gamepiecevision.GamePieceVision;
 import frc.robot.subsystems.superintake.Superintake;
 import frc.robot.subsystems.superstructure.Superstructure;
@@ -43,51 +43,49 @@ public class AutoHelpers {
     private static final Superstructure superstructure = Superstructure.get();
     private static final Choreo.TrajectoryCache trajectoryCache = new Choreo.TrajectoryCache();
 
-    public static final DriveConstants.MoveToConstraints shootingConstraints = defaultMoveToConstraints
+    public static final DriveConstraints shootingConstraints = defaultMoveToConstraints
             .withMaxLinearVelocityMetersPerSec(new LoggedTunableNumber("AutoHelpers/Shoot/MaxLinearVelocity", 1.0))
             .withMaxLinearAccelerationMetersPerSecPerSec(new LoggedTunableNumber("AutoHelpers/Shoot/MaxLinearAcceleration", 5));
 
-    public static Command intermediateWaypoint(Supplier<Pose2d> poseSupplier, DriveConstants.MoveToConstraints constraints, boolean aiming) {
+    public static Command intermediateWaypoint(Supplier<Pose2d> poseSupplier, DriveConstraints constraints, boolean aiming) {
         var cmd = drive
                 .moveTo(
                         () -> AllianceFlipUtil.apply(poseSupplier.get()),
                         constraints
                         //.withFullSpeed(true)
-                )
-                .until(() -> robotState.isAtPoseWithTolerance(
-                        AllianceFlipUtil.apply(poseSupplier.get()),
-                        intermediateLinearTolerance,
-                        // if we are aiming, the rotation from the pose supplier
-                        // is not the rotation that move to will target
-                        aiming
-                                ? Double.MAX_VALUE
-                                : intermediateAngularTolerance
-                ));
+                );
         if (aiming) {
-            return Commands.parallel(cmd, drive.setAim());
+            cmd = cmd.withAiming();
         }
-        return cmd;
+        return cmd.until(() -> robotState.isAtPoseWithTolerance(
+                AllianceFlipUtil.apply(poseSupplier.get()),
+                intermediateLinearTolerance,
+                // if we are aiming, the rotation from the pose supplier
+                // is not the rotation that move to will target
+                aiming
+                        ? Double.MAX_VALUE
+                        : intermediateAngularTolerance
+        ));
     }
 
-    public static Command finalWaypoint(Supplier<Pose2d> poseSupplier, DriveConstants.MoveToConstraints constraints, boolean aiming) {
+    public static Command finalWaypoint(Supplier<Pose2d> poseSupplier, DriveConstraints constraints, boolean aiming) {
         var cmd = drive
                 .moveTo(
                         () -> AllianceFlipUtil.apply(poseSupplier.get()),
                         constraints
-                )
-                .until(() -> robotState.isAtPoseWithTolerance(
-                        AllianceFlipUtil.apply(poseSupplier.get()),
-                        finalLinearTolerance,
-                        // if we are aiming, the rotation from the pose supplier
-                        // is not the rotation that move to will target
-                        aiming
-                                ? Double.MAX_VALUE
-                                : finalAngularTolerance
-                ));
+                );
         if (aiming) {
-            return Commands.parallel(cmd, drive.setAim());
+            cmd = cmd.withAiming();
         }
-        return cmd;
+        return cmd.until(() -> robotState.isAtPoseWithTolerance(
+                AllianceFlipUtil.apply(poseSupplier.get()),
+                finalLinearTolerance,
+                // if we are aiming, the rotation from the pose supplier
+                // is not the rotation that move to will target
+                aiming
+                        ? Double.MAX_VALUE
+                        : finalAngularTolerance
+        ));
     }
 
 
@@ -138,7 +136,7 @@ public class AutoHelpers {
             Translation2d end,
             Rotation2d heading,
             double yDistanceToStartInterpolation,
-            DriveConstants.MoveToConstraints constraints,
+            DriveConstraints constraints,
             boolean aiming
     ) {
         return intermediateWaypoint(
@@ -171,7 +169,7 @@ public class AutoHelpers {
             Translation2d end,
             Rotation2d heading,
             double xDistanceToStartInterpolation,
-            DriveConstants.MoveToConstraints constraints,
+            DriveConstraints constraints,
             boolean aiming
     ) {
         return intermediateWaypoint(
@@ -181,7 +179,7 @@ public class AutoHelpers {
         );
     }
 
-    public static final DriveConstants.MoveToConstraints intakeConstraints = defaultMoveToConstraints
+    public static final DriveConstraints intakeConstraints = defaultMoveToConstraints
             .withMaxLinearVelocityMetersPerSec(new LoggedTunableNumber("AutoHelpers/Intake/MaxLinearVelocity", 2))
             .withMaxAngularAccelerationRadPerSecPerSec(new LoggedTunableNumber("AutoHelpers/Intake/MaxAngularAcceleration", 40.0));
 
@@ -244,7 +242,7 @@ public class AutoHelpers {
         );
     }
 
-    public static Command intakeFromDepotWhileShooting(DriveConstants.MoveToConstraints constraints) {
+    public static Command intakeFromDepotWhileShooting(DriveConstraints constraints) {
         Pose2d ifNoGamePieces = new Pose2d(0.2 + driveConfig.bumperLengthMeters() / 2.0, FieldConstants.Depot.depotCenter.getY(), Rotation2d.k180deg);
         return Commands.parallel(
                 drive.moveTo(
@@ -255,8 +253,7 @@ public class AutoHelpers {
                                 FieldConstants.Depot.leftCorner.getY()
                         ), ifNoGamePieces),
                         constraints
-                ),
-                drive.setAim(),
+                ).withAiming(),
                 superintake.setGoal(Superintake.Goal.INTAKE),
                 superstructure.setGoal(Superstructure.Goal.SHOOT)
         );

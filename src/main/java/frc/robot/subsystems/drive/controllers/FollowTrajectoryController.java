@@ -87,6 +87,8 @@ public class FollowTrajectoryController {
     }
 
     public void stop() {
+        trajectory = null;
+
         robotState.setTrajectory(Optional.empty());
         robotState.setTrajectorySample(Optional.empty());
     }

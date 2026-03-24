@@ -163,6 +163,9 @@ public class MoveToController {
     }
 
     public void stop() {
+        goalPoseSupplier = null;
+        constraints = null;
+
         robotState.setMoveToGoal(Optional.empty());
     }
 }

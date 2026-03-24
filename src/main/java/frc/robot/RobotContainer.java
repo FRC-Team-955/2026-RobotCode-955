@@ -94,15 +94,15 @@ public class RobotContainer {
                 .whileTrue(Commands.parallel(
                         superintake.setGoal(Superintake.Goal.INTAKE),
                         // Citrus mode: always point in direction of travel
-                        drive.setHeadingOverride(() -> OptionalDouble.of(controller.getDriveLinearDirection().getRadians()))
+                        drive.joystickDrive().withHeadingOverride(() -> OptionalDouble.of(controller.getDriveLinearDirection().getRadians()))
                 ));
 
         shoot.whileTrue(Commands.parallel(
-                drive.setAim(),
+                drive.joystickDrive().withAiming(),
                 superstructure.setGoal(Superstructure.Goal.SHOOT)
         ));
         shootForce.whileTrue(Commands.parallel(
-                drive.setAim(),
+                drive.joystickDrive().withAiming(),
                 superstructure.setGoal(Superstructure.Goal.SHOOT_FORCE)
         ));
 
