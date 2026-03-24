@@ -90,10 +90,8 @@ public class Controller implements Periodic {
             if (AllianceFlipUtil.shouldFlip()) {
                 driveLinearDirection = driveLinearDirection.plus(Rotation2d.k180deg);
             }
-        } else {
-            // Linear magnitude should be 0 anyways
-            driveLinearDirection = new Rotation2d();
         }
+        // If linear magnitude is 0, just keep the old linear direction
 
         //Logger.recordOutput("Controller/Drive/LinearMagnitude", driveLinearMagnitude);
         //Logger.recordOutput("Controller/Drive/LinearDirection", driveLinearDirection);
