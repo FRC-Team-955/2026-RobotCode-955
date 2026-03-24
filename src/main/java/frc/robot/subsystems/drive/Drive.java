@@ -74,13 +74,12 @@ public class Drive extends CommandBasedSubsystem {
         CHARACTERIZATION,
     }
 
-    @Getter
-    private State state = State.STOP;
+    private State wantedState = State.STOP;
 
     private boolean shouldStopWithX = false;
 
-    private Supplier<OptionalDouble> headingOverrideSetpointSupplier = OptionalDouble::empty;
-    private Supplier<OptionalDouble> headingOverrideFeedforwardSupplier = OptionalDouble::empty;
+    private @Nullable Supplier<OptionalDouble> headingOverrideSetpointSupplier = null;
+    private @Nullable Supplier<OptionalDouble> headingOverrideFeedforwardSupplier = null;
     private final PIDController headingOverrideController = headingOverrideGains
             .toPIDWrapRadians(
                     moveToConfig.angularPositionToleranceRad().get(),
@@ -309,13 +308,15 @@ public class Drive extends CommandBasedSubsystem {
 
     @Override
     public void periodicAfterCommands() {
-        Logger.recordOutput("Drive/OriginalState", state);
-        evaluateStateMachine();
+        Logger.recordOutput("Drive/StopWithXSet", shouldStopWithX);
+        Logger.recordOutput("Drive/HeadingOverrideSet", headingOverrideSetpointSupplier != null);
+
+        Logger.recordOutput("Drive/WantedState", wantedState);
+        State actualState = evaluateStateMachine(wantedState);
+        Logger.recordOutput("Drive/ActualState", actualState);
     }
 
-    private void evaluateStateMachine() {
-        Logger.recordOutput("Drive/FinalState", state);
-
+    private State evaluateStateMachine(State state) {
         // Stop moving when idle or disabled
         if (state == State.STOP || DriverStation.isDisabled()) {
             // Only attempt to stop with X when enabled
@@ -339,9 +340,11 @@ public class Drive extends CommandBasedSubsystem {
         } else if (state == State.CHARACTERIZATION) {
             // Do nothing - commands handle setting voltages
         } else {
-            ChassisSpeeds setpoint = new ChassisSpeeds();
+            ChassisSpeeds wantedSpeeds = new ChassisSpeeds();
 
-            OptionalDouble headingOverrideSetpoint = headingOverrideSetpointSupplier.get();
+            OptionalDouble headingOverrideSetpoint = headingOverrideSetpointSupplier == null
+                    ? OptionalDouble.empty()
+                    : headingOverrideSetpointSupplier.get();
 
             switch (state) {
                 case JOYSTICK_DRIVE -> {
@@ -350,7 +353,7 @@ public class Drive extends CommandBasedSubsystem {
                             controller.getDriveLinearDirection()
                     );
 
-                    setpoint = ChassisSpeeds.fromFieldRelativeSpeeds(
+                    wantedSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
                             linearSetpoint.getX(),
                             linearSetpoint.getY(),
                             controller.getDriveAngularVelocityRadPerSec(),
@@ -367,17 +370,17 @@ public class Drive extends CommandBasedSubsystem {
                         headingOverrideSetpoint = OptionalDouble.of(joystickDriveHeadingStabilizeSetpoint);
                     }
                 }
-                case MOVE_TO -> setpoint = moveToController.update();
-                case FOLLOW_TRAJECTORY -> setpoint = followTrajectoryController.update();
+                case MOVE_TO -> wantedSpeeds = moveToController.update();
+                case FOLLOW_TRAJECTORY -> wantedSpeeds = followTrajectoryController.update();
                 case CHASSIS_SPEEDS -> {
                     if (chassisSpeedsSetpointSupplier != null) {
-                        setpoint = chassisSpeedsSetpointSupplier.get();
+                        wantedSpeeds = chassisSpeedsSetpointSupplier.get();
                     }
                 }
             }
 
             if (headingOverrideSetpoint.isPresent()) {
-                setpoint.omegaRadiansPerSecond = headingOverrideController.calculate(
+                wantedSpeeds.omegaRadiansPerSecond = headingOverrideController.calculate(
                         robotState.getRotation().getRadians(),
                         headingOverrideSetpoint.getAsDouble()
                 );
@@ -385,30 +388,30 @@ public class Drive extends CommandBasedSubsystem {
                 boolean atSetpoint = headingOverrideController.atSetpoint();
                 //Logger.recordOutput("Drive/HeadingOverrideAtSetpoint", headingOverrideAtSetpoint);
                 if (atSetpoint) {
-                    setpoint.omegaRadiansPerSecond = 0.0;
+                    wantedSpeeds.omegaRadiansPerSecond = 0.0;
                 }
 
-                OptionalDouble feedforward = headingOverrideFeedforwardSupplier.get();
+                OptionalDouble feedforward = headingOverrideFeedforwardSupplier == null
+                        ? OptionalDouble.empty()
+                        : headingOverrideFeedforwardSupplier.get();
                 if (feedforward.isPresent()) {
-                    setpoint.omegaRadiansPerSecond += feedforward.getAsDouble();
+                    wantedSpeeds.omegaRadiansPerSecond += feedforward.getAsDouble();
                 }
             } else {
                 headingOverrideController.reset();
             }
 
-            if (setpoint.vxMetersPerSecond == 0.0 && setpoint.vyMetersPerSecond == 0.0 && setpoint.omegaRadiansPerSecond == 0.0) {
+            if (wantedSpeeds.vxMetersPerSecond == 0.0 && wantedSpeeds.vyMetersPerSecond == 0.0 && wantedSpeeds.omegaRadiansPerSecond == 0.0) {
                 // Re-evaluate state machine to stop - this handles stopping with X in a nice way
-                state = State.STOP;
-                evaluateStateMachine();
-                return;
+                return evaluateStateMachine(State.STOP);
             }
 
-            Logger.recordOutput("Drive/ModuleStates/Setpoints", robotState.getKinematics().toSwerveModuleStates(setpoint));
+            Logger.recordOutput("Drive/ModuleStates/Setpoints", robotState.getKinematics().toSwerveModuleStates(wantedSpeeds));
 
             // Discretize - use larger dt than actual to reduce translational skew when rotating and translating at the same time
             // See https://www.chiefdelphi.com/t/whitepaper-swerve-drive-skew-and-second-order-kinematics/416964/5
             // and https://github.com/frc1678/C2024-Public/blob/main/src/main/java/com/team1678/frc2024/subsystems/Drive.java#L406
-            ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(setpoint, Constants.loopPeriod * 4.0);
+            ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(wantedSpeeds, Constants.loopPeriod * 4.0);
 
             // Convert to module states and desaturate
             SwerveModuleState[] setpointStates = robotState.getKinematics().toSwerveModuleStates(discreteSpeeds);
@@ -432,6 +435,9 @@ public class Drive extends CommandBasedSubsystem {
             Logger.recordOutput("Drive/ModuleStates/SetpointsOptimized", setpointStates);
             Logger.recordOutput("Drive/ChassisSpeeds/SetpointOptimized", robotState.getKinematics().toChassisSpeeds(setpointStates));
         }
+
+        // No re-evaluation, so state stayed the same. Return it
+        return state;
     }
 
     /**
@@ -513,12 +519,12 @@ public class Drive extends CommandBasedSubsystem {
     }
 
     public Command stop() {
-        return startIdle(() -> state = State.STOP);
+        return startIdle(() -> wantedState = State.STOP);
     }
 
     public Command joystickDrive() {
         return startIdle(() -> {
-            state = State.JOYSTICK_DRIVE;
+            wantedState = State.JOYSTICK_DRIVE;
             joystickDriveHeadingStabilizeTimer.restart();
         });
     }
@@ -530,7 +536,7 @@ public class Drive extends CommandBasedSubsystem {
     public Command moveTo(Supplier<Pose2d> goalPoseSupplier, MoveToConstraints constraints) {
         return startEnd(
                 () -> {
-                    state = State.MOVE_TO;
+                    wantedState = State.MOVE_TO;
                     moveToController.start(goalPoseSupplier, constraints);
                 },
                 moveToController::stop
@@ -540,7 +546,7 @@ public class Drive extends CommandBasedSubsystem {
     public Command followTrajectory(Trajectory<SwerveSample> trajectory) {
         return startEndWaitUntil(
                 () -> {
-                    state = State.FOLLOW_TRAJECTORY;
+                    wantedState = State.FOLLOW_TRAJECTORY;
                     followTrajectoryController.start(trajectory);
                 },
                 followTrajectoryController::stop,
@@ -550,7 +556,7 @@ public class Drive extends CommandBasedSubsystem {
 
     public Command chassisSpeeds(Supplier<ChassisSpeeds> chassisSpeedsSupplier) {
         return startIdle(() -> {
-            state = State.CHASSIS_SPEEDS;
+            wantedState = State.CHASSIS_SPEEDS;
             chassisSpeedsSetpointSupplier = chassisSpeedsSupplier;
         });
     }
@@ -565,7 +571,7 @@ public class Drive extends CommandBasedSubsystem {
         Timer timer = new Timer();
         return startRun(
                 () -> {
-                    state = State.CHARACTERIZATION;
+                    wantedState = State.CHARACTERIZATION;
                     timer.restart();
                 },
                 () -> {
