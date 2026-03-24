@@ -316,6 +316,10 @@ public class AprilTagVision implements Periodic {
         Logger.recordOutput("AprilTagVision/Summary/RobotPoses", allRobotPoses.toArray(Pose3d[]::new));
         Logger.recordOutput("AprilTagVision/Summary/RobotPosesAccepted", allRobotPosesAccepted.toArray(Pose3d[]::new));
         Logger.recordOutput("AprilTagVision/Summary/RobotPosesRejected", allRobotPosesRejected.toArray(Pose3d[]::new));
+
+        // Add summary to Field2d
+        robotState.setAcceptedPoses(allRobotPosesAccepted);
+        robotState.setRejectedPoses(allRobotPosesRejected);
     }
 
     @Override

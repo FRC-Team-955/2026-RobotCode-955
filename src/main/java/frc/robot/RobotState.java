@@ -20,8 +20,10 @@ import lombok.Setter;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
+import java.util.stream.IntStream;
 
 import static frc.robot.subsystems.drive.DriveConstants.driveConfig;
 
@@ -57,6 +59,18 @@ public class RobotState implements Periodic {
     @Setter
     private Optional<Pose2d> trajectorySample = Optional.empty();
     private final FieldObject2d trajectorySampleObject = field2d.getObject("TrajectorySample");
+
+    @Setter
+    private List<Pose3d> acceptedPoses = List.of();
+    private final FieldObject2d[] acceptedPoseObjects = IntStream.range(0, 3)
+            .mapToObj(n -> field2d.getObject("AcceptedPose" + n))
+            .toArray(FieldObject2d[]::new);
+
+    @Setter
+    private List<Pose3d> rejectedPoses = List.of();
+    private final FieldObject2d[] rejectedPoseObjects = IntStream.range(0, 3)
+            .mapToObj(n -> field2d.getObject("RejectedPose" + n))
+            .toArray(FieldObject2d[]::new);
 
     @Getter
     @Setter
@@ -196,6 +210,20 @@ public class RobotState implements Periodic {
                 trajectorySampleObject::setPose,
                 trajectorySampleObject::setPoses
         );
+        for (int i = 0; i < acceptedPoseObjects.length; i++) {
+            if (i < acceptedPoses.size()) {
+                acceptedPoseObjects[i].setPose(acceptedPoses.get(i).toPose2d());
+            } else {
+                acceptedPoseObjects[i].setPoses();
+            }
+        }
+        for (int i = 0; i < rejectedPoseObjects.length; i++) {
+            if (i < rejectedPoses.size()) {
+                rejectedPoseObjects[i].setPose(rejectedPoses.get(i).toPose2d());
+            } else {
+                rejectedPoseObjects[i].setPoses();
+            }
+        }
         SmartDashboard.putData("Field2d", field2d);
     }
 
