@@ -67,11 +67,10 @@ public class FollowTrajectoryController {
             robotState.setTrajectorySample(Optional.of(sample.getPose()));
             Logger.recordOutput("Drive/TrajectorySetpoint", sample.getPose());
 
-            return ChassisSpeeds.fromFieldRelativeSpeeds(
+            return new ChassisSpeeds(
                     sample.vx + feedbackX.calculate(currentPose.getX(), sample.x),
                     sample.vy + feedbackY.calculate(currentPose.getY(), sample.y),
-                    sample.omega + feedbackOmega.calculate(currentPose.getRotation().getRadians(), sample.heading),
-                    currentPose.getRotation() // Trajectories are absolute, don't flip
+                    sample.omega + feedbackOmega.calculate(currentPose.getRotation().getRadians(), sample.heading)
             );
         } else {
             Util.error("No sample at " + timer.get() + " for trajectory " + trajectory.name());

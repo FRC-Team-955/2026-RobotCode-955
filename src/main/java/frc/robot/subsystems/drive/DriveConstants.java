@@ -6,7 +6,7 @@ import edu.wpi.first.math.util.Units;
 import frc.lib.network.LoggedTunableNumber;
 import frc.lib.network.LoggedTunablePIDF;
 import frc.robot.BuildConstants;
-import lombok.With;
+import frc.robot.subsystems.drive.constraints.DriveConstraints;
 
 public class DriveConstants {
     public static final double assistDirectionToleranceRad = Units.degreesToRadians(50);
@@ -53,11 +53,18 @@ public class DriveConstants {
     /** Maximum angular velocity of the whole drivetrain if all drive motors/wheels are going at full speed. */
     public static final double maxAngularVelocityRadPerSec = driveConfig.maxVelocityMetersPerSec() / drivebaseRadiusMeters;
 
-    public static final MoveToConstraints defaultMoveToConstraints = new MoveToConstraints(
+    public static final DriveConstraints defaultMoveToConstraints = new DriveConstraints(
             new LoggedTunableNumber("Drive/MoveTo/MaxLinearVelocity", driveConfig.maxVelocityMetersPerSec()),
             new LoggedTunableNumber("Drive/MoveTo/MaxLinearAcceleration", 20.0),
             new LoggedTunableNumber("Drive/MoveTo/MaxAngularVelocity", 9),
             new LoggedTunableNumber("Drive/MoveTo/MaxAngularAcceleration", 30.0)
+    );
+
+    public static final DriveConstraints shootingConstraints = new DriveConstraints(
+            new LoggedTunableNumber("Drive/Shooting/MaxLinearVelocity", 1.0),
+            new LoggedTunableNumber("Drive/Shooting/MaxLinearAcceleration", 5.0),
+            null,
+            null
     );
 
     public static final MoveToConfig moveToConfig = new MoveToConfig(
@@ -167,15 +174,6 @@ public class DriveConstants {
             case SIM -> new AccelerometerIOSim();
             case REPLAY -> new AccelerometerIO();
         };
-    }
-
-    @With
-    public record MoveToConstraints(
-            LoggedTunableNumber maxLinearVelocityMetersPerSec,
-            LoggedTunableNumber maxLinearAccelerationMetersPerSecPerSec,
-            LoggedTunableNumber maxAngularVelocityRadPerSec,
-            LoggedTunableNumber maxAngularAccelerationRadPerSecPerSec
-    ) {
     }
 
     public record MoveToConfig(

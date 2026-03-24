@@ -6,9 +6,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import frc.lib.SlewRateLimiter2d;
 import frc.lib.Util;
-import frc.lib.wpilib.SlewRateLimiter;
 import frc.robot.BuildConstants;
 import frc.robot.RobotState;
 import frc.robot.subsystems.drive.DriveConstants;
@@ -28,14 +26,12 @@ public class MoveToController {
                     moveToConfig.linearPositionToleranceMeters().get(),
                     moveToConfig.linearVelocityToleranceMetersPerSec().get()
             );
-    private final SlewRateLimiter2d linearAccelLimiter = new SlewRateLimiter2d(0.0);
 
     private final PIDController angularController = moveToConfig.angularGains()
             .toPIDWrapRadians(
                     moveToConfig.angularPositionToleranceRad().get(),
                     moveToConfig.angularVelocityToleranceRadPerSec().get()
             );
-    private final SlewRateLimiter angularAccelLimiter = new SlewRateLimiter(0.0);
 
     public void applyNetworkInputs() {
         if (moveToConfig.linearGains().hasChanged()) {
@@ -48,38 +44,18 @@ public class MoveToController {
     }
 
     private @Nullable Supplier<Pose2d> goalPoseSupplier = null;
-    private @Nullable DriveConstants.MoveToConstraints constraints = null;
 
-    public void start(Supplier<Pose2d> goalPoseSupplier, DriveConstants.MoveToConstraints constraints) {
+    public void start(Supplier<Pose2d> goalPoseSupplier) {
         this.goalPoseSupplier = goalPoseSupplier;
-        this.constraints = constraints;
 
         linearController.reset();
         angularController.reset();
-
-        ChassisSpeeds speeds = robotState.getMeasuredChassisSpeedsFieldRelative();
-        linearAccelLimiter.reset(speeds);
-        angularAccelLimiter.reset(speeds.omegaRadiansPerSecond);
-
-        if (linearAccelLimiter.getLimit() != constraints.maxLinearAccelerationMetersPerSecPerSec().get()) {
-            linearAccelLimiter.setLimit(constraints.maxLinearAccelerationMetersPerSecPerSec().get());
-        }
-        if (angularAccelLimiter.getLimit() != constraints.maxAngularAccelerationRadPerSecPerSec().get()) {
-            angularAccelLimiter.setLimit(constraints.maxAngularAccelerationRadPerSecPerSec().get());
-        }
     }
 
     public ChassisSpeeds update() {
-        if (goalPoseSupplier == null || constraints == null) {
-            Util.error("Goal pose or constraints are null");
+        if (goalPoseSupplier == null) {
+            Util.error("Goal pose is null");
             return new ChassisSpeeds();
-        }
-
-        if (constraints.maxLinearAccelerationMetersPerSecPerSec().hasChanged()) {
-            linearAccelLimiter.setLimit(constraints.maxLinearAccelerationMetersPerSecPerSec().get());
-        }
-        if (constraints.maxAngularAccelerationRadPerSecPerSec().hasChanged()) {
-            angularAccelLimiter.setLimit(constraints.maxAngularAccelerationRadPerSecPerSec().get());
         }
 
         Pose2d currentPose = robotState.getPose();
@@ -91,42 +67,27 @@ public class MoveToController {
         double distanceToGoal = currentPose.getTranslation().getDistance(goalPose.getTranslation());
         if (BuildConstants.isSimOrReplay) Logger.recordOutput("Drive/MoveTo/DistanceToGoalMeters", distanceToGoal);
 
-        double linearVelocityMetersPerSec = calculateLinearVelocityMetersPerSec(distanceToGoal, constraints);
+        double linearVelocityMetersPerSec = calculateLinearVelocityMetersPerSec(distanceToGoal);
         Rotation2d angleToGoalRad = goalPose.getTranslation().minus(currentPose.getTranslation()).getAngle();
         Translation2d linearXYVelocityMetersPerSec = new Translation2d(linearVelocityMetersPerSec, angleToGoalRad);
 
-        double angularVelocityRadPerSec = calculateAngularVelocityRadPerSec(currentPose, goalPose, constraints);
+        double angularVelocityRadPerSec = calculateAngularVelocityRadPerSec(currentPose, goalPose);
 
         // Scale linear speed by angular speed so that angular change is prioritized
         // When going max angular speed, reduce linear to 50%
         double linearScalar = MathUtil.clamp(1 - angularVelocityRadPerSec / DriveConstants.maxAngularVelocityRadPerSec, 0.50, 1);
 
-        linearXYVelocityMetersPerSec = linearAccelLimiter.calculate(linearXYVelocityMetersPerSec);
-        if (BuildConstants.isSimOrReplay)
-            Logger.recordOutput("Drive/MoveTo/LinearSetpoint", linearXYVelocityMetersPerSec.getNorm());
-
-        angularVelocityRadPerSec = angularAccelLimiter.calculate(angularVelocityRadPerSec);
-        if (BuildConstants.isSimOrReplay) Logger.recordOutput("Drive/MoveTo/LinearSetpoint", angularVelocityRadPerSec);
-
-        return ChassisSpeeds.fromFieldRelativeSpeeds(
+        return new ChassisSpeeds(
                 linearXYVelocityMetersPerSec.getX() * linearScalar,
                 linearXYVelocityMetersPerSec.getY() * linearScalar,
-                angularVelocityRadPerSec,
-                currentPose.getRotation() // Move to is absolute, don't flip
+                angularVelocityRadPerSec
         );
     }
 
-    private double calculateLinearVelocityMetersPerSec(double distanceToGoal, DriveConstants.MoveToConstraints constraints) {
+    private double calculateLinearVelocityMetersPerSec(double distanceToGoal) {
         double linearVelocityMetersPerSec = linearController.calculate(
                 -distanceToGoal,
                 0.0
-        );
-        // linear velocity *shouldn't* ever be negative because it is a magnitude
-        // but eh you never know
-        linearVelocityMetersPerSec = MathUtil.clamp(
-                linearVelocityMetersPerSec,
-                -constraints.maxLinearVelocityMetersPerSec().get(),
-                constraints.maxLinearVelocityMetersPerSec().get()
         );
         if (BuildConstants.isSimOrReplay)
             Logger.recordOutput("Drive/MoveTo/LinearSetpointUnlimited", linearVelocityMetersPerSec);
@@ -140,15 +101,10 @@ public class MoveToController {
         return linearVelocityMetersPerSec;
     }
 
-    private double calculateAngularVelocityRadPerSec(Pose2d currentPose, Pose2d goalPose, DriveConstants.MoveToConstraints constraints) {
+    private double calculateAngularVelocityRadPerSec(Pose2d currentPose, Pose2d goalPose) {
         double angularVelocityRadPerSec = angularController.calculate(
                 MathUtil.angleModulus(currentPose.getRotation().getRadians()),
                 MathUtil.angleModulus(goalPose.getRotation().getRadians())
-        );
-        angularVelocityRadPerSec = MathUtil.clamp(
-                angularVelocityRadPerSec,
-                -constraints.maxAngularVelocityRadPerSec().get(),
-                constraints.maxAngularVelocityRadPerSec().get()
         );
         if (BuildConstants.isSimOrReplay)
             Logger.recordOutput("Drive/MoveTo/AngularSetpointUnlimited", angularVelocityRadPerSec);
@@ -164,7 +120,6 @@ public class MoveToController {
 
     public void stop() {
         goalPoseSupplier = null;
-        constraints = null;
 
         robotState.setMoveToGoal(Optional.empty());
     }

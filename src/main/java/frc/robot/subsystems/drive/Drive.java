@@ -31,6 +31,8 @@ import frc.robot.OperatorDashboard;
 import frc.robot.RobotState;
 import frc.robot.controller.Controller;
 import frc.robot.shooting.ShootingKinematics;
+import frc.robot.subsystems.drive.constraints.DriveConstrainer;
+import frc.robot.subsystems.drive.constraints.DriveConstraints;
 import frc.robot.subsystems.drive.controllers.FollowTrajectoryController;
 import frc.robot.subsystems.drive.controllers.MoveToController;
 import lombok.Getter;
@@ -94,6 +96,8 @@ public class Drive extends CommandBasedSubsystem {
     private final MoveToController moveToController = new MoveToController();
     private final FollowTrajectoryController followTrajectoryController = new FollowTrajectoryController();
     private @Nullable Supplier<ChassisSpeeds> chassisSpeedsSetpointSupplier = null;
+
+    private final DriveConstrainer constrainer = new DriveConstrainer();
 
     /**
      * FL, FR, BL, BR
@@ -344,7 +348,7 @@ public class Drive extends CommandBasedSubsystem {
         } else if (state == State.CHARACTERIZATION) {
             // Do nothing - commands handle setting voltages
         } else {
-            ChassisSpeeds wantedSpeeds = new ChassisSpeeds();
+            ChassisSpeeds wantedFieldSpeeds = new ChassisSpeeds();
 
             OptionalDouble headingOverrideSetpoint = headingOverrideSetpointSupplier == null
                     ? OptionalDouble.empty()
@@ -352,7 +356,7 @@ public class Drive extends CommandBasedSubsystem {
 
             switch (state) {
                 case JOYSTICK_DRIVE -> {
-                    wantedSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(controller.getDriveFieldRelativeSpeeds(), robotState.getRotation());
+                    wantedFieldSpeeds = controller.getDriveFieldRelativeSpeeds();
 
                     if (headingOverrideSetpoint.isPresent() || controller.getDriveAngularMagnitude() != 0.0) {
                         joystickDriveHeadingStabilizeTimer.restart();
@@ -364,17 +368,22 @@ public class Drive extends CommandBasedSubsystem {
                         headingOverrideSetpoint = OptionalDouble.of(joystickDriveHeadingStabilizeSetpoint);
                     }
                 }
-                case MOVE_TO -> wantedSpeeds = moveToController.update();
-                case FOLLOW_TRAJECTORY -> wantedSpeeds = followTrajectoryController.update();
+                case MOVE_TO -> wantedFieldSpeeds = moveToController.update();
+                case FOLLOW_TRAJECTORY -> wantedFieldSpeeds = followTrajectoryController.update();
                 case CHASSIS_SPEEDS -> {
                     if (chassisSpeedsSetpointSupplier != null) {
-                        wantedSpeeds = chassisSpeedsSetpointSupplier.get();
+                        wantedFieldSpeeds = chassisSpeedsSetpointSupplier.get();
                     }
                 }
             }
 
+            // We are done with the linear part of the setpoint
+            // We need to constrain the linear part before giving the speeds to the heading override
+            // feedforward supplier or the feedforward would be for the speeds BEFORE limiting
+            constrainer.constrainFieldRelativeSpeedsLinear(wantedFieldSpeeds);
+
             if (headingOverrideSetpoint.isPresent()) {
-                wantedSpeeds.omegaRadiansPerSecond = headingOverrideController.calculate(
+                wantedFieldSpeeds.omegaRadiansPerSecond = headingOverrideController.calculate(
                         robotState.getRotation().getRadians(),
                         headingOverrideSetpoint.getAsDouble()
                 );
@@ -383,33 +392,35 @@ public class Drive extends CommandBasedSubsystem {
                 if (BuildConstants.isSimOrReplay)
                     Logger.recordOutput("Drive/HeadingOverrideAtSetpoint", atSetpoint);
                 if (atSetpoint) {
-                    wantedSpeeds.omegaRadiansPerSecond = 0.0;
+                    wantedFieldSpeeds.omegaRadiansPerSecond = 0.0;
                 }
 
                 OptionalDouble feedforward = headingOverrideFeedforwardSupplier == null
                         ? OptionalDouble.empty()
-                        : headingOverrideFeedforwardSupplier.apply(
-                        // DON'T FORGET TO CONVERT TO FIELD RELATIVE
-                        ChassisSpeeds.fromRobotRelativeSpeeds(wantedSpeeds, robotState.getRotation())
-                );
+                        : headingOverrideFeedforwardSupplier.apply(wantedFieldSpeeds);
                 if (feedforward.isPresent()) {
-                    wantedSpeeds.omegaRadiansPerSecond += feedforward.getAsDouble();
+                    wantedFieldSpeeds.omegaRadiansPerSecond += feedforward.getAsDouble();
                 }
             } else {
                 headingOverrideController.reset();
             }
 
-            if (wantedSpeeds.vxMetersPerSecond == 0.0 && wantedSpeeds.vyMetersPerSecond == 0.0 && wantedSpeeds.omegaRadiansPerSecond == 0.0) {
+            // Now we are done with the angular part of the setpoint and can constrain it
+            constrainer.constrainFieldRelativeSpeedsAngular(wantedFieldSpeeds);
+
+            if (wantedFieldSpeeds.vxMetersPerSecond == 0.0 && wantedFieldSpeeds.vyMetersPerSecond == 0.0 && wantedFieldSpeeds.omegaRadiansPerSecond == 0.0) {
                 // Re-evaluate state machine to stop - this handles stopping with X in a nice way
                 return evaluateStateMachine(State.STOP);
             }
 
-            Logger.recordOutput("Drive/ModuleStates/Setpoints", robotState.getKinematics().toSwerveModuleStates(wantedSpeeds));
+            ChassisSpeeds wantedRobotSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(wantedFieldSpeeds, robotState.getRotation());
+
+            Logger.recordOutput("Drive/ModuleStates/Setpoints", robotState.getKinematics().toSwerveModuleStates(wantedRobotSpeeds));
 
             // Discretize - use larger dt than actual to reduce translational skew when rotating and translating at the same time
             // See https://www.chiefdelphi.com/t/whitepaper-swerve-drive-skew-and-second-order-kinematics/416964/5
             // and https://github.com/frc1678/C2024-Public/blob/main/src/main/java/com/team1678/frc2024/subsystems/Drive.java#L406
-            ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(wantedSpeeds, Constants.loopPeriod * 4.0);
+            ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(wantedRobotSpeeds, Constants.loopPeriod * 4.0);
 
             // Convert to module states and desaturate
             SwerveModuleState[] setpointStates = robotState.getKinematics().toSwerveModuleStates(discreteSpeeds);
@@ -480,10 +491,10 @@ public class Drive extends CommandBasedSubsystem {
         return new ModifiableDriveCommand(startEnd(
                 () -> {
                     wantedState = State.MOVE_TO;
-                    moveToController.start(goalPoseSupplier, constraints);
+                    moveToController.start(goalPoseSupplier);
                 },
                 moveToController::stop
-        ));
+        )).withConstraints(constraints);
     }
 
     public ModifiableDriveCommand followTrajectory(Trajectory<SwerveSample> trajectory) {
@@ -547,6 +558,22 @@ public class Drive extends CommandBasedSubsystem {
             };
         }
 
+        public ModifiableDriveCommand withConstraints(DriveConstraints constraints) {
+            return new ModifiableDriveCommand(this) {
+                @Override
+                public void initialize() {
+                    constrainer.start(constraints);
+                    super.initialize();
+                }
+
+                @Override
+                public void end(boolean interrupted) {
+                    constrainer.stop();
+                    super.end(interrupted);
+                }
+            };
+        }
+
         public ModifiableDriveCommand withAiming() {
             return withHeadingOverride(
                     () -> operatorDashboard.manualAiming.get()
@@ -555,7 +582,9 @@ public class Drive extends CommandBasedSubsystem {
                     (speeds) -> operatorDashboard.manualAiming.get()
                             ? OptionalDouble.empty()
                             : OptionalDouble.of(shootingKinematics.rotationAboutHubRadiansPerSecForDrivebase(speeds))
-            ).withStopWithX();
+            )
+                    .withStopWithX()
+                    .withConstraints(shootingConstraints);
         }
     }
 
