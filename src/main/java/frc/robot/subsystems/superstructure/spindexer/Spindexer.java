@@ -1,5 +1,9 @@
 package frc.robot.subsystems.superstructure.spindexer;
 
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.lib.Util;
@@ -84,5 +88,15 @@ public class Spindexer implements Periodic {
 
     public double getPositionRad() {
         return inputs.positionRad;
+    }
+
+    public Transform3d spindexerTransform() {
+        return new Transform3d(
+                new Translation3d(0.0, Units.inchesToMeters(1.4), Units.inchesToMeters(12.0)),
+                new Rotation3d(0.0, 0.0, Units.degreesToRadians(90.0))
+        ).plus(new Transform3d(
+                new Translation3d(),
+                new Rotation3d(0.0, getPositionRad(), 0.0)
+        ));
     }
 }

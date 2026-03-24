@@ -3,10 +3,7 @@ package frc.robot;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -24,6 +21,8 @@ import org.littletonrobotics.junction.AutoLogOutput;
 
 import java.util.Optional;
 import java.util.function.Supplier;
+
+import static frc.robot.subsystems.drive.DriveConstants.driveConfig;
 
 public class RobotState implements Periodic {
     @Getter
@@ -254,11 +253,11 @@ public class RobotState implements Periodic {
     }
 
     @AutoLogOutput(key = "RobotState/IsInTrench")
-    public boolean isInTrench() {
+    public boolean isInTrench(Translation2d t) {
         // make each bounding box larger so that the hood has time to move down before going under the trench
         double adjustmentMetersPositiveX = 0.55 + Math.max(0.0, getMeasuredChassisSpeedsFieldRelative().vxMetersPerSecond) * 0.5;
         double adjustmentMetersNegativeX = 0.55 + Math.min(0.0, getMeasuredChassisSpeedsFieldRelative().vxMetersPerSecond) * -0.5;
-        Translation2d t = getTranslation();
+        //Translation2d t = getTranslation();
         //Logger.recordOutput(
         //        "RobotState/TrenchChecks",
         //        new Pose2d(new Translation2d(FieldConstants.LinesVertical.neutralZoneNear + adjustmentMetersNegativeX, 0.6), new Rotation2d()),
@@ -273,5 +272,13 @@ public class RobotState implements Periodic {
         boolean inLeftTrench = t.getY() > FieldConstants.LinesHorizontal.leftTrenchOpenEnd;
         boolean inRightTrench = t.getY() < FieldConstants.LinesHorizontal.rightTrenchOpenStart;
         return !inNeutralZone && !inAllianceZone && (inLeftTrench || inRightTrench);
+    }
+
+    public Pose3d robotPoseMec() {
+        return new Pose3d(getPose())
+                .transformBy(new Transform3d(
+                        new Translation3d(0.0, 0.0, driveConfig.bottomOfFrameRailsToCenterOfWheelsMeters() + driveConfig.wheelRadiusMeters()),
+                        new Rotation3d()
+                ));
     }
 }
