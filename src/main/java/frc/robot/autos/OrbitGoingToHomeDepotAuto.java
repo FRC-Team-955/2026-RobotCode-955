@@ -2,16 +2,10 @@ package frc.robot.autos;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.commands.CommandsExt;
-import frc.robot.FieldConstants;
 import frc.robot.subsystems.superintake.Superintake;
 import frc.robot.subsystems.superstructure.Superstructure;
-
-import static frc.robot.autos.AutoHelpers.intakeConstraints;
-import static frc.robot.subsystems.drive.DriveConstants.defaultMoveToConstraints;
 
 public class OrbitGoingToHomeDepotAuto extends Auto {
     private static final Superintake superintake = Superintake.get();
@@ -31,6 +25,7 @@ public class OrbitGoingToHomeDepotAuto extends Auto {
 
     private static Command build() {
         return CommandsExt.eagerSequence(
+                /*
                 // move out of trench
                 AutoHelpers.intermediateWaypoint(() -> new Pose2d(
                         exitTrenchX,
@@ -180,6 +175,7 @@ public class OrbitGoingToHomeDepotAuto extends Auto {
                 //        superstructure.setGoal(Superstructure.Goal.SHOOT),
                 //        AutoHelpers.finalWaypoint(() -> trenchShootingPosition, defaultMoveToConstraints.withAiming(true))
                 //).withTimeout(5)
+                 */
         );
     }
 }

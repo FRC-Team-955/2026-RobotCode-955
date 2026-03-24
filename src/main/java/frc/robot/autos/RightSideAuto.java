@@ -48,9 +48,7 @@ public final class RightSideAuto extends Auto {
             new LoggedTunableNumber("RightSideAuto/MoveTo/MaxLinearVelocity", 0.5),
             new LoggedTunableNumber("RightSideAuto/MoveTo/MaxLinearAcceleration", 15.0),
             new LoggedTunableNumber("RightSideAuto/MoveTo/MaxAngularVelocity", maxAngularVelocityRadPerSec),
-            new LoggedTunableNumber("RightSideAuto/MoveTo/MaxAngularAcceleration", 30.0),
-            false,
-            false
+            new LoggedTunableNumber("RightSideAuto/MoveTo/MaxAngularAcceleration", 30.0)
     );
 
     private static final int INTERPOLATION_START_INDEX = baseWaypoints.size();
