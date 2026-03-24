@@ -3,70 +3,113 @@
  "version":2,
  "type":"Swerve",
  "variables":{
-  "expressions":{},
+  "expressions":{
+   "BumperLength":{
+    "dimension":"Length",
+    "var":{
+     "exp":"31.5 in",
+     "val":0.8000999999999999
+    }
+   },
+   "BumperWidth":{
+    "dimension":"Length",
+    "var":{
+     "exp":"36.5 in",
+     "val":0.9271
+    }
+   },
+   "GearRatio":{
+    "dimension":"Number",
+    "var":{
+     "exp":"(50 / 16) * (17 / 27) * (45 / 15)",
+     "val":5.902777777777778
+    }
+   },
+   "TrackLength":{
+    "dimension":"Length",
+    "var":{
+     "exp":"19.25 in",
+     "val":0.48895
+    }
+   },
+   "TrackWidth":{
+    "dimension":"Length",
+    "var":{
+     "exp":"24.25 in",
+     "val":0.61595
+    }
+   },
+   "WheelRadius":{
+    "dimension":"Length",
+    "var":{
+     "exp":"1.883 in",
+     "val":0.0478282
+    }
+   }
+  },
   "poses":{}
  },
  "config":{
   "frontLeft":{
    "x":{
-    "exp":"11 in",
-    "val":0.2794
+    "exp":"TrackLength / 2",
+    "val":0.244475
    },
    "y":{
-    "exp":"11 in",
-    "val":0.2794
+    "exp":"TrackWidth / 2",
+    "val":0.307975
    }
   },
   "backLeft":{
    "x":{
-    "exp":"-11 in",
-    "val":-0.2794
+    "exp":"-TrackLength / 2",
+    "val":-0.244475
    },
    "y":{
-    "exp":"11 in",
-    "val":0.2794
+    "exp":"TrackWidth / 2",
+    "val":0.307975
    }
   },
   "mass":{
-   "exp":"150 lbs",
-   "val":68.0388555
+   "exp":"140 lbs",
+   "val":63.502931800000006
   },
   "inertia":{
-   "exp":"6 kg m ^ 2",
-   "val":6.0
+   "exp":"20161.244269 lb * in ^ 2",
+   "val":5.899979535581604
   },
   "gearing":{
-   "exp":"6.5",
-   "val":6.5
+   "exp":"GearRatio",
+   "val":5.902777777777778
   },
   "radius":{
-   "exp":"2 in",
-   "val":0.0508
+   "exp":"WheelRadius",
+   "val":0.0478282
   },
   "vmax":{
-   "exp":"6000 RPM",
-   "val":628.3185307179587
+   "exp":"0.9 * 6065 RPM",
+   "val":571.6127833206629
   },
   "tmax":{
-   "exp":"1.2 N * m",
-   "val":1.2
+   "exp":"0.9 * 1.418 N * m",
+   "val":1.2762
   },
   "cof":{
-   "exp":"1.5",
-   "val":1.5
+   "exp":"1.4",
+   "val":1.4
   },
   "bumper":{
    "front":{
-    "exp":"16 in",
-    "val":0.4064
+    "exp":"BumperLength / 2",
+    "val":0.40005
    },
    "side":{
-    "exp":"16 in",
-    "val":0.4064
+    "exp":"BumperWidth / 2",
+    "val":0.46355
    },
    "back":{
-    "exp":"16 in",
-    "val":0.4064
+    "exp":"BumperLength / 2",
+    "val":0.40005
    }
   },
   "differentialTrackWidth":{
