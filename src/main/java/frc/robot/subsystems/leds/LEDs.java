@@ -181,7 +181,10 @@ public class LEDs implements Periodic {
 
         if (lowBattery) {
             LEDPatterns.lowBattery.applyTo(firstHalfView);
+            return;
         }
+
+        LEDPatterns.idle.applyTo(firstHalfView);
     }
 }
 
