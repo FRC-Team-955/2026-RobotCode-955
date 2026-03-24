@@ -477,10 +477,13 @@ public class Drive extends CommandBasedSubsystem {
     }
 
     public ModifiableDriveCommand joystickDrive() {
-        return new ModifiableDriveCommand(startIdle(() -> {
-            wantedState = State.JOYSTICK_DRIVE;
-            joystickDriveHeadingStabilizeTimer.restart();
-        }));
+        return new ModifiableDriveCommand(startEnd(
+                () -> {
+                    wantedState = State.JOYSTICK_DRIVE;
+                    joystickDriveHeadingStabilizeTimer.restart();
+                },
+                () -> wantedState = State.STOP
+        ));
     }
 
     public ModifiableDriveCommand moveTo(Supplier<Pose2d> goalPoseSupplier) {
@@ -493,7 +496,10 @@ public class Drive extends CommandBasedSubsystem {
                     wantedState = State.MOVE_TO;
                     moveToController.start(goalPoseSupplier);
                 },
-                moveToController::stop
+                () -> {
+                    wantedState = State.STOP;
+                    moveToController.stop();
+                }
         )).withConstraints(constraints);
     }
 
@@ -503,16 +509,22 @@ public class Drive extends CommandBasedSubsystem {
                     wantedState = State.FOLLOW_TRAJECTORY;
                     followTrajectoryController.start(trajectory);
                 },
-                followTrajectoryController::stop,
+                () -> {
+                    wantedState = State.STOP;
+                    followTrajectoryController.stop();
+                },
                 followTrajectoryController::isDone
         ));
     }
 
     public ModifiableDriveCommand chassisSpeeds(Supplier<ChassisSpeeds> chassisSpeedsSupplier) {
-        return new ModifiableDriveCommand(startIdle(() -> {
-            wantedState = State.CHASSIS_SPEEDS;
-            chassisSpeedsSetpointSupplier = chassisSpeedsSupplier;
-        }));
+        return new ModifiableDriveCommand(startEnd(
+                () -> {
+                    wantedState = State.CHASSIS_SPEEDS;
+                    chassisSpeedsSetpointSupplier = chassisSpeedsSupplier;
+                },
+                () -> wantedState = State.STOP
+        ));
     }
 
     public class ModifiableDriveCommand extends WrapperCommand {
