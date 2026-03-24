@@ -86,7 +86,7 @@ public class RobotContainer {
         Trigger shoot = controller.leftTrigger();
         Trigger shootForce = controller.leftBumper();
 
-        BooleanSupplier shouldNotAssist = () -> operatorDashboard.disableAssist.get() || robotState.isInTrench();
+        BooleanSupplier shouldNotAssist = () -> operatorDashboard.disableAssist.get() || robotState.isInTrench(robotState.getTranslation());
         intake
                 .and(shoot.negate())
                 .whileTrue(Commands.parallel(

@@ -1,6 +1,10 @@
 package frc.robot.subsystems.superstructure.feeder;
 
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.lib.Util;
@@ -90,5 +94,15 @@ public class Feeder implements Periodic {
 
     public double getPositionRad() {
         return inputs.positionRad;
+    }
+
+    public Transform3d feederTransform() {
+        return new Transform3d(
+                new Translation3d(Units.inchesToMeters(-3.451296), Units.inchesToMeters(-5.445256), Units.inchesToMeters(8.430151)),
+                new Rotation3d(0.0, 0.0, Units.degreesToRadians(90.0))
+        ).plus((new Transform3d(
+                new Translation3d(),
+                new Rotation3d(0.0, getPositionRad(), 0.0)
+        )));
     }
 }
