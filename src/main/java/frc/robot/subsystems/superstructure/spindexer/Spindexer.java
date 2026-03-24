@@ -36,7 +36,8 @@ public class Spindexer implements Periodic {
     public enum Goal {
         IDLE(() -> 0, RequestType.VoltageVolts),
         FEED(feedVoltage::get, RequestType.VoltageVolts),
-        EJECT(() -> Timer.getTimestamp() % 1.0 < 0.5 ? ejectVoltage.get() : -ejectVoltage.get(), RequestType.VoltageVolts),
+        EJECT(ejectVoltage::get, RequestType.VoltageVolts),
+        EJECT_ALTERNATE(() -> Timer.getTimestamp() % 1.0 < 0.5 ? ejectVoltage.get() : -ejectVoltage.get(), RequestType.VoltageVolts),
         ;
 
         /** Should be constant for every loop cycle */

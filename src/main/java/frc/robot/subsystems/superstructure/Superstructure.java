@@ -160,7 +160,7 @@ public class Superstructure extends CommandBasedSubsystem {
             case EJECT -> {
                 flywheel.setGoal(Flywheel.Goal.EJECT);
                 feeder.setGoal(Feeder.Goal.EJECT);
-                spindexer.setGoal(Spindexer.Goal.EJECT);
+                spindexer.setGoal(Spindexer.Goal.EJECT_ALTERNATE);
                 hood.setGoal(Hood.Goal.STOW);
             }
         }
