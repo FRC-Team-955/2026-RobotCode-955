@@ -140,7 +140,7 @@ public class DriveConstants {
             // Module order: FL, FR, BL, BR
             case REAL -> new ModuleIO[]{
                     new ModuleIOTalonFXSparkMaxCANcoder(0, 2, 1, 9, -1.6145),
-                    new ModuleIOTalonFXSparkMaxCANcoder(1, 4, 3, 10, 2.383),
+                    new ModuleIOTalonFXSparkMaxCANcoder(1, 4, 3, 10, 1.875),
                     new ModuleIOTalonFXSparkMaxCANcoder(2, 6, 5, 11, -0.584),
                     new ModuleIOTalonFXSparkMaxCANcoder(3, 8, 7, 12, 2.7495),
             };
