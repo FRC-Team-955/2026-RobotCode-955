@@ -88,31 +88,22 @@ public class AutoHelpers {
         ));
     }
 
-
     @SuppressWarnings("unchecked")
-    public static Command trajectory(String name) {
+    public static Drive.ModifiableDriveCommand trajectory(ChoreoTraj traj) {
         // Basically copied from AutoFactory
-        Optional<? extends Trajectory<?>> optTrajectory = trajectoryCache.loadTrajectory(name);
+        Optional<? extends Trajectory<?>> optTrajectory;
+        if (traj.segment().isPresent()) {
+            optTrajectory = trajectoryCache.loadTrajectory(traj.name(), traj.segment().getAsInt());
+        } else {
+            optTrajectory = trajectoryCache.loadTrajectory(traj.name());
+        }
         if (optTrajectory.isPresent()) {
             return drive.followTrajectory((Trajectory<SwerveSample>) optTrajectory.get());
         } else {
-            Util.error("Trajectory " + name + " is not present");
-            return drive.idle();
+            Util.error("Trajectory " + traj.name() + " is not present");
+            return drive.stop();
         }
     }
-
-    @SuppressWarnings("unchecked")
-    public static Command trajectory(String name, final int splitIndex) {
-        // Basically copied from AutoFactory
-        Optional<? extends Trajectory<?>> optTrajectory = trajectoryCache.loadTrajectory(name, splitIndex);
-        if (optTrajectory.isPresent()) {
-            return drive.followTrajectory((Trajectory<SwerveSample>) optTrajectory.get());
-        } else {
-            Util.error("Trajectory " + name + " is not present");
-            return drive.idle();
-        }
-    }
-
 
     public static Pose2d yDistanceInterpolation(
             Translation2d start,

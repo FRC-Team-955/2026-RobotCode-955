@@ -39,7 +39,7 @@ public class AutoManager {
         autoChooser.addOption("None", null);
         //autoChooser.addOption("LeftSideAuto", new LeftSideAuto());
         //autoChooser.addOption("RightSideAuto", new RightSideAuto());
-        autoChooser.addOption("Orbit at Home Depot", new OrbitAtHomeDepotAuto());
+        autoChooser.addOption("Canadian Depot", new CanadianDepotAuto());
         autoChooser.addOption("Orbit at the outpost", new OrbitAtTheOutpostAuto());
         autoChooser.addOption("Aura", new AuraAuto());
         autoChooser.addOption("Test", new OrbitGoingToHomeDepotAuto());

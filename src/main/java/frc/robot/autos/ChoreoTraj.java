@@ -20,26 +20,12 @@ public record ChoreoTraj(
     Pose2d initialPoseBlue,
     Pose2d endPoseBlue
 ) {
-    public static final ChoreoTraj NewPath_copy7 = new ChoreoTraj(
-	    "NewPath_copy7",
+    public static final ChoreoTraj CanadianDepot_FirstPass = new ChoreoTraj(
+	    "CanadianDepot_FirstPass",
 	    OptionalInt.empty(),
-	    1.58859,
-	    new Pose2d(7.271, 4.3, Rotation2d.fromRadians(-1.571)),
-	    new Pose2d(5.85, 4.3, Rotation2d.fromRadians(1.571))
-	);
-	public static final ChoreoTraj NewPath_copy7$0 = new ChoreoTraj(
-	    "NewPath_copy7",
-	    OptionalInt.of(0),
-	    0.79872,
-	    new Pose2d(7.271, 4.3, Rotation2d.fromRadians(-1.571)),
-	    new Pose2d(6.636, 3.325, Rotation2d.fromRadians(-3.142))
-	);
-	public static final ChoreoTraj NewPath_copy7$1 = new ChoreoTraj(
-	    "NewPath_copy7",
-	    OptionalInt.of(1),
-	    0.78987,
-	    new Pose2d(6.636, 3.325, Rotation2d.fromRadians(-3.142)),
-	    new Pose2d(5.85, 4.3, Rotation2d.fromRadians(1.571))
+	    4.43709,
+	    new Pose2d(6.34, 7.55, Rotation2d.fromRadians(-1.571)),
+	    new Pose2d(3.965, 5.618, Rotation2d.fromRadians(1.995))
 	);
 
     /**
@@ -47,9 +33,7 @@ public record ChoreoTraj(
      * This allows for trajectory data to be looked up with strings during runtime.
      */
     public static final Map<String, ChoreoTraj> ALL_TRAJECTORIES = Map.ofEntries(
-    	Map.entry("NewPath_copy7", NewPath_copy7),
-		Map.entry("NewPath_copy7$0", NewPath_copy7$0),
-		Map.entry("NewPath_copy7$1", NewPath_copy7$1)
+    	Map.entry("CanadianDepot_FirstPass", CanadianDepot_FirstPass)
     );
 
     /**
