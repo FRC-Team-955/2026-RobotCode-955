@@ -1,7 +1,12 @@
 package frc.robot.subsystems.superstructure.spindexer;
 
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Timer;
 import frc.lib.Util;
 import frc.lib.motor.MotorIO;
 import frc.lib.motor.MotorIOInputsAutoLogged;
@@ -31,7 +36,7 @@ public class Spindexer implements Periodic {
     public enum Goal {
         IDLE(() -> 0, RequestType.VoltageVolts),
         FEED(feedVoltage::get, RequestType.VoltageVolts),
-        EJECT(ejectVoltage::get, RequestType.VoltageVolts),
+        EJECT(() -> Timer.getTimestamp() % 1.0 < 0.5 ? ejectVoltage.get() : -ejectVoltage.get(), RequestType.VoltageVolts),
         ;
 
         /** Should be constant for every loop cycle */
@@ -84,5 +89,15 @@ public class Spindexer implements Periodic {
 
     public double getPositionRad() {
         return inputs.positionRad;
+    }
+
+    public Transform3d spindexerTransform() {
+        return new Transform3d(
+                new Translation3d(0.0, Units.inchesToMeters(1.4), Units.inchesToMeters(12.0)),
+                new Rotation3d(0.0, 0.0, Units.degreesToRadians(90.0))
+        ).plus(new Transform3d(
+                new Translation3d(),
+                new Rotation3d(0.0, getPositionRad(), 0.0)
+        ));
     }
 }

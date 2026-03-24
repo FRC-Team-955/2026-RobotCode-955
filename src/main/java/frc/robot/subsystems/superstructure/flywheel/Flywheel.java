@@ -1,5 +1,8 @@
 package frc.robot.subsystems.superstructure.flywheel;
 
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -99,5 +102,15 @@ public class Flywheel implements Periodic {
 
     public double getSetpointRPM() {
         return goal.setpointRPM.getAsDouble();
+    }
+
+    public Transform3d flywheelTransform() {
+        return new Transform3d(
+                new Translation3d(Units.inchesToMeters(-6.910046), Units.inchesToMeters(-9.109744), Units.inchesToMeters(12.861381)),
+                new Rotation3d(0.0, 0.0, 0.0)
+        ).plus(new Transform3d(
+                new Translation3d(),
+                new Rotation3d(0.0, getPositionRad(), 0.0)
+        ));
     }
 }

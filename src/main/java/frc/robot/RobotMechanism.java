@@ -1,44 +1,16 @@
 package frc.robot;
 
 import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.math.geometry.Translation3d;
-import edu.wpi.first.math.util.Units;
 import frc.lib.Util;
 import frc.lib.subsystem.Periodic;
 import frc.robot.subsystems.superintake.Superintake;
 import frc.robot.subsystems.superstructure.Superstructure;
 import org.littletonrobotics.junction.Logger;
 
-import static frc.robot.subsystems.drive.DriveConstants.driveConfig;
-
 public class RobotMechanism implements Periodic {
     // All transforms are relative to center of robot at the bottom of the frame rail
-    private static final Transform3d intakeRollersInitial = new Transform3d(
-            new Translation3d(Units.inchesToMeters(19.75), 0.0, Units.inchesToMeters(8.985680)),
-            new Rotation3d()
-    );
-    private static final Transform3d spindexerInitial = new Transform3d(
-            new Translation3d(0.0, Units.inchesToMeters(1.4), Units.inchesToMeters(12.0)),
-            new Rotation3d(0.0, 0.0, Units.degreesToRadians(90.0))
-    );
-    private static final Transform3d flywheelsInitial = new Transform3d(
-            new Translation3d(Units.inchesToMeters(-6.910046), Units.inchesToMeters(-9.109744), Units.inchesToMeters(12.861381)),
-            new Rotation3d(0.0, 0.0, 0.0)
-    );
-    private static final Transform3d feederInitial = new Transform3d(
-            new Translation3d(Units.inchesToMeters(-3.451296), Units.inchesToMeters(-5.445256), Units.inchesToMeters(8.430151)),
-            new Rotation3d(0.0, 0.0, Units.degreesToRadians(90.0))
-    );
-    private static final Transform3d intakePivotInitial = new Transform3d(
-            new Translation3d(Units.inchesToMeters(10.0), 0.0, Units.inchesToMeters(6.25)),
-            new Rotation3d(0.0, Units.degreesToRadians(90.0), 0.0)
-    );
-    private static final Transform3d hoodInitial = new Transform3d(
-            flywheelsInitial.getTranslation(),
-            new Rotation3d(0.0, Units.degreesToRadians(-90.0), Math.PI)
-    );
+
 
     private static final RobotState robotState = RobotState.get();
     private static final Superintake superintake = Superintake.get();
@@ -62,41 +34,19 @@ public class RobotMechanism implements Periodic {
 
     @Override
     public void periodicAfterCommands() {
-        Pose3d robotPose = new Pose3d(robotState.getPose())
-                .transformBy(new Transform3d(
-                        new Translation3d(0.0, 0.0, driveConfig.bottomOfFrameRailsToCenterOfWheelsMeters() + driveConfig.wheelRadiusMeters()),
-                        new Rotation3d()
-                ));
+        Pose3d robotPose = robotState.robotPoseMec();
 
-        Transform3d intakeRollersTransform = intakeRollersInitial.plus(new Transform3d(
-                new Translation3d(),
-                new Rotation3d(0.0, superintake.intakeRollers.getPositionRad(), 0.0)
-        ));
+        Transform3d intakeRollersTransform = superintake.intakeRollers.intakeRollersTransform();
 
-        Transform3d intakePivotTransform = intakePivotInitial.plus(new Transform3d(
-                new Translation3d(),
-                new Rotation3d(0.0, -superintake.intakePivot.getPositionRad(), 0.0)
-        ));
+        Transform3d intakePivotTransform = superintake.intakePivot.intakePivotTransform();
 
-        Transform3d spindexerTransform = spindexerInitial.plus(new Transform3d(
-                new Translation3d(),
-                new Rotation3d(0.0, superstructure.spindexer.getPositionRad(), 0.0)
-        ));
+        Transform3d spindexerTransform = superstructure.spindexer.spindexerTransform();
 
-        Transform3d feederTransform = feederInitial.plus(new Transform3d(
-                new Translation3d(),
-                new Rotation3d(0.0, superstructure.feeder.getPositionRad(), 0.0)
-        ));
+        Transform3d feederTransform = superstructure.feeder.feederTransform();
 
-        Transform3d flywheelTransform = flywheelsInitial.plus(new Transform3d(
-                new Translation3d(),
-                new Rotation3d(0.0, superstructure.flywheel.getPositionRad(), 0.0)
-        ));
+        Transform3d flywheelTransform = superstructure.flywheel.flywheelTransform();
 
-        Transform3d hoodTransform = hoodInitial.plus(new Transform3d(
-                new Translation3d(),
-                new Rotation3d(0.0, superstructure.hood.getPositionRad(), 0.0)
-        ));
+        Transform3d hoodTransform = superstructure.hood.hoodTransform();
 
         Logger.recordOutput("RobotMechanism/Pose", robotPose);
         Logger.recordOutput(

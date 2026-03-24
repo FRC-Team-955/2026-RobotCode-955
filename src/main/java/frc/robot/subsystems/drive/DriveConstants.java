@@ -28,7 +28,7 @@ public class DriveConstants {
             // TO TUNE WHEEL RADIUS: Place robot on carpet and use wheel radius characterization auto.
             // Output will be in console in AdvantageScope.
             // KEEP SYNCED WITH shooting_regression.py
-            Units.inchesToMeters(1.945),
+            Units.inchesToMeters(1.883),
             Units.inchesToMeters(19.25),
             Units.inchesToMeters(24.25),
             Units.inchesToMeters(36.5),
@@ -70,7 +70,7 @@ public class DriveConstants {
     );
 
     /** Must be below maxAngularVelocityRadPerSec */
-    public static final double joystickMaxAngularSpeedRadPerSec = Units.degreesToRadians(300);
+    public static final double joystickMaxAngularSpeedRadPerSec = Units.degreesToRadians(400);
     public static final double joystickDriveDeadband = 0.05;
 
     static final ModuleConfig moduleConfig = switch (BuildConstants.mode) {
@@ -139,7 +139,7 @@ public class DriveConstants {
             // Module order: FL, FR, BL, BR
             case REAL -> new ModuleIO[]{
                     new ModuleIOTalonFXSparkMaxCANcoder(0, 2, 1, 9, -1.6145),
-                    new ModuleIOTalonFXSparkMaxCANcoder(1, 4, 3, 10, 2.383),
+                    new ModuleIOTalonFXSparkMaxCANcoder(1, 4, 3, 10, 1.875),
                     new ModuleIOTalonFXSparkMaxCANcoder(2, 6, 5, 11, -0.584),
                     new ModuleIOTalonFXSparkMaxCANcoder(3, 8, 7, 12, 2.7495),
             };

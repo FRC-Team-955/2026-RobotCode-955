@@ -13,6 +13,7 @@
 
 package frc.robot;
 
+import com.reduxrobotics.canand.CanandEventLoop;
 import com.revrobotics.util.StatusLogger;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
@@ -52,6 +53,9 @@ public class Robot extends LoggedRobot {
 
         // Stop REV logger
         StatusLogger.disableAutoLogging();
+
+        // Start Redux CanLink
+        CanandEventLoop.getInstance();
 
         if (BuildConstants.isSim) {
             // Setup arena BEFORE any of our robot code tries to use it
