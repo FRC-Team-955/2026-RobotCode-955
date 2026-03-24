@@ -6,6 +6,7 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Timer;
 import frc.lib.Util;
 import frc.lib.motor.MotorIO;
 import frc.lib.motor.MotorIOInputsAutoLogged;
@@ -35,7 +36,7 @@ public class Spindexer implements Periodic {
     public enum Goal {
         IDLE(() -> 0, RequestType.VoltageVolts),
         FEED(feedVoltage::get, RequestType.VoltageVolts),
-        EJECT(ejectVoltage::get, RequestType.VoltageVolts),
+        EJECT(() -> Timer.getTimestamp() % 1.0 < 0.5 ? ejectVoltage.get() : -ejectVoltage.get(), RequestType.VoltageVolts),
         ;
 
         /** Should be constant for every loop cycle */
