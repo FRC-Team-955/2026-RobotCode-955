@@ -21,7 +21,7 @@ import org.littletonrobotics.junction.Logger;
 import static edu.wpi.first.units.Units.*;
 
 public class SuperstructureIOSim extends SuperstructureIO {
-    private static final double shootingBallsPerSec = 6.0;
+    private static final double shootingBallsPerSec = 8.0;
     private static final double ballShootDelay = 1.0 / shootingBallsPerSec;
 
     private static final IntakePivot intakePivot = IntakePivot.get();
