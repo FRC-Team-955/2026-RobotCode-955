@@ -29,8 +29,8 @@ public class DriveConstants {
             // Output will be in console in AdvantageScope.
             // KEEP SYNCED WITH shooting_regression.py
             Units.inchesToMeters(1.883),
-            Units.inchesToMeters(19.25),
             Units.inchesToMeters(24.25),
+            Units.inchesToMeters(19.25),
             Units.inchesToMeters(36.5),
             Units.inchesToMeters(31.5),
             // KEEP SYNCED WITH shooting_regression.py
@@ -42,13 +42,13 @@ public class DriveConstants {
      * FL, FR, BL, BR
      */
     public static final Translation2d[] moduleTranslations = new Translation2d[]{
-            new Translation2d(driveConfig.trackWidthMeters / 2.0, driveConfig.trackLengthMeters / 2.0),
-            new Translation2d(driveConfig.trackWidthMeters / 2.0, -driveConfig.trackLengthMeters / 2.0),
-            new Translation2d(-driveConfig.trackWidthMeters / 2.0, driveConfig.trackLengthMeters / 2.0),
-            new Translation2d(-driveConfig.trackWidthMeters / 2.0, -driveConfig.trackLengthMeters / 2.0)
+            new Translation2d(driveConfig.trackLengthMeters / 2.0, driveConfig.trackWidthMeters / 2.0),
+            new Translation2d(driveConfig.trackLengthMeters / 2.0, -driveConfig.trackWidthMeters / 2.0),
+            new Translation2d(-driveConfig.trackLengthMeters / 2.0, driveConfig.trackWidthMeters / 2.0),
+            new Translation2d(-driveConfig.trackLengthMeters / 2.0, -driveConfig.trackWidthMeters / 2.0)
     };
 
-    public static final double drivebaseRadiusMeters = Math.hypot(driveConfig.trackWidthMeters / 2.0, driveConfig.trackLengthMeters / 2.0);
+    public static final double drivebaseRadiusMeters = Math.hypot(driveConfig.trackLengthMeters / 2.0, driveConfig.trackWidthMeters / 2.0);
 
     /** Maximum angular velocity of the whole drivetrain if all drive motors/wheels are going at full speed. */
     public static final double maxAngularVelocityRadPerSec = driveConfig.maxVelocityMetersPerSec() / drivebaseRadiusMeters;
@@ -188,6 +188,8 @@ public class DriveConstants {
 
     public record DriveConfig(
             double wheelRadiusMeters,
+            // Width = Y axis
+            // Length = X axis
             double trackWidthMeters, // Measured from the center of the swerve wheels
             double trackLengthMeters,
             double bumperWidthMeters,
