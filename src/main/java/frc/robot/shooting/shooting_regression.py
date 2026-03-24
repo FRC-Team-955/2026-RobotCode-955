@@ -356,16 +356,18 @@ def optimize_shot(distance, robot_radial_vel):
             x, y, z, direction, x_full, y_full, z_full = calculate_trajectory_iterative(v, shot_angle, robot_radial_vel,
                                                                                         x0)
             shots_simmed += 1
-            steps = len(x)
+            # Use the full trajectory - ToF is when it actually hits the hub, not when it passes through the top
+            tof = t[len(x_full) - 1]
             x_1, entry_angle_1 = get_end_parameters(x, z, direction)
-            if DEBUG_SHOT and not DEBUG_DISTANCE_RANGE and not DEBUG_VELOCITY_RANGE and i % (max_iterations / 10) == 0:
-                ax.plot(x_full, z_full, linestyle="dotted", c=(1 - i / max_iterations, i / max_iterations, 0))
 
             # If guess is within tolerance, exit early
             # print(i, abs(x_1 - wanted_x) <= x_tolerance, abs(entry_angle_1 - wanted_entry_angle) <= entry_angle_tolerance)
             if (abs(x_1 - wanted_x) <= x_tolerance and abs(
                     entry_angle_1 - wanted_entry_angle) <= entry_angle_tolerance):
                 break
+
+            if DEBUG_SHOT and not DEBUG_DISTANCE_RANGE and not DEBUG_VELOCITY_RANGE and i % (max_iterations / 10) == 0:
+                ax.plot(x_full, z_full, linestyle="dotted", c=(1 - i / max_iterations, i / max_iterations, 0))
 
             # Compute guess with velocity increment
             x, y, z, direction, x_full, y_full, z_full = calculate_trajectory_iterative(v + Δv, shot_angle,
@@ -404,7 +406,8 @@ def optimize_shot(distance, robot_radial_vel):
             x, y, z, direction, x_full, y_full, z_full = calculate_trajectory_iterative(v, shot_angle, robot_radial_vel,
                                                                                         x0)
             shots_simmed += 1
-            steps = len(x)
+            # Use the full trajectory - ToF is when it actually hits the hub, not when it passes through the top
+            tof = t[len(x_full) - 1]
             x, entry_angle = get_end_parameters(x, z, direction)
 
             if (abs(x - wanted_x) > x_tolerance or
@@ -415,10 +418,10 @@ def optimize_shot(distance, robot_radial_vel):
             # Sanity check because sometimes the solver goes crazy
             return None
 
-        return steps
+        return tof
 
-    steps = solve()
-    if steps is None:
+    tof = solve()
+    if tof is None:
         x_tolerance *= 2
         entry_angle_tolerance *= 2
 
@@ -431,8 +434,8 @@ def optimize_shot(distance, robot_radial_vel):
         v = v_initial
         shot_angle = shot_angle_initial
 
-        steps = solve()
-        if steps is None:
+        tof = solve()
+        if tof is None:
             print(f"Could not find solution after {i} iterations.")
             print(f"\tdistance = {distance}, robot_radial_vel = {robot_radial_vel}")
             print(f"\tv = {v}, shot_angle = {shot_angle}")
@@ -447,8 +450,6 @@ def optimize_shot(distance, robot_radial_vel):
         print(f"Found invalid solution")
         print(f"\tdistance = {distance}, robot_radial_vel = {robot_radial_vel}")
         print(f"\tv = {v}, shot_angle = {shot_angle}")
-
-    tof = t[steps - 1]
 
     if DEBUG_SHOT:
         print(f"Found valid solution after {i} iterations")

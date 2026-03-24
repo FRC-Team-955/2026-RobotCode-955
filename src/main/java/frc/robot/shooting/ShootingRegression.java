@@ -18,6 +18,6 @@ public class ShootingRegression {
     public static double calculateToFSeconds(double distanceMeters, double radialRobotVelocityMetersPerSec) {
         double x = distanceMeters;
         double y = radialRobotVelocityMetersPerSec;
-        return 0.8104390677842054 + 0.07557589096987961 * x + -0.026329956834587328 * y + -0.00038224090721069676 * x * y + -0.0019411259577533676 * x * x + 0.001169151758177957 * y * y;
+        return 0.9274802964558833 + 0.06340584103545889 * x + -0.02115370275004476 * y + -0.0011249229861029688 * x * y + -0.0013045351446585424 * x * x + 0.0010398060452381664 * y * y;
     }
 }
