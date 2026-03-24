@@ -45,11 +45,10 @@ public class AutoHelpers {
 
     public static final DriveConstants.MoveToConstraints shootingConstraints = defaultMoveToConstraints
             .withMaxLinearVelocityMetersPerSec(new LoggedTunableNumber("AutoHelpers/Shoot/MaxLinearVelocity", 1.0))
-            .withMaxLinearAccelerationMetersPerSecPerSec(new LoggedTunableNumber("AutoHelpers/Shoot/MaxLinearAcceleration", 5))
-            .withAiming(true);
+            .withMaxLinearAccelerationMetersPerSecPerSec(new LoggedTunableNumber("AutoHelpers/Shoot/MaxLinearAcceleration", 5));
 
-    public static Command intermediateWaypoint(Supplier<Pose2d> poseSupplier, DriveConstants.MoveToConstraints constraints) {
-        return drive
+    public static Command intermediateWaypoint(Supplier<Pose2d> poseSupplier, DriveConstants.MoveToConstraints constraints, boolean aiming) {
+        var cmd = drive
                 .moveTo(
                         () -> AllianceFlipUtil.apply(poseSupplier.get()),
                         constraints
@@ -60,14 +59,18 @@ public class AutoHelpers {
                         intermediateLinearTolerance,
                         // if we are aiming, the rotation from the pose supplier
                         // is not the rotation that move to will target
-                        constraints.aiming()
+                        aiming
                                 ? Double.MAX_VALUE
                                 : intermediateAngularTolerance
                 ));
+        if (aiming) {
+            return Commands.parallel(cmd, drive.setAim());
+        }
+        return cmd;
     }
 
-    public static Command finalWaypoint(Supplier<Pose2d> poseSupplier, DriveConstants.MoveToConstraints constraints) {
-        return drive
+    public static Command finalWaypoint(Supplier<Pose2d> poseSupplier, DriveConstants.MoveToConstraints constraints, boolean aiming) {
+        var cmd = drive
                 .moveTo(
                         () -> AllianceFlipUtil.apply(poseSupplier.get()),
                         constraints
@@ -77,49 +80,37 @@ public class AutoHelpers {
                         finalLinearTolerance,
                         // if we are aiming, the rotation from the pose supplier
                         // is not the rotation that move to will target
-                        constraints.aiming()
+                        aiming
                                 ? Double.MAX_VALUE
                                 : finalAngularTolerance
                 ));
+        if (aiming) {
+            return Commands.parallel(cmd, drive.setAim());
+        }
+        return cmd;
     }
 
 
     @SuppressWarnings("unchecked")
-    public static Command trajectory(String name, Supplier<Pose2d> poseSupplier) {
+    public static Command trajectory(String name) {
         // Basically copied from AutoFactory
         Optional<? extends Trajectory<?>> optTrajectory = trajectoryCache.loadTrajectory(name);
         if (optTrajectory.isPresent()) {
-            return drive.followTrajectory((Trajectory<SwerveSample>) optTrajectory.get()).until(() ->
-
-                    robotState.isAtPoseWithTolerance(
-                            AllianceFlipUtil.apply(poseSupplier.get()),
-                            finalLinearTolerance,
-                            // if we are aiming, the rotation from the pose supplier
-                            // is not the rotation that move to will target
-                            finalAngularTolerance));
+            return drive.followTrajectory((Trajectory<SwerveSample>) optTrajectory.get());
         } else {
             Util.error("Trajectory " + name + " is not present");
-            //noinspection Convert2Diamond
             return drive.idle();
         }
     }
 
     @SuppressWarnings("unchecked")
-    public static Command trajectory(String name, final int splitIndex, Supplier<Pose2d> poseSupplier) {
+    public static Command trajectory(String name, final int splitIndex) {
         // Basically copied from AutoFactory
         Optional<? extends Trajectory<?>> optTrajectory = trajectoryCache.loadTrajectory(name, splitIndex);
         if (optTrajectory.isPresent()) {
-            return drive.followTrajectory((Trajectory<SwerveSample>) optTrajectory.get()).until(() ->
-
-                    robotState.isAtPoseWithTolerance(
-                            AllianceFlipUtil.apply(poseSupplier.get()),
-                            finalLinearTolerance,
-                            // if we are aiming, the rotation from the pose supplier
-                            // is not the rotation that move to will target
-                            finalAngularTolerance));
+            return drive.followTrajectory((Trajectory<SwerveSample>) optTrajectory.get());
         } else {
             Util.error("Trajectory " + name + " is not present");
-            //noinspection Convert2Diamond
             return drive.idle();
         }
     }
@@ -147,11 +138,13 @@ public class AutoHelpers {
             Translation2d end,
             Rotation2d heading,
             double yDistanceToStartInterpolation,
-            DriveConstants.MoveToConstraints constraints
+            DriveConstants.MoveToConstraints constraints,
+            boolean aiming
     ) {
         return intermediateWaypoint(
                 () -> yDistanceInterpolation(start, end, heading, yDistanceToStartInterpolation),
-                constraints
+                constraints,
+                aiming
         );
     }
 
@@ -178,11 +171,13 @@ public class AutoHelpers {
             Translation2d end,
             Rotation2d heading,
             double xDistanceToStartInterpolation,
-            DriveConstants.MoveToConstraints constraints
+            DriveConstants.MoveToConstraints constraints,
+            boolean aiming
     ) {
         return intermediateWaypoint(
                 () -> xDistanceToStartInterpolation(start, end, heading, xDistanceToStartInterpolation),
-                constraints
+                constraints,
+                aiming
         );
     }
 
@@ -259,8 +254,9 @@ public class AutoHelpers {
                                 FieldConstants.Depot.rightCorner.getY(),
                                 FieldConstants.Depot.leftCorner.getY()
                         ), ifNoGamePieces),
-                        constraints.withAiming(true)
+                        constraints
                 ),
+                drive.setAim(),
                 superintake.setGoal(Superintake.Goal.INTAKE),
                 superstructure.setGoal(Superstructure.Goal.SHOOT)
         );

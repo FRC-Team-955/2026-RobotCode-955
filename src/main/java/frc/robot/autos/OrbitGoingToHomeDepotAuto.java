@@ -110,7 +110,7 @@ public class OrbitGoingToHomeDepotAuto extends Auto {
                                 superintake.intakeShootAlternate(),
                                 superstructure.setGoal(Superstructure.Goal.SHOOT),
                                 AutoHelpers.finalWaypoint(()
-                                        -> new Pose2d(1.55, 4.75, Rotation2d.k180deg), defaultMoveToConstraints.withAiming(true)))
+                                        -> new Pose2d(1.55, 4.75, Rotation2d.k180deg), defaultMoveToConstraints))
                         .withTimeout(5),
                 superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
                 superstructure.setGoal(Superstructure.Goal.IDLE).until(() -> true)

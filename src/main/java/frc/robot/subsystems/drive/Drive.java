@@ -30,6 +30,7 @@ import frc.robot.Constants;
 import frc.robot.OperatorDashboard;
 import frc.robot.RobotState;
 import frc.robot.controller.Controller;
+import frc.robot.shooting.ShootingKinematics;
 import frc.robot.subsystems.drive.controllers.FollowTrajectoryController;
 import frc.robot.subsystems.drive.controllers.MoveToController;
 import lombok.Getter;
@@ -50,6 +51,7 @@ public class Drive extends CommandBasedSubsystem {
     private static final RobotState robotState = RobotState.get();
     private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
     private static final Controller controller = Controller.get();
+    private static final ShootingKinematics shootingKinematics = ShootingKinematics.get();
 
     private final GyroIO gyroIO = createGyroIO();
     private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
@@ -77,8 +79,8 @@ public class Drive extends CommandBasedSubsystem {
 
     private boolean shouldStopWithX = false;
 
-    private @Nullable DoubleSupplier headingOverrideSetpointSupplier = null;
-    private @Nullable DoubleSupplier headingOverrideFeedforwardSupplier = null;
+    private Supplier<OptionalDouble> headingOverrideSetpointSupplier = OptionalDouble::empty;
+    private Supplier<OptionalDouble> headingOverrideFeedforwardSupplier = OptionalDouble::empty;
     private final PIDController headingOverrideController = headingOverrideGains
             .toPIDWrapRadians(
                     moveToConfig.angularPositionToleranceRad().get(),
@@ -339,9 +341,7 @@ public class Drive extends CommandBasedSubsystem {
         } else {
             ChassisSpeeds setpoint = new ChassisSpeeds();
 
-            OptionalDouble headingOverrideSetpoint = headingOverrideSetpointSupplier != null
-                    ? OptionalDouble.of(headingOverrideSetpointSupplier.getAsDouble())
-                    : OptionalDouble.empty();
+            OptionalDouble headingOverrideSetpoint = headingOverrideSetpointSupplier.get();
 
             switch (state) {
                 case JOYSTICK_DRIVE -> {
@@ -388,8 +388,9 @@ public class Drive extends CommandBasedSubsystem {
                     setpoint.omegaRadiansPerSecond = 0.0;
                 }
 
-                if (headingOverrideFeedforwardSupplier != null) {
-                    setpoint.omegaRadiansPerSecond += headingOverrideFeedforwardSupplier.getAsDouble();
+                OptionalDouble feedforward = headingOverrideFeedforwardSupplier.get();
+                if (feedforward.isPresent()) {
+                    setpoint.omegaRadiansPerSecond += feedforward.getAsDouble();
                 }
             } else {
                 headingOverrideController.reset();
@@ -457,12 +458,12 @@ public class Drive extends CommandBasedSubsystem {
     }
 
     /** Doesn't require the Drive subsystem. This is intended to be used in conjunction with another state command */
-    public Command setHeadingOverride(DoubleSupplier targetRad) {
-        return setHeadingOverride(targetRad, null);
+    public Command setHeadingOverride(Supplier<OptionalDouble> targetRad) {
+        return setHeadingOverride(targetRad, OptionalDouble::empty);
     }
 
     /** Doesn't require the Drive subsystem. This is intended to be used in conjunction with another state command */
-    public Command setHeadingOverride(DoubleSupplier targetRad, DoubleSupplier feedforwardRadPerSec) {
+    public Command setHeadingOverride(Supplier<OptionalDouble> targetRad, Supplier<OptionalDouble> feedforwardRadPerSec) {
         return Commands.startEnd(
                 () -> {
                     // Attempt to catch bugs caused by not requiring the subsystem (which allows multiple instances
@@ -494,6 +495,20 @@ public class Drive extends CommandBasedSubsystem {
                     shouldStopWithX = true;
                 },
                 () -> shouldStopWithX = false
+        );
+    }
+
+    public Command setAim() {
+        return Commands.parallel(
+                setHeadingOverride(
+                        () -> operatorDashboard.manualAiming.get()
+                                ? OptionalDouble.empty()
+                                : OptionalDouble.of(shootingKinematics.getShootingParameters().headingRad()),
+                        () -> operatorDashboard.manualAiming.get()
+                                ? OptionalDouble.empty()
+                                : OptionalDouble.of(shootingKinematics.rotationAboutHubRadiansPerSecForDrivebase(controller.getFieldRelSpeed()))
+                ),
+                setStopWithX()
         );
     }
 

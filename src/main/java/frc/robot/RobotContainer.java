@@ -13,8 +13,6 @@ import frc.robot.controller.Controller;
 import frc.robot.shooting.ShootingKinematics;
 import frc.robot.subsystems.apriltagvision.AprilTagVision;
 import frc.robot.subsystems.drive.Drive;
-import frc.robot.subsystems.drive.goals.DriveJoystickGoal;
-import frc.robot.subsystems.drive.goals.WheelRadiusCharacterizationGoal;
 import frc.robot.subsystems.gamepiecevision.GamePieceVision;
 import frc.robot.subsystems.leds.LEDs;
 import frc.robot.subsystems.superintake.Superintake;
@@ -58,17 +56,17 @@ public class RobotContainer {
     }
 
     private void addCharacterizations() {
-        characterizationChooser.addOption("Drive 1 m/s Characterization", drive.runRobotRelative(() -> new ChassisSpeeds(1.0, 0.0, 0.0)));
-        characterizationChooser.addOption("Drive 2 m/s Characterization", drive.runRobotRelative(() -> new ChassisSpeeds(2.0, 0.0, 0.0)));
-        characterizationChooser.addOption("Drive 3 m/s Characterization", drive.runRobotRelative(() -> new ChassisSpeeds(3.0, 0.0, 0.0)));
-        characterizationChooser.addOption("Drive 4 m/s Characterization", drive.runRobotRelative(() -> new ChassisSpeeds(4.0, 0.0, 0.0)));
+        characterizationChooser.addOption("Drive 1 m/s Characterization", drive.chassisSpeeds(() -> new ChassisSpeeds(1.0, 0.0, 0.0)));
+        characterizationChooser.addOption("Drive 2 m/s Characterization", drive.chassisSpeeds(() -> new ChassisSpeeds(2.0, 0.0, 0.0)));
+        characterizationChooser.addOption("Drive 3 m/s Characterization", drive.chassisSpeeds(() -> new ChassisSpeeds(3.0, 0.0, 0.0)));
+        characterizationChooser.addOption("Drive 4 m/s Characterization", drive.chassisSpeeds(() -> new ChassisSpeeds(4.0, 0.0, 0.0)));
         characterizationChooser.addOption("Drive Full Speed Characterization", drive.fullSpeedCharacterization());
-        characterizationChooser.addOption("Drive Wheel Radius Characterization", drive.wheelRadiusCharacterization(WheelRadiusCharacterizationGoal.Direction.CLOCKWISE));
+        characterizationChooser.addOption("Drive Wheel Radius Characterization", drive.wheelRadiusCharacterization());
         characterizationChooser.addOption("Drive Slip Current Characterization", drive.slipCurrentCharacterization());
     }
 
     private void setDefaultCommands() {
-        drive.setDefaultCommand(drive.driveJoystick(() -> DriveJoystickGoal.Mode.Normal));
+        drive.setDefaultCommand(drive.joystickDrive());
         superintake.setDefaultCommand(superintake.setGoal(Superintake.Goal.IDLE).ignoringDisable(true));
         superstructure.setDefaultCommand(superstructure.setGoal(Superstructure.Goal.IDLE).ignoringDisable(true));
     }
@@ -89,49 +87,25 @@ public class RobotContainer {
         BooleanSupplier shouldNotAssist = () -> operatorDashboard.disableAssist.get() || robotState.isInTrench();
         intake
                 .and(shoot.negate())
-                .whileTrue(Commands.parallel(
-                        drive.driveJoystick(() -> shouldNotAssist.getAsBoolean() ? DriveJoystickGoal.Mode.Normal : DriveJoystickGoal.Mode.Assist),
-                        superintake.setGoal(Superintake.Goal.INTAKE)
-                ));
+                .whileTrue(superintake.setGoal(Superintake.Goal.INTAKE));
+
 
         shoot
                 .and(intake.negate())
                 .whileTrue(Commands.parallel(
-                        drive.setHeadingOverride(() -> shootingKinematics.getShootingParameters().headingRad()
-
-
-                                , () -> shootingKinematics.rotationAboutHubRadiansPerSecForDrivebase(
-                                        controller.getFieldRelSpeed()
-                                )), drive.setStopWithX()
-                        ,
+                        drive.setAim(),
                         superstructure.setGoal(Superstructure.Goal.SHOOT)
                 ));
         shootForce
                 .and(intake.negate())
                 .whileTrue(Commands.parallel(
-                        drive.driveJoystick(() -> {
-                            if (operatorDashboard.manualAiming.get()) {
-                                return DriveJoystickGoal.Mode.StopWithX;
-                            } else {
-                                return DriveJoystickGoal.Mode.Aim;
-                            }
-                        }),
+                        drive.setAim(),
                         superstructure.setGoal(Superstructure.Goal.SHOOT_FORCE)
                 ));
         shoot
                 .and(intake)
                 .whileTrue(Commands.parallel(
-                        drive.driveJoystick(() -> {
-                            if (operatorDashboard.manualAiming.get() && shouldNotAssist.getAsBoolean()) {
-                                return DriveJoystickGoal.Mode.StopWithX;
-                            } else if (operatorDashboard.manualAiming.get()) {
-                                return DriveJoystickGoal.Mode.Assist;
-                            } else if (shouldNotAssist.getAsBoolean()) {
-                                return DriveJoystickGoal.Mode.Aim;
-                            } else {
-                                return DriveJoystickGoal.Mode.AimAndAssist;
-                            }
-                        }),
+                        drive.setAim(),
                         superintake.setGoal(Superintake.Goal.INTAKE),
                         superstructure.setGoal(Superstructure.Goal.SHOOT)
                 ));
