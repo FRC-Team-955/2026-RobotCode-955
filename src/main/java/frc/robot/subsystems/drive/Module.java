@@ -24,12 +24,14 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import frc.lib.network.LoggedTunablePIDF;
 import frc.robot.OperatorDashboard;
+import frc.robot.energy.BatteryLogger;
 import org.littletonrobotics.junction.Logger;
 
 import static frc.robot.subsystems.drive.DriveConstants.*;
 
 public class Module {
     private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
+    private static final BatteryLogger batteryLogger = BatteryLogger.get();
 
     private final ModuleIO io;
     private final ModuleIOInputsAutoLogged inputs = new ModuleIOInputsAutoLogged();
@@ -56,6 +58,10 @@ public class Module {
     public void updateAndProcessInputs() {
         io.updateInputs(inputs);
         Logger.processInputs("Inputs/Drive/Module" + index, inputs);
+        batteryLogger.reportCurrentUsage("Module/Drive/" + index,
+                inputs.driveConnected ? inputs.driveCurrentAmps : 0.0);
+        batteryLogger.reportCurrentUsage("Module/Turn/" + index,
+                inputs.turnConnected ? inputs.turnCurrentAmps : 0.0);
     }
 
     public void periodicBeforeCommands() {
@@ -68,7 +74,10 @@ public class Module {
                         MathUtil.angleModulus(inputs.turnAbsolutePositionRad)
                                 - MathUtil.angleModulus(inputs.turnPositionRad)
                 ) > Units.degreesToRadians(3.0)
+
+
         ));
+
     }
 
     public void runSetpoint(SwerveModuleState state) {
