@@ -1,10 +1,11 @@
-
+// spotless:off
 package frc.robot.autos;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import java.util.Map;
 import java.util.OptionalInt;
+
 
 
 /**
@@ -21,27 +22,27 @@ public record ChoreoTraj(
     Pose2d endPoseBlue
 ) {
     public static final ChoreoTraj CanadianDepot_FirstPass = new ChoreoTraj(
-	    "CanadianDepot_FirstPass",
-	    OptionalInt.empty(),
-	    4.77111,
-	    new Pose2d(6.34, 7.55, Rotation2d.fromRadians(-1.571)),
-	    new Pose2d(3.632, 5.633, Rotation2d.fromRadians(1.995))
-	);
-	public static final ChoreoTraj CanadianDepot_SecondPath = new ChoreoTraj(
-	    "CanadianDepot_SecondPath",
-	    OptionalInt.empty(),
-	    5.87055,
-	    new Pose2d(6.36, 7.387, Rotation2d.fromRadians(-1.571)),
-	    new Pose2d(3.632, 5.633, Rotation2d.fromRadians(1.995))
-	);
+        "CanadianDepot_FirstPass",
+        OptionalInt.empty(),
+        2.34785,
+        new Pose2d(6.34, 7.55, Rotation2d.fromRadians(-1.5708)),
+        new Pose2d(5.71094, 5.53025, Rotation2d.fromRadians(2.35619))
+    );
+    public static final ChoreoTraj CanadianDepot_SecondPath = new ChoreoTraj(
+        "CanadianDepot_SecondPath",
+        OptionalInt.empty(),
+        2.57203,
+        new Pose2d(5.77121, 7.55, Rotation2d.fromRadians(-1.5708)),
+        new Pose2d(5.71197, 5.52342, Rotation2d.fromRadians(2.35619))
+    );
 
     /**
      * A map between trajectory names and their corresponding data.
      * This allows for trajectory data to be looked up with strings during runtime.
      */
     public static final Map<String, ChoreoTraj> ALL_TRAJECTORIES = Map.ofEntries(
-    	Map.entry("CanadianDepot_FirstPass", CanadianDepot_FirstPass),
-		Map.entry("CanadianDepot_SecondPath", CanadianDepot_SecondPath)
+        Map.entry("CanadianDepot_FirstPass", CanadianDepot_FirstPass),
+        Map.entry("CanadianDepot_SecondPath", CanadianDepot_SecondPath)
     );
 
     /**
@@ -57,3 +58,4 @@ public record ChoreoTraj(
     }
     
 }
+// spotless:on

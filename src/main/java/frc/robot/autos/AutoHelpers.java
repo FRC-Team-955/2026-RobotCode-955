@@ -47,6 +47,9 @@ public class AutoHelpers {
             .withMaxLinearVelocityMetersPerSec(new LoggedTunableNumber("AutoHelpers/Shoot/MaxLinearVelocity", 1.0))
             .withMaxLinearAccelerationMetersPerSecPerSec(new LoggedTunableNumber("AutoHelpers/Shoot/MaxLinearAcceleration", 5));
 
+    public static final DriveConstraints bumpConstraints = defaultMoveToConstraints
+            .withMaxLinearVelocityMetersPerSec(new LoggedTunableNumber("AutoHelpers/Bump/MaxLinearVelocity", 2.0));
+
     public static Command intermediateWaypoint(Supplier<Pose2d> poseSupplier, DriveConstraints constraints, boolean aiming) {
         var cmd = drive
                 .moveTo(
