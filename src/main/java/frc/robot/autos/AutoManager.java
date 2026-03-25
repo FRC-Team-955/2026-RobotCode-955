@@ -44,8 +44,8 @@ public class AutoManager {
         autoChooser.addOption("Aura", new AuraAuto());
         autoChooser.addOption("Test", new OrbitGoingToHomeDepotAuto());
         autoChooser.addOption("Canadian Depot Intake", new CanadianDepotIntakeAuto());
-        autoChooser.addOption("TestCandian", new TestCandian());
         robotState.setAutoStartPoseSupplier(this::getSelectedAutoStartingPose);
+        
     }
 
     public Command getSelectedAutoCommand() {

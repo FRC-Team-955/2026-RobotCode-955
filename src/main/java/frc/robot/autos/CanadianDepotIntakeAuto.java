@@ -50,6 +50,7 @@ public class CanadianDepotIntakeAuto extends Auto {
                         AutoHelpers.finalWaypoint(() -> new Pose2d(1.22, 5.9, Rotation2d.k180deg), shootingConstraints, true)
                 ),
 
+
                 // Stop Shooting
                 superstructure.setGoal(Superstructure.Goal.IDLE).until(() -> true),
                 Commands.race(superintake.setGoal(Superintake.Goal.INTAKE),
