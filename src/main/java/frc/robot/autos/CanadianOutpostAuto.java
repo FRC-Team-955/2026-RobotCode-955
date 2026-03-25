@@ -10,7 +10,7 @@ import frc.robot.subsystems.superstructure.Superstructure;
 
 import static frc.robot.subsystems.drive.DriveConstants.defaultMoveToConstraints;
 
-public class TestCandian extends Auto {
+public class CanadianOutpostAuto extends Auto {
     private static final Superintake superintake = Superintake.get();
     private static final Superstructure superstructure = Superstructure.get();
 
@@ -21,7 +21,7 @@ public class TestCandian extends Auto {
     private static final Pose2d trenchEntranceNochange = new Pose2d(3.5, startingY, new Rotation2d());
 
 
-    public TestCandian() {
+    public CanadianOutpostAuto() {
         super(
                 new Pose2d(4.45, startingY, startingRotation),
                 build()
@@ -90,6 +90,6 @@ public class TestCandian extends Auto {
                 ).withTimeout(4.5)
 
 
-                );
+        );
     }
 }
