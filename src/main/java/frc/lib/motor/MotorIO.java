@@ -11,7 +11,8 @@ public class MotorIO {
         public double positionRad = 0.0;
         public double velocityRadPerSec = 0.0;
         public double appliedVolts = 0.0;
-        public double currentAmps = 0.0;
+        public double statorCurrentAmps = 0.0;
+        public double supplyCurrentAmps = 0.0;
         public double temperatureCelsius = 0.0;
     }
 
