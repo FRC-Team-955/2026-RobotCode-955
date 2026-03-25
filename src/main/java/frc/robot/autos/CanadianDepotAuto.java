@@ -31,6 +31,7 @@ public class CanadianDepotAuto extends Auto {
     private static Command build() {
         return CommandsExt.eagerSequence(
                 // move out of trench
+                superintake.setGoal(Superintake.Goal.INTAKE).until(() -> true),
                 AutoHelpers.intermediateWaypoint(() -> new Pose2d(
                         ChoreoTraj.CanadianDepot_FirstPass.initialPoseBlue().getX(),
                         startingY,
@@ -38,10 +39,7 @@ public class CanadianDepotAuto extends Auto {
                 ), defaultMoveToConstraints, false),
 
                 // follow collection path
-                Commands.parallel(
-                        AutoHelpers.trajectory(ChoreoTraj.CanadianDepot_FirstPass),
-                        superintake.setGoal(Superintake.Goal.INTAKE).until(() -> true)
-                ),
+                AutoHelpers.trajectory(ChoreoTraj.CanadianDepot_FirstPass),
                 superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
 
                 // go over the bump
@@ -51,8 +49,9 @@ public class CanadianDepotAuto extends Auto {
                 Commands.parallel(
                         superintake.intakeShootAlternate(),
                         superstructure.setGoal(Superstructure.Goal.SHOOT),
-                        AutoHelpers.finalWaypoint(robotState::getPose, defaultMoveToConstraints, true)
+                        AutoHelpers.aimWhileStationary()
                 ).withTimeout(4.5),
+                superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
                 superstructure.setGoal(Superstructure.Goal.IDLE).until(() -> true),
 
                 AutoHelpers.intermediateWaypoint(() -> new Pose2d(3.0, startingY - 0.5,
@@ -62,6 +61,7 @@ public class CanadianDepotAuto extends Auto {
                 AutoHelpers.finalWaypoint(() -> trenchEntrance, defaultMoveToConstraints, false),
 
                 // move out of trench
+                superintake.setGoal(Superintake.Goal.INTAKE).until(() -> true),
                 AutoHelpers.intermediateWaypoint(() -> new Pose2d(
                         ChoreoTraj.CanadianDepot_FirstPass.initialPoseBlue().getX(),
                         startingY,
@@ -77,14 +77,12 @@ public class CanadianDepotAuto extends Auto {
                 // go over the bump
                 AutoHelpers.goOverDepotSideBump(),
 
-                Commands.race(superintake.setGoal(Superintake.Goal.INTAKE),
-                        AutoHelpers.finalWaypoint(() -> new Pose2d(0.67, 5.965,
-                                Rotation2d.k180deg), shootingConstraints, true)),
-                Commands.parallel(
-                        AutoHelpers.finalWaypoint(() -> new Pose2d(1.0, 5.5,
-                                Rotation2d.k180deg), defaultMoveToConstraints, true),
-
-                        superstructure.setGoal(Superstructure.Goal.SHOOT))
+                superstructure.setGoal(Superstructure.Goal.SHOOT).until(() -> true),
+                superintake.setGoal(Superintake.Goal.INTAKE).until(() -> true),
+                AutoHelpers.finalWaypoint(() -> new Pose2d(0.67, 5.965,
+                        Rotation2d.k180deg), shootingConstraints, true)
+                //AutoHelpers.finalWaypoint(() -> new Pose2d(1.0, 5.5,
+                //        Rotation2d.k180deg), defaultMoveToConstraints, true)
 
                 //// Shoot
                 //Commands.parallel(

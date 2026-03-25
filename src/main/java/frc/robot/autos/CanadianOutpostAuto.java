@@ -14,8 +14,8 @@ public class CanadianOutpostAuto extends Auto {
     private static final Superintake superintake = Superintake.get();
     private static final Superstructure superstructure = Superstructure.get();
 
-    private static final double startingY = ChoreoTraj.CanadianHuman_FirstPass.initialPoseBlue().getY();
-    private static final Rotation2d startingRotation = ChoreoTraj.CanadianHuman_FirstPass.initialPoseBlue().getRotation();
+    private static final double startingY = ChoreoTraj.CanadianOutpost_FirstPass.initialPoseBlue().getY();
+    private static final Rotation2d startingRotation = ChoreoTraj.CanadianOutpost_FirstPass.initialPoseBlue().getRotation();
     private static final Pose2d preemptiveTrenchEntrance = new Pose2d(3.2, 0.6, Rotation2d.kCCW_90deg);
     private static final Pose2d trenchEntrance = new Pose2d(3.5, startingY, Rotation2d.kCCW_90deg);
     private static final Pose2d trenchEntranceNochange = new Pose2d(3.5, startingY, new Rotation2d());
@@ -32,14 +32,14 @@ public class CanadianOutpostAuto extends Auto {
         return CommandsExt.eagerSequence(
                 // move out of trench
                 AutoHelpers.intermediateWaypoint(() -> new Pose2d(
-                        ChoreoTraj.CanadianHuman_FirstPass.initialPoseBlue().getX(),
+                        ChoreoTraj.CanadianOutpost_FirstPass.initialPoseBlue().getX(),
                         startingY,
                         startingRotation
                 ), defaultMoveToConstraints, false),
 
                 // follow collection path
                 Commands.parallel(
-                        AutoHelpers.trajectory(ChoreoTraj.CanadianHuman_FirstPass),
+                        AutoHelpers.trajectory(ChoreoTraj.CanadianOutpost_FirstPass),
                         superintake.setGoal(Superintake.Goal.INTAKE).until(() -> true)
                 ),
 
@@ -63,14 +63,14 @@ public class CanadianOutpostAuto extends Auto {
 
                 //Move out for second path
                 AutoHelpers.intermediateWaypoint(() -> new Pose2d(
-                        ChoreoTraj.CanadianHuman_SeconPass.initialPoseBlue().getX(),
+                        ChoreoTraj.CanadianOutpost_SecondPass.initialPoseBlue().getX(),
                         startingY,
                         startingRotation
                 ), defaultMoveToConstraints, false),
 
                 //Follow the second path
                 Commands.parallel(
-                        AutoHelpers.trajectory(ChoreoTraj.CanadianHuman_SeconPass),
+                        AutoHelpers.trajectory(ChoreoTraj.CanadianOutpost_SecondPass),
                         superintake.setGoal(Superintake.Goal.INTAKE).until(() -> true)
                 ),
 
