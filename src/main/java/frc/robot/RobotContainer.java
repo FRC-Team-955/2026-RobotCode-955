@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.CANLogger;
 import frc.robot.autos.AutoManager;
 import frc.robot.controller.Controller;
+import frc.robot.energy.BatteryLogger;
 import frc.robot.shooting.ShootingKinematics;
 import frc.robot.subsystems.apriltagvision.AprilTagVision;
 import frc.robot.subsystems.drive.Drive;
@@ -40,7 +41,7 @@ public class RobotContainer {
     public final ShootingKinematics shootingKinematics = ShootingKinematics.get();
     public final AutoManager autoManager = AutoManager.get();
     public final HubShiftTracker hubShiftTracker = HubShiftTracker.get();
-
+    public final BatteryLogger batteryLogger = BatteryLogger.get();
     /* Subsystems */
     public final Drive drive = Drive.get();
     public final AprilTagVision aprilTagVision = AprilTagVision.get();
