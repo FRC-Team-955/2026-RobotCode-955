@@ -48,6 +48,7 @@ public class SimManager {
         );
     }
 
+    @SuppressWarnings("unchecked")
     public final SwerveDriveSimulation driveSimulation = new SwerveDriveSimulation(
             // Specify Configuration
             DriveTrainSimulationConfig.Default()
