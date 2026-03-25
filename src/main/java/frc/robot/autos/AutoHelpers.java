@@ -264,7 +264,7 @@ public class AutoHelpers {
                 ), defaultMoveToConstraints, false),
 
                 // go over the bump
-                AutoHelpers.finalWaypoint(() -> new Pose2d(
+                AutoHelpers.intermediateWaypoint(() -> new Pose2d(
                         bumpEndX,
                         y,
                         rotation
