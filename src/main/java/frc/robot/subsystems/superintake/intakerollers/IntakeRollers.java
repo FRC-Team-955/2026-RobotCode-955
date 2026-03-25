@@ -14,6 +14,7 @@ import frc.lib.network.LoggedTunableNumber;
 import frc.lib.subsystem.Periodic;
 import frc.robot.BuildConstants;
 import frc.robot.OperatorDashboard;
+import frc.robot.energy.BatteryLogger;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -27,6 +28,7 @@ public class IntakeRollers implements Periodic {
     private static final LoggedTunableNumber idleVoltage = new LoggedTunableNumber("Superintake/IntakeRollers/Goal/IdleVoltage", 0.0);
     private static final LoggedTunableNumber intakeVoltage = new LoggedTunableNumber("Superintake/IntakeRollers/Goal/IntakeVoltage", 12.0);
     private static final LoggedTunableNumber ejectVoltage = new LoggedTunableNumber("Superintake/IntakeRollers/Goal/EjectVoltage", -12.0);
+    private static final BatteryLogger batteryLogger = BatteryLogger.get();
 
     private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
 
@@ -76,6 +78,9 @@ public class IntakeRollers implements Periodic {
 
         motorDisconnectedAlert.set(!inputs.connected);
         highTemperatureAlert.set(inputs.temperatureCelsius > 50);
+
+        batteryLogger.reportCurrentUsage("IntakeRollers",
+                inputs.connected ? inputs.supplyCurrentAmps : 0.0);
     }
 
     @Override
