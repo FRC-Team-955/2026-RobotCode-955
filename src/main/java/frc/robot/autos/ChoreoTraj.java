@@ -31,7 +31,7 @@ public record ChoreoTraj(
     public static final ChoreoTraj CanadianHuman_SeconPass = new ChoreoTraj(
         "CanadianHuman_SeconPass",
         OptionalInt.empty(),
-        2.83298,
+        2.62734,
         new Pose2d(6.39331, 0.60333, Rotation2d.fromRadians(1.5708)),
         new Pose2d(5.7009, 2.41898, Rotation2d.fromRadians(-1.99499))
     );
