@@ -11,6 +11,7 @@ import frc.robot.subsystems.superintake.Superintake;
 import frc.robot.subsystems.superstructure.Superstructure;
 
 import static frc.robot.subsystems.drive.DriveConstants.defaultMoveToConstraints;
+import static frc.robot.subsystems.drive.DriveConstants.shootingConstraints;
 
 public class OrbitGoingToHomeDepotAuto extends Auto {
     private static final Superintake superintake = Superintake.get();
@@ -79,7 +80,7 @@ public class OrbitGoingToHomeDepotAuto extends Auto {
                 // shoot
                 superstructure.setGoal(Superstructure.Goal.SHOOT).until(() -> true),
                 Commands.race(AutoHelpers.finalWaypoint(() -> new Pose2d(1.25, 7.2, Rotation2d.k180deg),
-                        AutoHelpers.shootingConstraints, true), superintake.intakeShootAlternate()),
+                        shootingConstraints, true), superintake.intakeShootAlternate()),
                 superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
                 superstructure.setGoal(Superstructure.Goal.IDLE).until(() -> true),
                 AutoHelpers.finalWaypoint(()
