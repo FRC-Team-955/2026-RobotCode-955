@@ -30,7 +30,7 @@ public record ChoreoTraj(
 	public static final ChoreoTraj CanadianDepot_SecondPath = new ChoreoTraj(
 	    "CanadianDepot_SecondPath",
 	    OptionalInt.empty(),
-	    5.36687,
+	    5.87055,
 	    new Pose2d(6.36, 7.387, Rotation2d.fromRadians(-1.571)),
 	    new Pose2d(3.632, 5.633, Rotation2d.fromRadians(1.995))
 	);
