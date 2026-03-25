@@ -19,6 +19,7 @@ public class Superintake extends CommandBasedSubsystem {
     @RequiredArgsConstructor
     public enum Goal {
         IDLE,
+        DEPLOY,
         INTAKE,
         SHOOT,
         EJECT,
@@ -70,6 +71,10 @@ public class Superintake extends CommandBasedSubsystem {
         switch (goal) {
             case IDLE -> {
                 intakePivot.setGoal(IntakePivot.Goal.STOW);
+                intakeRollers.setGoal(IntakeRollers.Goal.IDLE);
+            }
+            case DEPLOY -> {
+                intakePivot.setGoal(IntakePivot.Goal.DEPLOY);
                 intakeRollers.setGoal(IntakeRollers.Goal.IDLE);
             }
             case INTAKE -> {
