@@ -11,6 +11,7 @@ import frc.lib.network.LoggedTunableNumber;
 import frc.lib.subsystem.Periodic;
 import frc.robot.BuildConstants;
 import frc.robot.OperatorDashboard;
+import frc.robot.energy.BatteryLogger;
 import frc.robot.shooting.ShootingKinematics;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +28,8 @@ public class Flywheel implements Periodic {
 
     private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
     private static final ShootingKinematics shootingKinematics = ShootingKinematics.get();
+    private static final BatteryLogger batteryLogger = BatteryLogger.get();
+
 
     private final FlywheelIO io = createIO();
     private final FlywheelIOInputsAutoLogged inputs = new FlywheelIOInputsAutoLogged();
@@ -71,9 +74,14 @@ public class Flywheel implements Periodic {
         io.updateInputs(inputs);
         Logger.processInputs("Inputs/Superstructure/Flywheel", inputs);
 
+
         leaderMotorDisconnectedAlert.set(!inputs.leader.connected);
         followerMotorDisconnectedAlert.set(!inputs.follower.connected);
         highTemperatureAlert.set(Math.max(inputs.leader.temperatureCelsius, inputs.follower.temperatureCelsius) > 50);
+
+        batteryLogger.reportCurrentUsage("Flywheel",
+                inputs.leader.connected ? inputs.leader.supplyCurrentAmps : 0.0,
+                inputs.follower.connected ? inputs.follower.supplyCurrentAmps : 0.0);
 
         if (velocityGains.hasChanged()) {
             io.setVelocityPIDF(velocityGains);

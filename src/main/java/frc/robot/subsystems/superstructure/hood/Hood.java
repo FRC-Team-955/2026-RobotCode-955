@@ -15,6 +15,7 @@ import frc.lib.subsystem.Periodic;
 import frc.robot.BuildConstants;
 import frc.robot.OperatorDashboard;
 import frc.robot.RobotState;
+import frc.robot.energy.BatteryLogger;
 import frc.robot.shooting.ShootingKinematics;
 import frc.robot.subsystems.superstructure.hood.HoodIO.HoodCurrentLimitMode;
 import lombok.Getter;
@@ -30,6 +31,7 @@ public class Hood implements Periodic {
     private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
     private static final ShootingKinematics shootingKinematics = ShootingKinematics.get();
     private static final RobotState robotState = RobotState.get();
+    private static final BatteryLogger batteryLogger = BatteryLogger.get();
     private final HoodIO io = createIO();
     private final MotorIOInputsAutoLogged inputs = new MotorIOInputsAutoLogged();
 
@@ -89,11 +91,14 @@ public class Hood implements Periodic {
         io.updateInputs(inputs);
         Logger.processInputs("Inputs/Superstructure/Hood", inputs);
 
+
         motorDisconnectedAlert.set(!inputs.connected);
         highTemperatureAlert.set(inputs.temperatureCelsius > 50);
+        batteryLogger.reportCurrentUsage("Hood", inputs.connected ?
+                inputs.supplyCurrentAmps : 0.0);
 
         if (!emergencyStopped) {
-            if (emergencyStopDebouncer.calculate(inputs.currentAmps >= 20) || operatorDashboard.hoodEStop.get()) {
+            if (emergencyStopDebouncer.calculate(inputs.statorCurrentAmps >= 20) || operatorDashboard.hoodEStop.get()) {
                 io.setVoltageRequest(0.0);
                 io.setNeutralMode(NeutralModeValue.Coast);
                 emergencyStopped = true;

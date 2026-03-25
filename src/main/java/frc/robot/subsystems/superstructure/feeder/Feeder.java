@@ -15,6 +15,7 @@ import frc.lib.network.LoggedTunableNumber;
 import frc.lib.subsystem.Periodic;
 import frc.robot.BuildConstants;
 import frc.robot.OperatorDashboard;
+import frc.robot.energy.BatteryLogger;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -28,6 +29,7 @@ public class Feeder implements Periodic {
     private static final LoggedTunableNumber feedVoltage = new LoggedTunableNumber("Superstructure/Feeder/Goal/FeedVoltage", 12.0);
     private static final LoggedTunableNumber ejectVoltage = new LoggedTunableNumber("Superstructure/Feeder/Goal/EjectVoltage", -12.0);
 
+    private static final BatteryLogger batteryLogger = BatteryLogger.get();
     private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
 
     private final MotorIO io = createIO();
@@ -73,7 +75,8 @@ public class Feeder implements Periodic {
         Logger.processInputs("Inputs/Superstructure/Feeder", inputs);
 
         motorDisconnectedAlert.set(!inputs.connected);
-
+        batteryLogger.reportCurrentUsage("Feeder", inputs.connected ?
+                inputs.supplyCurrentAmps : 0.0);
         // Apply network inputs
         if (operatorDashboard.coastOverride.hasChanged()) {
             io.setNeutralMode(operatorDashboard.coastOverride.get() ? NeutralModeValue.Coast : NeutralModeValue.Brake);

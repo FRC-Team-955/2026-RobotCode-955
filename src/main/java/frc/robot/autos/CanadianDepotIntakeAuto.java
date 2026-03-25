@@ -10,6 +10,7 @@ import frc.robot.subsystems.superstructure.Superstructure;
 
 import static frc.robot.autos.AutoHelpers.intakeConstraints;
 import static frc.robot.subsystems.drive.DriveConstants.defaultMoveToConstraints;
+import static frc.robot.subsystems.drive.DriveConstants.shootingConstraints;
 
 public class CanadianDepotIntakeAuto extends Auto {
     private static final Superintake superintake = Superintake.get();
@@ -46,14 +47,14 @@ public class CanadianDepotIntakeAuto extends Auto {
                 Commands.race(
                         superintake.intakeShootAlternate(),
                         superstructure.setGoal(Superstructure.Goal.SHOOT),
-                        AutoHelpers.finalWaypoint(() -> new Pose2d(1.22, 5.9, Rotation2d.k180deg), defaultMoveToConstraints, true)
+                        AutoHelpers.finalWaypoint(() -> new Pose2d(1.22, 5.9, Rotation2d.k180deg), shootingConstraints, true)
                 ),
 
 
                 // Stop Shooting
                 superstructure.setGoal(Superstructure.Goal.IDLE).until(() -> true),
                 Commands.race(superintake.setGoal(Superintake.Goal.INTAKE),
-                        AutoHelpers.finalWaypoint(() -> new Pose2d(0.67, 5.965,
+                        AutoHelpers.finalWaypoint(() -> new Pose2d(0.45, 5.9,
                                 Rotation2d.k180deg), intakeConstraints, false)),
                 Commands.parallel(
                         AutoHelpers.finalWaypoint(() -> new Pose2d(1.0, 5.5,
