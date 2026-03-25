@@ -12,8 +12,8 @@ public class AccelerometerIOroboRIO extends AccelerometerIO {
 
     @Override
     public void updateInputs(AccelerometerIOInputs inputs) {
-        inputs.accelerationXMetersPerSecPerSec = accelerometer.getX() / g;
+        inputs.accelerationXMetersPerSecPerSec = -accelerometer.getX() / g;
         inputs.accelerationYMetersPerSecPerSec = accelerometer.getY() / g;
-        inputs.accelerationZMetersPerSecPerSec = accelerometer.getZ() / g;
+        inputs.accelerationZMetersPerSecPerSec = -accelerometer.getZ() / g;
     }
 }
