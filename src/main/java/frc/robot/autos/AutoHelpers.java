@@ -248,7 +248,7 @@ public class AutoHelpers {
     }
 
     private static final DriveConstraints bumpConstraints = defaultMoveToConstraints
-            .withMaxLinearVelocityMetersPerSec(new LoggedTunableNumber("AutoHelpers/Bump/MaxLinearVelocity", 2.0));
+            .withMaxLinearVelocityMetersPerSec(new LoggedTunableNumber("AutoHelpers/Bump/MaxLinearVelocity", 2.5));
     private static double bumpStartX = 5.71;
     private static double bumpEndX = 2.6;
 
