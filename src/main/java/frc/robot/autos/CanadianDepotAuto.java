@@ -5,19 +5,19 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.commands.CommandsExt;
+import frc.robot.RobotState;
 import frc.robot.subsystems.superintake.Superintake;
 import frc.robot.subsystems.superstructure.Superstructure;
 
-import static frc.robot.autos.AutoHelpers.bumpConstraints;
 import static frc.robot.subsystems.drive.DriveConstants.defaultMoveToConstraints;
 
 public class CanadianDepotAuto extends Auto {
     private static final Superintake superintake = Superintake.get();
     private static final Superstructure superstructure = Superstructure.get();
+    private static final RobotState robotState = RobotState.get();
 
     private static final double startingY = ChoreoTraj.CanadianDepot_FirstPass.initialPoseBlue().getY();
     private static final Rotation2d startingRotation = ChoreoTraj.CanadianDepot_FirstPass.initialPoseBlue().getRotation();
-    private static final Pose2d preemptiveTrenchEntrance = new Pose2d(3.2, 7.0, Rotation2d.kCCW_90deg);
     private static final Pose2d trenchEntrance = new Pose2d(3.5, startingY, Rotation2d.kCW_90deg);
 
     public CanadianDepotAuto() {
@@ -43,29 +43,14 @@ public class CanadianDepotAuto extends Auto {
                 ),
                 superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
 
-                // go to the start of the bump
-                AutoHelpers.intermediateWaypoint(() -> new Pose2d(
-                        5.71,
-                        5.53,
-                        Rotation2d.fromDegrees(135)
-                ), defaultMoveToConstraints, false),
-
                 // go over the bump
-                AutoHelpers.finalWaypoint(() -> new Pose2d(
-                        2.6,
-                        5.53,
-                        Rotation2d.fromDegrees(135)
-                ), bumpConstraints, false),
+                AutoHelpers.goOverDepotSideBump(),
 
                 // Shoot
                 Commands.parallel(
                         superintake.intakeShootAlternate(),
                         superstructure.setGoal(Superstructure.Goal.SHOOT),
-                        AutoHelpers.finalWaypoint(() -> new Pose2d(
-                                2.6,
-                                5.53,
-                                Rotation2d.fromDegrees(135)
-                        ), defaultMoveToConstraints, true)
+                        AutoHelpers.finalWaypoint(robotState::getPose, defaultMoveToConstraints, true)
                 ).withTimeout(4.5),
                 superstructure.setGoal(Superstructure.Goal.IDLE).until(() -> true),
 
@@ -85,29 +70,14 @@ public class CanadianDepotAuto extends Auto {
                         superintake.setGoal(Superintake.Goal.INTAKE).until(() -> true)
                 ),
 
-                // go to the start of the bump
-                AutoHelpers.intermediateWaypoint(() -> new Pose2d(
-                        5.71,
-                        5.53,
-                        Rotation2d.fromDegrees(135)
-                ), defaultMoveToConstraints, false),
-
                 // go over the bump
-                AutoHelpers.finalWaypoint(() -> new Pose2d(
-                        2.6,
-                        5.53,
-                        Rotation2d.fromDegrees(135)
-                ), bumpConstraints, false),
+                AutoHelpers.goOverDepotSideBump(),
 
                 // Shoot
                 Commands.parallel(
                         superintake.intakeShootAlternate(),
                         superstructure.setGoal(Superstructure.Goal.SHOOT),
-                        AutoHelpers.finalWaypoint(() -> new Pose2d(
-                                2.6,
-                                5.53,
-                                Rotation2d.fromDegrees(135)
-                        ), defaultMoveToConstraints, true)
+                        AutoHelpers.finalWaypoint(robotState::getPose, defaultMoveToConstraints, true)
                 ),
                 superstructure.setGoal(Superstructure.Goal.IDLE).until(() -> true)
         );

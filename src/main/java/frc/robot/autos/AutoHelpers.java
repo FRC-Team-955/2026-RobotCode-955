@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.AllianceFlipUtil;
 import frc.lib.Bounds;
 import frc.lib.Util;
+import frc.lib.commands.CommandsExt;
 import frc.lib.network.LoggedTunableNumber;
 import frc.robot.FieldConstants;
 import frc.robot.RobotState;
@@ -42,13 +43,6 @@ public class AutoHelpers {
     private static final Superintake superintake = Superintake.get();
     private static final Superstructure superstructure = Superstructure.get();
     private static final Choreo.TrajectoryCache trajectoryCache = new Choreo.TrajectoryCache();
-
-    public static final DriveConstraints shootingConstraints = defaultMoveToConstraints
-            .withMaxLinearVelocityMetersPerSec(new LoggedTunableNumber("AutoHelpers/Shoot/MaxLinearVelocity", 1.0))
-            .withMaxLinearAccelerationMetersPerSecPerSec(new LoggedTunableNumber("AutoHelpers/Shoot/MaxLinearAcceleration", 5));
-
-    public static final DriveConstraints bumpConstraints = defaultMoveToConstraints
-            .withMaxLinearVelocityMetersPerSec(new LoggedTunableNumber("AutoHelpers/Bump/MaxLinearVelocity", 2.0));
 
     public static Command intermediateWaypoint(Supplier<Pose2d> poseSupplier, DriveConstraints constraints, boolean aiming) {
         var cmd = drive
@@ -250,6 +244,31 @@ public class AutoHelpers {
                 ).withAiming(),
                 superintake.setGoal(Superintake.Goal.INTAKE),
                 superstructure.setGoal(Superstructure.Goal.SHOOT)
+        );
+    }
+
+    private static final DriveConstraints bumpConstraints = defaultMoveToConstraints
+            .withMaxLinearVelocityMetersPerSec(new LoggedTunableNumber("AutoHelpers/Bump/MaxLinearVelocity", 2.0));
+    private static double bumpStartX = 5.71;
+    private static double bumpEndX = 2.6;
+
+    public static Command goOverDepotSideBump() {
+        double y = 5.53;
+        Rotation2d rotation = Rotation2d.fromDegrees(135);
+        return CommandsExt.eagerSequence(
+                // go to the start of the bump
+                AutoHelpers.intermediateWaypoint(() -> new Pose2d(
+                        bumpStartX,
+                        y,
+                        rotation
+                ), defaultMoveToConstraints, false),
+
+                // go over the bump
+                AutoHelpers.finalWaypoint(() -> new Pose2d(
+                        bumpEndX,
+                        y,
+                        rotation
+                ), bumpConstraints, false)
         );
     }
 }
