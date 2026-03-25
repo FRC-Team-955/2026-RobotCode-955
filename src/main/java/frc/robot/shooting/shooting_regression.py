@@ -531,7 +531,7 @@ else:
         stop_dist = 7.5
         max_vel = 4.5
         for distance in np.linspace(start_dist, stop_dist, 70):
-            for velocity in [-max_vel, -3.0, -2.25, -1.5, -0.75, 0.0, 0.75, 1.5, 2.25, 3.0, max_vel]:
+            for velocity in [-max_vel, -3.0, -1.5, -1.0, -0.5, 0.0, 0.5, 1.0, 1.5, 3.0, max_vel]:
                 distance_velocity_pairs.append((distance, velocity))
 
         all_shots = []
