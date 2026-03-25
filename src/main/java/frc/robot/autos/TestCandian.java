@@ -43,6 +43,10 @@ public class TestCandian extends Auto {
                         superintake.setGoal(Superintake.Goal.INTAKE).until(() -> true)
                 ),
 
+                Commands.parallel(
+                        AutoHelpers.goOverHumanSideBump()
+                ),
+
                 // Shoot while moving to entrance to trench
                 Commands.parallel(
                         superintake.intakeShootAlternate(),
@@ -63,6 +67,10 @@ public class TestCandian extends Auto {
                 Commands.parallel(
                         AutoHelpers.trajectory(ChoreoTraj.CanadianHuman_SeconPass),
                         superintake.setGoal(Superintake.Goal.INTAKE).until(() -> true)
+                ),
+
+                Commands.parallel(
+                        AutoHelpers.goOverHumanSideBump()
                 ),
 
                 // Shoot while moving to entrance to trench

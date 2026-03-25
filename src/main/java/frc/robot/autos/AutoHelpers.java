@@ -271,4 +271,23 @@ public class AutoHelpers {
                 ), bumpConstraints, false)
         );
     }
+    public static Command goOverHumanSideBump() {
+        double y = 2.42;
+        Rotation2d rotation = Rotation2d.fromDegrees(-114);
+        return CommandsExt.eagerSequence(
+                // go to the start of the bump
+                AutoHelpers.intermediateWaypoint(() -> new Pose2d(
+                        bumpStartX,
+                        y,
+                        rotation
+                ), defaultMoveToConstraints, false),
+
+                // go over the bump
+                AutoHelpers.intermediateWaypoint(() -> new Pose2d(
+                        bumpEndX,
+                        y,
+                        rotation
+                ), bumpConstraints, false)
+        );
+    }
 }
