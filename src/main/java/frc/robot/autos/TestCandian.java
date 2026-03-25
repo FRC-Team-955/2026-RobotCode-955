@@ -47,12 +47,16 @@ public class TestCandian extends Auto {
                         AutoHelpers.goOverHumanSideBump()
                 ),
 
+                //To stop shoot on move
+                AutoHelpers.finalWaypoint(() -> preemptiveTrenchEntrance, defaultMoveToConstraints, true),
+
                 // Shoot while moving to entrance to trench
                 Commands.parallel(
                         superintake.intakeShootAlternate(),
                         superstructure.setGoal(Superstructure.Goal.SHOOT),
                         AutoHelpers.finalWaypoint(() -> preemptiveTrenchEntrance, defaultMoveToConstraints, true)
                 ).withTimeout(4.5),
+                superstructure.setGoal(Superstructure.Goal.IDLE).until(() -> true),
 
                 // Move to final trench entrance
                 AutoHelpers.finalWaypoint(() -> trenchEntrance, defaultMoveToConstraints, false),
@@ -63,6 +67,7 @@ public class TestCandian extends Auto {
                         startingY,
                         startingRotation
                 ), defaultMoveToConstraints, false),
+
                 //Follow the second path
                 Commands.parallel(
                         AutoHelpers.trajectory(ChoreoTraj.CanadianHuman_SeconPass),
@@ -72,6 +77,10 @@ public class TestCandian extends Auto {
                 Commands.parallel(
                         AutoHelpers.goOverHumanSideBump()
                 ),
+
+                //To stop shoot on move
+                AutoHelpers.finalWaypoint(() -> preemptiveTrenchEntrance, defaultMoveToConstraints, true),
+
 
                 // Shoot while moving to entrance to trench
                 Commands.parallel(
