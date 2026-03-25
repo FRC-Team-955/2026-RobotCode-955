@@ -24,6 +24,7 @@ package frc.robot.energy;
 
 import edu.wpi.first.wpilibj.RobotController;
 import frc.lib.subsystem.Periodic;
+import frc.robot.BuildConstants;
 import frc.robot.Constants;
 import lombok.Getter;
 import lombok.Setter;
@@ -101,7 +102,8 @@ public class BatteryLogger implements Periodic {
         setRioCurrent(RobotController.getInputCurrent());
 
         setBatteryVoltage(RobotController.getBatteryVoltage());
-        Logger.recordOutput("EnergyLogger/BatteryVoltage", batteryVoltage,
+
+        if (BuildConstants.isSimOrReplay) Logger.recordOutput("EnergyLogger/BatteryVoltage", batteryVoltage,
                 "volts");
         //Logger.recordOutput("EnergyLogger/RioCurrent",
         //        rioCurrent, "amps");
@@ -114,15 +116,18 @@ public class BatteryLogger implements Periodic {
         reportCurrentUsage("EnergyLogger/Controls/Radio", 0.5);
 
         for (var entry : subsytemCurrents.entrySet()) {
-            Logger.recordOutput("EnergyLogger/Current/" + entry.getKey(), entry.getValue(), "amps");
+            if (BuildConstants.isSimOrReplay)
+                Logger.recordOutput("EnergyLogger/Current/" + entry.getKey(), entry.getValue(), "amps");
+
             subsytemCurrents.put(entry.getKey(), 0.0);
         }
         for (var entry : subsytemPowers.entrySet()) {
-            Logger.recordOutput("EnergyLogger/Power/" + entry.getKey(), entry.getValue(), "watts");
+            if (BuildConstants.isSimOrReplay)
+                Logger.recordOutput("EnergyLogger/Power/" + entry.getKey(), entry.getValue(), "watts");
             subsytemPowers.put(entry.getKey(), 0.0);
         }
         for (var entry : subsytemEnergies.entrySet()) {
-            Logger.recordOutput(
+            if (BuildConstants.isSimOrReplay) Logger.recordOutput(
                     "EnergyLogger/Energy/" + entry.getKey(),
                     joulesToWattHours(entry.getValue()),
                     "watt hours");
