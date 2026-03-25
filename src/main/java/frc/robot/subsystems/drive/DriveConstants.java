@@ -37,7 +37,7 @@ public class DriveConstants {
             PIDF.ofPD(3.5, 0),
             PIDF.ofPD(3, 0),
             PIDF.ofP(15),
-            4.58
+            10
     );
 
     /**
@@ -75,8 +75,8 @@ public class DriveConstants {
                 true,
                 false,
                 false,
-                30,
-                60
+                35,
+                35
         );
         case SIM -> new ModuleConfig(
                 PIDF.ofPDSV(0.05, 0.0, 0.04075, 0.14117),
@@ -107,10 +107,10 @@ public class DriveConstants {
             // to the absolute encoder offset parameter in the IO layer constructor.
             // Module order: FL, FR, BL, BR
             case REAL -> new ModuleIO[]{
-                    new ModuleIOSparkMaxCANcoder(7, 8, 10, -2.675),
-                    new ModuleIOSparkMaxCANcoder(5, 6, 9, -2.295),
-                    new ModuleIOSparkMaxCANcoder(1, 2, 12, 0.268),
-                    new ModuleIOSparkMaxCANcoder(3, 4, 11, 0.825),
+                    new ModuleIOSparkMaxCANcoder(7, 8, 10, 2.879),
+                    new ModuleIOSparkMaxCANcoder(5, 6, 9, -2.876),
+                    new ModuleIOSparkMaxCANcoder(1, 2, 12, 0.348),
+                    new ModuleIOSparkMaxCANcoder(3, 4, 11, 0.822),
             };
             case SIM -> new ModuleIO[]{
                     new ModuleIOSim(0),
