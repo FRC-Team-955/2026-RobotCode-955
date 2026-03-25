@@ -1,4 +1,3 @@
-
 // Copyright 2021-2025 FRC 6328
 // http://github.com/Mechanical-Advantage
 //
@@ -31,7 +30,7 @@ public final class Constants {
     }
 
     public static final class CANivore {
-        public static final CANBus canivore = new CANBus("*"); // the canivore is called electrical_problem, but using * is better because it will select any canivore it sees
+        public static final CANBus canivore = new CANBus("rio"); // the canivore is called electrical_problem, but using * is better because it will select any canivore it sees
         public static final boolean isCANFD = switch (BuildConstants.mode) {
             case REAL -> canivore.isNetworkFD();
             case SIM, REPLAY -> false;
