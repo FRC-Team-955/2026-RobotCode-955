@@ -72,6 +72,10 @@ public class RobotState implements Periodic {
             .mapToObj(n -> field2d.getObject("RejectedPose" + n))
             .toArray(FieldObject2d[]::new);
 
+    private final FieldObject2d[] uncertaintyRangeObjects = IntStream.range(0, 5)
+            .mapToObj(n -> field2d.getObject("UncertaintyRange" + n))
+            .toArray(FieldObject2d[]::new);
+
     @Getter
     @Setter
     private ChassisSpeeds measuredChassisSpeedsRobotRelative = new ChassisSpeeds();
@@ -109,8 +113,10 @@ public class RobotState implements Periodic {
     private double poseUncertaintyLinearYMeters = 0.0;
     private double poseUncertaintyAngularRad = 0.0;
 
+    /*
     private boolean lastInNeutralZone = false;
     private double lastIncreasedUncertaintyDueToBump = 0.0;
+     */
 
     private static RobotState instance;
 
@@ -130,7 +136,6 @@ public class RobotState implements Periodic {
 
     @Override
     public void periodicBeforeCommands() {
-        /*
         // Increase uncertainty if we are moving
         final double chassisSpeedsLinearFactor = 0.06;
         poseUncertaintyLinearXMeters += Constants.loopPeriod * chassisSpeedsLinearFactor * Math.abs(measuredChassisSpeedsFieldRelative.vxMetersPerSecond);
@@ -141,6 +146,7 @@ public class RobotState implements Periodic {
 
         // Increase uncertainty if we went over the bump
         Translation2d t = getTranslation();
+        /*
         boolean inNeutralZone =
                 t.getX() > FieldConstants.LinesVertical.hubCenter &&
                         t.getX() < FieldConstants.LinesVertical.oppHubCenter;
@@ -162,6 +168,7 @@ public class RobotState implements Periodic {
         lastInNeutralZone = inNeutralZone;
         Logger.recordOutput("RobotState/InNeutralZone", inNeutralZone);
         Logger.recordOutput("RobotState/LastIncreasedUncertaintyDueToBump", lastIncreasedUncertaintyDueToBump);
+        */
 
         // Increase uncertainty if there is a large impact
         final double accelerationFactor = 0.001;
@@ -177,18 +184,22 @@ public class RobotState implements Periodic {
         // Log uncertainty range
         // The Periodic execution order defined in Robot ensures that AprilTagVision will have already reduced uncertainty if there were any vision measurements
         Rotation2d r = getRotation();
-        Logger.recordOutput(
-                "RobotState/PoseUncertaintyRange",
+        Pose2d[] uncertaintyRange = new Pose2d[]{
                 new Pose2d(t.getX() + poseUncertaintyLinearXMeters, t.getY() + poseUncertaintyLinearYMeters, r),
                 new Pose2d(t.getX() + poseUncertaintyLinearXMeters, t.getY() - poseUncertaintyLinearYMeters, r),
                 new Pose2d(t.getX() - poseUncertaintyLinearXMeters, t.getY() - poseUncertaintyLinearYMeters, r),
                 new Pose2d(t.getX() - poseUncertaintyLinearXMeters, t.getY() + poseUncertaintyLinearYMeters, r),
                 new Pose2d(t, r.plus(new Rotation2d(poseUncertaintyAngularRad))),
                 new Pose2d(t, r.minus(new Rotation2d(poseUncertaintyAngularRad)))
-        );
-         */
-
-        moveToGoal = Optional.empty();
+        };
+        for (int i = 0; i < uncertaintyRangeObjects.length; i++) {
+            if (i < uncertaintyRange.length) {
+                uncertaintyRangeObjects[i].setPose(uncertaintyRange[i]);
+            } else {
+                Util.error("Number of uncertainty range poses and field objects don't match up");
+            }
+        }
+        Logger.recordOutput("RobotState/PoseUncertaintyRange", uncertaintyRange);
     }
 
     @Override

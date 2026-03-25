@@ -11,6 +11,7 @@ import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -276,12 +277,13 @@ public class Drive extends CommandBasedSubsystem {
         robotState.setMeasuredChassisSpeedsFieldRelative(measuredChassisSpeedsFieldRelative);
 
         // Update filtered acceleration
-        //Translation2d filteredAccelerationMetersPerSecPerSec = new Translation2d(
-        //        accelerationXFilter.calculate(accelerometerInputs.accelerationXMetersPerSecPerSec),
-        //        accelerationYFilter.calculate(accelerometerInputs.accelerationYMetersPerSecPerSec)
-        //).rotateBy(robotState.getRotation());
-        //robotState.setFilteredAccelerationMetersPerSecPerSec(filteredAccelerationMetersPerSecPerSec);
-        //Logger.recordOutput("Drive/FilteredAccelerationMetersPerSecPerSec", filteredAccelerationMetersPerSecPerSec);
+        Translation2d filteredAccelerationMetersPerSecPerSec = new Translation2d(
+                accelerationXFilter.calculate(accelerometerInputs.accelerationXMetersPerSecPerSec),
+                accelerationYFilter.calculate(accelerometerInputs.accelerationYMetersPerSecPerSec)
+        ).rotateBy(robotState.getRotation());
+        robotState.setFilteredAccelerationMetersPerSecPerSec(filteredAccelerationMetersPerSecPerSec);
+        if (BuildConstants.isSimOrReplay)
+            Logger.recordOutput("Drive/FilteredAccelerationMetersPerSecPerSec", filteredAccelerationMetersPerSecPerSec);
 
         // Apply network inputs
         if (operatorDashboard.coastOverride.hasChanged()) {
