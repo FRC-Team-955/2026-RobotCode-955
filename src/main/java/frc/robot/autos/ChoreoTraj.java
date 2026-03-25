@@ -23,9 +23,16 @@ public record ChoreoTraj(
     public static final ChoreoTraj CanadianDepot_FirstPass = new ChoreoTraj(
 	    "CanadianDepot_FirstPass",
 	    OptionalInt.empty(),
-	    4.43709,
+	    4.77111,
 	    new Pose2d(6.34, 7.55, Rotation2d.fromRadians(-1.571)),
-	    new Pose2d(3.965, 5.618, Rotation2d.fromRadians(1.995))
+	    new Pose2d(3.632, 5.633, Rotation2d.fromRadians(1.995))
+	);
+	public static final ChoreoTraj CanadianDepot_SecondPath = new ChoreoTraj(
+	    "CanadianDepot_SecondPath",
+	    OptionalInt.empty(),
+	    5.87055,
+	    new Pose2d(6.36, 7.387, Rotation2d.fromRadians(-1.571)),
+	    new Pose2d(3.632, 5.633, Rotation2d.fromRadians(1.995))
 	);
 
     /**
@@ -33,7 +40,8 @@ public record ChoreoTraj(
      * This allows for trajectory data to be looked up with strings during runtime.
      */
     public static final Map<String, ChoreoTraj> ALL_TRAJECTORIES = Map.ofEntries(
-    	Map.entry("CanadianDepot_FirstPass", CanadianDepot_FirstPass)
+    	Map.entry("CanadianDepot_FirstPass", CanadianDepot_FirstPass),
+		Map.entry("CanadianDepot_SecondPath", CanadianDepot_SecondPath)
     );
 
     /**
