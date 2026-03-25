@@ -17,7 +17,7 @@ public class CanadianDepotAuto extends Auto {
     private static final double startingY = ChoreoTraj.CanadianDepot_FirstPass.initialPoseBlue().getY();
     private static final Rotation2d startingRotation = ChoreoTraj.CanadianDepot_FirstPass.initialPoseBlue().getRotation();
     private static final Pose2d preemptiveTrenchEntrance = new Pose2d(3.2, 7.0, Rotation2d.kCCW_90deg);
-    private static final Pose2d trenchEntrance = new Pose2d(3.5, startingY, Rotation2d.kCCW_90deg);
+    private static final Pose2d trenchEntrance = new Pose2d(3.5, startingY, Rotation2d.kCW_90deg);
 
     public CanadianDepotAuto() {
         super(
@@ -48,8 +48,30 @@ public class CanadianDepotAuto extends Auto {
                         AutoHelpers.finalWaypoint(() -> preemptiveTrenchEntrance, defaultMoveToConstraints, true)
                 ).withTimeout(4.5),
 
+                // Stop Shooting
+                superstructure.setGoal(Superstructure.Goal.IDLE).until(() -> true),
+
                 // Move to final trench entrance
-                AutoHelpers.finalWaypoint(() -> trenchEntrance, defaultMoveToConstraints, false)
+                AutoHelpers.finalWaypoint(() -> trenchEntrance, defaultMoveToConstraints, false),
+
+                // move out of trench
+                AutoHelpers.intermediateWaypoint(() -> new Pose2d(
+                        ChoreoTraj.CanadianDepot_FirstPass.initialPoseBlue().getX(),
+                        startingY,
+                        startingRotation
+                ), defaultMoveToConstraints, false),
+
+                // follow collection path
+                Commands.parallel(
+                        AutoHelpers.trajectory(ChoreoTraj.CanadianDepot_SecondPath),
+                        superintake.setGoal(Superintake.Goal.INTAKE).until(() -> true)
+                ),
+
+                // Shoot
+                Commands.parallel(
+                        superintake.intakeShootAlternate(),
+                        superstructure.setGoal(Superstructure.Goal.SHOOT)
+                ).withTimeout(4.5)
         );
     }
 }
