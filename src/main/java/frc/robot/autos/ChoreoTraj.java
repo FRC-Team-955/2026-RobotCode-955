@@ -1,11 +1,10 @@
-// spotless:off
+
 package frc.robot.autos;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import java.util.Map;
 import java.util.OptionalInt;
-
 
 
 /**
@@ -22,43 +21,43 @@ public record ChoreoTraj(
     Pose2d endPoseBlue
 ) {
     public static final ChoreoTraj CanadianDepot_FirstPass = new ChoreoTraj(
-        "CanadianDepot_FirstPass",
-        OptionalInt.empty(),
-        2.34785,
-        new Pose2d(6.34, 7.55, Rotation2d.fromRadians(-1.5708)),
-        new Pose2d(5.71094, 5.53025, Rotation2d.fromRadians(2.35619))
-    );
-    public static final ChoreoTraj CanadianHuman_SeconPass = new ChoreoTraj(
-        "CanadianHuman_SeconPass",
-        OptionalInt.empty(),
-        2.62734,
-        new Pose2d(6.39331, 0.60333, Rotation2d.fromRadians(1.5708)),
-        new Pose2d(5.7009, 2.41898, Rotation2d.fromRadians(-1.99499))
-    );
-    public static final ChoreoTraj CanadianDepot_SecondPath = new ChoreoTraj(
-        "CanadianDepot_SecondPath",
-        OptionalInt.empty(),
-        2.57203,
-        new Pose2d(5.77121, 7.55, Rotation2d.fromRadians(-1.5708)),
-        new Pose2d(5.71197, 5.52342, Rotation2d.fromRadians(2.35619))
-    );
-    public static final ChoreoTraj CanadianHuman_FirstPass = new ChoreoTraj(
-        "CanadianHuman_FirstPass",
-        OptionalInt.empty(),
-        3.12159,
-        new Pose2d(6.39331, 0.60333, Rotation2d.fromRadians(1.5708)),
-        new Pose2d(5.7009, 2.41898, Rotation2d.fromRadians(-1.99499))
-    );
+	    "CanadianDepot_FirstPass",
+	    OptionalInt.empty(),
+	    2.34785,
+	    new Pose2d(6.34, 7.55, Rotation2d.fromRadians(-1.571)),
+	    new Pose2d(5.711, 5.53, Rotation2d.fromRadians(2.356))
+	);
+	public static final ChoreoTraj CanadianOutpost_SecondPass = new ChoreoTraj(
+	    "CanadianOutpost_SecondPass",
+	    OptionalInt.empty(),
+	    4.34281,
+	    new Pose2d(6.393, 0.603, Rotation2d.fromRadians(1.571)),
+	    new Pose2d(3.993, 2.296, Rotation2d.fromRadians(-2.409))
+	);
+	public static final ChoreoTraj CanadianDepot_SecondPath = new ChoreoTraj(
+	    "CanadianDepot_SecondPath",
+	    OptionalInt.empty(),
+	    2.57203,
+	    new Pose2d(5.771, 7.55, Rotation2d.fromRadians(-1.571)),
+	    new Pose2d(5.712, 5.523, Rotation2d.fromRadians(2.356))
+	);
+	public static final ChoreoTraj CanadianOutpost_FirstPass = new ChoreoTraj(
+	    "CanadianOutpost_FirstPass",
+	    OptionalInt.empty(),
+	    4.81376,
+	    new Pose2d(6.393, 0.603, Rotation2d.fromRadians(1.571)),
+	    new Pose2d(3.978, 2.465, Rotation2d.fromRadians(-1.995))
+	);
 
     /**
      * A map between trajectory names and their corresponding data.
      * This allows for trajectory data to be looked up with strings during runtime.
      */
     public static final Map<String, ChoreoTraj> ALL_TRAJECTORIES = Map.ofEntries(
-        Map.entry("CanadianDepot_FirstPass", CanadianDepot_FirstPass),
-        Map.entry("CanadianHuman_SeconPass", CanadianHuman_SeconPass),
-        Map.entry("CanadianDepot_SecondPath", CanadianDepot_SecondPath),
-        Map.entry("CanadianHuman_FirstPass", CanadianHuman_FirstPass)
+    	Map.entry("CanadianDepot_FirstPass", CanadianDepot_FirstPass),
+		Map.entry("CanadianOutpost_SecondPass", CanadianOutpost_SecondPass),
+		Map.entry("CanadianDepot_SecondPath", CanadianDepot_SecondPath),
+		Map.entry("CanadianOutpost_FirstPass", CanadianOutpost_FirstPass)
     );
 
     /**
@@ -74,4 +73,3 @@ public record ChoreoTraj(
     }
     
 }
-// spotless:on
