@@ -8,6 +8,7 @@ import frc.lib.commands.CommandsExt;
 import frc.robot.subsystems.superintake.Superintake;
 import frc.robot.subsystems.superstructure.Superstructure;
 
+import static frc.robot.autos.AutoHelpers.bumpConstraints;
 import static frc.robot.subsystems.drive.DriveConstants.defaultMoveToConstraints;
 
 public class CanadianDepotAuto extends Auto {
@@ -40,15 +41,32 @@ public class CanadianDepotAuto extends Auto {
                         AutoHelpers.trajectory(ChoreoTraj.CanadianDepot_FirstPass),
                         superintake.setGoal(Superintake.Goal.INTAKE).until(() -> true)
                 ),
+                superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
 
-                // Shoot while moving to entrance to trench
+                // go to the start of the bump
+                AutoHelpers.intermediateWaypoint(() -> new Pose2d(
+                        5.71,
+                        5.53,
+                        Rotation2d.fromDegrees(135)
+                ), defaultMoveToConstraints, false),
+
+                // go over the bump
+                AutoHelpers.finalWaypoint(() -> new Pose2d(
+                        2.6,
+                        5.53,
+                        Rotation2d.fromDegrees(135)
+                ), bumpConstraints, false),
+
+                // Shoot
                 Commands.parallel(
                         superintake.intakeShootAlternate(),
                         superstructure.setGoal(Superstructure.Goal.SHOOT),
-                        AutoHelpers.finalWaypoint(() -> preemptiveTrenchEntrance, defaultMoveToConstraints, true)
+                        AutoHelpers.finalWaypoint(() -> new Pose2d(
+                                2.6,
+                                5.53,
+                                Rotation2d.fromDegrees(135)
+                        ), defaultMoveToConstraints, true)
                 ).withTimeout(4.5),
-
-                // Stop Shooting
                 superstructure.setGoal(Superstructure.Goal.IDLE).until(() -> true),
 
                 // Move to final trench entrance
@@ -67,11 +85,31 @@ public class CanadianDepotAuto extends Auto {
                         superintake.setGoal(Superintake.Goal.INTAKE).until(() -> true)
                 ),
 
+                // go to the start of the bump
+                AutoHelpers.intermediateWaypoint(() -> new Pose2d(
+                        5.71,
+                        5.53,
+                        Rotation2d.fromDegrees(135)
+                ), defaultMoveToConstraints, false),
+
+                // go over the bump
+                AutoHelpers.finalWaypoint(() -> new Pose2d(
+                        2.6,
+                        5.53,
+                        Rotation2d.fromDegrees(135)
+                ), bumpConstraints, false),
+
                 // Shoot
                 Commands.parallel(
                         superintake.intakeShootAlternate(),
-                        superstructure.setGoal(Superstructure.Goal.SHOOT)
-                ).withTimeout(4.5)
+                        superstructure.setGoal(Superstructure.Goal.SHOOT),
+                        AutoHelpers.finalWaypoint(() -> new Pose2d(
+                                2.6,
+                                5.53,
+                                Rotation2d.fromDegrees(135)
+                        ), defaultMoveToConstraints, true)
+                ),
+                superstructure.setGoal(Superstructure.Goal.IDLE).until(() -> true)
         );
     }
 }
