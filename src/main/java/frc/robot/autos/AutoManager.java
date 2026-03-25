@@ -43,6 +43,7 @@ public class AutoManager {
         autoChooser.addOption("Orbit at the outpost", new OrbitAtTheOutpostAuto());
         autoChooser.addOption("Aura", new AuraAuto());
         autoChooser.addOption("Test", new OrbitGoingToHomeDepotAuto());
+        autoChooser.addOption("TestCandian", new TestCandian());
         robotState.setAutoStartPoseSupplier(this::getSelectedAutoStartingPose);
     }
 
