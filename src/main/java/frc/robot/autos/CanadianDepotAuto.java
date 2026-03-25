@@ -55,6 +55,9 @@ public class CanadianDepotAuto extends Auto {
                 ).withTimeout(4.5),
                 superstructure.setGoal(Superstructure.Goal.IDLE).until(() -> true),
 
+                AutoHelpers.finalWaypoint(() -> new Pose2d(3.0, startingY - 0.5,
+                        Rotation2d.kCW_90deg), defaultMoveToConstraints, false),
+
                 // Move to final trench entrance
                 AutoHelpers.finalWaypoint(() -> trenchEntrance, defaultMoveToConstraints, false),
 
