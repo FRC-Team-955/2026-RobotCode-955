@@ -44,6 +44,7 @@ public class Module {
     private final Alert turnDisconnectedAlert;
     private final Alert turnEncoderDisconnectedAlert;
     private final Alert turnEncoderDisparityAlert;
+    private final Alert turnEncoderDisparityStickyAlert;
 
     public Module(ModuleIO io, int index) {
         this.io = io;
@@ -53,6 +54,7 @@ public class Module {
         turnDisconnectedAlert = new Alert("Disconnected turn motor on module " + index + ".", AlertType.kError);
         turnEncoderDisconnectedAlert = new Alert("Disconnected turn encoder on module " + index + ".", AlertType.kError);
         turnEncoderDisparityAlert = new Alert("Absolute and relative turn encoders on module " + index + " are not matching up.", AlertType.kError);
+        turnEncoderDisparityStickyAlert = new Alert("Absolute and relative turn encoders on module " + index + " didn't match up, but they do now.", AlertType.kWarning);
     }
 
     public void updateAndProcessInputs() {
@@ -69,15 +71,18 @@ public class Module {
         driveDisconnectedAlert.set(!inputs.driveConnected);
         turnDisconnectedAlert.set(!inputs.turnConnected);
         turnEncoderDisconnectedAlert.set(!inputs.turnAbsoluteEncoderConnected);
-        turnEncoderDisparityAlert.set(turnAbsoluteRelativeDifferenceDebouncer.calculate(
+        boolean turnEncoderDisparity = turnAbsoluteRelativeDifferenceDebouncer.calculate(
                 Math.abs(
                         MathUtil.angleModulus(inputs.turnAbsolutePositionRad)
                                 - MathUtil.angleModulus(inputs.turnPositionRad)
                 ) > Units.degreesToRadians(3.0)
-
-
-        ));
-
+        );
+        turnEncoderDisparityAlert.set(turnEncoderDisparity);
+        // TODO check if encoder connected and check if magnet health is not invalid
+        if (turnEncoderDisparity && Math.abs(getDriveVelocityMetersPerSec()) < 1e-4) {
+            io.setTurnRelativeEncoderFromAbsolute();
+            turnEncoderDisparityStickyAlert.set(true);
+        }
     }
 
     public void runSetpoint(SwerveModuleState state) {

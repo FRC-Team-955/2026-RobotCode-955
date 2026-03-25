@@ -319,4 +319,16 @@ public class ModuleIOTalonFXSparkMaxCANcoder extends ModuleIO {
         double setpoint = MathUtil.inputModulus(positionRad, 0.0, 2 * Math.PI);
         turnController.setSetpoint(setpoint, SparkBase.ControlType.kPosition);
     }
+
+    @Override
+    public void setTurnRelativeEncoderFromAbsolute() {
+        // Ensure it is connected
+        var turnEncoderStatus = BaseStatusSignal.refreshAll(turnAbsolutePosition);
+        if (turnEncoderStatus.isOK()) {
+            System.out.println("Setting turn relative encoder from absolute");
+            SparkUtil.tryUntilOkAsync(5, () -> turnEncoder.setPosition(Units.rotationsToRadians(turnAbsolutePosition.getValueAsDouble())));
+        } else {
+            System.out.println("Failed to set turn relative encoder from absolute");
+        }
+    }
 }

@@ -98,4 +98,7 @@ public class ModuleIO {
      */
     public void setTurnClosedLoop(double positionRad) {
     }
+
+    public void setTurnRelativeEncoderFromAbsolute() {
+    }
 }
