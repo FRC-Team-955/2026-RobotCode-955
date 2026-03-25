@@ -207,7 +207,13 @@ public class ShootingKinematics implements Periodic {
                 <= Units.degreesToRadians(hoodToleranceDeg.get());
         Logger.recordOutput("ShootingKinematics/AngleMet", angleMet);
 
-        shootingParametersMet = shiftMet && headingMet && headingVelocityMet && velocityMet && angleMet;
+        boolean uncertaintyMet = operatorDashboard.disableUncertainty.get() ||
+                noPhaseDelayParameters.isPass() ||
+                (robotState.getPoseUncertaintyLinearMeters() < 0.3 &&
+                        robotState.getPoseUncertaintyAngularRad() < 0.005);
+        Logger.recordOutput("ShootingKinematics/UncertaintyMet", uncertaintyMet);
+
+        shootingParametersMet = shiftMet && headingMet && headingVelocityMet && velocityMet && angleMet && uncertaintyMet;
         Logger.recordOutput("ShootingKinematics/ShootingParametersMet", shootingParametersMet);
     }
 

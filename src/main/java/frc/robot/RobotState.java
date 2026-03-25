@@ -111,7 +111,12 @@ public class RobotState implements Periodic {
     // it is able to obtain the deviation and its variation, which is called error.
     private double poseUncertaintyLinearXMeters = 0.0;
     private double poseUncertaintyLinearYMeters = 0.0;
+    @Getter
     private double poseUncertaintyAngularRad = 0.0;
+
+    public double getPoseUncertaintyLinearMeters() {
+        return Math.hypot(poseUncertaintyLinearXMeters, poseUncertaintyLinearYMeters);
+    }
 
     /*
     private boolean lastInNeutralZone = false;
@@ -181,6 +186,14 @@ public class RobotState implements Periodic {
         if (poseUncertaintyLinearYMeters < 0.0) poseUncertaintyLinearYMeters = 0.0;
         if (poseUncertaintyAngularRad < 0.0) poseUncertaintyAngularRad = 0.0;
 
+        // Log uncertainty
+        if (BuildConstants.isSimOrReplay) {
+            Logger.recordOutput("RobotState/PoseUncertainty/LinearX", poseUncertaintyLinearXMeters);
+            Logger.recordOutput("RobotState/PoseUncertainty/LinearY", poseUncertaintyLinearYMeters);
+            Logger.recordOutput("RobotState/PoseUncertainty/Linear", getPoseUncertaintyLinearMeters());
+            Logger.recordOutput("RobotState/PoseUncertainty/Angular", poseUncertaintyAngularRad);
+        }
+
         // Log uncertainty range
         // The Periodic execution order defined in Robot ensures that AprilTagVision will have already reduced uncertainty if there were any vision measurements
         Rotation2d r = getRotation();
@@ -199,7 +212,9 @@ public class RobotState implements Periodic {
                 Util.error("Number of uncertainty range poses and field objects don't match up");
             }
         }
-        Logger.recordOutput("RobotState/PoseUncertaintyRange", uncertaintyRange);
+        if (BuildConstants.isSimOrReplay) {
+            Logger.recordOutput("RobotState/PoseUncertainty/Range", uncertaintyRange);
+        }
     }
 
     @Override
