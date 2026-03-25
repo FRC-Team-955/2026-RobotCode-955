@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.Util;
 import frc.lib.network.LoggedTunableNumber;
 import frc.lib.subsystem.CommandBasedSubsystem;
+import frc.robot.BuildConstants;
 import frc.robot.FieldConstants;
 import frc.robot.OperatorDashboard;
 import frc.robot.RobotState;
@@ -124,13 +125,20 @@ public class Superstructure extends CommandBasedSubsystem {
                 flywheel.setGoal(Flywheel.Goal.IDLE);
                 feeder.setGoal(Feeder.Goal.IDLE);
                 spindexer.setGoal(Spindexer.Goal.IDLE);
+                if (goal == Goal.HOME_HOOD) {
+                    hood.setGoal(Hood.Goal.HOME);
+                } else {
+                    hood.setGoal(Hood.Goal.STOW);
+                }
             }
             case SHOOT, SHOOT_FORCE -> {
                 flywheel.setGoal(Flywheel.Goal.SHOOT);
+                hood.setGoal(Hood.Goal.SHOOT);
 
                 boolean needsToCommitToShot = !operatorDashboard.disableCANrange.get() &&
                         Timer.getTimestamp() - lastStartedShot < commitToShotTimeSeconds.get();
-                //Logger.recordOutput("Superstructure/NeedsToCommitToShot", needsToCommitToShot);
+                if (BuildConstants.isSimOrReplay)
+                    Logger.recordOutput("Superstructure/NeedsToCommitToShot", needsToCommitToShot);
                 boolean shouldShoot = shootingKinematics.isShootingParametersMet() || needsToCommitToShot;
                 if (goal == Goal.SHOOT_FORCE || shouldShoot) {
                     feeder.setGoal(Feeder.Goal.FEED);
@@ -154,14 +162,9 @@ public class Superstructure extends CommandBasedSubsystem {
             case EJECT -> {
                 flywheel.setGoal(Flywheel.Goal.EJECT);
                 feeder.setGoal(Feeder.Goal.EJECT);
-                spindexer.setGoal(Spindexer.Goal.EJECT);
+                spindexer.setGoal(Spindexer.Goal.EJECT_ALTERNATE);
+                hood.setGoal(Hood.Goal.STOW);
             }
-        }
-
-        if (goal == Goal.HOME_HOOD) {
-            hood.setGoal(Hood.Goal.HOME);
-        } else {
-            hood.setGoal(Hood.Goal.SHOOT);
         }
 
         Logger.recordOutput(

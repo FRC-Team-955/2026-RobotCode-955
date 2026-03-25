@@ -14,11 +14,12 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.AllianceFlipUtil;
 import frc.lib.Bounds;
 import frc.lib.Util;
+import frc.lib.commands.CommandsExt;
 import frc.lib.network.LoggedTunableNumber;
 import frc.robot.FieldConstants;
 import frc.robot.RobotState;
 import frc.robot.subsystems.drive.Drive;
-import frc.robot.subsystems.drive.DriveConstants;
+import frc.robot.subsystems.drive.constraints.DriveConstraints;
 import frc.robot.subsystems.gamepiecevision.GamePieceVision;
 import frc.robot.subsystems.superintake.Superintake;
 import frc.robot.subsystems.superstructure.Superstructure;
@@ -43,87 +44,63 @@ public class AutoHelpers {
     private static final Superstructure superstructure = Superstructure.get();
     private static final Choreo.TrajectoryCache trajectoryCache = new Choreo.TrajectoryCache();
 
-    public static final DriveConstants.MoveToConstraints shootingConstraints = defaultMoveToConstraints
-            .withMaxLinearVelocityMetersPerSec(new LoggedTunableNumber("AutoHelpers/Shoot/MaxLinearVelocity", 1.0))
-            .withMaxLinearAccelerationMetersPerSecPerSec(new LoggedTunableNumber("AutoHelpers/Shoot/MaxLinearAcceleration", 5))
-            .withAiming(true);
-
-    public static Command intermediateWaypoint(Supplier<Pose2d> poseSupplier, DriveConstants.MoveToConstraints constraints) {
-        return drive
+    public static Command intermediateWaypoint(Supplier<Pose2d> poseSupplier, DriveConstraints constraints, boolean aiming) {
+        var cmd = drive
                 .moveTo(
                         () -> AllianceFlipUtil.apply(poseSupplier.get()),
                         constraints
                         //.withFullSpeed(true)
-                )
-                .until(() -> robotState.isAtPoseWithTolerance(
-                        AllianceFlipUtil.apply(poseSupplier.get()),
-                        intermediateLinearTolerance,
-                        // if we are aiming, the rotation from the pose supplier
-                        // is not the rotation that move to will target
-                        constraints.aiming()
-                                ? Double.MAX_VALUE
-                                : intermediateAngularTolerance
-                ));
+                );
+        if (aiming) {
+            cmd = cmd.withAiming();
+        }
+        return cmd.until(() -> robotState.isAtPoseWithTolerance(
+                AllianceFlipUtil.apply(poseSupplier.get()),
+                intermediateLinearTolerance,
+                // if we are aiming, the rotation from the pose supplier
+                // is not the rotation that move to will target
+                aiming
+                        ? Double.MAX_VALUE
+                        : intermediateAngularTolerance
+        ));
     }
 
-    public static Command finalWaypoint(Supplier<Pose2d> poseSupplier, DriveConstants.MoveToConstraints constraints) {
-        return drive
+    public static Command finalWaypoint(Supplier<Pose2d> poseSupplier, DriveConstraints constraints, boolean aiming) {
+        var cmd = drive
                 .moveTo(
                         () -> AllianceFlipUtil.apply(poseSupplier.get()),
                         constraints
-                )
-                .until(() -> robotState.isAtPoseWithTolerance(
-                        AllianceFlipUtil.apply(poseSupplier.get()),
-                        finalLinearTolerance,
-                        // if we are aiming, the rotation from the pose supplier
-                        // is not the rotation that move to will target
-                        constraints.aiming()
-                                ? Double.MAX_VALUE
-                                : intermediateAngularTolerance
-                ));
-    }
-
-
-    @SuppressWarnings("unchecked")
-    public static Command trajectory(String name, Supplier<Pose2d> poseSupplier) {
-        // Basically copied from AutoFactory
-        Optional<? extends Trajectory<?>> optTrajectory = trajectoryCache.loadTrajectory(name);
-        if (optTrajectory.isPresent()) {
-            return drive.followTrajectory((Trajectory<SwerveSample>) optTrajectory.get()).until(() ->
-
-                    robotState.isAtPoseWithTolerance(
-                            AllianceFlipUtil.apply(poseSupplier.get()),
-                            finalLinearTolerance,
-                            // if we are aiming, the rotation from the pose supplier
-                            // is not the rotation that move to will target
-                            finalAngularTolerance));
-        } else {
-            Util.error("Trajectory " + name + " is not present");
-            //noinspection Convert2Diamond
-            return drive.idle();
+                );
+        if (aiming) {
+            cmd = cmd.withAiming();
         }
+        return cmd.until(() -> robotState.isAtPoseWithTolerance(
+                AllianceFlipUtil.apply(poseSupplier.get()),
+                finalLinearTolerance,
+                // if we are aiming, the rotation from the pose supplier
+                // is not the rotation that move to will target
+                aiming
+                        ? Double.MAX_VALUE
+                        : finalAngularTolerance
+        ));
     }
 
     @SuppressWarnings("unchecked")
-    public static Command trajectory(String name, final int splitIndex, Supplier<Pose2d> poseSupplier) {
+    public static Drive.ModifiableDriveCommand trajectory(ChoreoTraj traj) {
         // Basically copied from AutoFactory
-        Optional<? extends Trajectory<?>> optTrajectory = trajectoryCache.loadTrajectory(name, splitIndex);
-        if (optTrajectory.isPresent()) {
-            return drive.followTrajectory((Trajectory<SwerveSample>) optTrajectory.get()).until(() ->
-
-                    robotState.isAtPoseWithTolerance(
-                            AllianceFlipUtil.apply(poseSupplier.get()),
-                            finalLinearTolerance,
-                            // if we are aiming, the rotation from the pose supplier
-                            // is not the rotation that move to will target
-                            finalAngularTolerance));
+        Optional<? extends Trajectory<?>> optTrajectory;
+        if (traj.segment().isPresent()) {
+            optTrajectory = trajectoryCache.loadTrajectory(traj.name(), traj.segment().getAsInt());
         } else {
-            Util.error("Trajectory " + name + " is not present");
-            //noinspection Convert2Diamond
-            return drive.idle();
+            optTrajectory = trajectoryCache.loadTrajectory(traj.name());
+        }
+        if (optTrajectory.isPresent()) {
+            return drive.followTrajectory((Trajectory<SwerveSample>) optTrajectory.get());
+        } else {
+            Util.error("Trajectory " + traj.name() + " is not present");
+            return drive.stop();
         }
     }
-
 
     public static Pose2d yDistanceInterpolation(
             Translation2d start,
@@ -147,11 +124,13 @@ public class AutoHelpers {
             Translation2d end,
             Rotation2d heading,
             double yDistanceToStartInterpolation,
-            DriveConstants.MoveToConstraints constraints
+            DriveConstraints constraints,
+            boolean aiming
     ) {
         return intermediateWaypoint(
                 () -> yDistanceInterpolation(start, end, heading, yDistanceToStartInterpolation),
-                constraints
+                constraints,
+                aiming
         );
     }
 
@@ -178,15 +157,17 @@ public class AutoHelpers {
             Translation2d end,
             Rotation2d heading,
             double xDistanceToStartInterpolation,
-            DriveConstants.MoveToConstraints constraints
+            DriveConstraints constraints,
+            boolean aiming
     ) {
         return intermediateWaypoint(
                 () -> xDistanceToStartInterpolation(start, end, heading, xDistanceToStartInterpolation),
-                constraints
+                constraints,
+                aiming
         );
     }
 
-    public static final DriveConstants.MoveToConstraints intakeConstraints = defaultMoveToConstraints
+    public static final DriveConstraints intakeConstraints = defaultMoveToConstraints
             .withMaxLinearVelocityMetersPerSec(new LoggedTunableNumber("AutoHelpers/Intake/MaxLinearVelocity", 2))
             .withMaxAngularAccelerationRadPerSecPerSec(new LoggedTunableNumber("AutoHelpers/Intake/MaxAngularAcceleration", 40.0));
 
@@ -249,7 +230,7 @@ public class AutoHelpers {
         );
     }
 
-    public static Command intakeFromDepotWhileShooting(DriveConstants.MoveToConstraints constraints) {
+    public static Command intakeFromDepotWhileShooting(DriveConstraints constraints) {
         Pose2d ifNoGamePieces = new Pose2d(0.2 + driveConfig.bumperLengthMeters() / 2.0, FieldConstants.Depot.depotCenter.getY(), Rotation2d.k180deg);
         return Commands.parallel(
                 drive.moveTo(
@@ -259,10 +240,35 @@ public class AutoHelpers {
                                 FieldConstants.Depot.rightCorner.getY(),
                                 FieldConstants.Depot.leftCorner.getY()
                         ), ifNoGamePieces),
-                        constraints.withAiming(true)
-                ),
+                        constraints
+                ).withAiming(),
                 superintake.setGoal(Superintake.Goal.INTAKE),
                 superstructure.setGoal(Superstructure.Goal.SHOOT)
+        );
+    }
+
+    private static final DriveConstraints bumpConstraints = defaultMoveToConstraints
+            .withMaxLinearVelocityMetersPerSec(new LoggedTunableNumber("AutoHelpers/Bump/MaxLinearVelocity", 2.5));
+    private static double bumpStartX = 5.71;
+    private static double bumpEndX = 2.6;
+
+    public static Command goOverDepotSideBump() {
+        double y = 5.53;
+        Rotation2d rotation = Rotation2d.fromDegrees(135);
+        return CommandsExt.eagerSequence(
+                // go to the start of the bump
+                AutoHelpers.intermediateWaypoint(() -> new Pose2d(
+                        bumpStartX,
+                        y,
+                        rotation
+                ), defaultMoveToConstraints, false),
+
+                // go over the bump
+                AutoHelpers.intermediateWaypoint(() -> new Pose2d(
+                        bumpEndX,
+                        y,
+                        rotation
+                ), bumpConstraints, false)
         );
     }
 }

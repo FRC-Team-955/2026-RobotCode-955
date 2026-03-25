@@ -42,7 +42,7 @@ public class CANLogger implements Periodic {
         roboRIOCANErrorAlert.set(roboRIOCANErrorTimer.isRunning() && !roboRIOCANErrorTimer.hasElapsed(0.5));
 
         // Check and log CANivore status
-        if (BuildConstants.mode == BuildConstants.Mode.REAL) {
+        if (BuildConstants.isReal) {
             var canivoreStatus = canivoreBus.getStatus();
             Logger.recordOutput("CANivore/Status", canivoreStatus.Status.getName());
             Logger.recordOutput("CANivore/Utilization", canivoreStatus.BusUtilization);

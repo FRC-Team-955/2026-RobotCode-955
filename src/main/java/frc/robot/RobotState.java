@@ -18,9 +18,12 @@ import frc.robot.subsystems.drive.DriveConstants;
 import lombok.Getter;
 import lombok.Setter;
 import org.littletonrobotics.junction.AutoLogOutput;
+import org.littletonrobotics.junction.Logger;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
+import java.util.stream.IntStream;
 
 import static frc.robot.subsystems.drive.DriveConstants.driveConfig;
 
@@ -48,6 +51,26 @@ public class RobotState implements Periodic {
     @Setter
     private Optional<Pose2d> moveToGoal = Optional.empty();
     private final FieldObject2d moveToGoalObject = field2d.getObject("MoveTo");
+
+    @Setter
+    private Optional<Pose2d[]> trajectory = Optional.empty();
+    private final FieldObject2d trajectoryObject = field2d.getObject("Trajectory");
+
+    @Setter
+    private Optional<Pose2d> trajectorySample = Optional.empty();
+    private final FieldObject2d trajectorySampleObject = field2d.getObject("TrajectorySample");
+
+    @Setter
+    private List<Pose3d> acceptedPoses = List.of();
+    private final FieldObject2d[] acceptedPoseObjects = IntStream.range(0, 3)
+            .mapToObj(n -> field2d.getObject("AcceptedPose" + n))
+            .toArray(FieldObject2d[]::new);
+
+    @Setter
+    private List<Pose3d> rejectedPoses = List.of();
+    private final FieldObject2d[] rejectedPoseObjects = IntStream.range(0, 3)
+            .mapToObj(n -> field2d.getObject("RejectedPose" + n))
+            .toArray(FieldObject2d[]::new);
 
     @Getter
     @Setter
@@ -179,6 +202,28 @@ public class RobotState implements Periodic {
                 moveToGoalObject::setPose,
                 moveToGoalObject::setPoses
         );
+        trajectory.ifPresentOrElse(
+                trajectoryObject::setPoses,
+                trajectoryObject::setPoses
+        );
+        trajectorySample.ifPresentOrElse(
+                trajectorySampleObject::setPose,
+                trajectorySampleObject::setPoses
+        );
+        for (int i = 0; i < acceptedPoseObjects.length; i++) {
+            if (i < acceptedPoses.size()) {
+                acceptedPoseObjects[i].setPose(acceptedPoses.get(i).toPose2d());
+            } else {
+                acceptedPoseObjects[i].setPoses();
+            }
+        }
+        for (int i = 0; i < rejectedPoseObjects.length; i++) {
+            if (i < rejectedPoses.size()) {
+                rejectedPoseObjects[i].setPose(rejectedPoses.get(i).toPose2d());
+            } else {
+                rejectedPoseObjects[i].setPoses();
+            }
+        }
         SmartDashboard.putData("Field2d", field2d);
     }
 
@@ -226,7 +271,7 @@ public class RobotState implements Periodic {
 
     public void setPose(Pose2d pose) {
         poseEstimator.resetPose(pose);
-        if (BuildConstants.mode == BuildConstants.Mode.SIM) {
+        if (BuildConstants.isSim) {
             SimManager.get().driveSimulation.setSimulationWorldPose(pose);
         }
     }
@@ -252,19 +297,18 @@ public class RobotState implements Periodic {
                 && Math.abs(getMeasuredChassisSpeedsFieldRelative().omegaRadiansPerSecond) < angularToleranceRadPerSec;
     }
 
-    @AutoLogOutput(key = "RobotState/IsInTrench")
     public boolean isInTrench(Translation2d t) {
         // make each bounding box larger so that the hood has time to move down before going under the trench
         double adjustmentMetersPositiveX = 0.55 + Math.max(0.0, getMeasuredChassisSpeedsFieldRelative().vxMetersPerSecond) * 0.5;
         double adjustmentMetersNegativeX = 0.55 + Math.min(0.0, getMeasuredChassisSpeedsFieldRelative().vxMetersPerSecond) * -0.5;
-        //Translation2d t = getTranslation();
-        //Logger.recordOutput(
-        //        "RobotState/TrenchChecks",
-        //        new Pose2d(new Translation2d(FieldConstants.LinesVertical.neutralZoneNear + adjustmentMetersNegativeX, 0.6), new Rotation2d()),
-        //        new Pose2d(new Translation2d(FieldConstants.LinesVertical.neutralZoneFar - adjustmentMetersPositiveX, 0.6), new Rotation2d()),
-        //        new Pose2d(new Translation2d(FieldConstants.LinesVertical.allianceZone - adjustmentMetersPositiveX, 0.6), new Rotation2d()),
-        //        new Pose2d(new Translation2d(FieldConstants.LinesVertical.oppAllianceZone + adjustmentMetersNegativeX, 0.6), new Rotation2d())
-        //);
+        if (BuildConstants.isSimOrReplay)
+            Logger.recordOutput(
+                    "RobotState/TrenchChecks",
+                    new Pose2d(new Translation2d(FieldConstants.LinesVertical.neutralZoneNear + adjustmentMetersNegativeX, 0.6), new Rotation2d()),
+                    new Pose2d(new Translation2d(FieldConstants.LinesVertical.neutralZoneFar - adjustmentMetersPositiveX, 0.6), new Rotation2d()),
+                    new Pose2d(new Translation2d(FieldConstants.LinesVertical.allianceZone - adjustmentMetersPositiveX, 0.6), new Rotation2d()),
+                    new Pose2d(new Translation2d(FieldConstants.LinesVertical.oppAllianceZone + adjustmentMetersNegativeX, 0.6), new Rotation2d())
+            );
         boolean inNeutralZone = t.getX() > FieldConstants.LinesVertical.neutralZoneNear + adjustmentMetersNegativeX &&
                 t.getX() < FieldConstants.LinesVertical.neutralZoneFar - adjustmentMetersPositiveX;
         boolean inAllianceZone = t.getX() < FieldConstants.LinesVertical.allianceZone - adjustmentMetersPositiveX ||

@@ -4,32 +4,46 @@ import choreo.trajectory.SwerveSample;
 import choreo.trajectory.Trajectory;
 import edu.wpi.first.hal.FRCNetComm;
 import edu.wpi.first.hal.HAL;
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.LinearFilter;
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.WrapperCommand;
 import frc.lib.Util;
+import frc.lib.commands.CommandsExt;
 import frc.lib.subsystem.CommandBasedSubsystem;
+import frc.robot.BuildConstants;
 import frc.robot.Constants;
 import frc.robot.OperatorDashboard;
 import frc.robot.RobotState;
-import frc.robot.subsystems.drive.goals.*;
+import frc.robot.controller.Controller;
+import frc.robot.shooting.ShootingKinematics;
+import frc.robot.subsystems.drive.constraints.DriveConstrainer;
+import frc.robot.subsystems.drive.constraints.DriveConstraints;
+import frc.robot.subsystems.drive.controllers.FollowTrajectoryController;
+import frc.robot.subsystems.drive.controllers.MoveToController;
 import lombok.Getter;
+import org.jetbrains.annotations.Nullable;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.Arrays;
+import java.util.OptionalDouble;
 import java.util.function.DoubleSupplier;
+import java.util.function.Function;
 import java.util.function.IntToDoubleFunction;
 import java.util.function.Supplier;
 
@@ -39,6 +53,8 @@ import static frc.robot.subsystems.drive.DriveConstants.*;
 public class Drive extends CommandBasedSubsystem {
     private static final RobotState robotState = RobotState.get();
     private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
+    private static final Controller controller = Controller.get();
+    private static final ShootingKinematics shootingKinematics = ShootingKinematics.get();
 
     private final GyroIO gyroIO = createGyroIO();
     private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
@@ -52,8 +68,36 @@ public class Drive extends CommandBasedSubsystem {
     private final Debouncer gyroDebouncer = new Debouncer(2.0, Debouncer.DebounceType.kRising);
     private boolean gyroDebounced = false;
 
-    @Getter
-    private DriveGoal goal = new IdleGoal();
+    public enum State {
+        STOP,
+        JOYSTICK_DRIVE,
+        MOVE_TO,
+        FOLLOW_TRAJECTORY,
+        CHASSIS_SPEEDS,
+        CHARACTERIZATION,
+    }
+
+    private State wantedState = State.STOP;
+
+    private boolean stopWithX = false;
+
+    private @Nullable Supplier<OptionalDouble> headingOverrideSetpointSupplier = null;
+    /** Takes FIELD RELATIVE wanted speeds and gives a feedfoward in rad/sec */
+    private @Nullable Function<ChassisSpeeds, OptionalDouble> headingOverrideFeedforwardSupplier = null;
+    private final PIDController headingOverrideController = headingOverrideGains
+            .toPIDWrapRadians(
+                    moveToConfig.angularPositionToleranceRad().get(),
+                    moveToConfig.angularVelocityToleranceRadPerSec().get()
+            );
+
+    private final Timer joystickDriveHeadingStabilizeTimer = new Timer();
+    private double joystickDriveHeadingStabilizeSetpoint;
+
+    private final MoveToController moveToController = new MoveToController();
+    private final FollowTrajectoryController followTrajectoryController = new FollowTrajectoryController();
+    private @Nullable Supplier<ChassisSpeeds> chassisSpeedsSetpointSupplier = null;
+
+    private final DriveConstrainer constrainer = new DriveConstrainer();
 
     /**
      * FL, FR, BL, BR
@@ -131,7 +175,8 @@ public class Drive extends CommandBasedSubsystem {
         // Sanity check in case gyro is connected but not giving timestamps
         boolean prevGyroDebounced = gyroDebounced;
         gyroDebounced = gyroDebouncer.calculate(gyroInputs.connected);
-        //Logger.recordOutput("Drive/GyroConnectedDebounced", gyroDebounced);
+        if (BuildConstants.isSimOrReplay)
+            Logger.recordOutput("Drive/GyroConnectedDebounced", gyroDebounced);
         // Update gyro alert
         gyroDisconnectedAlert.set(!gyroDebounced);
         if (gyroDebounced && !disableGyro && hasGyroYawPositionRadForSample) {
@@ -206,7 +251,8 @@ public class Drive extends CommandBasedSubsystem {
                     anySampleDiscarded = true;
                 }
             }
-            //Logger.recordOutput("Drive/AnySampleDiscarded", anySampleDiscarded);
+            if (BuildConstants.isSimOrReplay)
+                Logger.recordOutput("Drive/AnySampleDiscarded", anySampleDiscarded);
         } else {
             boolean discardSample = processOdometrySample(
                     Timer.getTimestamp(),
@@ -215,8 +261,8 @@ public class Drive extends CommandBasedSubsystem {
                     true,
                     () -> gyroInputs.yawPositionRad
             );
-
-            //Logger.recordOutput("Drive/SampleDiscarded", discardSample);
+            if (BuildConstants.isSimOrReplay)
+                Logger.recordOutput("Drive/SampleDiscarded", discardSample);
         }
 
         // Chassis speeds
@@ -259,48 +305,125 @@ public class Drive extends CommandBasedSubsystem {
                 module.setTurnAbsolutePIDF(moduleConfig.turnAbsoluteGains());
             }
         }
+
+        if (headingOverrideGains.hasChanged()) {
+            headingOverrideGains.applyPID(headingOverrideController);
+        }
+
+        moveToController.applyNetworkInputs();
+        followTrajectoryController.applyNetworkInputs();
     }
 
     @Override
     public void periodicAfterCommands() {
-        Logger.recordOutput("Drive/Goal", goal.loggableName);
-        DriveRequest request = goal.getRequest();
-        Logger.recordOutput("Drive/RequestType", request.type());
-        Logger.recordOutput("Drive/RequestValue", request.value());
+        Logger.recordOutput("Drive/StopWithXSet", stopWithX);
+        Logger.recordOutput("Drive/HeadingOverrideSet", headingOverrideSetpointSupplier != null);
 
+        Logger.recordOutput("Drive/WantedState", wantedState);
+        State actualState = evaluateStateMachine(wantedState);
+        Logger.recordOutput("Drive/ActualState", actualState);
+    }
+
+    private State evaluateStateMachine(State state) {
         // Stop moving when idle or disabled
-        if (request.type() == DriveRequest.Type.STOP || DriverStation.isDisabled()) {
-            for (var module : modules) {
-                module.stop();
+        if (state == State.STOP || DriverStation.isDisabled()) {
+            // Only attempt to stop with X when enabled
+            if (DriverStation.isEnabled() && stopWithX) {
+                // Create a list of headings where each heading points from the center
+                // of the robot to the module. Tell the module to point at this angle.
+                // This means that the modules will point towards the center of the
+                // robot, forming an X.
+                Rotation2d[] headings = new Rotation2d[modules.length];
+                for (int i = 0; i < modules.length; i++) {
+                    headings[i] = moduleTranslations[i].getAngle();
+                    modules[i].runSetpoint(new SwerveModuleState(0.0, headings[i]));
+                }
+                // We also need to make kinematics aware of the new headings
+                robotState.getKinematics().resetHeadings(headings);
+            } else {
+                for (var module : modules) {
+                    module.stop();
+                }
             }
-        } else if (request.type() == DriveRequest.Type.STOP_WITH_X) {
-            // Create a list of headings where each heading points from the center
-            // of the robot to the module. Tell the module to point at this angle.
-            // This means that the modules will point towards the center of the
-            // robot, forming an X.
-            Rotation2d[] headings = new Rotation2d[modules.length];
-            for (int i = 0; i < modules.length; i++) {
-                headings[i] = moduleTranslations[i].getAngle();
-                modules[i].runSetpoint(new SwerveModuleState(0.0, headings[i]));
-            }
-            // We also need to make kinematics aware of the new headings
-            robotState.getKinematics().resetHeadings(headings);
-        }
-        // Closed loop control
-        else if (request.type() == DriveRequest.Type.CHASSIS_SPEEDS) {
-            Translation2d centerOfRotation = request.centerOfRotation().orElse(Translation2d.kZero);
-            //Logger.recordOutput("Drive/RequestCenterOfRotation", centerOfRotation);
+        } else if (state == State.CHARACTERIZATION) {
+            // Do nothing - commands handle setting voltages
+        } else {
+            ChassisSpeeds wantedFieldSpeeds = new ChassisSpeeds();
 
-            ChassisSpeeds rawSpeeds = request.value();
-            Logger.recordOutput("Drive/ModuleStates/Setpoints", robotState.getKinematics().toSwerveModuleStates(rawSpeeds, centerOfRotation));
+            OptionalDouble headingOverrideSetpoint = headingOverrideSetpointSupplier == null
+                    ? OptionalDouble.empty()
+                    : headingOverrideSetpointSupplier.get();
+
+            switch (state) {
+                case JOYSTICK_DRIVE -> {
+                    wantedFieldSpeeds = controller.getDriveFieldRelativeSpeeds();
+
+                    if (headingOverrideSetpoint.isPresent() || controller.getDriveAngularMagnitude() != 0.0) {
+                        joystickDriveHeadingStabilizeTimer.restart();
+                    } else if (!joystickDriveHeadingStabilizeTimer.hasElapsed(0.3)) {
+                        // Before the timer finishes, set the setpoint to current heading
+                        joystickDriveHeadingStabilizeSetpoint = robotState.getRotation().getRadians();
+                    } else {
+                        // After time finishes, run heading stabilize with previously set setpoint
+                        headingOverrideSetpoint = OptionalDouble.of(joystickDriveHeadingStabilizeSetpoint);
+                    }
+                }
+                case MOVE_TO -> wantedFieldSpeeds = moveToController.update();
+                case FOLLOW_TRAJECTORY -> wantedFieldSpeeds = followTrajectoryController.update();
+                case CHASSIS_SPEEDS -> {
+                    if (chassisSpeedsSetpointSupplier != null) {
+                        wantedFieldSpeeds = chassisSpeedsSetpointSupplier.get();
+                    }
+                }
+            }
+
+            // We are done with the linear part of the setpoint
+            // We need to constrain the linear part before giving the speeds to the heading override
+            // feedforward supplier or the feedforward would be for the speeds BEFORE limiting
+            constrainer.constrainFieldRelativeSpeedsLinear(wantedFieldSpeeds);
+
+            if (headingOverrideSetpoint.isPresent()) {
+                wantedFieldSpeeds.omegaRadiansPerSecond = headingOverrideController.calculate(
+                        robotState.getRotation().getRadians(),
+                        headingOverrideSetpoint.getAsDouble()
+                );
+
+                boolean atSetpoint = headingOverrideController.atSetpoint();
+                if (BuildConstants.isSimOrReplay)
+                    Logger.recordOutput("Drive/HeadingOverrideAtSetpoint", atSetpoint);
+                if (atSetpoint) {
+                    wantedFieldSpeeds.omegaRadiansPerSecond = 0.0;
+                }
+
+                OptionalDouble feedforward = headingOverrideFeedforwardSupplier == null
+                        ? OptionalDouble.empty()
+                        : headingOverrideFeedforwardSupplier.apply(wantedFieldSpeeds);
+                if (feedforward.isPresent()) {
+                    wantedFieldSpeeds.omegaRadiansPerSecond += feedforward.getAsDouble();
+                }
+            } else {
+                headingOverrideController.reset();
+            }
+
+            // Now we are done with the angular part of the setpoint and can constrain it
+            constrainer.constrainFieldRelativeSpeedsAngular(wantedFieldSpeeds);
+
+            if (wantedFieldSpeeds.vxMetersPerSecond == 0.0 && wantedFieldSpeeds.vyMetersPerSecond == 0.0 && wantedFieldSpeeds.omegaRadiansPerSecond == 0.0) {
+                // Re-evaluate state machine to stop - this handles stopping with X in a nice way
+                return evaluateStateMachine(State.STOP);
+            }
+
+            ChassisSpeeds wantedRobotSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(wantedFieldSpeeds, robotState.getRotation());
+
+            Logger.recordOutput("Drive/ModuleStates/Setpoints", robotState.getKinematics().toSwerveModuleStates(wantedRobotSpeeds));
 
             // Discretize - use larger dt than actual to reduce translational skew when rotating and translating at the same time
             // See https://www.chiefdelphi.com/t/whitepaper-swerve-drive-skew-and-second-order-kinematics/416964/5
             // and https://github.com/frc1678/C2024-Public/blob/main/src/main/java/com/team1678/frc2024/subsystems/Drive.java#L406
-            ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(rawSpeeds, Constants.loopPeriod * 4.0);
+            ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(wantedRobotSpeeds, Constants.loopPeriod * 4.0);
 
             // Convert to module states and desaturate
-            SwerveModuleState[] setpointStates = robotState.getKinematics().toSwerveModuleStates(discreteSpeeds, centerOfRotation);
+            SwerveModuleState[] setpointStates = robotState.getKinematics().toSwerveModuleStates(discreteSpeeds);
             SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, driveConfig.maxVelocityMetersPerSec());
 
             // Send setpoints to modules
@@ -320,13 +443,10 @@ public class Drive extends CommandBasedSubsystem {
             // Log setpoint states
             Logger.recordOutput("Drive/ModuleStates/SetpointsOptimized", setpointStates);
             Logger.recordOutput("Drive/ChassisSpeeds/SetpointOptimized", robotState.getKinematics().toChassisSpeeds(setpointStates));
-        } else if (request.type() == DriveRequest.Type.CHARACTERIZATION) {
-            for (var module : modules) {
-                module.runCharacterization(request.value().vxMetersPerSecond);
-            }
-        } else {
-            Util.error("Unknown request type: " + request.type());
         }
+
+        // No re-evaluation, so state stayed the same. Return it
+        return state;
     }
 
     /**
@@ -352,51 +472,247 @@ public class Drive extends CommandBasedSubsystem {
         return states;
     }
 
-    public double[] getWheelRadiusCharacterizationPositions() {
-        return Arrays.stream(modules).mapToDouble(Module::getDrivePositionRad).toArray();
+    public ModifiableDriveCommand stop() {
+        return new ModifiableDriveCommand(startIdle(() -> wantedState = State.STOP));
     }
 
-    public double[] getSlipCurrentCharacterizationVelocities() {
-        return Arrays.stream(modules).mapToDouble(Module::getDriveVelocityRadPerSec).toArray();
+    public ModifiableDriveCommand joystickDrive() {
+        return new ModifiableDriveCommand(startEnd(
+                () -> {
+                    wantedState = State.JOYSTICK_DRIVE;
+                    joystickDriveHeadingStabilizeTimer.restart();
+                },
+                () -> wantedState = State.STOP
+        ));
     }
 
-    public double[] getSlipCurrentCharacterizationCurrents() {
-        return Arrays.stream(modules).mapToDouble(Module::getDriveCurrentAmps).toArray();
+    public ModifiableDriveCommand moveTo(Supplier<Pose2d> goalPoseSupplier) {
+        return moveTo(goalPoseSupplier, defaultMoveToConstraints);
     }
 
-    public Command followTrajectory(Trajectory<SwerveSample> trajectory) {
-        return startIdle(() -> goal = new FollowTrajectoryGoal(trajectory));
+    public ModifiableDriveCommand moveTo(Supplier<Pose2d> goalPoseSupplier, DriveConstraints constraints) {
+        return new ModifiableDriveCommand(startEnd(
+                () -> {
+                    wantedState = State.MOVE_TO;
+                    moveToController.start(goalPoseSupplier);
+                },
+                () -> {
+                    wantedState = State.STOP;
+                    moveToController.stop();
+                }
+        )).withConstraints(constraints);
     }
 
-    public Command moveTo(Supplier<Pose2d> poseSupplier) {
-        return startIdle(() -> goal = new MoveToGoal(poseSupplier, defaultMoveToConstraints));
+    public ModifiableDriveCommand followTrajectory(Trajectory<SwerveSample> trajectory) {
+        return new ModifiableDriveCommand(startEndWaitUntil(
+                () -> {
+                    wantedState = State.FOLLOW_TRAJECTORY;
+                    followTrajectoryController.start(trajectory);
+                },
+                () -> {
+                    wantedState = State.STOP;
+                    followTrajectoryController.stop();
+                },
+                followTrajectoryController::isDone
+        ));
     }
 
-    public Command moveTo(Supplier<Pose2d> poseSupplier, DriveConstants.MoveToConstraints moveToConstraints) {
-        return startIdle(() -> goal = new MoveToGoal(poseSupplier, moveToConstraints));
+    public ModifiableDriveCommand chassisSpeeds(Supplier<ChassisSpeeds> chassisSpeedsSupplier) {
+        return new ModifiableDriveCommand(startEnd(
+                () -> {
+                    wantedState = State.CHASSIS_SPEEDS;
+                    chassisSpeedsSetpointSupplier = chassisSpeedsSupplier;
+                },
+                () -> wantedState = State.STOP
+        ));
     }
 
-    public Command driveJoystick(Supplier<DriveJoystickGoal.Mode> mode) {
-        return startIdle(() -> goal = new DriveJoystickGoal(mode));
+    public class ModifiableDriveCommand extends WrapperCommand {
+        private Supplier<OptionalDouble> targetRad = null;
+        private Function<ChassisSpeeds, OptionalDouble> feedforwardRadPerSec = null;
+        private Boolean wantedStopWithX = null;
+        private DriveConstraints constraints = null;
+
+        private ModifiableDriveCommand(Command command) {
+            super(command);
+        }
+
+        public ModifiableDriveCommand withHeadingOverride(Supplier<OptionalDouble> targetRad) {
+            this.targetRad = targetRad;
+            return this;
+        }
+
+        public ModifiableDriveCommand withHeadingOverride(Supplier<OptionalDouble> targetRad, Function<ChassisSpeeds, OptionalDouble> feedforwardRadPerSec) {
+            this.targetRad = targetRad;
+            this.feedforwardRadPerSec = feedforwardRadPerSec;
+            return this;
+        }
+
+        public ModifiableDriveCommand withStopWithX() {
+            this.wantedStopWithX = true;
+            return this;
+        }
+
+        public ModifiableDriveCommand withConstraints(DriveConstraints constraints) {
+            this.constraints = constraints;
+            return this;
+        }
+
+        public ModifiableDriveCommand withAiming() {
+            return withHeadingOverride(
+                    () -> operatorDashboard.manualAiming.get()
+                            ? OptionalDouble.empty()
+                            : OptionalDouble.of(shootingKinematics.getShootingParameters().headingRad()),
+                    (speeds) -> operatorDashboard.manualAiming.get()
+                            ? OptionalDouble.empty()
+                            : OptionalDouble.of(shootingKinematics.rotationAboutHubRadiansPerSecForDrivebase(speeds))
+            )
+                    .withStopWithX()
+                    .withConstraints(shootingConstraints);
+        }
+
+        @Override
+        public void initialize() {
+            if (targetRad != null) headingOverrideSetpointSupplier = targetRad;
+            if (feedforwardRadPerSec != null) headingOverrideFeedforwardSupplier = feedforwardRadPerSec;
+            if (wantedStopWithX != null) stopWithX = wantedStopWithX;
+            if (constraints != null) constrainer.start(constraints);
+            super.initialize();
+        }
+
+        @Override
+        public void end(boolean interrupted) {
+            headingOverrideSetpointSupplier = null;
+            headingOverrideFeedforwardSupplier = null;
+            stopWithX = false;
+            constrainer.stop();
+            super.end(interrupted);
+        }
     }
 
-    public Command runRobotRelative(Supplier<ChassisSpeeds> chassisSpeedsSupplier) {
-        return startIdle(() -> goal = new VelocityRobotRelativeGoal(chassisSpeedsSupplier));
+    private void runCharacterization(double volts) {
+        for (var module : modules) {
+            module.runCharacterization(volts);
+        }
     }
 
     public Command fullSpeedCharacterization() {
-        return startIdle(() -> goal = new FullSpeedCharacterizationGoal());
+        Timer timer = new Timer();
+        return startRun(
+                () -> {
+                    wantedState = State.CHARACTERIZATION;
+                    timer.restart();
+                },
+                () -> {
+                    if (!timer.hasElapsed(2.0)) {
+                        runCharacterization(2.0);
+                    } else {
+                        runCharacterization(12.0);
+                    }
+                }
+        );
     }
 
-    public Command idle() {
-        return run(() -> goal.getRequest());
-    }
+    public Command wheelRadiusCharacterization() {
+        double speedRadPerSec = 1.0;
+        int direction = 1; // or -1
 
-    public Command wheelRadiusCharacterization(WheelRadiusCharacterizationGoal.Direction direction) {
-        return startIdle(() -> goal = new WheelRadiusCharacterizationGoal(direction));
+        SlewRateLimiter omegaLimiter = new SlewRateLimiter(0.2);
+        var state = new Object() {
+            double[] startWheelPositions = new double[4];
+            double lastGyroYawRad = 0.0;
+            double accumGyroYawRad = 0.0;
+        };
+
+        Supplier<double[]> wheelPositionsSupplier = () -> Arrays.stream(modules).mapToDouble(Module::getDrivePositionRad).toArray();
+
+        return CommandsExt.eagerSequence(
+                runOnce(() -> {
+                    omegaLimiter.reset(0.0);
+                    state.startWheelPositions = wheelPositionsSupplier.get();
+                    state.lastGyroYawRad = rawGyroRotation.getRadians();
+                    state.accumGyroYawRad = 0.0;
+                }),
+                chassisSpeeds(() -> {
+                    var omega = omegaLimiter.calculate(direction * speedRadPerSec);
+
+                    // Get yaw and wheel positions
+                    state.accumGyroYawRad += MathUtil.angleModulus(rawGyroRotation.getRadians() - state.lastGyroYawRad);
+                    state.lastGyroYawRad = getRawGyroRotation().getRadians();
+                    double averageWheelPosition = 0.0;
+                    double[] wheelPositions = wheelPositionsSupplier.get();
+                    for (int i = 0; i < 4; i++) {
+                        averageWheelPosition += Math.abs(wheelPositions[i] - state.startWheelPositions[i]);
+                    }
+                    averageWheelPosition /= 4.0;
+
+                    double currentEffectiveWheelRadius = (state.accumGyroYawRad * drivebaseRadiusMeters) / averageWheelPosition;
+                    Logger.recordOutput("Drive/WheelRadiusCharacterization/DrivePosition", averageWheelPosition);
+                    Logger.recordOutput("Drive/WheelRadiusCharacterization/AccumGyroYawRad", state.accumGyroYawRad);
+                    Logger.recordOutput("Drive/WheelRadiusCharacterization/CurrentWheelRadiusInches", Units.metersToInches(currentEffectiveWheelRadius));
+                    Logger.recordOutput("Drive/WheelRadiusCharacterization/HasEnoughData", Math.abs(state.accumGyroYawRad) > Math.PI * 2.0);
+
+                    return new ChassisSpeeds(0, 0, omega);
+                })
+        );
     }
 
     public Command slipCurrentCharacterization() {
-        return startIdle(() -> goal = new SlipCurrentCharacterizationGoal());
+        double minVelocityRadPerSec = 0.1;
+
+        Timer timer = new Timer();
+        var state = new Object() {
+            double[] lastCurrents = new double[4];
+            double[] currentNeededForMovement = new double[4];
+            boolean done = false;
+        };
+
+        Supplier<double[]> velocitiesSupplier = () -> Arrays.stream(modules).mapToDouble(Module::getDriveVelocityRadPerSec).toArray();
+        Supplier<double[]> currentsSupplier = () -> Arrays.stream(modules).mapToDouble(Module::getDriveCurrentAmps).toArray();
+
+        return startRun(
+                () -> {
+                    timer.restart();
+                    state.lastCurrents = new double[4];
+                    state.currentNeededForMovement = new double[4];
+                    state.done = false;
+                },
+                () -> {
+                    if (!state.done) {
+                        double[] velocities = velocitiesSupplier.get();
+                        double[] currents = currentsSupplier.get();
+
+                        if (timer.hasElapsed(0.5)) {
+                            double total = 0.0;
+                            state.done = true;
+                            for (int i = 0; i < 4; i++) {
+                                if (velocities[i] > minVelocityRadPerSec && state.currentNeededForMovement[i] == 0) {
+                                    state.currentNeededForMovement[i] = state.lastCurrents[i];
+                                }
+
+                                if (state.done && state.currentNeededForMovement[i] != 0) {
+                                    total += state.currentNeededForMovement[i];
+                                } else {
+                                    state.done = false;
+                                }
+                            }
+
+                            if (state.done) {
+                                double avg = total / 4.0;
+                                System.out.println("Average current for each module to move: " + avg);
+                                for (int i = 0; i < 4; i++) {
+                                    System.out.println("\tCurrent for module " + i + " to move: " + state.currentNeededForMovement[i]);
+                                }
+                                // Don't stop moving to allow for manual line graph based analysis
+                            }
+                        }
+
+                        state.lastCurrents = currents;
+                    }
+
+                    // Increase voltage at 0.1 V/s
+                    runCharacterization(timer.get() * 0.1);
+                }
+        );
     }
 }

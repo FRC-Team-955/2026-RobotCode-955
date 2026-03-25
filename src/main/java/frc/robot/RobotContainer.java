@@ -13,14 +13,13 @@ import frc.robot.controller.Controller;
 import frc.robot.shooting.ShootingKinematics;
 import frc.robot.subsystems.apriltagvision.AprilTagVision;
 import frc.robot.subsystems.drive.Drive;
-import frc.robot.subsystems.drive.goals.DriveJoystickGoal;
-import frc.robot.subsystems.drive.goals.WheelRadiusCharacterizationGoal;
 import frc.robot.subsystems.gamepiecevision.GamePieceVision;
 import frc.robot.subsystems.leds.LEDs;
 import frc.robot.subsystems.superintake.Superintake;
 import frc.robot.subsystems.superstructure.Superstructure;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
+import java.util.OptionalDouble;
 import java.util.function.BooleanSupplier;
 
 /**
@@ -58,17 +57,17 @@ public class RobotContainer {
     }
 
     private void addCharacterizations() {
-        characterizationChooser.addOption("Drive 1 m/s Characterization", drive.runRobotRelative(() -> new ChassisSpeeds(1.0, 0.0, 0.0)));
-        characterizationChooser.addOption("Drive 2 m/s Characterization", drive.runRobotRelative(() -> new ChassisSpeeds(2.0, 0.0, 0.0)));
-        characterizationChooser.addOption("Drive 3 m/s Characterization", drive.runRobotRelative(() -> new ChassisSpeeds(3.0, 0.0, 0.0)));
-        characterizationChooser.addOption("Drive 4 m/s Characterization", drive.runRobotRelative(() -> new ChassisSpeeds(4.0, 0.0, 0.0)));
+        characterizationChooser.addOption("Drive 1 m/s Characterization", drive.chassisSpeeds(() -> new ChassisSpeeds(1.0, 0.0, 0.0)));
+        characterizationChooser.addOption("Drive 2 m/s Characterization", drive.chassisSpeeds(() -> new ChassisSpeeds(2.0, 0.0, 0.0)));
+        characterizationChooser.addOption("Drive 3 m/s Characterization", drive.chassisSpeeds(() -> new ChassisSpeeds(3.0, 0.0, 0.0)));
+        characterizationChooser.addOption("Drive 4 m/s Characterization", drive.chassisSpeeds(() -> new ChassisSpeeds(4.0, 0.0, 0.0)));
         characterizationChooser.addOption("Drive Full Speed Characterization", drive.fullSpeedCharacterization());
-        characterizationChooser.addOption("Drive Wheel Radius Characterization", drive.wheelRadiusCharacterization(WheelRadiusCharacterizationGoal.Direction.CLOCKWISE));
+        characterizationChooser.addOption("Drive Wheel Radius Characterization", drive.wheelRadiusCharacterization());
         characterizationChooser.addOption("Drive Slip Current Characterization", drive.slipCurrentCharacterization());
     }
 
     private void setDefaultCommands() {
-        drive.setDefaultCommand(drive.driveJoystick(() -> DriveJoystickGoal.Mode.Normal));
+        drive.setDefaultCommand(drive.joystickDrive());
         superintake.setDefaultCommand(superintake.setGoal(Superintake.Goal.IDLE).ignoringDisable(true));
         superstructure.setDefaultCommand(superstructure.setGoal(Superstructure.Goal.IDLE).ignoringDisable(true));
     }
@@ -82,59 +81,30 @@ public class RobotContainer {
     private void configureBindings() {
         controller.y().onTrue(robotState.resetRotation());
 
-        Trigger intake = controller.rightTrigger();
         Trigger shoot = controller.leftTrigger();
         Trigger shootForce = controller.leftBumper();
+        Trigger anyShoot = shoot.or(shootForce);
 
         BooleanSupplier shouldNotAssist = () -> operatorDashboard.disableAssist.get() || robotState.isInTrench(robotState.getTranslation());
-        intake
-                .and(shoot.negate())
+        controller.rightTrigger()
+                .or(controller.rightBumper().and(anyShoot))
+                .whileTrue(superintake.setGoal(Superintake.Goal.INTAKE));
+        controller.rightBumper()
+                .and(anyShoot.negate())
                 .whileTrue(Commands.parallel(
-                        drive.driveJoystick(() -> shouldNotAssist.getAsBoolean() ? DriveJoystickGoal.Mode.Normal : DriveJoystickGoal.Mode.Assist),
-                        superintake.setGoal(Superintake.Goal.INTAKE)
+                        superintake.setGoal(Superintake.Goal.INTAKE),
+                        // Citrus mode: always point in direction of travel
+                        drive.joystickDrive().withHeadingOverride(() -> OptionalDouble.of(controller.getDriveLinearDirection().getRadians()))
                 ));
 
-        shoot
-                .and(intake.negate())
-                .whileTrue(Commands.parallel(
-                        drive.driveJoystick(() -> {
-                            if (operatorDashboard.manualAiming.get()) {
-                                return DriveJoystickGoal.Mode.StopWithX;
-                            } else {
-                                return DriveJoystickGoal.Mode.Aim;
-                            }
-                        }),
-                        superstructure.setGoal(Superstructure.Goal.SHOOT)
-                ));
-        shootForce
-                .and(intake.negate())
-                .whileTrue(Commands.parallel(
-                        drive.driveJoystick(() -> {
-                            if (operatorDashboard.manualAiming.get()) {
-                                return DriveJoystickGoal.Mode.StopWithX;
-                            } else {
-                                return DriveJoystickGoal.Mode.Aim;
-                            }
-                        }),
-                        superstructure.setGoal(Superstructure.Goal.SHOOT_FORCE)
-                ));
-        shoot
-                .and(intake)
-                .whileTrue(Commands.parallel(
-                        drive.driveJoystick(() -> {
-                            if (operatorDashboard.manualAiming.get() && shouldNotAssist.getAsBoolean()) {
-                                return DriveJoystickGoal.Mode.StopWithX;
-                            } else if (operatorDashboard.manualAiming.get()) {
-                                return DriveJoystickGoal.Mode.Assist;
-                            } else if (shouldNotAssist.getAsBoolean()) {
-                                return DriveJoystickGoal.Mode.Aim;
-                            } else {
-                                return DriveJoystickGoal.Mode.AimAndAssist;
-                            }
-                        }),
-                        superintake.setGoal(Superintake.Goal.INTAKE),
-                        superstructure.setGoal(Superstructure.Goal.SHOOT)
-                ));
+        shoot.whileTrue(Commands.parallel(
+                drive.joystickDrive().withAiming(),
+                superstructure.setGoal(Superstructure.Goal.SHOOT)
+        ));
+        shootForce.whileTrue(Commands.parallel(
+                drive.joystickDrive().withAiming(),
+                superstructure.setGoal(Superstructure.Goal.SHOOT_FORCE)
+        ));
 
         controller.x()
                 .whileTrue(Commands.parallel(

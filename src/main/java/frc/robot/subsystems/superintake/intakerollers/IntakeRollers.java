@@ -12,6 +12,7 @@ import frc.lib.motor.MotorIOInputsAutoLogged;
 import frc.lib.motor.RequestType;
 import frc.lib.network.LoggedTunableNumber;
 import frc.lib.subsystem.Periodic;
+import frc.robot.BuildConstants;
 import frc.robot.OperatorDashboard;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -83,10 +84,12 @@ public class IntakeRollers implements Periodic {
         if (DriverStation.isDisabled()) {
             io.setRequest(RequestType.VoltageVolts, 0);
         } else {
-            //            Logger.recordOutput("Superintake/IntakeRollers/RequestType", goal.type);
             double value = goal.value.getAsDouble();
-            //Logger.recordOutput("Superintake/IntakeRollers/RequestValue", value);
             io.setRequest(goal.type, value);
+            if (BuildConstants.isSimOrReplay) {
+                Logger.recordOutput("Superintake/IntakeRollers/RequestType", goal.type);
+                Logger.recordOutput("Superintake/IntakeRollers/RequestValue", value);
+            }
         }
     }
 

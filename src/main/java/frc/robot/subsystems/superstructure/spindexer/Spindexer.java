@@ -13,6 +13,7 @@ import frc.lib.motor.MotorIOInputsAutoLogged;
 import frc.lib.motor.RequestType;
 import frc.lib.network.LoggedTunableNumber;
 import frc.lib.subsystem.Periodic;
+import frc.robot.BuildConstants;
 import frc.robot.OperatorDashboard;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -36,7 +37,8 @@ public class Spindexer implements Periodic {
     public enum Goal {
         IDLE(() -> 0, RequestType.VoltageVolts),
         FEED(feedVoltage::get, RequestType.VoltageVolts),
-        EJECT(() -> Timer.getTimestamp() % 1.0 < 0.5 ? ejectVoltage.get() : -ejectVoltage.get(), RequestType.VoltageVolts),
+        EJECT(ejectVoltage::get, RequestType.VoltageVolts),
+        EJECT_ALTERNATE(() -> Timer.getTimestamp() % 0.5 < 0.25 ? ejectVoltage.get() : -ejectVoltage.get(), RequestType.VoltageVolts),
         ;
 
         /** Should be constant for every loop cycle */
@@ -80,10 +82,12 @@ public class Spindexer implements Periodic {
         if (DriverStation.isDisabled()) {
             io.setRequest(RequestType.VoltageVolts, 0);
         } else {
-            //Logger.recordOutput("Superstructure/Spindexer/RequestType", goal.type);
             double value = goal.value.getAsDouble();
-            //Logger.recordOutput("Superstructure/Spindexer/RequestValue", value);
             io.setRequest(goal.type, value);
+            if (BuildConstants.isSimOrReplay) {
+                Logger.recordOutput("Superstructure/Spindexer/RequestType", goal.type);
+                Logger.recordOutput("Superstructure/Spindexer/RequestValue", value);
+            }
         }
     }
 

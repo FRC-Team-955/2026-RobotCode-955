@@ -12,6 +12,7 @@ import frc.lib.Util;
 import frc.lib.motor.MotorIOInputsAutoLogged;
 import frc.lib.network.LoggedTunableNumber;
 import frc.lib.subsystem.Periodic;
+import frc.robot.BuildConstants;
 import frc.robot.Constants;
 import frc.robot.OperatorDashboard;
 import frc.robot.RobotState;
@@ -124,7 +125,8 @@ public class IntakePivot implements Periodic {
                 }
             }
             setpointRad = MathUtil.clamp(setpointRad, minPositionRad, maxPositionRad);
-            //Logger.recordOutput("Superintake/IntakePivot/OriginalSetpointRad", setpointRad);
+            if (BuildConstants.isSimOrReplay)
+                Logger.recordOutput("Superintake/IntakePivot/OriginalSetpointRad", setpointRad);
             TrapezoidProfile.State wantedState = new TrapezoidProfile.State(setpointRad, 0.0);
 
             if (lastSetpointRad == null || setpointRad != lastSetpointRad) {
@@ -134,10 +136,12 @@ public class IntakePivot implements Periodic {
             lastSetpointRad = setpointRad;
 
             goalState = profile.calculate(Constants.loopPeriod, goalState, wantedState);
-            //Logger.recordOutput("Superintake/IntakePivot/ProfileSetpointRad", goalState.position);
+            if (BuildConstants.isSimOrReplay)
+                Logger.recordOutput("Superintake/IntakePivot/ProfileSetpointRad", goalState.position);
 
             lookaheadState = profile.calculate(Constants.loopPeriod, lookaheadState, wantedState);
-            //Logger.recordOutput("Superintake/IntakePivot/LookaheadSetpointRad", lookaheadState.position);
+            if (BuildConstants.isSimOrReplay)
+                Logger.recordOutput("Superintake/IntakePivot/LookaheadSetpointRad", lookaheadState.position);
 
             io.setPositionRequest(lookaheadState.position);
         }

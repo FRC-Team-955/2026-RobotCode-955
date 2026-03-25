@@ -43,12 +43,12 @@ public class OperatorDashboard implements Periodic {
     public final LoggedNetworkBooleanExt fixedHood = new LoggedNetworkBooleanExt(prefix + "FixedHood", false);
     public final LoggedNetworkBooleanExt manualAiming = new LoggedNetworkBooleanExt(prefix + "ManualAiming", false);
     public final LoggedNetworkBooleanExt disableAssist = new LoggedNetworkBooleanExt(prefix + "DisableAssist", false);
-    public final LoggedNetworkBooleanExt disableCANrange = new LoggedNetworkBooleanExt(prefix + "DisableCANrange", true);
+    public final LoggedNetworkBooleanExt disableCANrange = new LoggedNetworkBooleanExt(prefix + "DisableCANrange", false);
     public final LoggedNetworkNumberExt flywheelSmudgeRPM = new LoggedNetworkNumberExt(prefix + "FlywheelSmudgeRPM", 0.0);
     public final LoggedNetworkNumberExt hoodSmudgeDegrees = new LoggedNetworkNumberExt(prefix + "HoodSmudgeDegrees", 0.0);
     public final LoggedNetworkBooleanExt lostAuto = new LoggedNetworkBooleanExt(prefix + "LostAuto", false);
     public final LoggedNetworkBooleanExt wonAuto = new LoggedNetworkBooleanExt(prefix + "WonAuto", false);
-    public final LoggedNetworkBooleanExt disableShiftTracking = new LoggedNetworkBooleanExt(prefix + "DisableShiftTracking", BuildConstants.mode == BuildConstants.Mode.SIM);
+    public final LoggedNetworkBooleanExt disableShiftTracking = new LoggedNetworkBooleanExt(prefix + "DisableShiftTracking", BuildConstants.isSim);
     public final LoggedNetworkBooleanExt driveTurnAbsolutePID = new LoggedNetworkBooleanExt(prefix + "DriveTurnAbsolutePID", false);
     public final LoggedNetworkBooleanExt hoodEStop = new LoggedNetworkBooleanExt(prefix + "HoodEStop", false);
 
@@ -108,7 +108,8 @@ public class OperatorDashboard implements Periodic {
         }
 
         handleEnumToggles(scoringModeToggles, selectedScoringMode, selectNew -> selectedScoringMode = selectNew);
-        Logger.recordOutput("OperatorDashboard/SelectedScoringMode", selectedScoringMode);
+        if (BuildConstants.isSimOrReplay)
+            Logger.recordOutput("OperatorDashboard/SelectedScoringMode", selectedScoringMode);
 
         // Note - we only handle alerts for general overrides.
         // So subsystem toggles are handled in their respective subsystems
