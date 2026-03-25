@@ -1,11 +1,10 @@
-// spotless:off
+
 package frc.robot.autos;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import java.util.Map;
 import java.util.OptionalInt;
-
 
 
 /**
@@ -22,35 +21,27 @@ public record ChoreoTraj(
     Pose2d endPoseBlue
 ) {
     public static final ChoreoTraj CanadianDepot_FirstPass = new ChoreoTraj(
-        "CanadianDepot_FirstPass",
-        OptionalInt.empty(),
-        4.43049,
-        new Pose2d(6.34, 7.55, Rotation2d.fromRadians(-1.5708)),
-        new Pose2d(3.96548, 5.61758, Rotation2d.fromRadians(1.99499))
-    );
-    public static final ChoreoTraj CanadianHuman_FirstPass = new ChoreoTraj(
-        "CanadianHuman_FirstPass",
-        OptionalInt.empty(),
-        4.58063,
-        new Pose2d(6.39331, 0.60333, Rotation2d.fromRadians(1.5708)),
-        new Pose2d(3.97757, 2.46514, Rotation2d.fromRadians(-1.99499))
-    );
-    public static final ChoreoTraj CanadianHuman_SeconPass = new ChoreoTraj(
-        "CanadianHuman_SeconPass",
-        OptionalInt.empty(),
-        4.34281,
-        new Pose2d(6.39331, 0.60333, Rotation2d.fromRadians(1.5708)),
-        new Pose2d(3.99296, 2.29589, Rotation2d.fromRadians(-2.40878))
-    );
+	    "CanadianDepot_FirstPass",
+	    OptionalInt.empty(),
+	    4.77111,
+	    new Pose2d(6.34, 7.55, Rotation2d.fromRadians(-1.571)),
+	    new Pose2d(3.632, 5.633, Rotation2d.fromRadians(1.995))
+	);
+	public static final ChoreoTraj CanadianDepot_SecondPath = new ChoreoTraj(
+	    "CanadianDepot_SecondPath",
+	    OptionalInt.empty(),
+	    5.87055,
+	    new Pose2d(6.36, 7.387, Rotation2d.fromRadians(-1.571)),
+	    new Pose2d(3.632, 5.633, Rotation2d.fromRadians(1.995))
+	);
 
     /**
      * A map between trajectory names and their corresponding data.
      * This allows for trajectory data to be looked up with strings during runtime.
      */
     public static final Map<String, ChoreoTraj> ALL_TRAJECTORIES = Map.ofEntries(
-        Map.entry("CanadianDepot_FirstPass", CanadianDepot_FirstPass),
-        Map.entry("CanadianHuman_FirstPass", CanadianHuman_FirstPass),
-        Map.entry("CanadianHuman_SeconPass", CanadianHuman_SeconPass)
+    	Map.entry("CanadianDepot_FirstPass", CanadianDepot_FirstPass),
+		Map.entry("CanadianDepot_SecondPath", CanadianDepot_SecondPath)
     );
 
     /**
@@ -66,4 +57,3 @@ public record ChoreoTraj(
     }
     
 }
-// spotless:on
