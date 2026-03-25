@@ -10,7 +10,6 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.Util;
 import frc.lib.subsystem.Periodic;
@@ -25,7 +24,7 @@ public class Controller implements Periodic {
     }
 
     //    private final CommandXboxController controller;
-    private final CommandXboxController controller;
+    private final CommandPS5Controller controller;
     private final Alert controllerDisconnectedAlert = new Alert("Driver controller is not connected!", Alert.AlertType.kError);
 
     // Intermediates - used in assist calculations
@@ -50,7 +49,7 @@ public class Controller implements Periodic {
     }
 
     private Controller() {
-        controller = new CommandXboxController(0);
+        controller = new CommandPS5Controller(0);
 //        if (BuildConstants.mode == BuildConstants.Mode.SIM && System.getProperty("os.name").contains("Mac OS X")) {
 //            controller = new CommandSteamInputController(0);
 ////            controller = new CommandNintendoSwitchProController(0);
@@ -179,7 +178,7 @@ public class Controller implements Periodic {
 //    }
 
     public Trigger y() {
-        return controller.y();
+        return controller.triangle();
     }
 //    public Trigger y() {
 //        return controller.y();
