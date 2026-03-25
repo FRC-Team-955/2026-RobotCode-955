@@ -13,6 +13,7 @@
 
 package frc.robot.subsystems.drive;
 
+import com.ctre.phoenix6.signals.MagnetHealthValue;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.filter.Debouncer;
@@ -79,7 +80,8 @@ public class Module {
         );
         turnEncoderDisparityAlert.set(turnEncoderDisparity);
         // TODO check if encoder connected and check if magnet health is not invalid
-        if (turnEncoderDisparity && Math.abs(getDriveVelocityMetersPerSec()) < 1e-4) {
+        if (turnEncoderDisparity && Math.abs(getDriveVelocityMetersPerSec()) < 1e-4 && inputs.turnAbsoluteEncoderConnected
+                && !(inputs.turnAbsoluteEncoderMagnetHealth == MagnetHealthValue.Magnet_Invalid)) {
             io.setTurnRelativeEncoderFromAbsolute();
             turnEncoderDisparityStickyAlert.set(true);
         }
