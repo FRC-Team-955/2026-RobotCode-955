@@ -145,7 +145,7 @@ public class LEDs implements Periodic {
         hubPattern.applyTo(secondHalfView);
 
         LEDPattern superintakePattern = switch (superintake.getGoal()) {
-            case IDLE -> null;
+            case IDLE, DEPLOY -> null;
             case INTAKE, SHOOT -> LEDPatterns.intaking;
             case EJECT -> LEDPatterns.eject;
             case HOME_INTAKE_PIVOT -> LEDPatterns.homing;
