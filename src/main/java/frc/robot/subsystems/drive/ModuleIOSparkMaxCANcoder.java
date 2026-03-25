@@ -91,7 +91,7 @@ public class ModuleIOSparkMaxCANcoder extends ModuleIO {
     ) {
         driveSpark = new SparkMax(driveCanID, MotorType.kBrushless);
         turnSpark = new SparkMax(turnCanID, MotorType.kBrushless);
-        cancoder = new CANcoder(cancoderCanID, canivore);
+        cancoder = new CANcoder(cancoderCanID);
         driveEncoder = driveSpark.getEncoder();
         turnEncoder = turnSpark.getEncoder();
         driveController = driveSpark.getClosedLoopController();

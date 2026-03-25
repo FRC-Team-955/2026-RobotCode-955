@@ -42,7 +42,7 @@ public class GyroIOPigeon2 extends GyroIO {
     private final StatusSignal<AngularVelocity> yawVelocity;
 
     public GyroIOPigeon2(int canID) {
-        pigeon = new Pigeon2(canID, canivore);
+        pigeon = new Pigeon2(canID);
         yaw = pigeon.getYaw();
         yawVelocity = pigeon.getAngularVelocityZWorld();
 
