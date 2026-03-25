@@ -10,6 +10,7 @@ import frc.robot.subsystems.superintake.Superintake;
 import frc.robot.subsystems.superstructure.Superstructure;
 
 import static frc.robot.subsystems.drive.DriveConstants.defaultMoveToConstraints;
+import static frc.robot.subsystems.drive.DriveConstants.shootingConstraints;
 
 public class CanadianDepotAuto extends Auto {
     private static final Superintake superintake = Superintake.get();
@@ -73,13 +74,22 @@ public class CanadianDepotAuto extends Auto {
                 // go over the bump
                 AutoHelpers.goOverDepotSideBump(),
 
-                // Shoot
+                Commands.race(superintake.setGoal(Superintake.Goal.INTAKE),
+                        AutoHelpers.finalWaypoint(() -> new Pose2d(0.67, 5.965,
+                                Rotation2d.k180deg), shootingConstraints, true)),
                 Commands.parallel(
-                        superintake.intakeShootAlternate(),
-                        superstructure.setGoal(Superstructure.Goal.SHOOT),
-                        AutoHelpers.finalWaypoint(robotState::getPose, defaultMoveToConstraints, true)
-                ),
-                superstructure.setGoal(Superstructure.Goal.IDLE).until(() -> true)
+                        AutoHelpers.finalWaypoint(() -> new Pose2d(1.0, 5.5,
+                                Rotation2d.k180deg), defaultMoveToConstraints, true),
+
+                        superstructure.setGoal(Superstructure.Goal.SHOOT))
+
+                //// Shoot
+                //Commands.parallel(
+                //        superintake.intakeShootAlternate(),
+                //        superstructure.setGoal(Superstructure.Goal.SHOOT),
+                //        AutoHelpers.finalWaypoint(robotState::getPose, defaultMoveToConstraints, true)
+                //),
+                //superstructure.setGoal(Superstructure.Goal.IDLE).until(() -> true)
         );
     }
 }
