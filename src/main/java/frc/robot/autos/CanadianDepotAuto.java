@@ -10,7 +10,6 @@ import frc.robot.subsystems.superintake.Superintake;
 import frc.robot.subsystems.superstructure.Superstructure;
 
 import static frc.robot.subsystems.drive.DriveConstants.defaultMoveToConstraints;
-import static frc.robot.subsystems.drive.DriveConstants.shootingConstraints;
 
 public class CanadianDepotAuto extends Auto {
     private static final Superintake superintake = Superintake.get();
@@ -77,10 +76,17 @@ public class CanadianDepotAuto extends Auto {
                 // go over the bump
                 AutoHelpers.goOverDepotSideBump(),
 
-                superstructure.setGoal(Superstructure.Goal.SHOOT).until(() -> true),
-                superintake.setGoal(Superintake.Goal.INTAKE).until(() -> true),
-                AutoHelpers.finalWaypoint(() -> new Pose2d(0.67, 5.965,
-                        Rotation2d.k180deg), shootingConstraints, true)
+                Commands.parallel(
+                        superintake.intakeShootAlternate(),
+                        superstructure.setGoal(Superstructure.Goal.SHOOT),
+                        AutoHelpers.aimWhileStationary()
+                )
+
+                // we removed go back to depot because might hit other robots
+                //superstructure.setGoal(Superstructure.Goal.SHOOT).until(() -> true),
+                //superintake.setGoal(Superintake.Goal.INTAKE).until(() -> true),
+                //AutoHelpers.finalWaypoint(() -> new Pose2d(0.67, 5.965,
+                //        Rotation2d.k180deg), shootingConstraints, true)
                 //AutoHelpers.finalWaypoint(() -> new Pose2d(1.0, 5.5,
                 //        Rotation2d.k180deg), defaultMoveToConstraints, true)
 
