@@ -84,9 +84,13 @@ public class Module {
                 ) > Units.degreesToRadians(3.0)
         );
         turnEncoderDisparityAlert.set(turnEncoderDisparity);
-        // TODO check if encoder connected and check if magnet health is not invalid
-        if (turnEncoderDisparity && Math.abs(getDriveVelocityMetersPerSec()) < 1e-4 && inputs.turnAbsoluteEncoderConnected
-                && !(inputs.turnAbsoluteEncoderMagnetHealth == MagnetHealthValue.Magnet_Invalid)) {
+
+        // Zero turn if there is a disparity and we aren't moving
+        if (turnEncoderDisparity &&
+                Math.abs(getDriveVelocityMetersPerSec()) < 1e-4 &&
+                inputs.turnAbsoluteEncoderConnected &&
+                inputs.turnAbsoluteEncoderMagnetHealth != MagnetHealthValue.Magnet_Invalid
+        ) {
             io.setTurnRelativeEncoderFromAbsolute();
             turnEncoderDisparityStickyAlert.set(true);
         }
