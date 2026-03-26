@@ -116,7 +116,7 @@ public class ShootingKinematics implements Periodic {
                         .plus(fuelExitRotation)
                         .getRadians();
                 shootingParameters = new ShootingParameters(
-                        2100.0 + 400.0 * Math.max(0.0, AllianceFlipUtil.applyY(robotState.getTranslation().getX()) - 6.0),
+                        2100.0 + 100.0 * Math.max(0.0, AllianceFlipUtil.applyX(robotState.getTranslation().getX()) - 6.0),
                         Units.degreesToRadians(passManualAngleDegrees.get()),
                         0.15 * (AllianceFlipUtil.shouldFlip() ? -1 : 1) * robotSpeeds.vyMetersPerSecond + heading,
                         OptionalDouble.empty(),
