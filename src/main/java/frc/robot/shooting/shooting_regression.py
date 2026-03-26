@@ -173,6 +173,17 @@ def calculate_trajectory_iterative(vel, angle, robot_radial_velocity, x0):
     past_hub_on_upwards_arc = False
     below_edge_i = None
 
+    def get_end_parameters(x, z, direction):
+        # We end below the hub. Interpolate to get the exact x and direction when we hit the hub
+
+        ez = hub_edge_z - z[-1]
+        dz = z[-2] - z[-1]
+        t = ez / dz
+
+        dx = x[-2] - x[-1]
+        ddirection = direction[-2] - direction[-1]
+        return x[-1] + t * dx, direction[-1] + t * ddirection
+
     for i in range(len(t)):
         if i > 0:
             # Get last position, velocity, acceleration
@@ -263,10 +274,11 @@ def calculate_trajectory_iterative(vel, angle, robot_radial_velocity, x0):
             # Newton's method freaks out if we try to use the x and direction from a certain index (when below the edge)
             # To fix this, just return separate arrays for calculation and visualization (calculation ends when below the
             # edge, visualization ends when below the whole hub)
-            return (x[:below_edge_i], y[:below_edge_i], z[:below_edge_i], direction[:below_edge_i],
-                    x[:below_i], y[:below_i], z[:below_i])
+            entry_x, entry_angle = get_end_parameters(x[:below_edge_i], z[:below_edge_i], direction[:below_edge_i])
+            return entry_x, entry_angle, x[:below_i], y[:below_i], z[:below_i]
 
-    return x, y, z, direction, x, y, z
+    entry_x, entry_angle = get_end_parameters(x, z, direction)
+    return entry_x, entry_angle, x, y, z
 
 def calculate_shooting_params_kinematics(distance, robot_radial_vel):
     # https://www.desmos.com/calculator/9npcb4woqc
@@ -333,17 +345,7 @@ def optimize_shot(distance, robot_radial_vel):
     v = v_initial
     shot_angle = shot_angle_initial
 
-    def get_end_parameters(x, z, direction):
-        # We end below the hub. Interpolate to get the exact x and direction when we hit the hub
-
-        ez = hub_edge_z - z[-1]
-        dz = z[-2] - z[-1]
-        t = ez / dz
-
-        dx = x[-2] - x[-1]
-        # Interpolating direction breaks everything, so just return the last direction (it will be close enough)
-        ddirection = direction[-2] - direction[-1]
-        return x[-1] + t * dx, direction[-1] + t * ddirection
+    calc_traj = lambda vel, angle: calculate_trajectory_iterative(vel, angle, robot_radial_vel, x0)
 
     def solve():
         nonlocal i, v, shot_angle, shots_simmed
@@ -352,12 +354,10 @@ def optimize_shot(distance, robot_radial_vel):
 
             # Newton's method in two dimensions
             # Compute initial guess
-            x, y, z, direction, x_full, y_full, z_full = calculate_trajectory_iterative(v, shot_angle, robot_radial_vel,
-                                                                                        x0)
+            x_1, entry_angle_1, x_full, y_full, z_full = calc_traj(v, shot_angle)
             shots_simmed += 1
             # Use the full trajectory - ToF is when it actually hits the hub, not when it passes through the top
             tof = t[len(x_full) - 1]
-            x_1, entry_angle_1 = get_end_parameters(x, z, direction)
 
             # If guess is within tolerance, exit early
             # print(i, abs(x_1 - wanted_x) <= x_tolerance, abs(entry_angle_1 - wanted_entry_angle) <= entry_angle_tolerance)
@@ -369,16 +369,12 @@ def optimize_shot(distance, robot_radial_vel):
                 ax.plot(x_full, z_full, linestyle="dotted", c=(1 - i / max_iterations, i / max_iterations, 0))
 
             # Compute guess with velocity increment
-            x, y, z, direction, x_full, y_full, z_full = calculate_trajectory_iterative(v + Δv, shot_angle,
-                                                                                        robot_radial_vel, x0)
+            x_2, entry_angle_2, x_full, y_full, z_full = calc_traj(v + Δv, shot_angle)
             shots_simmed += 1
-            x_2, entry_angle_2 = get_end_parameters(x, z, direction)
 
             # Compute guess with angle increment
-            x, y, z, direction, x_full, y_full, z_full = calculate_trajectory_iterative(v, shot_angle + Δshot_angle,
-                                                                                        robot_radial_vel, x0)
+            x_3, entry_angle_3, x_full, y_full, z_full = calc_traj(v, shot_angle + Δshot_angle)
             shots_simmed += 1
-            x_3, entry_angle_3 = get_end_parameters(x, z, direction)
 
             # Compute matrix
             A_11 = (x_2 - x_1) / Δv
@@ -402,12 +398,10 @@ def optimize_shot(distance, robot_radial_vel):
         else:
             # If we don't break (that's what the else clause checks for), check the guess once more.
             # If it doesn't satisfy tolerances, solution could not be found
-            x, y, z, direction, x_full, y_full, z_full = calculate_trajectory_iterative(v, shot_angle, robot_radial_vel,
-                                                                                        x0)
+            x, entry_angle, x_full, y_full, z_full = calc_traj(v, shot_angle)
             shots_simmed += 1
             # Use the full trajectory - ToF is when it actually hits the hub, not when it passes through the top
             tof = t[len(x_full) - 1]
-            x, entry_angle = get_end_parameters(x, z, direction)
 
             if (abs(x - wanted_x) > x_tolerance or
                     abs(entry_angle - wanted_entry_angle) > entry_angle_tolerance):
@@ -458,7 +452,7 @@ def optimize_shot(distance, robot_radial_vel):
         # ax.plot(*calculate_trajectory_kinematics(v_initial, angle_initial, robot_radial_vel), label="Simple Kinematics (Initial)")
         # ax.plot(*calculate_trajectory_kinematics(v_final, angle_final, robot_radial_vel), label="Simple Kinematics (Final)")
         # ax.plot(*calculate_trajectory_iterative(v_initial, angle_initial, robot_radial_vel), label="Iterative Simulation (Initial)")
-        _, _, _, _, x_full, y_full, z_full = calculate_trajectory_iterative(v, shot_angle, robot_radial_vel, x0)
+        _, _, x_full, y_full, z_full = calc_traj(v, shot_angle)
         ax.plot(
             x_full, z_full,
             c=(
