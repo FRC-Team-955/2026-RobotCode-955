@@ -60,7 +60,15 @@ public class CanadianDepotAuto extends Auto {
                 AutoHelpers.finalWaypoint(() -> trenchEntrance, defaultMoveToConstraints, false),
 
                 // move out of trench
+                AutoHelpers.intermediateWaypoint(() -> new Pose2d(
+                        4.8,
+                        startingY,
+                        startingRotation
+                ), defaultMoveToConstraints, false),
+
                 superintake.setGoal(Superintake.Goal.INTAKE).until(() -> true),
+
+                // move out of trench
                 AutoHelpers.intermediateWaypoint(() -> new Pose2d(
                         ChoreoTraj.CanadianDepot_FirstPass.initialPoseBlue().getX(),
                         startingY,
