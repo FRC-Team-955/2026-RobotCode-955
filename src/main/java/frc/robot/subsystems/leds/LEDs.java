@@ -135,8 +135,8 @@ public class LEDs implements Periodic {
         LEDPattern hubPattern;
         if (hubShiftTracker.getShiftInfo().remainingTime() < 10.0) {
             hubPattern = hubShiftTracker.getShiftInfo().active()
-                    ? LEDPatterns.active.blink(Seconds.of(Math.max(0.05, hubShiftTracker.getShiftInfo().remainingTime() / 25.0)))
-                    : LEDPatterns.inactive.blink(Seconds.of(Math.max(0.05, hubShiftTracker.getShiftInfo().remainingTime() / 25.0)));
+                    ? LEDPatterns.active.blink(Seconds.of(Math.max(0.05, hubShiftTracker.getShiftInfo().remainingTime() / 10.0)))
+                    : LEDPatterns.inactive.blink(Seconds.of(Math.max(0.05, hubShiftTracker.getShiftInfo().remainingTime() / 10.0)));
         } else {
             hubPattern = hubShiftTracker.getShiftInfo().active()
                     ? LEDPatterns.active
