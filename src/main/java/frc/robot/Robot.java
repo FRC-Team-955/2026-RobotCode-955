@@ -132,7 +132,6 @@ public class Robot extends LoggedRobot {
 
                 // Start with hub shift tracker
                 robotContainer.hubShiftTracker,
-                robotContainer.batteryLogger,
                 // Lots of things depend on controller
                 robotContainer.controller,
                 // Vision depends on drive
@@ -161,9 +160,10 @@ public class Robot extends LoggedRobot {
                 // Misc
                 robotContainer.canLogger,
 
-                // Update the mechanism and LEDs last
+                // Update the mechanism, LEDs and energy logger last
                 robotContainer.robotMechanism,
-                robotContainer.leds
+                robotContainer.leds,
+                robotContainer.energyLogger
         );
     }
 

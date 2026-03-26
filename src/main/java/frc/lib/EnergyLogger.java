@@ -20,20 +20,19 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-package frc.robot.energy;
+package frc.lib;
 
 import edu.wpi.first.wpilibj.RobotController;
 import frc.lib.subsystem.Periodic;
 import frc.robot.BuildConstants;
 import frc.robot.Constants;
 import lombok.Getter;
-import lombok.Setter;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class BatteryLogger implements Periodic {
+public class EnergyLogger implements Periodic {
     @Getter
     private double totalCurrent = 0.0;
     @Getter
@@ -41,45 +40,46 @@ public class BatteryLogger implements Periodic {
     @Getter
     private double totalEnergy = 0.0;
 
+    private final Map<String, Double> subsystemCurrents = new HashMap<>();
+    private final Map<String, Double> subsystemPowers = new HashMap<>();
+    private final Map<String, Double> subsystemEnergies = new HashMap<>();
 
-    @Setter
-    private double batteryVoltage = 0.0;
-    @Setter
-    private double rioCurrent = 0.0;
+    private static EnergyLogger instance;
 
-
-    private Map<String, Double> subsytemCurrents = new HashMap<>();
-    private Map<String, Double> subsytemPowers = new HashMap<>();
-    private Map<String, Double> subsytemEnergies = new HashMap<>();
-
-
-    private static BatteryLogger instance;
-
-    public static synchronized BatteryLogger get() {
+    public static synchronized EnergyLogger get() {
         if (instance == null) {
-            instance = new BatteryLogger();
+            instance = new EnergyLogger();
         }
 
         return instance;
     }
 
+    private EnergyLogger() {
+        if (instance != null) {
+            Util.error("Duplicate EnergyLogger created");
+        }
+    }
+
     public void reportCurrentUsage(String key, double... amps) {
+        if (!BuildConstants.isSimOrReplay) {
+            return;
+        }
 
         double totalAmps = 0.0;
         for (double amp : amps) {
             totalAmps += Math.abs(amp);
         }
 
-        double power = totalAmps * batteryVoltage;
+        double power = totalAmps * RobotController.getBatteryVoltage();
         double energy = power * Constants.loopPeriod;
 
         totalCurrent += totalAmps;
         totalPower += power;
         totalEnergy += energy;
 
-        subsytemCurrents.put(key, totalAmps);
-        subsytemPowers.put(key, power);
-        subsytemEnergies.merge(key, energy, Double::sum);
+        subsystemCurrents.put(key, totalAmps);
+        subsystemPowers.put(key, power);
+        subsystemEnergies.merge(key, energy, Double::sum);
 
         String[] keys = key.split("/|-");
         if (keys.length < 2) {
@@ -91,49 +91,47 @@ public class BatteryLogger implements Periodic {
             if (i < keys.length - 2) {
                 subkey += "/";
             }
-            subsytemCurrents.merge(subkey, totalAmps, Double::sum);
-            subsytemPowers.merge(subkey, power, Double::sum);
-            subsytemEnergies.merge(subkey, energy, Double::sum);
+            subsystemCurrents.merge(subkey, totalAmps, Double::sum);
+            subsystemPowers.merge(subkey, power, Double::sum);
+            subsystemEnergies.merge(subkey, energy, Double::sum);
         }
     }
 
     @Override
     public void periodicAfterCommands() {
-        setRioCurrent(RobotController.getInputCurrent());
-
-        setBatteryVoltage(RobotController.getBatteryVoltage());
-
-        if (BuildConstants.isSimOrReplay) Logger.recordOutput("EnergyLogger/BatteryVoltage", batteryVoltage,
-                "volts");
-        //Logger.recordOutput("EnergyLogger/RioCurrent",
-        //        rioCurrent, "amps");
-
-
-        reportCurrentUsage("EnergyLogger/Controls/roboRIO", rioCurrent);
-        reportCurrentUsage("EnergyLogger/Controls/CANcoders", 0.05 * 4);
-        reportCurrentUsage("EnergyLogger/Controls/Pigeon", 0.04);
-        reportCurrentUsage("EnergyLogger/Controls/CANivore", 0.03);
-        reportCurrentUsage("EnergyLogger/Controls/Radio", 0.5);
-
-        for (var entry : subsytemCurrents.entrySet()) {
-            if (BuildConstants.isSimOrReplay)
-                Logger.recordOutput("EnergyLogger/Current/" + entry.getKey(), entry.getValue(), "amps");
-
-            subsytemCurrents.put(entry.getKey(), 0.0);
+        if (!BuildConstants.isSimOrReplay) {
+            return;
         }
-        for (var entry : subsytemPowers.entrySet()) {
-            if (BuildConstants.isSimOrReplay)
-                Logger.recordOutput("EnergyLogger/Power/" + entry.getKey(), entry.getValue(), "watts");
-            subsytemPowers.put(entry.getKey(), 0.0);
+
+        reportCurrentUsage("Controls/roboRIO", RobotController.getInputCurrent());
+        reportCurrentUsage("Controls/CANcoders", 0.05 * 4);
+        reportCurrentUsage("Controls/Pigeon", 0.04);
+        reportCurrentUsage("Controls/CANivore", 0.03);
+        reportCurrentUsage("Controls/Radio", 0.5);
+
+        for (var entry : subsystemCurrents.entrySet()) {
+            Logger.recordOutput("EnergyLogger/Current/" + entry.getKey(), entry.getValue(), "amps");
+
+            subsystemCurrents.put(entry.getKey(), 0.0);
         }
-        for (var entry : subsytemEnergies.entrySet()) {
-            if (BuildConstants.isSimOrReplay) Logger.recordOutput(
+        for (var entry : subsystemPowers.entrySet()) {
+            Logger.recordOutput("EnergyLogger/Power/" + entry.getKey(), entry.getValue(), "watts");
+
+            subsystemPowers.put(entry.getKey(), 0.0);
+        }
+        for (var entry : subsystemEnergies.entrySet()) {
+            Logger.recordOutput(
                     "EnergyLogger/Energy/" + entry.getKey(),
                     joulesToWattHours(entry.getValue()),
-                    "watt hours");
+                    "watt hours"
+            );
         }
-        totalPower = 0.0;
+
+        Logger.recordOutput("EnergyLogger/TotalCurrent", totalCurrent, "amps");
+        Logger.recordOutput("EnergyLogger/TotalPower", totalPower, "watts");
+        Logger.recordOutput("EnergyLogger/TotalEnergy", joulesToWattHours(totalEnergy), "watt hours");
         totalCurrent = 0.0;
+        totalPower = 0.0;
     }
 
     private double joulesToWattHours(double joules) {

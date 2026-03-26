@@ -670,7 +670,7 @@ public class Drive extends CommandBasedSubsystem {
         };
 
         Supplier<double[]> velocitiesSupplier = () -> Arrays.stream(modules).mapToDouble(Module::getDriveVelocityRadPerSec).toArray();
-        Supplier<double[]> currentsSupplier = () -> Arrays.stream(modules).mapToDouble(Module::getDriveCurrentAmps).toArray();
+        Supplier<double[]> currentsSupplier = () -> Arrays.stream(modules).mapToDouble(Module::getDriveStatorCurrentAmps).toArray();
 
         return startRun(
                 () -> {

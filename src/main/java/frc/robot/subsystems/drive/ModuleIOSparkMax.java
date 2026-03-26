@@ -163,7 +163,10 @@ public class ModuleIOSparkMax extends ModuleIO {
                 new DoubleSupplier[]{driveSpark::getAppliedOutput, driveSpark::getBusVoltage},
                 (values) -> inputs.driveAppliedVolts = values[0] * values[1]
         );
-        ifOk(driveSpark, driveSpark::getOutputCurrent, (value) -> inputs.driveCurrentAmps = value);
+        ifOk(driveSpark, driveSpark::getOutputCurrent, (value) -> {
+            inputs.driveStatorCurrentAmps = value;
+            inputs.driveSupplyCurrentAmps = value;
+        });
         ifOk(driveSpark, driveSpark::getMotorTemperature, (value) -> inputs.driveTemperatureCelsius = value);
         inputs.driveConnected = driveConnectedDebounce.calculate(!sparkStickyFault);
 
@@ -180,7 +183,10 @@ public class ModuleIOSparkMax extends ModuleIO {
                 new DoubleSupplier[]{turnSpark::getAppliedOutput, turnSpark::getBusVoltage},
                 (values) -> inputs.turnAppliedVolts = values[0] * values[1]
         );
-        ifOk(turnSpark, turnSpark::getOutputCurrent, (value) -> inputs.turnCurrentAmps = value);
+        ifOk(turnSpark, turnSpark::getOutputCurrent, (value) -> {
+            inputs.turnStatorCurrentAmps = value;
+            inputs.turnSupplyCurrentAmps = value;
+        });
         ifOk(turnSpark, turnSpark::getMotorTemperature, (value) -> inputs.turnTemperatureCelsius = value);
         inputs.turnConnected = turnConnectedDebounce.calculate(!sparkStickyFault);
 

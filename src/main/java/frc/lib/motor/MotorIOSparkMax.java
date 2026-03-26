@@ -87,12 +87,10 @@ public class MotorIOSparkMax extends MotorIO {
                 new DoubleSupplier[]{spark::getAppliedOutput, spark::getBusVoltage},
                 (values) -> inputs.appliedVolts = values[0] * values[1]
         );
-        ifOk(spark, spark::getOutputCurrent, (value) ->
-                {
-                    inputs.supplyCurrentAmps = value;
-                    inputs.statorCurrentAmps = value;
-                }
-        );
+        ifOk(spark, spark::getOutputCurrent, (value) -> {
+            inputs.supplyCurrentAmps = value;
+            inputs.statorCurrentAmps = value;
+        });
         ifOk(spark, spark::getMotorTemperature, (value) -> inputs.temperatureCelsius = value);
         inputs.connected = connectedDebounce.calculate(!sparkStickyFault);
     }

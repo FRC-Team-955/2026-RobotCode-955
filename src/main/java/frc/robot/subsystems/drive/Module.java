@@ -23,16 +23,16 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
+import frc.lib.EnergyLogger;
 import frc.lib.network.LoggedTunablePIDF;
 import frc.robot.OperatorDashboard;
-import frc.robot.energy.BatteryLogger;
 import org.littletonrobotics.junction.Logger;
 
 import static frc.robot.subsystems.drive.DriveConstants.*;
 
 public class Module {
     private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
-    private static final BatteryLogger batteryLogger = BatteryLogger.get();
+    private static final EnergyLogger energyLogger = EnergyLogger.get();
 
     private final ModuleIO io;
     private final ModuleIOInputsAutoLogged inputs = new ModuleIOInputsAutoLogged();
@@ -61,13 +61,18 @@ public class Module {
     public void updateAndProcessInputs() {
         io.updateInputs(inputs);
         Logger.processInputs("Inputs/Drive/Module" + index, inputs);
-        batteryLogger.reportCurrentUsage("Module/Drive/" + index,
-                inputs.driveConnected ? inputs.driveCurrentAmps : 0.0);
-        batteryLogger.reportCurrentUsage("Module/Turn/" + index,
-                inputs.turnConnected ? inputs.turnCurrentAmps : 0.0);
     }
 
     public void periodicBeforeCommands() {
+        energyLogger.reportCurrentUsage(
+                "Module/Drive/" + index,
+                inputs.driveConnected ? inputs.driveSupplyCurrentAmps : 0.0
+        );
+        energyLogger.reportCurrentUsage(
+                "Module/Turn/" + index,
+                inputs.turnConnected ? inputs.turnSupplyCurrentAmps : 0.0
+        );
+
         // Update alerts
         driveDisconnectedAlert.set(!inputs.driveConnected);
         turnDisconnectedAlert.set(!inputs.turnConnected);
@@ -176,8 +181,8 @@ public class Module {
         return inputs.driveVelocityRadPerSec * driveConfig.wheelRadiusMeters();
     }
 
-    public double getDriveCurrentAmps() {
-        return inputs.driveCurrentAmps;
+    public double getDriveStatorCurrentAmps() {
+        return inputs.driveStatorCurrentAmps;
     }
 
     /**
