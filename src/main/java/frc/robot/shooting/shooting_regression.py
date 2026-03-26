@@ -10,6 +10,7 @@ from time import time
 DEBUG_SHOT = False
 DEBUG_SHOT_DISTANCE = 1
 DEBUG_SHOT_ROBOT_RADIAL_VELOCITY = 2
+DEBUG_PASS = False  # DEBUG_SHOT must also be true
 
 DEBUG_DISTANCE_RANGE = True
 DEBUG_SHOT_DISTANCE_RANGE = 6
@@ -47,6 +48,7 @@ z_initial_base = bottom_of_frame_rails_to_center_of_wheels + wheel_radius + bott
 # From horizontal
 min_angle_allowed = deg_to_rad(50)
 max_angle_allowed = deg_to_rad(75)
+passing_angle = min_angle_allowed
 
 hub_base_z = inches_to_meters(56.5)
 hub_base_x = inches_to_meters(11.914689)  # Half of inner radius of base
@@ -54,8 +56,7 @@ hub_base_x = inches_to_meters(11.914689)  # Half of inner radius of base
 hub_edge_z = inches_to_meters(72.0)
 hub_edge_x = inches_to_meters(20.863618)  # Half of the inner radius of the edge
 
-hub_clearance_z = inches_to_meters(5) + fuel_radius
-hub_edge_z_with_clearance = hub_edge_z + hub_clearance_z
+hub_clearance = inches_to_meters(5) + fuel_radius
 
 def hub_z(x):
     # In base
@@ -85,8 +86,8 @@ def get_wanted_entry_angle(d, rv):
 # plt.show()
 
 if DEBUG_SHOT:
-    ax.scatter(-hub_edge_x, hub_edge_z_with_clearance, c="red")
-    ax.scatter(-hub_edge_x - fuel_radius, hub_edge_z, c="red")
+    ax.scatter(-hub_edge_x, hub_edge_z + hub_clearance, c="red")
+    ax.scatter(-hub_edge_x - hub_clearance, hub_edge_z, c="red")
     ax.plot(
         [
             -hub_edge_x,
@@ -161,7 +162,7 @@ def calculate_trajectory_kinematics(vel, angle, robot_radial_velocity, x0):
 
     return x, y, z
 
-def calculate_trajectory_iterative(vel, angle, robot_radial_velocity, x0):
+def calculate_trajectory_iterative(vel, angle, robot_radial_velocity, x0, end_param_z, end_z_supplier):
     vx, vy, vz = polar_velocity_to_components(vel, angle)
     vx += robot_radial_velocity
 
@@ -170,13 +171,13 @@ def calculate_trajectory_iterative(vel, angle, robot_radial_velocity, x0):
     z = np.zeros_like(t)
     direction = np.zeros_like(t)
 
-    past_hub_on_upwards_arc = False
-    below_edge_i = None
+    past_end_param_on_upwards_arc = False
+    end_param_i = None
 
     def get_end_parameters(x, z, direction):
         # We end below the hub. Interpolate to get the exact x and direction when we hit the hub
 
-        ez = hub_edge_z - z[-1]
+        ez = end_param_z - z[-1]
         dz = z[-2] - z[-1]
         t = ez / dz
 
@@ -265,17 +266,17 @@ def calculate_trajectory_iterative(vel, angle, robot_radial_velocity, x0):
         direction[i] = np.atan2(vz, vx)
 
         # Only return trajectory until we go into the hub, if possible
-        if z[i] > hub_edge_z:
-            past_hub_on_upwards_arc = True
-        elif z[i] < hub_edge_z and past_hub_on_upwards_arc and below_edge_i is None:
-            below_edge_i = i + 1
-        elif z[i] < hub_z(x[i]) and past_hub_on_upwards_arc:
-            below_i = i + 1
+        if z[i] > end_param_z:
+            past_end_param_on_upwards_arc = True
+        elif z[i] < end_param_z and past_end_param_on_upwards_arc and end_param_i is None:
+            end_param_i = i + 1
+        elif z[i] < end_z_supplier(x[i]) and past_end_param_on_upwards_arc:
+            end_i = i + 1
             # Newton's method freaks out if we try to use the x and direction from a certain index (when below the edge)
             # To fix this, just return separate arrays for calculation and visualization (calculation ends when below the
             # edge, visualization ends when below the whole hub)
-            entry_x, entry_angle = get_end_parameters(x[:below_edge_i], z[:below_edge_i], direction[:below_edge_i])
-            return entry_x, entry_angle, x[:below_i], y[:below_i], z[:below_i]
+            entry_x, entry_angle = get_end_parameters(x[:end_param_i], z[:end_param_i], direction[:end_param_i])
+            return entry_x, entry_angle, x[:end_i], y[:end_i], z[:end_i]
 
     entry_x, entry_angle = get_end_parameters(x, z, direction)
     return entry_x, entry_angle, x, y, z
@@ -288,7 +289,7 @@ def calculate_shooting_params_kinematics(distance, robot_radial_vel):
     # print(f"v0 = {v0}, vr = {vr}")
 
     # First compute stationary shooting velocity
-    discriminant = v0 ** 4 - g * (g * distance ** 2 + 2 * (hub_base_z + hub_clearance_z) * v0 ** 2)
+    discriminant = v0 ** 4 - g * (g * distance ** 2 + 2 * (hub_base_z + hub_clearance) * v0 ** 2)
     if discriminant < 0:
         print("\tDiscriminant is negative")
         exit(1)
@@ -345,7 +346,7 @@ def optimize_shot(distance, robot_radial_vel):
     v = v_initial
     shot_angle = shot_angle_initial
 
-    calc_traj = lambda vel, angle: calculate_trajectory_iterative(vel, angle, robot_radial_vel, x0)
+    calc_traj = lambda vel, angle: calculate_trajectory_iterative(vel, angle, robot_radial_vel, x0, hub_edge_z, hub_z)
 
     def solve():
         nonlocal i, v, shot_angle, shots_simmed
@@ -465,18 +466,128 @@ def optimize_shot(distance, robot_radial_vel):
 
     return v, shot_angle, tof, shots_simmed, i
 
+def optimize_pass(distance, robot_radial_vel):
+    x0 = -distance
+
+    wanted_x = 0.0
+
+    x_tolerance = inches_to_meters(0.5)
+
+    v_initial, _ = calculate_shooting_params_kinematics(distance, robot_radial_vel)
+
+    shots_simmed = 0
+
+    Δv = 0.1
+    α = 0.5
+
+    i = 0
+    max_iterations = 70
+
+    v = v_initial
+
+    calc_traj = lambda vel: calculate_trajectory_iterative(vel, passing_angle, robot_radial_vel, x0, 0.0, lambda _: 0.0)
+
+    def solve():
+        nonlocal i, v, shots_simmed
+        while i < max_iterations:
+            i += 1
+
+            # Newton's method
+            # Compute initial guess
+            x_1, _, x_full, y_full, z_full = calc_traj(v)
+            shots_simmed += 1
+
+            # If guess is within tolerance, exit early
+            # print(i, abs(x_1 - wanted_x) <= x_tolerance, abs(entry_angle_1 - wanted_entry_angle) <= entry_angle_tolerance)
+            if abs(x_1 - wanted_x) <= x_tolerance:
+                break
+
+            if DEBUG_SHOT and not DEBUG_DISTANCE_RANGE and not DEBUG_VELOCITY_RANGE and i % (max_iterations / 10) == 0:
+                ax.plot(x_full, z_full, linestyle="dotted", c=(1 - i / max_iterations, i / max_iterations, 0))
+
+            # Compute guess with velocity increment
+            x_2, _, _, _, _ = calc_traj(v + Δv)
+            shots_simmed += 1
+
+            # Compute slope
+            m = (x_2 - x_1) / Δv
+
+            # Compute difference
+            d = wanted_x - x_1
+
+            # Compute increment
+            Δ = m * d
+
+            # Update guess
+            v += α * Δ
+        else:
+            # If we don't break (that's what the else clause checks for), check the guess once more.
+            # If it doesn't satisfy tolerances, solution could not be found
+            x, _, _, _, _ = calc_traj(v)
+            shots_simmed += 1
+
+            if abs(x - wanted_x) > x_tolerance:
+                return False
+
+        if v < 0 or v > 30:
+            # Sanity check because sometimes the solver goes crazy
+            return False
+
+        return True
+
+    if not solve():
+        x_tolerance *= 2
+
+        Δv *= 0.5
+        α *= 0.5
+
+        max_iterations += 300
+
+        v = v_initial
+
+        if not solve():
+            print(f"Could not find solution after {i} iterations.")
+            print(f"\tdistance = {distance}, robot_radial_vel = {robot_radial_vel}")
+            print(f"\tv = {v}")
+            return None, None, None
+
+    if DEBUG_SHOT:
+        print(f"Found valid solution after {i} iterations")
+        print(f"\tdistance = {distance}, robot_radial_vel = {robot_radial_vel}")
+        print(f"\tv = {v}")
+        # ax.plot(*calculate_trajectory_kinematics(v_initial, angle_initial, robot_radial_vel), label="Simple Kinematics (Initial)")
+        # ax.plot(*calculate_trajectory_kinematics(v_final, angle_final, robot_radial_vel), label="Simple Kinematics (Final)")
+        # ax.plot(*calculate_trajectory_iterative(v_initial, angle_initial, robot_radial_vel), label="Iterative Simulation (Initial)")
+        _, _, x_full, y_full, z_full = calc_traj(v)
+        ax.plot(
+            x_full, z_full,
+            c=(
+                1 - (robot_radial_vel + 5) / (5 * 2),
+                (robot_radial_vel + 5) / (5 * 2),
+                0
+            ) if DEBUG_DISTANCE_RANGE or DEBUG_VELOCITY_RANGE else None,
+            label=f"{robot_radial_vel}" if DEBUG_DISTANCE_RANGE or DEBUG_VELOCITY_RANGE else None
+        )
+
+    return v, shots_simmed, i
+
 if DEBUG_SHOT:
-    optimize_shot(DEBUG_SHOT_DISTANCE, DEBUG_SHOT_ROBOT_RADIAL_VELOCITY)
+    if DEBUG_PASS:
+        f = optimize_pass
+    else:
+        f = optimize_shot
+
+    f(DEBUG_SHOT_DISTANCE, DEBUG_SHOT_ROBOT_RADIAL_VELOCITY)
     if DEBUG_DISTANCE_RANGE and DEBUG_VELOCITY_RANGE:
         for i in range((DEBUG_SHOT_DISTANCE_RANGE + 1) * 2):
             for j in range(DEBUG_SHOT_ROBOT_RADIAL_VELOCITY_RANGE):
-                optimize_shot(DEBUG_SHOT_DISTANCE + i / 2, j - (DEBUG_SHOT_ROBOT_RADIAL_VELOCITY_RANGE / 2))
+                f(DEBUG_SHOT_DISTANCE + i / 2, j - (DEBUG_SHOT_ROBOT_RADIAL_VELOCITY_RANGE / 2))
     elif DEBUG_DISTANCE_RANGE:
         for i in range((DEBUG_SHOT_DISTANCE_RANGE + 1) * 2):
-            optimize_shot(DEBUG_SHOT_DISTANCE + i / 2, DEBUG_SHOT_ROBOT_RADIAL_VELOCITY)
+            f(DEBUG_SHOT_DISTANCE + i / 2, DEBUG_SHOT_ROBOT_RADIAL_VELOCITY)
     elif DEBUG_VELOCITY_RANGE:
         for j in range(DEBUG_SHOT_ROBOT_RADIAL_VELOCITY_RANGE):
-            optimize_shot(DEBUG_SHOT_DISTANCE, j - (DEBUG_SHOT_ROBOT_RADIAL_VELOCITY_RANGE / 2))
+            f(DEBUG_SHOT_DISTANCE, j - (DEBUG_SHOT_ROBOT_RADIAL_VELOCITY_RANGE / 2))
 
     # ax.set(ylim=[-2, 2], zlim=[0, hubz + 2], xlabel="X (m)", ylabel="Y (m)", zlabel="Z (m)")
     # ax.set_ylim([0, abs(ax.get_xlim()[0]) + abs(ax.get_xlim()[1])])
@@ -501,8 +612,7 @@ else:
 
             v, angle, tof, shots_simmed, iterations = optimize_shot(distance, velocity)
             if v is None and angle is None and tof is None:
-                print(
-                    f"[{worker_index}] {progress_count} FAILED (distance = {distance}, velocity = {velocity})")
+                print(f"[{worker_index}] {progress_count} FAILED (distance = {distance}, velocity = {velocity})")
                 continue
             all_shots_simmed += shots_simmed
             # the two tuples need to be the same length for numpy to be happy, so add the extra 0
@@ -516,9 +626,39 @@ else:
 
         return shots, all_shots_simmed
 
-        # counter = 0
+    def pass_compute_worker(x):
+        worker_index, worker_distance_velocity_pairs = x
+
+        passes = []
+        counter = 0
+        all_passes_simmed = 0
+
+        print(f"[{worker_index}] Starting")
+        start_time_worker = time()
+
+        for distance, velocity in worker_distance_velocity_pairs:
+            counter += 1
+            progress_count = f"{counter}/{len(worker_distance_velocity_pairs)}"
+            progress_percent = round(float(counter) / float(len(worker_distance_velocity_pairs)) * 100)
+
+            v, passes_simmed, iterations = optimize_pass(distance, velocity)
+            if v is None:
+                print(f"[{worker_index}] {progress_count} FAILED (distance = {distance}, velocity = {velocity})")
+                continue
+            all_passes_simmed += passes_simmed
+            # the two tuples need to be the same length for numpy to be happy, so add the extra 0
+            passes.append(((distance, velocity), (v, 0)))
+            print(f"[{worker_index}] {progress_count}\t{progress_percent}% ({passes_simmed}, {iterations})")
+
+        end_time_worker = time()
+        print(
+            f"[{worker_index}] Done, took {end_time_worker - start_time_worker} seconds and {all_passes_simmed} simulations"
+        )
+
+        return passes, all_passes_simmed
 
     if __name__ == "__main__":
+        ################################ SHOT COMPUTATION ################################
         distance_velocity_pairs = []
 
         start_dist = 0.7
@@ -560,6 +700,39 @@ else:
         print(f"Of {len(distance_velocity_pairs)} shots, {len(all_shots)} succeeded.")
         print(f"{all_shots_simmed} simulations run.")
 
+        ################################ PASS COMPUTATION ################################
+        distance_velocity_pairs = []
+
+        start_dist = 0.5
+        stop_dist = 15
+        max_vel = 4.5
+        for distance in np.linspace(start_dist, stop_dist, 100):
+            for velocity in [-max_vel, -3.0, -1.5, -1.0, -0.5, 0.0, 0.5, 1.0, 1.5, 3.0, max_vel]:
+                distance_velocity_pairs.append((distance, velocity))
+
+        all_passes = []
+        all_passes_simmed = 0
+        min_per_worker = floor(len(distance_velocity_pairs) / workers)
+
+        print(
+            f"Computing {len(distance_velocity_pairs)} distance velocity pairs,"
+            f"with a minimum of {min_per_worker} per worker"
+        )
+
+        start_time = time()
+
+        with Pool(workers) as p:
+            args = map(get_distance_velocity_pairs_for_worker, range(workers))
+            for (computed_passes, passes_simmed) in p.map(pass_compute_worker, args):
+                all_passes += computed_passes
+                all_passes_simmed += passes_simmed
+
+        end_time = time()
+        print(f"Took {end_time - start_time} seconds")
+        print(f"Of {len(distance_velocity_pairs)} passes, {len(all_passes)} succeeded.")
+        print(f"{all_passes_simmed} simulations run.")
+
+        ################################ SHOT REGRESSION ################################
         all_shots = np.array(all_shots)
 
         X = (all_shots[:, 0, 0], all_shots[:, 0, 1])
@@ -572,7 +745,7 @@ else:
         print("y_angle", y_angle)
         print("y_tof", y_tof)
 
-        def f(X, i0, i1, i2, i3, i4, i5, i6, i7):
+        def f(X, i0, i1, i2, i3, i4, i5):
             x = X[0]
             y = X[1]
             return (
@@ -602,7 +775,7 @@ else:
             print(equation)
             return coeff, equation
 
-        fig, (ax1, ax2, ax3) = plt.subplots(1, 3, subplot_kw=dict(projection="3d"))
+        _, (ax1, ax2, ax3) = plt.subplots(1, 3, subplot_kw=dict(projection="3d"), label="Shooting")
 
         print()
         print("vel")
@@ -664,6 +837,34 @@ else:
         ax3.set(xlabel="Distance", ylabel="Radial velocity", zlabel="ToF")
         ax3.legend()
 
+        ################################ PASS REGRESSION ################################
+        all_passes = np.array(all_passes)
+
+        X = (all_passes[:, 0, 0], all_passes[:, 0, 1])
+        y_vel = all_passes[:, 1, 0]
+
+        print("X", X)
+        print("y_vel", y_vel)
+
+        _, (ax1) = plt.subplots(1, 1, subplot_kw=dict(projection="3d"), label="Passing")
+
+        print()
+        print("pass vel")
+        pass_vel_coeff, pass_vel_equation = make_regression(X, y_vel)
+
+        X_reg = np.meshgrid(np.linspace(0, 16, 50), np.linspace(-6, 6, 50))
+        ax1.plot_surface(
+            X_reg[0],
+            X_reg[1],
+            f(X_reg, *pass_vel_coeff),
+            alpha=0.5,
+            label="Velocity regression"
+        )
+        ax1.scatter(X[0], X[1], y_vel, label="Velocity data")
+        ax1.set(xlabel="Distance", ylabel="Radial velocity", zlabel="Velocity")
+        ax1.legend()
+
+        ################################ OUTPUT ################################
         with open(dirname(realpath(__file__)) + "/ShootingRegression.java", "w") as f:
             f.write("""package frc.robot.shooting;
 
@@ -686,6 +887,21 @@ public class ShootingRegression {
         double x = distanceMeters;
         double y = radialRobotVelocityMetersPerSec;
         return """ + tof_equation + """;
+    }
+}
+""")
+        with open(dirname(realpath(__file__)) + "/PassingRegression.java", "w") as f:
+            f.write("""package frc.robot.shooting;
+
+/** GENERATED BY shooting_regression.py DO NOT EDIT BY HAND */
+public class PassingRegression {
+    /** Passing angle **from the horizontal**. Note that hood angle is from the vertical. */
+    public static final double angleRad = """ + str(passing_angle) + """;
+
+    public static double calculateVelocityMetersPerSec(double distanceMeters, double radialRobotVelocityMetersPerSec) {
+        double x = distanceMeters;
+        double y = radialRobotVelocityMetersPerSec;
+        return """ + pass_vel_equation + """;
     }
 }
 """)

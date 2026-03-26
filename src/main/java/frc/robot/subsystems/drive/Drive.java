@@ -567,7 +567,7 @@ public class Drive extends CommandBasedSubsystem {
                             : OptionalDouble.of(shootingKinematics.getShootingParameters().headingRad()),
                     (speeds) -> operatorDashboard.manualAiming.get()
                             ? OptionalDouble.empty()
-                            : OptionalDouble.of(shootingKinematics.rotationAboutHubRadiansPerSecForDrivebase(speeds))
+                            : OptionalDouble.of(shootingKinematics.rotationAboutTargetRadiansPerSecForDrivebase(speeds))
             )
                     .withStopWithX()
                     .withConstraints(shootingConstraints);
