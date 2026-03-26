@@ -46,6 +46,7 @@ public class Module {
     private final Alert turnEncoderDisconnectedAlert;
     private final Alert turnEncoderDisparityAlert;
     private final Alert turnEncoderDisparityStickyAlert;
+    private final Alert invalidMagnetHealthAlert;
 
     public Module(ModuleIO io, int index) {
         this.io = io;
@@ -56,6 +57,7 @@ public class Module {
         turnEncoderDisconnectedAlert = new Alert("Disconnected turn encoder on module " + index + ".", AlertType.kError);
         turnEncoderDisparityAlert = new Alert("Absolute and relative turn encoders on module " + index + " are not matching up.", AlertType.kError);
         turnEncoderDisparityStickyAlert = new Alert("Absolute and relative turn encoders on module " + index + " didn't match up, but they do now.", AlertType.kWarning);
+        invalidMagnetHealthAlert = new Alert("Module " + index + "'s magnet health is bad.", AlertType.kError);
     }
 
     public void updateAndProcessInputs() {
@@ -84,6 +86,7 @@ public class Module {
                 ) > Units.degreesToRadians(3.0)
         );
         turnEncoderDisparityAlert.set(turnEncoderDisparity);
+        invalidMagnetHealthAlert.set(inputs.turnAbsoluteEncoderMagnetHealth != MagnetHealthValue.Magnet_Green && inputs.turnAbsoluteEncoderMagnetHealth != MagnetHealthValue.Magnet_Orange);
 
         // Zero turn if there is a disparity and we aren't moving
         if (turnEncoderDisparity &&
