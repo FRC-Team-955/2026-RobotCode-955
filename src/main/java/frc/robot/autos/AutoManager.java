@@ -48,7 +48,7 @@ public class AutoManager {
         autoChooser.addOption("Test", new OrbitGoingToHomeDepotAuto());
         autoChooser.addOption("Canadian Depot Intake", new CanadianDepotIntakeAuto());
         autoChooser.addOption("Canadian Outpost", new CanadianOutpostAuto());
-        autoChooser.addOption("CanadianJn Outpost", new CanadianOutpostJAuto());
+        //autoChooser.addOption("CanadianJn Outpost", new CanadianOutpostJAuto());
         //autoChooser.addOption("CandiantOutpostAutolessAgro", new CanadianOutpostAutolessAgro());
         autoChooser.addOption("I want a turret (Orbit passing at the outpost)", new OrbitPassingOutpost());
 
