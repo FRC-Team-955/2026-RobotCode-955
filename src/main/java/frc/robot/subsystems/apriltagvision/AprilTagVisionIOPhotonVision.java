@@ -49,12 +49,12 @@ public class AprilTagVisionIOPhotonVision extends AprilTagVisionIO {
 
             if (result.hasTargets()) {
                 var bestTarget = result.getBestTarget();
+
                 bestTargetObservations.add(new BestTargetObservation(
                         result.getTimestampSeconds(),
                         bestTarget.poseAmbiguity,
                         bestTarget.fiducialId,
                         bestTarget.bestCameraToTarget,
-                        bestTarget.altCameraToTarget,
                         bestTarget.getPitch(),
                         bestTarget.getYaw()
                 ));
