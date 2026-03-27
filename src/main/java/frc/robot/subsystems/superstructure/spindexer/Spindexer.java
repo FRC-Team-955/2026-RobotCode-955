@@ -77,7 +77,7 @@ public class Spindexer implements Periodic {
 
         motorDisconnectedAlert.set(!inputs.connected);
 
-        energyLogger.reportCurrentUsage("Spindexer", inputs.connected ? inputs.supplyCurrentAmps : 0.0);
+        energyLogger.reportPowerUsage("Spindexer", inputs.connected ? inputs.appliedVolts * inputs.supplyCurrentAmps : 0.0);
     }
 
     @Override

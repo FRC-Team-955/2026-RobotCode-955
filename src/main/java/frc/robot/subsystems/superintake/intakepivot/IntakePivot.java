@@ -95,7 +95,7 @@ public class IntakePivot implements Periodic {
 
         motorDisconnectedAlert.set(!inputs.connected);
 
-        energyLogger.reportCurrentUsage("IntakePivot", inputs.connected ? inputs.supplyCurrentAmps : 0.0);
+        energyLogger.reportPowerUsage("IntakePivot", inputs.connected ? inputs.appliedVolts * inputs.supplyCurrentAmps : 0.0);
 
         if (gains.hasChanged()) {
             io.setPositionPIDF(gains);

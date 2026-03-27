@@ -33,14 +33,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class EnergyLogger implements Periodic {
-    @Getter
-    private double totalCurrent = 0.0;
+
     @Getter
     private double totalPower = 0.0;
     @Getter
     private double totalEnergy = 0.0;
 
-    private final Map<String, Double> subsystemCurrents = new HashMap<>();
     private final Map<String, Double> subsystemPowers = new HashMap<>();
     private final Map<String, Double> subsystemEnergies = new HashMap<>();
 
@@ -60,7 +58,7 @@ public class EnergyLogger implements Periodic {
         }
     }
 
-    public void reportCurrentUsage(String key, double... amps) {
+    public void reportPowerUsage(String key, double... amps) {
         if (!BuildConstants.isSimOrReplay) {
             return;
         }
@@ -73,11 +71,9 @@ public class EnergyLogger implements Periodic {
         double power = totalAmps * RobotController.getBatteryVoltage();
         double energy = power * Constants.loopPeriod;
 
-        totalCurrent += totalAmps;
         totalPower += power;
         totalEnergy += energy;
 
-        subsystemCurrents.put(key, totalAmps);
         subsystemPowers.put(key, power);
         subsystemEnergies.merge(key, energy, Double::sum);
 
@@ -91,7 +87,6 @@ public class EnergyLogger implements Periodic {
             if (i < keys.length - 2) {
                 subkey += "/";
             }
-            subsystemCurrents.merge(subkey, totalAmps, Double::sum);
             subsystemPowers.merge(subkey, power, Double::sum);
             subsystemEnergies.merge(subkey, energy, Double::sum);
         }
@@ -103,17 +98,13 @@ public class EnergyLogger implements Periodic {
             return;
         }
 
-        reportCurrentUsage("Controls/roboRIO", RobotController.getInputCurrent());
-        reportCurrentUsage("Controls/CANcoders", 0.05 * 4);
-        reportCurrentUsage("Controls/Pigeon", 0.04);
-        reportCurrentUsage("Controls/CANivore", 0.03);
-        reportCurrentUsage("Controls/Radio", 0.5);
+        reportPowerUsage("Controls/roboRIO", RobotController.getInputCurrent() * RobotController.getBatteryVoltage());
+        reportPowerUsage("Controls/CANcoders", 0.05 * 4 * RobotController.getBatteryVoltage());
+        reportPowerUsage("Controls/Pigeon", 0.04 * RobotController.getBatteryVoltage());
+        reportPowerUsage("Controls/CANivore", 0.03 * RobotController.getBatteryVoltage());
+        reportPowerUsage("Controls/Radio", 0.5 * RobotController.getBatteryVoltage());
 
-        for (var entry : subsystemCurrents.entrySet()) {
-            Logger.recordOutput("EnergyLogger/Current/" + entry.getKey(), entry.getValue(), "amps");
 
-            subsystemCurrents.put(entry.getKey(), 0.0);
-        }
         for (var entry : subsystemPowers.entrySet()) {
             Logger.recordOutput("EnergyLogger/Power/" + entry.getKey(), entry.getValue(), "watts");
 
@@ -127,10 +118,8 @@ public class EnergyLogger implements Periodic {
             );
         }
 
-        Logger.recordOutput("EnergyLogger/TotalCurrent", totalCurrent, "amps");
         Logger.recordOutput("EnergyLogger/TotalPower", totalPower, "watts");
         Logger.recordOutput("EnergyLogger/TotalEnergy", joulesToWattHours(totalEnergy), "watt hours");
-        totalCurrent = 0.0;
         totalPower = 0.0;
     }
 

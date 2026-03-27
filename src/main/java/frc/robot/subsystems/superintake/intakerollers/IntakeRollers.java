@@ -79,7 +79,7 @@ public class IntakeRollers implements Periodic {
         motorDisconnectedAlert.set(!inputs.connected);
         highTemperatureAlert.set(inputs.temperatureCelsius > 50);
 
-        energyLogger.reportCurrentUsage("IntakeRollers", inputs.connected ? inputs.supplyCurrentAmps : 0.0);
+        energyLogger.reportPowerUsage("IntakeRollers", inputs.connected ? inputs.appliedVolts * inputs.supplyCurrentAmps : 0.0);
     }
 
     @Override

@@ -76,7 +76,7 @@ public class Feeder implements Periodic {
 
         motorDisconnectedAlert.set(!inputs.connected);
 
-        energyLogger.reportCurrentUsage("Feeder", inputs.connected ? inputs.supplyCurrentAmps : 0.0);
+        energyLogger.reportPowerUsage("Feeder", inputs.connected ? inputs.appliedVolts * inputs.supplyCurrentAmps : 0.0);
 
         // Apply network inputs
         if (operatorDashboard.coastOverride.hasChanged()) {
