@@ -87,7 +87,6 @@ public class MotorIOTalonFX extends MotorIO {
                 appliedVolts,
                 statorCurrentAmps,
                 supplyCurrentAmps,
-
                 temperatureCelsius
         );
         ParentDevice.optimizeBusUtilizationForAll(talon);

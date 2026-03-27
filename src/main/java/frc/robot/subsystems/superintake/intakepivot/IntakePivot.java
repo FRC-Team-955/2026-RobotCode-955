@@ -8,6 +8,7 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
+import frc.lib.EnergyLogger;
 import frc.lib.Util;
 import frc.lib.motor.MotorIOInputsAutoLogged;
 import frc.lib.network.LoggedTunableNumber;
@@ -16,7 +17,6 @@ import frc.robot.BuildConstants;
 import frc.robot.Constants;
 import frc.robot.OperatorDashboard;
 import frc.robot.RobotState;
-import frc.robot.energy.BatteryLogger;
 import frc.robot.subsystems.superintake.intakepivot.IntakePivotIO.IntakePivotCurrentLimitMode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +31,7 @@ public class IntakePivot implements Periodic {
     private static final LoggedTunableNumber profileLookaheadTimeSec = new LoggedTunableNumber("Superintake/IntakePivot/ProfileLookaheadTimeSec", 0.15);
     private static final LoggedTunableNumber stowSetpointDegrees = new LoggedTunableNumber("Superintake/IntakePivot/Goal/StowDegrees", 70.0);
 
-    private static final BatteryLogger batteryLogger = BatteryLogger.get();
+    private static final EnergyLogger energyLogger = EnergyLogger.get();
 
     private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
     private static final RobotState robotState = RobotState.get();
@@ -92,8 +92,10 @@ public class IntakePivot implements Periodic {
     public void periodicBeforeCommands() {
         io.updateInputs(inputs);
         Logger.processInputs("Inputs/Superintake/IntakePivot", inputs);
-        batteryLogger.reportCurrentUsage("IntakePivot", inputs.connected ? inputs.supplyCurrentAmps : 0.0);
+
         motorDisconnectedAlert.set(!inputs.connected);
+
+        energyLogger.reportCurrentUsage("IntakePivot", inputs.connected ? inputs.supplyCurrentAmps : 0.0);
 
         if (gains.hasChanged()) {
             io.setPositionPIDF(gains);

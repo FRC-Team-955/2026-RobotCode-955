@@ -28,6 +28,7 @@ import frc.robot.subsystems.superstructure.Superstructure;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+import static edu.wpi.first.units.Units.MetersPerSecond;
 import static frc.robot.subsystems.drive.DriveConstants.defaultMoveToConstraints;
 import static frc.robot.subsystems.drive.DriveConstants.driveConfig;
 
@@ -173,7 +174,7 @@ public class AutoHelpers {
     }
 
     public static final DriveConstraints intakeConstraints = defaultMoveToConstraints
-            .withMaxLinearVelocityMetersPerSec(new LoggedTunableNumber("AutoHelpers/Intake/MaxLinearVelocity", 2))
+            .withMaxLinearVelocityMetersPerSec(new LoggedTunableNumber("AutoHelpers/Intake/MaxLinearVelocity", ChoreoVars.IntakingMaxVel.in(MetersPerSecond)))
             .withMaxAngularAccelerationRadPerSecPerSec(new LoggedTunableNumber("AutoHelpers/Intake/MaxAngularAcceleration", 40.0));
 
     private static final LinearFilter targetXFilter = LinearFilter.movingAverage(10);
@@ -253,12 +254,12 @@ public class AutoHelpers {
     }
 
     private static final DriveConstraints bumpConstraints = defaultMoveToConstraints
-            .withMaxLinearVelocityMetersPerSec(new LoggedTunableNumber("AutoHelpers/Bump/MaxLinearVelocity", 2.5));
+            .withMaxLinearVelocityMetersPerSec(new LoggedTunableNumber("AutoHelpers/Bump/MaxLinearVelocity", 3));
     private static double bumpStartX = 5.71;
     private static double bumpEndX = 2.6;
 
     public static Command goOverDepotSideBump() {
-        double y = 5.53;
+        double y = 4.9;
         Rotation2d rotation = Rotation2d.fromDegrees(135);
         return CommandsExt.eagerSequence(
                 // go to the start of the bump

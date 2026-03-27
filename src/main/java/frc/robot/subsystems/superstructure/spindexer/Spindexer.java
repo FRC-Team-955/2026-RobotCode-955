@@ -7,6 +7,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
+import frc.lib.EnergyLogger;
 import frc.lib.Util;
 import frc.lib.motor.MotorIO;
 import frc.lib.motor.MotorIOInputsAutoLogged;
@@ -15,7 +16,6 @@ import frc.lib.network.LoggedTunableNumber;
 import frc.lib.subsystem.Periodic;
 import frc.robot.BuildConstants;
 import frc.robot.OperatorDashboard;
-import frc.robot.energy.BatteryLogger;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -30,7 +30,7 @@ public class Spindexer implements Periodic {
     private static final LoggedTunableNumber ejectVoltage = new LoggedTunableNumber("Superstructure/Spindexer/Goal/EjectVoltage", -12.0);
 
     private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
-    private static final BatteryLogger batteryLogger = BatteryLogger.get();
+    private static final EnergyLogger energyLogger = EnergyLogger.get();
 
     private final MotorIO io = createIO();
     private final MotorIOInputsAutoLogged inputs = new MotorIOInputsAutoLogged();
@@ -76,9 +76,8 @@ public class Spindexer implements Periodic {
         Logger.processInputs("Inputs/Superstructure/Spindexer", inputs);
 
         motorDisconnectedAlert.set(!inputs.connected);
-        batteryLogger.reportCurrentUsage("Spindexer",
-                inputs.connected ? inputs.supplyCurrentAmps : 0.0);
 
+        energyLogger.reportCurrentUsage("Spindexer", inputs.connected ? inputs.supplyCurrentAmps : 0.0);
     }
 
     @Override

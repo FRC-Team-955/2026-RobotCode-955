@@ -6,12 +6,12 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
+import frc.lib.EnergyLogger;
 import frc.lib.Util;
 import frc.lib.network.LoggedTunableNumber;
 import frc.lib.subsystem.Periodic;
 import frc.robot.BuildConstants;
 import frc.robot.OperatorDashboard;
-import frc.robot.energy.BatteryLogger;
 import frc.robot.shooting.ShootingKinematics;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +28,7 @@ public class Flywheel implements Periodic {
 
     private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
     private static final ShootingKinematics shootingKinematics = ShootingKinematics.get();
-    private static final BatteryLogger batteryLogger = BatteryLogger.get();
+    private static final EnergyLogger energyLogger = EnergyLogger.get();
 
 
     private final FlywheelIO io = createIO();
@@ -79,7 +79,7 @@ public class Flywheel implements Periodic {
         followerMotorDisconnectedAlert.set(!inputs.follower.connected);
         highTemperatureAlert.set(Math.max(inputs.leader.temperatureCelsius, inputs.follower.temperatureCelsius) > 50);
 
-        batteryLogger.reportCurrentUsage("Flywheel",
+        energyLogger.reportCurrentUsage("Flywheel",
                 inputs.leader.connected ? inputs.leader.supplyCurrentAmps : 0.0,
                 inputs.follower.connected ? inputs.follower.supplyCurrentAmps : 0.0);
 

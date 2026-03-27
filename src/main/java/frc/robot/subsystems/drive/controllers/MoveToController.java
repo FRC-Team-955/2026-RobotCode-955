@@ -117,10 +117,4 @@ public class MoveToController {
 
         return angularVelocityRadPerSec;
     }
-
-    public void stop() {
-        goalPoseSupplier = null;
-
-        robotState.setMoveToGoal(Optional.empty());
-    }
 }

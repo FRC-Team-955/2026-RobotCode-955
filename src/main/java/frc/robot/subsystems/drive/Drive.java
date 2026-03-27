@@ -479,13 +479,10 @@ public class Drive extends CommandBasedSubsystem {
     }
 
     public ModifiableDriveCommand joystickDrive() {
-        return new ModifiableDriveCommand(startEnd(
-                () -> {
-                    wantedState = State.JOYSTICK_DRIVE;
-                    joystickDriveHeadingStabilizeTimer.restart();
-                },
-                () -> wantedState = State.STOP
-        ));
+        return new ModifiableDriveCommand(startIdle(() -> {
+            wantedState = State.JOYSTICK_DRIVE;
+            joystickDriveHeadingStabilizeTimer.restart();
+        }));
     }
 
     public ModifiableDriveCommand moveTo(Supplier<Pose2d> goalPoseSupplier) {
@@ -493,40 +490,27 @@ public class Drive extends CommandBasedSubsystem {
     }
 
     public ModifiableDriveCommand moveTo(Supplier<Pose2d> goalPoseSupplier, DriveConstraints constraints) {
-        return new ModifiableDriveCommand(startEnd(
-                () -> {
-                    wantedState = State.MOVE_TO;
-                    moveToController.start(goalPoseSupplier);
-                },
-                () -> {
-                    wantedState = State.STOP;
-                    moveToController.stop();
-                }
-        )).withConstraints(constraints);
+        return new ModifiableDriveCommand(startIdle(() -> {
+            wantedState = State.MOVE_TO;
+            moveToController.start(goalPoseSupplier);
+        })).withConstraints(constraints);
     }
 
     public ModifiableDriveCommand followTrajectory(Trajectory<SwerveSample> trajectory) {
-        return new ModifiableDriveCommand(startEndWaitUntil(
+        return new ModifiableDriveCommand(startIdleWaitUntil(
                 () -> {
                     wantedState = State.FOLLOW_TRAJECTORY;
                     followTrajectoryController.start(trajectory);
-                },
-                () -> {
-                    wantedState = State.STOP;
-                    followTrajectoryController.stop();
                 },
                 followTrajectoryController::isDone
         ));
     }
 
     public ModifiableDriveCommand chassisSpeeds(Supplier<ChassisSpeeds> chassisSpeedsSupplier) {
-        return new ModifiableDriveCommand(startEnd(
-                () -> {
-                    wantedState = State.CHASSIS_SPEEDS;
-                    chassisSpeedsSetpointSupplier = chassisSpeedsSupplier;
-                },
-                () -> wantedState = State.STOP
-        ));
+        return new ModifiableDriveCommand(startIdle(() -> {
+            wantedState = State.CHASSIS_SPEEDS;
+            chassisSpeedsSetpointSupplier = chassisSpeedsSupplier;
+        }));
     }
 
     public class ModifiableDriveCommand extends WrapperCommand {
@@ -567,7 +551,7 @@ public class Drive extends CommandBasedSubsystem {
                             : OptionalDouble.of(shootingKinematics.getShootingParameters().headingRad()),
                     (speeds) -> operatorDashboard.manualAiming.get()
                             ? OptionalDouble.empty()
-                            : OptionalDouble.of(shootingKinematics.rotationAboutHubRadiansPerSecForDrivebase(speeds))
+                            : OptionalDouble.of(shootingKinematics.rotationAboutTargetRadiansPerSecForDrivebase(speeds))
             )
                     .withStopWithX()
                     .withConstraints(shootingConstraints);
@@ -575,20 +559,19 @@ public class Drive extends CommandBasedSubsystem {
 
         @Override
         public void initialize() {
-            if (targetRad != null) headingOverrideSetpointSupplier = targetRad;
-            if (feedforwardRadPerSec != null) headingOverrideFeedforwardSupplier = feedforwardRadPerSec;
-            if (wantedStopWithX != null) stopWithX = wantedStopWithX;
-            if (constraints != null) constrainer.start(constraints);
+            headingOverrideSetpointSupplier = targetRad;
+            headingOverrideFeedforwardSupplier = feedforwardRadPerSec;
+            if (wantedStopWithX != null) {
+                stopWithX = wantedStopWithX;
+            } else {
+                stopWithX = false;
+            }
+            if (constraints != null) {
+                constrainer.start(constraints);
+            } else {
+                constrainer.stop();
+            }
             super.initialize();
-        }
-
-        @Override
-        public void end(boolean interrupted) {
-            headingOverrideSetpointSupplier = null;
-            headingOverrideFeedforwardSupplier = null;
-            stopWithX = false;
-            constrainer.stop();
-            super.end(interrupted);
         }
     }
 
@@ -670,7 +653,7 @@ public class Drive extends CommandBasedSubsystem {
         };
 
         Supplier<double[]> velocitiesSupplier = () -> Arrays.stream(modules).mapToDouble(Module::getDriveVelocityRadPerSec).toArray();
-        Supplier<double[]> currentsSupplier = () -> Arrays.stream(modules).mapToDouble(Module::getDriveCurrentAmps).toArray();
+        Supplier<double[]> currentsSupplier = () -> Arrays.stream(modules).mapToDouble(Module::getDriveStatorCurrentAmps).toArray();
 
         return startRun(
                 () -> {

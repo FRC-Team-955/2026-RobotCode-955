@@ -55,8 +55,6 @@ public class FollowTrajectoryController {
         }
 
         Pose2d[] poses = trajectory.getPoses();
-        robotState.setTrajectory(Optional.of(poses));
-        Logger.recordOutput("Drive/Trajectory", poses);
 
         var sampleOpt = trajectory.sampleAt(timer.get(), AllianceFlipUtil.shouldFlip());
         if (sampleOpt.isPresent()) {
@@ -64,7 +62,9 @@ public class FollowTrajectoryController {
 
             var currentPose = robotState.getPose();
 
+            robotState.setTrajectory(Optional.of(poses));
             robotState.setTrajectorySample(Optional.of(sample.getPose()));
+            Logger.recordOutput("Drive/Trajectory", poses);
             Logger.recordOutput("Drive/TrajectorySetpoint", sample.getPose());
 
             return new ChassisSpeeds(
@@ -74,21 +74,11 @@ public class FollowTrajectoryController {
             );
         } else {
             Util.error("No sample at " + timer.get() + " for trajectory " + trajectory.name());
-
-            robotState.setTrajectorySample(Optional.empty());
-
             return new ChassisSpeeds();
         }
     }
 
     public boolean isDone() {
         return trajectory != null && timer.hasElapsed(trajectory.getTotalTime());
-    }
-
-    public void stop() {
-        trajectory = null;
-
-        robotState.setTrajectory(Optional.empty());
-        robotState.setTrajectorySample(Optional.empty());
     }
 }
