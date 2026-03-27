@@ -69,7 +69,7 @@ public class AprilTagVisionConstants {
                 },
                 // Relatively stable, even at long distance
                 1.5,
-                1.0
+                5.0
         ),
         ShooterCam(
                 new Transform3d(
