@@ -31,7 +31,7 @@ public class Superintake extends CommandBasedSubsystem {
 
     private boolean shouldGoalEnd() {
         if (goal == Goal.HOME_INTAKE_PIVOT) {
-            if (intakePivot.isCurrentAtThresholdForHoming()) {
+            if (intakePivot.isAtVelocityThresholdForHoming()) {
                 intakePivot.finishHoming();
                 return true;
             }

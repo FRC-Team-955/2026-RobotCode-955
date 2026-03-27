@@ -1,6 +1,7 @@
 package frc.robot.subsystems.superintake.intakepivot;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
@@ -70,6 +71,10 @@ public class IntakePivot implements Periodic {
     private TrapezoidProfile.State goalState = new TrapezoidProfile.State();
     private TrapezoidProfile.State lookaheadState = new TrapezoidProfile.State();
 
+    @Getter
+    private boolean atVelocityThresholdForHoming = false;
+    private final Debouncer homingVelocityDebouncer = new Debouncer(0.1, Debouncer.DebounceType.kRising);
+
     private final Alert motorDisconnectedAlert = new Alert("Intake pivot motor is disconnected.", Alert.AlertType.kError);
 
     private static IntakePivot instance;
@@ -96,6 +101,8 @@ public class IntakePivot implements Periodic {
         motorDisconnectedAlert.set(!inputs.connected);
 
         energyLogger.reportPowerUsage("IntakePivot", inputs.connected ? inputs.appliedVolts * inputs.supplyCurrentAmps : 0.0);
+
+        atVelocityThresholdForHoming = homingVelocityDebouncer.calculate(goal == Goal.HOME && Math.abs(inputs.velocityRadPerSec) < 0.1);
 
         if (gains.hasChanged()) {
             io.setPositionPIDF(gains);
@@ -153,11 +160,6 @@ public class IntakePivot implements Periodic {
 
     public double getPositionRad() {
         return inputs.positionRad;
-    }
-
-    public boolean isCurrentAtThresholdForHoming() {
-        return inputs
-                .statorCurrentAmps >= 10.0;
     }
 
     public void finishHoming() {
