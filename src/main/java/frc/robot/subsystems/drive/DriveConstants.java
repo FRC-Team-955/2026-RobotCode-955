@@ -10,7 +10,7 @@ import frc.robot.BuildConstants;
 import frc.robot.autos.ChoreoVars;
 import frc.robot.subsystems.drive.constraints.DriveConstraints;
 
-import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.*;
 
 public class DriveConstants {
     public static final double assistDirectionToleranceRad = Units.degreesToRadians(50);
@@ -65,8 +65,8 @@ public class DriveConstants {
     );
 
     public static final DriveConstraints shootingConstraints = new DriveConstraints(
-            new LoggedTunableNumber("Drive/Shooting/MaxLinearVelocity", 1.0),
-            new LoggedTunableNumber("Drive/Shooting/MaxLinearAcceleration", 5.0),
+            new LoggedTunableNumber("Drive/Shooting/MaxLinearVelocity", ChoreoVars.ShootingMaxVel.in(MetersPerSecond)),
+            new LoggedTunableNumber("Drive/Shooting/MaxLinearAcceleration", ChoreoVars.ShootingMaxAccel.in(MetersPerSecondPerSecond)),
             null,
             null
     );

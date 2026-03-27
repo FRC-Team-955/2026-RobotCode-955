@@ -30,6 +30,7 @@ public class SuperstructureIOSim extends SuperstructureIO {
     private static final Flywheel flywheel = Flywheel.get();
     private static final Hood hood = Hood.get();
     private static final Spindexer spindexer = Spindexer.get();
+    private static final ShootingKinematics shootingKinematics = ShootingKinematics.get();
 
     private final SimManager simManager = SimManager.get();
 
@@ -77,7 +78,10 @@ public class SuperstructureIOSim extends SuperstructureIO {
                         // which puts it in the opposite corner of the robot. Instead, just
                         // reverse the hood
                         Radians.of(Math.PI / 2.0 + hood.getPositionRad())
-                ).disableBecomesGamePieceOnFieldAfterTouchGround();
+                );
+                if (!shootingKinematics.getShootingParameters().isPass()) {
+                    gamePiece.disableBecomesGamePieceOnFieldAfterTouchGround();
+                }
                 Logger.recordOutput("ShootingKinematics/ProjectileVelocity", gamePiece.getVelocity3dMPS());
                 Logger.recordOutput("ShootingKinematics/ProjectileSpeedRobotRelative", Units.rotationsPerMinuteToRadiansPerSecond(flywheel.getVelocityRPM()) * FlywheelConstants.flywheelRadiusMeters);
                 SimulatedArena.getInstance().addGamePieceProjectile(gamePiece);

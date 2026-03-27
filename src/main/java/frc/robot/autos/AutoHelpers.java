@@ -28,6 +28,7 @@ import frc.robot.subsystems.superstructure.Superstructure;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+import static edu.wpi.first.units.Units.MetersPerSecond;
 import static frc.robot.subsystems.drive.DriveConstants.defaultMoveToConstraints;
 import static frc.robot.subsystems.drive.DriveConstants.driveConfig;
 
@@ -173,7 +174,7 @@ public class AutoHelpers {
     }
 
     public static final DriveConstraints intakeConstraints = defaultMoveToConstraints
-            .withMaxLinearVelocityMetersPerSec(new LoggedTunableNumber("AutoHelpers/Intake/MaxLinearVelocity", 2))
+            .withMaxLinearVelocityMetersPerSec(new LoggedTunableNumber("AutoHelpers/Intake/MaxLinearVelocity", ChoreoVars.IntakingMaxVel.in(MetersPerSecond)))
             .withMaxAngularAccelerationRadPerSecPerSec(new LoggedTunableNumber("AutoHelpers/Intake/MaxAngularAcceleration", 40.0));
 
     private static final LinearFilter targetXFilter = LinearFilter.movingAverage(10);

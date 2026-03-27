@@ -25,6 +25,27 @@
      "val":5.902777777777778
     }
    },
+   "IntakingMaxVel":{
+    "dimension":"LinVel",
+    "var":{
+     "exp":"2 m / s",
+     "val":2.0
+    }
+   },
+   "ShootingMaxAccel":{
+    "dimension":"LinAcc",
+    "var":{
+     "exp":"5 m / s ^ 2",
+     "val":5.0
+    }
+   },
+   "ShootingMaxVel":{
+    "dimension":"LinVel",
+    "var":{
+     "exp":"1 m / s",
+     "val":1.0
+    }
+   },
    "TrackLength":{
     "dimension":"Length",
     "var":{
@@ -91,8 +112,8 @@
    "val":571.6127833206629
   },
   "tmax":{
-   "exp":"0.9 * 1.418 N * m",
-   "val":1.2762
+   "exp":"0.8 * 1.418 N * m",
+   "val":1.1344
   },
   "cof":{
    "exp":"1.4",

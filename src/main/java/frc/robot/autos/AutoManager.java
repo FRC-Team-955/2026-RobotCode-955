@@ -46,6 +46,7 @@ public class AutoManager {
         autoChooser.addOption("Test", new OrbitGoingToHomeDepotAuto());
         autoChooser.addOption("Canadian Depot Intake", new CanadianDepotIntakeAuto());
         autoChooser.addOption("Canadian Outpost", new CanadianOutpostAuto());
+        autoChooser.addOption("I want a turret (Orbit passing at the outpost)", new OrbitPassingOutpost());
         robotState.setAutoStartPoseSupplier(this::getSelectedAutoStartingPose);
 
     }
