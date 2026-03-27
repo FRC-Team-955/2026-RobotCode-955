@@ -43,7 +43,6 @@ public class AprilTagVisionIO {
             int tagID,
             Transform3d bestCameraToTarget,
             Transform3d altCameraToTarget,
-
             double pitch,
             double yaw
     ) {}

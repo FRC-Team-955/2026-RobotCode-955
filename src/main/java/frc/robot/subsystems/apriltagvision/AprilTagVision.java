@@ -114,27 +114,31 @@ public class AprilTagVision implements Periodic {
                 }
                 Pose3d tagPose = tagPoseOptional.get();
 
+                //////////////////////////////// 3d solve ////////////////////////////////
                 Transform3d fieldToTarget = new Transform3d(tagPose.getTranslation(), tagPose.getRotation());
+
                 Transform3d fieldToCameraBest = fieldToTarget.plus(observation.bestCameraToTarget().inverse());
-                Transform3d fieldToCameraAlt = fieldToTarget.plus(observation.altCameraToTarget().inverse());
+                //Transform3d fieldToCameraAlt = fieldToTarget.plus(observation.altCameraToTarget().inverse());
 
                 Transform3d fieldToRobotBest = fieldToCameraBest.plus(metadata.robotToCamera.inverse());
-                Transform3d fieldToRobotAlt = fieldToCameraAlt.plus(metadata.robotToCamera.inverse());
+                //Transform3d fieldToRobotAlt = fieldToCameraAlt.plus(metadata.robotToCamera.inverse());
 
-                Transform3d cameraToTargetAccurate;
-                Transform3d fieldToRobotAccurate;
-                if (fieldToRobotBest.getRotation().toRotation2d().minus(robotState.getRotation()).getRotations()
-                        > fieldToRobotAlt.getRotation().toRotation2d().minus(robotState.getRotation()).getRotations()) {
-                    cameraToTargetAccurate = observation.altCameraToTarget();
-                    fieldToRobotAccurate = fieldToRobotAlt;
-                    Logger.recordOutput("AprilTagVision/" + metadata.name() + "/BestCamToTag", "alt");
+                Transform3d cameraToTargetAccurate = observation.bestCameraToTarget();
+                Transform3d fieldToRobotAccurate = fieldToRobotBest;
+                //if (fieldToRobotBest.getRotation().toRotation2d().minus(robotState.getRotation()).getRotations()
+                //        > fieldToRobotAlt.getRotation().toRotation2d().minus(robotState.getRotation()).getRotations()) {
+                //    cameraToTargetAccurate = observation.altCameraToTarget();
+                //    fieldToRobotAccurate = fieldToRobotAlt;
+                //    Logger.recordOutput("AprilTagVision/" + metadata.name() + "/BestCamToTag", "alt");
+                //
+                //} else {
+                //    cameraToTargetAccurate = observation.bestCameraToTarget();
+                //    fieldToRobotAccurate = fieldToRobotBest;
+                //    Logger.recordOutput("AprilTagVision/" + metadata.name() + "/BestCamToTag/", "best");
+                //
+                //}
 
-                } else {
-                    cameraToTargetAccurate = observation.bestCameraToTarget();
-                    fieldToRobotAccurate = fieldToRobotBest;
-                    Logger.recordOutput("AprilTagVision/" + metadata.name() + "/BestCamToTag/", "best");
-
-                }
+                double tagDistance = cameraToTargetAccurate.getTranslation().getNorm();
 
                 if (enableExtrinsicCalibration) {
                     // use https://quaternions.online/ to visualize resulting rotation and convert to euler angles
@@ -143,18 +147,6 @@ public class AprilTagVision implements Periodic {
                     Transform3d robotToCam = tagToRobot.inverse().plus(tagToCam);
                     Logger.recordOutput("AprilTagVision/" + metadata.name() + "/ExtrinsicCalibration/Tag" + observation.tagID(), robotToCam);
                 }
-
-                //Optional<Pose3d> tagPoseOptional = aprilTagLayout.getTagPose(observation.tagID());
-                //
-                //if (tagPoseOptional.isEmpty()) {
-                //    Util.error("Couldn't find tag with ID " + observation.tagID());
-                //    continue;
-                //}
-                //Pose3d tagPose = tagPoseOptional.get();
-
-                double tagDistance = cameraToTargetAccurate.getTranslation().getNorm();
-
-                //////////////////////////////// 3d solve ////////////////////////////////
 
                 Pose3d poseEstimate3dSolve = new Pose3d(fieldToRobotAccurate.getTranslation(), fieldToRobotAccurate.getRotation());
 
