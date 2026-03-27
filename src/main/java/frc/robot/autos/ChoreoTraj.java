@@ -35,36 +35,6 @@ public record ChoreoTraj(
         new Pose2d(6.43947, 0.64949, Rotation2d.fromRadians(1.5708)),
         new Pose2d(5.7009, 2.41898, Rotation2d.fromRadians(-1.99499))
     );
-    public static final ChoreoTraj OrbitPassingOutpost_Score = new ChoreoTraj(
-        "OrbitPassingOutpost_Score",
-        OptionalInt.empty(),
-        9.20263,
-        new Pose2d(3.56254, 0.59382, Rotation2d.fromRadians(3.14159)),
-        new Pose2d(0.81781, 0.76175, Rotation2d.fromRadians(-2.43314))
-    );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
-    public static final ChoreoTraj OrbitPassingOutpost_Score$0 = new ChoreoTraj(
-        "OrbitPassingOutpost_Score",
-        OptionalInt.of(0),
-        1.62952,
-        new Pose2d(3.56254, 0.59382, Rotation2d.fromRadians(3.14159)),
-        new Pose2d(2.8259, 3.07236, Rotation2d.fromRadians(-2.65572))
-    );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
-    public static final ChoreoTraj OrbitPassingOutpost_Score$1 = new ChoreoTraj(
-        "OrbitPassingOutpost_Score",
-        OptionalInt.of(1),
-        7.573109999999999,
-        new Pose2d(2.8259, 3.07236, Rotation2d.fromRadians(-2.65572)),
-        new Pose2d(0.81781, 0.76175, Rotation2d.fromRadians(-2.43314))
-    );
-    public static final ChoreoTraj CanadianDepot_SecondPath = new ChoreoTraj(
-        "CanadianDepot_SecondPath",
-        OptionalInt.empty(),
-        17.95704,
-        new Pose2d(5.77121, 7.55, Rotation2d.fromRadians(-1.5708)),
-        new Pose2d(5.71197, 5.52342, Rotation2d.fromRadians(2.35619))
-    );
     public static final ChoreoTraj CanadianOutpost_SecondPass = new ChoreoTraj(
         "CanadianOutpost_SecondPass",
         OptionalInt.empty(),
@@ -72,43 +42,68 @@ public record ChoreoTraj(
         new Pose2d(6.39331, 0.60333, Rotation2d.fromRadians(1.5708)),
         new Pose2d(5.51626, 2.57285, Rotation2d.fromRadians(-2.62245))
     );
-    public static final ChoreoTraj OrbitPassingOutpost_Collect = new ChoreoTraj(
-        "OrbitPassingOutpost_Collect",
+    public static final ChoreoTraj OrbitPassingOutpost = new ChoreoTraj(
+        "OrbitPassingOutpost",
         OptionalInt.empty(),
-        8.42389,
-        new Pose2d(5.87427, 0.59382, Rotation2d.fromRadians(0)),
-        new Pose2d(5.86254, 0.59382, Rotation2d.fromRadians(3.14159))
+        18.36832,
+        new Pose2d(4.4, 0.59382, Rotation2d.fromRadians(0)),
+        new Pose2d(0.81781, 0.76175, Rotation2d.fromRadians(-2.43397))
     );
     /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
-    public static final ChoreoTraj OrbitPassingOutpost_Collect$0 = new ChoreoTraj(
-        "OrbitPassingOutpost_Collect",
+    public static final ChoreoTraj OrbitPassingOutpost$0 = new ChoreoTraj(
+        "OrbitPassingOutpost",
         OptionalInt.of(0),
-        1.38036,
-        new Pose2d(5.87427, 0.59382, Rotation2d.fromRadians(0)),
-        new Pose2d(6.65968, 2.99812, Rotation2d.fromRadians(0.19097))
+        0.61188,
+        new Pose2d(4.4, 0.59382, Rotation2d.fromRadians(0)),
+        new Pose2d(5.77427, 0.59382, Rotation2d.fromRadians(0))
     );
     /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
-    public static final ChoreoTraj OrbitPassingOutpost_Collect$1 = new ChoreoTraj(
-        "OrbitPassingOutpost_Collect",
+    public static final ChoreoTraj OrbitPassingOutpost$1 = new ChoreoTraj(
+        "OrbitPassingOutpost",
         OptionalInt.of(1),
-        4.5685,
-        new Pose2d(6.65968, 2.99812, Rotation2d.fromRadians(0.19097)),
-        new Pose2d(7.6807, 3.89817, Rotation2d.fromRadians(0.28055))
+        1.9827800000000002,
+        new Pose2d(5.77427, 0.59382, Rotation2d.fromRadians(0)),
+        new Pose2d(6.89506, 2.90696, Rotation2d.fromRadians(0.16525))
     );
     /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
-    public static final ChoreoTraj OrbitPassingOutpost_Collect$2 = new ChoreoTraj(
-        "OrbitPassingOutpost_Collect",
+    public static final ChoreoTraj OrbitPassingOutpost$2 = new ChoreoTraj(
+        "OrbitPassingOutpost",
         OptionalInt.of(2),
-        2.4750300000000003,
-        new Pose2d(7.6807, 3.89817, Rotation2d.fromRadians(0.28055)),
+        4.18562,
+        new Pose2d(6.89506, 2.90696, Rotation2d.fromRadians(0.16525)),
+        new Pose2d(7.6807, 3.89817, Rotation2d.fromRadians(0.28054))
+    );
+    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
+    public static final ChoreoTraj OrbitPassingOutpost$3 = new ChoreoTraj(
+        "OrbitPassingOutpost",
+        OptionalInt.of(3),
+        2.4319800000000003,
+        new Pose2d(7.6807, 3.89817, Rotation2d.fromRadians(0.28054)),
         new Pose2d(5.86254, 0.59382, Rotation2d.fromRadians(3.14159))
     );
-    public static final ChoreoTraj CanadianOutpsot_lessAgroSecondPass = new ChoreoTraj(
-        "CanadianOutpsot_lessAgroSecondPass",
-        OptionalInt.empty(),
-        3.84442,
-        new Pose2d(5.77121, 0.64949, Rotation2d.fromRadians(1.5708)),
-        new Pose2d(5.7009, 2.41898, Rotation2d.fromRadians(-1.99499))
+    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
+    public static final ChoreoTraj OrbitPassingOutpost$4 = new ChoreoTraj(
+        "OrbitPassingOutpost",
+        OptionalInt.of(4),
+        0.5591999999999988,
+        new Pose2d(5.86254, 0.59382, Rotation2d.fromRadians(3.14159)),
+        new Pose2d(3.59712, 0.61583, Rotation2d.fromRadians(3.14159))
+    );
+    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
+    public static final ChoreoTraj OrbitPassingOutpost$5 = new ChoreoTraj(
+        "OrbitPassingOutpost",
+        OptionalInt.of(5),
+        1.4548500000000004,
+        new Pose2d(3.59712, 0.61583, Rotation2d.fromRadians(3.14159)),
+        new Pose2d(2.61969, 3.01936, Rotation2d.fromRadians(-2.66694))
+    );
+    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
+    public static final ChoreoTraj OrbitPassingOutpost$6 = new ChoreoTraj(
+        "OrbitPassingOutpost",
+        OptionalInt.of(6),
+        7.142010000000001,
+        new Pose2d(2.61969, 3.01936, Rotation2d.fromRadians(-2.66694)),
+        new Pose2d(0.81781, 0.76175, Rotation2d.fromRadians(-2.43397))
     );
 
     /**
@@ -118,16 +113,15 @@ public record ChoreoTraj(
     public static final Map<String, ChoreoTraj> ALL_TRAJECTORIES = Map.ofEntries(
         Map.entry("CanadianDepot_FirstPass", CanadianDepot_FirstPass),
         Map.entry("CanadianOutpost_FirstPass", CanadianOutpost_FirstPass),
-        Map.entry("OrbitPassingOutpost_Score", OrbitPassingOutpost_Score),
-        Map.entry("OrbitPassingOutpost_Score$0", OrbitPassingOutpost_Score$0),
-        Map.entry("OrbitPassingOutpost_Score$1", OrbitPassingOutpost_Score$1),
-        Map.entry("CanadianDepot_SecondPath", CanadianDepot_SecondPath),
         Map.entry("CanadianOutpost_SecondPass", CanadianOutpost_SecondPass),
-        Map.entry("OrbitPassingOutpost_Collect", OrbitPassingOutpost_Collect),
-        Map.entry("OrbitPassingOutpost_Collect$0", OrbitPassingOutpost_Collect$0),
-        Map.entry("OrbitPassingOutpost_Collect$1", OrbitPassingOutpost_Collect$1),
-        Map.entry("OrbitPassingOutpost_Collect$2", OrbitPassingOutpost_Collect$2),
-        Map.entry("CanadianOutpsot_lessAgroSecondPass", CanadianOutpsot_lessAgroSecondPass)
+        Map.entry("OrbitPassingOutpost", OrbitPassingOutpost),
+        Map.entry("OrbitPassingOutpost$0", OrbitPassingOutpost$0),
+        Map.entry("OrbitPassingOutpost$1", OrbitPassingOutpost$1),
+        Map.entry("OrbitPassingOutpost$2", OrbitPassingOutpost$2),
+        Map.entry("OrbitPassingOutpost$3", OrbitPassingOutpost$3),
+        Map.entry("OrbitPassingOutpost$4", OrbitPassingOutpost$4),
+        Map.entry("OrbitPassingOutpost$5", OrbitPassingOutpost$5),
+        Map.entry("OrbitPassingOutpost$6", OrbitPassingOutpost$6)
     );
 
     /**

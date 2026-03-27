@@ -12,7 +12,7 @@ public class OrbitPassingOutpost extends Auto {
     private static final Superintake superintake = Superintake.get();
     private static final Superstructure superstructure = Superstructure.get();
 
-    private static final Pose2d starting = ChoreoTraj.OrbitPassingOutpost_Collect.initialPoseBlue();
+    private static final Pose2d starting = ChoreoTraj.OrbitPassingOutpost$1.initialPoseBlue();
 
     public OrbitPassingOutpost() {
         super(
@@ -28,30 +28,30 @@ public class OrbitPassingOutpost extends Auto {
 
                 // move into position
                 superintake.setGoal(Superintake.Goal.INTAKE).until(() -> true),
-                AutoHelpers.trajectory(ChoreoTraj.OrbitPassingOutpost_Collect$0),
+                AutoHelpers.trajectory(ChoreoTraj.OrbitPassingOutpost$1),
 
                 // follow passing path
                 superstructure.setGoal(Superstructure.Goal.SHOOT).until(() -> true),
-                AutoHelpers.trajectory(ChoreoTraj.OrbitPassingOutpost_Collect$1).withAiming(),
+                AutoHelpers.trajectory(ChoreoTraj.OrbitPassingOutpost$2).withAiming(),
                 superstructure.setGoal(Superstructure.Goal.IDLE).until(() -> true),
 
                 // follow collection path
-                AutoHelpers.trajectory(ChoreoTraj.OrbitPassingOutpost_Collect$2),
+                AutoHelpers.trajectory(ChoreoTraj.OrbitPassingOutpost$3),
                 superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
 
                 // move to entrance to trench
-                AutoHelpers.intermediateWaypoint(ChoreoTraj.OrbitPassingOutpost_Collect::endPoseBlue, defaultMoveToConstraints, false),
+                AutoHelpers.intermediateWaypoint(ChoreoTraj.OrbitPassingOutpost$3::endPoseBlue, defaultMoveToConstraints, false),
 
                 // go through trench to shooting position
-                AutoHelpers.intermediateWaypoint(ChoreoTraj.OrbitPassingOutpost_Score::initialPoseBlue, defaultMoveToConstraints, false),
+                AutoHelpers.intermediateWaypoint(ChoreoTraj.OrbitPassingOutpost$5::initialPoseBlue, defaultMoveToConstraints, false),
 
                 // move into position
                 superintake.setGoal(Superintake.Goal.INTAKE).until(() -> true),
-                AutoHelpers.trajectory(ChoreoTraj.OrbitPassingOutpost_Score$0),
+                AutoHelpers.trajectory(ChoreoTraj.OrbitPassingOutpost$5),
 
                 // +1000 aura
                 superstructure.setGoal(Superstructure.Goal.SHOOT).until(() -> true),
-                AutoHelpers.trajectory(ChoreoTraj.OrbitPassingOutpost_Score$1).withAiming(),
+                AutoHelpers.trajectory(ChoreoTraj.OrbitPassingOutpost$6).withAiming(),
                 AutoHelpers.aimWhileStationary()
         );
     }
