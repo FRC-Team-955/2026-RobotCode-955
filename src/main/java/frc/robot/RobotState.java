@@ -215,6 +215,11 @@ public class RobotState implements Periodic {
         if (BuildConstants.isSimOrReplay) {
             Logger.recordOutput("RobotState/PoseUncertainty/Range", uncertaintyRange);
         }
+
+        // Reset field objects for drive controllers so they only show up if they are explicitly set
+        moveToGoal = Optional.empty();
+        trajectory = Optional.empty();
+        trajectorySample = Optional.empty();
     }
 
     @Override

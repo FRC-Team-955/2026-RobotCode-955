@@ -41,14 +41,16 @@ public class AutoManager {
         //autoChooser.addOption("RightSideAuto", new RightSideAuto());
         autoChooser.addOption("Canadian Depot", new CanadianDepotAuto());
         autoChooser.addOption("Orbit at the outpost", new OrbitAtTheOutpostAuto());
+        autoChooser.addOption("Orbit at Home Depot", new OrbitAtHomeDepotAuto());
+        autoChooser.addOption("Aura", new AuraAuto());
         autoChooser.addOption("AuraOutpost", new AuraAutoOutpost());
         autoChooser.addOption("AuraDepot", new AuraAutoDepot());
         autoChooser.addOption("Test", new OrbitGoingToHomeDepotAuto());
         autoChooser.addOption("Canadian Depot Intake", new CanadianDepotIntakeAuto());
         autoChooser.addOption("Canadian Outpost", new CanadianOutpostAuto());
         autoChooser.addOption("I want a turret (Orbit passing at the outpost)", new OrbitPassingOutpost());
-        robotState.setAutoStartPoseSupplier(this::getSelectedAutoStartingPose);
 
+        robotState.setAutoStartPoseSupplier(this::getSelectedAutoStartingPose);
     }
 
     public Command getSelectedAutoCommand() {
