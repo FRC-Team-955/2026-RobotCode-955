@@ -58,17 +58,16 @@ public class EnergyLogger implements Periodic {
         }
     }
 
-    public void reportPowerUsage(String key, double... amps) {
+    public void reportPowerUsage(String key, double... watts) {
         if (!BuildConstants.isSimOrReplay) {
             return;
         }
 
-        double totalAmps = 0.0;
-        for (double amp : amps) {
-            totalAmps += Math.abs(amp);
+        double power = 0.0;
+        for (double watt : watts) {
+            power += Math.abs(watt);
         }
 
-        double power = totalAmps * RobotController.getBatteryVoltage();
         double energy = power * Constants.loopPeriod;
 
         totalPower += power;
