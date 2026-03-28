@@ -46,6 +46,7 @@ public class IntakePivot implements Periodic {
         STOW(() -> Units.degreesToRadians(stowSetpointDegrees.get())),
         DEPLOY(() -> minPositionRad),
         HOME(null),
+        FINALIZE_HOME(null),
         ;
 
         private final DoubleSupplier setpointRad;
@@ -121,6 +122,8 @@ public class IntakePivot implements Periodic {
             lookaheadState = goalState;
         } else if (goal == Goal.HOME) {
             io.setVoltageRequest(-2.0);
+        } else if (goal == Goal.FINALIZE_HOME) {
+            io.setVoltageRequest(0.0);
         } else {
             // See the comments above the lookaheadState and goalState variables for why we effectively calculate two profiles
             boolean isInTrench = robotState.isInTrench(robotState.getTranslation().

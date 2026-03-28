@@ -1,6 +1,7 @@
 package frc.robot.subsystems.superintake;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.Util;
 import frc.lib.commands.CommandsExt;
 import frc.lib.subsystem.CommandBasedSubsystem;
@@ -24,6 +25,7 @@ public class Superintake extends CommandBasedSubsystem {
         SHOOT,
         EJECT,
         HOME_INTAKE_PIVOT,
+        FINALIZE_HOME_INTAKE_PIVOT,
     }
 
     @Getter
@@ -42,6 +44,14 @@ public class Superintake extends CommandBasedSubsystem {
     public Command setGoal(Goal goal) {
         return startIdle(() -> this.goal = goal)
                 .until(this::shouldGoalEnd);
+    }
+
+    public Command setHomeIntakePivotGoal() {
+        return CommandsExt.eagerSequence(
+                runOnce(() -> this.goal = Goal.HOME_INTAKE_PIVOT),
+                Commands.waitUntil(intakePivot::isAtVelocityThresholdForHoming),
+
+        );
     }
 
     private static Superintake instance;
