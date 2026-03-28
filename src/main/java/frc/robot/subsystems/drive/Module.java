@@ -66,13 +66,13 @@ public class Module {
     }
 
     public void periodicBeforeCommands() {
-        energyLogger.reportCurrentUsage(
+        energyLogger.reportPowerUsage(
                 "Module/Drive/" + index,
-                inputs.driveConnected ? inputs.driveSupplyCurrentAmps : 0.0
+                inputs.driveConnected ? inputs.driveAppliedVolts * inputs.driveSupplyCurrentAmps : 0.0
         );
-        energyLogger.reportCurrentUsage(
+        energyLogger.reportPowerUsage(
                 "Module/Turn/" + index,
-                inputs.turnConnected ? inputs.turnSupplyCurrentAmps : 0.0
+                inputs.turnConnected ? inputs.turnAppliedVolts * inputs.turnSupplyCurrentAmps : 0.0
         );
 
         // Update alerts

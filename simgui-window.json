@@ -1,7 +1,7 @@
 {
   "Docking": {
     "Data": [
-      "DockNode          ID=0x00000002 Pos=10,21 Size=1119,734 Split=Y",
+      "DockNode          ID=0x00000002 Pos=21,18 Size=1119,734 Split=Y",
       "DockNode        ID=0x00000006 Parent=0x00000002 SizeRef=944,332 Split=X",
       "DockNode      ID=0x00000001 Parent=0x00000006 SizeRef=300,551 Split=X",
       "DockNode    ID=0x0000000B Parent=0x00000001 SizeRef=543,293 Split=Y",
@@ -24,13 +24,13 @@
     "GLOBAL": {
       "font": "Proggy Dotted",
       "fps": "120",
-      "height": "752",
-      "maximized": "0",
+      "height": "771",
+      "maximized": "1",
       "style": "0",
       "userScale": "2",
       "width": "1280",
-      "xpos": "400",
-      "ypos": "1175"
+      "xpos": "218",
+      "ypos": "762"
     }
   },
   "Window": {
@@ -42,25 +42,25 @@
     "###/SmartDashboard/Alerts": {
       "Collapsed": "0",
       "DockId": "0x00000010,0",
-      "Pos": "368,94",
+      "Pos": "379,91",
       "Size": "761,158"
     },
     "###/SmartDashboard/Auto Choices": {
       "Collapsed": "0",
       "DockId": "0x0000000E,0",
-      "Pos": "368,21",
+      "Pos": "379,18",
       "Size": "438,71"
     },
     "###/SmartDashboard/Characterization Choices": {
       "Collapsed": "0",
       "DockId": "0x0000000F,0",
-      "Pos": "808,21",
+      "Pos": "819,18",
       "Size": "321,71"
     },
     "###/SmartDashboard/Field2d": {
       "Collapsed": "0",
       "DockId": "0x00000011,0",
-      "Pos": "368,254",
+      "Pos": "379,251",
       "Size": "761,210"
     },
     "###Addressable LEDs": {
@@ -72,13 +72,13 @@
     "###FMS": {
       "Collapsed": "0",
       "DockId": "0x00000004,0",
-      "Pos": "10,206",
+      "Pos": "21,203",
       "Size": "356,258"
     },
     "###Joysticks": {
       "Collapsed": "0",
       "DockId": "0x00000009,0",
-      "Pos": "238,466",
+      "Pos": "249,463",
       "Size": "891,289"
     },
     "###Keyboard 0 Settings": {
@@ -119,7 +119,7 @@
     "###System Joysticks": {
       "Collapsed": "0",
       "DockId": "0x00000005,0",
-      "Pos": "10,466",
+      "Pos": "21,463",
       "Size": "226,289"
     },
     "###Timing": {
@@ -135,7 +135,7 @@
     "Robot State": {
       "Collapsed": "0",
       "DockId": "0x00000003,0",
-      "Pos": "10,21",
+      "Pos": "21,18",
       "Size": "356,183"
     }
   }

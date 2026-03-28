@@ -76,10 +76,10 @@ public class CanadianDepotAuto extends Auto {
                 ), defaultMoveToConstraints, false),
 
                 // follow collection path
-                Commands.parallel(
-                        AutoHelpers.trajectory(ChoreoTraj.CanadianDepot_SecondPath),
-                        superintake.setGoal(Superintake.Goal.INTAKE).until(() -> true)
-                ),
+                //Commands.parallel(
+                //        AutoHelpers.trajectory(ChoreoTraj.CanadianDepot_SecondPath),
+                //        superintake.setGoal(Superintake.Goal.INTAKE).until(() -> true)
+                //),
 
                 superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
 

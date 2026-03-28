@@ -105,7 +105,7 @@ public class DriveConstants {
                 false,
                 false,
                 75,
-                40
+                30
         );
         case SIM -> new ModuleConfig(
                 new LoggedTunablePIDF("Drive/DriveGains")

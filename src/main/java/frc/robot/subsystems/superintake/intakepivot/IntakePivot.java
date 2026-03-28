@@ -1,6 +1,7 @@
 package frc.robot.subsystems.superintake.intakepivot;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
@@ -45,6 +46,7 @@ public class IntakePivot implements Periodic {
         STOW(() -> Units.degreesToRadians(stowSetpointDegrees.get())),
         DEPLOY(() -> minPositionRad),
         HOME(null),
+        FINALIZE_HOME(null),
         ;
 
         private final DoubleSupplier setpointRad;
@@ -69,6 +71,10 @@ public class IntakePivot implements Periodic {
     // lookaheadState is shifted some seconds into the future, and is used for PID setpoint.
     private TrapezoidProfile.State goalState = new TrapezoidProfile.State();
     private TrapezoidProfile.State lookaheadState = new TrapezoidProfile.State();
+
+    @Getter
+    private boolean atVelocityThresholdForHoming = false;
+    private final Debouncer homingVelocityDebouncer = new Debouncer(0.1, Debouncer.DebounceType.kRising);
 
     private final Alert motorDisconnectedAlert = new Alert("Intake pivot motor is disconnected.", Alert.AlertType.kError);
 
@@ -95,7 +101,9 @@ public class IntakePivot implements Periodic {
 
         motorDisconnectedAlert.set(!inputs.connected);
 
-        energyLogger.reportCurrentUsage("IntakePivot", inputs.connected ? inputs.supplyCurrentAmps : 0.0);
+        energyLogger.reportPowerUsage("IntakePivot", inputs.connected ? inputs.appliedVolts * inputs.supplyCurrentAmps : 0.0);
+
+        atVelocityThresholdForHoming = homingVelocityDebouncer.calculate(goal == Goal.HOME && Math.abs(inputs.velocityRadPerSec) < 0.1);
 
         if (gains.hasChanged()) {
             io.setPositionPIDF(gains);
@@ -114,6 +122,8 @@ public class IntakePivot implements Periodic {
             lookaheadState = goalState;
         } else if (goal == Goal.HOME) {
             io.setVoltageRequest(-2.0);
+        } else if (goal == Goal.FINALIZE_HOME) {
+            io.setVoltageRequest(0.0);
         } else {
             // See the comments above the lookaheadState and goalState variables for why we effectively calculate two profiles
             boolean isInTrench = robotState.isInTrench(robotState.getTranslation().
@@ -153,11 +163,6 @@ public class IntakePivot implements Periodic {
 
     public double getPositionRad() {
         return inputs.positionRad;
-    }
-
-    public boolean isCurrentAtThresholdForHoming() {
-        return inputs
-                .statorCurrentAmps >= 10.0;
     }
 
     public void finishHoming() {

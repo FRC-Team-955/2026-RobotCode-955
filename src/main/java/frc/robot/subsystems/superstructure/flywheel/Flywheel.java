@@ -79,9 +79,9 @@ public class Flywheel implements Periodic {
         followerMotorDisconnectedAlert.set(!inputs.follower.connected);
         highTemperatureAlert.set(Math.max(inputs.leader.temperatureCelsius, inputs.follower.temperatureCelsius) > 50);
 
-        energyLogger.reportCurrentUsage("Flywheel",
-                inputs.leader.connected ? inputs.leader.supplyCurrentAmps : 0.0,
-                inputs.follower.connected ? inputs.follower.supplyCurrentAmps : 0.0);
+        energyLogger.reportPowerUsage("Flywheel",
+                inputs.leader.connected ? inputs.leader.appliedVolts * inputs.leader.supplyCurrentAmps : 0.0,
+                inputs.follower.connected ? inputs.follower.appliedVolts * inputs.follower.supplyCurrentAmps : 0.0);
 
         if (velocityGains.hasChanged()) {
             io.setVelocityPIDF(velocityGains);

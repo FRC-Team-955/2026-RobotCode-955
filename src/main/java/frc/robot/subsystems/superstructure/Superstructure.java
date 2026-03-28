@@ -114,6 +114,7 @@ public class Superstructure extends CommandBasedSubsystem {
 
         hasFuel = !operatorDashboard.disableCANrange.get() &&
                 hasFuelDebouncer.calculate(inputs.canrangeDistanceMeters < hasFuelThresholdMeters.get());
+        Logger.recordOutput("Superstructure/HasFuel", hasFuel);
     }
 
     @Override

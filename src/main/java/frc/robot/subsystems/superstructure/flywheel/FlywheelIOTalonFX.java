@@ -10,7 +10,7 @@ import static frc.robot.subsystems.superstructure.flywheel.FlywheelConstants.gea
 import static frc.robot.subsystems.superstructure.flywheel.FlywheelConstants.velocityGains;
 
 public class FlywheelIOTalonFX extends FlywheelIO {
-    private static final int statorCurrentLimitAmps = 120;
+    private static final int statorCurrentLimitAmps = 140;
     private static final int supplyCurrentLimitAmps = 30;
 
     private final MotorIOTalonFX leader;

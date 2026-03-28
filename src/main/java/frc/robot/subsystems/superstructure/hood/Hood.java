@@ -94,7 +94,7 @@ public class Hood implements Periodic {
         motorDisconnectedAlert.set(!inputs.connected);
         highTemperatureAlert.set(inputs.temperatureCelsius > 50);
 
-        energyLogger.reportCurrentUsage("Hood", inputs.connected ? inputs.supplyCurrentAmps : 0.0);
+        energyLogger.reportPowerUsage("Hood", inputs.connected ? inputs.appliedVolts * inputs.supplyCurrentAmps : 0.0);
 
         if (!emergencyStopped) {
             if (emergencyStopDebouncer.calculate(inputs.statorCurrentAmps >= 20) || operatorDashboard.hoodEStop.get()) {

@@ -57,7 +57,7 @@ public class CanadianOutpostAutolessAgro extends Auto {
                 superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
                 superstructure.setGoal(Superstructure.Goal.IDLE).until(() -> true),
 
-               // AutoHelpers.finalWaypoint(() -> preemptiveTrenchEntrance, defaultMoveToConstraints, false),
+                // AutoHelpers.finalWaypoint(() -> preemptiveTrenchEntrance, defaultMoveToConstraints, false),
 
                 // Move to final trench entrance
                 AutoHelpers.finalWaypoint(() -> trenchEntrance, defaultMoveToConstraints, false),
@@ -70,10 +70,10 @@ public class CanadianOutpostAutolessAgro extends Auto {
                 ), defaultMoveToConstraints, false),
 
                 //Follow the second path
-                Commands.parallel(
-                        AutoHelpers.trajectory(ChoreoTraj.CanadianOutpsot_lessAgroSecondPass),
-                        superintake.setGoal(Superintake.Goal.INTAKE).until(() -> true)
-                ),
+                //Commands.parallel(
+                //        AutoHelpers.trajectory(ChoreoTraj.CanadianOutpsot_lessAgroSecondPass),
+                //        superintake.setGoal(Superintake.Goal.INTAKE).until(() -> true)
+                //),
 
                 AutoHelpers.goOverHumanSideBump(),
 
