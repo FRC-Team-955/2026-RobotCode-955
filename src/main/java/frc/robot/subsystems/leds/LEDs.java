@@ -101,7 +101,7 @@ public class LEDs implements Periodic {
     private void setLEDPatterns() {
         boolean somethingIsReallyWrong =
                 aprilTagVision.anyCamerasDisconnected()
-                        || gamePieceVision.anyCamerasDisconnected()
+                        //|| gamePieceVision.anyCamerasDisconnected()
                         || superstructure.hood.isEmergencyStopped();
         boolean lowBattery = operatorDashboard.isBatteryVoltageAlertActive();
 
