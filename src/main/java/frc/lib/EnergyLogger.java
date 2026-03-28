@@ -1,0 +1,129 @@
+// MIT License
+//
+// Copyright (c) 2025-2026 Littleton Robotics
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
+package frc.lib;
+
+import edu.wpi.first.wpilibj.RobotController;
+import frc.lib.subsystem.Periodic;
+import frc.robot.BuildConstants;
+import frc.robot.Constants;
+import lombok.Getter;
+import org.littletonrobotics.junction.Logger;
+
+import java.util.HashMap;
+import java.util.Map;
+
+public class EnergyLogger implements Periodic {
+
+    @Getter
+    private double totalPower = 0.0;
+    @Getter
+    private double totalEnergy = 0.0;
+
+    private final Map<String, Double> subsystemPowers = new HashMap<>();
+    private final Map<String, Double> subsystemEnergies = new HashMap<>();
+
+    private static EnergyLogger instance;
+
+    public static synchronized EnergyLogger get() {
+        if (instance == null) {
+            instance = new EnergyLogger();
+        }
+
+        return instance;
+    }
+
+    private EnergyLogger() {
+        if (instance != null) {
+            Util.error("Duplicate EnergyLogger created");
+        }
+    }
+
+    public void reportPowerUsage(String key, double... watts) {
+        if (!BuildConstants.isSimOrReplay) {
+            return;
+        }
+
+        double power = 0.0;
+        for (double watt : watts) {
+            power += Math.abs(watt);
+        }
+
+        double energy = power * Constants.loopPeriod;
+
+        totalPower += power;
+        totalEnergy += energy;
+
+        subsystemPowers.put(key, power);
+        subsystemEnergies.merge(key, energy, Double::sum);
+
+        String[] keys = key.split("/|-");
+        if (keys.length < 2) {
+            return;
+        }
+        String subkey = "";
+        for (int i = 0; i < keys.length - 1; i++) {
+            subkey += keys[i];
+            if (i < keys.length - 2) {
+                subkey += "/";
+            }
+            subsystemPowers.merge(subkey, power, Double::sum);
+            subsystemEnergies.merge(subkey, energy, Double::sum);
+        }
+    }
+
+    @Override
+    public void periodicAfterCommands() {
+        if (!BuildConstants.isSimOrReplay) {
+            return;
+        }
+
+        reportPowerUsage("Controls/roboRIO", RobotController.getInputCurrent() * RobotController.getBatteryVoltage());
+        reportPowerUsage("Controls/CANcoders", 0.05 * 4 * RobotController.getBatteryVoltage());
+        reportPowerUsage("Controls/Pigeon", 0.04 * RobotController.getBatteryVoltage());
+        reportPowerUsage("Controls/CANivore", 0.03 * RobotController.getBatteryVoltage());
+        reportPowerUsage("Controls/Radio", 0.5 * RobotController.getBatteryVoltage());
+
+
+        for (var entry : subsystemPowers.entrySet()) {
+            Logger.recordOutput("EnergyLogger/Power/" + entry.getKey(), entry.getValue(), "watts");
+
+            subsystemPowers.put(entry.getKey(), 0.0);
+        }
+        for (var entry : subsystemEnergies.entrySet()) {
+            Logger.recordOutput(
+                    "EnergyLogger/Energy/" + entry.getKey(),
+                    joulesToWattHours(entry.getValue()),
+                    "watt hours"
+            );
+        }
+
+        Logger.recordOutput("EnergyLogger/TotalPower", totalPower, "watts");
+        Logger.recordOutput("EnergyLogger/TotalEnergy", joulesToWattHours(totalEnergy), "watt hours");
+        totalPower = 0.0;
+    }
+
+    private double joulesToWattHours(double joules) {
+        return joules / 3600.0;
+    }
+}
+

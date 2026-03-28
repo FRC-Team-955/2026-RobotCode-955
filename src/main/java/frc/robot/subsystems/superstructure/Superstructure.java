@@ -8,9 +8,12 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.Util;
+import frc.lib.commands.CommandsExt;
 import frc.lib.network.LoggedTunableNumber;
 import frc.lib.subsystem.CommandBasedSubsystem;
+import frc.robot.BuildConstants;
 import frc.robot.FieldConstants;
 import frc.robot.OperatorDashboard;
 import frc.robot.RobotState;
@@ -56,24 +59,28 @@ public class Superstructure extends CommandBasedSubsystem {
         SHOOT_FORCE,
         EJECT,
         HOME_HOOD,
+        HOME_HOOD_FINALIZE,
     }
 
     @Getter
     private Goal goal = Goal.IDLE;
 
-    private boolean shouldGoalEnd() {
-        if (goal == Goal.HOME_HOOD) {
-            if (hood.isAtVelocityThresholdForHoming()) {
-                hood.finishHoming();
-                return true;
-            }
+    public Command setGoal(Goal goal) {
+        if (goal == Goal.HOME_HOOD || goal == Goal.HOME_HOOD_FINALIZE) {
+            Util.error("Use setGoalHomeHood");
         }
-        return false;
+
+        return startIdle(() -> this.goal = goal);
     }
 
-    public Command setGoal(Goal goal) {
-        return startIdle(() -> this.goal = goal)
-                .until(this::shouldGoalEnd);
+    public Command setGoalHomeHood() {
+        return CommandsExt.eagerSequence(
+                runOnce(() -> this.goal = Goal.HOME_HOOD),
+                Commands.waitUntil(hood::isAtVelocityThresholdForHoming),
+                runOnce(() -> this.goal = Goal.HOME_HOOD_FINALIZE),
+                Commands.waitSeconds(0.5),
+                runOnce(hood::finishHoming)
+        );
     }
 
     private final Debouncer hasFuelDebouncer = new Debouncer(hasFuelDebounceSeconds.get(), Debouncer.DebounceType.kFalling);
@@ -113,6 +120,7 @@ public class Superstructure extends CommandBasedSubsystem {
 
         hasFuel = !operatorDashboard.disableCANrange.get() &&
                 hasFuelDebouncer.calculate(inputs.canrangeDistanceMeters < hasFuelThresholdMeters.get());
+        Logger.recordOutput("Superstructure/HasFuel", hasFuel);
     }
 
     @Override
@@ -120,17 +128,24 @@ public class Superstructure extends CommandBasedSubsystem {
         Logger.recordOutput("Superstructure/Goal", goal);
 
         switch (goal) {
-            case IDLE, HOME_HOOD -> {
+            case IDLE, HOME_HOOD, HOME_HOOD_FINALIZE -> {
                 flywheel.setGoal(Flywheel.Goal.IDLE);
                 feeder.setGoal(Feeder.Goal.IDLE);
                 spindexer.setGoal(Spindexer.Goal.IDLE);
+                switch (goal) {
+                    case HOME_HOOD -> hood.setGoal(Hood.Goal.HOME);
+                    case HOME_HOOD_FINALIZE -> hood.setGoal(Hood.Goal.HOME_FINALIZE);
+                    default -> hood.setGoal(Hood.Goal.STOW);
+                }
             }
             case SHOOT, SHOOT_FORCE -> {
                 flywheel.setGoal(Flywheel.Goal.SHOOT);
+                hood.setGoal(Hood.Goal.SHOOT);
 
                 boolean needsToCommitToShot = !operatorDashboard.disableCANrange.get() &&
                         Timer.getTimestamp() - lastStartedShot < commitToShotTimeSeconds.get();
-                //Logger.recordOutput("Superstructure/NeedsToCommitToShot", needsToCommitToShot);
+                if (BuildConstants.isSimOrReplay)
+                    Logger.recordOutput("Superstructure/NeedsToCommitToShot", needsToCommitToShot);
                 boolean shouldShoot = shootingKinematics.isShootingParametersMet() || needsToCommitToShot;
                 if (goal == Goal.SHOOT_FORCE || shouldShoot) {
                     feeder.setGoal(Feeder.Goal.FEED);
@@ -154,14 +169,9 @@ public class Superstructure extends CommandBasedSubsystem {
             case EJECT -> {
                 flywheel.setGoal(Flywheel.Goal.EJECT);
                 feeder.setGoal(Feeder.Goal.EJECT);
-                spindexer.setGoal(Spindexer.Goal.EJECT);
+                spindexer.setGoal(Spindexer.Goal.EJECT_ALTERNATE);
+                hood.setGoal(Hood.Goal.STOW);
             }
-        }
-
-        if (goal == Goal.HOME_HOOD) {
-            hood.setGoal(Hood.Goal.HOME);
-        } else {
-            hood.setGoal(Hood.Goal.SHOOT);
         }
 
         Logger.recordOutput(

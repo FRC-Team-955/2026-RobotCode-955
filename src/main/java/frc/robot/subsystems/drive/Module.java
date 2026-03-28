@@ -13,6 +13,7 @@
 
 package frc.robot.subsystems.drive;
 
+import com.ctre.phoenix6.signals.MagnetHealthValue;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.filter.Debouncer;
@@ -22,6 +23,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
+import frc.lib.EnergyLogger;
 import frc.lib.network.LoggedTunablePIDF;
 import frc.robot.OperatorDashboard;
 import org.littletonrobotics.junction.Logger;
@@ -30,6 +32,7 @@ import static frc.robot.subsystems.drive.DriveConstants.*;
 
 public class Module {
     private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
+    private static final EnergyLogger energyLogger = EnergyLogger.get();
 
     private final ModuleIO io;
     private final ModuleIOInputsAutoLogged inputs = new ModuleIOInputsAutoLogged();
@@ -42,6 +45,8 @@ public class Module {
     private final Alert turnDisconnectedAlert;
     private final Alert turnEncoderDisconnectedAlert;
     private final Alert turnEncoderDisparityAlert;
+    private final Alert turnEncoderDisparityStickyAlert;
+    private final Alert invalidMagnetHealthAlert;
 
     public Module(ModuleIO io, int index) {
         this.io = io;
@@ -51,6 +56,8 @@ public class Module {
         turnDisconnectedAlert = new Alert("Disconnected turn motor on module " + index + ".", AlertType.kError);
         turnEncoderDisconnectedAlert = new Alert("Disconnected turn encoder on module " + index + ".", AlertType.kError);
         turnEncoderDisparityAlert = new Alert("Absolute and relative turn encoders on module " + index + " are not matching up.", AlertType.kError);
+        turnEncoderDisparityStickyAlert = new Alert("Absolute and relative turn encoders on module " + index + " didn't match up, but they do now.", AlertType.kWarning);
+        invalidMagnetHealthAlert = new Alert("Module " + index + "'s magnet health is bad.", AlertType.kError);
     }
 
     public void updateAndProcessInputs() {
@@ -59,16 +66,37 @@ public class Module {
     }
 
     public void periodicBeforeCommands() {
+        energyLogger.reportPowerUsage(
+                "Module/Drive/" + index,
+                inputs.driveConnected ? inputs.driveAppliedVolts * inputs.driveSupplyCurrentAmps : 0.0
+        );
+        energyLogger.reportPowerUsage(
+                "Module/Turn/" + index,
+                inputs.turnConnected ? inputs.turnAppliedVolts * inputs.turnSupplyCurrentAmps : 0.0
+        );
+
         // Update alerts
         driveDisconnectedAlert.set(!inputs.driveConnected);
         turnDisconnectedAlert.set(!inputs.turnConnected);
         turnEncoderDisconnectedAlert.set(!inputs.turnAbsoluteEncoderConnected);
-        turnEncoderDisparityAlert.set(turnAbsoluteRelativeDifferenceDebouncer.calculate(
+        boolean turnEncoderDisparity = turnAbsoluteRelativeDifferenceDebouncer.calculate(
                 Math.abs(
                         MathUtil.angleModulus(inputs.turnAbsolutePositionRad)
                                 - MathUtil.angleModulus(inputs.turnPositionRad)
                 ) > Units.degreesToRadians(3.0)
-        ));
+        );
+        turnEncoderDisparityAlert.set(turnEncoderDisparity);
+        invalidMagnetHealthAlert.set(inputs.turnAbsoluteEncoderMagnetHealth != MagnetHealthValue.Magnet_Green && inputs.turnAbsoluteEncoderMagnetHealth != MagnetHealthValue.Magnet_Orange);
+
+        // Zero turn if there is a disparity and we aren't moving
+        if (turnEncoderDisparity &&
+                Math.abs(getDriveVelocityMetersPerSec()) < 1e-4 &&
+                inputs.turnAbsoluteEncoderConnected &&
+                inputs.turnAbsoluteEncoderMagnetHealth != MagnetHealthValue.Magnet_Invalid
+        ) {
+            io.setTurnRelativeEncoderFromAbsolute();
+            turnEncoderDisparityStickyAlert.set(true);
+        }
     }
 
     public void runSetpoint(SwerveModuleState state) {
@@ -160,8 +188,8 @@ public class Module {
         return inputs.driveVelocityRadPerSec * driveConfig.wheelRadiusMeters();
     }
 
-    public double getDriveCurrentAmps() {
-        return inputs.driveCurrentAmps;
+    public double getDriveStatorCurrentAmps() {
+        return inputs.driveStatorCurrentAmps;
     }
 
     /**

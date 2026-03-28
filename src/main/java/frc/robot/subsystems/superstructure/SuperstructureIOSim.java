@@ -21,7 +21,7 @@ import org.littletonrobotics.junction.Logger;
 import static edu.wpi.first.units.Units.*;
 
 public class SuperstructureIOSim extends SuperstructureIO {
-    private static final double shootingBallsPerSec = 6.0;
+    private static final double shootingBallsPerSec = 8.0;
     private static final double ballShootDelay = 1.0 / shootingBallsPerSec;
 
     private static final IntakePivot intakePivot = IntakePivot.get();
@@ -30,6 +30,7 @@ public class SuperstructureIOSim extends SuperstructureIO {
     private static final Flywheel flywheel = Flywheel.get();
     private static final Hood hood = Hood.get();
     private static final Spindexer spindexer = Spindexer.get();
+    private static final ShootingKinematics shootingKinematics = ShootingKinematics.get();
 
     private final SimManager simManager = SimManager.get();
 
@@ -78,6 +79,9 @@ public class SuperstructureIOSim extends SuperstructureIO {
                         // reverse the hood
                         Radians.of(Math.PI / 2.0 + hood.getPositionRad())
                 );
+                if (!shootingKinematics.getShootingParameters().isPass()) {
+                    gamePiece.disableBecomesGamePieceOnFieldAfterTouchGround();
+                }
                 Logger.recordOutput("ShootingKinematics/ProjectileVelocity", gamePiece.getVelocity3dMPS());
                 Logger.recordOutput("ShootingKinematics/ProjectileSpeedRobotRelative", Units.rotationsPerMinuteToRadiansPerSecond(flywheel.getVelocityRPM()) * FlywheelConstants.flywheelRadiusMeters);
                 SimulatedArena.getInstance().addGamePieceProjectile(gamePiece);

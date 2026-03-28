@@ -4,6 +4,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.lib.AllianceFlipUtil;
 import frc.lib.Util;
 import frc.robot.RobotState;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -38,11 +39,24 @@ public class AutoManager {
         autoChooser.addOption("None", null);
         //autoChooser.addOption("LeftSideAuto", new LeftSideAuto());
         //autoChooser.addOption("RightSideAuto", new RightSideAuto());
-        autoChooser.addOption("Orbit at Home Depot", new OrbitAtHomeDepotAuto());
+        autoChooser.addOption("Canadian Depot", new CanadianDepotAuto());
         autoChooser.addOption("Orbit at the outpost", new OrbitAtTheOutpostAuto());
+        autoChooser.addOption("Orbit at Home Depot", new OrbitAtHomeDepotAuto());
         autoChooser.addOption("Aura", new AuraAuto());
+        autoChooser.addOption("AuraOutpost", new AuraAutoOutpost());
+        autoChooser.addOption("AuraDepot", new AuraAutoDepot());
         autoChooser.addOption("Test", new OrbitGoingToHomeDepotAuto());
+        autoChooser.addOption("Canadian Depot Intake", new CanadianDepotIntakeAuto());
+        autoChooser.addOption("Canadian Outpost", new CanadianOutpostAuto());
+        //autoChooser.addOption("CanadianJn Outpost", new CanadianOutpostJAuto());
+        autoChooser.addOption("Orbit at the depot 2nd pass", new OrbitAtDepotSecondAuto());
+        autoChooser.addOption("Orbit at the outpost 2nd pass", new OrbitAtOutpostSecondAuto());
+
+        //autoChooser.addOption("CandiantOutpostAutolessAgro", new CanadianOutpostAutolessAgro());
+        autoChooser.addOption("I want a turret (Orbit passing at the outpost)", new OrbitPassingOutpost());
+
         robotState.setAutoStartPoseSupplier(this::getSelectedAutoStartingPose);
+
     }
 
     public Command getSelectedAutoCommand() {
@@ -62,7 +76,7 @@ public class AutoManager {
             return Optional.empty();
         }
 
-        return Optional.of(selectedAuto.startingPose);
+        return Optional.of(AllianceFlipUtil.apply(selectedAuto.startingPose));
     }
 
     private Optional<Double> getDistanceToAutoStart() {

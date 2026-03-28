@@ -61,7 +61,9 @@ public class MotorIOArmSim extends MotorIO {
         inputs.positionRad = armSim.getAngleRads();
         inputs.velocityRadPerSec = armSim.getVelocityRadPerSec();
         inputs.appliedVolts = appliedVolts;
-        inputs.currentAmps = Math.abs(armSim.getCurrentDrawAmps());
+        inputs.statorCurrentAmps = Math.abs(armSim.getCurrentDrawAmps());
+        inputs.supplyCurrentAmps = inputs.statorCurrentAmps;
+
     }
 
     @Override

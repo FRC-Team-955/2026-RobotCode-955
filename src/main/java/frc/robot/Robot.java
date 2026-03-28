@@ -13,15 +13,15 @@
 
 package frc.robot;
 
+import com.reduxrobotics.canand.CanandEventLoop;
+import com.revrobotics.util.StatusLogger;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.lib.LoggedTracer;
 import frc.lib.subsystem.Periodic;
-import frc.robot.subsystems.leds.LEDs;
 import org.ironmaple.simulation.SimulatedArena;
 import org.littletonrobotics.junction.AutoLogOutputManager;
 import org.littletonrobotics.junction.LogFileUtil;
@@ -51,15 +51,18 @@ public class Robot extends LoggedRobot {
     public Robot() {
         super(Constants.loopPeriod);
 
-        if (BuildConstants.mode == BuildConstants.Mode.SIM) {
+        // Stop REV logger
+        StatusLogger.disableAutoLogging();
+
+        // Start Redux CanLink
+        CanandEventLoop.getInstance();
+
+        if (BuildConstants.isSim) {
             // Setup arena BEFORE any of our robot code tries to use it
             // Otherwise, literally everything in maple-sim breaks
             //SimulatedArena.overrideInstance(new Arena2026Rebuilt(false));
             SimulatedArena.overrideInstance(new SimManager.CustomArena(false));
         }
-
-        @SuppressWarnings("resource")
-        Notifier ledsStartupNotifier = LEDs.createAndStartStartupNotifier();
 
         AutoLogOutputManager.addPackage("frc");
 
@@ -129,7 +132,6 @@ public class Robot extends LoggedRobot {
 
                 // Start with hub shift tracker
                 robotContainer.hubShiftTracker,
-
                 // Lots of things depend on controller
                 robotContainer.controller,
                 // Vision depends on drive
@@ -158,12 +160,11 @@ public class Robot extends LoggedRobot {
                 // Misc
                 robotContainer.canLogger,
 
-                // Update the mechanism and LEDs last
+                // Update the mechanism, LEDs and energy logger last
                 robotContainer.robotMechanism,
-                robotContainer.leds
+                robotContainer.leds,
+                robotContainer.energyLogger
         );
-
-        ledsStartupNotifier.stop();
     }
 
     private void logConstantClass(Class<?> clazz, String parentName) {
@@ -196,7 +197,7 @@ public class Robot extends LoggedRobot {
     public void robotPeriodic() {
         LoggedTracer.reset();
 
-        if (BuildConstants.mode == BuildConstants.Mode.SIM) {
+        if (BuildConstants.isSim) {
             SimManager.get().periodicBeforeNormalCode();
             LoggedTracer.record("Simulation");
         }

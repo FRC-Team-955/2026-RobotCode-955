@@ -9,7 +9,7 @@ import frc.robot.BuildConstants;
 
 public class HoodConstants {
     static final double minPositionRad = Units.degreesToRadians(15.0);
-    static final double maxPositionRad = Units.degreesToRadians(40.0);
+    public static final double maxPositionRad = Units.degreesToRadians(40.0);
     static final double initialPositionRad = minPositionRad;
     static final double maxPositionUnderTrench = Units.degreesToRadians(30.0);
 

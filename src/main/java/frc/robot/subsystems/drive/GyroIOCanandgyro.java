@@ -5,25 +5,25 @@ import com.reduxrobotics.sensors.canandgyro.CanandgyroSettings;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.util.Units;
 import frc.lib.HighFrequencySamplingThread;
+import frc.robot.Constants;
 
 import java.util.Queue;
 
 /**
  * IO implementation for Canandgyro
  */
-public class GyroIORedux extends GyroIO {
+public class GyroIOCanandgyro extends GyroIO {
+    private static final double yawFramePeriodSeconds = 1.0 / HighFrequencySamplingThread.frequencyHz;
+    private static final double otherFramePeriodSeconds = Constants.loopPeriod;
+
     private final Canandgyro canandgyro;
 
     private final Queue<Double> yawPositionQueue;
     private final Queue<Double> yawTimestampQueue;
 
-    private final double yawFramePeriodSeconds = 0.004;
-    private final double otherFramePeriodSeconds = 0.02;
-
     private final Debouncer connectedDebouncer = new Debouncer(0.5);
 
-
-    public GyroIORedux(int canID) {
+    public GyroIOCanandgyro(int canID) {
         canandgyro = new Canandgyro(canID);
 
         var canandgyroSettings = new CanandgyroSettings();
@@ -38,7 +38,7 @@ public class GyroIORedux extends GyroIO {
         canandgyro.setYaw(0.0, 0.25, 5);
 
         yawTimestampQueue = HighFrequencySamplingThread.get().makeTimestampQueue();
-        yawPositionQueue = HighFrequencySamplingThread.get().registerGenericSignal(canandgyro::getYaw);
+        yawPositionQueue = HighFrequencySamplingThread.get().registerGenericSignal(canandgyro::getMultiturnYaw);
     }
 
     @Override
@@ -46,8 +46,7 @@ public class GyroIORedux extends GyroIO {
         inputs.connected = connectedDebouncer.calculate(canandgyro.isConnected());
         inputs.temperatureCelsius = canandgyro.getTemperature();
 
-        inputs.yawPositionRad = Units.rotationsToRadians(canandgyro.getYaw());
-        //getMultiTurn?
+        inputs.yawPositionRad = Units.rotationsToRadians(canandgyro.getMultiturnYaw());
         inputs.orientation = canandgyro.getRotation3d();
 
         inputs.angularVelocityXRadPerSec = Units.rotationsToRadians(canandgyro.getAngularVelocityRoll());

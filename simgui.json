@@ -14,12 +14,14 @@
   "NTProvider": {
     "types": {
       "/AdvantageKit/RealOutputs/Alerts": "Alerts",
+      "/AdvantageKit/RealOutputs/Choreo Alerts": "Alerts",
       "/AdvantageKit/RealOutputs/LEDs/Mechanism": "Mechanism2d",
       "/AdvantageKit/RealOutputs/PhotonAlerts": "Alerts",
       "/FMSInfo": "FMSInfo",
       "/SmartDashboard/Alerts": "Alerts",
       "/SmartDashboard/Auto Choices": "String Chooser",
       "/SmartDashboard/Characterization Choices": "String Chooser",
+      "/SmartDashboard/Choreo Alerts": "Alerts",
       "/SmartDashboard/Field2d": "Field2d",
       "/SmartDashboard/PhotonAlerts": "Alerts",
       "/SmartDashboard/VisionSystemSim-apriltag/Sim Field": "Field2d",
@@ -41,6 +43,30 @@
         "window": {
           "visible": true
         }
+      },
+      "/SmartDashboard/Field2d": {
+        "bottom": 1914,
+        "height": 8.069275856018066,
+        "left": 245,
+        "right": 3942,
+        "top": 118,
+        "width": 16.54119300842285,
+        "window": {
+          "visible": true
+        }
+      }
+    }
+  },
+  "NetworkTables": {
+    "transitory": {
+      "AdvantageKit": {
+        "RealOutputs": {
+          "LoggedRobot": {
+            "open": true
+          },
+          "open": true
+        },
+        "open": true
       }
     }
   },
@@ -49,5 +75,31 @@
   },
   "NetworkTables View": {
     "visible": false
+  },
+  "Plot": {
+    "Plot <0>": {
+      "plots": [
+        {
+          "backgroundColor": [
+            0.0,
+            0.0,
+            0.0,
+            0.8500000238418579
+          ],
+          "height": 0,
+          "series": [
+            {
+              "color": [
+                0.2980392277240753,
+                0.44705885648727417,
+                0.6901960968971252,
+                1.0
+              ],
+              "id": "NT:/AdvantageKit/RealOutputs/LoggedRobot/FullCycleMS"
+            }
+          ]
+        }
+      ]
+    }
   }
 }

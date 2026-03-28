@@ -55,6 +55,7 @@ public class AprilTagVisionConstants {
     @RequiredArgsConstructor
     enum Camera {
         // BrainpanCam - ThriftyCam
+        /*
         BrainpanCam(
                 new Transform3d(
                         Units.inchesToMeters(-11.441561), Units.inchesToMeters(4.404409), Units.inchesToMeters(7.451625),
@@ -69,8 +70,9 @@ public class AprilTagVisionConstants {
                 },
                 // Relatively stable, even at long distance
                 1.5,
-                1.0
+                5.0
         ),
+        */
         ShooterCam(
                 new Transform3d(
                         Units.inchesToMeters(-11.668592), Units.inchesToMeters(-13.462841), Units.inchesToMeters(7.136914),

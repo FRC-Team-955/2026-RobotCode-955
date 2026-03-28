@@ -1,7 +1,7 @@
 {
   "Docking": {
     "Data": [
-      "DockNode          ID=0x00000002 Pos=57,26 Size=893,551 Split=Y",
+      "DockNode          ID=0x00000002 Pos=21,18 Size=1119,734 Split=Y",
       "DockNode        ID=0x00000006 Parent=0x00000002 SizeRef=944,332 Split=X",
       "DockNode      ID=0x00000001 Parent=0x00000006 SizeRef=300,551 Split=X",
       "DockNode    ID=0x0000000B Parent=0x00000001 SizeRef=543,293 Split=Y",
@@ -9,10 +9,12 @@
       "DockNode  ID=0x00000004 Parent=0x0000000B SizeRef=427,186 Selected=0xC8493FD8",
       "DockNode    ID=0x0000000C Parent=0x00000001 SizeRef=174,293 Selected=0x05F38D96",
       "DockNode      ID=0x00000008 Parent=0x00000006 SizeRef=642,551 Split=Y Selected=0x949F284C",
-      "DockNode    ID=0x0000000A Parent=0x00000008 SizeRef=470,53 Selected=0xCDEF627F",
+      "DockNode    ID=0x0000000A Parent=0x00000008 SizeRef=470,53 Split=X Selected=0xCDEF627F",
+      "DockNode  ID=0x0000000E Parent=0x0000000A SizeRef=438,71 Selected=0xCDEF627F",
+      "DockNode  ID=0x0000000F Parent=0x0000000A SizeRef=321,71 Selected=0xEC2CAA88",
       "DockNode    ID=0x0000000D Parent=0x00000008 SizeRef=470,277 Split=Y Selected=0x949F284C",
-      "DockNode  ID=0x0000000E Parent=0x0000000D SizeRef=470,53 Selected=0xEC2CAA88",
-      "DockNode  ID=0x0000000F Parent=0x0000000D SizeRef=470,222 Selected=0x949F284C",
+      "DockNode  ID=0x00000010 Parent=0x0000000D SizeRef=607,158 Selected=0x949F284C",
+      "DockNode  ID=0x00000011 Parent=0x0000000D SizeRef=607,210 Selected=0x1D2CCB5F",
       "DockNode        ID=0x00000007 Parent=0x00000002 SizeRef=944,217 Split=X Selected=0x138219D4",
       "DockNode      ID=0x00000005 Parent=0x00000007 SizeRef=191,217 Selected=0x6AE6D891",
       "DockNode      ID=0x00000009 Parent=0x00000007 SizeRef=751,217 Selected=0x138219D4"
@@ -22,13 +24,13 @@
     "GLOBAL": {
       "font": "Proggy Dotted",
       "fps": "120",
-      "height": "752",
-      "maximized": "0",
+      "height": "771",
+      "maximized": "1",
       "style": "0",
       "userScale": "2",
       "width": "1280",
-      "xpos": "389",
-      "ypos": "219"
+      "xpos": "218",
+      "ypos": "762"
     }
   },
   "Window": {
@@ -39,21 +41,27 @@
     },
     "###/SmartDashboard/Alerts": {
       "Collapsed": "0",
-      "DockId": "0x0000000F,0",
-      "Pos": "343,136",
-      "Size": "607,222"
+      "DockId": "0x00000010,0",
+      "Pos": "379,91",
+      "Size": "761,158"
     },
     "###/SmartDashboard/Auto Choices": {
       "Collapsed": "0",
-      "DockId": "0x0000000A,0",
-      "Pos": "343,26",
-      "Size": "607,53"
+      "DockId": "0x0000000E,0",
+      "Pos": "379,18",
+      "Size": "438,71"
     },
     "###/SmartDashboard/Characterization Choices": {
       "Collapsed": "0",
-      "DockId": "0x0000000E,0",
-      "Pos": "343,81",
-      "Size": "607,53"
+      "DockId": "0x0000000F,0",
+      "Pos": "819,18",
+      "Size": "321,71"
+    },
+    "###/SmartDashboard/Field2d": {
+      "Collapsed": "0",
+      "DockId": "0x00000011,0",
+      "Pos": "379,251",
+      "Size": "761,210"
     },
     "###Addressable LEDs": {
       "Collapsed": "0",
@@ -64,14 +72,14 @@
     "###FMS": {
       "Collapsed": "0",
       "DockId": "0x00000004,0",
-      "Pos": "57,165",
-      "Size": "284,193"
+      "Pos": "21,203",
+      "Size": "356,258"
     },
     "###Joysticks": {
       "Collapsed": "0",
       "DockId": "0x00000009,0",
-      "Pos": "240,360",
-      "Size": "710,217"
+      "Pos": "249,463",
+      "Size": "891,289"
     },
     "###Keyboard 0 Settings": {
       "Collapsed": "0",
@@ -98,6 +106,11 @@
       "Pos": "1025,20",
       "Size": "250,695"
     },
+    "###Plot <0>": {
+      "Collapsed": "0",
+      "Pos": "60,60",
+      "Size": "115,62"
+    },
     "###RoboRIO": {
       "Collapsed": "0",
       "Pos": "5,125",
@@ -106,8 +119,8 @@
     "###System Joysticks": {
       "Collapsed": "0",
       "DockId": "0x00000005,0",
-      "Pos": "57,360",
-      "Size": "181,217"
+      "Pos": "21,463",
+      "Size": "226,289"
     },
     "###Timing": {
       "Collapsed": "0",
@@ -122,8 +135,8 @@
     "Robot State": {
       "Collapsed": "0",
       "DockId": "0x00000003,0",
-      "Pos": "57,26",
-      "Size": "284,137"
+      "Pos": "21,18",
+      "Size": "356,183"
     }
   }
 }

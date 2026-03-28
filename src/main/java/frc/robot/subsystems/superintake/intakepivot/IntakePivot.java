@@ -1,14 +1,20 @@
 package frc.robot.subsystems.superintake.intakepivot;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.filter.Debouncer;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
+import frc.lib.EnergyLogger;
 import frc.lib.Util;
 import frc.lib.motor.MotorIOInputsAutoLogged;
 import frc.lib.network.LoggedTunableNumber;
 import frc.lib.subsystem.Periodic;
+import frc.robot.BuildConstants;
 import frc.robot.Constants;
 import frc.robot.OperatorDashboard;
 import frc.robot.RobotState;
@@ -26,6 +32,8 @@ public class IntakePivot implements Periodic {
     private static final LoggedTunableNumber profileLookaheadTimeSec = new LoggedTunableNumber("Superintake/IntakePivot/ProfileLookaheadTimeSec", 0.15);
     private static final LoggedTunableNumber stowSetpointDegrees = new LoggedTunableNumber("Superintake/IntakePivot/Goal/StowDegrees", 70.0);
 
+    private static final EnergyLogger energyLogger = EnergyLogger.get();
+
     private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
     private static final RobotState robotState = RobotState.get();
 
@@ -38,6 +46,7 @@ public class IntakePivot implements Periodic {
         STOW(() -> Units.degreesToRadians(stowSetpointDegrees.get())),
         DEPLOY(() -> minPositionRad),
         HOME(null),
+        HOME_FINALIZE(null),
         ;
 
         private final DoubleSupplier setpointRad;
@@ -63,7 +72,15 @@ public class IntakePivot implements Periodic {
     private TrapezoidProfile.State goalState = new TrapezoidProfile.State();
     private TrapezoidProfile.State lookaheadState = new TrapezoidProfile.State();
 
+    @Getter
+    private boolean emergencyStopped = false;
+
+    @Getter
+    private boolean atVelocityThresholdForHoming = false;
+    private final Debouncer homingVelocityDebouncer = new Debouncer(0.1, Debouncer.DebounceType.kRising);
+
     private final Alert motorDisconnectedAlert = new Alert("Intake pivot motor is disconnected.", Alert.AlertType.kError);
+    private final Alert emergencyStoppedAlert = new Alert("Intake pivot is E-stopped!", Alert.AlertType.kError);
 
     private static IntakePivot instance;
 
@@ -88,6 +105,26 @@ public class IntakePivot implements Periodic {
 
         motorDisconnectedAlert.set(!inputs.connected);
 
+        energyLogger.reportPowerUsage("IntakePivot", inputs.connected ? inputs.appliedVolts * inputs.supplyCurrentAmps : 0.0);
+
+        if (!emergencyStopped) {
+            if (operatorDashboard.intakePivotEStop.get()) {
+                io.setVoltageRequest(0.0);
+                emergencyStopped = true;
+                operatorDashboard.intakePivotEStop.set(true);
+            }
+        } else {
+            if (!operatorDashboard.intakePivotEStop.get()) {
+                // Let operator turn off e-stop
+                emergencyStopped = false;
+                operatorDashboard.intakePivotEStop.set(false);
+            }
+        }
+        emergencyStoppedAlert.set(emergencyStopped);
+
+        atVelocityThresholdForHoming = homingVelocityDebouncer.calculate(goal == Goal.HOME && Math.abs(inputs.velocityRadPerSec) < 0.1);
+
+        // Apply network inputs
         if (gains.hasChanged()) {
             io.setPositionPIDF(gains);
         }
@@ -96,7 +133,13 @@ public class IntakePivot implements Periodic {
     @Override
     public void periodicAfterCommands() {
         Logger.recordOutput("Superintake/IntakePivot/Goal", goal);
-        if (DriverStation.isDisabled()) {
+
+        // Turn off E-stop when homing
+        if (goal == Goal.HOME) {
+            emergencyStopped = false;
+        }
+
+        if (DriverStation.isDisabled() || emergencyStopped || goal == Goal.HOME_FINALIZE) {
             io.setVoltageRequest(0.0);
 
             // Reset states to current position
@@ -106,9 +149,12 @@ public class IntakePivot implements Periodic {
             io.setVoltageRequest(-2.0);
         } else {
             // See the comments above the lookaheadState and goalState variables for why we effectively calculate two profiles
+            boolean isInTrench = robotState.isInTrench(robotState.getTranslation().
+                    plus(intakePivotTransform().getTranslation().toTranslation2d()));
+            Logger.recordOutput("Superintake/IntakePivot/IsInTrench", isInTrench);
 
             double setpointRad = goal.setpointRad.getAsDouble();
-            if (robotState.isInTrench()) {
+            if (isInTrench) {
                 if (getPositionRad() < tresholdForLoweringUnderTrench) {
                     setpointRad = Math.min(setpointRad, maxPositionUnderTrench);
                 } else {
@@ -116,7 +162,8 @@ public class IntakePivot implements Periodic {
                 }
             }
             setpointRad = MathUtil.clamp(setpointRad, minPositionRad, maxPositionRad);
-            //Logger.recordOutput("Superintake/IntakePivot/OriginalSetpointRad", setpointRad);
+            if (BuildConstants.isSimOrReplay)
+                Logger.recordOutput("Superintake/IntakePivot/OriginalSetpointRad", setpointRad);
             TrapezoidProfile.State wantedState = new TrapezoidProfile.State(setpointRad, 0.0);
 
             if (lastSetpointRad == null || setpointRad != lastSetpointRad) {
@@ -126,10 +173,12 @@ public class IntakePivot implements Periodic {
             lastSetpointRad = setpointRad;
 
             goalState = profile.calculate(Constants.loopPeriod, goalState, wantedState);
-            //Logger.recordOutput("Superintake/IntakePivot/ProfileSetpointRad", goalState.position);
+            if (BuildConstants.isSimOrReplay)
+                Logger.recordOutput("Superintake/IntakePivot/ProfileSetpointRad", goalState.position);
 
             lookaheadState = profile.calculate(Constants.loopPeriod, lookaheadState, wantedState);
-            //Logger.recordOutput("Superintake/IntakePivot/LookaheadSetpointRad", lookaheadState.position);
+            if (BuildConstants.isSimOrReplay)
+                Logger.recordOutput("Superintake/IntakePivot/LookaheadSetpointRad", lookaheadState.position);
 
             io.setPositionRequest(lookaheadState.position);
         }
@@ -139,12 +188,18 @@ public class IntakePivot implements Periodic {
         return inputs.positionRad;
     }
 
-    public boolean isCurrentAtThresholdForHoming() {
-        return inputs.currentAmps >= 10.0;
-    }
-
     public void finishHoming() {
         io.setEncoderPositionToInitial();
         operatorDashboard.intakePivotNotHomedAlert.set(false);
+    }
+
+    public Transform3d intakePivotTransform() {
+        return new Transform3d(
+                new Translation3d(Units.inchesToMeters(10.0), 0.0, Units.inchesToMeters(6.25)),
+                new Rotation3d(0.0, Units.degreesToRadians(90.0), 0.0)).plus(new Transform3d(
+                new Translation3d(),
+                new Rotation3d(0.0, -getPositionRad(), 0.0)
+        ));
+
     }
 }

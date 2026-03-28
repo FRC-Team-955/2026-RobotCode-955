@@ -1,11 +1,16 @@
 package frc.robot.subsystems.superstructure.flywheel;
 
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
+import frc.lib.EnergyLogger;
 import frc.lib.Util;
 import frc.lib.network.LoggedTunableNumber;
 import frc.lib.subsystem.Periodic;
+import frc.robot.BuildConstants;
 import frc.robot.OperatorDashboard;
 import frc.robot.shooting.ShootingKinematics;
 import lombok.Getter;
@@ -23,6 +28,8 @@ public class Flywheel implements Periodic {
 
     private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
     private static final ShootingKinematics shootingKinematics = ShootingKinematics.get();
+    private static final EnergyLogger energyLogger = EnergyLogger.get();
+
 
     private final FlywheelIO io = createIO();
     private final FlywheelIOInputsAutoLogged inputs = new FlywheelIOInputsAutoLogged();
@@ -67,9 +74,14 @@ public class Flywheel implements Periodic {
         io.updateInputs(inputs);
         Logger.processInputs("Inputs/Superstructure/Flywheel", inputs);
 
+
         leaderMotorDisconnectedAlert.set(!inputs.leader.connected);
         followerMotorDisconnectedAlert.set(!inputs.follower.connected);
         highTemperatureAlert.set(Math.max(inputs.leader.temperatureCelsius, inputs.follower.temperatureCelsius) > 50);
+
+        energyLogger.reportPowerUsage("Flywheel",
+                inputs.leader.connected ? inputs.leader.appliedVolts * inputs.leader.supplyCurrentAmps : 0.0,
+                inputs.follower.connected ? inputs.follower.appliedVolts * inputs.follower.supplyCurrentAmps : 0.0);
 
         if (velocityGains.hasChanged()) {
             io.setVelocityPIDF(velocityGains);
@@ -83,8 +95,8 @@ public class Flywheel implements Periodic {
             io.setStopRequest();
         } else {
             double value = Units.rotationsPerMinuteToRadiansPerSecond(goal.setpointRPM.getAsDouble());
-            //Logger.recordOutput("Superstructure/Flywheel/RequestValue", value);
             io.setVelocityRequest(value);
+            if (BuildConstants.isSimOrReplay) Logger.recordOutput("Superstructure/Flywheel/RequestValue", value);
         }
     }
 
@@ -99,5 +111,15 @@ public class Flywheel implements Periodic {
 
     public double getSetpointRPM() {
         return goal.setpointRPM.getAsDouble();
+    }
+
+    public Transform3d flywheelTransform() {
+        return new Transform3d(
+                new Translation3d(Units.inchesToMeters(-6.910046), Units.inchesToMeters(-9.109744), Units.inchesToMeters(12.861381)),
+                new Rotation3d(0.0, 0.0, 0.0)
+        ).plus(new Transform3d(
+                new Translation3d(),
+                new Rotation3d(0.0, getPositionRad(), 0.0)
+        ));
     }
 }

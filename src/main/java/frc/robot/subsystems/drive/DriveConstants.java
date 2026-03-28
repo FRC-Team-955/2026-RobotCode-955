@@ -3,10 +3,14 @@ package frc.robot.subsystems.drive;
 import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
+import frc.lib.Util;
 import frc.lib.network.LoggedTunableNumber;
 import frc.lib.network.LoggedTunablePIDF;
 import frc.robot.BuildConstants;
-import lombok.With;
+import frc.robot.autos.ChoreoVars;
+import frc.robot.subsystems.drive.constraints.DriveConstraints;
+
+import static edu.wpi.first.units.Units.*;
 
 public class DriveConstants {
     public static final double assistDirectionToleranceRad = Units.degreesToRadians(50);
@@ -28,9 +32,9 @@ public class DriveConstants {
             // TO TUNE WHEEL RADIUS: Place robot on carpet and use wheel radius characterization auto.
             // Output will be in console in AdvantageScope.
             // KEEP SYNCED WITH shooting_regression.py
-            Units.inchesToMeters(1.945),
-            Units.inchesToMeters(19.25),
+            Units.inchesToMeters(1.883),
             Units.inchesToMeters(24.25),
+            Units.inchesToMeters(19.25),
             Units.inchesToMeters(36.5),
             Units.inchesToMeters(31.5),
             // KEEP SYNCED WITH shooting_regression.py
@@ -42,24 +46,29 @@ public class DriveConstants {
      * FL, FR, BL, BR
      */
     public static final Translation2d[] moduleTranslations = new Translation2d[]{
-            new Translation2d(driveConfig.trackWidthMeters / 2.0, driveConfig.trackLengthMeters / 2.0),
-            new Translation2d(driveConfig.trackWidthMeters / 2.0, -driveConfig.trackLengthMeters / 2.0),
-            new Translation2d(-driveConfig.trackWidthMeters / 2.0, driveConfig.trackLengthMeters / 2.0),
-            new Translation2d(-driveConfig.trackWidthMeters / 2.0, -driveConfig.trackLengthMeters / 2.0)
+            new Translation2d(driveConfig.trackLengthMeters / 2.0, driveConfig.trackWidthMeters / 2.0),
+            new Translation2d(driveConfig.trackLengthMeters / 2.0, -driveConfig.trackWidthMeters / 2.0),
+            new Translation2d(-driveConfig.trackLengthMeters / 2.0, driveConfig.trackWidthMeters / 2.0),
+            new Translation2d(-driveConfig.trackLengthMeters / 2.0, -driveConfig.trackWidthMeters / 2.0)
     };
 
-    public static final double drivebaseRadiusMeters = Math.hypot(driveConfig.trackWidthMeters / 2.0, driveConfig.trackLengthMeters / 2.0);
+    public static final double drivebaseRadiusMeters = Math.hypot(driveConfig.trackLengthMeters / 2.0, driveConfig.trackWidthMeters / 2.0);
 
     /** Maximum angular velocity of the whole drivetrain if all drive motors/wheels are going at full speed. */
     public static final double maxAngularVelocityRadPerSec = driveConfig.maxVelocityMetersPerSec() / drivebaseRadiusMeters;
 
-    public static final MoveToConstraints defaultMoveToConstraints = new MoveToConstraints(
+    public static final DriveConstraints defaultMoveToConstraints = new DriveConstraints(
             new LoggedTunableNumber("Drive/MoveTo/MaxLinearVelocity", driveConfig.maxVelocityMetersPerSec()),
             new LoggedTunableNumber("Drive/MoveTo/MaxLinearAcceleration", 20.0),
             new LoggedTunableNumber("Drive/MoveTo/MaxAngularVelocity", 9),
-            new LoggedTunableNumber("Drive/MoveTo/MaxAngularAcceleration", 30.0),
-            false,
-            false
+            new LoggedTunableNumber("Drive/MoveTo/MaxAngularAcceleration", 30.0)
+    );
+
+    public static final DriveConstraints shootingConstraints = new DriveConstraints(
+            new LoggedTunableNumber("Drive/Shooting/MaxLinearVelocity", ChoreoVars.ShootingMaxVel.in(MetersPerSecond)),
+            new LoggedTunableNumber("Drive/Shooting/MaxLinearAcceleration", ChoreoVars.ShootingMaxAccel.in(MetersPerSecondPerSecond)),
+            null,
+            null
     );
 
     public static final MoveToConfig moveToConfig = new MoveToConfig(
@@ -67,11 +76,12 @@ public class DriveConstants {
             new LoggedTunableNumber("Drive/MoveTo/LinearPositionTolerance", 0.05),
             new LoggedTunableNumber("Drive/MoveTo/LinearVelocityToleranceMeters", 0.2),
             new LoggedTunablePIDF("Drive/MoveTo/Angular").withP(4.0).withD(0.02),
-            new LoggedTunableNumber("Drive/MoveTo/AngularPositionTolerance", Units.degreesToRadians(5)),
-            new LoggedTunableNumber("Drive/MoveTo/AngularVelocityTolerance", Units.degreesToRadians(20))
+            new LoggedTunableNumber("Drive/MoveTo/AngularPositionTolerance", Units.degreesToRadians(3)),
+            new LoggedTunableNumber("Drive/MoveTo/AngularVelocityTolerance", Units.degreesToRadians(10))
     );
 
-    public static final double joystickMaxAngularSpeedRadPerSec = Math.min(Units.degreesToRadians(500), maxAngularVelocityRadPerSec);
+    /** Must be below maxAngularVelocityRadPerSec */
+    public static final double joystickMaxAngularSpeedRadPerSec = Units.degreesToRadians(400);
     public static final double joystickDriveDeadband = 0.05;
 
     static final ModuleConfig moduleConfig = switch (BuildConstants.mode) {
@@ -95,7 +105,7 @@ public class DriveConstants {
                 false,
                 false,
                 75,
-                40
+                30
         );
         case SIM -> new ModuleConfig(
                 new LoggedTunablePIDF("Drive/DriveGains")
@@ -140,7 +150,7 @@ public class DriveConstants {
             // Module order: FL, FR, BL, BR
             case REAL -> new ModuleIO[]{
                     new ModuleIOTalonFXSparkMaxCANcoder(0, 2, 1, 9, -1.6145),
-                    new ModuleIOTalonFXSparkMaxCANcoder(1, 4, 3, 10, 2.383),
+                    new ModuleIOTalonFXSparkMaxCANcoder(1, 4, 3, 10, 1.875),
                     new ModuleIOTalonFXSparkMaxCANcoder(2, 6, 5, 11, -0.584),
                     new ModuleIOTalonFXSparkMaxCANcoder(3, 8, 7, 12, 2.7495),
             };
@@ -170,17 +180,6 @@ public class DriveConstants {
         };
     }
 
-    @With
-    public record MoveToConstraints(
-            LoggedTunableNumber maxLinearVelocityMetersPerSec,
-            LoggedTunableNumber maxLinearAccelerationMetersPerSecPerSec,
-            LoggedTunableNumber maxAngularVelocityRadPerSec,
-            LoggedTunableNumber maxAngularAccelerationRadPerSecPerSec,
-            boolean aiming,
-            boolean fullSpeed
-    ) {
-    }
-
     public record MoveToConfig(
             LoggedTunablePIDF linearGains,
             LoggedTunableNumber linearPositionToleranceMeters,
@@ -193,6 +192,8 @@ public class DriveConstants {
 
     public record DriveConfig(
             double wheelRadiusMeters,
+            // Width = Y axis
+            // Length = X axis
             double trackWidthMeters, // Measured from the center of the swerve wheels
             double trackLengthMeters,
             double bumperWidthMeters,
@@ -226,5 +227,31 @@ public class DriveConstants {
 
         public static final double MK4I_TURN = (150.0 / 7.0);
         public static final double MK4N_TURN = 18.75;
+    }
+
+    static {
+        // Check to ensure that choreo vars and real vars match up.
+        // The reason we don't just use the choreo vars is because choreo rounds to 3 decimal places, which means we get less precision.
+        // This mostly doesn't matter, but can have an impact (especially for small values like wheel radius or gear ratio).
+        if (Math.abs(driveConfig.wheelRadiusMeters() - ChoreoVars.WheelRadius.in(Meters)) > 0.001) {
+            Util.error("Choreo wheel radius is incorrect");
+        }
+        if (Math.abs(driveConfig.trackWidthMeters() - ChoreoVars.TrackWidth.in(Meters)) > 0.001) {
+            Util.error("Choreo track width is incorrect");
+        }
+        if (Math.abs(driveConfig.trackLengthMeters() - ChoreoVars.TrackLength.in(Meters)) > 0.001) {
+            Util.error("Choreo track length is incorrect");
+        }
+        if (Math.abs(driveConfig.bumperWidthMeters() - ChoreoVars.BumperWidth.in(Meters)) > 0.001) {
+            Util.error("Choreo bumper width is incorrect");
+        }
+        if (Math.abs(driveConfig.bumperLengthMeters() - ChoreoVars.BumperLength.in(Meters)) > 0.001) {
+            Util.error("Choreo bumper length is incorrect");
+        }
+        for (GearRatioConfig config : gearRatioConfigs) {
+            if (Math.abs(config.driveGearRatio() - ChoreoVars.GearRatio) > 0.001) {
+                Util.error("Choreo gear ratio is incorrect: " + config.driveGearRatio() + " expected but got " + ChoreoVars.GearRatio);
+            }
+        }
     }
 }

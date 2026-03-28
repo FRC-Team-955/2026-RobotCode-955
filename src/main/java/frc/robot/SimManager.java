@@ -48,6 +48,7 @@ public class SimManager {
         );
     }
 
+    @SuppressWarnings("unchecked")
     public final SwerveDriveSimulation driveSimulation = new SwerveDriveSimulation(
             // Specify Configuration
             DriveTrainSimulationConfig.Default()
@@ -99,7 +100,7 @@ public class SimManager {
             Util.error("Duplicate SimManager created");
         }
 
-        if (BuildConstants.mode != BuildConstants.Mode.SIM) {
+        if (!BuildConstants.isSim) {
             Util.error("SimManager created when not in sim");
         } else {
             aprilTagVisionSystem.addAprilTags(aprilTagLayout);
@@ -204,7 +205,7 @@ public class SimManager {
     }
 
     public static class CustomArena extends SimulatedArena {
-        protected boolean isInEfficiencyMode = true;
+        protected boolean isInEfficiencyMode = false;
 
         protected static Translation2d centerPieceBottomRightCorner = new Translation2d(7.35737, 1.724406);
         protected static Translation2d redDepotBottomRightCorner = new Translation2d(0.02, 5.53);

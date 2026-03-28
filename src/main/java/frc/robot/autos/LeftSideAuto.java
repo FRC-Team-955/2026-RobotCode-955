@@ -13,7 +13,7 @@ import frc.robot.RobotState;
 import frc.robot.shooting.ShootingKinematics;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.DriveConstants;
-import frc.robot.subsystems.drive.goals.DriveJoystickGoal;
+import frc.robot.subsystems.drive.constraints.DriveConstraints;
 import frc.robot.subsystems.superintake.Superintake;
 import frc.robot.subsystems.superstructure.Superstructure;
 import org.littletonrobotics.junction.Logger;
@@ -44,13 +44,11 @@ public final class LeftSideAuto extends Auto {
             new Pose2d(2.5, 7.5, Rotation2d.fromDegrees(180))
     );
 
-    private static final DriveConstants.MoveToConstraints leftSideAutoMoveToConstraints = new DriveConstants.MoveToConstraints(
+    private static final DriveConstraints leftSideAutoMoveToConstraints = new DriveConstraints(
             new LoggedTunableNumber("LeftSideAuto/MoveTo/MaxLinearVelocity", 0.75),
             new LoggedTunableNumber("LeftSideAuto/MoveTo/MaxLinearAcceleration", 15.0),
             new LoggedTunableNumber("LeftSideAuto/MoveTo/MaxAngularVelocity", maxAngularVelocityRadPerSec),
-            new LoggedTunableNumber("LeftSideAuto/MoveTo/MaxAngularAcceleration", 30.0),
-            false,
-            false
+            new LoggedTunableNumber("LeftSideAuto/MoveTo/MaxAngularAcceleration", 30.0)
     );
 
     private static final int INTERPOLATION_START_INDEX = baseWaypoints.size();
@@ -180,7 +178,7 @@ public final class LeftSideAuto extends Auto {
                         Commands.waitUntil(() -> ShootingKinematics.get().isShootingParametersMet()),
                         Commands.waitSeconds(2.0)
                 ),
-                drive.driveJoystick(() -> DriveJoystickGoal.Mode.Aim),
+                drive.stop().withAiming(),
                 superstructure.setGoal(Superstructure.Goal.SHOOT)
         ).onlyWhile(DriverStation::isAutonomousEnabled);
 
