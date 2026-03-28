@@ -21,7 +21,6 @@ import org.littletonrobotics.junction.mechanism.LoggedMechanism2d;
 import org.littletonrobotics.junction.mechanism.LoggedMechanismLigament2d;
 import org.littletonrobotics.junction.mechanism.LoggedMechanismRoot2d;
 
-import static edu.wpi.first.units.Units.Seconds;
 import static frc.robot.subsystems.leds.LEDConstants.createIO;
 import static frc.robot.subsystems.leds.LEDConstants.length;
 
@@ -39,8 +38,6 @@ public class LEDs implements Periodic {
     private final LEDsIO io = createIO();
     private final AddressableLEDBuffer buffer = new AddressableLEDBuffer(length);
     private final AddressableLEDBufferView firstHalfView = new AddressableLEDBufferView(buffer, 0, length / 2 - 1);
-    private final AddressableLEDBufferView firstQuarterView = new AddressableLEDBufferView(firstHalfView, 0, firstHalfView.getLength() / 2 - 1);
-    private final AddressableLEDBufferView secondQuarterView = new AddressableLEDBufferView(firstHalfView, firstHalfView.getLength() / 2, firstHalfView.getLength() - 1);
     private final AddressableLEDBufferView secondHalfView = new AddressableLEDBufferView(buffer, length / 2, length - 1);
 
     private final LoggedMechanism2d mechanism = new LoggedMechanism2d(1.5, 2.1, new Color8Bit(Color.kBlack));
@@ -82,7 +79,12 @@ public class LEDs implements Periodic {
 
     @Override
     public void periodicAfterCommands() {
-        setLEDPatterns();
+        if (DriverStation.isDisabled()) {
+            getDisabledPattern().applyTo(buffer);
+        } else {
+            getEnabledPatternFirstHalf().applyTo(firstHalfView);
+            getEnabledPatternSecondHalf().applyTo(secondHalfView);
+        }
 
         io.setData(buffer);
         for (int i = 0; i < buffer.getLength(); i++) {
@@ -96,19 +98,41 @@ public class LEDs implements Periodic {
         }
         //        System.out.println();
         Logger.recordOutput("LEDs/Mechanism", mechanism);
-    }v
+    }
 
-    private void setLEDPatterns() {
+    private LEDPattern getDisabledPattern() {
+        if (operatorDashboard.hoodNotHomedAlert.get()) {
+            return LEDPatterns.hoodNotHomed;
+        }
+
+        if (operatorDashboard.intakePivotNotHomedAlert.get()) {
+            return LEDPatterns.intakePivotNotHomed;
+        }
+
+        if (operatorDashboard.autoNotChosenAlert.get()) {
+            return LEDPatterns.autoNotChosen;
+        }
+
+        if (operatorDashboard.isBatteryVoltageAlertActive()) {
+            return LEDPatterns.lowBattery;
+        }
+
+        //if (operatorDashboard.autoChosen.get() && autoManager.getSelectedAutoStartingPose().isPresent() && !autoManager.isAtAutoStartingPose()) {
+        //    LEDPatterns.autoPlacementProgress(autoManager::getPlacementProgress).applyTo(buffer);
+        //} else {
+        return LEDPatterns.autoReady;
+        //}
+    }
+
+    private LEDPattern getEnabledPatternFirstHalf() {
         boolean somethingIsReallyWrong =
                 aprilTagVision.anyCamerasDisconnected()
                         //|| gamePieceVision.anyCamerasDisconnected()
                         || superstructure.hood.isEmergencyStopped()
                         || superintake.intakePivot.isEmergencyStopped();
-        boolean lowBattery = operatorDashboard.isBatteryVoltageAlertActive();
 
         if (somethingIsReallyWrong) {
-            LEDPatterns.somethingIsReallyWrong.applyTo(buffer);
-            return;
+            return LEDPatterns.somethingIsReallyWrong;
         }
 
         if (
@@ -116,44 +140,18 @@ public class LEDs implements Periodic {
                         superstructure.flywheel.highTemperatureAlert.get() ||
                         superstructure.hood.highTemperatureAlert.get()
         ) {
-            LEDPatterns.hotMotors.applyTo(buffer);
-            return;
+            return LEDPatterns.hotMotors;
         }
 
-        if (DriverStation.isDisabled()) {
-            if (lowBattery) {
-                LEDPatterns.lowBattery.applyTo(buffer);
-            } else {
-                //if (operatorDashboard.autoChosen.get() && autoManager.getSelectedAutoStartingPose().isPresent() && !autoManager.isAtAutoStartingPose()) {
-                //    LEDPatterns.autoPlacementProgress(autoManager::getPlacementProgress).applyTo(buffer);
-                //} else {
-                LEDPatterns.autoReady.applyTo(buffer);
-                //}
-            }
-            return;
+        if (operatorDashboard.isBatteryVoltageAlertActive()) {
+            return LEDPatterns.lowBattery;
         }
 
-        LEDPattern hubPattern;
-        if (hubShiftTracker.getShiftInfo().remainingTime() < 10.0) {
-            hubPattern = hubShiftTracker.getShiftInfo().active()
-                    ? LEDPatterns.active.blink(Seconds.of(Math.max(0.05, hubShiftTracker.getShiftInfo().remainingTime() / 10.0)))
-                    : LEDPatterns.inactive.blink(Seconds.of(Math.max(0.05, hubShiftTracker.getShiftInfo().remainingTime() / 10.0)));
-        } else {
-            hubPattern = hubShiftTracker.getShiftInfo().active()
-                    ? LEDPatterns.active
-                    : LEDPatterns.inactive;
-        }
-        hubPattern.applyTo(secondHalfView);
+        return LEDPatterns.idle;
+    }
 
-        LEDPattern superintakePattern = switch (superintake.getGoal()) {
-            case IDLE, DEPLOY -> null;
-            case INTAKE, SHOOT -> LEDPatterns.intaking;
-            case EJECT -> LEDPatterns.eject;
-            case HOME_INTAKE_PIVOT, HOME_INTAKE_PIVOT_FINALIZE -> LEDPatterns.homing;
-        };
-
-        LEDPattern superstructurePattern = switch (superstructure.getGoal()) {
-            case IDLE -> null;
+    private LEDPattern getEnabledPatternSecondHalf() {
+        return switch (superstructure.getGoal()) {
             case SHOOT -> shootingKinematics.isShootingParametersMet()
                     ? LEDPatterns.shooting
                     : (
@@ -162,30 +160,8 @@ public class LEDs implements Periodic {
                             : LEDPatterns.waitingForShift
             );
             case SHOOT_FORCE -> LEDPatterns.shootingForced;
-            case EJECT -> LEDPatterns.eject;
-            case HOME_HOOD, HOME_HOOD_FINALIZE -> LEDPatterns.homing;
+            default -> LEDPatterns.idle;
         };
-
-        if (superintakePattern != null && superstructurePattern != null) {
-            superintakePattern.applyTo(firstQuarterView);
-            superstructurePattern.applyTo(secondQuarterView);
-            return;
-        }
-        if (superintakePattern != null) {
-            superintakePattern.applyTo(firstHalfView);
-            return;
-        }
-        if (superstructurePattern != null) {
-            superstructurePattern.applyTo(firstHalfView);
-            return;
-        }
-
-        if (lowBattery) {
-            LEDPatterns.lowBattery.applyTo(firstHalfView);
-            return;
-        }
-
-        LEDPatterns.idle.applyTo(firstHalfView);
     }
 }
 
