@@ -96,13 +96,14 @@ public class LEDs implements Periodic {
         }
         //        System.out.println();
         Logger.recordOutput("LEDs/Mechanism", mechanism);
-    }
+    }v
 
     private void setLEDPatterns() {
         boolean somethingIsReallyWrong =
                 aprilTagVision.anyCamerasDisconnected()
                         //|| gamePieceVision.anyCamerasDisconnected()
-                        || superstructure.hood.isEmergencyStopped();
+                        || superstructure.hood.isEmergencyStopped()
+                        || superintake.intakePivot.isEmergencyStopped();
         boolean lowBattery = operatorDashboard.isBatteryVoltageAlertActive();
 
         if (somethingIsReallyWrong) {

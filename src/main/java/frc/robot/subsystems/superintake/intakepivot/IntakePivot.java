@@ -73,10 +73,14 @@ public class IntakePivot implements Periodic {
     private TrapezoidProfile.State lookaheadState = new TrapezoidProfile.State();
 
     @Getter
+    private boolean emergencyStopped = false;
+
+    @Getter
     private boolean atVelocityThresholdForHoming = false;
     private final Debouncer homingVelocityDebouncer = new Debouncer(0.1, Debouncer.DebounceType.kRising);
 
     private final Alert motorDisconnectedAlert = new Alert("Intake pivot motor is disconnected.", Alert.AlertType.kError);
+    private final Alert emergencyStoppedAlert = new Alert("Intake pivot is E-stopped!", Alert.AlertType.kError);
 
     private static IntakePivot instance;
 
@@ -103,8 +107,24 @@ public class IntakePivot implements Periodic {
 
         energyLogger.reportPowerUsage("IntakePivot", inputs.connected ? inputs.appliedVolts * inputs.supplyCurrentAmps : 0.0);
 
+        if (!emergencyStopped) {
+            if (operatorDashboard.intakePivotEStop.get()) {
+                io.setVoltageRequest(0.0);
+                emergencyStopped = true;
+                operatorDashboard.intakePivotEStop.set(true);
+            }
+        } else {
+            if (!operatorDashboard.intakePivotEStop.get()) {
+                // Let operator turn off e-stop
+                emergencyStopped = false;
+                operatorDashboard.intakePivotEStop.set(false);
+            }
+        }
+        emergencyStoppedAlert.set(emergencyStopped);
+
         atVelocityThresholdForHoming = homingVelocityDebouncer.calculate(goal == Goal.HOME && Math.abs(inputs.velocityRadPerSec) < 0.1);
 
+        // Apply network inputs
         if (gains.hasChanged()) {
             io.setPositionPIDF(gains);
         }
@@ -114,7 +134,12 @@ public class IntakePivot implements Periodic {
     public void periodicAfterCommands() {
         Logger.recordOutput("Superintake/IntakePivot/Goal", goal);
 
-        if (DriverStation.isDisabled() || goal == Goal.HOME_FINALIZE) {
+        // Turn off E-stop when homing
+        if (goal == Goal.HOME) {
+            emergencyStopped = false;
+        }
+
+        if (DriverStation.isDisabled() || emergencyStopped || goal == Goal.HOME_FINALIZE) {
             io.setVoltageRequest(0.0);
 
             // Reset states to current position

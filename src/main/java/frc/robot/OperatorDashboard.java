@@ -52,6 +52,7 @@ public class OperatorDashboard implements Periodic {
     public final LoggedNetworkBooleanExt disableShiftTracking = new LoggedNetworkBooleanExt(prefix + "DisableShiftTracking", BuildConstants.isSim);
     public final LoggedNetworkBooleanExt driveTurnAbsolutePID = new LoggedNetworkBooleanExt(prefix + "DriveTurnAbsolutePID", false);
     public final LoggedNetworkBooleanExt hoodEStop = new LoggedNetworkBooleanExt(prefix + "HoodEStop", false);
+    public final LoggedNetworkBooleanExt intakePivotEStop = new LoggedNetworkBooleanExt(prefix + "IntakePivotEStop", false);
 
     @Getter
     private ScoringMode selectedScoringMode = ScoringMode.ShootAndPassAutomatic;
