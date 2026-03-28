@@ -132,12 +132,10 @@ public class Superstructure extends CommandBasedSubsystem {
                 flywheel.setGoal(Flywheel.Goal.IDLE);
                 feeder.setGoal(Feeder.Goal.IDLE);
                 spindexer.setGoal(Spindexer.Goal.IDLE);
-                if (goal == Goal.HOME_HOOD) {
-                    hood.setGoal(Hood.Goal.HOME);
-                } else if (goal == Goal.HOME_HOOD_FINALIZE) {
-                    hood.setGoal(Hood.Goal.HOME_FINALIZE);
-                } else {
-                    hood.setGoal(Hood.Goal.STOW);
+                switch (goal) {
+                    case HOME_HOOD -> hood.setGoal(Hood.Goal.HOME);
+                    case HOME_HOOD_FINALIZE -> hood.setGoal(Hood.Goal.HOME_FINALIZE);
+                    default -> hood.setGoal(Hood.Goal.STOW);
                 }
             }
             case SHOOT, SHOOT_FORCE -> {

@@ -117,7 +117,7 @@ public class RobotContainer {
                 .onTrue(Commands.runOnce(() -> operatorDashboard.homeIntakePivot.set(false)).ignoringDisable(true));
         new Trigger(operatorDashboard.homeIntakePivot::get)
                 .and(DriverStation::isEnabled)
-                .onTrue(superintake.setGoal(Superintake.Goal.HOME_INTAKE_PIVOT));
+                .onTrue(superintake.setGoalHomeIntakePivot());
         new Trigger(operatorDashboard.homeIntakePivot::get)
                 .and(DriverStation::isDisabled)
                 .onTrue(Commands.runOnce(superintake.intakePivot::finishHoming).ignoringDisable(true));

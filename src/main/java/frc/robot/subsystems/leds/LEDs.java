@@ -148,7 +148,7 @@ public class LEDs implements Periodic {
             case IDLE, DEPLOY -> null;
             case INTAKE, SHOOT -> LEDPatterns.intaking;
             case EJECT -> LEDPatterns.eject;
-            case HOME_INTAKE_PIVOT -> LEDPatterns.homing;
+            case HOME_INTAKE_PIVOT, HOME_INTAKE_PIVOT_FINALIZE -> LEDPatterns.homing;
         };
 
         LEDPattern superstructurePattern = switch (superstructure.getGoal()) {
@@ -162,7 +162,7 @@ public class LEDs implements Periodic {
             );
             case SHOOT_FORCE -> LEDPatterns.shootingForced;
             case EJECT -> LEDPatterns.eject;
-            case HOME_HOOD -> LEDPatterns.homing;
+            case HOME_HOOD, HOME_HOOD_FINALIZE -> LEDPatterns.homing;
         };
 
         if (superintakePattern != null && superstructurePattern != null) {

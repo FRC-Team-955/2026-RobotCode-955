@@ -25,32 +25,27 @@ public class Superintake extends CommandBasedSubsystem {
         SHOOT,
         EJECT,
         HOME_INTAKE_PIVOT,
-        FINALIZE_HOME_INTAKE_PIVOT,
+        HOME_INTAKE_PIVOT_FINALIZE,
     }
 
     @Getter
     private Goal goal = Goal.IDLE;
 
-    private boolean shouldGoalEnd() {
-        if (goal == Goal.HOME_INTAKE_PIVOT) {
-            if (intakePivot.isAtVelocityThresholdForHoming()) {
-                intakePivot.finishHoming();
-                return true;
-            }
-        }
-        return false;
-    }
-
     public Command setGoal(Goal goal) {
-        return startIdle(() -> this.goal = goal)
-                .until(this::shouldGoalEnd);
+        if (goal == Goal.HOME_INTAKE_PIVOT || goal == Goal.HOME_INTAKE_PIVOT_FINALIZE) {
+            Util.error("Use setGoalHomeIntakePivot");
+        }
+
+        return startIdle(() -> this.goal = goal);
     }
 
-    public Command setHomeIntakePivotGoal() {
+    public Command setGoalHomeIntakePivot() {
         return CommandsExt.eagerSequence(
                 runOnce(() -> this.goal = Goal.HOME_INTAKE_PIVOT),
                 Commands.waitUntil(intakePivot::isAtVelocityThresholdForHoming),
-
+                runOnce(() -> this.goal = Goal.HOME_INTAKE_PIVOT_FINALIZE),
+                Commands.waitSeconds(0.5),
+                runOnce(intakePivot::finishHoming)
         );
     }
 
@@ -99,8 +94,11 @@ public class Superintake extends CommandBasedSubsystem {
                 intakePivot.setGoal(IntakePivot.Goal.DEPLOY);
                 intakeRollers.setGoal(IntakeRollers.Goal.EJECT);
             }
-            case HOME_INTAKE_PIVOT -> {
-                intakePivot.setGoal(IntakePivot.Goal.HOME);
+            case HOME_INTAKE_PIVOT, HOME_INTAKE_PIVOT_FINALIZE -> {
+                switch (goal) {
+                    case HOME_INTAKE_PIVOT -> intakePivot.setGoal(IntakePivot.Goal.HOME);
+                    case HOME_INTAKE_PIVOT_FINALIZE -> intakePivot.setGoal(IntakePivot.Goal.HOME_FINALIZE);
+                }
                 intakeRollers.setGoal(IntakeRollers.Goal.IDLE);
             }
         }
