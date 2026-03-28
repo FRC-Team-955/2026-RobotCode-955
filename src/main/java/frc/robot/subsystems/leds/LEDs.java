@@ -125,13 +125,11 @@ public class LEDs implements Periodic {
     }
 
     private LEDPattern getEnabledPatternFirstHalf() {
-        boolean somethingIsReallyWrong =
-                aprilTagVision.anyCamerasDisconnected()
-                        //|| gamePieceVision.anyCamerasDisconnected()
-                        || superstructure.hood.isEmergencyStopped()
-                        || superintake.intakePivot.isEmergencyStopped();
-
-        if (somethingIsReallyWrong) {
+        if (aprilTagVision.anyCamerasDisconnected()
+                //|| gamePieceVision.anyCamerasDisconnected()
+                || superstructure.hood.isEmergencyStopped()
+                || superintake.intakePivot.isEmergencyStopped()
+                || hubShiftTracker.gameDataBrokenAlert.get()) {
             return LEDPatterns.somethingIsReallyWrong;
         }
 
