@@ -17,9 +17,9 @@ public class OrbitAtOutpostSecondAuto extends Auto {
     private static final Superstructure superstructure = Superstructure.get();
 
     //private static final double startingPositionY = 0.45;
-    private static final double startingPositionY = 0.52;
+    private static final double startingPositionY = 0.6;
     //private static final Pose2d trenchShootingPosition = new Pose2d(3.6, 0.6, Rotation2d.kCW_90deg);
-    private static final Pose2d trenchShootingPosition = new Pose2d(3.6, 0.67, Rotation2d.kCW_90deg);
+    private static final Pose2d trenchShootingPosition = new Pose2d(3.88, 0.65, Rotation2d.kCW_90deg);
 
     public OrbitAtOutpostSecondAuto() {
         super(
@@ -54,7 +54,7 @@ public class OrbitAtOutpostSecondAuto extends Auto {
                 AutoHelpers.finalWaypoint(() -> new Pose2d(
                         FieldConstants.LinesVertical.center,
                         //3.3,
-                        3.3,
+                        3.51,
                         Rotation2d.kCCW_90deg
                 ), AutoHelpers.intakeConstraints, false).withTimeout(3),
                 superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
@@ -85,7 +85,7 @@ public class OrbitAtOutpostSecondAuto extends Auto {
 
                 //move to entrance to trench
                 AutoHelpers.intermediateWaypoint(() -> new Pose2d(
-                        6.07,//6.1 og 6.7 worked
+                        6.1,//6.1 og 6.7 worked
                         startingPositionY, //og trench shooting work
                         trenchShootingPosition.getRotation()
                 ), defaultMoveToConstraints, false),
@@ -104,7 +104,7 @@ public class OrbitAtOutpostSecondAuto extends Auto {
 
                 // move out of trench
                 AutoHelpers.finalWaypoint(() -> new Pose2d(
-                        6.5,
+                        OrbitAtDepotSecondAuto.exitTrenchX,
                         trenchShootingPosition.getY(),
                         trenchShootingPosition.getRotation()
                 ), defaultMoveToConstraints, false),
@@ -119,9 +119,9 @@ public class OrbitAtOutpostSecondAuto extends Auto {
                 //).withTimeout(3),
                 Commands.parallel(
                         superintake.setGoal(Superintake.Goal.INTAKE).until(() -> true),
-                        AutoHelpers.trajectory(ChoreoTraj.OrbitOutpost)),
-                superintake.setGoal(Superintake.Goal.IDLE
-                ).until(() -> true),
+                        AutoHelpers.trajectory(ChoreoTraj.OrbitOutpost)
+                ),
+                superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
                 AutoHelpers.finalWaypoint(() -> new Pose2d(
                         FieldConstants.LinesVertical.center - 1.5,
                         trenchShootingPosition.getY() + 0.15,
@@ -170,7 +170,7 @@ public class OrbitAtOutpostSecondAuto extends Auto {
 
                 // move to entrance to trench
                 AutoHelpers.intermediateWaypoint(() -> new Pose2d(
-                        6.0,//6.1 og 6.7 worked
+                        6.1,//6.1 og 6.7 worked
                         startingPositionY, //og trench shooting work
                         trenchShootingPosition.getRotation()
                 ), defaultMoveToConstraints, false),
