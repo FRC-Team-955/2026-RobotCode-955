@@ -8,7 +8,9 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.Util;
+import frc.lib.commands.CommandsExt;
 import frc.lib.network.LoggedTunableNumber;
 import frc.lib.subsystem.CommandBasedSubsystem;
 import frc.robot.BuildConstants;
@@ -57,24 +59,28 @@ public class Superstructure extends CommandBasedSubsystem {
         SHOOT_FORCE,
         EJECT,
         HOME_HOOD,
+        HOME_HOOD_FINALIZE,
     }
 
     @Getter
     private Goal goal = Goal.IDLE;
 
-    private boolean shouldGoalEnd() {
-        if (goal == Goal.HOME_HOOD) {
-            if (hood.isAtVelocityThresholdForHoming()) {
-                hood.finishHoming();
-                return true;
-            }
+    public Command setGoal(Goal goal) {
+        if (goal == Goal.HOME_HOOD || goal == Goal.HOME_HOOD_FINALIZE) {
+            Util.error("Use setGoalHomeHood");
         }
-        return false;
+
+        return startIdle(() -> this.goal = goal);
     }
 
-    public Command setGoal(Goal goal) {
-        return startIdle(() -> this.goal = goal)
-                .until(this::shouldGoalEnd);
+    public Command setGoalHomeHood() {
+        return CommandsExt.eagerSequence(
+                runOnce(() -> this.goal = Goal.HOME_HOOD),
+                Commands.waitUntil(hood::isAtVelocityThresholdForHoming),
+                runOnce(() -> this.goal = Goal.HOME_HOOD_FINALIZE),
+                Commands.waitSeconds(0.5),
+                runOnce(hood::finishHoming)
+        );
     }
 
     private final Debouncer hasFuelDebouncer = new Debouncer(hasFuelDebounceSeconds.get(), Debouncer.DebounceType.kFalling);
@@ -122,12 +128,14 @@ public class Superstructure extends CommandBasedSubsystem {
         Logger.recordOutput("Superstructure/Goal", goal);
 
         switch (goal) {
-            case IDLE, HOME_HOOD -> {
+            case IDLE, HOME_HOOD, HOME_HOOD_FINALIZE -> {
                 flywheel.setGoal(Flywheel.Goal.IDLE);
                 feeder.setGoal(Feeder.Goal.IDLE);
                 spindexer.setGoal(Spindexer.Goal.IDLE);
                 if (goal == Goal.HOME_HOOD) {
                     hood.setGoal(Hood.Goal.HOME);
+                } else if (goal == Goal.HOME_HOOD_FINALIZE) {
+                    hood.setGoal(Hood.Goal.HOME_FINALIZE);
                 } else {
                     hood.setGoal(Hood.Goal.STOW);
                 }

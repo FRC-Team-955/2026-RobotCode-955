@@ -40,6 +40,7 @@ public class Hood implements Periodic {
         STOW(() -> minPositionRad),
         SHOOT(() -> convertBetweenShotAngleAndHoodAngleRad(shootingKinematics.getShootingParameters().angleRad())),
         HOME(null),
+        HOME_FINALIZE(null),
         ;
 
         private final DoubleSupplier setpointRad;
@@ -96,8 +97,9 @@ public class Hood implements Periodic {
 
         energyLogger.reportPowerUsage("Hood", inputs.connected ? inputs.appliedVolts * inputs.supplyCurrentAmps : 0.0);
 
+        boolean shouldEmergencyStop = emergencyStopDebouncer.calculate(inputs.statorCurrentAmps >= 20);
         if (!emergencyStopped) {
-            if (emergencyStopDebouncer.calculate(inputs.statorCurrentAmps >= 20) || operatorDashboard.hoodEStop.get()) {
+            if (shouldEmergencyStop || operatorDashboard.hoodEStop.get()) {
                 io.setVoltageRequest(0.0);
                 io.setNeutralMode(NeutralModeValue.Coast);
                 emergencyStopped = true;
@@ -134,7 +136,7 @@ public class Hood implements Periodic {
             emergencyStopped = false;
         }
 
-        if (DriverStation.isDisabled() || emergencyStopped) {
+        if (DriverStation.isDisabled() || emergencyStopped || goal == Goal.HOME_FINALIZE) {
             io.setVoltageRequest(0.0);
         } else if (goal == Goal.HOME) {
             io.setVoltageRequest(-0.5);

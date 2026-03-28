@@ -126,7 +126,7 @@ public class RobotContainer {
                 .onTrue(Commands.runOnce(() -> operatorDashboard.homeHood.set(false)).ignoringDisable(true));
         new Trigger(operatorDashboard.homeHood::get)
                 .and(DriverStation::isEnabled)
-                .onTrue(superstructure.setGoal(Superstructure.Goal.HOME_HOOD));
+                .onTrue(superstructure.setGoalHomeHood());
         new Trigger(operatorDashboard.homeHood::get)
                 .and(DriverStation::isDisabled)
                 .onTrue(Commands.runOnce(superstructure.hood::finishHoming).ignoringDisable(true));
