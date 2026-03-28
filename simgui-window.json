@@ -24,11 +24,11 @@
     "GLOBAL": {
       "font": "Proggy Dotted",
       "fps": "120",
-      "height": "771",
+      "height": "1057",
       "maximized": "1",
       "style": "0",
       "userScale": "2",
-      "width": "1280",
+      "width": "1920",
       "xpos": "218",
       "ypos": "762"
     }
@@ -72,14 +72,14 @@
     "###FMS": {
       "Collapsed": "0",
       "DockId": "0x00000004,0",
-      "Pos": "21,203",
-      "Size": "356,258"
+      "Pos": "21,18",
+      "Size": "356,443"
     },
     "###Joysticks": {
       "Collapsed": "0",
       "DockId": "0x00000009,0",
-      "Pos": "249,463",
-      "Size": "891,289"
+      "Pos": "21,463",
+      "Size": "1119,289"
     },
     "###Keyboard 0 Settings": {
       "Collapsed": "0",
@@ -120,7 +120,7 @@
       "Collapsed": "0",
       "DockId": "0x00000005,0",
       "Pos": "21,463",
-      "Size": "226,289"
+      "Size": "32,35"
     },
     "###Timing": {
       "Collapsed": "0",
@@ -136,7 +136,7 @@
       "Collapsed": "0",
       "DockId": "0x00000003,0",
       "Pos": "21,18",
-      "Size": "356,183"
+      "Size": "32,35"
     }
   }
 }

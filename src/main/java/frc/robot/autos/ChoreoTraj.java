@@ -24,7 +24,7 @@ public record ChoreoTraj(
     public static final ChoreoTraj AuraAutoDepotIntake = new ChoreoTraj(
         "AuraAutoDepotIntake",
         OptionalInt.empty(),
-        1.39345,
+        1.45939,
         new Pose2d(2.5, 2.2, Rotation2d.fromRadians(3.14159)),
         new Pose2d(1.7, 1.2, Rotation2d.fromRadians(0))
     );
