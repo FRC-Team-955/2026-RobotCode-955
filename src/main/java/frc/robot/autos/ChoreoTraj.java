@@ -21,12 +21,12 @@ public record ChoreoTraj(
     Pose2d initialPoseBlue,
     Pose2d endPoseBlue
 ) {
-    public static final ChoreoTraj AuraAutoDepotIntake = new ChoreoTraj(
-        "AuraAutoDepotIntake",
+    public static final ChoreoTraj StealAuto1540_FirstPass = new ChoreoTraj(
+        "StealAuto1540_FirstPass",
         OptionalInt.empty(),
-        1.83148,
-        new Pose2d(2.5, 2.2, Rotation2d.fromRadians(3.14159)),
-        new Pose2d(1.02, 0.85, Rotation2d.fromRadians(-1.4))
+        4.52658,
+        new Pose2d(5.9, 0.65, Rotation2d.fromRadians(1.5708)),
+        new Pose2d(2.79278, 0.7572, Rotation2d.fromRadians(-2.18709))
     );
     public static final ChoreoTraj CanadianDepot_FirstPass = new ChoreoTraj(
         "CanadianDepot_FirstPass",
@@ -35,19 +35,19 @@ public record ChoreoTraj(
         new Pose2d(6.34, 7.55, Rotation2d.fromRadians(-1.5708)),
         new Pose2d(5.71094, 5.53025, Rotation2d.fromRadians(2.35619))
     );
-    public static final ChoreoTraj CanadianDepot_SecondPath = new ChoreoTraj(
-        "CanadianDepot_SecondPath",
-        OptionalInt.empty(),
-        2.42241,
-        new Pose2d(5.77121, 7.55, Rotation2d.fromRadians(-1.5708)),
-        new Pose2d(8.58451, 5.69883, Rotation2d.fromRadians(1.5708))
-    );
     public static final ChoreoTraj CanadianOutpost_FirstPass = new ChoreoTraj(
         "CanadianOutpost_FirstPass",
         OptionalInt.empty(),
         3.18619,
         new Pose2d(6.43947, 0.64949, Rotation2d.fromRadians(1.5708)),
         new Pose2d(5.7009, 2.41898, Rotation2d.fromRadians(-1.99499))
+    );
+    public static final ChoreoTraj CanadianDepot_SecondPath = new ChoreoTraj(
+        "CanadianDepot_SecondPath",
+        OptionalInt.empty(),
+        2.42241,
+        new Pose2d(5.77121, 7.55, Rotation2d.fromRadians(-1.5708)),
+        new Pose2d(8.58451, 5.69883, Rotation2d.fromRadians(1.5708))
     );
     public static final ChoreoTraj CanadianOutpost_SecondPass = new ChoreoTraj(
         "CanadianOutpost_SecondPass",
@@ -56,19 +56,19 @@ public record ChoreoTraj(
         new Pose2d(6.39331, 0.60333, Rotation2d.fromRadians(1.5708)),
         new Pose2d(5.51626, 2.57285, Rotation2d.fromRadians(-2.62245))
     );
-    public static final ChoreoTraj OrbitDepot = new ChoreoTraj(
-        "OrbitDepot",
-        OptionalInt.empty(),
-        2.71745,
-        new Pose2d(6.5, 7.4, Rotation2d.fromRadians(-1.5708)),
-        new Pose2d(7, 4, Rotation2d.fromRadians(1.5708))
-    );
     public static final ChoreoTraj OrbitOutpost = new ChoreoTraj(
         "OrbitOutpost",
         OptionalInt.empty(),
         2.71745,
         new Pose2d(6.5, 0.6, Rotation2d.fromRadians(1.5708)),
         new Pose2d(7, 4, Rotation2d.fromRadians(-1.5708))
+    );
+    public static final ChoreoTraj AuraAutoDepotIntake = new ChoreoTraj(
+        "AuraAutoDepotIntake",
+        OptionalInt.empty(),
+        1.83148,
+        new Pose2d(2.5, 2.2, Rotation2d.fromRadians(3.14159)),
+        new Pose2d(1.02, 0.85, Rotation2d.fromRadians(-1.4))
     );
     public static final ChoreoTraj OrbitPassingOutpost = new ChoreoTraj(
         "OrbitPassingOutpost",
@@ -133,19 +133,40 @@ public record ChoreoTraj(
         new Pose2d(2.61969, 3.01936, Rotation2d.fromRadians(-2.66694)),
         new Pose2d(0.81781, 0.76175, Rotation2d.fromRadians(-2.43397))
     );
+    public static final ChoreoTraj CanadianOutpsot_lessAgroSecondPass = new ChoreoTraj(
+        "CanadianOutpsot_lessAgroSecondPass",
+        OptionalInt.empty(),
+        3.84442,
+        new Pose2d(5.77121, 0.64949, Rotation2d.fromRadians(1.5708)),
+        new Pose2d(5.7009, 2.41898, Rotation2d.fromRadians(-1.99499))
+    );
+    public static final ChoreoTraj OrbitDepot = new ChoreoTraj(
+        "OrbitDepot",
+        OptionalInt.empty(),
+        2.71745,
+        new Pose2d(6.5, 7.4, Rotation2d.fromRadians(-1.5708)),
+        new Pose2d(7, 4, Rotation2d.fromRadians(1.5708))
+    );
+    public static final ChoreoTraj OrbitDepotTilted = new ChoreoTraj(
+        "OrbitDepotTilted",
+        OptionalInt.empty(),
+        2.30438,
+        new Pose2d(5.99325, 7.40432, Rotation2d.fromRadians(-1.5708)),
+        new Pose2d(7, 4, Rotation2d.fromRadians(1.5708))
+    );
 
     /**
      * A map between trajectory names and their corresponding data.
      * This allows for trajectory data to be looked up with strings during runtime.
      */
     public static final Map<String, ChoreoTraj> ALL_TRAJECTORIES = Map.ofEntries(
-        Map.entry("AuraAutoDepotIntake", AuraAutoDepotIntake),
+        Map.entry("StealAuto1540_FirstPass", StealAuto1540_FirstPass),
         Map.entry("CanadianDepot_FirstPass", CanadianDepot_FirstPass),
-        Map.entry("CanadianDepot_SecondPath", CanadianDepot_SecondPath),
         Map.entry("CanadianOutpost_FirstPass", CanadianOutpost_FirstPass),
+        Map.entry("CanadianDepot_SecondPath", CanadianDepot_SecondPath),
         Map.entry("CanadianOutpost_SecondPass", CanadianOutpost_SecondPass),
-        Map.entry("OrbitDepot", OrbitDepot),
         Map.entry("OrbitOutpost", OrbitOutpost),
+        Map.entry("AuraAutoDepotIntake", AuraAutoDepotIntake),
         Map.entry("OrbitPassingOutpost", OrbitPassingOutpost),
         Map.entry("OrbitPassingOutpost$0", OrbitPassingOutpost$0),
         Map.entry("OrbitPassingOutpost$1", OrbitPassingOutpost$1),
@@ -153,7 +174,10 @@ public record ChoreoTraj(
         Map.entry("OrbitPassingOutpost$3", OrbitPassingOutpost$3),
         Map.entry("OrbitPassingOutpost$4", OrbitPassingOutpost$4),
         Map.entry("OrbitPassingOutpost$5", OrbitPassingOutpost$5),
-        Map.entry("OrbitPassingOutpost$6", OrbitPassingOutpost$6)
+        Map.entry("OrbitPassingOutpost$6", OrbitPassingOutpost$6),
+        Map.entry("CanadianOutpsot_lessAgroSecondPass", CanadianOutpsot_lessAgroSecondPass),
+        Map.entry("OrbitDepot", OrbitDepot),
+        Map.entry("OrbitDepotTilted", OrbitDepotTilted)
     );
 
     /**
