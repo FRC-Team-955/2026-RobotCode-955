@@ -86,6 +86,7 @@ public class RobotState implements Periodic {
     /**
      * Field relative
      */
+    @Getter
     @Setter
     private Translation2d filteredAccelerationMetersPerSecPerSec = new Translation2d();
 
