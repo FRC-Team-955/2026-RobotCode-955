@@ -2,8 +2,6 @@ plugins {
     id "java"
     id "edu.wpi.first.GradleRIO" version "2026.2.1"
     id "org.photonvision.tools.WpilibTools" version "2.4.1-photon"
-    id 'cpp'
-    id 'edu.wpi.first.NativeUtils' version '2026.0.1'
     id "idea"
     id "edu.wpi.first.wpilib.repositories.WPILibRepositoriesPlugin" version "2020.2"
 }
