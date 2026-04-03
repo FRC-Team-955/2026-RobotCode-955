@@ -80,14 +80,14 @@ public class LEDPatterns {
     public static final LEDPattern autoReady = LEDPattern.solid(Color.kRed).breathe(Seconds.of(1));
     public static final LEDPattern hoodNotHomed = LEDPattern.gradient(
             LEDPattern.GradientType.kContinuous,
-            Color.kOrange,
-            Color.kRed
+            Color.kGreen,
+            Color.kBlack
     ).scrollAtRelativeSpeed(Hertz.of(3));
     public static final LEDPattern intakePivotNotHomed = LEDPattern.gradient(
             LEDPattern.GradientType.kContinuous,
-            Color.kBlue,
+            Color.kOrange,
             Color.kBlack
-    ).scrollAtRelativeSpeed(Hertz.of(3)).reversed();
+    ).scrollAtRelativeSpeed(Hertz.of(3));
 
     // Enabled
     public static final LEDPattern idle = LEDPattern.kOff;

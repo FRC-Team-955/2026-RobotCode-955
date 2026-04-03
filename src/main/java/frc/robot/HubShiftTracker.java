@@ -72,7 +72,7 @@ public class HubShiftTracker implements Periodic {
     private static final boolean[] activeSchedule = {true, true, false, true, false, true};
     private static final boolean[] inactiveSchedule = {true, false, true, false, true, true};
 
-    private final Alert gameDataBrokenAlert = new Alert("Game data is broken. Please manually enter who wins in auto.", Alert.AlertType.kError);
+    public final Alert gameDataBrokenAlert = new Alert("Game data is broken. Please manually enter who wins in auto.", Alert.AlertType.kError);
 
     private final Timer shiftTimer = new Timer();
     @Getter

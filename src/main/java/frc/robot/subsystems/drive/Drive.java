@@ -43,10 +43,7 @@ import org.littletonrobotics.junction.Logger;
 
 import java.util.Arrays;
 import java.util.OptionalDouble;
-import java.util.function.DoubleSupplier;
-import java.util.function.Function;
-import java.util.function.IntToDoubleFunction;
-import java.util.function.Supplier;
+import java.util.function.*;
 
 import static frc.lib.HighFrequencySamplingThread.highFrequencyLock;
 import static frc.robot.subsystems.drive.DriveConstants.*;
@@ -84,7 +81,7 @@ public class Drive extends CommandBasedSubsystem {
 
     private @Nullable Supplier<OptionalDouble> headingOverrideSetpointSupplier = null;
     /** Takes FIELD RELATIVE wanted speeds and gives a feedfoward in rad/sec */
-    private @Nullable Function<ChassisSpeeds, OptionalDouble> headingOverrideFeedforwardSupplier = null;
+    private @Nullable BiFunction<ChassisSpeeds, Translation2d, OptionalDouble> headingOverrideFeedforwardSupplier = null;
     private final PIDController headingOverrideController = headingOverrideGains
             .toPIDWrapRadians(
                     moveToConfig.angularPositionToleranceRad().get(),
@@ -383,6 +380,7 @@ public class Drive extends CommandBasedSubsystem {
             // We need to constrain the linear part before giving the speeds to the heading override
             // feedforward supplier or the feedforward would be for the speeds BEFORE limiting
             constrainer.constrainFieldRelativeSpeedsLinear(wantedFieldSpeeds);
+            Translation2d wantedAcceleration = constrainer.getFieldRelativeAccelerationLinear();
 
             if (headingOverrideSetpoint.isPresent()) {
                 wantedFieldSpeeds.omegaRadiansPerSecond = headingOverrideController.calculate(
@@ -399,7 +397,7 @@ public class Drive extends CommandBasedSubsystem {
 
                 OptionalDouble feedforward = headingOverrideFeedforwardSupplier == null
                         ? OptionalDouble.empty()
-                        : headingOverrideFeedforwardSupplier.apply(wantedFieldSpeeds);
+                        : headingOverrideFeedforwardSupplier.apply(wantedFieldSpeeds, wantedAcceleration);
                 if (feedforward.isPresent()) {
                     wantedFieldSpeeds.omegaRadiansPerSecond += feedforward.getAsDouble();
                 }
@@ -515,7 +513,7 @@ public class Drive extends CommandBasedSubsystem {
 
     public class ModifiableDriveCommand extends WrapperCommand {
         private Supplier<OptionalDouble> targetRad = null;
-        private Function<ChassisSpeeds, OptionalDouble> feedforwardRadPerSec = null;
+        private BiFunction<ChassisSpeeds, Translation2d, OptionalDouble> feedforwardRadPerSec = null;
         private Boolean wantedStopWithX = null;
         private DriveConstraints constraints = null;
 
@@ -528,7 +526,7 @@ public class Drive extends CommandBasedSubsystem {
             return this;
         }
 
-        public ModifiableDriveCommand withHeadingOverride(Supplier<OptionalDouble> targetRad, Function<ChassisSpeeds, OptionalDouble> feedforwardRadPerSec) {
+        public ModifiableDriveCommand withHeadingOverride(Supplier<OptionalDouble> targetRad, BiFunction<ChassisSpeeds, Translation2d, OptionalDouble> feedforwardRadPerSec) {
             this.targetRad = targetRad;
             this.feedforwardRadPerSec = feedforwardRadPerSec;
             return this;
@@ -549,9 +547,9 @@ public class Drive extends CommandBasedSubsystem {
                     () -> operatorDashboard.manualAiming.get()
                             ? OptionalDouble.empty()
                             : OptionalDouble.of(shootingKinematics.getShootingParameters().headingRad()),
-                    (speeds) -> operatorDashboard.manualAiming.get()
+                    (speeds, accelerations) -> operatorDashboard.manualAiming.get()
                             ? OptionalDouble.empty()
-                            : OptionalDouble.of(shootingKinematics.rotationAboutTargetRadiansPerSecForDrivebase(speeds))
+                            : OptionalDouble.of(shootingKinematics.totalRotationFeedForward(accelerations, speeds))
             )
                     .withStopWithX()
                     .withConstraints(shootingConstraints);

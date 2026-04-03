@@ -57,6 +57,10 @@ public class DriveConstrainer {
         wantedSpeeds.vyMetersPerSecond = wantedLinearSpeed.getY();
     }
 
+    public Translation2d getFieldRelativeAccelerationLinear() {
+        return linearAccelLimiter.acceleration();
+    }
+
     public void constrainFieldRelativeSpeedsAngular(ChassisSpeeds wantedSpeeds) {
         if (constraints == null) {
             return;

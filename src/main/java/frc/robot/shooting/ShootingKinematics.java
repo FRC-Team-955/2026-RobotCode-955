@@ -76,6 +76,8 @@ public class ShootingKinematics implements Periodic {
     @Getter
     private boolean shiftMet = false;
 
+    private double shootingVelocityXY = 0;
+
     private final Debouncer velocityMetDebouncer = new Debouncer(0.15, Debouncer.DebounceType.kFalling);
 
     private static ShootingKinematics instance;
@@ -132,7 +134,7 @@ public class ShootingKinematics implements Periodic {
             Logger.recordOutput("ShootingKinematics/ShootingParameters/None/IsPass", noPhaseDelayParameters.isPass());
         }
 
-        double headingVelocitySetpoint = rotationAboutTargetRadiansPerSecForDrivebase(robotState.getMeasuredChassisSpeedsFieldRelative());
+        double headingVelocitySetpoint = totalRotationFeedForward(robotState.getFilteredAccelerationMetersPerSecPerSec(), robotState.getMeasuredChassisSpeedsFieldRelative());
         double headingVelocityMeasurement = robotState.getMeasuredChassisSpeedsFieldRelative().omegaRadiansPerSecond;
 
         if (BuildConstants.isSimOrReplay) {
@@ -188,6 +190,10 @@ public class ShootingKinematics implements Periodic {
 
         shootingParametersMet = shiftMet && headingMet && headingVelocityMet && velocityMet && angleMet && uncertaintyMet;
         Logger.recordOutput("ShootingKinematics/ShootingParametersMet", shootingParametersMet);
+
+        Logger.recordOutput("ShootingKinematics/Drive/VelocityCompensation", rotationAboutTargetRadiansPerSecForDrivebase(robotState.getMeasuredChassisSpeedsFieldRelative()));
+        Logger.recordOutput("ShootingKinematics/Drive/AccelerationCompensation", rotationFeedforwardAcceleration(robotState.getFilteredAccelerationMetersPerSecPerSec()));
+        Logger.recordOutput("ShootingKinematics/Drive/TotalFFComp", rotationFeedforwardAcceleration(robotState.getFilteredAccelerationMetersPerSecPerSec())+rotationAboutTargetRadiansPerSecForDrivebase(robotState.getMeasuredChassisSpeedsFieldRelative()));
     }
 
     private static final LoggedTunableNumber shootHubManualFlywheelRPM = new LoggedTunableNumber("ShootingKinematics/ShootHubManual/FlywheelRPM", 2000.0);
@@ -305,6 +311,7 @@ public class ShootingKinematics implements Periodic {
         double phi = Math.asin(vz / v);
         double theta = Math.atan2(vy, vx);
         Logger.recordOutput(key + "VelocityMetersPerSec", v);
+        shootingVelocityXY = Math.sqrt(vx * vx + vy * vy);
         if (BuildConstants.isSimOrReplay) {
             Logger.recordOutput(key + "Phi", phi);
             Logger.recordOutput(key + "Theta", theta);
@@ -389,21 +396,28 @@ public class ShootingKinematics implements Periodic {
         return -targetRelative.getY() / fuelExitToTarget.translation().toTranslation2d().getNorm();
     }
 
-    /*
+
     // Estimated rotation due to tangential acceleration, add to drive for aiming feedforward
-    public double rotationFeedforwardAcceleration(Translation2d fieldRelativeMetersPerSecSquared, Translation2d robotSpeeds) {
-        Translation2d shootingParameters2dHubRelative = robotVelocityHubRelativeForDrivebase(new Translation2d(shootingVelocity, shootingParameters.headingRad()));
-        Translation2d robotVelocityHubRelative = robotVelocityHubRelativeForDrivebase(robotSpeeds);
+    // Returns rotation in rad/sec
+    public double rotationFeedforwardAcceleration(Translation2d fieldRelativeMetersPerSecSquared) {
+        Translation2d shootingParameters2dHubRelative = robotVelocityTargetRelativeForDrivebase(new Translation2d(shootingVelocityXY, shootingParameters.headingRad()));
+        //Translation2d robotVelocityHubRelative = robotVelocityTargetRelativeForDrivebase(robotSpeeds);
         // Again, positive Y is CLOCKWISE
-        double tangentialAcceleration = robotVelocityHubRelativeForDrivebase(fieldRelativeMetersPerSecSquared).getY();
+        Translation2d tangentialAccelerationHubRelative = robotVelocityTargetRelativeForDrivebase(fieldRelativeMetersPerSecSquared);
+        double tangentialAccelerationShotRelative = fieldRelativeMetersPerSecSquared.rotateBy(new Rotation2d(-shootingParameters.headingRad())).getY();
+        return tangentialAccelerationShotRelative / shootingVelocityXY;
     }
-     */
+
 
     public double rotationAboutTargetRadiansPerSecForDrivebase(ChassisSpeeds fieldRelativeSpeeds) {
         return rotationAboutTargetRadiansPerSecForDrivebase(new Translation2d(
                 fieldRelativeSpeeds.vxMetersPerSecond,
                 fieldRelativeSpeeds.vyMetersPerSecond
         ));
+    }
+
+    public double totalRotationFeedForward(Translation2d fieldRelativeMetersPerSecSquared, ChassisSpeeds fieldRelativeSpeeds) {
+        return rotationFeedforwardAcceleration(fieldRelativeMetersPerSecSquared) + rotationAboutTargetRadiansPerSecForDrivebase(fieldRelativeSpeeds);
     }
 
     private record FuelExitToTarget(Translation3d translation, Rotation2d angle) {}
