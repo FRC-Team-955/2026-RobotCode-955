@@ -1,0 +1,18 @@
+// Copyright (c) FIRST and other WPILib contributors.
+
+// Open Source Software; you can modify and/or share it under the terms of
+// the WPILib BSD license file in the root directory of this project.
+
+package frc955.gamepiecevision;
+
+
+import org.photonvision.jni.LibraryLoader;
+
+public final class Main {
+    private Main() {
+    }
+
+    public static void main(String... args) {
+        LibraryLoader.loadWpiLibraries();
+    }
+}
