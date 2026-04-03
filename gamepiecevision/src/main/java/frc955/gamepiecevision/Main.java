@@ -13,6 +13,7 @@ public final class Main {
     }
 
     public static void main(String... args) {
-        LibraryLoader.loadWpiLibraries();
+        assert LibraryLoader.loadWpiLibraries();
+        assert LibraryLoader.loadTargeting();
     }
 }
