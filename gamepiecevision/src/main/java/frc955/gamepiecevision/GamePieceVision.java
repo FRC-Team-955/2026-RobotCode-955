@@ -37,7 +37,7 @@ public class GamePieceVision {
         List<Translation2d> targetXYPoints = new LinkedList<>();
 
         // Process observations
-        for (var observation : inputs.targetObservations) {
+        for (var observation : inputs.targ etObservations) {
             // Based on https://github.com/Mechanical-Advantage/RobotCode2026Public/blob/main/src/main/java/org/littletonrobotics/frc2026/ObjectDetection.java#L105
             // Copyright (c) 2025-2026 Littleton Robotics
             // http://github.com/Mechanical-Advantage
@@ -125,7 +125,9 @@ public class GamePieceVision {
                 largestSize = fuelCluster.size();
             }
         }
-        bestTargetPublisher.set(new Transform2d(bestTarget.getX(), bestTarget.getY(), Rotation2d.kZero));
+        if (bestTarget != null) {
+            bestTargetPublisher.set(new Transform2d(bestTarget.getX(), bestTarget.getY(), Rotation2d.kZero));
+        }
         lastTarget = Optional.ofNullable(bestTarget);
         /*
         Logger.recordOutput("GamePieceVision/BestCluster", bestTarget);
