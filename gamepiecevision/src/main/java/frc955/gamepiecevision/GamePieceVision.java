@@ -37,7 +37,7 @@ public class GamePieceVision {
         List<Translation2d> targetXYPoints = new LinkedList<>();
 
         // Process observations
-        for (var observation : inputs.targ etObservations) {
+        for (var observation : inputs.targetObservations) {
             // Based on https://github.com/Mechanical-Advantage/RobotCode2026Public/blob/main/src/main/java/org/littletonrobotics/frc2026/ObjectDetection.java#L105
             // Copyright (c) 2025-2026 Littleton Robotics
             // http://github.com/Mechanical-Advantage
