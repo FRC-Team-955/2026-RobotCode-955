@@ -13,6 +13,8 @@
 
 package frc.robot.subsystems.gamepiecevision;
 
+import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import org.photonvision.PhotonCamera;
 
 /**
@@ -28,6 +30,9 @@ public class GamePieceVisionIOPhotonVision extends GamePieceVisionIO {
     @Override
     public void updateInputs(GamePieceVisionIOInputs inputs) {
         inputs.connected = camera.isConnected();
-
+        inputs.bestTarget = NetworkTableInstance.getDefault()
+                .getStructTopic("GamePieceVision/BestTarget", Transform2d.struct).subscribe(new Transform2d()).get();
+        inputs.timestampSeconds = NetworkTableInstance.getDefault()
+                .getDoubleTopic("GamePieceVision/timestampSeconds").subscribe(0.0).get();
     }
 }

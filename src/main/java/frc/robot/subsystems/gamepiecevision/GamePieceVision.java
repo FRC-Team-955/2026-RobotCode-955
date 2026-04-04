@@ -2,10 +2,6 @@ package frc.robot.subsystems.gamepiecevision;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.networktables.DoubleSubscriber;
-import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.networktables.StructSubscriber;
 import edu.wpi.first.wpilibj.Alert;
 import frc.lib.Util;
 import frc.lib.subsystem.Periodic;
@@ -47,10 +43,10 @@ public class GamePieceVision implements Periodic {
     }
 
 
-    StructSubscriber<Transform2d> bestTargetSubscriber = NetworkTableInstance.getDefault()
-            .getStructTopic("GamePieceVision/BestTarget", Transform2d.struct).subscribe(new Transform2d());
-    DoubleSubscriber timestampSecondsSubscriber = NetworkTableInstance.getDefault()
-            .getDoubleTopic("GamePieceVision/timestampSeconds").subscribe(0.0);
+    //StructSubscriber<Transform2d> bestTargetSubscriber = NetworkTableInstance.getDefault()
+    //        .getStructTopic("GamePieceVision/BestTarget", Transform2d.struct).subscribe(new Transform2d());
+    //DoubleSubscriber timestampSecondsSubscriber = NetworkTableInstance.getDefault()
+    //        .getDoubleTopic("GamePieceVision/timestampSeconds").subscribe(0.0);
 
     @Override
     public void periodicAfterCommands() {
@@ -62,8 +58,12 @@ public class GamePieceVision implements Periodic {
                         .map(cam -> robotPose.transformBy(cam.robotToCamera))
                         .toArray(Pose3d[]::new)
         );
-        Logger.recordOutput("GamePieceVision/RealBestTarget", robotState.getPoseAtTimestamp(
-                timestampSecondsSubscriber.get()).orElse(new Pose2d()).transformBy(bestTargetSubscriber.get()));
+        for (Map.Entry<Camera, CameraData> cam : cameras.entrySet()) {
+            CameraData data = cam.getValue();
+
+            Logger.recordOutput("GamePieceVision/RealBestTarget", robotState.getPoseAtTimestamp(
+                    data.inputs.timestampSeconds).orElse(new Pose2d()).transformBy(data.inputs.bestTarget));
+        }
     }
 
     public boolean anyCamerasDisconnected() {
