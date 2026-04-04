@@ -174,3 +174,56 @@ tasks.register("run", JavaExec) {
     mainClass = ROBOT_MAIN_CLASS
     dependsOn tasks.named("build")
 }
+
+// Based on https://github.com/PhotonVision/photonvision/blob/main/photon-server/build.gradle
+import edu.wpi.first.deployutils.deploy.artifact.*
+import edu.wpi.first.deployutils.deploy.target.RemoteTarget
+import edu.wpi.first.deployutils.deploy.target.location.SshDeployLocation
+deploy {
+    targets {
+        orangepi(RemoteTarget) {
+            directory = '/home/photon/gamepiecevision'
+            locations {
+                ssh(SshDeployLocation) {
+                    address = "10.9.55.TODO"
+                    user = "photon"
+                    password = "vision"
+                }
+            }
+            artifacts {
+                stop(CommandArtifact) {
+                    predeploy << {
+                        println 'Starting deployment to ' + deploy.targets.orangepi.locations.ssh.address
+                        println 'targetArch = ' + wpilibTools.platformMapper.currentPlatform.platformName
+                    }
+                    // Stop gamepiecevision before manipulating its files
+                    command = "sudo systemctl stop gamepiecevision.service"
+                }
+                sleep(CommandArtifact) {
+                    // gerth2 - I was having issues with the .jar being in use still - waiting a tiny bit here seems to get rid of it on a pi4
+                    command = "sleep 3"
+                    dependsOn artifacts.stop.deployTask
+                }
+                gamepiecevisionJar(JavaArtifact) {
+                    jarTask = jar
+                    filename = "gamepiecevision.jar"
+                    dependsOn artifacts.sleep.deployTask
+                }
+                service(FileArtifact) {
+                    file = file("gamepiecevision.service")
+                    filename = "gamepiecevision.service"
+                    dependsOn artifacts.gamepiecevisionJar.deployTask
+                }
+                moveService(CommandArtifact) {
+                    command = "sudo mv gamepiecevision.service /etc/systemd/system/gamepiecevision.service"
+                    dependsOn artifacts.service.deployTask
+                }
+                start(CommandArtifact) {
+                    // Fire up photonvision again
+                    command = "sudo systemctl start photonvision.service"
+                    dependsOn artifacts.moveService.deployTask
+                }
+            }
+        }
+    }
+}
