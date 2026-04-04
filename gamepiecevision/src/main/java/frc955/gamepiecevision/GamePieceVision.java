@@ -1,32 +1,39 @@
 package frc955.gamepiecevision;
 
 import edu.wpi.first.math.geometry.*;
+import edu.wpi.first.math.geometry.struct.Pose2dStruct;
+import edu.wpi.first.math.geometry.struct.Translation2dStruct;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StructArrayPublisher;
+import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.util.datalog.DoubleArrayLogEntry;
+import edu.wpi.first.util.datalog.StructArrayLogEntry;
+import edu.wpi.first.wpilibj.Timer;
 import frc955.gamepiecevision.GamePieceVisionIO.GamePieceVisionIOInputs;
+import frc955.gamepiecevision.multiobjecttracking.DBSCAN;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
-import static frc955.gamepiecevision.GamePieceVisionConstants.fuelDiameterMeters;
-import static frc955.gamepiecevision.GamePieceVisionConstants.robotToCamera;
+import static frc955.gamepiecevision.GamePieceVisionConstants.*;
 
 public class GamePieceVision {
     private final GamePieceVisionIOInputs inputs = new GamePieceVisionIOInputs();
     private final GamePieceVisionIO io = new GamePieceVisionIOPhotonVision("IntakeCam");
 
-    private final DoubleArrayLogEntry testEntry = new DoubleArrayLogEntry(Logger.getLog(), "Test");
+    private final StructArrayLogEntry<Translation2d> clusterTranslationsEntry = StructArrayLogEntry.create(Logger.getLog(), "Test", Translation2d.struct);
+    private final StructPublisher<Translation2d> bestTargetPublisher = NetworkTableInstance.getDefault()
+            .getStructTopic("GamePieceVision/BestTarget", Translation2d.struct).publish();
 
-    //private final Map<Translation2d, Double> targetsToLastSeen = new HashMap<>();
+    private final Map<Translation2d, Double> targetsToLastSeen = new HashMap<>();
 
-    //private final DBSCAN dbscan = new DBSCAN(new ArrayList<Translation2d>(), 3, 0.5);
+    private final DBSCAN dbscan = new DBSCAN(new ArrayList<Translation2d>(), 3, 0.5);
 
-    //private Optional<Translation2d> lastTarget = Optional.empty();
+    private Optional<Translation2d> lastTarget = Optional.empty();
 
     public void periodic() {
         io.updateInputs(inputs);
 
-        //Map<Translation2d, Double> newlySeenTargets = new HashMap<>();
+        Map<Translation2d, Double> newlySeenTargets = new HashMap<>();
         List<Translation2d> targetXYPoints = new LinkedList<>();
 
         // Process observations
@@ -53,75 +60,79 @@ public class GamePieceVision {
             // 2. send transform over nt
             // 3. on rio, robotPose.transformBy(cluster) = fieldtoCluster
 
+            // this part needs to get fixed since we don't have robot pos
+
             // TODO: Apply in actual robot code
             // Pose2d fieldToCamera = robotPose.toPose2d().transformBy(robotToCameraTransform2d);
 
-            Pose2d fieldToFuel =
+            Pose2d robotToFuel =
                     robotToCameraPose2d
                             .transformBy(new Transform2d(Translation2d.kZero, new Rotation2d(-targetYaw)))
                             .transformBy(new Transform2d(new Translation2d(cameraToFuelNorm, 0), Rotation2d.kZero));
-            Pose3d fuelPose = new Pose3d(fieldToFuel).plus(new Transform3d(0, 0, fuelDiameterMeters / 2.0, new Rotation3d()));
+            Pose3d fuelPose = new Pose3d(robotToFuel).plus(new Transform3d(0, 0, fuelDiameterMeters / 2.0, new Rotation3d()));
 
-            //    if (fuelPose.getTranslation().getDistance(robotPose.getTranslation()) > 3.0) {
-            //        continue;
-            //    }
-            //
-            //    newlySeenTargets.put(
-            //            fuelPose.getTranslation().toTranslation2d(),
-            //            observation.timestampSeconds()
-            //    );
+            if (fuelPose.getTranslation().getNorm() > 3.0) {
+                continue;
+            }
+
+            newlySeenTargets.put(
+                    fuelPose.getTranslation().toTranslation2d(),
+                    observation.timestampSeconds()
+            );
         }
 
-        testEntry.append(new double[]{Math.random(), Math.random()}, Logger.getTimestamp());
-
         // Handle newly seen targets
-        //for (var target : newlySeenTargets.keySet()) {
-        //    // Remove old targets within distance to be counted as the same target
-        //    targetsToLastSeen.keySet()
-        //            .removeIf(otherTarget -> target.getDistance(otherTarget) < minDistanceForSameCoralMeters);
-        //}
-        //targetsToLastSeen.putAll(newlySeenTargets);
-        //
-        //// Remove expired coral
-        //targetsToLastSeen.values().removeIf(lastSeen -> Timer.getTimestamp() - lastSeen > expireTimeSeconds);
-        //
-        //ArrayList<FuelCluster> clusterList = new ArrayList<FuelCluster>();
-        //Translation2d bestTarget = null;
-        //double bestWeight = 0;
-        //int largestSize = 0;
-        //ArrayList<ArrayList<Translation2d>> dbscanResults = new ArrayList<ArrayList<Translation2d>>();
-        //if (targetsToLastSeen.size() > 2) {
-        //    dbscan.setInputValues(targetsToLastSeen.keySet());
-        //    dbscanResults = dbscan.performClustering();
-        //}
-        //if (dbscanResults.isEmpty()) {
-        //    for (Translation2d target : targetsToLastSeen.keySet()) {
-        //        ArrayList<Translation2d> singleTarget = new ArrayList<Translation2d>();
-        //        singleTarget.add(target);
-        //        dbscanResults.add(singleTarget);
-        //    }
-        //}
-        //
-        //for (ArrayList<Translation2d> cluster : dbscanResults) {
-        //    FuelCluster fuelCluster = new FuelCluster(cluster);
-        //    clusterList.add(fuelCluster);
-        //    double weight = fuelCluster.weight();
-        //    if (lastTarget.isPresent() & fuelCluster.avgLocation().isPresent()) {
-        //        weight += 2 / (fuelCluster.avgLocation().get().getDistance(lastTarget.get()) + 1);
-        //    }
-        //    if (weight > bestWeight) {
-        //        bestWeight = weight;
-        //        bestTarget = fuelCluster.avgLocation().get();
-        //    }
-        //    if (fuelCluster.size() > largestSize) {
-        //        largestSize = fuelCluster.size();
-        //    }
-        //}
-        //lastTarget = Optional.ofNullable(bestTarget);
-        //Logger.recordOutput("GamePieceVision/BestCluster", bestTarget);
-        //Logger.recordOutput("GamePieceVision/BestWeight", bestWeight);
-        //Logger.recordOutput("GamePieceVision/NumClusters", dbscanResults.size());
-        //Logger.recordOutput("GamePieceVision/LargestCluster", largestSize);
+        for (var target : newlySeenTargets.keySet()) {
+            // Remove old targets within distance to be counted as the same target
+            targetsToLastSeen.keySet()
+                    .removeIf(otherTarget -> target.getDistance(otherTarget) < minDistanceForSameCoralMeters);
+        }
+        targetsToLastSeen.putAll(newlySeenTargets);
+
+        // Remove expired coral
+        targetsToLastSeen.values().removeIf(lastSeen -> Timer.getTimestamp() - lastSeen > expireTimeSeconds);
+
+        ArrayList<FuelCluster> clusterList = new ArrayList<FuelCluster>();
+        Translation2d bestTarget = null;
+        double bestWeight = 0;
+        int largestSize = 0;
+
+        ArrayList<ArrayList<Translation2d>> dbscanResults = new ArrayList<ArrayList<Translation2d>>();
+        if (targetsToLastSeen.size() > 2) {
+            dbscan.setInputValues(targetsToLastSeen.keySet());
+            dbscanResults = dbscan.performClustering();
+        }
+        if (dbscanResults.isEmpty()) {
+            for (Translation2d target : targetsToLastSeen.keySet()) {
+                ArrayList<Translation2d> singleTarget = new ArrayList<Translation2d>();
+                singleTarget.add(target);
+                dbscanResults.add(singleTarget);
+            }
+        }
+
+        for (ArrayList<Translation2d> cluster : dbscanResults) {
+            FuelCluster fuelCluster = new FuelCluster(cluster);
+            clusterList.add(fuelCluster);
+            double weight = fuelCluster.weight();
+            if (lastTarget.isPresent() & fuelCluster.avgLocation().isPresent()) {
+                weight += 2 / (fuelCluster.avgLocation().get().getDistance(lastTarget.get()) + 1);
+            }
+            if (weight > bestWeight) {
+                bestWeight = weight;
+                bestTarget = fuelCluster.avgLocation().get();
+            }
+            if (fuelCluster.size() > largestSize) {
+                largestSize = fuelCluster.size();
+            }
+        }
+        bestTargetPublisher.set(bestTarget);
+        lastTarget = Optional.ofNullable(bestTarget);
+        /*
+        Logger.recordOutput("GamePieceVision/BestCluster", bestTarget);
+        Logger.recordOutput("GamePieceVision/BestWeight", bestWeight);
+        Logger.recordOutput("GamePieceVision/NumClusters", dbscanResults.size());
+        Logger.recordOutput("GamePieceVision/LargestCluster", largestSize);
+         */
         //bestTargets = clusters
         //        .stream()
         //        .sorted(Comparator.comparing(FuelCluster::size))

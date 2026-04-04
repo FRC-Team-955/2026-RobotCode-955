@@ -6,6 +6,8 @@ import edu.wpi.first.util.datalog.IntegerLogEntry;
 import edu.wpi.first.wpilibj.RobotController;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Date;
 
 public class Logger {
@@ -16,6 +18,7 @@ public class Logger {
 
     static {
         try {
+            Files.createDirectories(Path.of("logs"));
             writer = new DataLogWriter("logs/" + new Date() + ".wpilog");
         } catch (IOException e) {
             throw new RuntimeException(e);
