@@ -32,6 +32,8 @@ public class GamePieceVision {
 
     public void periodic() {
         io.updateInputs(inputs);
+        inputs.ntPublishers.publish();
+        inputs.dataLogEntries.append();
 
         Map<Translation2d, Double> newlySeenTargets = new HashMap<>();
         List<Translation2d> targetXYPoints = new LinkedList<>();
