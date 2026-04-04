@@ -16,10 +16,6 @@ package frc955.gamepiecevision;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.util.Units;
-import frc.robot.BuildConstants;
-import lombok.RequiredArgsConstructor;
-
-import java.util.function.Function;
 
 public class GamePieceVisionConstants {
     static final double horizontalFOVRad = Math.toRadians(160.0);

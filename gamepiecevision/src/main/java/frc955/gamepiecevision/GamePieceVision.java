@@ -2,11 +2,11 @@ package frc955.gamepiecevision;
 
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.util.datalog.DoubleArrayLogEntry;
-import edu.wpi.first.wpilibj.Timer;
 import frc955.gamepiecevision.GamePieceVisionIO.GamePieceVisionIOInputs;
-import frc955.gamepiecevision.multiobjecttracking.DBSCAN;
 
-import java.util.*;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Optional;
 
 import static frc955.gamepiecevision.GamePieceVisionConstants.fuelDiameterMeters;
 import static frc955.gamepiecevision.GamePieceVisionConstants.robotToCamera;
@@ -71,6 +71,8 @@ public class GamePieceVision {
             //            observation.timestampSeconds()
             //    );
         }
+
+        testEntry.append(new double[]{Math.random(), Math.random()}, Logger.getTimestamp());
 
         // Handle newly seen targets
         //for (var target : newlySeenTargets.keySet()) {

@@ -11,6 +11,10 @@ public class Robot extends TimedRobot {
 
     @Override
     public void robotPeriodic() {
+        Logger.periodicBeforeCode();
+
         gamePieceVision.periodic();
+
+        Logger.periodicAfterCode();
     }
 }

@@ -1,9 +1,6 @@
 package frc955.gamepiecevision;
 
-import org.littletonrobotics.junction.AutoLog;
-
 public class GamePieceVisionIO {
-    @AutoLog
     public static class GamePieceVisionIOInputs {
         public boolean connected = false;
         public TargetObservation[] targetObservations = new TargetObservation[0];
