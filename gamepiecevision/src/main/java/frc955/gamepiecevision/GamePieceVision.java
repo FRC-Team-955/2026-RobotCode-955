@@ -23,8 +23,8 @@ public class GamePieceVision {
     private final StructArrayLogEntry<Translation2d> clusterTranslationsEntry = StructArrayLogEntry.create(Logger.getLog(), "Test", Translation2d.struct);
     private final StructPublisher<Transform2d> bestTargetPublisher = NetworkTableInstance.getDefault()
             .getStructTopic("GamePieceVision/BestTarget", Transform2d.struct).publish();
-    private final StructPublisher<Double> timestampSecondsPublisher = NetworkTableInstance.getDefault()
-            .getStructTopic("GamePieceVision/timestampSeconds", Double.struct).publish();
+    private final DoublePublisher timestampSecondsPublisher = NetworkTableInstance.getDefault()
+            .getDoubleTopic("GamePieceVision/timestampSeconds").publish();
 
     private final Map<Translation2d, Double> targetsToLastSeen = new HashMap<>();
 
