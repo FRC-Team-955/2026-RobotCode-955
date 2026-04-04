@@ -44,7 +44,7 @@ public class CanadianOutpostAutolessAgro extends Auto {
                         superintake.setGoal(Superintake.Goal.INTAKE).until(() -> true)
                 ),
 
-                AutoHelpers.goOverHumanSideBump()
+                AutoHelpers.goOverOutpostSideBump()
                 ,
 
                 // Shoot while moving to entrance to trench
@@ -75,7 +75,7 @@ public class CanadianOutpostAutolessAgro extends Auto {
                 //        superintake.setGoal(Superintake.Goal.INTAKE).until(() -> true)
                 //),
 
-                AutoHelpers.goOverHumanSideBump(),
+                AutoHelpers.goOverOutpostSideBump(),
 
                 // Shoot while moving to entrance to trench
                 Commands.parallel(

@@ -44,7 +44,7 @@ public class CanadianOutpostAuto extends Auto {
                 ),
 
                 Commands.parallel(
-                        AutoHelpers.goOverHumanSideBump()
+                        AutoHelpers.goOverOutpostSideBump()
                 ),
 
                 //To stop shoot on move
@@ -75,7 +75,7 @@ public class CanadianOutpostAuto extends Auto {
                 ),
 
                 Commands.parallel(
-                        AutoHelpers.goOverHumanSideBump()
+                        AutoHelpers.goOverOutpostSideBump()
                 ),
 
                 //To stop shoot on move

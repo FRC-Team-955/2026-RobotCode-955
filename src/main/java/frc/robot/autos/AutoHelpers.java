@@ -278,8 +278,8 @@ public class AutoHelpers {
 
 
     public static Command goOverOutpostSideBump() {
-        double y = 2.47;
-        Rotation2d rotation = Rotation2d.fromDegrees(-115);
+        double y = 3.17;
+        Rotation2d rotation = Rotation2d.fromDegrees(-135);
         return CommandsExt.eagerSequence(
                 // go to the start of the bump
                 AutoHelpers.intermediateWaypoint(() -> new Pose2d(
