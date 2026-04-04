@@ -7,10 +7,10 @@ public class Robot extends TimedRobot {
     public Robot() {
     }
 
-    PhotonCamera c = new PhotonCamera("IntakeCam");
+    private final GamePieceVision gamePieceVision = new GamePieceVision();
 
     @Override
     public void robotPeriodic() {
-        System.out.println(c.isConnected());
+        gamePieceVision.periodic();
     }
 }
