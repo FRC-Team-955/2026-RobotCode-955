@@ -133,20 +133,6 @@ def nativeTasks = wpilibTools.createExtractionTasks {
 
 nativeTasks.addToSourceSetResources(sourceSets.main)
 
-def wpilibNative = { String group, String name ->
-    return project.getDependencies().create(
-            "edu.wpi.first." +
-                    group +
-                    ":" +
-                    name +
-                    ":" +
-                    wpi.versions.wpilibVersion.get() +
-                    ":" +
-                    wpilibTools.platformMapper.getWpilibClassifier() +
-                    "@zip"
-    )
-}
-
 nativeConfig.dependencies.addAll wpi.java.vendor.jniRelease(wpi.platforms.desktop).collect { project.getDependencies().create(it.get()) }
 nativeConfig.dependencies.add wpilibTools.deps.wpilib("wpiutil")
 nativeConfig.dependencies.add wpilibTools.deps.wpilib("wpimath")
@@ -155,7 +141,6 @@ nativeConfig.dependencies.add wpilibTools.deps.wpilib("ntcore")
 nativeConfig.dependencies.add wpilibTools.deps.wpilib("cscore")
 nativeConfig.dependencies.add wpilibTools.deps.wpilib("hal")
 nativeConfig.dependencies.add wpilibTools.deps.wpilib("apriltag")
-//nativeConfig.dependencies.add wpilibNative("halsim", "halsim_ds_socket")
 def opencvYear = "2025" // wpi.frcYear.get()
 nativeConfig.dependencies.add wpilibTools.deps.wpilibOpenCv("frc" + opencvYear, wpi.versions.opencvVersion.get())
 
