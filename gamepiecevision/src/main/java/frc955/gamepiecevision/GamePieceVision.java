@@ -116,7 +116,7 @@ public class GamePieceVision {
             FuelCluster fuelCluster = new FuelCluster(cluster);
             clusterList.add(fuelCluster);
             double weight = fuelCluster.weight();
-            if (lastTarget.isPresent() & fuelCluster.avgLocation().isPresent()) {
+            if (lastTarget.isPresent() && fuelCluster.avgLocation().isPresent()) {
                 weight += 2 / (fuelCluster.avgLocation().get().getDistance(lastTarget.get()) + 1);
             }
             if (weight > bestWeight) {
