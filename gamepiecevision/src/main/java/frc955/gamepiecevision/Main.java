@@ -6,6 +6,7 @@
 package frc955.gamepiecevision;
 
 
+import edu.wpi.first.wpilibj.RobotBase;
 import org.photonvision.jni.LibraryLoader;
 
 public final class Main {
@@ -13,7 +14,11 @@ public final class Main {
     }
 
     public static void main(String... args) {
-        assert LibraryLoader.loadWpiLibraries();
-        assert LibraryLoader.loadTargeting();
+        // Load natives
+        LibraryLoader.loadWpiLibraries();
+        LibraryLoader.loadTargeting();
+
+        // Start code
+        RobotBase.startRobot(Robot::new);
     }
 }

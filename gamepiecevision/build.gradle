@@ -133,6 +133,21 @@ def nativeTasks = wpilibTools.createExtractionTasks {
 
 nativeTasks.addToSourceSetResources(sourceSets.main)
 
+def wpilibNative = { String group, String name ->
+    return project.getDependencies().create(
+            "edu.wpi.first." +
+                    group +
+                    ":" +
+                    name +
+                    ":" +
+                    wpi.versions.wpilibVersion.get() +
+                    ":" +
+                    wpilibTools.platformMapper.getWpilibClassifier() +
+                    "@zip"
+    )
+}
+
+nativeConfig.dependencies.addAll wpi.java.vendor.jniRelease(wpi.platforms.desktop).collect { project.getDependencies().create(it.get()) }
 nativeConfig.dependencies.add wpilibTools.deps.wpilib("wpiutil")
 nativeConfig.dependencies.add wpilibTools.deps.wpilib("wpimath")
 nativeConfig.dependencies.add wpilibTools.deps.wpilib("wpinet")
@@ -140,6 +155,7 @@ nativeConfig.dependencies.add wpilibTools.deps.wpilib("ntcore")
 nativeConfig.dependencies.add wpilibTools.deps.wpilib("cscore")
 nativeConfig.dependencies.add wpilibTools.deps.wpilib("hal")
 nativeConfig.dependencies.add wpilibTools.deps.wpilib("apriltag")
+//nativeConfig.dependencies.add wpilibNative("halsim", "halsim_ds_socket")
 def opencvYear = "2025" // wpi.frcYear.get()
 nativeConfig.dependencies.add wpilibTools.deps.wpilibOpenCv("frc" + opencvYear, wpi.versions.opencvVersion.get())
 
@@ -157,6 +173,7 @@ dependencies {
     implementation wpilibTools.deps.wpilibJava("hal")
     implementation wpilibTools.deps.wpilibJava("apriltag")
     implementation wpilibTools.deps.wpilibJava("cameraserver")
+    implementation wpilibTools.deps.wpilibJava("wpiunits")
     implementation wpilibTools.deps.wpilibOpenCvJava("frc" + opencvYear, wpi.versions.opencvVersion.get())
 
     implementation group: "com.fasterxml.jackson.core", name: "jackson-annotations", version: wpi.versions.jacksonVersion.get()
