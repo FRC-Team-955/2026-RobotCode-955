@@ -13,11 +13,7 @@
 
 package frc.robot.subsystems.gamepiecevision;
 
-import edu.wpi.first.math.geometry.Rotation2d;
 import org.photonvision.PhotonCamera;
-
-import java.util.LinkedList;
-import java.util.List;
 
 /**
  * IO implementation for real PhotonVision hardware.
@@ -33,18 +29,5 @@ public class GamePieceVisionIOPhotonVision extends GamePieceVisionIO {
     public void updateInputs(GamePieceVisionIOInputs inputs) {
         inputs.connected = camera.isConnected();
 
-        List<TargetObservation> targetObservations = new LinkedList<>();
-
-        for (var result : camera.getAllUnreadResults()) {
-            for (var target : result.getTargets()) {
-                targetObservations.add(new TargetObservation(
-                        result.getTimestampSeconds(),
-                        Rotation2d.fromDegrees(target.getYaw()).getRadians(),
-                        Rotation2d.fromDegrees(target.getPitch()).getRadians()
-                ));
-            }
-        }
-
-        inputs.targetObservations = targetObservations.toArray(TargetObservation[]::new);
     }
 }
