@@ -21,8 +21,8 @@ public class GamePieceVision {
     private final GamePieceVisionIO io = new GamePieceVisionIOPhotonVision("IntakeCam");
 
     private final StructArrayLogEntry<Translation2d> clusterTranslationsEntry = StructArrayLogEntry.create(Logger.getLog(), "Test", Translation2d.struct);
-    private final StructPublisher<Translation2d> bestTargetPublisher = NetworkTableInstance.getDefault()
-            .getStructTopic("GamePieceVision/BestTarget", Translation2d.struct).publish();
+    private final StructPublisher<Transform2d> bestTargetPublisher = NetworkTableInstance.getDefault()
+            .getStructTopic("GamePieceVision/BestTarget", Transform2d.struct).publish();
 
     private final Map<Translation2d, Double> targetsToLastSeen = new HashMap<>();
 
@@ -125,7 +125,7 @@ public class GamePieceVision {
                 largestSize = fuelCluster.size();
             }
         }
-        bestTargetPublisher.set(bestTarget);
+        bestTargetPublisher.set(new Transform2d(bestTarget.getX(), bestTarget.getY(), Rotation2d.kZero));
         lastTarget = Optional.ofNullable(bestTarget);
         /*
         Logger.recordOutput("GamePieceVision/BestCluster", bestTarget);

@@ -1,6 +1,8 @@
 package frc.robot.subsystems.gamepiecevision;
 
 import edu.wpi.first.math.geometry.*;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StructSubscriber;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Timer;
 import frc.lib.Bounds;
@@ -13,7 +15,6 @@ import org.littletonrobotics.junction.Logger;
 
 import java.util.*;
 
-import static frc.robot.subsystems.gamepiecevision.GamePieceVisionConstants.Camera;
 import static frc.robot.subsystems.gamepiecevision.GamePieceVisionConstants.*;
 
 public class GamePieceVision implements Periodic {
@@ -125,9 +126,9 @@ public class GamePieceVision implements Periodic {
 
         ArrayList<FuelCluster> clusterList = new ArrayList<FuelCluster>();
         Translation2d bestTarget = null;
-        double bestWeight  = 0;
+        double bestWeight = 0;
         int largestSize = 0;
-        ArrayList<ArrayList<Translation2d>> dbscanResults = new ArrayList<ArrayList<Translation2d>> ();
+        ArrayList<ArrayList<Translation2d>> dbscanResults = new ArrayList<ArrayList<Translation2d>>();
         if (targetsToLastSeen.size() > 2) {
             dbscan.setInputValues(targetsToLastSeen.keySet());
             dbscanResults = dbscan.performClustering();
@@ -183,6 +184,9 @@ public class GamePieceVision implements Periodic {
         //Logger.recordOutput("GamePieceVision/BestTargets", bestTargets.toArray(Translation2d[]::new));
     }
 
+    StructSubscriber<Transform2d> bestTargetSubscriber = NetworkTableInstance.getDefault()
+            .getStructTopic("GamePieceVision/BestTarget", Transform2d.struct).subscribe(new Transform2d());
+
     @Override
     public void periodicAfterCommands() {
 
@@ -193,6 +197,7 @@ public class GamePieceVision implements Periodic {
                         .map(cam -> robotPose.transformBy(cam.robotToCamera))
                         .toArray(Pose3d[]::new)
         );
+        Logger.recordOutput("GamePieceVision/RealBestTarget", robotState.getPose().transformBy(bestTargetSubscriber.get()));
     }
 
     public boolean anyCamerasDisconnected() {
@@ -267,7 +272,7 @@ public class GamePieceVision implements Periodic {
 
         public double weight() {
             if (avgLocation().isPresent()) {
-                return ((double) size()) / ( avgLocation().get().getNorm() + 1);
+                return ((double) size()) / (avgLocation().get().getNorm() + 1);
             } else {
                 return 0;
             }
