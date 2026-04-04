@@ -11,9 +11,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.AllianceFlipUtil;
-import frc.lib.Bounds;
 import frc.lib.Util;
 import frc.lib.commands.CommandsExt;
 import frc.lib.network.LoggedTunableNumber;
@@ -180,78 +178,78 @@ public class AutoHelpers {
     private static final LinearFilter targetXFilter = LinearFilter.movingAverage(10);
     private static final LinearFilter targetYFilter = LinearFilter.movingAverage(10);
 
-    public static Pose2d getIntakePose(Bounds bounds, Pose2d ifNoGamePieces) {
-        for (var target : gamePieceVision.getBestTargetsInBounds(Optional.of(bounds))) {
-            if (AllianceFlipUtil.apply(bounds).contains(target)) {
-                Translation2d targetFiltered = new Translation2d(
-                        targetXFilter.calculate(target.getX()),
-                        targetYFilter.calculate(target.getY())
-                );
-                return new Pose2d(
-                        targetFiltered,
-                        // Point towards target
-                        targetFiltered.minus(robotState.getTranslation()).getAngle()
-                ).transformBy(new Transform2d(
-                        // Move align pose towards robot so that it doesn't try to move
-                        // such that the center of the robot is at the target
-                        -(driveConfig.bumperLengthMeters() / 2.0),
-                        0.0,
-                        new Rotation2d()
-                ));
-            }
-        }
-        return AllianceFlipUtil.apply(ifNoGamePieces);
-    }
+    //public static Pose2d getIntakePose(Bounds bounds, Pose2d ifNoGamePieces) {
+    //    for (var target : gamePieceVision.getBestTargetsInBounds(Optional.of(bounds))) {
+    //        if (AllianceFlipUtil.apply(bounds).contains(target)) {
+    //            Translation2d targetFiltered = new Translation2d(
+    //                    targetXFilter.calculate(target.getX()),
+    //                    targetYFilter.calculate(target.getY())
+    //            );
+    //            return new Pose2d(
+    //                    targetFiltered,
+    //                    // Point towards target
+    //                    targetFiltered.minus(robotState.getTranslation()).getAngle()
+    //            ).transformBy(new Transform2d(
+    //                    // Move align pose towards robot so that it doesn't try to move
+    //                    // such that the center of the robot is at the target
+    //                    -(driveConfig.bumperLengthMeters() / 2.0),
+    //                    0.0,
+    //                    new Rotation2d()
+    //            ));
+    //        }
+    //    }
+    //    return AllianceFlipUtil.apply(ifNoGamePieces);
+    //}
 
     private static final double neutralZoneXMin = FieldConstants.LinesVertical.neutralZoneNear + driveConfig.bumperLengthMeters() / 2.0;
     private static final double neutralZoneXMax = FieldConstants.LinesVertical.center - 0.2;
 
-    public static Command intakeFromLeftNeutralZone(Supplier<Pose2d> poseSupplierIfNoGamePieces) {
-        return Commands.parallel(
-                drive.moveTo(
-                        () -> getIntakePose(new Bounds(
-                                neutralZoneXMin,
-                                neutralZoneXMax,
-                                FieldConstants.LinesHorizontal.center,
-                                FieldConstants.fieldWidth - driveConfig.bumperLengthMeters() / 2.0
-                        ), poseSupplierIfNoGamePieces.get()),
-                        intakeConstraints
-                ),
-                superintake.setGoal(Superintake.Goal.INTAKE)
-        );
-    }
-
-    public static Command intakeFromRightNeutralZone(Supplier<Pose2d> poseSupplierIfNoGamePieces) {
-        return Commands.parallel(
-                drive.moveTo(
-                        () -> getIntakePose(new Bounds(
-                                neutralZoneXMin,
-                                neutralZoneXMax,
-                                0.0 + driveConfig.bumperLengthMeters() / 2.0,
-                                FieldConstants.LinesHorizontal.center
-                        ), poseSupplierIfNoGamePieces.get()),
-                        intakeConstraints
-                ),
-                superintake.setGoal(Superintake.Goal.INTAKE)
-        );
-    }
-
-    public static Command intakeFromDepotWhileShooting(DriveConstraints constraints) {
-        Pose2d ifNoGamePieces = new Pose2d(0.2 + driveConfig.bumperLengthMeters() / 2.0, FieldConstants.Depot.depotCenter.getY(), Rotation2d.k180deg);
-        return Commands.parallel(
-                drive.moveTo(
-                        () -> getIntakePose(new Bounds(
-                                driveConfig.bumperLengthMeters() / 2.0,
-                                FieldConstants.Depot.depth,
-                                FieldConstants.Depot.rightCorner.getY(),
-                                FieldConstants.Depot.leftCorner.getY()
-                        ), ifNoGamePieces),
-                        constraints
-                ).withAiming(),
-                superintake.setGoal(Superintake.Goal.INTAKE),
-                superstructure.setGoal(Superstructure.Goal.SHOOT)
-        );
-    }
+    //public static Command intakeFromLeftNeutralZone(Supplier<Pose2d> poseSupplierIfNoGamePieces) {
+    //    return Commands.parallel(
+    //            drive.moveTo(
+    //                    () -> getIntakePose(new Bounds(
+    //                            neutralZoneXMin,
+    //                            neutralZoneXMax,
+    //                            FieldConstants.LinesHorizontal.center,
+    //                            FieldConstants.fieldWidth - driveConfig.bumperLengthMeters() / 2.0
+    //                    ), poseSupplierIfNoGamePieces.get()),
+    //                    intakeConstraints
+    //            ),
+    //            superintake.setGoal(Superintake.Goal.INTAKE)
+    //    );
+    //}
+    //
+    //public static Command intakeFromRightNeutralZone(Supplier<Pose2d> poseSupplierIfNoGamePieces) {
+    //    return Commands.parallel(
+    //            drive.moveTo(
+    //                    () -> getIntakePose(new Bounds(
+    //                            neutralZoneXMin,
+    //                            neutralZoneXMax,
+    //                            0.0 + driveConfig.bumperLengthMeters() / 2.0,
+    //                            FieldConstants.LinesHorizontal.center
+    //                    ), poseSupplierIfNoGamePieces.get()),
+    //                    intakeConstraints
+    //            ),
+    //            superintake.setGoal(Superintake.Goal.INTAKE)
+    //    );
+    //}
+    //
+    //public static Command intakeFromDepotWhileShooting(DriveConstraints constraints) {
+    //    Pose2d ifNoGamePieces = new Pose2d(0.2 + driveConfig.bumperLengthMeters() / 2.0, FieldConstants.Depot.depotCenter.getY(), Rotation2d.k180deg);
+    //    return Commands.parallel(
+    //            drive.moveTo(
+    //                    () -> getIntakePose(new Bounds(
+    //                            driveConfig.bumperLengthMeters() / 2.0,
+    //                            FieldConstants.Depot.depth,
+    //                            FieldConstants.Depot.rightCorner.getY(),
+    //                            FieldConstants.Depot.leftCorner.getY()
+    //                    ), ifNoGamePieces),
+    //                    constraints
+    //            ).withAiming(),
+    //            superintake.setGoal(Superintake.Goal.INTAKE),
+    //            superstructure.setGoal(Superstructure.Goal.SHOOT)
+    //    );
+    //}
 
     private static final DriveConstraints bumpConstraints = defaultMoveToConstraints
             .withMaxLinearVelocityMetersPerSec(new LoggedTunableNumber("AutoHelpers/Bump/MaxLinearVelocity", 3));
@@ -278,9 +276,10 @@ public class AutoHelpers {
         );
     }
 
-    public static Command goOverHumanSideBump() {
-        double y = 2.42;
-        Rotation2d rotation = Rotation2d.fromDegrees(-114);
+
+    public static Command goOverOutpostSideBump() {
+        double y = 2.47;
+        Rotation2d rotation = Rotation2d.fromDegrees(-115);
         return CommandsExt.eagerSequence(
                 // go to the start of the bump
                 AutoHelpers.intermediateWaypoint(() -> new Pose2d(
