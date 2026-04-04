@@ -5,6 +5,7 @@ plugins {
     id "edu.wpi.first.GradleRIO" version "2026.2.1"
     id "com.peterabeles.gversion" version "1.10"
     id "io.freefair.lombok" version "8.6"
+    id "idea"
 }
 
 java {
@@ -300,16 +301,9 @@ tasks.register("updateVendordeps") {
 
 
 idea {
-    project {
-        // The project.sourceCompatibility setting is not always picked up, so we set explicitly
-        languageLevel = javaVersion
-    }
     module {
         // Improve development & (especially) debugging experience (and IDEA's capabilities) by having libraries' source & javadoc attached
         downloadJavadoc = true
         downloadSources = true
-        // Exclude the following from indexing and search
-        excludeDirs += file(".run")
-        excludeDirs += file(".vscode")
     }
 }
