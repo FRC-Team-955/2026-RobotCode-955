@@ -38,7 +38,7 @@ public class DBSCAN {
     private ArrayList<Translation2d> inputValues = null;
 
     /** index maintaining visited points */
-    private HashSet<Translation2d> visitedPoints = new HashSet<Translation2d>();
+    private final HashSet<Translation2d> visitedPoints = new HashSet<Translation2d>();
 
     /**
      * Creates a DBSCAN clusterer instance.

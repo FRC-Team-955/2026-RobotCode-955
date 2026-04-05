@@ -1,16 +1,11 @@
 package frc955.gamepiecevision;
 
 import edu.wpi.first.math.geometry.*;
-import edu.wpi.first.math.geometry.struct.Pose2dStruct;
-import edu.wpi.first.math.geometry.struct.Translation2dStruct;
-import edu.wpi.first.networktables.DoublePublisher;
-import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.networktables.StructArrayPublisher;
-import edu.wpi.first.networktables.StructPublisher;
-import edu.wpi.first.util.datalog.DoubleArrayLogEntry;
-import edu.wpi.first.util.datalog.StructArrayLogEntry;
 import edu.wpi.first.wpilibj.Timer;
 import frc955.gamepiecevision.GamePieceVisionIO.GamePieceVisionIOInputs;
+import frc955.gamepiecevision.GamePieceVisionIO.GamePieceVisionIOInputsLogger;
+import frc955.gamepiecevision.logging.LoggedDouble;
+import frc955.gamepiecevision.logging.LoggedStruct;
 import frc955.gamepiecevision.multiobjecttracking.DBSCAN;
 
 import java.util.*;
@@ -19,24 +14,21 @@ import static frc955.gamepiecevision.GamePieceVisionConstants.*;
 
 public class GamePieceVision {
     private final GamePieceVisionIOInputs inputs = new GamePieceVisionIOInputs();
+    private final GamePieceVisionIOInputsLogger inputsLogger = new GamePieceVisionIOInputsLogger();
     private final GamePieceVisionIO io = new GamePieceVisionIOPhotonVision("IntakeCam");
 
-    private final StructArrayLogEntry<Translation2d> clusterTranslationsEntry = StructArrayLogEntry.create(Logger.getLog(), "Test", Translation2d.struct);
-    private final StructPublisher<Transform2d> bestTargetPublisher = NetworkTableInstance.getDefault()
-            .getStructTopic("GamePieceVision/BestTarget", Transform2d.struct).publish();
-    private final DoublePublisher timestampSecondsPublisher = NetworkTableInstance.getDefault()
-            .getDoubleTopic("GamePieceVision/timestampSeconds").publish();
+    private final LoggedStruct<Transform2d> loggedBestTarget = new LoggedStruct<>("BestTarget", Transform2d.struct);
+    private final LoggedDouble loggedTimestamp = new LoggedDouble("Timestamp");
 
     private final Map<Translation2d, Double> targetsToLastSeen = new HashMap<>();
 
-    private final DBSCAN dbscan = new DBSCAN(new ArrayList<Translation2d>(), 3, 0.5);
+    private final DBSCAN dbscan = new DBSCAN(new ArrayList<>(), 3, 0.5);
 
     private Optional<Translation2d> lastTarget = Optional.empty();
 
     public void periodic() {
         io.updateInputs(inputs);
-        inputs.ntPublishers.publish();
-        inputs.dataLogEntries.append();
+        inputsLogger.log(inputs);
 
         Map<Translation2d, Double> newlySeenTargets = new HashMap<>();
         List<Translation2d> targetXYPoints = new LinkedList<>();
@@ -84,7 +76,7 @@ public class GamePieceVision {
                     fuelPose.getTranslation().toTranslation2d(),
                     observation.timestampSeconds()
             );
-            timestampSecondsPublisher.set(observation.timestampSeconds());
+            loggedTimestamp.set(observation.timestampSeconds());
 
         }
 
@@ -133,7 +125,7 @@ public class GamePieceVision {
             }
         }
         if (bestTarget != null) {
-            bestTargetPublisher.set(new Transform2d(bestTarget.getX(), bestTarget.getY(), Rotation2d.kZero));
+            loggedBestTarget.set(new Transform2d(bestTarget.getX(), bestTarget.getY(), Rotation2d.kZero));
         }
         lastTarget = Optional.ofNullable(bestTarget);
         /*

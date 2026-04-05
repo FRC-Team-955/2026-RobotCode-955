@@ -1,7 +1,7 @@
 package frc955.gamepiecevision;
 
 import edu.wpi.first.wpilibj.TimedRobot;
-import org.photonvision.PhotonCamera;
+import frc955.gamepiecevision.logging.Logger;
 
 public class Robot extends TimedRobot {
     public Robot() {

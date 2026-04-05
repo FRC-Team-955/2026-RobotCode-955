@@ -1,8 +1,7 @@
-package frc955.gamepiecevision;
+package frc955.gamepiecevision.logging;
 
 import edu.wpi.first.util.datalog.DataLog;
 import edu.wpi.first.util.datalog.DataLogWriter;
-import edu.wpi.first.util.datalog.IntegerLogEntry;
 import edu.wpi.first.wpilibj.RobotController;
 
 import java.io.IOException;
@@ -13,8 +12,8 @@ import java.util.Date;
 public class Logger {
     private static final DataLogWriter writer;
 
-    private static final IntegerLogEntry startTimestampEntry;
-    private static final IntegerLogEntry endTimestampEntry;
+    private static final LoggedInteger startTimestamp;
+    private static final LoggedInteger endTimestamp;
 
     static {
         try {
@@ -24,8 +23,8 @@ public class Logger {
             throw new RuntimeException(e);
         }
 
-        startTimestampEntry = new IntegerLogEntry(writer, "/Timestamp");
-        endTimestampEntry = new IntegerLogEntry(writer, "/EndTimestamp");
+        startTimestamp = new LoggedInteger("Timestamp");
+        endTimestamp = new LoggedInteger("EndTimestamp");
     }
 
     public static DataLog getLog() {
@@ -40,12 +39,12 @@ public class Logger {
 
     public static void periodicBeforeCode() {
         timestamp = RobotController.getFPGATime();
-        startTimestampEntry.append(timestamp, timestamp);
+        startTimestamp.set(timestamp);
     }
 
     public static void periodicAfterCode() {
-        long endTimestamp = RobotController.getFPGATime();
-        endTimestampEntry.append(endTimestamp, timestamp);
+        long timestamp = RobotController.getFPGATime();
+        endTimestamp.set(timestamp);
 
         writer.flush();
     }

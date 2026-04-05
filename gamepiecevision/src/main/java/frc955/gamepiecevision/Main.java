@@ -12,8 +12,6 @@ import org.photonvision.jni.LibraryLoader;
 import org.photonvision.jni.TimeSyncServer;
 import org.photonvision.timesync.TimeSyncSingleton;
 
-import java.lang.reflect.Field;
-
 public final class Main {
     private Main() {
     }
