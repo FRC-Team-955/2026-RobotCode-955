@@ -13,11 +13,9 @@
 
 package frc.robot.subsystems.gamepiecevision;
 
-import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import org.photonvision.PhotonCamera;
-
-import java.util.LinkedList;
-import java.util.List;
 
 /**
  * IO implementation for real PhotonVision hardware.
@@ -32,19 +30,9 @@ public class GamePieceVisionIOPhotonVision extends GamePieceVisionIO {
     @Override
     public void updateInputs(GamePieceVisionIOInputs inputs) {
         inputs.connected = camera.isConnected();
-
-        List<TargetObservation> targetObservations = new LinkedList<>();
-
-        for (var result : camera.getAllUnreadResults()) {
-            for (var target : result.getTargets()) {
-                targetObservations.add(new TargetObservation(
-                        result.getTimestampSeconds(),
-                        Rotation2d.fromDegrees(target.getYaw()).getRadians(),
-                        Rotation2d.fromDegrees(target.getPitch()).getRadians()
-                ));
-            }
-        }
-
-        inputs.targetObservations = targetObservations.toArray(TargetObservation[]::new);
+        inputs.bestTarget = NetworkTableInstance.getDefault()
+                .getStructTopic("GamePieceVision/BestTarget", Transform2d.struct).subscribe(new Transform2d()).get();
+        inputs.timestampSeconds = NetworkTableInstance.getDefault()
+                .getDoubleTopic("GamePieceVision/timestampSeconds").subscribe(0.0).get();
     }
 }

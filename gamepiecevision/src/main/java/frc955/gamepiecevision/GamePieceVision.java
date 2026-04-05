@@ -3,6 +3,7 @@ package frc955.gamepiecevision;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.geometry.struct.Pose2dStruct;
 import edu.wpi.first.math.geometry.struct.Translation2dStruct;
+import edu.wpi.first.networktables.DoublePublisher;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.networktables.StructPublisher;
@@ -23,6 +24,8 @@ public class GamePieceVision {
     private final StructArrayLogEntry<Translation2d> clusterTranslationsEntry = StructArrayLogEntry.create(Logger.getLog(), "Test", Translation2d.struct);
     private final StructPublisher<Transform2d> bestTargetPublisher = NetworkTableInstance.getDefault()
             .getStructTopic("GamePieceVision/BestTarget", Transform2d.struct).publish();
+    private final DoublePublisher timestampSecondsPublisher = NetworkTableInstance.getDefault()
+            .getDoubleTopic("GamePieceVision/timestampSeconds").publish();
 
     private final Map<Translation2d, Double> targetsToLastSeen = new HashMap<>();
 
@@ -81,6 +84,8 @@ public class GamePieceVision {
                     fuelPose.getTranslation().toTranslation2d(),
                     observation.timestampSeconds()
             );
+            timestampSecondsPublisher.set(observation.timestampSeconds());
+
         }
 
         // Handle newly seen targets
