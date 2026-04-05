@@ -13,6 +13,7 @@
 
 package frc.robot;
 
+import com.ctre.phoenix6.SignalLogger;
 import com.reduxrobotics.canand.CanandEventLoop;
 import com.revrobotics.util.StatusLogger;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -51,8 +52,9 @@ public class Robot extends LoggedRobot {
     public Robot() {
         super(Constants.loopPeriod);
 
-        // Stop REV logger
+        // Stop REV and CTRE loggers
         StatusLogger.disableAutoLogging();
+        SignalLogger.enableAutoLogging(false);
 
         // Start Redux CanLink
         CanandEventLoop.getInstance();
