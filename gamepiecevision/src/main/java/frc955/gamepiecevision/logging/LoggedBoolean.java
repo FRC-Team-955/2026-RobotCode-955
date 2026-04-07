@@ -11,7 +11,7 @@ public class LoggedBoolean {
     /** name MUST start with "/" */
     public LoggedBoolean(String name) {
         publisher = NetworkTableInstance.getDefault()
-                .getBooleanTopic("/GamePieceVision" + name).publish();
+                .getBooleanTopic("/GamePieceVision/" + name).publish();
         entry = new BooleanLogEntry(Logger.getLog(), name);
     }
 

@@ -6,6 +6,7 @@ import frc955.gamepiecevision.GamePieceVisionIO.GamePieceVisionIOInputs;
 import frc955.gamepiecevision.GamePieceVisionIO.GamePieceVisionIOInputsLogger;
 import frc955.gamepiecevision.logging.LoggedDouble;
 import frc955.gamepiecevision.logging.LoggedStruct;
+import frc955.gamepiecevision.logging.LoggedStructArray;
 import frc955.gamepiecevision.multiobjecttracking.DBSCAN;
 
 import java.util.*;
@@ -18,6 +19,7 @@ public class GamePieceVision {
     private final GamePieceVisionIO io = new GamePieceVisionIOPhotonVision("IntakeCam");
 
     private final LoggedStruct<Transform2d> loggedBestTarget = new LoggedStruct<>("BestTarget", Transform2d.struct);
+    private final LoggedStructArray<Translation2d> loggedTargets = new LoggedStructArray<>("Targets", Translation2d.struct);
     private final LoggedDouble loggedTimestamp = new LoggedDouble("Timestamp");
 
     private final Map<Translation2d, Double> targetsToLastSeen = new HashMap<>();
@@ -91,6 +93,7 @@ public class GamePieceVision {
         // Remove expired coral
         targetsToLastSeen.values().removeIf(lastSeen -> Timer.getTimestamp() - lastSeen > expireTimeSeconds);
 
+        loggedTargets.set(targetsToLastSeen.keySet().toArray(Translation2d[]::new));
         ArrayList<FuelCluster> clusterList = new ArrayList<FuelCluster>();
         Translation2d bestTarget = null;
         double bestWeight = 0;

@@ -12,7 +12,7 @@ public class LoggedStructArray<T> {
     /** name MUST start with "/" */
     public LoggedStructArray(String name, Struct<T> struct) {
         publisher = NetworkTableInstance.getDefault()
-                .getStructArrayTopic("/GamePieceVision" + name, struct).publish();
+                .getStructArrayTopic("/GamePieceVision/" + name, struct).publish();
         entry = StructArrayLogEntry.create(Logger.getLog(), name, struct);
     }
 

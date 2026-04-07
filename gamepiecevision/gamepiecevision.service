@@ -4,6 +4,7 @@ Description=frc955.gamepiecevision
 [Service]
 Type=simple
 User=photon
+WorkingDirectory=/home/photon/gamepiecevision
 ExecStart=/usr/bin/java -Xmx512m -jar /home/photon/gamepiecevision/gamepiecevision.jar
 # Not sure why this is needed but I just copied it from photonvision.service: https://github.com/PhotonVision/photon-image-modifier/blob/e5018c1f8e2045c46ba90bb3543b43d0a866e066/install.sh#L324-L346
 ExecStop=/bin/systemctl kill gamepiecevision

@@ -11,7 +11,7 @@ public class LoggedInteger {
     /** name MUST start with "/" */
     public LoggedInteger(String name) {
         publisher = NetworkTableInstance.getDefault()
-                .getIntegerTopic("/GamePieceVision" + name).publish();
+                .getIntegerTopic("/GamePieceVision/" + name).publish();
         entry = new IntegerLogEntry(Logger.getLog(), name);
     }
 

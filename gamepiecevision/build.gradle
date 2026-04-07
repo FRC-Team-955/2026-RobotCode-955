@@ -140,6 +140,8 @@ nativeConfig.dependencies.add wpilibTools.deps.wpilib("hal")
 nativeConfig.dependencies.add wpilibTools.deps.wpilib("apriltag")
 def opencvYear = "2025" // wpi.frcYear.get()
 nativeConfig.dependencies.add wpilibTools.deps.wpilibOpenCv("frc" + opencvYear, wpi.versions.opencvVersion.get())
+// add photon natives that we had to manually extract from the photonvision release jar because they aren't on maven
+nativeConfig.dependencies.add project.getDependencies().create(files("natives/photonvision-v2026.3.3-linuxarm64"))
 
 dependencies {
     implementation wpi.java.vendor.java()
