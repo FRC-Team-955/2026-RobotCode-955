@@ -8,7 +8,7 @@ import frc.lib.motor.MotorIOSparkMax;
 import frc.robot.BuildConstants;
 
 public class FeederConstants {
-    static final double gearRatio = 5;
+    static final double gearRatio = 3;
 
     static MotorIO createIO() {
         return switch (BuildConstants.mode) {

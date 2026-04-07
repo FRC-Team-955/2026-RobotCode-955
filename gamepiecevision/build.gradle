@@ -223,8 +223,8 @@ deploy {
                     dependsOn artifacts.service.deployTask
                 }
                 start(CommandArtifact) {
-                    // Fire up photonvision again
-                    command = "sudo systemctl start photonvision.service"
+                    // Fire up gamepiecevision again
+                    command = "sudo systemctl start gamepiecevision.service"
                     dependsOn artifacts.moveService.deployTask
                 }
             }

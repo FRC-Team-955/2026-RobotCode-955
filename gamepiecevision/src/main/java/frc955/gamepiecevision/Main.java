@@ -18,10 +18,12 @@ public final class Main {
 
     public static void main(String... args) {
         // Load natives
+        System.out.println("Loading natives");
         LibraryLoader.loadWpiLibraries();
         LibraryLoader.loadTargeting();
 
         // Setup NetworkTables
+        System.out.println("Setting up NT");
         NetworkTableInstance inst = NetworkTableInstance.getDefault();
         inst.startClient4("frc955.gamepiecevision");
         inst.setServerTeam(955);
@@ -30,6 +32,7 @@ public final class Main {
         }
 
         // Manually create TimeSyncSingleton instance to avoid attempt to load photontargetingJNI
+        System.out.println("Fixing TimeSyncSingleton");
         try {
             var instance = TimeSyncSingleton.class.getDeclaredField("INSTANCE");
             instance.setAccessible(true);
@@ -41,6 +44,7 @@ public final class Main {
         }
 
         // Start code
+        System.out.println("Starting robot");
         RobotBase.startRobot(Robot::new);
     }
 }
