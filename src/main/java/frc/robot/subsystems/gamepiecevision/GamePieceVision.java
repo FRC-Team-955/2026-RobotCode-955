@@ -1,6 +1,5 @@
 package frc.robot.subsystems.gamepiecevision;
 
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.Alert;
@@ -19,6 +18,7 @@ public class GamePieceVision implements Periodic {
 
     private final GamePieceVisionIOInputsAutoLogged inputs = new GamePieceVisionIOInputsAutoLogged();
     private final GamePieceVisionIO io = createIO();
+
     private final Alert disconnectedAlert = new Alert("Game piece vision camera is disconnected.", Alert.AlertType.kError);
 
     private static GamePieceVision instance;
@@ -65,8 +65,8 @@ public class GamePieceVision implements Periodic {
         if (!inputs.present) {
             return Optional.empty();
         }
-        Optional<Pose2d> pose = robotState.getPoseAtTimestamp(inputs.timestamp);
-        return pose.map(pose2d -> pose2d.transformBy(inputs.robotToTarget).getTranslation());
+        return robotState.getPoseAtTimestamp(inputs.timestamp)
+                .map(pose -> pose.transformBy(inputs.robotToTarget).getTranslation());
     }
 
     //public List<Translation2d> getBestTargetsInBounds(Optional<Bounds> bounds) {
