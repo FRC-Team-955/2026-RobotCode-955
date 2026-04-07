@@ -17,42 +17,21 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.util.Units;
 import frc.robot.BuildConstants;
-import lombok.RequiredArgsConstructor;
-
-import java.util.function.Function;
 
 public class GamePieceVisionConstants {
-    static final double horizontalFOVRad = Math.toRadians(160.0);
-    static final double camWidth = 640;
-    static final double focalLengthPixels = camWidth / (2.0 * Math.tan(horizontalFOVRad / 2.0));
-    static final double clusterGroupingDistanceMeters = 0.3;
-    static final double diagFOVRad = 2 * Math.atan(Math.tan(horizontalFOVRad / 2) * Math.sqrt(1 + Math.pow(0.75, 2)));
-    static final double pixelsToRad = camWidth / horizontalFOVRad;
-    static final double minDistanceForSameCoralMeters = 0.4;
-    static final double expireTimeSeconds = 0.1;
+    /** KEEP SYNCED WITH GAMEPIECEVISION CODE!!! */
+    static final Transform3d robotToCamera = new Transform3d(
+            Units.inchesToMeters(15.902293), Units.inchesToMeters(11.595038), Units.inchesToMeters(16.533898),
+            // Rotation order matters
+            new Rotation3d(0.0, Units.degreesToRadians(10.0), 0.0)
+                    .rotateBy(new Rotation3d(0.0, 0.0, Units.degreesToRadians(0.0)))
+    );
 
-    @RequiredArgsConstructor
-    enum Camera {
-        IntakeCam(
-                new Transform3d(
-                        Units.inchesToMeters(15.902293), Units.inchesToMeters(11.595038), Units.inchesToMeters(16.533898),
-                        // Rotation order matters
-                        new Rotation3d(0.0, Units.degreesToRadians(10.0), 0.0)
-                                .rotateBy(new Rotation3d(0.0, 0.0, Units.degreesToRadians(0.0)))
-                ),
-                (cam) -> switch (BuildConstants.mode) {
-                    case REAL -> new GamePieceVisionIOPhotonVision("IntakeCam");
-                    case SIM -> new GamePieceVisionIOPhotonVisionSim("IntakeCam", cam.robotToCamera);
-                    case REPLAY -> new GamePieceVisionIO();
-                }
-        ),
-        ;
-
-        final Transform3d robotToCamera;
-        private final Function<Camera, GamePieceVisionIO> createIO;
-
-        GamePieceVisionIO createIO() {
-            return createIO.apply(this);
-        }
+    static GamePieceVisionIO createIO() {
+        return switch (BuildConstants.mode) {
+            case REAL -> new GamePieceVisionIOCoprocessor();
+            case SIM -> new GamePieceVisionIOCoprocessorSim("IntakeCam");
+            case REPLAY -> new GamePieceVisionIO();
+        };
     }
 }

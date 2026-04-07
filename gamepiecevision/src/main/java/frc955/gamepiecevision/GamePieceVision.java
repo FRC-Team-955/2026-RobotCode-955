@@ -1,28 +1,35 @@
 package frc955.gamepiecevision;
 
 import edu.wpi.first.math.geometry.*;
-import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.util.struct.Struct;
 import frc955.gamepiecevision.GamePieceVisionIO.GamePieceVisionIOInputs;
 import frc955.gamepiecevision.GamePieceVisionIO.GamePieceVisionIOInputsLogger;
 import frc955.gamepiecevision.logging.LoggedDouble;
+import frc955.gamepiecevision.logging.LoggedInteger;
 import frc955.gamepiecevision.logging.LoggedStruct;
 import frc955.gamepiecevision.logging.LoggedStructArray;
 import frc955.gamepiecevision.multiobjecttracking.DBSCAN;
+import org.littletonrobotics.junction.RecordStruct;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Optional;
 
-import static frc955.gamepiecevision.GamePieceVisionConstants.*;
+import static frc955.gamepiecevision.GamePieceVisionConstants.fuelDiameterMeters;
+import static frc955.gamepiecevision.GamePieceVisionConstants.robotToCamera;
 
 public class GamePieceVision {
     private final GamePieceVisionIOInputs inputs = new GamePieceVisionIOInputs();
     private final GamePieceVisionIOInputsLogger inputsLogger = new GamePieceVisionIOInputsLogger();
     private final GamePieceVisionIO io = new GamePieceVisionIOPhotonVision("IntakeCam");
 
-    private final LoggedStruct<Transform2d> loggedBestTarget = new LoggedStruct<>("BestTarget", Transform2d.struct);
-    private final LoggedStructArray<Translation2d> loggedTargets = new LoggedStructArray<>("Targets", Translation2d.struct);
-    private final LoggedDouble loggedTimestamp = new LoggedDouble("Timestamp");
-
-    private final Map<Translation2d, Double> targetsToLastSeen = new HashMap<>();
+    private final LoggedStruct<Result> loggedResult = new LoggedStruct<>("Outputs/Result", Result.struct);
+    private final LoggedDouble loggedBestWeight = new LoggedDouble("Outputs/BestWeight");
+    private final LoggedInteger loggedNumClusters = new LoggedInteger("Outputs/NumClusters");
+    private final LoggedInteger loggedLargestCluster = new LoggedInteger("Outputs/LargestCluster");
+    private final LoggedStructArray<Translation2d> loggedTargetPoints = new LoggedStructArray<>("Outputs/TargetPoints", Translation2d.struct);
+    private final LoggedStructArray<Translation2d> loggedAllTargets = new LoggedStructArray<>("Outputs/AllTargets", Translation2d.struct);
 
     private final DBSCAN dbscan = new DBSCAN(new ArrayList<>(), 3, 0.5);
 
@@ -32,8 +39,8 @@ public class GamePieceVision {
         io.updateInputs(inputs);
         inputsLogger.log(inputs);
 
-        Map<Translation2d, Double> newlySeenTargets = new HashMap<>();
-        List<Translation2d> targetXYPoints = new LinkedList<>();
+        List<Translation2d> targetPointsOnCapture = new LinkedList<>();
+        List<Translation2d> targetsOnField = new LinkedList<>();
 
         // Process observations
         for (var observation : inputs.targetObservations) {
@@ -43,7 +50,7 @@ public class GamePieceVision {
             Translation2d pitchYawTranslation =
                     new Translation2d(Math.tan(observation.yawRad()), Math.tan(-observation.pitchRad()))
                             .rotateBy(new Rotation2d(-robotToCamera.getRotation().getX()));
-            targetXYPoints.add(pitchYawTranslation);
+            targetPointsOnCapture.add(pitchYawTranslation);
             double targetYaw = Math.atan(pitchYawTranslation.getX());
             double targetPitch = -Math.atan(pitchYawTranslation.getY());
 
@@ -53,17 +60,6 @@ public class GamePieceVision {
                             / Math.cos(targetYaw);
 
             Pose2d robotToCameraPose2d = new Pose3d(robotToCamera.getTranslation(), robotToCamera.getRotation()).toPose2d();
-            Transform2d robotToCameraTransform2d = new Transform2d(robotToCameraPose2d.getTranslation(), robotToCameraPose2d.getRotation());
-
-            // 1. compute Transform3d of robot to fuel/cluster
-            // 2. send transform over nt
-            // 3. on rio, robotPose.transformBy(cluster) = fieldtoCluster
-
-            // this part needs to get fixed since we don't have robot pos
-
-            // TODO: Apply in actual robot code
-            // Pose2d fieldToCamera = robotPose.toPose2d().transformBy(robotToCameraTransform2d);
-
             Pose2d robotToFuel =
                     robotToCameraPose2d
                             .transformBy(new Transform2d(Translation2d.kZero, new Rotation2d(-targetYaw)))
@@ -74,39 +70,21 @@ public class GamePieceVision {
                 continue;
             }
 
-            newlySeenTargets.put(
-                    fuelPose.getTranslation().toTranslation2d(),
-                    observation.timestampSeconds()
-            );
-            loggedTimestamp.set(observation.timestampSeconds());
-
+            targetsOnField.add(fuelPose.getTranslation().toTranslation2d());
         }
 
-        // Handle newly seen targets
-        for (var target : newlySeenTargets.keySet()) {
-            // Remove old targets within distance to be counted as the same target
-            targetsToLastSeen.keySet()
-                    .removeIf(otherTarget -> target.getDistance(otherTarget) < minDistanceForSameCoralMeters);
-        }
-        targetsToLastSeen.putAll(newlySeenTargets);
-
-        // Remove expired coral
-        targetsToLastSeen.values().removeIf(lastSeen -> Timer.getTimestamp() - lastSeen > expireTimeSeconds);
-
-        loggedTargets.set(targetsToLastSeen.keySet().toArray(Translation2d[]::new));
-        ArrayList<FuelCluster> clusterList = new ArrayList<FuelCluster>();
         Translation2d bestTarget = null;
         double bestWeight = 0;
         int largestSize = 0;
 
-        ArrayList<ArrayList<Translation2d>> dbscanResults = new ArrayList<ArrayList<Translation2d>>();
-        if (targetsToLastSeen.size() > 2) {
-            dbscan.setInputValues(targetsToLastSeen.keySet());
+        ArrayList<ArrayList<Translation2d>> dbscanResults = new ArrayList<>();
+        if (targetsOnField.size() > 2) {
+            dbscan.setInputValues(targetsOnField);
             dbscanResults = dbscan.performClustering();
         }
         if (dbscanResults.isEmpty()) {
-            for (Translation2d target : targetsToLastSeen.keySet()) {
-                ArrayList<Translation2d> singleTarget = new ArrayList<Translation2d>();
+            for (Translation2d target : targetsOnField) {
+                ArrayList<Translation2d> singleTarget = new ArrayList<>();
                 singleTarget.add(target);
                 dbscanResults.add(singleTarget);
             }
@@ -114,7 +92,6 @@ public class GamePieceVision {
 
         for (ArrayList<Translation2d> cluster : dbscanResults) {
             FuelCluster fuelCluster = new FuelCluster(cluster);
-            clusterList.add(fuelCluster);
             double weight = fuelCluster.weight();
             if (lastTarget.isPresent() && fuelCluster.avgLocation().isPresent()) {
                 weight += 2 / (fuelCluster.avgLocation().get().getDistance(lastTarget.get()) + 1);
@@ -127,37 +104,21 @@ public class GamePieceVision {
                 largestSize = fuelCluster.size();
             }
         }
-        if (bestTarget != null) {
-            loggedBestTarget.set(new Transform2d(bestTarget.getX(), bestTarget.getY(), Rotation2d.kZero));
-        }
         lastTarget = Optional.ofNullable(bestTarget);
-        /*
-        Logger.recordOutput("GamePieceVision/BestCluster", bestTarget);
-        Logger.recordOutput("GamePieceVision/BestWeight", bestWeight);
-        Logger.recordOutput("GamePieceVision/NumClusters", dbscanResults.size());
-        Logger.recordOutput("GamePieceVision/LargestCluster", largestSize);
-         */
-        //bestTargets = clusters
-        //        .stream()
-        //        .sorted(Comparator.comparing(FuelCluster::size))
-        //        .map(FuelCluster::avgLocation)
-        //        .flatMap(Optional::stream)
-        //        .toList();
-        //bestTargets = clusters
-        //        .stream()
-        //        .max(Comparator.comparing(FuelCluster::size))
-        //        .map(FuelCluster::avgLocation)
-        //        .stream()
-        //        .toList();
-        //bestTargets = targetsToLastSeen
-        //        .keySet()
-        //        .stream()
-        //        .sorted(Comparator.comparingDouble(t -> t.getDistance(robotState.getTranslation())))
-        //        .toList();
 
-        //Logger.recordOutput("GamePieceVision/TargetXYPoints", targetXYPoints.toArray(Translation2d[]::new));
-        //Logger.recordOutput("GamePieceVision/AllTargets", targetsToLastSeen.keySet().toArray(Translation2d[]::new));
-        //Logger.recordOutput("GamePieceVision/BestTargets", bestTargets.toArray(Translation2d[]::new));
+        loggedResult.set(new Result(
+                inputs.connected,
+                inputs.timestamp,
+                bestTarget != null,
+                bestTarget != null
+                        ? new Transform2d(bestTarget.getX(), bestTarget.getY(), Rotation2d.kZero)
+                        : new Transform2d()
+        ));
+        loggedBestWeight.set(bestWeight);
+        loggedNumClusters.set(dbscanResults.size());
+        loggedLargestCluster.set(largestSize);
+        loggedTargetPoints.set(targetPointsOnCapture.toArray(Translation2d[]::new));
+        loggedAllTargets.set(targetsOnField.toArray(Translation2d[]::new));
     }
 
     private record FuelCluster(List<Translation2d> cluster) {
@@ -197,6 +158,17 @@ public class GamePieceVision {
             }
             return Optional.of(average.div(cluster.size()));
         }
+    }
+
+    /** KEEP SYNCED WITH ROBOT CODE!!!! */
+    public record Result(
+            boolean connected,
+            double timestamp,
+            boolean present,
+            Transform2d robotToTarget
+    ) {
+        @SuppressWarnings("unchecked")
+        public static Struct<Result> struct = (Struct<Result>) new RecordStruct(Result.class);
     }
 }
 

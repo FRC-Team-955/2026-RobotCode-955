@@ -2,28 +2,24 @@ package frc.robot.subsystems.gamepiecevision;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.Alert;
 import frc.lib.Util;
 import frc.lib.subsystem.Periodic;
 import frc.robot.RobotState;
 import org.littletonrobotics.junction.Logger;
 
-import java.util.Arrays;
-import java.util.EnumMap;
-import java.util.Map;
+import java.util.Optional;
 
-import static frc.robot.subsystems.gamepiecevision.GamePieceVisionConstants.Camera;
+import static frc.robot.subsystems.gamepiecevision.GamePieceVisionConstants.createIO;
+import static frc.robot.subsystems.gamepiecevision.GamePieceVisionConstants.robotToCamera;
 
 public class GamePieceVision implements Periodic {
     private static final RobotState robotState = RobotState.get();
 
-    private final EnumMap<Camera, CameraData> cameras =
-            Util.createEnumMap(Camera.class,
-                    Camera.values(), (cam) -> new CameraData(
-                            new GamePieceVisionIOInputsAutoLogged(),
-                            cam.createIO(),
-                            new Alert("Game piece vision camera " + cam.name() + " is disconnected.", Alert.AlertType.kError)
-                    ));
+    private final GamePieceVisionIOInputsAutoLogged inputs = new GamePieceVisionIOInputsAutoLogged();
+    private final GamePieceVisionIO io = createIO();
+    private final Alert disconnectedAlert = new Alert("Game piece vision camera is disconnected.", Alert.AlertType.kError);
 
     private static GamePieceVision instance;
 
@@ -42,11 +38,13 @@ public class GamePieceVision implements Periodic {
         }
     }
 
-
-    //StructSubscriber<Transform2d> bestTargetSubscriber = NetworkTableInstance.getDefault()
-    //        .getStructTopic("GamePieceVision/BestTarget", Transform2d.struct).subscribe(new Transform2d());
-    //DoubleSubscriber timestampSecondsSubscriber = NetworkTableInstance.getDefault()
-    //        .getDoubleTopic("GamePieceVision/timestampSeconds").subscribe(0.0);
+    @Override
+    public void periodicBeforeCommands() {
+        io.updateInputs(inputs);
+        Logger.processInputs("Inputs/GamePieceVision", inputs);
+        // Update disconnected alert
+        disconnectedAlert.set(!inputs.connected);
+    }
 
     @Override
     public void periodicAfterCommands() {
@@ -54,33 +52,23 @@ public class GamePieceVision implements Periodic {
         var robotPose = new Pose3d(robotState.getPose());
         Logger.recordOutput(
                 "GamePieceVision/CameraPoses",
-                Arrays.stream(Camera.values())
-                        .map(cam -> robotPose.transformBy(cam.robotToCamera))
-                        .toArray(Pose3d[]::new)
+                robotPose.transformBy(robotToCamera)
         );
-        for (Map.Entry<Camera, CameraData> cam : cameras.entrySet()) {
-            CameraData data = cam.getValue();
-
-            Logger.recordOutput("GamePieceVision/RealBestTarget", robotState.getPoseAtTimestamp(
-                    data.inputs.timestampSeconds).orElse(new Pose2d()).transformBy(data.inputs.bestTarget));
-        }
+        Logger.recordOutput("GamePieceVision/BestTarget", getBestTarget().orElse(new Translation2d()));
     }
 
     public boolean anyCamerasDisconnected() {
-        for (Map.Entry<Camera, CameraData> cam : cameras.entrySet()) {
-            CameraData data = cam.getValue();
-            return !data.inputs.connected;
+        return !inputs.connected;
+    }
+
+    public Optional<Translation2d> getBestTarget() {
+        if (!inputs.present) {
+            return Optional.empty();
         }
-        return false;
+        Optional<Pose2d> pose = robotState.getPoseAtTimestamp(inputs.timestamp);
+        return pose.map(pose2d -> pose2d.transformBy(inputs.robotToTarget).getTranslation());
     }
 
-
-    private record CameraData(
-            GamePieceVisionIOInputsAutoLogged inputs,
-            GamePieceVisionIO io,
-            Alert disconnectedAlert
-    ) {
-    }
     //public List<Translation2d> getBestTargetsInBounds(Optional<Bounds> bounds) {
     //    List<FuelCluster> clusters = new LinkedList<>();
     //

@@ -1,16 +1,18 @@
 package frc.robot.subsystems.gamepiecevision;
 
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform3d;
 import frc.robot.SimManager;
+import org.photonvision.PhotonCamera;
 import org.photonvision.simulation.PhotonCameraSim;
 import org.photonvision.simulation.SimCameraProperties;
 
-public class GamePieceVisionIOPhotonVisionSim extends GamePieceVisionIOPhotonVision {
+public class GamePieceVisionIOCoprocessorSim extends GamePieceVisionIOCoprocessor {
     private static final SimManager simManager = SimManager.get();
 
-    public GamePieceVisionIOPhotonVisionSim(String name, Transform3d robotToCamera) {
-        super(name);
+    protected final PhotonCamera camera;
+
+    public GamePieceVisionIOCoprocessorSim(String name) {
+        camera = new PhotonCamera(name);
 
         // Add sim camera
         var cameraProperties = new SimCameraProperties();
@@ -26,7 +28,7 @@ public class GamePieceVisionIOPhotonVisionSim extends GamePieceVisionIOPhotonVis
         cameraSim.enableRawStream(false);
         cameraSim.enableProcessedStream(false);
 
-        simManager.gamePieceVisionSystem.addCamera(cameraSim, robotToCamera);
+        simManager.gamePieceVisionSystem.addCamera(cameraSim, GamePieceVisionConstants.robotToCamera);
     }
 
     @Override

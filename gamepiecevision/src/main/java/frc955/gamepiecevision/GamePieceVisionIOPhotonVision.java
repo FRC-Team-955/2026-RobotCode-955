@@ -13,7 +13,7 @@
 
 package frc955.gamepiecevision;
 
-import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.util.Units;
 import org.photonvision.PhotonCamera;
 
 import java.util.LinkedList;
@@ -33,18 +33,18 @@ public class GamePieceVisionIOPhotonVision extends GamePieceVisionIO {
     public void updateInputs(GamePieceVisionIOInputs inputs) {
         inputs.connected = camera.isConnected();
 
-        List<TargetObservation> targetObservations = new LinkedList<>();
-
         for (var result : camera.getAllUnreadResults()) {
+            List<TargetObservation> targetObservations = new LinkedList<>();
+
             for (var target : result.getTargets()) {
                 targetObservations.add(new TargetObservation(
-                        result.getTimestampSeconds(),
-                        Rotation2d.fromDegrees(target.getYaw()).getRadians(),
-                        Rotation2d.fromDegrees(target.getPitch()).getRadians()
+                        Units.degreesToRadians(target.getYaw()),
+                        Units.degreesToRadians(target.getPitch())
                 ));
             }
-        }
 
-        inputs.targetObservations = targetObservations.toArray(TargetObservation[]::new);
+            inputs.timestamp = result.getTimestampSeconds();
+            inputs.targetObservations = targetObservations.toArray(TargetObservation[]::new);
+        }
     }
 }

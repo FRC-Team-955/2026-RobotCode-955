@@ -23,7 +23,7 @@ public class Logger {
             throw new RuntimeException(e);
         }
 
-        startTimestamp = new LoggedInteger("Timestamp");
+        startTimestamp = new LoggedInteger("StartTimestamp");
         endTimestamp = new LoggedInteger("EndTimestamp");
     }
 
@@ -47,5 +47,9 @@ public class Logger {
         endTimestamp.set(timestamp);
 
         writer.flush();
+    }
+
+    public static String addPrefix(String name) {
+        return "/GamePieceVision/" + name;
     }
 }

@@ -18,16 +18,9 @@ import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.util.Units;
 
 public class GamePieceVisionConstants {
-    static final double horizontalFOVRad = Math.toRadians(160.0);
-    static final double camWidth = 640;
     static final double fuelDiameterMeters = 0.15;
-    static final double focalLengthPixels = camWidth / (2.0 * Math.tan(horizontalFOVRad / 2.0));
-    static final double clusterGroupingDistanceMeters = 0.3;
-    static final double diagFOVRad = 2 * Math.atan(Math.tan(horizontalFOVRad / 2) * Math.sqrt(1 + Math.pow(0.75, 2)));
-    static final double pixelsToRad = camWidth / horizontalFOVRad;
-    static final double minDistanceForSameCoralMeters = 0.15;
-    static final double expireTimeSeconds = 0.1;
 
+    /** KEEP SYNCED WITH ROBOT CODE!!! */
     static final Transform3d robotToCamera = new Transform3d(
             Units.inchesToMeters(15.902293), Units.inchesToMeters(11.595038), Units.inchesToMeters(16.533898),
             // Rotation order matters

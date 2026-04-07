@@ -8,11 +8,9 @@ public class LoggedDouble {
     private final DoublePublisher publisher;
     private final DoubleLogEntry entry;
 
-    /** name MUST start with "/" */
     public LoggedDouble(String name) {
-        publisher = NetworkTableInstance.getDefault()
-                .getDoubleTopic("/GamePieceVision/" + name).publish();
-        entry = new DoubleLogEntry(Logger.getLog(), name);
+        publisher = NetworkTableInstance.getDefault().getDoubleTopic(Logger.addPrefix(name)).publish();
+        entry = new DoubleLogEntry(Logger.getLog(), Logger.addPrefix(name));
     }
 
     public void set(double value) {

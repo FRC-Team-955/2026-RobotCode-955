@@ -9,11 +9,9 @@ public class LoggedStructArray<T> {
     private final StructArrayPublisher<T> publisher;
     private final StructArrayLogEntry<T> entry;
 
-    /** name MUST start with "/" */
     public LoggedStructArray(String name, Struct<T> struct) {
-        publisher = NetworkTableInstance.getDefault()
-                .getStructArrayTopic("/GamePieceVision/" + name, struct).publish();
-        entry = StructArrayLogEntry.create(Logger.getLog(), name, struct);
+        publisher = NetworkTableInstance.getDefault().getStructArrayTopic(Logger.addPrefix(name), struct).publish();
+        entry = StructArrayLogEntry.create(Logger.getLog(), Logger.addPrefix(name), struct);
     }
 
     public void set(T... value) {

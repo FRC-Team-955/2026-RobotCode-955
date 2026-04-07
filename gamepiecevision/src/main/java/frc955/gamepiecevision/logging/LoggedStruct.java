@@ -9,11 +9,9 @@ public class LoggedStruct<T> {
     private final StructPublisher<T> publisher;
     private final StructLogEntry<T> entry;
 
-    /** name MUST start with "/" */
     public LoggedStruct(String name, Struct<T> struct) {
-        publisher = NetworkTableInstance.getDefault()
-                .getStructTopic("/GamePieceVision/" + name, struct).publish();
-        entry = StructLogEntry.create(Logger.getLog(), name, struct);
+        publisher = NetworkTableInstance.getDefault().getStructTopic(Logger.addPrefix(name), struct).publish();
+        entry = StructLogEntry.create(Logger.getLog(), Logger.addPrefix(name), struct);
     }
 
     public void set(T value) {

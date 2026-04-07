@@ -8,11 +8,9 @@ public class LoggedBoolean {
     private final BooleanPublisher publisher;
     private final BooleanLogEntry entry;
 
-    /** name MUST start with "/" */
     public LoggedBoolean(String name) {
-        publisher = NetworkTableInstance.getDefault()
-                .getBooleanTopic("/GamePieceVision/" + name).publish();
-        entry = new BooleanLogEntry(Logger.getLog(), name);
+        publisher = NetworkTableInstance.getDefault().getBooleanTopic(Logger.addPrefix(name)).publish();
+        entry = new BooleanLogEntry(Logger.getLog(), Logger.addPrefix(name));
     }
 
     public void set(boolean value) {

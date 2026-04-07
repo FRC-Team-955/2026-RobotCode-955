@@ -8,11 +8,9 @@ public class LoggedInteger {
     private final IntegerPublisher publisher;
     private final IntegerLogEntry entry;
 
-    /** name MUST start with "/" */
     public LoggedInteger(String name) {
-        publisher = NetworkTableInstance.getDefault()
-                .getIntegerTopic("/GamePieceVision/" + name).publish();
-        entry = new IntegerLogEntry(Logger.getLog(), name);
+        publisher = NetworkTableInstance.getDefault().getIntegerTopic(Logger.addPrefix(name)).publish();
+        entry = new IntegerLogEntry(Logger.getLog(), Logger.addPrefix(name));
     }
 
     public void set(long value) {
