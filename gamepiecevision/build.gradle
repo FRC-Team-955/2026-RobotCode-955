@@ -176,16 +176,20 @@ tasks.register("run", JavaExec) {
 }
 
 // Based on https://github.com/PhotonVision/photonvision/blob/main/photon-server/build.gradle
-import edu.wpi.first.deployutils.deploy.artifact.*
+
+import edu.wpi.first.deployutils.deploy.artifact.CommandArtifact
+import edu.wpi.first.deployutils.deploy.artifact.FileArtifact
+import edu.wpi.first.deployutils.deploy.artifact.JavaArtifact
 import edu.wpi.first.deployutils.deploy.target.RemoteTarget
 import edu.wpi.first.deployutils.deploy.target.location.SshDeployLocation
+
 deploy {
     targets {
         orangepi(RemoteTarget) {
             directory = '/home/photon/gamepiecevision'
             locations {
                 ssh(SshDeployLocation) {
-                    address = "10.9.55.TODO"
+                    address = "10.9.55.12"
                     user = "photon"
                     password = "vision"
                 }
