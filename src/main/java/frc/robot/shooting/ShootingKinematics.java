@@ -51,11 +51,12 @@ public class ShootingKinematics implements Periodic {
     //private static final InterpolatingDoubleTreeMap velocityToRPMMap = new InterpolatingDoubleTreeMap();
 
     static {
-        //velocityToRPMMap.put(7.39, 2000);
-        //velocityToRPMMap.put(7.91, 2076);
-        //velocityToRPMMap.put(8.41, 2207);
-        //velocityToRPMMap.put(9.02, 2367);
-        //velocityToRPMMap.put(9.69, 2691);
+        //velocityToRPMMap.put(6.96, 1766);
+        //velocityToRPMMap.put(7.415, 1900);
+        //velocityToRPMMap.put(8.035, 2085.5);
+        //velocityToRPMMap.put(8.535, 2233);
+        //velocityToRPMMap.put(9.09, 2449);
+        //velocityToRPMMap.put(10.08, 2742.7);
 
         //velocityToRPM = (x) -> velocityToRPMMap.get(x);
 
@@ -193,7 +194,7 @@ public class ShootingKinematics implements Periodic {
 
         Logger.recordOutput("ShootingKinematics/Drive/VelocityCompensation", rotationAboutTargetRadiansPerSecForDrivebase(robotState.getMeasuredChassisSpeedsFieldRelative()));
         Logger.recordOutput("ShootingKinematics/Drive/AccelerationCompensation", rotationFeedforwardAcceleration(robotState.getFilteredAccelerationMetersPerSecPerSec()));
-        Logger.recordOutput("ShootingKinematics/Drive/TotalFFComp", rotationFeedforwardAcceleration(robotState.getFilteredAccelerationMetersPerSecPerSec())+rotationAboutTargetRadiansPerSecForDrivebase(robotState.getMeasuredChassisSpeedsFieldRelative()));
+        Logger.recordOutput("ShootingKinematics/Drive/TotalFFComp", rotationFeedforwardAcceleration(robotState.getFilteredAccelerationMetersPerSecPerSec()) + rotationAboutTargetRadiansPerSecForDrivebase(robotState.getMeasuredChassisSpeedsFieldRelative()));
     }
 
     private static final LoggedTunableNumber shootHubManualFlywheelRPM = new LoggedTunableNumber("ShootingKinematics/ShootHubManual/FlywheelRPM", 2000.0);
