@@ -8,8 +8,7 @@ public class GamePieceVisionIO {
     public static class GamePieceVisionIOInputs {
         public boolean connected = false;
         public double timestamp = 0.0;
-        public boolean present = false;
-        public Transform2d robotToTarget = new Transform2d();
+        public Transform2d[] clusters = new Transform2d[0];
     }
 
     public void updateInputs(GamePieceVisionIOInputs inputs) {

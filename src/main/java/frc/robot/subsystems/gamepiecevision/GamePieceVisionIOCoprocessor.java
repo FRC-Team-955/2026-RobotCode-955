@@ -17,13 +17,12 @@ import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructSubscriber;
-import edu.wpi.first.util.struct.Struct;
 import edu.wpi.first.wpilibj.Timer;
-import org.notlittletonrobotics.junction.RecordStruct;
+import frc955.gamepiecevision.Result;
 
 public class GamePieceVisionIOCoprocessor extends GamePieceVisionIO {
     private final StructSubscriber<Result> resultSubscriber = NetworkTableInstance.getDefault()
-            .getStructTopic("/GamePieceVision/Outputs/Result", Result.struct).subscribe(new Result(false, 0.0, false, new Transform2d()));
+            .getStructTopic("/GamePieceVision/Outputs/Result", Result.struct).subscribe(new Result(false, 0.0, new Transform2d[0]));
 
     private final Debouncer connectedDebouncer = new Debouncer(0.5, Debouncer.DebounceType.kRising);
     private double lastTimestamp = 0.0;
@@ -44,18 +43,6 @@ public class GamePieceVisionIOCoprocessor extends GamePieceVisionIO {
                 Timer.getTimestamp() - lastTimestampChanged < 0.5;
 
         inputs.timestamp = result.timestamp();
-        inputs.present = result.present();
-        inputs.robotToTarget = result.robotToTarget();
-    }
-
-    /** KEEP SYNCED WITH GAMEPIECEVISION CODE!!!! */
-    private record Result(
-            boolean connected,
-            double timestamp,
-            boolean present,
-            Transform2d robotToTarget
-    ) {
-        @SuppressWarnings("unchecked")
-        public static Struct<Result> struct = (Struct<Result>) new RecordStruct(Result.class);
+        inputs.clusters = result.clusters();
     }
 }

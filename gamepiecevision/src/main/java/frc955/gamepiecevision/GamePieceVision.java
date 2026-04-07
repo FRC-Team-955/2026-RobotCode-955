@@ -1,7 +1,6 @@
 package frc955.gamepiecevision;
 
 import edu.wpi.first.math.geometry.*;
-import edu.wpi.first.util.struct.Struct;
 import frc955.gamepiecevision.GamePieceVisionIO.GamePieceVisionIOInputs;
 import frc955.gamepiecevision.GamePieceVisionIO.GamePieceVisionIOInputsLogger;
 import frc955.gamepiecevision.logging.LoggedDouble;
@@ -9,15 +8,14 @@ import frc955.gamepiecevision.logging.LoggedInteger;
 import frc955.gamepiecevision.logging.LoggedStruct;
 import frc955.gamepiecevision.logging.LoggedStructArray;
 import frc955.gamepiecevision.multiobjecttracking.DBSCAN;
-import org.littletonrobotics.junction.RecordStruct;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
-import static frc955.gamepiecevision.GamePieceVisionConstants.fuelDiameterMeters;
-import static frc955.gamepiecevision.GamePieceVisionConstants.robotToCamera;
+import static frc955.gamepiecevision.SharedGamePieceVisionConstants.fuelDiameterMeters;
+import static frc955.gamepiecevision.SharedGamePieceVisionConstants.robotToCamera;
 
 public class GamePieceVision {
     private final GamePieceVisionIOInputs inputs = new GamePieceVisionIOInputs();
@@ -109,10 +107,9 @@ public class GamePieceVision {
         loggedResult.set(new Result(
                 inputs.connected,
                 inputs.timestamp,
-                bestTarget != null,
                 bestTarget != null
-                        ? new Transform2d(bestTarget.getX(), bestTarget.getY(), Rotation2d.kZero)
-                        : new Transform2d()
+                        ? new Transform2d[]{new Transform2d(bestTarget.getX(), bestTarget.getY(), Rotation2d.kZero)}
+                        : new Transform2d[0]
         ));
         loggedBestWeight.set(bestWeight);
         loggedNumClusters.set(dbscanResults.size());
@@ -159,16 +156,4 @@ public class GamePieceVision {
             return Optional.of(average.div(cluster.size()));
         }
     }
-
-    /** KEEP SYNCED WITH ROBOT CODE!!!! */
-    public record Result(
-            boolean connected,
-            double timestamp,
-            boolean present,
-            Transform2d robotToTarget
-    ) {
-        @SuppressWarnings("unchecked")
-        public static Struct<Result> struct = (Struct<Result>) new RecordStruct(Result.class);
-    }
 }
-

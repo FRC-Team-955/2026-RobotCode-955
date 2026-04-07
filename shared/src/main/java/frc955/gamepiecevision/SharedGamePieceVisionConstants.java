@@ -17,11 +17,10 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.util.Units;
 
-public class GamePieceVisionConstants {
-    static final double fuelDiameterMeters = 0.15;
+public class SharedGamePieceVisionConstants {
+    public static final double fuelDiameterMeters = 0.15;
 
-    /** KEEP SYNCED WITH ROBOT CODE!!! */
-    static final Transform3d robotToCamera = new Transform3d(
+    public static final Transform3d robotToCamera = new Transform3d(
             Units.inchesToMeters(15.902293), Units.inchesToMeters(11.595038), Units.inchesToMeters(16.533898),
             // Rotation order matters
             new Rotation3d(0.0, Units.degreesToRadians(10.0), 0.0)

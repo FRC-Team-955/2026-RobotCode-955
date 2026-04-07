@@ -28,6 +28,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
+import frc955.gamepiecevision.SharedGamePieceVisionConstants;
 
 /**
  * https://github.com/Mechanical-Advantage/RobotCode2026Public/blob/main/src/main/java/org/littletonrobotics/frc2026/FieldConstants.java
@@ -47,8 +48,8 @@ public class FieldConstants {
     // Field dimensions
     public static final double fieldLength = aprilTagLayout.getFieldLength();
     public static final double fieldWidth = aprilTagLayout.getFieldWidth();
-    public static final double fuelDiameter = 0.15;
-    
+    public static final double fuelDiameter = SharedGamePieceVisionConstants.fuelDiameterMeters;
+
     /**
      * Officially defined and relevant vertical lines found on the field (defined by X-axis offset)
      */

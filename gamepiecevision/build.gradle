@@ -233,3 +233,11 @@ deploy {
         }
     }
 }
+
+sourceSets {
+    main {
+        java {
+            srcDirs += ["../shared/src/main/java"]
+        }
+    }
+}

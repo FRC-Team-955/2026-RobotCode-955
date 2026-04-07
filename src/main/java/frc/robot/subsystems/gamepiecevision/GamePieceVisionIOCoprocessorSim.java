@@ -2,6 +2,7 @@ package frc.robot.subsystems.gamepiecevision;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import frc.robot.SimManager;
+import frc955.gamepiecevision.SharedGamePieceVisionConstants;
 import org.photonvision.PhotonCamera;
 import org.photonvision.simulation.PhotonCameraSim;
 import org.photonvision.simulation.SimCameraProperties;
@@ -28,7 +29,7 @@ public class GamePieceVisionIOCoprocessorSim extends GamePieceVisionIOCoprocesso
         cameraSim.enableRawStream(false);
         cameraSim.enableProcessedStream(false);
 
-        simManager.gamePieceVisionSystem.addCamera(cameraSim, GamePieceVisionConstants.robotToCamera);
+        simManager.gamePieceVisionSystem.addCamera(cameraSim, SharedGamePieceVisionConstants.robotToCamera);
     }
 
     @Override

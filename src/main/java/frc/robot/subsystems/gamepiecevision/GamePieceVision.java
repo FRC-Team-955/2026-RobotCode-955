@@ -1,6 +1,8 @@
 package frc.robot.subsystems.gamepiecevision;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.Alert;
 import frc.lib.Util;
@@ -11,7 +13,7 @@ import org.littletonrobotics.junction.Logger;
 import java.util.Optional;
 
 import static frc.robot.subsystems.gamepiecevision.GamePieceVisionConstants.createIO;
-import static frc.robot.subsystems.gamepiecevision.GamePieceVisionConstants.robotToCamera;
+import static frc955.gamepiecevision.SharedGamePieceVisionConstants.robotToCamera;
 
 public class GamePieceVision implements Periodic {
     private static final RobotState robotState = RobotState.get();
@@ -54,7 +56,7 @@ public class GamePieceVision implements Periodic {
                 "GamePieceVision/CameraPoses",
                 robotPose.transformBy(robotToCamera)
         );
-        Logger.recordOutput("GamePieceVision/BestTarget", getBestTarget().orElse(new Translation2d()));
+        Logger.recordOutput("GamePieceVision/BestTarget", new Pose2d(getBestTarget().orElse(new Translation2d()), new Rotation2d()));
     }
 
     public boolean anyCamerasDisconnected() {
@@ -62,11 +64,11 @@ public class GamePieceVision implements Periodic {
     }
 
     public Optional<Translation2d> getBestTarget() {
-        if (!inputs.present) {
+        if (inputs.clusters.length == 0) {
             return Optional.empty();
         }
         return robotState.getPoseAtTimestamp(inputs.timestamp)
-                .map(pose -> pose.transformBy(inputs.robotToTarget).getTranslation());
+                .map(pose -> pose.transformBy(inputs.clusters[0]).getTranslation());
     }
 
     //public List<Translation2d> getBestTargetsInBounds(Optional<Bounds> bounds) {
