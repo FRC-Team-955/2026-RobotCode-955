@@ -10,7 +10,9 @@ import frc.lib.subsystem.Periodic;
 import frc.robot.RobotState;
 import org.littletonrobotics.junction.Logger;
 
+import java.util.Arrays;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static frc.robot.subsystems.gamepiecevision.GamePieceVisionConstants.createIO;
 import static frc955.gamepiecevision.SharedGamePieceVisionConstants.robotToCamera;
@@ -57,14 +59,33 @@ public class GamePieceVision implements Periodic {
                 robotPose.transformBy(robotToCamera)
         );
         Logger.recordOutput("GamePieceVision/BestTarget", new Pose2d(getBestTarget().orElse(new Translation2d()), new Rotation2d()));
+        Logger.recordOutput(
+                "GamePieceVision/AllTargets",
+                getAllTargets()
+                        .map(t -> new Pose2d(t, new Rotation2d()))
+                        .toArray(Pose2d[]::new)
+        );
     }
 
     public boolean anyCamerasDisconnected() {
         return !inputs.connected;
     }
 
+    public Stream<Translation2d> getAllTargets() {
+        if (!inputs.connected || inputs.clusters.length == 0) {
+            return Stream.empty();
+        }
+        Optional<Pose2d> poseOpt = robotState.getPoseAtTimestamp(inputs.timestamp);
+        if (poseOpt.isEmpty()) {
+            return Stream.empty();
+        }
+        Pose2d pose = poseOpt.get();
+        return Arrays.stream(inputs.clusters)
+                .map(t -> pose.transformBy(t).getTranslation());
+    }
+
     public Optional<Translation2d> getBestTarget() {
-        if (inputs.clusters.length == 0) {
+        if (!inputs.connected || inputs.clusters.length == 0) {
             return Optional.empty();
         }
         return robotState.getPoseAtTimestamp(inputs.timestamp)

@@ -10,9 +10,9 @@ public record Result(
         double timestamp,
         Transform2d[] clusters
 ) {
-    public static Struct<Result> struct = new Struct<>() {
-        private static final int maxClusters = 4;
+    public static final int maxClusters = 4;
 
+    public static Struct<Result> struct = new Struct<>() {
         @Override
         public Class<Result> getTypeClass() {
             return Result.class;

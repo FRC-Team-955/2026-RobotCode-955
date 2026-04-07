@@ -29,9 +29,11 @@ public class GamePieceVision {
     private final LoggedStructArray<Translation2d> loggedTargetPoints = new LoggedStructArray<>("Outputs/TargetPoints", Translation2d.struct);
     private final LoggedStructArray<Translation2d> loggedAllTargets = new LoggedStructArray<>("Outputs/AllTargets", Translation2d.struct);
 
-    private final DBSCAN dbscan = new DBSCAN(new ArrayList<>(), 3, 0.5);
+    private final DBSCAN dbscan = new DBSCAN(new ArrayList<>(), 3, 0.3);
 
-    private Optional<Translation2d> lastTarget = Optional.empty();
+    /** length should be the same as Result.maxClusters */
+    private static final Double[] wantedDistances = new Double[]{1.0, 1.5, 2.0, null};
+    private final Translation2d[] lastTargets = new Translation2d[Result.maxClusters];
 
     public void periodic() {
         io.updateInputs(inputs);
@@ -62,26 +64,48 @@ public class GamePieceVision {
                     robotToCameraPose2d
                             .transformBy(new Transform2d(Translation2d.kZero, new Rotation2d(-targetYaw)))
                             .transformBy(new Transform2d(new Translation2d(cameraToFuelNorm, 0), Rotation2d.kZero));
-            Pose3d fuelPose = new Pose3d(robotToFuel).plus(new Transform3d(0, 0, fuelDiameterMeters / 2.0, new Rotation3d()));
+            //Pose3d fuelPose = new Pose3d(robotToFuel).plus(new Transform3d(0, 0, fuelDiameterMeters / 2.0, new Rotation3d()));
 
-            if (fuelPose.getTranslation().getNorm() > 3.0) {
+            if (robotToFuel.getTranslation().getNorm() > 3.0) {
                 continue;
             }
 
-            targetsOnField.add(fuelPose.getTranslation().toTranslation2d());
+            targetsOnField.add(robotToFuel.getTranslation());
         }
 
+        List<Transform2d> clusters = new LinkedList<>();
+        for (int i = 0; i < wantedDistances.length; i++) {
+            Double wantedDistance = wantedDistances[i];
+            List<Translation2d> filteredTargetsOnField = wantedDistance != null
+                    ? targetsOnField.stream().filter(t -> t.getNorm() < wantedDistance).toList()
+                    : targetsOnField;
+            Translation2d cluster = findBestCluster(i, filteredTargetsOnField);
+            if (cluster != null) {
+                clusters.add(new Transform2d(cluster.getX(), cluster.getY(), Rotation2d.kZero));
+            }
+        }
+
+        loggedResult.set(new Result(
+                inputs.connected,
+                inputs.timestamp,
+                clusters.toArray(Transform2d[]::new)
+        ));
+        loggedTargetPoints.set(targetPointsOnCapture.toArray(Translation2d[]::new));
+        loggedAllTargets.set(targetsOnField.toArray(Translation2d[]::new));
+    }
+
+    private Translation2d findBestCluster(int index, List<Translation2d> filteredTargetsOnField) {
         Translation2d bestTarget = null;
         double bestWeight = 0;
         int largestSize = 0;
 
         ArrayList<ArrayList<Translation2d>> dbscanResults = new ArrayList<>();
-        if (targetsOnField.size() > 2) {
-            dbscan.setInputValues(targetsOnField);
+        if (filteredTargetsOnField.size() > 2) {
+            dbscan.setInputValues(filteredTargetsOnField);
             dbscanResults = dbscan.performClustering();
         }
         if (dbscanResults.isEmpty()) {
-            for (Translation2d target : targetsOnField) {
+            for (Translation2d target : filteredTargetsOnField) {
                 ArrayList<Translation2d> singleTarget = new ArrayList<>();
                 singleTarget.add(target);
                 dbscanResults.add(singleTarget);
@@ -91,8 +115,8 @@ public class GamePieceVision {
         for (ArrayList<Translation2d> cluster : dbscanResults) {
             FuelCluster fuelCluster = new FuelCluster(cluster);
             double weight = fuelCluster.weight();
-            if (lastTarget.isPresent() && fuelCluster.avgLocation().isPresent()) {
-                weight += 2 / (fuelCluster.avgLocation().get().getDistance(lastTarget.get()) + 1);
+            if (lastTargets[index] != null && fuelCluster.avgLocation().isPresent()) {
+                weight += 2 / (fuelCluster.avgLocation().get().getDistance(lastTargets[index]) + 1);
             }
             if (weight > bestWeight) {
                 bestWeight = weight;
@@ -102,20 +126,15 @@ public class GamePieceVision {
                 largestSize = fuelCluster.size();
             }
         }
-        lastTarget = Optional.ofNullable(bestTarget);
 
-        loggedResult.set(new Result(
-                inputs.connected,
-                inputs.timestamp,
-                bestTarget != null
-                        ? new Transform2d[]{new Transform2d(bestTarget.getX(), bestTarget.getY(), Rotation2d.kZero)}
-                        : new Transform2d[0]
-        ));
-        loggedBestWeight.set(bestWeight);
-        loggedNumClusters.set(dbscanResults.size());
-        loggedLargestCluster.set(largestSize);
-        loggedTargetPoints.set(targetPointsOnCapture.toArray(Translation2d[]::new));
-        loggedAllTargets.set(targetsOnField.toArray(Translation2d[]::new));
+        if (index == wantedDistances.length - 1) {
+            loggedBestWeight.set(bestWeight);
+            loggedNumClusters.set(dbscanResults.size());
+            loggedLargestCluster.set(largestSize);
+        }
+
+        lastTargets[index] = bestTarget;
+        return bestTarget;
     }
 
     private record FuelCluster(List<Translation2d> cluster) {
