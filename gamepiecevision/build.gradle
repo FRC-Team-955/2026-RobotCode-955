@@ -224,10 +224,14 @@ deploy {
                     command = "sudo mv gamepiecevision.service /etc/systemd/system/gamepiecevision.service"
                     dependsOn artifacts.service.deployTask
                 }
+                enable(CommandArtifact) {
+                    command = "sudo systemctl enable gamepiecevision.service"
+                    dependsOn artifacts.moveService.deployTask
+                }
                 start(CommandArtifact) {
                     // Fire up gamepiecevision again
                     command = "sudo systemctl start gamepiecevision.service"
-                    dependsOn artifacts.moveService.deployTask
+                    dependsOn artifacts.enable.deployTask
                 }
             }
         }
