@@ -7,7 +7,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.commands.CommandsExt;
 import frc.robot.FieldConstants;
-import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.superintake.Superintake;
 import frc.robot.subsystems.superstructure.Superstructure;
 
@@ -16,10 +15,6 @@ import static frc.robot.subsystems.drive.DriveConstants.driveConfig;
 import static frc.robot.subsystems.drive.DriveConstants.shootingConstraints;
 
 public class AuraAutoDepot extends Auto {
-    private static final Drive drive = Drive.get();
-    private static final Superintake superintake = Superintake.get();
-    private static final Superstructure superstructure = Superstructure.get();
-
     private static final Pose2d outpostPosition = new Pose2d(1.0, FieldConstants.Outpost.centerPoint.getY(), Rotation2d.k180deg);
     private static final Pose2d depotPosition = new Pose2d(1.0, FieldConstants.Depot.depotCenter.getY(), Rotation2d.k180deg);
     private static final Pose2d depotIntakePosition = new Pose2d(0.3, FieldConstants.Depot.depotCenter.getY(), Rotation2d.k180deg);

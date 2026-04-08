@@ -11,9 +11,6 @@ import frc.robot.subsystems.superstructure.Superstructure;
 import static frc.robot.subsystems.drive.DriveConstants.defaultMoveToConstraints;
 
 public class CanadianOutpostAutolessAgro extends Auto {
-    private static final Superintake superintake = Superintake.get();
-    private static final Superstructure superstructure = Superstructure.get();
-
     private static final double startingY = ChoreoTraj.CanadianOutpost_FirstPass.initialPoseBlue().getY();
     private static final Rotation2d startingRotation = ChoreoTraj.CanadianOutpost_FirstPass.initialPoseBlue().getRotation();
     private static final Pose2d preemptiveTrenchEntrance = new Pose2d(3.2, 0.6, Rotation2d.kCCW_90deg);
@@ -51,7 +48,7 @@ public class CanadianOutpostAutolessAgro extends Auto {
                 Commands.parallel(
                         superintake.intakeShootAlternate(),
                         superstructure.setGoal(Superstructure.Goal.SHOOT),
-                        AutoHelpers.aimWhileStationary()
+                        drive.stop().withAiming()
                         //AutoHelpers.finalWaypoint(() -> preemptiveTrenchEntrance, defaultMoveToConstraints, true)
                 ).withTimeout(4.5),
                 superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
@@ -81,7 +78,7 @@ public class CanadianOutpostAutolessAgro extends Auto {
                 Commands.parallel(
                         superintake.intakeShootAlternate(),
                         superstructure.setGoal(Superstructure.Goal.SHOOT),
-                        AutoHelpers.aimWhileStationary()
+                        drive.stop().withAiming()
                 ).withTimeout(4.5),
 
                 AutoHelpers.finalWaypoint(() -> preemptiveTrenchEntrance, defaultMoveToConstraints, false)

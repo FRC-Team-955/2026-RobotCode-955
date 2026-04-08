@@ -11,9 +11,6 @@ import frc.robot.subsystems.superstructure.Superstructure;
 import static frc.robot.subsystems.drive.DriveConstants.defaultMoveToConstraints;
 
 public class CanadianOutpostAuto extends Auto {
-    private static final Superintake superintake = Superintake.get();
-    private static final Superstructure superstructure = Superstructure.get();
-
     private static final double startingY = ChoreoTraj.CanadianOutpost_FirstPass.initialPoseBlue().getY();
     private static final Rotation2d startingRotation = ChoreoTraj.CanadianOutpost_FirstPass.initialPoseBlue().getRotation();
     private static final Pose2d preemptiveTrenchEntrance = new Pose2d(3.2, 0.6, Rotation2d.kCCW_90deg);

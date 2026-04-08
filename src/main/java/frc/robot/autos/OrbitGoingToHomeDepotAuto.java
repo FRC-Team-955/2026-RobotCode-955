@@ -14,9 +14,6 @@ import static frc.robot.subsystems.drive.DriveConstants.defaultMoveToConstraints
 import static frc.robot.subsystems.drive.DriveConstants.shootingConstraints;
 
 public class OrbitGoingToHomeDepotAuto extends Auto {
-    private static final Superintake superintake = Superintake.get();
-    private static final Superstructure superstructure = Superstructure.get();
-
     private static final double startingPositionY = 7.55;
     private static final Pose2d trenchShootingPosition = new Pose2d(3.6, 7.4, Rotation2d.kCCW_90deg);
     public static final double exitTrenchX = 6.34;

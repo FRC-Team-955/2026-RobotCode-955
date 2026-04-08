@@ -52,7 +52,7 @@ public class AutoManager {
         autoChooser.addOption("Orbit at the depot 2nd pass", new OrbitAtDepotSecondAuto());
         autoChooser.addOption("Orbit at the outpost 2nd pass", new OrbitAtOutpostSecondAuto());
         //autoChooser.addOption("CandiantOutpostAutolessAgro", new CanadianOutpostAutolessAgro());
-        autoChooser.addOption("I want a turret (Orbit passing at the outpost)", new OrbitPassingOutpost());
+        autoChooser.addOption("I want a turret (Orbit passing at the outpost)", new OrbitPassingOutpostAuto());
 
         robotState.setAutoStartPoseSupplier(this::getSelectedAutoStartingPose);
 

@@ -8,13 +8,10 @@ import frc.robot.subsystems.superstructure.Superstructure;
 
 import static frc.robot.subsystems.drive.DriveConstants.defaultMoveToConstraints;
 
-public class OrbitPassingOutpost extends Auto {
-    private static final Superintake superintake = Superintake.get();
-    private static final Superstructure superstructure = Superstructure.get();
-
+public class OrbitPassingOutpostAuto extends Auto {
     private static final Pose2d starting = ChoreoTraj.OrbitPassingOutpost$1.initialPoseBlue();
 
-    public OrbitPassingOutpost() {
+    public OrbitPassingOutpostAuto() {
         super(
                 new Pose2d(4.37, starting.getY(), starting.getRotation()),
                 build()
@@ -52,7 +49,7 @@ public class OrbitPassingOutpost extends Auto {
                 // +1000 aura
                 superstructure.setGoal(Superstructure.Goal.SHOOT).until(() -> true),
                 AutoHelpers.trajectory(ChoreoTraj.OrbitPassingOutpost$6).withAiming(),
-                AutoHelpers.aimWhileStationary()
+                drive.stop().withAiming()
         );
     }
 }

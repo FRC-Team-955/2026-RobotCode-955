@@ -8,7 +8,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.AllianceFlipUtil;
@@ -85,12 +84,8 @@ public class AutoHelpers {
         ));
     }
 
-    public static Command aimWhileStationary() {
-        return drive.chassisSpeeds(ChassisSpeeds::new).withAiming();
-    }
-
     @SuppressWarnings("unchecked")
-    public static Drive.ModifiableDriveCommand trajectory(ChoreoTraj traj) {
+    public static Drive.DriveCommand trajectory(ChoreoTraj traj) {
         // Basically copied from AutoFactory
         Optional<? extends Trajectory<?>> optTrajectory;
         if (traj.segment().isPresent()) {

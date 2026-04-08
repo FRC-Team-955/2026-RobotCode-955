@@ -43,7 +43,10 @@ import org.littletonrobotics.junction.Logger;
 
 import java.util.Arrays;
 import java.util.OptionalDouble;
-import java.util.function.*;
+import java.util.function.BiFunction;
+import java.util.function.DoubleSupplier;
+import java.util.function.IntToDoubleFunction;
+import java.util.function.Supplier;
 
 import static frc.lib.HighFrequencySamplingThread.highFrequencyLock;
 import static frc.robot.subsystems.drive.DriveConstants.*;
@@ -68,6 +71,7 @@ public class Drive extends CommandBasedSubsystem {
 
     public enum State {
         STOP,
+        FORCE_STOP,
         JOYSTICK_DRIVE,
         MOVE_TO,
         FOLLOW_TRAJECTORY,
@@ -323,9 +327,9 @@ public class Drive extends CommandBasedSubsystem {
         Logger.recordOutput("Drive/ActualState", actualState);
     }
 
-    private State evaluateStateMachine(State state) {
+    private State evaluateStateMachine(State wantedState) {
         // Stop moving when idle or disabled
-        if (state == State.STOP || DriverStation.isDisabled()) {
+        if (wantedState == State.FORCE_STOP || DriverStation.isDisabled()) {
             // Only attempt to stop with X when enabled
             if (DriverStation.isEnabled() && stopWithX) {
                 // Create a list of headings where each heading points from the center
@@ -344,7 +348,7 @@ public class Drive extends CommandBasedSubsystem {
                     module.stop();
                 }
             }
-        } else if (state == State.CHARACTERIZATION) {
+        } else if (wantedState == State.CHARACTERIZATION) {
             // Do nothing - commands handle setting voltages
         } else {
             ChassisSpeeds wantedFieldSpeeds = new ChassisSpeeds();
@@ -353,7 +357,7 @@ public class Drive extends CommandBasedSubsystem {
                     ? OptionalDouble.empty()
                     : headingOverrideSetpointSupplier.get();
 
-            switch (state) {
+            switch (wantedState) {
                 case JOYSTICK_DRIVE -> {
                     wantedFieldSpeeds = controller.getDriveFieldRelativeSpeeds();
 
@@ -410,7 +414,7 @@ public class Drive extends CommandBasedSubsystem {
 
             if (wantedFieldSpeeds.vxMetersPerSecond == 0.0 && wantedFieldSpeeds.vyMetersPerSecond == 0.0 && wantedFieldSpeeds.omegaRadiansPerSecond == 0.0) {
                 // Re-evaluate state machine to stop - this handles stopping with X in a nice way
-                return evaluateStateMachine(State.STOP);
+                return evaluateStateMachine(State.FORCE_STOP);
             }
 
             ChassisSpeeds wantedRobotSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(wantedFieldSpeeds, robotState.getRotation());
@@ -446,7 +450,7 @@ public class Drive extends CommandBasedSubsystem {
         }
 
         // No re-evaluation, so state stayed the same. Return it
-        return state;
+        return wantedState;
     }
 
     /**
@@ -472,30 +476,30 @@ public class Drive extends CommandBasedSubsystem {
         return states;
     }
 
-    public ModifiableDriveCommand stop() {
-        return new ModifiableDriveCommand(startIdle(() -> wantedState = State.STOP));
+    public DriveCommand stop() {
+        return new DriveCommand(startIdle(() -> wantedState = State.STOP));
     }
 
-    public ModifiableDriveCommand joystickDrive() {
-        return new ModifiableDriveCommand(startIdle(() -> {
+    public DriveCommand joystickDrive() {
+        return new DriveCommand(startIdle(() -> {
             wantedState = State.JOYSTICK_DRIVE;
             joystickDriveHeadingStabilizeTimer.restart();
         }));
     }
 
-    public ModifiableDriveCommand moveTo(Supplier<Pose2d> goalPoseSupplier) {
+    public DriveCommand moveTo(Supplier<Pose2d> goalPoseSupplier) {
         return moveTo(goalPoseSupplier, defaultMoveToConstraints);
     }
 
-    public ModifiableDriveCommand moveTo(Supplier<Pose2d> goalPoseSupplier, DriveConstraints constraints) {
-        return new ModifiableDriveCommand(startIdle(() -> {
+    public DriveCommand moveTo(Supplier<Pose2d> goalPoseSupplier, DriveConstraints constraints) {
+        return new DriveCommand(startIdle(() -> {
             wantedState = State.MOVE_TO;
             moveToController.start(goalPoseSupplier);
         })).withConstraints(constraints);
     }
 
-    public ModifiableDriveCommand followTrajectory(Trajectory<SwerveSample> trajectory) {
-        return new ModifiableDriveCommand(startIdleWaitUntil(
+    public DriveCommand followTrajectory(Trajectory<SwerveSample> trajectory) {
+        return new DriveCommand(startIdleWaitUntil(
                 () -> {
                     wantedState = State.FOLLOW_TRAJECTORY;
                     followTrajectoryController.start(trajectory);
@@ -504,45 +508,45 @@ public class Drive extends CommandBasedSubsystem {
         ));
     }
 
-    public ModifiableDriveCommand chassisSpeeds(Supplier<ChassisSpeeds> chassisSpeedsSupplier) {
-        return new ModifiableDriveCommand(startIdle(() -> {
+    public DriveCommand chassisSpeeds(Supplier<ChassisSpeeds> chassisSpeedsSupplier) {
+        return new DriveCommand(startIdle(() -> {
             wantedState = State.CHASSIS_SPEEDS;
             chassisSpeedsSetpointSupplier = chassisSpeedsSupplier;
         }));
     }
 
-    public class ModifiableDriveCommand extends WrapperCommand {
+    public class DriveCommand extends WrapperCommand {
         private Supplier<OptionalDouble> targetRad = null;
         private BiFunction<ChassisSpeeds, Translation2d, OptionalDouble> feedforwardRadPerSec = null;
         private Boolean wantedStopWithX = null;
         private DriveConstraints constraints = null;
 
-        private ModifiableDriveCommand(Command command) {
+        private DriveCommand(Command command) {
             super(command);
         }
 
-        public ModifiableDriveCommand withHeadingOverride(Supplier<OptionalDouble> targetRad) {
+        public DriveCommand withHeadingOverride(Supplier<OptionalDouble> targetRad) {
             this.targetRad = targetRad;
             return this;
         }
 
-        public ModifiableDriveCommand withHeadingOverride(Supplier<OptionalDouble> targetRad, BiFunction<ChassisSpeeds, Translation2d, OptionalDouble> feedforwardRadPerSec) {
+        public DriveCommand withHeadingOverride(Supplier<OptionalDouble> targetRad, BiFunction<ChassisSpeeds, Translation2d, OptionalDouble> feedforwardRadPerSec) {
             this.targetRad = targetRad;
             this.feedforwardRadPerSec = feedforwardRadPerSec;
             return this;
         }
 
-        public ModifiableDriveCommand withStopWithX() {
+        public DriveCommand withStopWithX() {
             this.wantedStopWithX = true;
             return this;
         }
 
-        public ModifiableDriveCommand withConstraints(DriveConstraints constraints) {
+        public DriveCommand withConstraints(DriveConstraints constraints) {
             this.constraints = constraints;
             return this;
         }
 
-        public ModifiableDriveCommand withAiming() {
+        public DriveCommand withAiming() {
             return withHeadingOverride(
                     () -> operatorDashboard.manualAiming.get()
                             ? OptionalDouble.empty()

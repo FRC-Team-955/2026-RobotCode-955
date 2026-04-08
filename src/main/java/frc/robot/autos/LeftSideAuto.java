@@ -9,9 +9,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.AllianceFlipUtil;
 import frc.lib.network.LoggedTunableNumber;
 import frc.robot.FieldConstants;
-import frc.robot.RobotState;
 import frc.robot.shooting.ShootingKinematics;
-import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.DriveConstants;
 import frc.robot.subsystems.drive.constraints.DriveConstraints;
 import frc.robot.subsystems.superintake.Superintake;
@@ -26,11 +24,6 @@ import java.util.function.BooleanSupplier;
 import static frc.robot.subsystems.drive.DriveConstants.maxAngularVelocityRadPerSec;
 
 public final class LeftSideAuto extends Auto {
-    private static final Drive drive = Drive.get();
-    private static final RobotState robotState = RobotState.get();
-    private static final Superintake superintake = Superintake.get();
-    private static final Superstructure superstructure = Superstructure.get();
-
     private static final List<Pose2d> baseWaypoints = List.of(
             new Pose2d(3.5, 5.5, Rotation2d.fromDegrees(-90)),
             new Pose2d(4.2, 5.5, Rotation2d.fromDegrees(-45)),
