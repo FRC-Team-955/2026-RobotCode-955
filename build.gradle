@@ -299,11 +299,18 @@ tasks.register("updateVendordeps") {
     }
 }
 
-
 idea {
     module {
         // Improve development & (especially) debugging experience (and IDEA's capabilities) by having libraries' source & javadoc attached
         downloadJavadoc = true
         downloadSources = true
+    }
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs += ["shared/src/main/java"]
+        }
     }
 }
