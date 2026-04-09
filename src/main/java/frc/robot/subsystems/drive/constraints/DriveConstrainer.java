@@ -4,9 +4,11 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.lib.SlewRateLimiter2d;
 import frc.lib.wpilib.SlewRateLimiter;
+import frc.robot.BuildConstants;
 import frc.robot.RobotState;
 import lombok.Getter;
 import org.jetbrains.annotations.Nullable;
+import org.littletonrobotics.junction.Logger;
 
 public class DriveConstrainer {
     private static final RobotState robotState = RobotState.get();
@@ -50,11 +52,15 @@ public class DriveConstrainer {
         // Limit max vel
         if (constraints.maxLinearVelocityMetersPerSec() != null &&
                 wantedLinearSpeed.getNorm() > constraints.maxLinearVelocityMetersPerSec().get()) {
+            if (BuildConstants.isSimOrReplay)
+                Logger.recordOutput("Drive/Constrainer/MaxLinearVel", constraints.maxLinearVelocityMetersPerSec().get());
             // Convert to unit vector by dividing by norm and then multiply by max
             wantedLinearSpeed = wantedLinearSpeed.div(wantedLinearSpeed.getNorm() / constraints.maxLinearVelocityMetersPerSec().get());
         }
         // Limit max accel
         if (constraints.maxLinearAccelerationMetersPerSecPerSec() != null) {
+            if (BuildConstants.isSimOrReplay)
+                Logger.recordOutput("Drive/Constrainer/MaxLinearAccel", constraints.maxLinearAccelerationMetersPerSecPerSec().get());
             wantedLinearSpeed = linearAccelLimiter.calculate(wantedLinearSpeed);
         }
         wantedSpeeds.vxMetersPerSecond = wantedLinearSpeed.getX();
@@ -82,10 +88,14 @@ public class DriveConstrainer {
         // Limit max vel
         if (constraints.maxAngularVelocityRadPerSec() != null &&
                 Math.abs(wantedAngularSpeed) > constraints.maxAngularVelocityRadPerSec().get()) {
+            if (BuildConstants.isSimOrReplay)
+                Logger.recordOutput("Drive/Constrainer/MaxAngularVel", constraints.maxAngularVelocityRadPerSec().get());
             wantedAngularSpeed = Math.copySign(constraints.maxAngularVelocityRadPerSec().get(), wantedAngularSpeed);
         }
         // Limit max accel
         if (constraints.maxAngularAccelerationRadPerSecPerSec() != null) {
+            if (BuildConstants.isSimOrReplay)
+                Logger.recordOutput("Drive/Constrainer/MaxAngularAccel", constraints.maxAngularAccelerationRadPerSecPerSec().get());
             wantedAngularSpeed = angularAccelLimiter.calculate(wantedAngularSpeed);
         }
         wantedSpeeds.omegaRadiansPerSecond = wantedAngularSpeed;
