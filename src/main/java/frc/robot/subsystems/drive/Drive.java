@@ -36,13 +36,13 @@ import frc.robot.subsystems.drive.constraints.DriveConstrainer;
 import frc.robot.subsystems.drive.constraints.DriveConstraints;
 import frc.robot.subsystems.drive.controllers.FollowTrajectoryController;
 import frc.robot.subsystems.drive.controllers.MoveToController;
-import frc.robot.subsystems.superstructure.hood.Hood;
 import lombok.Getter;
 import org.jetbrains.annotations.Nullable;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.function.BiFunction;
 import java.util.function.DoubleSupplier;
@@ -53,15 +53,13 @@ import static frc.lib.HighFrequencySamplingThread.highFrequencyLock;
 import static frc.robot.subsystems.drive.DriveConstants.*;
 
 public class Drive extends CommandBasedSubsystem {
-    private static RobotState robotState;
-    private static OperatorDashboard operatorDashboard;
-    private static Controller controller;
-    private static ShootingKinematics shootingKinematics;
+    private static final RobotState robotState = RobotState.get();
+    private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
+    private static final Controller controller = Controller.get();
+    private static final ShootingKinematics shootingKinematics = ShootingKinematics.get();
 
-    private GyroIO gyroIO;
-    private GyroIOInputsAutoLogged gyroInputs;
-
-    private Hood hood;
+    private final GyroIO gyroIO = createGyroIO();
+    private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
 
     private final AccelerometerIO accelerometerIO = createAccelerometerIO();
     private final AccelerometerIOInputsAutoLogged accelerometerInputs = new AccelerometerIOInputsAutoLogged();
@@ -74,7 +72,7 @@ public class Drive extends CommandBasedSubsystem {
 
     public enum State {
         STOP,
-        FORCE_STOP,
+        ACTUALLY_STOP,
         JOYSTICK_DRIVE,
         MOVE_TO,
         FOLLOW_TRAJECTORY,
@@ -125,7 +123,6 @@ public class Drive extends CommandBasedSubsystem {
     public static synchronized Drive get() {
         if (instance == null) {
             instance = new Drive();
-            instance.init();
         }
 
         return instance;
@@ -135,18 +132,6 @@ public class Drive extends CommandBasedSubsystem {
         if (instance != null) {
             Util.error("Duplicate Drive created");
         }
-    }
-
-    private void init() {
-        robotState = RobotState.get();
-        operatorDashboard = OperatorDashboard.get();
-        controller = Controller.get();
-        shootingKinematics = ShootingKinematics.get();
-
-        gyroIO = createGyroIO();
-        gyroInputs = new GyroIOInputsAutoLogged();
-
-        hood = Hood.get();
 
         var moduleIO = createModuleIO();
         // Array is currently four nulls, so length works just fine
@@ -346,7 +331,7 @@ public class Drive extends CommandBasedSubsystem {
 
     private State evaluateStateMachine(State wantedState) {
         // Stop moving when idle or disabled
-        if (wantedState == State.FORCE_STOP || DriverStation.isDisabled()) {
+        if (wantedState == State.ACTUALLY_STOP || DriverStation.isDisabled()) {
             // Only attempt to stop with X when enabled
             if (DriverStation.isEnabled() && stopWithX) {
                 // Create a list of headings where each heading points from the center
@@ -431,7 +416,7 @@ public class Drive extends CommandBasedSubsystem {
 
             // FIXME: figure out how to put this before the constrainer and not afterwards
             if (headingOverrideSetpoint.isPresent() && headingOverrideFeedforwardSupplier != null) {
-                Translation2d correction = ShootingKinematics.fuelExitTranslation.apply(hood.getPositionRad()).toTranslation2d()
+                Translation2d correction = shootingKinematics.getFuelExitTranslation().toTranslation2d()
                         .rotateBy(robotState.getRotation()).rotateBy(Rotation2d.kCW_90deg)
                         .times(wantedFieldSpeeds.omegaRadiansPerSecond);
                 wantedFieldSpeeds.plus(new ChassisSpeeds(correction.getX(), correction.getY(), 0));
@@ -439,7 +424,7 @@ public class Drive extends CommandBasedSubsystem {
 
             if (wantedFieldSpeeds.vxMetersPerSecond == 0.0 && wantedFieldSpeeds.vyMetersPerSecond == 0.0 && wantedFieldSpeeds.omegaRadiansPerSecond == 0.0) {
                 // Re-evaluate state machine to stop - this handles stopping with X in a nice way
-                return evaluateStateMachine(State.FORCE_STOP);
+                return evaluateStateMachine(State.ACTUALLY_STOP);
             }
 
             ChassisSpeeds wantedRobotSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(wantedFieldSpeeds, robotState.getRotation());
@@ -531,6 +516,27 @@ public class Drive extends CommandBasedSubsystem {
                 },
                 followTrajectoryController::isDone
         ));
+    }
+
+    public Command followTrajectoryWithMoveToOverride(Trajectory<SwerveSample> trajectory, Supplier<Optional<Pose2d>> moveToGoalPoseSupplier, DriveConstraints moveToConstraints) {
+        // don't return DriveCommand type because we don't want to allow adding
+        // modifications because this command does things weirdly (starts/stops constraints)
+        // we still use new DriveCommand because we want heading override and stuff like that to be reset
+        return new DriveCommand(startRun(
+                () -> {
+                    followTrajectoryController.start(trajectory);
+                    moveToController.start(() -> moveToGoalPoseSupplier.get().orElse(null));
+                },
+                () -> {
+                    if (moveToGoalPoseSupplier.get().isPresent()) {
+                        constrainer.start(moveToConstraints);
+                        wantedState = State.MOVE_TO;
+                    } else {
+                        constrainer.stop();
+                        wantedState = State.FOLLOW_TRAJECTORY;
+                    }
+                }
+        ).until(followTrajectoryController::isDone));
     }
 
     public DriveCommand chassisSpeeds(Supplier<ChassisSpeeds> chassisSpeedsSupplier) {
