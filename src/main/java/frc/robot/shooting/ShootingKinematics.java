@@ -200,9 +200,9 @@ public class ShootingKinematics implements Periodic {
                         <= Units.degreesToRadians(headingVelocityToleranceDegPerSec.get());
         Logger.recordOutput("ShootingKinematics/HeadingVelocityMet", headingVelocityMet);
         Logger.recordOutput("ShootingKinematics/HeadingVelocityDelta", headingVelocityMeasurement - headingVelocitySetpoint);
-        headingVelocityMet = headingVelocityDebouncer.calculate(headingVelocityMet);
-        if (BuildConstants.isSimOrReplay)
-            Logger.recordOutput("ShootingKinematics/HeadingVelocityMetDebounced", headingVelocityMet);
+        //headingVelocityMet = headingVelocityDebouncer.calculate(headingVelocityMet);
+        //if (BuildConstants.isSimOrReplay)
+        //    Logger.recordOutput("ShootingKinematics/HeadingVelocityMetDebounced", headingVelocityMet);
 
         boolean velocityMet = Math.abs(superstructure.flywheel.getVelocityRPM() - noPhaseDelayParameters.velocityRPM())
                 <= velocityToleranceRPM.get();
