@@ -35,8 +35,8 @@ public class Superstructure extends CommandBasedSubsystem {
     private static final LoggedTunableNumber hasFuelDebounceSeconds = new LoggedTunableNumber("Superstructure/HasFuelDebounceSeconds", 1.0);
     private static final LoggedTunableNumber commitToShotThresholdMeters = new LoggedTunableNumber("Superstructure/CommitToShotThresholdMeters", 0.15);
     private static final LoggedTunableNumber commitToShotTimeSeconds = new LoggedTunableNumber("Superstructure/CommitToShotTimeSeconds", 0.1);
-    private static final LoggedTunableNumber antiJamStartSeconds = new LoggedTunableNumber("Superstructure/AntiJamStartSeconds", 2.0);
-    private static final LoggedTunableNumber antiJamTimeSeconds = new LoggedTunableNumber("Superstructure/AntiJamTimeSeconds", 0.3);
+    private static final LoggedTunableNumber antiJamStartSeconds = new LoggedTunableNumber("Superstructure/AntiJamStartSeconds", 0.35);
+    private static final LoggedTunableNumber antiJamTimeSeconds = new LoggedTunableNumber("Superstructure/AntiJamTimeSeconds", 0.15);
 
     private static final RobotState robotState = RobotState.get();
     private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
@@ -127,6 +127,10 @@ public class Superstructure extends CommandBasedSubsystem {
     public void periodicAfterCommands() {
         Logger.recordOutput("Superstructure/Goal", goal);
 
+        if (goal != Goal.SHOOT && goal != Goal.SHOOT_FORCE) {
+            lastStartedShot = Timer.getTimestamp();
+        }
+
         switch (goal) {
             case IDLE, HOME_HOOD, HOME_HOOD_FINALIZE -> {
                 flywheel.setGoal(Flywheel.Goal.IDLE);
@@ -150,9 +154,10 @@ public class Superstructure extends CommandBasedSubsystem {
                 if (goal == Goal.SHOOT_FORCE || shouldShoot) {
                     feeder.setGoal(Feeder.Goal.FEED);
 
-                    if (hasFuel &&
-                            Timer.getTimestamp() - lastStartedShot > antiJamStartSeconds.get() &&
-                            Timer.getTimestamp() - lastStartedShot < antiJamStartSeconds.get() + antiJamTimeSeconds.get()) {
+                    double antiJamStart = antiJamStartSeconds.get();
+                    double antiJamEnd = antiJamStartSeconds.get() + antiJamTimeSeconds.get();
+                    double sinceStartedShotWrapping = (Timer.getTimestamp() - lastStartedShot) % antiJamEnd;
+                    if (sinceStartedShotWrapping > antiJamStart) {
                         spindexer.setGoal(Spindexer.Goal.EJECT);
                     } else {
                         spindexer.setGoal(Spindexer.Goal.FEED);
@@ -163,7 +168,11 @@ public class Superstructure extends CommandBasedSubsystem {
                     }
                 } else {
                     feeder.setGoal(Feeder.Goal.IDLE);
-                    spindexer.setGoal(Spindexer.Goal.IDLE);
+                    if (Timer.getTimestamp() % 3.0 < 0.1) {
+                        spindexer.setGoal(Spindexer.Goal.EJECT);
+                    } else {
+                        spindexer.setGoal(Spindexer.Goal.IDLE);
+                    }
                 }
             }
             case EJECT -> {
@@ -173,6 +182,9 @@ public class Superstructure extends CommandBasedSubsystem {
                 hood.setGoal(Hood.Goal.STOW);
             }
         }
+
+        if (BuildConstants.isSimOrReplay)
+            Logger.recordOutput("Superstructure/LastStartedShot", lastStartedShot);
 
         Logger.recordOutput(
                 "Superstructure/FuelPose",
