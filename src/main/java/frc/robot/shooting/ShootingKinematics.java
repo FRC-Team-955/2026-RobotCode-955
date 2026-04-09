@@ -61,6 +61,19 @@ public class ShootingKinematics implements Periodic {
         //velocityToRPMMap.put(9.09, 2449);
         //velocityToRPMMap.put(10.08, 2742.7);
 
+        //velocityToRPMMap.put(6.99, 1740.6);
+        //velocityToRPMMap.put(7.24, 1830);
+        //velocityToRPMMap.put(7.54, 1936);
+        //velocityToRPMMap.put(7.76, 2005);
+        //velocityToRPMMap.put(8.00, 2073);
+        //velocityToRPMMap.put(8.22, 2150);
+        //velocityToRPMMap.put(8.53, 2240);
+        //velocityToRPMMap.put(8.72, 2308);
+        //velocityToRPMMap.put(9.00, 2362);
+        //velocityToRPMMap.put(9.22, 2467);
+        //velocityToRPMMap.put(9.48, 2512.6);
+        //velocityToRPMMap.put(10.0, 2723.2);
+
         //velocityToRPM = (x) -> velocityToRPMMap.get(x);
 
         // https://www.desmos.com/calculator/ciizgjkq9g
