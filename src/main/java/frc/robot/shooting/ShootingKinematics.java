@@ -80,6 +80,7 @@ public class ShootingKinematics implements Periodic {
     private double shootingVelocityXY = 0;
 
     private final Debouncer velocityMetDebouncer = new Debouncer(0.15, Debouncer.DebounceType.kFalling);
+    private final Debouncer headingVelocityDebouncer = new Debouncer(0.15, Debouncer.DebounceType.kFalling);
 
     private static ShootingKinematics instance;
 
@@ -172,12 +173,15 @@ public class ShootingKinematics implements Periodic {
                 Math.abs(headingVelocityMeasurement - headingVelocitySetpoint)
                         <= Units.degreesToRadians(headingVelocityToleranceDegPerSec.get());
         Logger.recordOutput("ShootingKinematics/HeadingVelocityMet", headingVelocityMet);
+        Logger.recordOutput("ShootingKinematics/HeadingVelocityDelta", headingVelocityMeasurement - headingVelocitySetpoint);
+        headingVelocityMet = headingVelocityDebouncer.calculate(headingVelocityMet);
+        if (BuildConstants.isSimOrReplay) {Logger.recordOutput("ShootingKinematics/DebouncedHeadingVelocityMet", headingVelocityMet);}
 
-        boolean velocityMet = velocityMetDebouncer.calculate(
-                Math.abs(superstructure.flywheel.getVelocityRPM() - noPhaseDelayParameters.velocityRPM())
-                        <= velocityToleranceRPM.get()
-        );
+        boolean velocityMet = Math.abs(superstructure.flywheel.getVelocityRPM() - noPhaseDelayParameters.velocityRPM())
+                        <= velocityToleranceRPM.get();
         Logger.recordOutput("ShootingKinematics/VelocityMet", velocityMet);
+        velocityMet = velocityMetDebouncer.calculate(velocityMet);
+        if (BuildConstants.isSimOrReplay) {Logger.recordOutput("ShootingKinematics/DebouncedVelocityMet", velocityMet);}
 
         boolean angleMet = Math.abs(superstructure.hood.getShotAngleRad() - noPhaseDelayParameters.angleRad())
                 <= Units.degreesToRadians(hoodToleranceDeg.get());
