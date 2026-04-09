@@ -24,10 +24,10 @@ public class OrbitNewAuto extends Auto {
     private static Command build(boolean flipY) {
         return CommandsExt.eagerSequence(
                 // move out of trench
+                superintake.setGoal(Superintake.Goal.INTAKE).until(() -> true),
                 AutoHelpers.trajectory(ChoreoTraj.OrbitOutpostNew$0, flipY),
 
                 // follow intake path
-                superintake.setGoal(Superintake.Goal.INTAKE).until(() -> true),
                 AutoHelpers.trajectory(ChoreoTraj.OrbitOutpostNew$1, flipY),
 
                 // go to entrance to trench
