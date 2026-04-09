@@ -3,7 +3,6 @@ package frc.robot.autos;
 import choreo.Choreo;
 import choreo.trajectory.SwerveSample;
 import choreo.trajectory.Trajectory;
-import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -11,6 +10,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.AllianceFlipUtil;
+import frc.lib.Bounds;
 import frc.lib.Util;
 import frc.lib.commands.CommandsExt;
 import frc.lib.network.LoggedTunableNumber;
@@ -106,25 +106,12 @@ public class AutoHelpers {
         ));
     }
 
-    @SuppressWarnings("unchecked")
     public static Drive.DriveCommand trajectory(ChoreoTraj traj) {
-        // Basically copied from AutoFactory
-        Optional<? extends Trajectory<?>> optTrajectory;
-        if (traj.segment().isPresent()) {
-            optTrajectory = trajectoryCache.loadTrajectory(traj.name(), traj.segment().getAsInt());
-        } else {
-            optTrajectory = trajectoryCache.loadTrajectory(traj.name());
-        }
-        if (optTrajectory.isPresent()) {
-            return drive.followTrajectory((Trajectory<SwerveSample>) optTrajectory.get());
-        } else {
-            Util.error("Trajectory " + traj.name() + " is not present");
-            return drive.stop();
-        }
+        return trajectory(traj, false);
     }
 
     @SuppressWarnings("unchecked")
-    public static Drive.DriveCommand trajectory(ChoreoTraj traj, Boolean mirrorY) {
+    public static Drive.DriveCommand trajectory(ChoreoTraj traj, boolean mirrorY) {
         // Basically copied from AutoFactory
         Optional<? extends Trajectory<?>> optTrajectory;
         if (traj.segment().isPresent()) {
@@ -133,11 +120,10 @@ public class AutoHelpers {
             optTrajectory = trajectoryCache.loadTrajectory(traj.name());
         }
         if (optTrajectory.isPresent()) {
-            if (mirrorY) {
-                return drive.followTrajectory((Trajectory<SwerveSample>) optTrajectory.get().mirrorY());
-            } else {
-                return drive.followTrajectory((Trajectory<SwerveSample>) optTrajectory.get());
-            }
+            var trajectory = mirrorY
+                    ? optTrajectory.get().mirrorY()
+                    : optTrajectory.get();
+            return drive.followTrajectory((Trajectory<SwerveSample>) trajectory);
         } else {
             Util.error("Trajectory " + traj.name() + " is not present");
             return drive.stop();
@@ -213,34 +199,62 @@ public class AutoHelpers {
             .withMaxLinearVelocityMetersPerSec(new LoggedTunableNumber("AutoHelpers/Intake/MaxLinearVelocity", ChoreoVars.IntakingMaxVel.in(MetersPerSecond)))
             .withMaxAngularAccelerationRadPerSecPerSec(new LoggedTunableNumber("AutoHelpers/Intake/MaxAngularAcceleration", 40.0));
 
-    private static final LinearFilter targetXFilter = LinearFilter.movingAverage(10);
-    private static final LinearFilter targetYFilter = LinearFilter.movingAverage(10);
+    private static Optional<Pose2d> getIntakePose(Bounds bounds) {
+        for (var target : gamePieceVision.getAllTargets().toArray(Translation2d[]::new)) {
+            if (AllianceFlipUtil.apply(bounds).contains(target)) {
+                return Optional.of(new Pose2d(
+                        target,
+                        // Point towards target
+                        target.minus(robotState.getTranslation()).getAngle()
+                ).transformBy(new Transform2d(
+                        // Move align pose towards robot so that it doesn't try to move
+                        // such that the center of the robot is at the target
+                        -(driveConfig.bumperLengthMeters() / 2.0),
+                        0.0,
+                        new Rotation2d()
+                )));
+            }
+        }
+        return Optional.empty();
+    }
 
-    //public static Pose2d getIntakePose(Bounds bounds, Pose2d ifNoGamePieces) {
-    //    for (var target : gamePieceVision.getBestTargetsInBounds(Optional.of(bounds))) {
-    //        if (AllianceFlipUtil.apply(bounds).contains(target)) {
-    //            Translation2d targetFiltered = new Translation2d(
-    //                    targetXFilter.calculate(target.getX()),
-    //                    targetYFilter.calculate(target.getY())
-    //            );
-    //            return new Pose2d(
-    //                    targetFiltered,
-    //                    // Point towards target
-    //                    targetFiltered.minus(robotState.getTranslation()).getAngle()
-    //            ).transformBy(new Transform2d(
-    //                    // Move align pose towards robot so that it doesn't try to move
-    //                    // such that the center of the robot is at the target
-    //                    -(driveConfig.bumperLengthMeters() / 2.0),
-    //                    0.0,
-    //                    new Rotation2d()
-    //            ));
-    //        }
-    //    }
-    //    return AllianceFlipUtil.apply(ifNoGamePieces);
-    //}
+    @SuppressWarnings("unchecked")
+    public static Command intakeOrTrajectory(ChoreoTraj traj, Bounds bounds, boolean mirrorY) {
+        // Basically copied from AutoFactory
+        Optional<? extends Trajectory<?>> optTrajectory;
+        if (traj.segment().isPresent()) {
+            optTrajectory = trajectoryCache.loadTrajectory(traj.name(), traj.segment().getAsInt());
+        } else {
+            optTrajectory = trajectoryCache.loadTrajectory(traj.name());
+        }
+        if (optTrajectory.isPresent()) {
+            var trajectory = mirrorY
+                    ? optTrajectory.get().mirrorY()
+                    : optTrajectory.get();
+            return drive.followTrajectory((Trajectory<SwerveSample>) trajectory, () -> getIntakePose(bounds).orElse(null));
+        } else {
+            Util.error("Trajectory " + traj.name() + " is not present");
+            return drive.stop();
+        }
+
+    }
 
     private static final double neutralZoneXMin = FieldConstants.LinesVertical.neutralZoneNear + driveConfig.bumperLengthMeters() / 2.0;
     private static final double neutralZoneXMax = FieldConstants.LinesVertical.center - 0.2;
+
+    public static final Bounds leftNeutralZoneBounds = new Bounds(
+            neutralZoneXMin,
+            neutralZoneXMax,
+            FieldConstants.LinesHorizontal.center,
+            FieldConstants.fieldWidth - driveConfig.bumperLengthMeters() / 2.0
+    );
+
+    public static final Bounds rightNeutralZoneBounds = new Bounds(
+            neutralZoneXMin,
+            neutralZoneXMax,
+            0.0 + driveConfig.bumperLengthMeters() / 2.0,
+            FieldConstants.LinesHorizontal.center
+    );
 
     //public static Command intakeFromLeftNeutralZone(Supplier<Pose2d> poseSupplierIfNoGamePieces) {
     //    return Commands.parallel(

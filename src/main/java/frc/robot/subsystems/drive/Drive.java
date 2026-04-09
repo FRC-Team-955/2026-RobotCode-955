@@ -42,7 +42,6 @@ import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.Arrays;
-import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.function.BiFunction;
 import java.util.function.DoubleSupplier;
@@ -509,34 +508,17 @@ public class Drive extends CommandBasedSubsystem {
     }
 
     public DriveCommand followTrajectory(Trajectory<SwerveSample> trajectory) {
+        return followTrajectory(trajectory, null);
+    }
+
+    public DriveCommand followTrajectory(Trajectory<SwerveSample> trajectory, Supplier<Pose2d> smudgeGoalPoseSupplier) {
         return new DriveCommand(startIdleWaitUntil(
                 () -> {
                     wantedState = State.FOLLOW_TRAJECTORY;
-                    followTrajectoryController.start(trajectory);
+                    followTrajectoryController.start(trajectory, smudgeGoalPoseSupplier);
                 },
                 followTrajectoryController::isDone
         ));
-    }
-
-    public Command followTrajectoryWithMoveToOverride(Trajectory<SwerveSample> trajectory, Supplier<Optional<Pose2d>> moveToGoalPoseSupplier, DriveConstraints moveToConstraints) {
-        // don't return DriveCommand type because we don't want to allow adding
-        // modifications because this command does things weirdly (starts/stops constraints)
-        // we still use new DriveCommand because we want heading override and stuff like that to be reset
-        return new DriveCommand(startRun(
-                () -> {
-                    followTrajectoryController.start(trajectory);
-                    moveToController.start(() -> moveToGoalPoseSupplier.get().orElse(null));
-                },
-                () -> {
-                    if (moveToGoalPoseSupplier.get().isPresent()) {
-                        constrainer.start(moveToConstraints);
-                        wantedState = State.MOVE_TO;
-                    } else {
-                        constrainer.stop();
-                        wantedState = State.FOLLOW_TRAJECTORY;
-                    }
-                }
-        ).until(followTrajectoryController::isDone));
     }
 
     public DriveCommand chassisSpeeds(Supplier<ChassisSpeeds> chassisSpeedsSupplier) {

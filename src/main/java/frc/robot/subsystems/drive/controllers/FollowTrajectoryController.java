@@ -13,6 +13,7 @@ import org.jetbrains.annotations.Nullable;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import static frc.robot.subsystems.drive.DriveConstants.choreoFeedbackOmega;
 import static frc.robot.subsystems.drive.DriveConstants.choreoFeedbackXY;
@@ -25,6 +26,9 @@ public class FollowTrajectoryController {
     private final PIDController feedbackY = choreoFeedbackXY.toPID();
     private final PIDController feedbackOmega = choreoFeedbackOmega.toPIDWrapRadians();
 
+    private final MoveToController smudgeController = new MoveToController();
+    private @Nullable Supplier<Pose2d> smudgeGoalPoseSupplier = null;
+
     public void applyNetworkInputs() {
         if (choreoFeedbackXY.hasChanged()) {
             choreoFeedbackXY.applyPID(feedbackX);
@@ -34,11 +38,13 @@ public class FollowTrajectoryController {
         if (choreoFeedbackOmega.hasChanged()) {
             choreoFeedbackOmega.applyPID(feedbackOmega);
         }
+
+        smudgeController.applyNetworkInputs();
     }
 
     private @Nullable Trajectory<SwerveSample> trajectory = null;
 
-    public void start(Trajectory<SwerveSample> trajectory) {
+    public void start(Trajectory<SwerveSample> trajectory, @Nullable Supplier<Pose2d> smudgeGoalPoseSupplier) {
         this.trajectory = trajectory;
 
         timer.restart();
@@ -46,6 +52,11 @@ public class FollowTrajectoryController {
         feedbackX.reset();
         feedbackY.reset();
         feedbackOmega.reset();
+
+        this.smudgeGoalPoseSupplier = smudgeGoalPoseSupplier;
+        if (smudgeGoalPoseSupplier != null) {
+            smudgeController.start(smudgeGoalPoseSupplier);
+        }
     }
 
     public ChassisSpeeds update() {
@@ -67,11 +78,18 @@ public class FollowTrajectoryController {
             Logger.recordOutput("Drive/Trajectory", poses);
             Logger.recordOutput("Drive/TrajectorySetpoint", sample.getPose());
 
-            return new ChassisSpeeds(
+            ChassisSpeeds trajSpeeds = new ChassisSpeeds(
                     sample.vx + feedbackX.calculate(currentPose.getX(), sample.x),
                     sample.vy + feedbackY.calculate(currentPose.getY(), sample.y),
                     sample.omega + feedbackOmega.calculate(currentPose.getRotation().getRadians(), sample.heading)
             );
+
+            ChassisSpeeds smudgeSpeeds = smudgeGoalPoseSupplier != null &&
+                    smudgeGoalPoseSupplier.get() != null
+                    ? smudgeController.update()
+                    : new ChassisSpeeds();
+
+            return trajSpeeds.plus(smudgeSpeeds);
         } else {
             Util.error("No sample at " + timer.get() + " for trajectory " + trajectory.name());
             return new ChassisSpeeds();

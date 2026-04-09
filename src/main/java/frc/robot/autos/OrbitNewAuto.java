@@ -9,6 +9,8 @@ import frc.robot.subsystems.gamepiecevision.GamePieceVision;
 import frc.robot.subsystems.superintake.Superintake;
 import frc.robot.subsystems.superstructure.Superstructure;
 
+import static frc.robot.autos.AutoHelpers.leftNeutralZoneBounds;
+import static frc.robot.autos.AutoHelpers.rightNeutralZoneBounds;
 import static frc.robot.subsystems.drive.DriveConstants.defaultMoveToConstraints;
 
 public class OrbitNewAuto extends Auto {
@@ -51,44 +53,23 @@ public class OrbitNewAuto extends Auto {
                 AutoHelpers.trajectory(ChoreoTraj.OrbitOutpostNew$4, flipY),
 
                 // follow intake path
-                Commands.either(
-                        CommandsExt.eagerSequence(
-                                superintake.setGoal(Superintake.Goal.INTAKE).until(() -> true),
-                                AutoHelpers.trajectory(ChoreoTraj.OrbitOutpostNew$6, flipY)
-                        ),
-                        CommandsExt.eagerSequence(
-                                superintake.setGoal(Superintake.Goal.INTAKE).until(() -> true),
-                                AutoHelpers.trajectory(ChoreoTraj.OrbitOutpostNew$6, flipY)
-                        ).until(
-                                () -> gamePieceVision.getBestTarget().isPresent()
-                        ).andThen(
-                                AutoHelpers.intermediateWaypoint(
-                                        () -> new Pose2d(
-                                                gamePieceVision.getBestTarget().get().getX(),
-                                                gamePieceVision.getBestTarget().get().getY(),
-                                                gamePieceVision.getBestTarget().get().getAngle()
-                                        ),
-                                        defaultMoveToConstraints,
-                                        false
-                                )
-                        ),
-                        gamePieceVision::anyCamerasDisconnected
-                ),
-
-                // move to entrance of trench
-                AutoHelpers.trajectory(ChoreoTraj.OrbitOutpostNew$6, flipY),
+                superintake.setGoal(Superintake.Goal.INTAKE).until(() -> true),
+                AutoHelpers.trajectory(ChoreoTraj.OrbitOutpostNew$5, flipY),
+                AutoHelpers.intakeOrTrajectory(ChoreoTraj.OrbitOutpostNew$6, flipY ? leftNeutralZoneBounds : rightNeutralZoneBounds, flipY),
+                AutoHelpers.trajectory(ChoreoTraj.OrbitOutpostNew$7, flipY),
 
                 // make sure at entrance of trench
                 superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
                 AutoHelpers.checkWaypoint(
                         flipY
-                                ? () -> ChoreoAllianceFlipUtil.getMirrorY().flip(ChoreoTraj.OrbitOutpostNew$6.endPoseBlue())
+                                ? () -> ChoreoAllianceFlipUtil.getMirrorY().flip(ChoreoTraj.OrbitOutpostNew$7.endPoseBlue())
                                 : ChoreoTraj.OrbitOutpostNew$7::endPoseBlue,
                         defaultMoveToConstraints,
-                        false),
+                        false
+                ),
 
                 // go through trench and shoot
-                AutoHelpers.trajectory(ChoreoTraj.OrbitOutpostNew$7, flipY),
+                AutoHelpers.trajectory(ChoreoTraj.OrbitOutpostNew$8, flipY),
                 superstructure.setGoal(Superstructure.Goal.SHOOT).until(() -> true),
                 Commands.parallel(
                         superintake.intakeShootAlternate(),
