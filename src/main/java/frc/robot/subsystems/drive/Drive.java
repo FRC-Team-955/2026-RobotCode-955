@@ -406,9 +406,6 @@ public class Drive extends CommandBasedSubsystem {
                         : headingOverrideFeedforwardSupplier.apply(wantedFieldSpeeds, wantedAcceleration);
                 if (feedforward.isPresent()) {
                     wantedFieldSpeeds.omegaRadiansPerSecond += feedforward.getAsDouble();
-                    Translation2d fuelExitTranslationRobotRelative = shootingKinematics.getFuelExitTranslation().toTranslation2d();
-                    Translation2d fieldRelative = fuelExitTranslationRobotRelative.rotateBy(robotState.getRotation());
-                    Logger.recordOutput("Temp/robotToShooterFieldRelative", fieldRelative);
                 }
             } else {
                 headingOverrideController.reset();
@@ -416,6 +413,14 @@ public class Drive extends CommandBasedSubsystem {
 
             // Now we are done with the angular part of the setpoint and can constrain it
             constrainer.constrainFieldRelativeSpeedsAngular(wantedFieldSpeeds);
+
+            // FIXME: figure out how to put this before the constrainer and not afterwards
+            if (headingOverrideSetpoint.isPresent() && headingOverrideFeedforwardSupplier != null) {
+                Translation2d correction = shootingKinematics.getFuelExitTranslation().toTranslation2d()
+                        .rotateBy(robotState.getRotation()).rotateBy(Rotation2d.kCW_90deg)
+                        .times(wantedFieldSpeeds.omegaRadiansPerSecond);
+                wantedFieldSpeeds.plus(new ChassisSpeeds(correction.getX(), correction.getY(), 0));
+            }
 
             if (wantedFieldSpeeds.vxMetersPerSecond == 0.0 && wantedFieldSpeeds.vyMetersPerSecond == 0.0 && wantedFieldSpeeds.omegaRadiansPerSecond == 0.0) {
                 // Re-evaluate state machine to stop - this handles stopping with X in a nice way
