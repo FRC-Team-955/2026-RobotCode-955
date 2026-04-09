@@ -40,7 +40,7 @@ public class ShootingKinematics implements Periodic {
     public static final LoggedTunableNumber velocityToleranceRPM = new LoggedTunableNumber("ShootingKinematics/VelocityToleranceRPM", 100);
     public static final LoggedTunableNumber hoodToleranceDeg = new LoggedTunableNumber("ShootingKinematics/HoodToleranceDegrees", 3.0);
 
-    public static final DoubleFunction<Translation3d> fuelExitTranslation = (hoodAngleRad) -> new Translation3d(
+    private static final DoubleFunction<Translation3d> fuelExitTranslation = (hoodAngleRad) -> new Translation3d(
             Units.inchesToMeters(-6.910046) + Math.cos(hoodAngleRad) * shooterRadiusToCenterOfBallExitMeters,
             Units.inchesToMeters(-9.172244),
             driveConfig.bottomOfFrameRailsToCenterOfWheelsMeters() +
@@ -317,7 +317,7 @@ public class ShootingKinematics implements Periodic {
 
         // 3. Account for drivebase angular velocity
         Vector<N3> fuelExitFieldRelative = new Translation3d(
-                fuelExitTranslation.apply(superstructure.hood.getPositionRad()).toTranslation2d()
+                getFuelExitTranslation().toTranslation2d()
                         .rotateBy(robotState.getRotation())
         ).toVector();
         Vector<N3> angularVelocityVector = VecBuilder.fill(0.0, 0.0, robotSpeeds.omegaRadiansPerSecond);
@@ -354,7 +354,7 @@ public class ShootingKinematics implements Periodic {
         return new Pose3d(
                 new Pose3d(robotPose2d)
                         .transformBy(new Transform3d(
-                                fuelExitTranslation.apply(superstructure.hood.getPositionRad()),
+                                getFuelExitTranslation(),
                                 new Rotation3d()
                         ))
                         .getTranslation(),
@@ -444,6 +444,10 @@ public class ShootingKinematics implements Periodic {
 
     public double totalRotationFeedForward(Translation2d fieldRelativeSpeeds, Translation2d fieldRelativeMetersPerSecSquared) {
         return rotationAboutTargetRadiansPerSecForDrivebase(fieldRelativeSpeeds) + rotationFeedforwardAcceleration(fieldRelativeMetersPerSecSquared);
+    }
+
+    public Translation3d getFuelExitTranslation() {
+        return fuelExitTranslation.apply(superstructure.hood.getPositionRad());
     }
 
     private record FuelExitToTarget(Translation3d translation, Rotation2d angle) {}
