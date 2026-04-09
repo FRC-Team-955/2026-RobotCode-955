@@ -123,6 +123,27 @@ public class AutoHelpers {
         }
     }
 
+    @SuppressWarnings("unchecked")
+    public static Drive.DriveCommand trajectory(ChoreoTraj traj, Boolean mirrorY) {
+        // Basically copied from AutoFactory
+        Optional<? extends Trajectory<?>> optTrajectory;
+        if (traj.segment().isPresent()) {
+            optTrajectory = trajectoryCache.loadTrajectory(traj.name(), traj.segment().getAsInt());
+        } else {
+            optTrajectory = trajectoryCache.loadTrajectory(traj.name());
+        }
+        if (optTrajectory.isPresent()) {
+            if (mirrorY) {
+                return drive.followTrajectory((Trajectory<SwerveSample>) optTrajectory.get().mirrorY());
+            } else {
+                return drive.followTrajectory((Trajectory<SwerveSample>) optTrajectory.get());
+            }
+        } else {
+            Util.error("Trajectory " + traj.name() + " is not present");
+            return drive.stop();
+        }
+    }
+
     public static Pose2d yDistanceInterpolation(
             Translation2d start,
             Translation2d end,
