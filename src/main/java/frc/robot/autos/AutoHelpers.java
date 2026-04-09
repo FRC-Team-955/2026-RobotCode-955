@@ -34,6 +34,8 @@ public class AutoHelpers {
     private static final double intermediateAngularTolerance = Units.degreesToRadians(45);
     private static final double finalLinearTolerance = 0.1;
     private static final double finalAngularTolerance = Units.degreesToRadians(10);
+    private static final double checkLinearTolerance = 0.3;
+    private static final double checkAngularTolerance = Units.degreesToRadians(20);
 
     private static final RobotState robotState = RobotState.get();
     private static final GamePieceVision gamePieceVision = GamePieceVision.get();
@@ -81,6 +83,26 @@ public class AutoHelpers {
                 aiming
                         ? Double.MAX_VALUE
                         : finalAngularTolerance
+        ));
+    }
+
+    public static Command checkWaypoint(Supplier<Pose2d> poseSupplier, DriveConstraints constraints, boolean aiming) {
+        var cmd = drive
+                .moveTo(
+                        () -> AllianceFlipUtil.apply(poseSupplier.get()),
+                        constraints
+                );
+        if (aiming) {
+            cmd = cmd.withAiming();
+        }
+        return cmd.until(() -> robotState.isAtPoseWithTolerance(
+                AllianceFlipUtil.apply(poseSupplier.get()),
+                checkLinearTolerance,
+                // if we are aiming, the rotation from the pose supplier
+                // is not the rotation that move to will target
+                aiming
+                        ? Double.MAX_VALUE
+                        : checkAngularTolerance
         ));
     }
 
