@@ -32,7 +32,7 @@ public class GamePieceVision {
     private final DBSCAN dbscan = new DBSCAN(new ArrayList<>(), 3, 0.3);
 
     /** length should be the same as Result.maxClusters */
-    private static final Double[] wantedDistances = new Double[]{1.0, 1.5, 2.0, null};
+    private static final Double[] wantedDistances = new Double[]{null, 2.0, 1.5, 1.0};
     private final Translation2d[] lastTargets = new Translation2d[Result.maxClusters];
 
     public void periodic() {
