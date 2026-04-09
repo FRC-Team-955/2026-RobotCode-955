@@ -13,6 +13,7 @@ import frc.lib.Util;
 import frc.lib.network.LoggedTunableNumber;
 import frc.lib.subsystem.Periodic;
 import frc.robot.*;
+import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.superstructure.Superstructure;
 import frc.robot.subsystems.superstructure.flywheel.FlywheelConstants;
 import frc.robot.subsystems.superstructure.hood.HoodConstants;
@@ -27,6 +28,8 @@ import java.util.function.DoubleUnaryOperator;
 import static frc.robot.subsystems.drive.DriveConstants.driveConfig;
 
 public class ShootingKinematics implements Periodic {
+    private static final Drive drive = Drive.get();
+
     // KEEP SYNCED WITH shooting_regression.py
     private static final double bottomOfFrameRailsToShooterHeightMeters = Units.inchesToMeters(12.861380);
     private static final double shooterRadiusToCenterOfBallExitMeters = Units.inchesToMeters(4.602756);
@@ -71,16 +74,23 @@ public class ShootingKinematics implements Periodic {
     private static final Superstructure superstructure = Superstructure.get();
 
     @Getter
-    private ShootingParameters shootingParameters = new ShootingParameters(0, 0, 0, OptionalDouble.empty(), false);
+    private ShootingParameters shootingParameters = new ShootingParameters(0, 0, 0, 0, OptionalDouble.empty(), false);
     @Getter
     private boolean shootingParametersMet = false;
     @Getter
     private boolean shiftMet = false;
 
-    private double shootingVelocityXY = 0;
-
     private final Debouncer velocityMetDebouncer = new Debouncer(0.15, Debouncer.DebounceType.kFalling);
     private final Debouncer headingVelocityDebouncer = new Debouncer(0.15, Debouncer.DebounceType.kFalling);
+
+    private ShootingParameters noPhaseDelayParameters = new ShootingParameters(
+            0.0,
+            0.0,
+            0.0,
+            robotState.getRotation().getRadians(),
+            OptionalDouble.empty(),
+            false
+    );
 
     private static ShootingKinematics instance;
 
@@ -100,12 +110,12 @@ public class ShootingKinematics implements Periodic {
 
     @Override
     public void periodicBeforeCommands() {
-        ShootingParameters noPhaseDelayParameters;
         if (operatorDashboard.getSelectedScoringMode() == OperatorDashboard.ScoringMode.ShootAndPassAutomatic) {
             var shooterParams = getShootingParametersAutomaticForPhaseDelay(PhaseDelay.Shooter);
             var drivebaseParams = getShootingParametersAutomaticForPhaseDelay(PhaseDelay.Drivebase);
             shootingParameters = new ShootingParameters(
                     shooterParams.velocityRPM(),
+                    shooterParams.velocityXYMetersPerSec(),
                     shooterParams.angleRad(),
                     drivebaseParams.headingRad(),
                     shooterParams.timeOfFlightSeconds(),
@@ -118,6 +128,7 @@ public class ShootingKinematics implements Periodic {
         }
         shootingParameters = new ShootingParameters(
                 shootingParameters.velocityRPM() + operatorDashboard.flywheelSmudgeRPM.get(),
+                shootingParameters.velocityXYMetersPerSec * (shootingParameters.velocityRPM() + operatorDashboard.flywheelSmudgeRPM.get()) / shootingParameters.velocityRPM(),
                 shootingParameters.angleRad() + Units.degreesToRadians(operatorDashboard.hoodSmudgeDegrees.get()),
                 shootingParameters.headingRad(),
                 shootingParameters.timeOfFlightSeconds(),
@@ -125,6 +136,7 @@ public class ShootingKinematics implements Periodic {
         );
         noPhaseDelayParameters = new ShootingParameters(
                 noPhaseDelayParameters.velocityRPM() + operatorDashboard.flywheelSmudgeRPM.get(),
+                noPhaseDelayParameters.velocityXYMetersPerSec,
                 noPhaseDelayParameters.angleRad() + Units.degreesToRadians(operatorDashboard.hoodSmudgeDegrees.get()),
                 noPhaseDelayParameters.headingRad(),
                 noPhaseDelayParameters.timeOfFlightSeconds(),
@@ -136,7 +148,7 @@ public class ShootingKinematics implements Periodic {
             Logger.recordOutput("ShootingKinematics/ShootingParameters/None/IsPass", noPhaseDelayParameters.isPass());
         }
 
-        double headingVelocitySetpoint = totalRotationFeedForward(robotState.getMeasuredChassisSpeedsFieldRelative(), robotState.getFilteredAccelerationMetersPerSecPerSec());
+        double headingVelocitySetpoint = totalRotationFeedForward(drive.getConstrainer().getWantedLinearSpeed(), drive.getConstrainer().getFieldRelativeAccelerationLinear());
         double headingVelocityMeasurement = robotState.getMeasuredChassisSpeedsFieldRelative().omegaRadiansPerSecond;
 
         if (BuildConstants.isSimOrReplay) {
@@ -175,13 +187,14 @@ public class ShootingKinematics implements Periodic {
         Logger.recordOutput("ShootingKinematics/HeadingVelocityMet", headingVelocityMet);
         Logger.recordOutput("ShootingKinematics/HeadingVelocityDelta", headingVelocityMeasurement - headingVelocitySetpoint);
         headingVelocityMet = headingVelocityDebouncer.calculate(headingVelocityMet);
-        if (BuildConstants.isSimOrReplay) {Logger.recordOutput("ShootingKinematics/DebouncedHeadingVelocityMet", headingVelocityMet);}
+        if (BuildConstants.isSimOrReplay)
+            Logger.recordOutput("ShootingKinematics/HeadingVelocityMetDebounced", headingVelocityMet);
 
         boolean velocityMet = Math.abs(superstructure.flywheel.getVelocityRPM() - noPhaseDelayParameters.velocityRPM())
-                        <= velocityToleranceRPM.get();
+                <= velocityToleranceRPM.get();
         Logger.recordOutput("ShootingKinematics/VelocityMet", velocityMet);
         velocityMet = velocityMetDebouncer.calculate(velocityMet);
-        if (BuildConstants.isSimOrReplay) {Logger.recordOutput("ShootingKinematics/DebouncedVelocityMet", velocityMet);}
+        if (BuildConstants.isSimOrReplay) Logger.recordOutput("ShootingKinematics/VelocityMetDebounced", velocityMet);
 
         boolean angleMet = Math.abs(superstructure.hood.getShotAngleRad() - noPhaseDelayParameters.angleRad())
                 <= Units.degreesToRadians(hoodToleranceDeg.get());
@@ -196,9 +209,9 @@ public class ShootingKinematics implements Periodic {
         shootingParametersMet = shiftMet && headingMet && headingVelocityMet && velocityMet && angleMet && uncertaintyMet;
         Logger.recordOutput("ShootingKinematics/ShootingParametersMet", shootingParametersMet);
 
-        Logger.recordOutput("ShootingKinematics/Drive/VelocityCompensation", rotationAboutTargetRadiansPerSecForDrivebase(robotState.getMeasuredChassisSpeedsFieldRelative()));
-        Logger.recordOutput("ShootingKinematics/Drive/AccelerationCompensation", rotationFeedforwardAcceleration(robotState.getFilteredAccelerationMetersPerSecPerSec()));
-        Logger.recordOutput("ShootingKinematics/Drive/TotalFFComp", totalRotationFeedForward(robotState.getMeasuredChassisSpeedsFieldRelative(), robotState.getFilteredAccelerationMetersPerSecPerSec()));
+        Logger.recordOutput("ShootingKinematics/Drive/VelocityCompensation", rotationAboutTargetRadiansPerSecForDrivebase(drive.getConstrainer().getWantedLinearSpeed()));
+        Logger.recordOutput("ShootingKinematics/Drive/AccelerationCompensation", rotationFeedforwardAcceleration(drive.getConstrainer().getFieldRelativeAccelerationLinear()));
+        Logger.recordOutput("ShootingKinematics/Drive/TotalFFComp", totalRotationFeedForward(drive.getConstrainer().getWantedLinearSpeed(), drive.getConstrainer().getFieldRelativeAccelerationLinear()));
     }
 
     private static final LoggedTunableNumber shootHubManualFlywheelRPM = new LoggedTunableNumber("ShootingKinematics/ShootHubManual/FlywheelRPM", 2000.0);
@@ -215,6 +228,7 @@ public class ShootingKinematics implements Periodic {
         return switch (operatorDashboard.getSelectedScoringMode()) {
             case ShootHubManual -> new ShootingParameters(
                     shootHubManualFlywheelRPM.get(),
+                    0.0, // if we are using this we have bigger issues than acceleration compensation
                     Units.degreesToRadians(shootHubManualAngleDegrees.get()),
                     headingRad,
                     OptionalDouble.empty(),
@@ -222,6 +236,7 @@ public class ShootingKinematics implements Periodic {
             );
             case ShootTowerManual -> new ShootingParameters(
                     shootTowerManualFlywheelRPM.get(),
+                    0.0, // again, bigger issues
                     Units.degreesToRadians(shootTowerManualAngleDegrees.get()),
                     headingRad,
                     OptionalDouble.empty(),
@@ -229,6 +244,7 @@ public class ShootingKinematics implements Periodic {
             );
             case PassManual -> new ShootingParameters(
                     passManualFlywheelRPM.get(),
+                    0.0,
                     Units.degreesToRadians(passManualAngleDegrees.get()),
                     headingRad,
                     OptionalDouble.empty(),
@@ -237,6 +253,7 @@ public class ShootingKinematics implements Periodic {
 
             // something went wrong
             case ShootAndPassAutomatic -> new ShootingParameters(
+                    0.0,
                     0.0,
                     0.0,
                     robotState.getRotation().getRadians(),
@@ -316,7 +333,6 @@ public class ShootingKinematics implements Periodic {
         double phi = Math.asin(vz / v);
         double theta = Math.atan2(vy, vx);
         Logger.recordOutput(key + "VelocityMetersPerSec", v);
-        shootingVelocityXY = Math.sqrt(vx * vx + vy * vy);
         if (BuildConstants.isSimOrReplay) {
             Logger.recordOutput(key + "Phi", phi);
             Logger.recordOutput(key + "Theta", theta);
@@ -326,6 +342,7 @@ public class ShootingKinematics implements Periodic {
                 BuildConstants.isSim
                         ? Units.radiansPerSecondToRotationsPerMinute(v / FlywheelConstants.flywheelRadiusMeters)
                         : velocityToRPM.applyAsDouble(v),
+                Math.sqrt(vx * vx + vy * vy),
                 phi,
                 theta,
                 toF,
@@ -402,6 +419,14 @@ public class ShootingKinematics implements Periodic {
     }
 
 
+    private double rotationAboutTargetRadiansPerSecForDrivebase(ChassisSpeeds fieldRelativeSpeeds) {
+        return rotationAboutTargetRadiansPerSecForDrivebase(new Translation2d(
+                fieldRelativeSpeeds.vxMetersPerSecond,
+                fieldRelativeSpeeds.vyMetersPerSecond
+        ));
+    }
+
+
     // Estimated rotation due to tangential acceleration, add to drive for aiming feedforward
     // Returns rotation in rad/sec
     private double rotationFeedforwardAcceleration(Translation2d fieldRelativeMetersPerSecSquared) {
@@ -410,18 +435,14 @@ public class ShootingKinematics implements Periodic {
         // Again, positive Y is CLOCKWISE
         //Translation2d tangentialAccelerationHubRelative = robotVelocityTargetRelativeForDrivebase(fieldRelativeMetersPerSecSquared);
         double tangentialAccelerationShotRelative = fieldRelativeMetersPerSecSquared.rotateBy(new Rotation2d(-shootingParameters.headingRad())).getY();
-        return tangentialAccelerationShotRelative / shootingVelocityXY;
-    }
-
-
-    private double rotationAboutTargetRadiansPerSecForDrivebase(ChassisSpeeds fieldRelativeSpeeds) {
-        return rotationAboutTargetRadiansPerSecForDrivebase(new Translation2d(
-                fieldRelativeSpeeds.vxMetersPerSecond,
-                fieldRelativeSpeeds.vyMetersPerSecond
-        ));
+        return tangentialAccelerationShotRelative / noPhaseDelayParameters.velocityXYMetersPerSec;
     }
 
     public double totalRotationFeedForward(ChassisSpeeds fieldRelativeSpeeds, Translation2d fieldRelativeMetersPerSecSquared) {
+        return rotationAboutTargetRadiansPerSecForDrivebase(fieldRelativeSpeeds) + rotationFeedforwardAcceleration(fieldRelativeMetersPerSecSquared);
+    }
+
+    public double totalRotationFeedForward(Translation2d fieldRelativeSpeeds, Translation2d fieldRelativeMetersPerSecSquared) {
         return rotationAboutTargetRadiansPerSecForDrivebase(fieldRelativeSpeeds) + rotationFeedforwardAcceleration(fieldRelativeMetersPerSecSquared);
     }
 
@@ -429,6 +450,7 @@ public class ShootingKinematics implements Periodic {
 
     public record ShootingParameters(
             double velocityRPM,
+            double velocityXYMetersPerSec,
             double angleRad,
             double headingRad,
             OptionalDouble timeOfFlightSeconds,

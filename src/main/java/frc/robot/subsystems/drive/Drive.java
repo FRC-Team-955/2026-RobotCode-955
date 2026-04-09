@@ -99,6 +99,7 @@ public class Drive extends CommandBasedSubsystem {
     private final FollowTrajectoryController followTrajectoryController = new FollowTrajectoryController();
     private @Nullable Supplier<ChassisSpeeds> chassisSpeedsSetpointSupplier = null;
 
+    @Getter
     private final DriveConstrainer constrainer = new DriveConstrainer();
 
     /**
