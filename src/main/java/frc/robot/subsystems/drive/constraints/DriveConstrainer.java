@@ -5,6 +5,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.lib.SlewRateLimiter2d;
 import frc.lib.wpilib.SlewRateLimiter;
 import frc.robot.RobotState;
+import lombok.Getter;
 import org.jetbrains.annotations.Nullable;
 
 public class DriveConstrainer {
@@ -12,6 +13,9 @@ public class DriveConstrainer {
 
     private final SlewRateLimiter2d linearAccelLimiter = new SlewRateLimiter2d(0.0);
     private final SlewRateLimiter angularAccelLimiter = new SlewRateLimiter(0.0);
+
+    @Getter
+    private Translation2d wantedLinearSpeed = new Translation2d();
 
     private @Nullable DriveConstraints constraints = null;
 
@@ -42,7 +46,7 @@ public class DriveConstrainer {
             linearAccelLimiter.setLimit(constraints.maxLinearAccelerationMetersPerSecPerSec().get());
         }
 
-        Translation2d wantedLinearSpeed = new Translation2d(wantedSpeeds.vxMetersPerSecond, wantedSpeeds.vyMetersPerSecond);
+        wantedLinearSpeed = new Translation2d(wantedSpeeds.vxMetersPerSecond, wantedSpeeds.vyMetersPerSecond);
         // Limit max vel
         if (constraints.maxLinearVelocityMetersPerSec() != null &&
                 wantedLinearSpeed.getNorm() > constraints.maxLinearVelocityMetersPerSec().get()) {
@@ -58,6 +62,9 @@ public class DriveConstrainer {
     }
 
     public Translation2d getFieldRelativeAccelerationLinear() {
+        if (linearAccelLimiter.acceleration() == null) {
+            return new Translation2d();
+        }
         return linearAccelLimiter.acceleration();
     }
 

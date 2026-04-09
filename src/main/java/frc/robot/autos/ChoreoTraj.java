@@ -192,13 +192,20 @@ public record ChoreoTraj(
     public static final ChoreoTraj OrbitOutpostNew$5 = new ChoreoTraj(
         "OrbitOutpostNew",
         OptionalInt.of(5),
-        3.24983,
+        0.5890000000000004,
         new Pose2d(5.77427, 0.622, Rotation2d.fromRadians(-1.5708)),
-        new Pose2d(5.77427, 0.622, Rotation2d.fromRadians(-1.5708))
+        new Pose2d(5.85409, 1.28606, Rotation2d.fromRadians(1.22427))
     );
     public static final ChoreoTraj OrbitOutpostNew$6 = new ChoreoTraj(
         "OrbitOutpostNew",
         OptionalInt.of(6),
+        2.66083,
+        new Pose2d(5.85409, 1.28606, Rotation2d.fromRadians(1.22427)),
+        new Pose2d(5.77427, 0.622, Rotation2d.fromRadians(-1.5708))
+    );
+    public static final ChoreoTraj OrbitOutpostNew$7 = new ChoreoTraj(
+        "OrbitOutpostNew",
+        OptionalInt.of(7),
         0.6572299999999993,
         new Pose2d(5.77427, 0.622, Rotation2d.fromRadians(-1.5708)),
         new Pose2d(4.17427, 0.622, Rotation2d.fromRadians(-1.76448))
@@ -242,6 +249,7 @@ public record ChoreoTraj(
         Map.entry("OrbitOutpostNew$4", OrbitOutpostNew$4),
         Map.entry("OrbitOutpostNew$5", OrbitOutpostNew$5),
         Map.entry("OrbitOutpostNew$6", OrbitOutpostNew$6),
+        Map.entry("OrbitOutpostNew$7", OrbitOutpostNew$7),
         Map.entry("OrbitDepotTilted", OrbitDepotTilted)
     );
 

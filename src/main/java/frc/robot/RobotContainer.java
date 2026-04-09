@@ -34,14 +34,6 @@ public class RobotContainer {
     private final LoggedDashboardChooser<Command> characterizationChooser = new LoggedDashboardChooser<>("Characterization Choices");
 
     public final RobotState robotState = RobotState.get();
-    public final OperatorDashboard operatorDashboard = OperatorDashboard.get();
-    public final Controller controller = Controller.get();
-    public final CANLogger canLogger = CANLogger.get();
-    public final RobotMechanism robotMechanism = RobotMechanism.get();
-    public final ShootingKinematics shootingKinematics = ShootingKinematics.get();
-    public final AutoManager autoManager = AutoManager.get();
-    public final HubShiftTracker hubShiftTracker = HubShiftTracker.get();
-    public final EnergyLogger energyLogger = EnergyLogger.get();
     /* Subsystems */
     public final Drive drive = Drive.get();
     public final AprilTagVision aprilTagVision = AprilTagVision.get();
@@ -50,6 +42,16 @@ public class RobotContainer {
 
     public final Superintake superintake = Superintake.get();
     public final Superstructure superstructure = Superstructure.get();
+
+    /* Other stuff */
+    public final Controller controller = Controller.get();
+    public final CANLogger canLogger = CANLogger.get();
+    public final RobotMechanism robotMechanism = RobotMechanism.get();
+    public final ShootingKinematics shootingKinematics = ShootingKinematics.get();
+    public final AutoManager autoManager = AutoManager.get();
+    public final HubShiftTracker hubShiftTracker = HubShiftTracker.get();
+    public final EnergyLogger energyLogger = EnergyLogger.get();
+    public final OperatorDashboard operatorDashboard = OperatorDashboard.get();
 
     public RobotContainer() {
         addCharacterizations();

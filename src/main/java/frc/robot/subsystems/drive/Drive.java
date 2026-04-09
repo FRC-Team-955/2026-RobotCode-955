@@ -36,6 +36,7 @@ import frc.robot.subsystems.drive.constraints.DriveConstrainer;
 import frc.robot.subsystems.drive.constraints.DriveConstraints;
 import frc.robot.subsystems.drive.controllers.FollowTrajectoryController;
 import frc.robot.subsystems.drive.controllers.MoveToController;
+import frc.robot.subsystems.superstructure.hood.Hood;
 import lombok.Getter;
 import org.jetbrains.annotations.Nullable;
 import org.littletonrobotics.junction.AutoLogOutput;
@@ -52,13 +53,15 @@ import static frc.lib.HighFrequencySamplingThread.highFrequencyLock;
 import static frc.robot.subsystems.drive.DriveConstants.*;
 
 public class Drive extends CommandBasedSubsystem {
-    private static final RobotState robotState = RobotState.get();
-    private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
-    private static final Controller controller = Controller.get();
-    private static final ShootingKinematics shootingKinematics = ShootingKinematics.get();
+    private static RobotState robotState;
+    private static OperatorDashboard operatorDashboard;
+    private static Controller controller;
+    private static ShootingKinematics shootingKinematics;
 
-    private final GyroIO gyroIO = createGyroIO();
-    private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
+    private GyroIO gyroIO;
+    private GyroIOInputsAutoLogged gyroInputs;
+
+    private Hood hood;
 
     private final AccelerometerIO accelerometerIO = createAccelerometerIO();
     private final AccelerometerIOInputsAutoLogged accelerometerInputs = new AccelerometerIOInputsAutoLogged();
@@ -99,6 +102,7 @@ public class Drive extends CommandBasedSubsystem {
     private final FollowTrajectoryController followTrajectoryController = new FollowTrajectoryController();
     private @Nullable Supplier<ChassisSpeeds> chassisSpeedsSetpointSupplier = null;
 
+    @Getter
     private final DriveConstrainer constrainer = new DriveConstrainer();
 
     /**
@@ -121,6 +125,7 @@ public class Drive extends CommandBasedSubsystem {
     public static synchronized Drive get() {
         if (instance == null) {
             instance = new Drive();
+            instance.init();
         }
 
         return instance;
@@ -130,6 +135,18 @@ public class Drive extends CommandBasedSubsystem {
         if (instance != null) {
             Util.error("Duplicate Drive created");
         }
+    }
+
+    private void init() {
+        robotState = RobotState.get();
+        operatorDashboard = OperatorDashboard.get();
+        controller = Controller.get();
+        shootingKinematics = ShootingKinematics.get();
+
+        gyroIO = createGyroIO();
+        gyroInputs = new GyroIOInputsAutoLogged();
+
+        hood = Hood.get();
 
         var moduleIO = createModuleIO();
         // Array is currently four nulls, so length works just fine
@@ -404,6 +421,9 @@ public class Drive extends CommandBasedSubsystem {
                         : headingOverrideFeedforwardSupplier.apply(wantedFieldSpeeds, wantedAcceleration);
                 if (feedforward.isPresent()) {
                     wantedFieldSpeeds.omegaRadiansPerSecond += feedforward.getAsDouble();
+                    Translation2d fuelExitTranslationRobotRelative = ShootingKinematics.fuelExitTranslation.apply(hood.getPositionRad()).toTranslation2d();
+                    Translation2d fieldRelative = fuelExitTranslationRobotRelative.rotateBy(robotState.getRotation());
+                    Logger.recordOutput("Temp/robotToShooterFieldRelative", fieldRelative);
                 }
             } else {
                 headingOverrideController.reset();
