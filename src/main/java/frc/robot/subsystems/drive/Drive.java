@@ -71,7 +71,7 @@ public class Drive extends CommandBasedSubsystem {
 
     public enum State {
         STOP,
-        FORCE_STOP,
+        ACTUALLY_STOP,
         JOYSTICK_DRIVE,
         MOVE_TO,
         FOLLOW_TRAJECTORY,
@@ -329,7 +329,7 @@ public class Drive extends CommandBasedSubsystem {
 
     private State evaluateStateMachine(State wantedState) {
         // Stop moving when idle or disabled
-        if (wantedState == State.FORCE_STOP || DriverStation.isDisabled()) {
+        if (wantedState == State.ACTUALLY_STOP || DriverStation.isDisabled()) {
             // Only attempt to stop with X when enabled
             if (DriverStation.isEnabled() && stopWithX) {
                 // Create a list of headings where each heading points from the center
@@ -414,7 +414,7 @@ public class Drive extends CommandBasedSubsystem {
 
             if (wantedFieldSpeeds.vxMetersPerSecond == 0.0 && wantedFieldSpeeds.vyMetersPerSecond == 0.0 && wantedFieldSpeeds.omegaRadiansPerSecond == 0.0) {
                 // Re-evaluate state machine to stop - this handles stopping with X in a nice way
-                return evaluateStateMachine(State.FORCE_STOP);
+                return evaluateStateMachine(State.ACTUALLY_STOP);
             }
 
             ChassisSpeeds wantedRobotSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(wantedFieldSpeeds, robotState.getRotation());
