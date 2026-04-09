@@ -5,12 +5,14 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.commands.CommandsExt;
+import frc.robot.subsystems.gamepiecevision.GamePieceVision;
 import frc.robot.subsystems.superintake.Superintake;
 import frc.robot.subsystems.superstructure.Superstructure;
 
 import static frc.robot.subsystems.drive.DriveConstants.defaultMoveToConstraints;
 
 public class OrbitNewAuto extends Auto {
+    private static final GamePieceVision gamePieceVision = GamePieceVision.get();
     private static final Pose2d starting = ChoreoTraj.OrbitOutpostNew.initialPoseBlue();
 
     public OrbitNewAuto(boolean flipY) {
@@ -49,20 +51,44 @@ public class OrbitNewAuto extends Auto {
                 AutoHelpers.trajectory(ChoreoTraj.OrbitOutpostNew$4, flipY),
 
                 // follow intake path
-                superintake.setGoal(Superintake.Goal.INTAKE).until(() -> true),
-                AutoHelpers.trajectory(ChoreoTraj.OrbitOutpostNew$5, flipY),
+                Commands.either(
+                        CommandsExt.eagerSequence(
+                                superintake.setGoal(Superintake.Goal.INTAKE).until(() -> true),
+                                AutoHelpers.trajectory(ChoreoTraj.OrbitOutpostNew$6, flipY)
+                        ),
+                        CommandsExt.eagerSequence(
+                                superintake.setGoal(Superintake.Goal.INTAKE).until(() -> true),
+                                AutoHelpers.trajectory(ChoreoTraj.OrbitOutpostNew$6, flipY)
+                        ).until(
+                                () -> gamePieceVision.getBestTarget().isPresent()
+                        ).andThen(
+                                AutoHelpers.intermediateWaypoint(
+                                        () -> new Pose2d(
+                                                gamePieceVision.getBestTarget().get().getX(),
+                                                gamePieceVision.getBestTarget().get().getY(),
+                                                gamePieceVision.getBestTarget().get().getAngle()
+                                        ),
+                                        defaultMoveToConstraints,
+                                        false
+                                )
+                        ),
+                        gamePieceVision::anyCamerasDisconnected
+                ),
 
-                // go to entrance to trench
+                // move to entrance of trench
+                AutoHelpers.trajectory(ChoreoTraj.OrbitOutpostNew$6, flipY),
+
+                // make sure at entrance of trench
                 superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
                 AutoHelpers.checkWaypoint(
                         flipY
-                                ? () -> ChoreoAllianceFlipUtil.getMirrorY().flip(ChoreoTraj.OrbitOutpostNew$5.endPoseBlue())
-                                : ChoreoTraj.OrbitOutpostNew$5::endPoseBlue,
+                                ? () -> ChoreoAllianceFlipUtil.getMirrorY().flip(ChoreoTraj.OrbitOutpostNew$6.endPoseBlue())
+                                : ChoreoTraj.OrbitOutpostNew$7::endPoseBlue,
                         defaultMoveToConstraints,
                         false),
 
                 // go through trench and shoot
-                AutoHelpers.trajectory(ChoreoTraj.OrbitOutpostNew$6, flipY),
+                AutoHelpers.trajectory(ChoreoTraj.OrbitOutpostNew$7, flipY),
                 superstructure.setGoal(Superstructure.Goal.SHOOT).until(() -> true),
                 Commands.parallel(
                         superintake.intakeShootAlternate(),
