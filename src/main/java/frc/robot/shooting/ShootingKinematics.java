@@ -433,7 +433,7 @@ public class ShootingKinematics implements Periodic {
 
     @RequiredArgsConstructor
     private enum PhaseDelay {
-        Shooter(new LoggedTunableNumber("ShootingKinematics/ShooterPhaseDelay", 0.15)),
+        Shooter(new LoggedTunableNumber("ShootingKinematics/ShooterPhaseDelay", 0.3)),
         Drivebase(new LoggedTunableNumber("ShootingKinematics/DrivebasePhaseDelay", 0.03)),
         None(null),
         ;
