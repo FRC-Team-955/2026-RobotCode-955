@@ -61,6 +61,7 @@ public class ShootingKinematics implements Periodic {
         //velocityToRPMMap.put(9.09, 2449);
         //velocityToRPMMap.put(10.08, 2742.7);
 
+        // Manually Tuned Mk2
         //velocityToRPMMap.put(6.99, 1740.6);
         //velocityToRPMMap.put(7.24, 1830);
         //velocityToRPMMap.put(7.54, 1936);
@@ -76,8 +77,8 @@ public class ShootingKinematics implements Periodic {
 
         //velocityToRPM = (x) -> velocityToRPMMap.get(x);
 
-        // https://www.desmos.com/calculator/ciizgjkq9g
-        velocityToRPM = (x) -> 316.2111 * x - 445.11984;
+        // https://www.desmos.com/calculator/qruuow8ohv
+        velocityToRPM = (x) -> 316.01807 * x - 456.30162;
     }
 
     private static final RobotState robotState = RobotState.get();
