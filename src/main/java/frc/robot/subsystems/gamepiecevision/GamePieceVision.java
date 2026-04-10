@@ -80,6 +80,8 @@ public class GamePieceVision implements Periodic {
             return Stream.empty();
         }
         Pose2d pose = poseOpt.get();
+
+        // robotState.setAllClusters(Optional.of(poseOpt.get()));
         return Arrays.stream(inputs.clusters)
                 .map(t -> pose.transformBy(t).getTranslation());
     }
@@ -88,6 +90,8 @@ public class GamePieceVision implements Periodic {
         if (!inputs.connected || inputs.clusters.length == 0) {
             return Optional.empty();
         }
+        robotState.setBestClusters(robotState.getPoseAtTimestamp(inputs.timestamp)
+                .map(pose -> pose.transformBy(inputs.clusters[0])));
         return robotState.getPoseAtTimestamp(inputs.timestamp)
                 .map(pose -> pose.transformBy(inputs.clusters[0]).getTranslation());
     }

@@ -53,6 +53,11 @@ public class RobotState implements Periodic {
     private final FieldObject2d moveToGoalObject = field2d.getObject("MoveTo");
 
     @Setter
+    private Optional<Pose2d> bestClusters = Optional.empty();
+    private final FieldObject2d bestClustersObject = field2d.getObject("BestClusters");
+
+
+    @Setter
     private Optional<Pose2d[]> trajectory = Optional.empty();
     private final FieldObject2d trajectoryObject = field2d.getObject("Trajectory");
 
@@ -219,6 +224,7 @@ public class RobotState implements Periodic {
 
         // Reset field objects for drive controllers so they only show up if they are explicitly set
         moveToGoal = Optional.empty();
+        bestClusters = Optional.empty();
         trajectory = Optional.empty();
         trajectorySample = Optional.empty();
     }
@@ -241,6 +247,10 @@ public class RobotState implements Periodic {
         trajectorySample.ifPresentOrElse(
                 trajectorySampleObject::setPose,
                 trajectorySampleObject::setPoses
+        );
+        bestClusters.ifPresentOrElse(
+                bestClustersObject::setPose,
+                bestClustersObject::setPoses
         );
         for (int i = 0; i < acceptedPoseObjects.length; i++) {
             if (i < acceptedPoses.size()) {
