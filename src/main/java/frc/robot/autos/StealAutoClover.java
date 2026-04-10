@@ -43,9 +43,13 @@ public class StealAutoClover extends Auto {
                         .withAiming().withConstraints(shootingConstraints)
                 , AutoHelpers.trajectory(ChoreoTraj.Clover_Auto$7)
                         .withAiming().withConstraints(shootingConstraints),
+                Commands.parallel(
+                        superintake.intakeShootAlternate(),
+                        drive.stop().withAiming()
+                )
                 //AutoHelpers.checkWaypoint(ChoreoTraj.Clover_Auto$6::endPoseBlue,
                 //        shootingConstraints, true),
-                Commands.waitSeconds(5.0)
+                //   Commands.waitSeconds(5.0)
                 // superstructure.setGoal(Superstructure.Goal.SHOOT).until(() -> true)
 
 
