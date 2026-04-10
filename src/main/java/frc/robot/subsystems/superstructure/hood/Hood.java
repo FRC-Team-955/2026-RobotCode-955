@@ -99,7 +99,7 @@ public class Hood implements Periodic {
 
         boolean shouldEmergencyStop = emergencyStopDebouncer.calculate(inputs.statorCurrentAmps >= 20);
         if (!emergencyStopped) {
-            if (shouldEmergencyStop || operatorDashboard.hoodEStop.get()) {
+            if ((shouldEmergencyStop || operatorDashboard.hoodEStop.get()) && !BuildConstants.isSim) {
                 io.setVoltageRequest(0.0);
                 io.setNeutralMode(NeutralModeValue.Coast);
                 emergencyStopped = true;
