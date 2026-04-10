@@ -16,7 +16,8 @@ public class FlywheelConstants {
         case REAL, REPLAY -> new LoggedTunablePIDF("Superstructure/Flywheel/Gains")
                 .withS(0.27, StaticFeedforwardSignValue.UseVelocitySign)
                 .withV(0.019)
-                .withP(0.015);
+                .withP(0.02)
+                .withI(0.001);
         case SIM -> new LoggedTunablePIDF("Superstructure/Flywheel/Gains")
                 .withS(0.2, StaticFeedforwardSignValue.UseVelocitySign)
                 .withV(0.019)
