@@ -52,19 +52,18 @@ public class GamePieceVision implements Periodic {
 
     @Override
     public void periodicAfterCommands() {
-
         var robotPose = new Pose3d(robotState.getPose());
         Logger.recordOutput(
                 "GamePieceVision/CameraPoses",
                 robotPose.transformBy(robotToCamera)
         );
         Logger.recordOutput("GamePieceVision/BestTarget", new Pose2d(getBestTarget().orElse(new Translation2d()), new Rotation2d()));
-        Logger.recordOutput(
-                "GamePieceVision/AllTargets",
-                getAllTargets()
-                        .map(t -> new Pose2d(t, new Rotation2d()))
-                        .toArray(Pose2d[]::new)
-        );
+        Pose2d[] allTargets = getAllTargets()
+                .map(t -> new Pose2d(t, new Rotation2d()))
+                .toArray(Pose2d[]::new);
+        Logger.recordOutput("GamePieceVision/AllTargets", allTargets);
+
+        robotState.setFuel(allTargets);
     }
 
     public boolean anyCamerasDisconnected() {
@@ -81,9 +80,6 @@ public class GamePieceVision implements Periodic {
         }
         Pose2d pose = poseOpt.get();
 
-        robotState.setAllClusters(Optional.of(Arrays.stream(inputs.clusters)
-                .map(pose::transformBy).toArray(Pose2d[]::new)));
-        // robotState.setAllClusters(Optional.of(poseOpt.get()));
         return Arrays.stream(inputs.clusters)
                 .map(t -> pose.transformBy(t).getTranslation());
     }

@@ -52,12 +52,6 @@ public class RobotState implements Periodic {
     private Optional<Pose2d> moveToGoal = Optional.empty();
     private final FieldObject2d moveToGoalObject = field2d.getObject("MoveTo");
 
-
-    @Setter
-    private Optional<Pose2d[]> allClusters = Optional.empty();
-    private final FieldObject2d allClustersObject = field2d.getObject("AllClusters");
-
-
     @Setter
     private Optional<Pose2d[]> trajectory = Optional.empty();
     private final FieldObject2d trajectoryObject = field2d.getObject("Trajectory");
@@ -76,6 +70,12 @@ public class RobotState implements Periodic {
     private List<Pose3d> rejectedPoses = List.of();
     private final FieldObject2d[] rejectedPoseObjects = IntStream.range(0, 3)
             .mapToObj(n -> field2d.getObject("RejectedPose" + n))
+            .toArray(FieldObject2d[]::new);
+
+    @Setter
+    private Pose2d[] fuel = new Pose2d[0];
+    private final FieldObject2d[] fuelObjects = IntStream.range(0, 3)
+            .mapToObj(n -> field2d.getObject("Fuel" + n))
             .toArray(FieldObject2d[]::new);
 
     private final FieldObject2d[] uncertaintyRangeObjects = IntStream.range(0, 5)
@@ -225,7 +225,6 @@ public class RobotState implements Periodic {
 
         // Reset field objects for drive controllers so they only show up if they are explicitly set
         moveToGoal = Optional.empty();
-        allClusters = Optional.empty();
         trajectory = Optional.empty();
         trajectorySample = Optional.empty();
     }
@@ -249,10 +248,6 @@ public class RobotState implements Periodic {
                 trajectorySampleObject::setPose,
                 trajectorySampleObject::setPoses
         );
-        allClusters.ifPresentOrElse(
-                allClustersObject::setPoses,
-                allClustersObject::setPoses
-        );
         for (int i = 0; i < acceptedPoseObjects.length; i++) {
             if (i < acceptedPoses.size()) {
                 acceptedPoseObjects[i].setPose(acceptedPoses.get(i).toPose2d());
@@ -265,6 +260,13 @@ public class RobotState implements Periodic {
                 rejectedPoseObjects[i].setPose(rejectedPoses.get(i).toPose2d());
             } else {
                 rejectedPoseObjects[i].setPoses();
+            }
+        }
+        for (int i = 0; i < fuelObjects.length; i++) {
+            if (i < fuel.length) {
+                fuelObjects[i].setPose(fuel[i]);
+            } else {
+                fuelObjects[i].setPoses();
             }
         }
         SmartDashboard.putData("Field2d", field2d);
