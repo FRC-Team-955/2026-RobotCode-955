@@ -101,6 +101,13 @@ public class LEDs implements Periodic {
     }
 
     private LEDPattern getDisabledPattern() {
+        if (aprilTagVision.anyCamerasDisconnected()
+                || gamePieceVision.anyCamerasDisconnected()
+                || superstructure.hood.isEmergencyStopped()
+                || superintake.intakePivot.isEmergencyStopped()) {
+            return LEDPatterns.somethingIsReallyWrong;
+        }
+
         if (operatorDashboard.hoodNotHomedAlert.get()) {
             return LEDPatterns.hoodNotHomed;
         }
