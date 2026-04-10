@@ -5,19 +5,19 @@ public class ShootingRegression {
     public static double calculateVelocityMetersPerSec(double distanceMeters, double radialRobotVelocityMetersPerSec) {
         double x = distanceMeters;
         double y = radialRobotVelocityMetersPerSec;
-        return 6.282663302159447 + 0.5091271130265288 * x + -0.11454039440349108 * y + -0.06804902496593504 * x * y + 0.010544794182449461 * x * x + 0.04818112247557146 * y * y;
+        return 6.162422694628998 + 0.6139309976345089 * x + -0.12931130971633348 * y + -0.056731742743621805 * x * y + 0.003401560035435977 * x * x + 0.04873536516997791 * y * y;
     }
 
     /** Calculate shot angle **from the horizontal**. Note that hood angle is from the vertical. */
     public static double calculateAngleRad(double distanceMeters, double radialRobotVelocityMetersPerSec) {
         double x = distanceMeters;
         double y = radialRobotVelocityMetersPerSec;
-        return 1.4912613357422573 + -0.12494397516527446 * x + 0.14233501228838147 * y + -0.009386287342371593 * x * y + 0.006476574417958633 * x * x + 0.004109052291184407 * y * y;
+        return 1.4771204387126946 + -0.11268300359069991 * x + 0.1410780162774558 * y + -0.00912983150602111 * x * y + 0.006616807433751612 * x * x + 0.0037242943906749884 * y * y;
     }
 
     public static double calculateToFSeconds(double distanceMeters, double radialRobotVelocityMetersPerSec) {
         double x = distanceMeters;
         double y = radialRobotVelocityMetersPerSec;
-        return 0.9040038953039877 + 0.07479856351867331 * x + 0.0019580249125227267 * y + -0.00019702549326949814 * x * y + -0.002408797199675128 * x * x + 1.1775954863457727e-06 * y * y;
+        return 0.8775042041528127 + 0.0961106609750475 * x + 0.0018855195256620716 * y + -0.00016175648360938766 * x * y + -0.002352978273061579 * x * x + -4.466105669287401e-06 * y * y;
     }
 }

@@ -71,9 +71,8 @@ def hub_z(x):
 dist_to_entry_angle_data = np.array([
     [0.7, deg_to_rad(-80)],
     [1.2, deg_to_rad(-63)],
-    [4.2, deg_to_rad(-53)],
-    [6.2, deg_to_rad(-48.4)],
-    [8, deg_to_rad(-47)],
+    [4.2, deg_to_rad(-57)],
+    [8, deg_to_rad(-53)],
 ])
 
 def get_wanted_entry_angle(d, rv):
