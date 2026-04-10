@@ -304,7 +304,8 @@ public class AutoHelpers {
     //}
 
     private static final DriveConstraints bumpConstraints = defaultMoveToConstraints
-            .withMaxLinearVelocityMetersPerSec(new LoggedTunableNumber("AutoHelpers/Bump/MaxLinearVelocity", 3));
+            .withMaxLinearVelocityMetersPerSec(new LoggedTunableNumber("AutoHelpers/Bump/MaxLinearVelocity", 3))
+            .withMaxAngularAccelerationRadPerSecPerSec(new LoggedTunableNumber("AutoHelpers/Bump/MaxAngularAcceleration", 10.0));
     private static double bumpStartX = 5.71;
     private static double bumpEndX = 2.6;
 
@@ -330,7 +331,7 @@ public class AutoHelpers {
 
 
     public static Command goOverOutpostSideBump() {
-        double y = 3.17;
+        double y = 2.5;
         Rotation2d rotation = Rotation2d.fromDegrees(-135);
         return CommandsExt.eagerSequence(
                 // go to the start of the bump

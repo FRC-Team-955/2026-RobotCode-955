@@ -57,6 +57,7 @@ public class AutoManager {
         autoChooser.addOption("Passive depot", new PassiveAuto(true));
         autoChooser.addOption("Aggressive outpost", new AggressiveAuto(false));
         autoChooser.addOption("Aggressive depot", new AggressiveAuto(true));
+        autoChooser.addOption("Aggressive outpost bump", new AggressiveBumpAuto(false));
 
         robotState.setAutoStartPoseSupplier(this::getSelectedAutoStartingPose);
 
