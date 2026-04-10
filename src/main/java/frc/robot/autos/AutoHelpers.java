@@ -310,7 +310,7 @@ public class AutoHelpers {
     private static double bumpEndX = 2.6;
 
     public static Command goOverDepotSideBump() {
-        double y = 4.9;
+        double y = 5.5;
         Rotation2d rotation = Rotation2d.fromDegrees(135);
         return CommandsExt.eagerSequence(
                 // go to the start of the bump

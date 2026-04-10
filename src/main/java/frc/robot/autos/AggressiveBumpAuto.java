@@ -32,13 +32,15 @@ public class AggressiveBumpAuto extends Auto {
                 superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
                 AutoHelpers.checkWaypoint(
                         flipY
-                                ? () -> ChoreoAllianceFlipUtil.getMirrorY().flip(ChoreoTraj.AggressiveOutpost$2.endPoseBlue())
+                                ? () -> ChoreoAllianceFlipUtil.getMirrorY().flip(ChoreoTraj.AggressiveOutpostBump$1.endPoseBlue())
                                 : ChoreoTraj.AggressiveOutpostBump$1::endPoseBlue,
                         defaultMoveToConstraints,
                         false),
 
                 // go over the bump
-                AutoHelpers.goOverOutpostSideBump(),
+                flipY
+                        ? AutoHelpers.goOverDepotSideBump()
+                        : AutoHelpers.goOverOutpostSideBump(),
 
                 // shoot
                 superstructure.setGoal(Superstructure.Goal.SHOOT).until(() -> true),
@@ -64,14 +66,16 @@ public class AggressiveBumpAuto extends Auto {
                 superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
                 AutoHelpers.checkWaypoint(
                         flipY
-                                ? () -> ChoreoAllianceFlipUtil.getMirrorY().flip(ChoreoTraj.AggressiveOutpost$7.endPoseBlue())
+                                ? () -> ChoreoAllianceFlipUtil.getMirrorY().flip(ChoreoTraj.AggressiveOutpostBump$7.endPoseBlue())
                                 : ChoreoTraj.AggressiveOutpostBump$7::endPoseBlue,
                         defaultMoveToConstraints,
                         false
                 ),
 
                 // go over the bump
-                AutoHelpers.goOverOutpostSideBump(),
+                flipY
+                        ? AutoHelpers.goOverDepotSideBump()
+                        : AutoHelpers.goOverOutpostSideBump(),
 
                 //shoot
                 superstructure.setGoal(Superstructure.Goal.SHOOT).until(() -> true),
