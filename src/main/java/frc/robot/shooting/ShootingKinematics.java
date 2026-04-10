@@ -96,6 +96,7 @@ public class ShootingKinematics implements Periodic {
 
     private final Debouncer velocityMetDebouncer = new Debouncer(0.15, Debouncer.DebounceType.kFalling);
     private final Debouncer headingVelocityDebouncer = new Debouncer(0.10, Debouncer.DebounceType.kFalling);
+    private final Debouncer passDebouncer = new Debouncer(0.5, Debouncer.DebounceType.kFalling);
 
     private ShootingParameters noPhaseDelayParameters = new ShootingParameters(
             0.0,
@@ -221,6 +222,9 @@ public class ShootingKinematics implements Periodic {
         Logger.recordOutput("ShootingKinematics/UncertaintyMet", uncertaintyMet);
 
         shootingParametersMet = shiftMet && headingMet && headingVelocityMet && velocityMet && angleMet && uncertaintyMet;
+        if (noPhaseDelayParameters.isPass()) {
+            shootingParametersMet = passDebouncer.calculate(shootingParametersMet);
+        }
         Logger.recordOutput("ShootingKinematics/ShootingParametersMet", shootingParametersMet);
 
         Logger.recordOutput("ShootingKinematics/Drive/VelocityCompensation", rotationAboutTargetRadiansPerSecForDrivebase(drive.getConstrainer().getWantedLinearSpeed()));
