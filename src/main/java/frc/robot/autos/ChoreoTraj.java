@@ -206,9 +206,9 @@ public record ChoreoTraj(
     public static final ChoreoTraj Clover_Auto = new ChoreoTraj(
         "Clover_Auto",
         OptionalInt.empty(),
-        6.37621,
+        7.11058,
         new Pose2d(3.52, 4.42, Rotation2d.fromRadians(3.14159)),
-        new Pose2d(0.6, 5.8, Rotation2d.fromRadians(2.79253))
+        new Pose2d(0.67, 6.5, Rotation2d.fromRadians(2.35619))
     );
     public static final ChoreoTraj Clover_Auto$0 = new ChoreoTraj(
         "Clover_Auto",
@@ -234,30 +234,37 @@ public record ChoreoTraj(
     public static final ChoreoTraj Clover_Auto$3 = new ChoreoTraj(
         "Clover_Auto",
         OptionalInt.of(3),
-        2.4458699999999998,
+        2.4458800000000003,
         new Pose2d(5.95, 5.4, Rotation2d.fromRadians(-2.96706)),
         new Pose2d(6, 5.28, Rotation2d.fromRadians(-3.05433))
     );
     public static final ChoreoTraj Clover_Auto$4 = new ChoreoTraj(
         "Clover_Auto",
         OptionalInt.of(4),
-        1.0015600000000004,
+        1.0015599999999996,
         new Pose2d(6, 5.28, Rotation2d.fromRadians(-3.05433)),
         new Pose2d(3.25, 5.5, Rotation2d.fromRadians(3.14159))
     );
     public static final ChoreoTraj Clover_Auto$5 = new ChoreoTraj(
         "Clover_Auto",
         OptionalInt.of(5),
-        0.10336999999999996,
+        0.10333000000000059,
         new Pose2d(3.25, 5.5, Rotation2d.fromRadians(3.14159)),
-        new Pose2d(2.9, 5.5, Rotation2d.fromRadians(3.04691))
+        new Pose2d(2.9, 5.5, Rotation2d.fromRadians(3.05801))
     );
     public static final ChoreoTraj Clover_Auto$6 = new ChoreoTraj(
         "Clover_Auto",
         OptionalInt.of(6),
-        0.8353200000000003,
-        new Pose2d(2.9, 5.5, Rotation2d.fromRadians(3.04691)),
-        new Pose2d(0.6, 5.8, Rotation2d.fromRadians(2.79253))
+        0.6850199999999997,
+        new Pose2d(2.9, 5.5, Rotation2d.fromRadians(3.05801)),
+        new Pose2d(0.65, 5.8, Rotation2d.fromRadians(2.79253))
+    );
+    public static final ChoreoTraj Clover_Auto$7 = new ChoreoTraj(
+        "Clover_Auto",
+        OptionalInt.of(7),
+        0.8846999999999996,
+        new Pose2d(0.65, 5.8, Rotation2d.fromRadians(2.79253)),
+        new Pose2d(0.67, 6.5, Rotation2d.fromRadians(2.35619))
     );
     public static final ChoreoTraj OrbitDepot = new ChoreoTraj(
         "OrbitDepot",
@@ -460,6 +467,7 @@ public record ChoreoTraj(
         Map.entry("Clover_Auto$4", Clover_Auto$4),
         Map.entry("Clover_Auto$5", Clover_Auto$5),
         Map.entry("Clover_Auto$6", Clover_Auto$6),
+        Map.entry("Clover_Auto$7", Clover_Auto$7),
         Map.entry("OrbitDepot", OrbitDepot),
         Map.entry("OrbitDepotTilted", OrbitDepotTilted),
         Map.entry("OrbitOutpost", OrbitOutpost),

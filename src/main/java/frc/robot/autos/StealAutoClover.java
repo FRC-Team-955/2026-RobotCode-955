@@ -28,8 +28,8 @@ public class StealAutoClover extends Auto {
                 Commands.waitSeconds(2.0),
 
 
-                AutoHelpers.trajectory(ChoreoTraj.Clover_Auto$1)
-                , AutoHelpers.trajectory(ChoreoTraj.Clover_Auto$2),
+                AutoHelpers.trajectory(ChoreoTraj.Clover_Auto$1),
+                AutoHelpers.trajectory(ChoreoTraj.Clover_Auto$2),
                 AutoHelpers.checkWaypoint(ChoreoTraj.Clover_Auto$2::endPoseBlue, defaultMoveToConstraints, false)
                 , Commands.race(superintake.setGoal(Superintake.Goal.INTAKE),
                         AutoHelpers.trajectory(ChoreoTraj.Clover_Auto$3)),
@@ -40,10 +40,13 @@ public class StealAutoClover extends Auto {
                 AutoHelpers.trajectory(ChoreoTraj.Clover_Auto$5).withAiming().withConstraints(shootingConstraints),
                 superintake.setGoal(Superintake.Goal.INTAKE).until(() -> true),
                 AutoHelpers.trajectory(ChoreoTraj.Clover_Auto$6)
+                        .withAiming().withConstraints(shootingConstraints)
+                , AutoHelpers.trajectory(ChoreoTraj.Clover_Auto$7)
                         .withAiming().withConstraints(shootingConstraints),
-
-                AutoHelpers.checkWaypoint(ChoreoTraj.Clover_Auto$6::endPoseBlue,
-                        shootingConstraints, false)
+                //AutoHelpers.checkWaypoint(ChoreoTraj.Clover_Auto$6::endPoseBlue,
+                //        shootingConstraints, true),
+                Commands.waitSeconds(5.0)
+                // superstructure.setGoal(Superstructure.Goal.SHOOT).until(() -> true)
 
 
         );
