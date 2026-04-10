@@ -15,6 +15,7 @@ import frc.lib.AllianceFlipUtil;
 import frc.lib.Util;
 import frc.lib.subsystem.Periodic;
 import frc.robot.BuildConstants;
+import frc.robot.RobotState;
 import lombok.Getter;
 import org.littletonrobotics.junction.Logger;
 
@@ -25,12 +26,8 @@ public class Controller implements Periodic {
             ? new ControllerIOXbox(new CommandXboxController(0))
             : new ControllerIOPS5(new CommandPS5Controller(0));
 
-    private final ControllerIO secondaryIo = BuildConstants.isSim
-            ? new ControllerIOXbox(new CommandXboxController(1))
-            : new ControllerIOPS5(new CommandPS5Controller(1));
-    private final Alert primaryDisconnectedAlert =
-            new Alert("Primary Driver controller is not connected!", Alert.AlertType.kError);
-    private final Alert secondaryDisconnectedAlert = new Alert("Secondary Drive controller is not connected!", Alert.AlertType.kError);
+    private final Alert disconnectedAlert = new Alert("Driver controller is not connected!", Alert.AlertType.kError);
+    private static final RobotState robotState = RobotState.get();
 
     @Getter
     private Rotation2d driveLinearDirection = new Rotation2d();
@@ -56,14 +53,12 @@ public class Controller implements Periodic {
             Util.error("Duplicate Controller created");
         }
 
-        System.out.println("Name of controller IO is " +
-                (io.isConnected() ? io.getClass().getSimpleName() : secondaryIo.getClass().getSimpleName()));
+        System.out.println("Name of controller IO is " + io.getClass().getSimpleName());
     }
 
     @Override
     public void periodicBeforeCommands() {
-        primaryDisconnectedAlert.set(!io.isConnected());
-        secondaryDisconnectedAlert.set(!secondaryIo.isConnected());
+        disconnectedAlert.set(!io.isConnected());
 
         updateDriveSetpoint();
     }
@@ -71,11 +66,11 @@ public class Controller implements Periodic {
     private void updateDriveSetpoint() {
         // https://docs.wpilib.org/en/stable/docs/software/basic-programming/coordinate-system.html
         // forward on joystick is negative y - we want positive x for forward
-        double x = io.isConnected() ? -io.getLeftY() : -secondaryIo.getLeftY();
+        double x = -io.getLeftY();
         // right on joystick is positive x - we want negative y for right
-        double y = io.isConnected() ? -io.getLeftX() : -secondaryIo.getLeftX();
+        double y = -io.getLeftX();
         // right on joystick is positive x - we want negative x for right (CCW is positive)
-        double omega = io.isConnected() ? -io.getRightX() : -secondaryIo.getRightX();
+        double omega = -io.getRightX();
 
         if (BuildConstants.isSimOrReplay) {
             Logger.recordOutput("Controller/Drive/Suppliers/X", x);
@@ -171,45 +166,34 @@ public class Controller implements Periodic {
         return Commands.startEnd(
                 () -> {
                     System.out.println("Rumbling controller");
-                    if (io.isConnected()) {
-                        io.setRumble(value);
-                    } else {
-                        secondaryIo.setRumble(value);
-                    }
+                    io.setRumble(value);
                 },
-                () -> {
-                    io.setRumble(0);
-                    secondaryIo.setRumble(0);
-                }
+                () -> io.setRumble(0)
         );
     }
 
-    private Trigger primaryDisconnected() {
-        return new Trigger(() -> !io.isConnected());
-    }
-
     public Trigger a() {
-        return io.a().or(primaryDisconnected().and(secondaryIo.a()));
+        return io.a();
     }
 
     public Trigger b() {
-        return io.b().or(primaryDisconnected().and(secondaryIo.b()));
+        return io.b();
     }
 
     public Trigger x() {
-        return io.x().or(primaryDisconnected().and(secondaryIo.x()));
+        return io.x();
     }
 
     public Trigger y() {
-        return io.y().or(primaryDisconnected().and(secondaryIo.y()));
+        return io.y();
     }
 
     public Trigger leftBumper() {
-        return io.leftBumper().or(primaryDisconnected().and(secondaryIo.leftBumper()));
+        return io.leftBumper();
     }
 
     public Trigger rightBumper() {
-        return io.rightBumper().or(primaryDisconnected().and(secondaryIo.rightBumper()));
+        return io.rightBumper();
     }
 
     /**
@@ -217,7 +201,7 @@ public class Controller implements Periodic {
      * will be true when the axis value is greater than 0.5.
      */
     public Trigger leftTrigger() {
-        return io.leftTrigger().or(primaryDisconnected().and(secondaryIo.leftTrigger()));
+        return io.leftTrigger();
     }
 
     /**
@@ -225,6 +209,6 @@ public class Controller implements Periodic {
      * will be true when the axis value is greater than 0.5.
      */
     public Trigger rightTrigger() {
-        return io.rightTrigger().or(primaryDisconnected().and(secondaryIo.rightTrigger()));
+        return io.rightTrigger();
     }
 }
