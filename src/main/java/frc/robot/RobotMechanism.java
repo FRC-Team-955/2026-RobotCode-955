@@ -36,17 +36,17 @@ public class RobotMechanism implements Periodic {
     public void periodicAfterCommands() {
         Pose3d robotPose = robotState.robotPoseMec();
 
-        Transform3d intakeRollersTransform = superintake.intakeRollers.intakeRollersTransform();
+        Transform3d intakeRollersTransform = superintake.intakeRollers.transform();
 
-        Transform3d intakePivotTransform = superintake.intakePivot.intakePivotTransform();
+        Transform3d intakePivotTransform = superintake.intakePivot.transform();
 
-        Transform3d spindexerTransform = superstructure.spindexer.spindexerTransform();
+        Transform3d spindexerTransform = superstructure.spindexer.transform();
 
-        Transform3d feederTransform = superstructure.feeder.feederTransform();
+        Transform3d feederTransform = superstructure.feeder.transform();
 
-        Transform3d flywheelTransform = superstructure.flywheel.flywheelTransform();
+        Transform3d flywheelTransform = superstructure.flywheel.transform();
 
-        Transform3d hoodTransform = superstructure.hood.hoodTransform();
+        Transform3d hoodTransform = superstructure.hood.transform();
 
         Logger.recordOutput("RobotMechanism/Pose", robotPose);
         Logger.recordOutput(

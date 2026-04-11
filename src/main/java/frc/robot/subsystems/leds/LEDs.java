@@ -103,11 +103,13 @@ public class LEDs implements Periodic {
     }
 
     private LEDPattern getDisabledPattern() {
-        if (aprilTagVision.anyCamerasDisconnected()
-                //|| gamePieceVision.anyCamerasDisconnected()
-                || superstructure.hood.isEmergencyStopped()
-                || superintake.intakePivot.isEmergencyStopped() || superintake.anySuperintakeDisconnected() ||
-                superstructure.anySuperstructureDisconnected() || drive.gyroDisconnected() || drive.moduleDisconnected()) {
+        if (aprilTagVision.anyCamerasDisconnected() ||
+                //gamePieceVision.anyCamerasDisconnected() ||
+                superstructure.hood.isEmergencyStopped() ||
+                superintake.intakePivot.isEmergencyStopped() ||
+                superintake.isAnythingDisconnected() ||
+                superstructure.isAnythingDisconnected() ||
+                drive.isAnythingDisconnected()) {
             return LEDPatterns.somethingIsReallyWrong;
         }
 
@@ -135,12 +137,14 @@ public class LEDs implements Periodic {
     }
 
     private LEDPattern getEnabledPatternFirstHalf() {
-        if (aprilTagVision.anyCamerasDisconnected()
-                //|| gamePieceVision.anyCamerasDisconnected()
-                || superstructure.hood.isEmergencyStopped()
-                || superintake.intakePivot.isEmergencyStopped()
-                || hubShiftTracker.gameDataBrokenAlert.get() || superintake.anySuperintakeDisconnected() ||
-                superstructure.anySuperstructureDisconnected() || drive.gyroDisconnected() || drive.moduleDisconnected()) {
+        if (aprilTagVision.anyCamerasDisconnected() ||
+                //gamePieceVision.anyCamerasDisconnected() ||
+                superstructure.hood.isEmergencyStopped() ||
+                superintake.intakePivot.isEmergencyStopped() ||
+                hubShiftTracker.gameDataBrokenAlert.get() ||
+                superintake.isAnythingDisconnected() ||
+                superstructure.isAnythingDisconnected() ||
+                drive.isAnythingDisconnected()) {
             return LEDPatterns.somethingIsReallyWrong;
         }
 

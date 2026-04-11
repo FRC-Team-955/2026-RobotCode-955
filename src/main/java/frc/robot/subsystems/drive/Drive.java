@@ -611,18 +611,13 @@ public class Drive extends CommandBasedSubsystem {
         }
     }
 
-    public boolean moduleDisconnected() {
+    public boolean isAnythingDisconnected() {
         for (var module : modules) {
             if (module.moduleDisconnected())
                 return true;
         }
-        return false;
-    }
-
-    public boolean gyroDisconnected() {
         return !gyroInputs.connected;
     }
-
 
     public Command fullSpeedCharacterization() {
         Timer timer = new Timer();

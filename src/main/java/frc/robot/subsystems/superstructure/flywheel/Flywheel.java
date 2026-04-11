@@ -109,7 +109,7 @@ public class Flywheel implements Periodic {
         return Units.radiansPerSecondToRotationsPerMinute(inputs.leader.velocityRadPerSec);
     }
 
-    public boolean flywheelDisconnected() {
+    public boolean isDisconnected() {
         return !inputs.leader.connected || !inputs.follower.connected;
     }
 
@@ -117,7 +117,7 @@ public class Flywheel implements Periodic {
         return goal.setpointRPM.getAsDouble();
     }
 
-    public Transform3d flywheelTransform() {
+    public Transform3d transform() {
         return new Transform3d(
                 new Translation3d(Units.inchesToMeters(-6.910046), Units.inchesToMeters(-9.109744), Units.inchesToMeters(12.861381)),
                 new Rotation3d(0.0, 0.0, 0.0)
