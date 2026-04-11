@@ -73,6 +73,11 @@ public class Superstructure extends CommandBasedSubsystem {
         return startIdle(() -> this.goal = goal);
     }
 
+    public boolean anySuperstructureDisconnected() {
+        return hood.hoodDisconnected() || flywheel.flywheelDisconnected()
+                || spindexer.spindexerDisconnected() || feeder.feederDisconnected();
+    }
+
     public Command setGoalHomeHood() {
         return CommandsExt.eagerSequence(
                 runOnce(() -> this.goal = Goal.HOME_HOOD),
@@ -182,6 +187,9 @@ public class Superstructure extends CommandBasedSubsystem {
                 hood.setGoal(Hood.Goal.STOW);
             }
         }
+        //if (Timer.getTimestamp() - lastStartedShot > 1.0) {
+        //    flywheel.setGoal(flywheel.getGoal());
+        //}
 
         if (BuildConstants.isSimOrReplay)
             Logger.recordOutput("Superstructure/LastStartedShot", lastStartedShot);

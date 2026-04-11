@@ -193,6 +193,10 @@ public class IntakePivot implements Periodic {
         operatorDashboard.intakePivotNotHomedAlert.set(false);
     }
 
+    public boolean intakePivotDisconnected() {
+        return !inputs.connected;
+    }
+
     public Transform3d intakePivotTransform() {
         return new Transform3d(
                 new Translation3d(Units.inchesToMeters(10.0), 0.0, Units.inchesToMeters(6.25)),

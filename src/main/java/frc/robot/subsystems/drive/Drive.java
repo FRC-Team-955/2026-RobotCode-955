@@ -68,6 +68,8 @@ public class Drive extends CommandBasedSubsystem {
 
     private final Debouncer gyroDebouncer = new Debouncer(2.0, Debouncer.DebounceType.kRising);
     private boolean gyroDebounced = false;
+    //
+    //private boolean wasOnBump = false;
 
     public enum State {
         STOP,
@@ -284,6 +286,19 @@ public class Drive extends CommandBasedSubsystem {
                 accelerationYFilter.calculate(accelerometerInputs.accelerationYMetersPerSecPerSec)
         ).rotateBy(robotState.getRotation());
         robotState.setFilteredAccelerationMetersPerSecPerSec(filteredAccelerationMetersPerSecPerSec);
+        //
+        //boolean isNotOnBump = Math.abs(gyroInputs.orientation.getX()) < Units.degreesToRadians(10.0)
+        //        && Math.abs(gyroInputs.orientation.getY()) < Units.degreesToRadians(10.0);
+        //if (isNotOnBump && wasOnBump) {
+        //    robotState.setPose(new Pose2d(
+        //            measuredChassisSpeedsFieldRelative.vxMetersPerSecond > 0
+        //                    ? FieldConstants.LeftBump.farLeftCorner.getX()
+        //                    : FieldConstants.LeftBump.nearLeftCorner.getX()
+        //            , robotState.getPose().getY(),
+        //            robotState.getRotation()));
+        //
+        //}
+        //wasOnBump = !isNotOnBump;
         if (BuildConstants.isSimOrReplay)
             Logger.recordOutput("Drive/FilteredAccelerationMetersPerSecPerSec", filteredAccelerationMetersPerSecPerSec);
 
@@ -595,6 +610,19 @@ public class Drive extends CommandBasedSubsystem {
             module.runCharacterization(volts);
         }
     }
+
+    public boolean moduleDisconnected() {
+        for (var module : modules) {
+            if (module.moduleDisconnected())
+                return true;
+        }
+        return false;
+    }
+
+    public boolean gyroDisconnected() {
+        return !gyroInputs.connected;
+    }
+
 
     public Command fullSpeedCharacterization() {
         Timer timer = new Timer();

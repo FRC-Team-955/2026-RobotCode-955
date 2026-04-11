@@ -103,6 +103,11 @@ public class Feeder implements Periodic {
         return inputs.positionRad;
     }
 
+    public boolean feederDisconnected() {
+        return !inputs.connected;
+    }
+
+
     public Transform3d feederTransform() {
         return new Transform3d(
                 new Translation3d(Units.inchesToMeters(-3.451296), Units.inchesToMeters(-5.445256), Units.inchesToMeters(8.430151)),

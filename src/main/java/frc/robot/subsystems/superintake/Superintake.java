@@ -110,4 +110,8 @@ public class Superintake extends CommandBasedSubsystem {
                 setGoal(Goal.SHOOT).withTimeout(1)
         );
     }
+
+    public boolean anySuperintakeDisconnected() {
+        return intakePivot.intakePivotDisconnected() || intakeRollers.intakeRollersDisconnected();
+    }
 }

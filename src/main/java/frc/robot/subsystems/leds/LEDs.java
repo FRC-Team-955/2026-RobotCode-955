@@ -13,6 +13,7 @@ import frc.robot.OperatorDashboard;
 import frc.robot.autos.AutoManager;
 import frc.robot.shooting.ShootingKinematics;
 import frc.robot.subsystems.apriltagvision.AprilTagVision;
+import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.gamepiecevision.GamePieceVision;
 import frc.robot.subsystems.superintake.Superintake;
 import frc.robot.subsystems.superstructure.Superstructure;
@@ -32,6 +33,7 @@ public class LEDs implements Periodic {
     private static final GamePieceVision gamePieceVision = GamePieceVision.get();
     private static final HubShiftTracker hubShiftTracker = HubShiftTracker.get();
 
+    private static final Drive drive = Drive.get();
     private static final Superintake superintake = Superintake.get();
     private static final Superstructure superstructure = Superstructure.get();
 
@@ -104,7 +106,8 @@ public class LEDs implements Periodic {
         if (aprilTagVision.anyCamerasDisconnected()
                 || gamePieceVision.anyCamerasDisconnected()
                 || superstructure.hood.isEmergencyStopped()
-                || superintake.intakePivot.isEmergencyStopped()) {
+                || superintake.intakePivot.isEmergencyStopped() || superintake.anySuperintakeDisconnected() ||
+                superstructure.anySuperstructureDisconnected() || drive.gyroDisconnected() || drive.moduleDisconnected()) {
             return LEDPatterns.somethingIsReallyWrong;
         }
 
@@ -136,7 +139,8 @@ public class LEDs implements Periodic {
                 || gamePieceVision.anyCamerasDisconnected()
                 || superstructure.hood.isEmergencyStopped()
                 || superintake.intakePivot.isEmergencyStopped()
-                || hubShiftTracker.gameDataBrokenAlert.get()) {
+                || hubShiftTracker.gameDataBrokenAlert.get() || superintake.anySuperintakeDisconnected() ||
+                superstructure.anySuperstructureDisconnected() || drive.gyroDisconnected() || drive.moduleDisconnected()) {
             return LEDPatterns.somethingIsReallyWrong;
         }
 

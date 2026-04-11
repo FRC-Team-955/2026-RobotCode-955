@@ -99,6 +99,10 @@ public class Spindexer implements Periodic {
         return inputs.positionRad;
     }
 
+    public boolean spindexerDisconnected() {
+        return !inputs.connected;
+    }
+
     public Transform3d spindexerTransform() {
         return new Transform3d(
                 new Translation3d(0.0, Units.inchesToMeters(1.4), Units.inchesToMeters(12.0)),

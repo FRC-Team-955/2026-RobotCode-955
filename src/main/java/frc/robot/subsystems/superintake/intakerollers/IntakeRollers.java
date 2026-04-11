@@ -101,6 +101,10 @@ public class IntakeRollers implements Periodic {
         return inputs.positionRad;
     }
 
+    public boolean intakeRollersDisconnected() {
+        return !inputs.connected;
+    }
+
     public Transform3d intakeRollersTransform() {
         return new Transform3d(
                 new Translation3d(Units.inchesToMeters(19.75), 0.0, Units.inchesToMeters(8.985680)),

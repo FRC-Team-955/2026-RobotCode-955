@@ -114,6 +114,10 @@ public class Module {
         }
     }
 
+    public boolean moduleDisconnected() {
+        return !inputs.driveConnected || !inputs.turnConnected;
+    }
+
     /**
      * Runs the module with the specified output while controlling to zero degrees.
      */
