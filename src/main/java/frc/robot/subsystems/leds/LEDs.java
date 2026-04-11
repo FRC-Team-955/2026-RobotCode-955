@@ -14,6 +14,7 @@ import frc.robot.autos.AutoManager;
 import frc.robot.shooting.ShootingKinematics;
 import frc.robot.subsystems.apriltagvision.AprilTagVision;
 import frc.robot.subsystems.drive.Drive;
+import frc.robot.subsystems.drive.SparkCANcoderHelper;
 import frc.robot.subsystems.gamepiecevision.GamePieceVision;
 import frc.robot.subsystems.superintake.Superintake;
 import frc.robot.subsystems.superstructure.Superstructure;
@@ -109,7 +110,8 @@ public class LEDs implements Periodic {
                 superintake.intakePivot.isEmergencyStopped() ||
                 superintake.isAnythingDisconnected() ||
                 superstructure.isAnythingDisconnected() ||
-                drive.isAnythingDisconnected()) {
+                drive.isAnythingDisconnected() ||
+                SparkCANcoderHelper.isAnyResetFailed()) {
             return LEDPatterns.somethingIsReallyWrong;
         }
 
@@ -144,7 +146,8 @@ public class LEDs implements Periodic {
                 hubShiftTracker.gameDataBrokenAlert.get() ||
                 superintake.isAnythingDisconnected() ||
                 superstructure.isAnythingDisconnected() ||
-                drive.isAnythingDisconnected()) {
+                drive.isAnythingDisconnected() ||
+                SparkCANcoderHelper.isAnyResetFailed()) {
             return LEDPatterns.somethingIsReallyWrong;
         }
 

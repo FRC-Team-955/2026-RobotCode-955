@@ -7,12 +7,16 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
 import frc.lib.SparkUtil;
 import frc.lib.Util;
+import lombok.Getter;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.ArrayList;
 
 public class SparkCANcoderHelper {
     private static final ArrayList<Integer> resetFailedCANcoderIDs = new ArrayList<>();
+
+    @Getter
+    private static boolean anyResetFailed = false;
 
     public static void resetTurnSpark(
             RelativeEncoder turnEncoder,
@@ -54,6 +58,7 @@ public class SparkCANcoderHelper {
             Util.error("Drive module with cancoder ID %d GAVE UP setting initial position of turn relative encoder".formatted(cancoderCanID));
             resetFailedCANcoderIDs.add(cancoderCanID);
             Logger.recordOutput("Drive/SparkResetFailedCANcoderIDs", resetFailedCANcoderIDs.stream().mapToInt((val) -> val).toArray());
+            anyResetFailed = true;
         }
     }
 }

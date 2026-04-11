@@ -201,7 +201,10 @@ public class Superstructure extends CommandBasedSubsystem {
     }
 
     public boolean isAnythingDisconnected() {
-        return hood.isDisconnected() || flywheel.isDisconnected()
-                || spindexer.isDisconnected() || feeder.isDisconnected();
+        return hood.isDisconnected() ||
+                flywheel.isDisconnected() ||
+                spindexer.isDisconnected() ||
+                feeder.isDisconnected() ||
+                !inputs.canrangeConnected;
     }
 }
