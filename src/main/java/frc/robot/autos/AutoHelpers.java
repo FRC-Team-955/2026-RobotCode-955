@@ -307,7 +307,7 @@ public class AutoHelpers {
             .withMaxLinearVelocityMetersPerSec(new LoggedTunableNumber("AutoHelpers/Bump/MaxLinearVelocity", 3))
             .withMaxAngularAccelerationRadPerSecPerSec(new LoggedTunableNumber("AutoHelpers/Bump/MaxAngularAcceleration", 10.0));
     private static double bumpStartX = 5.71;
-    private static double bumpEndX = 2.6;
+    private static double bumpEndX = 3.3;
 
     public static Command goOverDepotSideBump() {
         double y = 5.5;
@@ -329,6 +329,44 @@ public class AutoHelpers {
         );
     }
 
+    public static Command goOverDepotSideBump(Boolean reversed) {
+        double y = 5.5;
+        Rotation2d rotation = Rotation2d.fromDegrees(135);
+        if (reversed) {
+            return CommandsExt.eagerSequence(
+                    // go over the bump
+                    AutoHelpers.intermediateWaypoint(() -> new Pose2d(
+                            bumpEndX,
+                            y,
+                            rotation
+                    ), bumpConstraints, false),
+
+                    // go to the start of the bump
+                    AutoHelpers.intermediateWaypoint(() -> new Pose2d(
+                            bumpStartX,
+                            y,
+                            rotation
+                    ), defaultMoveToConstraints, false)
+            );
+        } else {
+            return CommandsExt.eagerSequence(
+                    // go to the start of the bump
+                    AutoHelpers.intermediateWaypoint(() -> new Pose2d(
+                            bumpStartX,
+                            y,
+                            rotation
+                    ), defaultMoveToConstraints, false),
+
+                    // go over the bump
+                    AutoHelpers.intermediateWaypoint(() -> new Pose2d(
+                            bumpEndX,
+                            y,
+                            rotation
+                    ), bumpConstraints, false)
+            );
+        }
+    }
+
 
     public static Command goOverOutpostSideBump() {
         double y = 2.5;
@@ -348,5 +386,43 @@ public class AutoHelpers {
                         rotation
                 ), bumpConstraints, false)
         );
+    }
+
+    public static Command goOverOutpostSideBump(Boolean reversed) {
+        double y = 2.5;
+        Rotation2d rotation = Rotation2d.fromDegrees(-135);
+        if (reversed) {
+            return CommandsExt.eagerSequence(
+                    // go over the bump
+                    AutoHelpers.intermediateWaypoint(() -> new Pose2d(
+                            bumpEndX,
+                            y,
+                            rotation
+                    ), bumpConstraints, false),
+
+                    // go to the start of the bump
+                    AutoHelpers.intermediateWaypoint(() -> new Pose2d(
+                            bumpStartX,
+                            y,
+                            rotation
+                    ), defaultMoveToConstraints, false)
+            );
+        } else {
+            return CommandsExt.eagerSequence(
+                    // go to the start of the bump
+                    AutoHelpers.intermediateWaypoint(() -> new Pose2d(
+                            bumpStartX,
+                            y,
+                            rotation
+                    ), defaultMoveToConstraints, false),
+
+                    // go over the bump
+                    AutoHelpers.intermediateWaypoint(() -> new Pose2d(
+                            bumpEndX,
+                            y,
+                            rotation
+                    ), bumpConstraints, false)
+            );
+        }
     }
 }
