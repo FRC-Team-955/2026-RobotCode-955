@@ -78,6 +78,7 @@ public class ShootingKinematics implements Periodic {
         //velocityToRPM = (x) -> velocityToRPMMap.get(x);
 
         // https://www.desmos.com/calculator/qruuow8ohv
+        //
         velocityToRPM = (x) -> 316.01807 * x - 456.30162 + 30;
     }
 

@@ -85,7 +85,7 @@ public class AprilTagVisionConstants {
                 },
                 // Relatively stable, even at long distance
                 1.5,
-                3.0
+                1.0
         ),
         // HopperCam - OV2311
         //        YellowCam(

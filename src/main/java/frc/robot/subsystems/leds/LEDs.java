@@ -104,7 +104,7 @@ public class LEDs implements Periodic {
 
     private LEDPattern getDisabledPattern() {
         if (aprilTagVision.anyCamerasDisconnected()
-                || gamePieceVision.anyCamerasDisconnected()
+                //|| gamePieceVision.anyCamerasDisconnected()
                 || superstructure.hood.isEmergencyStopped()
                 || superintake.intakePivot.isEmergencyStopped() || superintake.anySuperintakeDisconnected() ||
                 superstructure.anySuperstructureDisconnected() || drive.gyroDisconnected() || drive.moduleDisconnected()) {
@@ -136,7 +136,7 @@ public class LEDs implements Periodic {
 
     private LEDPattern getEnabledPatternFirstHalf() {
         if (aprilTagVision.anyCamerasDisconnected()
-                || gamePieceVision.anyCamerasDisconnected()
+                //|| gamePieceVision.anyCamerasDisconnected()
                 || superstructure.hood.isEmergencyStopped()
                 || superintake.intakePivot.isEmergencyStopped()
                 || hubShiftTracker.gameDataBrokenAlert.get() || superintake.anySuperintakeDisconnected() ||
