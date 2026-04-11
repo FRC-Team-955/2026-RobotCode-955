@@ -53,14 +53,14 @@ public class AutoManager {
         //autoChooser.addOption("Orbit at the outpost 2nd pass", new OrbitAtOutpostSecondAuto());
         //autoChooser.addOption("CandiantOutpostAutolessAgro", new CanadianOutpostAutolessAgro());
         //autoChooser.addOption("I want a turret (Orbit passing at the outpost)", new OrbitPassingOutpostAuto());
+        //autoChooser.addOption("Clover auto", new StealAutoClover());
         autoChooser.addOption("Passive outpost", new PassiveAuto(false));
-        autoChooser.addOption("Clover auto", new StealAutoClover());
         autoChooser.addOption("Passive depot", new PassiveAuto(true));
         autoChooser.addOption("Aggressive outpost", new AggressiveAuto(false));
         autoChooser.addOption("Aggressive depot", new AggressiveAuto(true));
-        autoChooser.addOption("Aggressive outpost bump", new AggressiveBumpAuto(false));
-        autoChooser.addOption("Aggressive depot bump", new AggressiveBumpAuto(true));
-        autoChooser.addOption("Aggressive Outpost Bump Bump", new AggressiveDoubleBumpAuto(false));
+        //autoChooser.addOption("Aggressive outpost bump", new AggressiveBumpAuto(false));
+        //autoChooser.addOption("Aggressive depot bump", new AggressiveBumpAuto(true));
+        //autoChooser.addOption("Aggressive Outpost Bump Bump", new AggressiveDoubleBumpAuto(false));
 
         robotState.setAutoStartPoseSupplier(this::getSelectedAutoStartingPose);
 
