@@ -54,6 +54,7 @@ public class AutoManager {
         //autoChooser.addOption("CandiantOutpostAutolessAgro", new CanadianOutpostAutolessAgro());
         //autoChooser.addOption("I want a turret (Orbit passing at the outpost)", new OrbitPassingOutpostAuto());
         autoChooser.addOption("Passive outpost", new PassiveAuto(false));
+        autoChooser.addOption("Clover auto", new StealAutoClover());
         autoChooser.addOption("Passive depot", new PassiveAuto(true));
         autoChooser.addOption("Aggressive outpost", new AggressiveAuto(false));
         autoChooser.addOption("Aggressive depot", new AggressiveAuto(true));
