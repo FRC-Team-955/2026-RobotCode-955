@@ -73,11 +73,6 @@ public class Superstructure extends CommandBasedSubsystem {
         return startIdle(() -> this.goal = goal);
     }
 
-    public boolean anySuperstructureDisconnected() {
-        return hood.hoodDisconnected() || flywheel.flywheelDisconnected()
-                || spindexer.spindexerDisconnected() || feeder.feederDisconnected();
-    }
-
     public Command setGoalHomeHood() {
         return CommandsExt.eagerSequence(
                 runOnce(() -> this.goal = Goal.HOME_HOOD),
@@ -207,5 +202,13 @@ public class Superstructure extends CommandBasedSubsystem {
                                 new Rotation3d()
                         ))
         );
+    }
+
+    public boolean isAnythingDisconnected() {
+        return hood.isDisconnected() ||
+                flywheel.isDisconnected() ||
+                spindexer.isDisconnected() ||
+                feeder.isDisconnected() ||
+                !inputs.canrangeConnected;
     }
 }

@@ -143,7 +143,7 @@ public class Hood implements Periodic {
         } else {
             double setpointRad = goal.setpointRad.getAsDouble();
             boolean isInTrench = robotState.isInTrench(robotState.getTranslation().
-                    plus(hoodTransform().getTranslation().toTranslation2d()));
+                    plus(transform().getTranslation().toTranslation2d()));
             Logger.recordOutput("Superstructure/Hood/IsInTrench", isInTrench);
             if (isInTrench) {
                 setpointRad = Math.min(setpointRad, maxPositionUnderTrench);
@@ -168,11 +168,11 @@ public class Hood implements Periodic {
         operatorDashboard.hoodNotHomedAlert.set(false);
     }
 
-    public boolean hoodDisconnected() {
+    public boolean isDisconnected() {
         return !inputs.connected;
     }
 
-    public Transform3d hoodTransform() {
+    public Transform3d transform() {
         return new Transform3d(
                 new Translation3d(Units.inchesToMeters(-6.910046), Units.inchesToMeters(-9.109744), Units.inchesToMeters(12.861381)),
                 new Rotation3d(0.0, Units.degreesToRadians(-90.0), Math.PI)

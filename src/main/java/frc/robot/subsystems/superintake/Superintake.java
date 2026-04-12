@@ -111,7 +111,7 @@ public class Superintake extends CommandBasedSubsystem {
         );
     }
 
-    public boolean anySuperintakeDisconnected() {
-        return intakePivot.intakePivotDisconnected() || intakeRollers.intakeRollersDisconnected();
+    public boolean isAnythingDisconnected() {
+        return intakePivot.isDisconnected() || intakeRollers.isDisconnected();
     }
 }
