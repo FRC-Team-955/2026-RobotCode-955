@@ -18,19 +18,6 @@
             },
             "children": [
               {
-                "title": "IntakePivot",
-                "x": 1024.0,
-                "y": 256.0,
-                "width": 256.0,
-                "height": 128.0,
-                "type": "Toggle Switch",
-                "properties": {
-                  "topic": "/Tuning/OperatorDashboard/HomeIntakePivot",
-                  "period": 0.06,
-                  "data_type": "boolean"
-                }
-              },
-              {
                 "title": "Hood",
                 "x": 1024.0,
                 "y": 640.0,
@@ -39,6 +26,19 @@
                 "type": "Toggle Switch",
                 "properties": {
                   "topic": "/Tuning/OperatorDashboard/HomeHood",
+                  "period": 0.06,
+                  "data_type": "boolean"
+                }
+              },
+              {
+                "title": "IntakePivot",
+                "x": 1024.0,
+                "y": 256.0,
+                "width": 256.0,
+                "height": 128.0,
+                "type": "Toggle Switch",
+                "properties": {
+                  "topic": "/Tuning/OperatorDashboard/HomeIntakePivot",
                   "period": 0.06,
                   "data_type": "boolean"
                 }
@@ -135,7 +135,7 @@
             }
           },
           {
-            "title": "Intake",
+            "title": "Intake (0.29 when down, 1.6 when up)",
             "x": 512.0,
             "y": 384.0,
             "width": 384.0,
@@ -174,7 +174,7 @@
             }
           },
           {
-            "title": "Hood",
+            "title": "Hood (0.26 when down, 0.7 when up)",
             "x": 512.0,
             "y": 512.0,
             "width": 384.0,
@@ -297,42 +297,14 @@
             }
           },
           {
-            "title": "photonvision-blue_Port_1182_Output_MJPEG_Server",
-            "x": 1152.0,
-            "y": 512.0,
-            "width": 256.0,
-            "height": 256.0,
-            "type": "Camera Stream",
-            "properties": {
-              "topic": "/CameraPublisher/photonvision-blue_Port_1182_Output_MJPEG_Server",
-              "period": 0.06,
-              "rotation_turns": 0,
-              "fps": 10
-            }
-          },
-          {
             "title": "photonvision-red_Port_1182_Output_MJPEG_Server",
-            "x": 1408.0,
-            "y": 512.0,
-            "width": 256.0,
-            "height": 256.0,
-            "type": "Camera Stream",
-            "properties": {
-              "topic": "/CameraPublisher/photonvision-red_Port_1182_Output_MJPEG_Server",
-              "period": 0.06,
-              "rotation_turns": 0,
-              "fps": 10
-            }
-          },
-          {
-            "title": "photonvision-red_Port_1184_Output_MJPEG_Server",
             "x": 1152.0,
             "y": 0.0,
             "width": 512.0,
             "height": 512.0,
             "type": "Camera Stream",
             "properties": {
-              "topic": "/CameraPublisher/photonvision-red_Port_1184_Output_MJPEG_Server",
+              "topic": "/CameraPublisher/photonvision-red_Port_1182_Output_MJPEG_Server",
               "period": 0.06,
               "rotation_turns": 0,
               "fps": 10
@@ -413,6 +385,60 @@
               "topic": "/FMSInfo/MatchNumber",
               "period": 0.06,
               "data_type": "int"
+            }
+          },
+          {
+            "title": "photonvision-blue_Port_1182_Output_MJPEG_Server",
+            "x": 1152.0,
+            "y": 512.0,
+            "width": 256.0,
+            "height": 256.0,
+            "type": "Camera Stream",
+            "properties": {
+              "topic": "/CameraPublisher/photonvision-blue_Port_1182_Output_MJPEG_Server",
+              "period": 0.06,
+              "rotation_turns": 0,
+              "fps": 10
+            }
+          },
+          {
+            "title": "photonvision-red_Port_1184_Output_MJPEG_Server",
+            "x": 1408.0,
+            "y": 512.0,
+            "width": 256.0,
+            "height": 256.0,
+            "type": "Camera Stream",
+            "properties": {
+              "topic": "/CameraPublisher/photonvision-red_Port_1184_Output_MJPEG_Server",
+              "period": 0.06,
+              "rotation_turns": 0,
+              "fps": 10
+            }
+          },
+          {
+            "title": "PhotonAlerts",
+            "x": 1664.0,
+            "y": 512.0,
+            "width": 256.0,
+            "height": 512.0,
+            "type": "Alerts",
+            "properties": {
+              "topic": "/SmartDashboard/PhotonAlerts",
+              "period": 0.06
+            }
+          },
+          {
+            "title": "photonvision-blue_Port_1184_Output_MJPEG_Server",
+            "x": 896.0,
+            "y": 640.0,
+            "width": 256.0,
+            "height": 256.0,
+            "type": "Camera Stream",
+            "properties": {
+              "topic": "/CameraPublisher/photonvision-blue_Port_1184_Output_MJPEG_Server",
+              "period": 0.06,
+              "rotation_turns": 0,
+              "fps": 10
             }
           }
         ]
@@ -593,20 +619,6 @@
             }
           },
           {
-            "title": "FlywheelSmudgeRPM",
-            "x": 256.0,
-            "y": 0.0,
-            "width": 256.0,
-            "height": 128.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "/Tuning/OperatorDashboard/FlywheelSmudgeRPM",
-              "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": false
-            }
-          },
-          {
             "title": "HoodSmudgeDegrees",
             "x": 256.0,
             "y": 128.0,
@@ -670,20 +682,6 @@
               "topic": "/Tuning/OperatorDashboard/WonAuto",
               "period": 0.06,
               "data_type": "boolean"
-            }
-          },
-          {
-            "title": "VelocityMetersPerSec",
-            "x": 1024.0,
-            "y": 256.0,
-            "width": 256.0,
-            "height": 128.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "/AdvantageKit/RealOutputs/ShootingKinematics/ShootingParameters/VelocityMetersPerSec",
-              "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": false
             }
           },
           {
@@ -838,7 +836,7 @@
           {
             "title": "photonvision-blue_Port_1182_Output_MJPEG_Server",
             "x": 1408.0,
-            "y": 0.0,
+            "y": 256.0,
             "width": 256.0,
             "height": 256.0,
             "type": "Camera Stream",
@@ -927,26 +925,12 @@
           {
             "title": "photonvision-red_Port_1182_Output_MJPEG_Server",
             "x": 1408.0,
-            "y": 256.0,
+            "y": 0.0,
             "width": 256.0,
             "height": 256.0,
             "type": "Camera Stream",
             "properties": {
               "topic": "/CameraPublisher/photonvision-red_Port_1182_Output_MJPEG_Server",
-              "period": 0.06,
-              "rotation_turns": 0,
-              "fps": 10
-            }
-          },
-          {
-            "title": "photonvision-red_Port_1184_Output_MJPEG_Server",
-            "x": 1408.0,
-            "y": 512.0,
-            "width": 256.0,
-            "height": 256.0,
-            "type": "Camera Stream",
-            "properties": {
-              "topic": "/CameraPublisher/photonvision-red_Port_1184_Output_MJPEG_Server",
               "period": 0.06,
               "rotation_turns": 0,
               "fps": 10
@@ -966,20 +950,6 @@
             }
           },
           {
-            "title": "VelocityRPM",
-            "x": 1280.0,
-            "y": 256.0,
-            "width": 128.0,
-            "height": 128.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "/AdvantageKit/RealOutputs/ShootingKinematics/ShootingParameters/VelocityRPM",
-              "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": false
-            }
-          },
-          {
             "title": "BatteryVoltage",
             "x": 256.0,
             "y": 256.0,
@@ -995,6 +965,119 @@
               "divisions": 5,
               "inverted": false,
               "orientation": "horizontal"
+            }
+          },
+          {
+            "title": "XYDist",
+            "x": 1024.0,
+            "y": 256.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/RealOutputs/ShootingKinematics/ShootingParameters/None/XYDist",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "VelocityMetersPerSec",
+            "x": 1152.0,
+            "y": 256.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/RealOutputs/ShootingKinematics/ShootingParameters/None/VelocityMetersPerSec",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "VelocityRPM",
+            "x": 1280.0,
+            "y": 256.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/RealOutputs/ShootingKinematics/ShootingParameters/None/VelocityRPM",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "DisableUncertainty",
+            "x": 1152.0,
+            "y": 384.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Toggle Switch",
+            "properties": {
+              "topic": "/Tuning/OperatorDashboard/DisableUncertainty",
+              "period": 0.06,
+              "data_type": "boolean"
+            }
+          },
+          {
+            "title": "UncertaintyMet",
+            "x": 1024.0,
+            "y": 384.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/AdvantageKit/RealOutputs/ShootingKinematics/UncertaintyMet",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4283215696,
+              "false_color": 4294198070,
+              "true_icon": "None",
+              "false_icon": "None"
+            }
+          },
+          {
+            "title": "FlywheelSmudgeRPM",
+            "x": 256.0,
+            "y": 0.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/Tuning/OperatorDashboard/FlywheelSmudgeRPM",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "photonvision-red_Port_1184_Output_MJPEG_Server",
+            "x": 1408.0,
+            "y": 512.0,
+            "width": 256.0,
+            "height": 256.0,
+            "type": "Camera Stream",
+            "properties": {
+              "topic": "/CameraPublisher/photonvision-red_Port_1184_Output_MJPEG_Server",
+              "period": 0.06,
+              "rotation_turns": 0,
+              "fps": 10
+            }
+          },
+          {
+            "title": "IntakePivotEStop",
+            "x": 896.0,
+            "y": 256.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Toggle Switch",
+            "properties": {
+              "topic": "/Tuning/OperatorDashboard/IntakePivotEStop",
+              "period": 0.06,
+              "data_type": "boolean"
             }
           }
         ]
