@@ -7,16 +7,20 @@ from scipy.linalg import inv
 from scipy.optimize import curve_fit
 from time import time
 
-DEBUG_SHOT = False
+DEBUG_SHOT = True
 DEBUG_SHOT_DISTANCE = 1
 DEBUG_SHOT_ROBOT_RADIAL_VELOCITY = 2
-DEBUG_PASS = False  # DEBUG_SHOT must also be true
 
 DEBUG_DISTANCE_RANGE = True
 DEBUG_SHOT_DISTANCE_RANGE = 6
 
 DEBUG_VELOCITY_RANGE = True
 DEBUG_SHOT_ROBOT_RADIAL_VELOCITY_RANGE = 6
+
+DEBUG_PASS = False  # DEBUG_SHOT must also be true
+
+DEBUG_VARIANCE = True # DEBUG_SHOT must also be true
+DEBUG_VARIANCE_VEL = 0.5 # +/- this value
 
 MAGNUS_EFFECT_ENABLED = False
 
@@ -85,8 +89,8 @@ def get_wanted_entry_angle(d, rv):
 # plt.show()
 
 if DEBUG_SHOT:
-    ax.scatter(-hub_edge_x, hub_edge_z + hub_clearance, c="red")
-    ax.scatter(-hub_edge_x - hub_clearance, hub_edge_z, c="red")
+    ax.scatter(-hub_edge_x, hub_edge_z + hub_clearance, c="tab:red")
+    ax.scatter(-hub_edge_x - hub_clearance, hub_edge_z, c="tab:red")
     ax.plot(
         [
             -hub_edge_x,
@@ -100,7 +104,7 @@ if DEBUG_SHOT:
             hub_base_z,
             hub_edge_z,
         ],
-        c="green"
+        c="tab:green"
     )
 
     # x = np.linspace(-0.6, 0.6, 50)
@@ -440,11 +444,11 @@ def optimize_shot(distance, robot_radial_vel):
     # know that it cannot shoot if it wants to make the shot. However, it's still useful to know
     # when a solution is invalid so that entry angles can be tuned.
     if not (max_angle_allowed > shot_angle > min_angle_allowed):
-        print(f"Found invalid solution")
+        print("Found invalid solution")
         print(f"\tdistance = {distance}, robot_radial_vel = {robot_radial_vel}")
         print(f"\tv = {v}, shot_angle = {shot_angle}")
 
-    if DEBUG_SHOT:
+    if DEBUG_SHOT and not DEBUG_VARIANCE:
         print(f"Found valid solution after {i} iterations")
         print(f"\tdistance = {distance}, robot_radial_vel = {robot_radial_vel}")
         print(f"\tv = {v}, shot_angle = {shot_angle}")
@@ -460,8 +464,16 @@ def optimize_shot(distance, robot_radial_vel):
                 (robot_radial_vel + 5) / (5 * 2),
                 0
             ) if DEBUG_DISTANCE_RANGE or DEBUG_VELOCITY_RANGE else None,
-            label=f"{robot_radial_vel}" if DEBUG_DISTANCE_RANGE or DEBUG_VELOCITY_RANGE else None
+            label=str(float(robot_radial_vel)) if DEBUG_DISTANCE_RANGE or DEBUG_VELOCITY_RANGE else None
         )
+
+    if DEBUG_VARIANCE:
+        _, _, x_full, y_full, z_full = calc_traj(v, shot_angle)
+        ax.plot(x_full, z_full, c=orig_color, label="Original shot")
+        _, _, x_full, y_full, z_full = calc_traj(v + DEBUG_VARIANCE_VEL, shot_angle)
+        ax.plot(x_full, z_full, linestyle="dotted", c=variated_color, label="Variated shot")
+        _, _, x_full, y_full, z_full = calc_traj(v - DEBUG_VARIANCE_VEL, shot_angle)
+        ax.plot(x_full, z_full, linestyle="dotted", c=variated_color, label="Variated shot")
 
     return v, shot_angle, tof, shots_simmed, i
 
@@ -565,12 +577,26 @@ def optimize_pass(distance, robot_radial_vel):
                 (robot_radial_vel + 5) / (5 * 2),
                 0
             ) if DEBUG_DISTANCE_RANGE or DEBUG_VELOCITY_RANGE else None,
-            label=f"{robot_radial_vel}" if DEBUG_DISTANCE_RANGE or DEBUG_VELOCITY_RANGE else None
+            label=str(float(robot_radial_vel)) if DEBUG_DISTANCE_RANGE or DEBUG_VELOCITY_RANGE else None
         )
 
     return v, shots_simmed, i
 
-if DEBUG_SHOT:
+def deduplicate_legend_and_show_plot(sort_numerically=False):
+    # De-duplicate and then show labels
+    # Source - https://stackoverflow.com/a/56253636
+    # Posted by Fons
+    # Retrieved 2026-04-17, License - CC BY-SA 4.0
+    handles, labels = ax.get_legend_handles_labels()
+    unique = [(h, l) for i, (h, l) in enumerate(zip(handles, labels)) if l not in labels[:i]]
+    if sort_numerically:
+        # Sort numerically by label
+        unique.sort(key=lambda l: float(l[1]))
+    ax.legend(*zip(*unique))
+
+    plt.show()
+
+if DEBUG_SHOT and not DEBUG_VARIANCE:
     if DEBUG_PASS:
         f = optimize_pass
     else:
@@ -590,9 +616,22 @@ if DEBUG_SHOT:
 
     # ax.set(ylim=[-2, 2], zlim=[0, hubz + 2], xlabel="X (m)", ylabel="Y (m)", zlabel="Z (m)")
     # ax.set_ylim([0, abs(ax.get_xlim()[0]) + abs(ax.get_xlim()[1])])
-    ax.legend()
 
-    plt.show()
+    deduplicate_legend_and_show_plot(True)
+elif DEBUG_VARIANCE:
+    distance = 5.5
+    
+    get_wanted_entry_angle = lambda d, rv: deg_to_rad(-55.5)
+    orig_color = "tab:blue"
+    variated_color = "tab:cyan"
+    optimize_shot(distance, 0.0)
+    
+    get_wanted_entry_angle = lambda d, rv: deg_to_rad(-30)
+    orig_color = "tab:purple"
+    variated_color = "tab:pink"
+    optimize_shot(distance, 0.0)
+    
+    deduplicate_legend_and_show_plot()
 else:
     def shot_compute_worker(x):
         worker_index, worker_distance_velocity_pairs = x
