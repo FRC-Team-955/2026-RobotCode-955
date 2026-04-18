@@ -36,7 +36,7 @@ deg_to_rad = np.radians
 # All length quantities are in meters
 
 fuel_mass = 0.2150028  # kg - note, this is the average weight according to the range in the game manual
-# todo: maybe add some random mass difference to account for error?
+# TODO: maybe add some random mass difference to account for error?
 fuel_radius = (15 / 100) / 2
 
 # KEEP SYNCED WITH DriveConstants.java
@@ -368,7 +368,7 @@ def optimize_shot(distance, robot_radial_vel):
                     entry_angle_1 - wanted_entry_angle) <= entry_angle_tolerance):
                 break
 
-            if DEBUG_SHOT and not DEBUG_DISTANCE_RANGE and not DEBUG_VELOCITY_RANGE and i % (max_iterations / 10) == 0:
+            if DEBUG_SHOT and not DEBUG_DISTANCE_RANGE and not DEBUG_VELOCITY_RANGE and not DEBUG_VARIANCE and i % (max_iterations / 10) == 0:
                 ax.plot(x_full, z_full, linestyle="dotted", c=(1 - i / max_iterations, i / max_iterations, 0))
 
             # Compute guess with velocity increment
@@ -512,7 +512,7 @@ def optimize_pass(distance, robot_radial_vel):
             if abs(x_1 - wanted_x) <= x_tolerance:
                 break
 
-            if DEBUG_SHOT and not DEBUG_DISTANCE_RANGE and not DEBUG_VELOCITY_RANGE and i % (max_iterations / 10) == 0:
+            if DEBUG_SHOT and not DEBUG_DISTANCE_RANGE and not DEBUG_VELOCITY_RANGE and not DEBUG_VARIANCE and i % (max_iterations / 10) == 0:
                 ax.plot(x_full, z_full, linestyle="dotted", c=(1 - i / max_iterations, i / max_iterations, 0))
 
             # Compute guess with velocity increment
@@ -620,7 +620,12 @@ if DEBUG_SHOT and not DEBUG_VARIANCE:
 elif DEBUG_VARIANCE:
     distance = 5.5
     
-    get_wanted_entry_angle = lambda d, rv: deg_to_rad(-55.5)
+    get_wanted_entry_angle = lambda d, rv: deg_to_rad(-80)
+    orig_color = "tab:red"
+    variated_color = "tab:orange"
+    optimize_shot(distance, 0.0)
+    
+    get_wanted_entry_angle = lambda d, rv: deg_to_rad(-55)
     orig_color = "tab:blue"
     variated_color = "tab:cyan"
     optimize_shot(distance, 0.0)
