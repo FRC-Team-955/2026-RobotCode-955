@@ -8,6 +8,6 @@ public class PassingRegression {
     public static double calculateVelocityMetersPerSec(double distanceMeters, double radialRobotVelocityMetersPerSec) {
         double x = distanceMeters;
         double y = radialRobotVelocityMetersPerSec;
-        return 2.1989040016737915 + 1.1528038777245762 * x + -0.8946041893039075 * y + 0.0019250078252935692 * x * y + -0.02153204674672702 * x * x + 0.03579217928982277 * y * y;
+        return 2.088798145000358 + 1.0862137834657881 * x + -0.8946198705131636 * y + 0.0019533734625622854 * x * y + -0.02022931450517936 * x * x + 0.03746957928129486 * y * y;
     }
 }

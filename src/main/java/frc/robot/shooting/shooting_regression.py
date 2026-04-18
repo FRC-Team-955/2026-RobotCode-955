@@ -7,19 +7,19 @@ from scipy.linalg import inv
 from scipy.optimize import curve_fit
 from time import time
 
-DEBUG_SHOT = True
+DEBUG_SHOT = False
 DEBUG_SHOT_DISTANCE = 1
 DEBUG_SHOT_ROBOT_RADIAL_VELOCITY = 2
 
-DEBUG_DISTANCE_RANGE = True
+DEBUG_DISTANCE_RANGE = False
 DEBUG_SHOT_DISTANCE_RANGE = 6
 
-DEBUG_VELOCITY_RANGE = True
+DEBUG_VELOCITY_RANGE = False
 DEBUG_SHOT_ROBOT_RADIAL_VELOCITY_RANGE = 6
 
 DEBUG_PASS = False  # DEBUG_SHOT must also be true
 
-DEBUG_VARIANCE = True # DEBUG_SHOT must also be true
+DEBUG_VARIANCE = False # DEBUG_SHOT must also be true
 DEBUG_VARIANCE_VEL = 0.5 # +/- this value
 
 MAGNUS_EFFECT_ENABLED = False
@@ -114,8 +114,7 @@ dt = 0.005
 t_final = 3
 t = np.linspace(0, t_final, round(t_final / dt))
 
-# Use larger than real gravity value to approximate drag and stuff
-g = 11  # 9.81
+g = 9.81
 # Drag force and magnus effect coefficients. See:
 # - https://en.wikipedia.org/wiki/Drag_equation
 # - https://www.physics.usyd.edu.au/~cross/TRAJECTORIES/42.%20Ball%20Trajectories.pdf
@@ -286,13 +285,13 @@ def calculate_trajectory_iterative(vel, angle, robot_radial_velocity, x0, end_pa
 
 def calculate_shooting_params_kinematics(distance, robot_radial_vel):
     # https://www.desmos.com/calculator/9npcb4woqc
-    v0 = 0.0742955 * distance ** 2 + 0.185739 * distance + 6.16695 + 2
+    v0 = 0.0742955 * distance ** 2 + 0.185739 * distance + 6.16695
     vr = robot_radial_vel
 
     # print(f"v0 = {v0}, vr = {vr}")
 
     # First compute stationary shooting velocity
-    discriminant = v0 ** 4 - g * (g * distance ** 2 + 2 * (hub_base_z + hub_clearance) * v0 ** 2)
+    discriminant = v0 ** 4 - g * (g * distance ** 2 + 2 * hub_edge_z * v0 ** 2)
     if discriminant < 0:
         print("\tDiscriminant is negative")
         exit(1)
@@ -300,7 +299,7 @@ def calculate_shooting_params_kinematics(distance, robot_radial_vel):
     phi_2 = np.atan((v0 ** 2 - np.sqrt(discriminant)) / (g * distance))
 
     def is_valid_phi(phi):
-        return deg_to_rad(15) < phi < deg_to_rad(90)
+        return deg_to_rad(0) < phi < deg_to_rad(90)
 
     if is_valid_phi(phi_1) and (phi_1 > phi_2 or not is_valid_phi(phi_2)):
         angle = phi_1
