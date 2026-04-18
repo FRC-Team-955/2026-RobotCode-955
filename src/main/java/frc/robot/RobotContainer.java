@@ -8,19 +8,19 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.CANLogger;
+import frc.lib.EnergyLogger;
 import frc.robot.autos.AutoManager;
 import frc.robot.controller.Controller;
 import frc.robot.shooting.ShootingKinematics;
 import frc.robot.subsystems.apriltagvision.AprilTagVision;
 import frc.robot.subsystems.drive.Drive;
-import frc.robot.subsystems.drive.goals.DriveJoystickGoal;
-import frc.robot.subsystems.drive.goals.WheelRadiusCharacterizationGoal;
 import frc.robot.subsystems.gamepiecevision.GamePieceVision;
 import frc.robot.subsystems.leds.LEDs;
 import frc.robot.subsystems.superintake.Superintake;
 import frc.robot.subsystems.superstructure.Superstructure;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
+import java.util.OptionalDouble;
 import java.util.function.BooleanSupplier;
 
 /**
@@ -34,14 +34,6 @@ public class RobotContainer {
     private final LoggedDashboardChooser<Command> characterizationChooser = new LoggedDashboardChooser<>("Characterization Choices");
 
     public final RobotState robotState = RobotState.get();
-    public final OperatorDashboard operatorDashboard = OperatorDashboard.get();
-    public final Controller controller = Controller.get();
-    public final CANLogger canLogger = CANLogger.get();
-    public final RobotMechanism robotMechanism = RobotMechanism.get();
-    public final ShootingKinematics shootingKinematics = ShootingKinematics.get();
-    public final AutoManager autoManager = AutoManager.get();
-    public final HubShiftTracker hubShiftTracker = HubShiftTracker.get();
-
     /* Subsystems */
     public final Drive drive = Drive.get();
     public final AprilTagVision aprilTagVision = AprilTagVision.get();
@@ -51,6 +43,16 @@ public class RobotContainer {
     public final Superintake superintake = Superintake.get();
     public final Superstructure superstructure = Superstructure.get();
 
+    /* Other stuff */
+    public final Controller controller = Controller.get();
+    public final CANLogger canLogger = CANLogger.get();
+    public final RobotMechanism robotMechanism = RobotMechanism.get();
+    public final ShootingKinematics shootingKinematics = ShootingKinematics.get();
+    public final AutoManager autoManager = AutoManager.get();
+    public final HubShiftTracker hubShiftTracker = HubShiftTracker.get();
+    public final EnergyLogger energyLogger = EnergyLogger.get();
+    public final OperatorDashboard operatorDashboard = OperatorDashboard.get();
+
     public RobotContainer() {
         addCharacterizations();
         setDefaultCommands();
@@ -58,17 +60,17 @@ public class RobotContainer {
     }
 
     private void addCharacterizations() {
-        characterizationChooser.addOption("Drive 1 m/s Characterization", drive.runRobotRelative(() -> new ChassisSpeeds(1.0, 0.0, 0.0)));
-        characterizationChooser.addOption("Drive 2 m/s Characterization", drive.runRobotRelative(() -> new ChassisSpeeds(2.0, 0.0, 0.0)));
-        characterizationChooser.addOption("Drive 3 m/s Characterization", drive.runRobotRelative(() -> new ChassisSpeeds(3.0, 0.0, 0.0)));
-        characterizationChooser.addOption("Drive 4 m/s Characterization", drive.runRobotRelative(() -> new ChassisSpeeds(4.0, 0.0, 0.0)));
+        characterizationChooser.addOption("Drive 1 m/s Characterization", drive.chassisSpeeds(() -> new ChassisSpeeds(1.0, 0.0, 0.0)));
+        characterizationChooser.addOption("Drive 2 m/s Characterization", drive.chassisSpeeds(() -> new ChassisSpeeds(2.0, 0.0, 0.0)));
+        characterizationChooser.addOption("Drive 3 m/s Characterization", drive.chassisSpeeds(() -> new ChassisSpeeds(3.0, 0.0, 0.0)));
+        characterizationChooser.addOption("Drive 4 m/s Characterization", drive.chassisSpeeds(() -> new ChassisSpeeds(4.0, 0.0, 0.0)));
         characterizationChooser.addOption("Drive Full Speed Characterization", drive.fullSpeedCharacterization());
-        characterizationChooser.addOption("Drive Wheel Radius Characterization", drive.wheelRadiusCharacterization(WheelRadiusCharacterizationGoal.Direction.CLOCKWISE));
+        characterizationChooser.addOption("Drive Wheel Radius Characterization", drive.wheelRadiusCharacterization());
         characterizationChooser.addOption("Drive Slip Current Characterization", drive.slipCurrentCharacterization());
     }
 
     private void setDefaultCommands() {
-        drive.setDefaultCommand(drive.driveJoystick(() -> DriveJoystickGoal.Mode.Normal));
+        drive.setDefaultCommand(drive.joystickDrive());
         superintake.setDefaultCommand(superintake.setGoal(Superintake.Goal.IDLE).ignoringDisable(true));
         superstructure.setDefaultCommand(superstructure.setGoal(Superstructure.Goal.IDLE).ignoringDisable(true));
     }
@@ -82,59 +84,30 @@ public class RobotContainer {
     private void configureBindings() {
         controller.y().onTrue(robotState.resetRotation());
 
-        Trigger intake = controller.rightTrigger();
         Trigger shoot = controller.leftTrigger();
         Trigger shootForce = controller.leftBumper();
+        Trigger anyShoot = shoot.or(shootForce);
 
-        BooleanSupplier shouldNotAssist = () -> operatorDashboard.disableAssist.get() || robotState.isInTrench();
-        intake
-                .and(shoot.negate())
+        BooleanSupplier shouldNotAssist = () -> operatorDashboard.disableAssist.get() || robotState.isInTrench(robotState.getTranslation());
+        controller.rightTrigger()
+                .or(controller.rightBumper().and(anyShoot))
+                .whileTrue(superintake.setGoal(Superintake.Goal.INTAKE));
+        controller.rightBumper()
+                .and(anyShoot.negate())
                 .whileTrue(Commands.parallel(
-                        drive.driveJoystick(() -> shouldNotAssist.getAsBoolean() ? DriveJoystickGoal.Mode.Normal : DriveJoystickGoal.Mode.Assist),
-                        superintake.setGoal(Superintake.Goal.INTAKE)
-                ));
-
-        shoot
-                .and(intake.negate())
-                .whileTrue(Commands.parallel(
-                        drive.driveJoystick(() -> {
-                            if (operatorDashboard.manualAiming.get()) {
-                                return DriveJoystickGoal.Mode.StopWithX;
-                            } else {
-                                return DriveJoystickGoal.Mode.Aim;
-                            }
-                        }),
-                        superstructure.setGoal(Superstructure.Goal.SHOOT)
-                ));
-        shootForce
-                .and(intake.negate())
-                .whileTrue(Commands.parallel(
-                        drive.driveJoystick(() -> {
-                            if (operatorDashboard.manualAiming.get()) {
-                                return DriveJoystickGoal.Mode.StopWithX;
-                            } else {
-                                return DriveJoystickGoal.Mode.Aim;
-                            }
-                        }),
-                        superstructure.setGoal(Superstructure.Goal.SHOOT_FORCE)
-                ));
-        shoot
-                .and(intake)
-                .whileTrue(Commands.parallel(
-                        drive.driveJoystick(() -> {
-                            if (operatorDashboard.manualAiming.get() && shouldNotAssist.getAsBoolean()) {
-                                return DriveJoystickGoal.Mode.StopWithX;
-                            } else if (operatorDashboard.manualAiming.get()) {
-                                return DriveJoystickGoal.Mode.Assist;
-                            } else if (shouldNotAssist.getAsBoolean()) {
-                                return DriveJoystickGoal.Mode.Aim;
-                            } else {
-                                return DriveJoystickGoal.Mode.AimAndAssist;
-                            }
-                        }),
                         superintake.setGoal(Superintake.Goal.INTAKE),
-                        superstructure.setGoal(Superstructure.Goal.SHOOT)
+                        // Citrus mode: always point in direction of travel
+                        drive.joystickDrive().withHeadingOverride(() -> OptionalDouble.of(controller.getDriveLinearDirection().getRadians()))
                 ));
+
+        shoot.whileTrue(Commands.parallel(
+                drive.joystickDrive().withAiming(),
+                superstructure.setGoal(Superstructure.Goal.SHOOT)
+        ));
+        shootForce.whileTrue(Commands.parallel(
+                drive.joystickDrive().withAiming(),
+                superstructure.setGoal(Superstructure.Goal.SHOOT_FORCE)
+        ));
 
         controller.x()
                 .whileTrue(Commands.parallel(
@@ -146,7 +119,7 @@ public class RobotContainer {
                 .onTrue(Commands.runOnce(() -> operatorDashboard.homeIntakePivot.set(false)).ignoringDisable(true));
         new Trigger(operatorDashboard.homeIntakePivot::get)
                 .and(DriverStation::isEnabled)
-                .onTrue(superintake.setGoal(Superintake.Goal.HOME_INTAKE_PIVOT));
+                .onTrue(superintake.setGoalHomeIntakePivot());
         new Trigger(operatorDashboard.homeIntakePivot::get)
                 .and(DriverStation::isDisabled)
                 .onTrue(Commands.runOnce(superintake.intakePivot::finishHoming).ignoringDisable(true));
@@ -155,7 +128,7 @@ public class RobotContainer {
                 .onTrue(Commands.runOnce(() -> operatorDashboard.homeHood.set(false)).ignoringDisable(true));
         new Trigger(operatorDashboard.homeHood::get)
                 .and(DriverStation::isEnabled)
-                .onTrue(superstructure.setGoal(Superstructure.Goal.HOME_HOOD));
+                .onTrue(superstructure.setGoalHomeHood());
         new Trigger(operatorDashboard.homeHood::get)
                 .and(DriverStation::isDisabled)
                 .onTrue(Commands.runOnce(superstructure.hood::finishHoming).ignoringDisable(true));

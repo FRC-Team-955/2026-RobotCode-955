@@ -8,7 +8,7 @@ import frc.lib.motor.MotorIOTalonFX;
 import frc.robot.BuildConstants;
 
 public class IntakeRollersConstants {
-    static final double gearRatio = 5;
+    static final double gearRatio = 3;
 
     static MotorIO createIO() {
         return switch (BuildConstants.mode) {
@@ -16,8 +16,8 @@ public class IntakeRollersConstants {
                     15,
                     true,
                     NeutralModeValue.Coast,
-                    80,
-                    30,
+                    140,
+                    70,
                     gearRatio,
                     null,
                     null,

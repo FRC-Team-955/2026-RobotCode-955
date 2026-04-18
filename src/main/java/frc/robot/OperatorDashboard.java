@@ -42,15 +42,17 @@ public class OperatorDashboard implements Periodic {
     public final LoggedNetworkBooleanExt recordingStarted = new LoggedNetworkBooleanExt(prefix + "RecordingStarted", false);
     public final LoggedNetworkBooleanExt fixedHood = new LoggedNetworkBooleanExt(prefix + "FixedHood", false);
     public final LoggedNetworkBooleanExt manualAiming = new LoggedNetworkBooleanExt(prefix + "ManualAiming", false);
+    public final LoggedNetworkBooleanExt disableUncertainty = new LoggedNetworkBooleanExt(prefix + "DisableUncertainty", false);
     public final LoggedNetworkBooleanExt disableAssist = new LoggedNetworkBooleanExt(prefix + "DisableAssist", false);
-    public final LoggedNetworkBooleanExt disableCANrange = new LoggedNetworkBooleanExt(prefix + "DisableCANrange", true);
+    public final LoggedNetworkBooleanExt disableCANrange = new LoggedNetworkBooleanExt(prefix + "DisableCANrange", false);
     public final LoggedNetworkNumberExt flywheelSmudgeRPM = new LoggedNetworkNumberExt(prefix + "FlywheelSmudgeRPM", 0.0);
     public final LoggedNetworkNumberExt hoodSmudgeDegrees = new LoggedNetworkNumberExt(prefix + "HoodSmudgeDegrees", 0.0);
     public final LoggedNetworkBooleanExt lostAuto = new LoggedNetworkBooleanExt(prefix + "LostAuto", false);
     public final LoggedNetworkBooleanExt wonAuto = new LoggedNetworkBooleanExt(prefix + "WonAuto", false);
-    public final LoggedNetworkBooleanExt disableShiftTracking = new LoggedNetworkBooleanExt(prefix + "DisableShiftTracking", BuildConstants.mode == BuildConstants.Mode.SIM);
+    public final LoggedNetworkBooleanExt disableShiftTracking = new LoggedNetworkBooleanExt(prefix + "DisableShiftTracking", BuildConstants.isSim);
     public final LoggedNetworkBooleanExt driveTurnAbsolutePID = new LoggedNetworkBooleanExt(prefix + "DriveTurnAbsolutePID", false);
     public final LoggedNetworkBooleanExt hoodEStop = new LoggedNetworkBooleanExt(prefix + "HoodEStop", false);
+    public final LoggedNetworkBooleanExt intakePivotEStop = new LoggedNetworkBooleanExt(prefix + "IntakePivotEStop", false);
 
     @Getter
     private ScoringMode selectedScoringMode = ScoringMode.ShootAndPassAutomatic;
@@ -60,7 +62,7 @@ public class OperatorDashboard implements Periodic {
     public final Alert intakePivotNotHomedAlert = new Alert("Intake pivot has not been homed!", Alert.AlertType.kError);
     public final Alert hoodNotHomedAlert = new Alert("Hood has not been homed!", Alert.AlertType.kError);
     private final Alert coastOverrideAlert = new Alert("Coast override is enabled.", Alert.AlertType.kWarning);
-    private final Alert autoNotChosenAlert = new Alert("Auto is not chosen!", Alert.AlertType.kError);
+    public final Alert autoNotChosenAlert = new Alert("Auto is not chosen!", Alert.AlertType.kError);
     private final Alert recordingNotStartedAlert = new Alert("Recording is not started!", Alert.AlertType.kWarning);
     //private final Alert autoNotAlignedAlert = new Alert("Robot is not aligned for auto!", Alert.AlertType.kError);
     @SuppressWarnings("FieldCanBeLocal")
@@ -68,6 +70,7 @@ public class OperatorDashboard implements Periodic {
     private final Alert batteryVoltageAlert = new Alert("Battery is below 12 volts!", Alert.AlertType.kError);
     private final Alert fixedHoodAlert = new Alert("Fixed hood mode is enabled.", Alert.AlertType.kWarning);
     private final Alert manualAimingAlert = new Alert("Manual aiming is enabled.", Alert.AlertType.kWarning);
+    private final Alert disableUncertaintyAlert = new Alert("Disable uncertainty is enabled.", Alert.AlertType.kWarning);
     private final Alert disableAssistAlert = new Alert("Disable assist is enabled.", Alert.AlertType.kWarning);
     private final Alert disabledCANrangeAlert = new Alert("CANrange is disabled.", Alert.AlertType.kWarning);
     private final Alert smudgesNotZeroAlert = new Alert("Smudges are not zero.", Alert.AlertType.kWarning);
@@ -108,7 +111,8 @@ public class OperatorDashboard implements Periodic {
         }
 
         handleEnumToggles(scoringModeToggles, selectedScoringMode, selectNew -> selectedScoringMode = selectNew);
-        Logger.recordOutput("OperatorDashboard/SelectedScoringMode", selectedScoringMode);
+        if (BuildConstants.isSimOrReplay)
+            Logger.recordOutput("OperatorDashboard/SelectedScoringMode", selectedScoringMode);
 
         // Note - we only handle alerts for general overrides.
         // So subsystem toggles are handled in their respective subsystems
@@ -119,6 +123,7 @@ public class OperatorDashboard implements Periodic {
         batteryVoltageAlert.set(lowBatteryDebouncer.calculate(RobotController.getBatteryVoltage() <= 11.8));
         fixedHoodAlert.set(fixedHood.get());
         manualAimingAlert.set(manualAiming.get());
+        disableUncertaintyAlert.set(disableUncertainty.get());
         disableAssistAlert.set(disableAssist.get());
         disabledCANrangeAlert.set(disableCANrange.get());
         smudgesNotZeroAlert.set(flywheelSmudgeRPM.get() != 0 || hoodSmudgeDegrees.get() != 0);

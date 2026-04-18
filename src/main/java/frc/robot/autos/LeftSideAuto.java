@@ -9,11 +9,9 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.AllianceFlipUtil;
 import frc.lib.network.LoggedTunableNumber;
 import frc.robot.FieldConstants;
-import frc.robot.RobotState;
 import frc.robot.shooting.ShootingKinematics;
-import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.DriveConstants;
-import frc.robot.subsystems.drive.goals.DriveJoystickGoal;
+import frc.robot.subsystems.drive.constraints.DriveConstraints;
 import frc.robot.subsystems.superintake.Superintake;
 import frc.robot.subsystems.superstructure.Superstructure;
 import org.littletonrobotics.junction.Logger;
@@ -26,11 +24,6 @@ import java.util.function.BooleanSupplier;
 import static frc.robot.subsystems.drive.DriveConstants.maxAngularVelocityRadPerSec;
 
 public final class LeftSideAuto extends Auto {
-    private static final Drive drive = Drive.get();
-    private static final RobotState robotState = RobotState.get();
-    private static final Superintake superintake = Superintake.get();
-    private static final Superstructure superstructure = Superstructure.get();
-
     private static final List<Pose2d> baseWaypoints = List.of(
             new Pose2d(3.5, 5.5, Rotation2d.fromDegrees(-90)),
             new Pose2d(4.2, 5.5, Rotation2d.fromDegrees(-45)),
@@ -44,13 +37,11 @@ public final class LeftSideAuto extends Auto {
             new Pose2d(2.5, 7.5, Rotation2d.fromDegrees(180))
     );
 
-    private static final DriveConstants.MoveToConstraints leftSideAutoMoveToConstraints = new DriveConstants.MoveToConstraints(
+    private static final DriveConstraints leftSideAutoMoveToConstraints = new DriveConstraints(
             new LoggedTunableNumber("LeftSideAuto/MoveTo/MaxLinearVelocity", 0.75),
             new LoggedTunableNumber("LeftSideAuto/MoveTo/MaxLinearAcceleration", 15.0),
             new LoggedTunableNumber("LeftSideAuto/MoveTo/MaxAngularVelocity", maxAngularVelocityRadPerSec),
-            new LoggedTunableNumber("LeftSideAuto/MoveTo/MaxAngularAcceleration", 30.0),
-            false,
-            false
+            new LoggedTunableNumber("LeftSideAuto/MoveTo/MaxAngularAcceleration", 30.0)
     );
 
     private static final int INTERPOLATION_START_INDEX = baseWaypoints.size();
@@ -180,7 +171,7 @@ public final class LeftSideAuto extends Auto {
                         Commands.waitUntil(() -> ShootingKinematics.get().isShootingParametersMet()),
                         Commands.waitSeconds(2.0)
                 ),
-                drive.driveJoystick(() -> DriveJoystickGoal.Mode.Aim),
+                drive.stop().withAiming(),
                 superstructure.setGoal(Superstructure.Goal.SHOOT)
         ).onlyWhile(DriverStation::isAutonomousEnabled);
 

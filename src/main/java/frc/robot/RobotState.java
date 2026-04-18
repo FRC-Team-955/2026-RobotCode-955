@@ -3,10 +3,7 @@ package frc.robot;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -21,9 +18,14 @@ import frc.robot.subsystems.drive.DriveConstants;
 import lombok.Getter;
 import lombok.Setter;
 import org.littletonrobotics.junction.AutoLogOutput;
+import org.littletonrobotics.junction.Logger;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
+import java.util.stream.IntStream;
+
+import static frc.robot.subsystems.drive.DriveConstants.driveConfig;
 
 public class RobotState implements Periodic {
     @Getter
@@ -50,6 +52,36 @@ public class RobotState implements Periodic {
     private Optional<Pose2d> moveToGoal = Optional.empty();
     private final FieldObject2d moveToGoalObject = field2d.getObject("MoveTo");
 
+    @Setter
+    private Optional<Pose2d[]> trajectory = Optional.empty();
+    private final FieldObject2d trajectoryObject = field2d.getObject("Trajectory");
+
+    @Setter
+    private Optional<Pose2d> trajectorySample = Optional.empty();
+    private final FieldObject2d trajectorySampleObject = field2d.getObject("TrajectorySample");
+
+    @Setter
+    private List<Pose3d> acceptedPoses = List.of();
+    private final FieldObject2d[] acceptedPoseObjects = IntStream.range(0, 3)
+            .mapToObj(n -> field2d.getObject("AcceptedPose" + n))
+            .toArray(FieldObject2d[]::new);
+
+    @Setter
+    private List<Pose3d> rejectedPoses = List.of();
+    private final FieldObject2d[] rejectedPoseObjects = IntStream.range(0, 3)
+            .mapToObj(n -> field2d.getObject("RejectedPose" + n))
+            .toArray(FieldObject2d[]::new);
+
+    @Setter
+    private Pose2d[] fuel = new Pose2d[0];
+    private final FieldObject2d[] fuelObjects = IntStream.range(0, 3)
+            .mapToObj(n -> field2d.getObject("Fuel" + n))
+            .toArray(FieldObject2d[]::new);
+
+    private final FieldObject2d[] uncertaintyRangeObjects = IntStream.range(0, 5)
+            .mapToObj(n -> field2d.getObject("UncertaintyRange" + n))
+            .toArray(FieldObject2d[]::new);
+
     @Getter
     @Setter
     private ChassisSpeeds measuredChassisSpeedsRobotRelative = new ChassisSpeeds();
@@ -60,6 +92,7 @@ public class RobotState implements Periodic {
     /**
      * Field relative
      */
+    @Getter
     @Setter
     private Translation2d filteredAccelerationMetersPerSecPerSec = new Translation2d();
 
@@ -85,10 +118,17 @@ public class RobotState implements Periodic {
     // it is able to obtain the deviation and its variation, which is called error.
     private double poseUncertaintyLinearXMeters = 0.0;
     private double poseUncertaintyLinearYMeters = 0.0;
+    @Getter
     private double poseUncertaintyAngularRad = 0.0;
 
+    public double getPoseUncertaintyLinearMeters() {
+        return Math.hypot(poseUncertaintyLinearXMeters, poseUncertaintyLinearYMeters);
+    }
+
+    /*
     private boolean lastInNeutralZone = false;
     private double lastIncreasedUncertaintyDueToBump = 0.0;
+     */
 
     private static RobotState instance;
 
@@ -108,7 +148,6 @@ public class RobotState implements Periodic {
 
     @Override
     public void periodicBeforeCommands() {
-        /*
         // Increase uncertainty if we are moving
         final double chassisSpeedsLinearFactor = 0.06;
         poseUncertaintyLinearXMeters += Constants.loopPeriod * chassisSpeedsLinearFactor * Math.abs(measuredChassisSpeedsFieldRelative.vxMetersPerSecond);
@@ -119,6 +158,7 @@ public class RobotState implements Periodic {
 
         // Increase uncertainty if we went over the bump
         Translation2d t = getTranslation();
+        /*
         boolean inNeutralZone =
                 t.getX() > FieldConstants.LinesVertical.hubCenter &&
                         t.getX() < FieldConstants.LinesVertical.oppHubCenter;
@@ -140,6 +180,7 @@ public class RobotState implements Periodic {
         lastInNeutralZone = inNeutralZone;
         Logger.recordOutput("RobotState/InNeutralZone", inNeutralZone);
         Logger.recordOutput("RobotState/LastIncreasedUncertaintyDueToBump", lastIncreasedUncertaintyDueToBump);
+        */
 
         // Increase uncertainty if there is a large impact
         final double accelerationFactor = 0.001;
@@ -152,21 +193,40 @@ public class RobotState implements Periodic {
         if (poseUncertaintyLinearYMeters < 0.0) poseUncertaintyLinearYMeters = 0.0;
         if (poseUncertaintyAngularRad < 0.0) poseUncertaintyAngularRad = 0.0;
 
+        // Log uncertainty
+        if (BuildConstants.isSimOrReplay) {
+            Logger.recordOutput("RobotState/PoseUncertainty/LinearX", poseUncertaintyLinearXMeters);
+            Logger.recordOutput("RobotState/PoseUncertainty/LinearY", poseUncertaintyLinearYMeters);
+            Logger.recordOutput("RobotState/PoseUncertainty/Linear", getPoseUncertaintyLinearMeters());
+            Logger.recordOutput("RobotState/PoseUncertainty/Angular", poseUncertaintyAngularRad);
+        }
+
         // Log uncertainty range
         // The Periodic execution order defined in Robot ensures that AprilTagVision will have already reduced uncertainty if there were any vision measurements
         Rotation2d r = getRotation();
-        Logger.recordOutput(
-                "RobotState/PoseUncertaintyRange",
+        Pose2d[] uncertaintyRange = new Pose2d[]{
                 new Pose2d(t.getX() + poseUncertaintyLinearXMeters, t.getY() + poseUncertaintyLinearYMeters, r),
                 new Pose2d(t.getX() + poseUncertaintyLinearXMeters, t.getY() - poseUncertaintyLinearYMeters, r),
                 new Pose2d(t.getX() - poseUncertaintyLinearXMeters, t.getY() - poseUncertaintyLinearYMeters, r),
                 new Pose2d(t.getX() - poseUncertaintyLinearXMeters, t.getY() + poseUncertaintyLinearYMeters, r),
                 new Pose2d(t, r.plus(new Rotation2d(poseUncertaintyAngularRad))),
                 new Pose2d(t, r.minus(new Rotation2d(poseUncertaintyAngularRad)))
-        );
-         */
+        };
+        for (int i = 0; i < uncertaintyRangeObjects.length; i++) {
+            if (i < uncertaintyRange.length) {
+                uncertaintyRangeObjects[i].setPose(uncertaintyRange[i]);
+            } else {
+                Util.error("Number of uncertainty range poses and field objects don't match up");
+            }
+        }
+        if (BuildConstants.isSimOrReplay) {
+            Logger.recordOutput("RobotState/PoseUncertainty/Range", uncertaintyRange);
+        }
 
+        // Reset field objects for drive controllers so they only show up if they are explicitly set
         moveToGoal = Optional.empty();
+        trajectory = Optional.empty();
+        trajectorySample = Optional.empty();
     }
 
     @Override
@@ -180,6 +240,35 @@ public class RobotState implements Periodic {
                 moveToGoalObject::setPose,
                 moveToGoalObject::setPoses
         );
+        trajectory.ifPresentOrElse(
+                trajectoryObject::setPoses,
+                trajectoryObject::setPoses
+        );
+        trajectorySample.ifPresentOrElse(
+                trajectorySampleObject::setPose,
+                trajectorySampleObject::setPoses
+        );
+        for (int i = 0; i < acceptedPoseObjects.length; i++) {
+            if (i < acceptedPoses.size()) {
+                acceptedPoseObjects[i].setPose(acceptedPoses.get(i).toPose2d());
+            } else {
+                acceptedPoseObjects[i].setPoses();
+            }
+        }
+        for (int i = 0; i < rejectedPoseObjects.length; i++) {
+            if (i < rejectedPoses.size()) {
+                rejectedPoseObjects[i].setPose(rejectedPoses.get(i).toPose2d());
+            } else {
+                rejectedPoseObjects[i].setPoses();
+            }
+        }
+        for (int i = 0; i < fuelObjects.length; i++) {
+            if (i < fuel.length) {
+                fuelObjects[i].setPose(fuel[i]);
+            } else {
+                fuelObjects[i].setPoses();
+            }
+        }
         SmartDashboard.putData("Field2d", field2d);
     }
 
@@ -227,7 +316,7 @@ public class RobotState implements Periodic {
 
     public void setPose(Pose2d pose) {
         poseEstimator.resetPose(pose);
-        if (BuildConstants.mode == BuildConstants.Mode.SIM) {
+        if (BuildConstants.isSim) {
             SimManager.get().driveSimulation.setSimulationWorldPose(pose);
         }
     }
@@ -253,19 +342,18 @@ public class RobotState implements Periodic {
                 && Math.abs(getMeasuredChassisSpeedsFieldRelative().omegaRadiansPerSecond) < angularToleranceRadPerSec;
     }
 
-    @AutoLogOutput(key = "RobotState/IsInTrench")
-    public boolean isInTrench() {
+    public boolean isInTrench(Translation2d t) {
         // make each bounding box larger so that the hood has time to move down before going under the trench
         double adjustmentMetersPositiveX = 0.55 + Math.max(0.0, getMeasuredChassisSpeedsFieldRelative().vxMetersPerSecond) * 0.5;
         double adjustmentMetersNegativeX = 0.55 + Math.min(0.0, getMeasuredChassisSpeedsFieldRelative().vxMetersPerSecond) * -0.5;
-        Translation2d t = getTranslation();
-        //Logger.recordOutput(
-        //        "RobotState/TrenchChecks",
-        //        new Pose2d(new Translation2d(FieldConstants.LinesVertical.neutralZoneNear + adjustmentMetersNegativeX, 0.6), new Rotation2d()),
-        //        new Pose2d(new Translation2d(FieldConstants.LinesVertical.neutralZoneFar - adjustmentMetersPositiveX, 0.6), new Rotation2d()),
-        //        new Pose2d(new Translation2d(FieldConstants.LinesVertical.allianceZone - adjustmentMetersPositiveX, 0.6), new Rotation2d()),
-        //        new Pose2d(new Translation2d(FieldConstants.LinesVertical.oppAllianceZone + adjustmentMetersNegativeX, 0.6), new Rotation2d())
-        //);
+        if (BuildConstants.isSimOrReplay)
+            Logger.recordOutput(
+                    "RobotState/TrenchChecks",
+                    new Pose2d(new Translation2d(FieldConstants.LinesVertical.neutralZoneNear + adjustmentMetersNegativeX, 0.6), new Rotation2d()),
+                    new Pose2d(new Translation2d(FieldConstants.LinesVertical.neutralZoneFar - adjustmentMetersPositiveX, 0.6), new Rotation2d()),
+                    new Pose2d(new Translation2d(FieldConstants.LinesVertical.allianceZone - adjustmentMetersPositiveX, 0.6), new Rotation2d()),
+                    new Pose2d(new Translation2d(FieldConstants.LinesVertical.oppAllianceZone + adjustmentMetersNegativeX, 0.6), new Rotation2d())
+            );
         boolean inNeutralZone = t.getX() > FieldConstants.LinesVertical.neutralZoneNear + adjustmentMetersNegativeX &&
                 t.getX() < FieldConstants.LinesVertical.neutralZoneFar - adjustmentMetersPositiveX;
         boolean inAllianceZone = t.getX() < FieldConstants.LinesVertical.allianceZone - adjustmentMetersPositiveX ||
@@ -273,5 +361,13 @@ public class RobotState implements Periodic {
         boolean inLeftTrench = t.getY() > FieldConstants.LinesHorizontal.leftTrenchOpenEnd;
         boolean inRightTrench = t.getY() < FieldConstants.LinesHorizontal.rightTrenchOpenStart;
         return !inNeutralZone && !inAllianceZone && (inLeftTrench || inRightTrench);
+    }
+
+    public Pose3d robotPoseMec() {
+        return new Pose3d(getPose())
+                .transformBy(new Transform3d(
+                        new Translation3d(0.0, 0.0, driveConfig.bottomOfFrameRailsToCenterOfWheelsMeters() + driveConfig.wheelRadiusMeters()),
+                        new Rotation3d()
+                ));
     }
 }

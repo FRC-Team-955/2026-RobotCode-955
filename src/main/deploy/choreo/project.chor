@@ -1,0 +1,148 @@
+{
+ "name":"project",
+ "version":2,
+ "type":"Swerve",
+ "variables":{
+  "expressions":{
+   "BumperLength":{
+    "dimension":"Length",
+    "var":{
+     "exp":"31.5 in",
+     "val":0.8000999999999999
+    }
+   },
+   "BumperWidth":{
+    "dimension":"Length",
+    "var":{
+     "exp":"36.5 in",
+     "val":0.9271
+    }
+   },
+   "GearRatio":{
+    "dimension":"Number",
+    "var":{
+     "exp":"(50 / 16) * (17 / 27) * (45 / 15)",
+     "val":5.902777777777778
+    }
+   },
+   "IntakingMaxVel":{
+    "dimension":"LinVel",
+    "var":{
+     "exp":"2 m / s",
+     "val":2.0
+    }
+   },
+   "ShootingMaxAccel":{
+    "dimension":"LinAcc",
+    "var":{
+     "exp":"5 m / s ^ 2",
+     "val":5.0
+    }
+   },
+   "ShootingMaxVel":{
+    "dimension":"LinVel",
+    "var":{
+     "exp":"1 m / s",
+     "val":1.0
+    }
+   },
+   "TrackLength":{
+    "dimension":"Length",
+    "var":{
+     "exp":"19.25 in",
+     "val":0.48895
+    }
+   },
+   "TrackWidth":{
+    "dimension":"Length",
+    "var":{
+     "exp":"24.25 in",
+     "val":0.61595
+    }
+   },
+   "WheelRadius":{
+    "dimension":"Length",
+    "var":{
+     "exp":"1.883 in",
+     "val":0.0478282
+    }
+   }
+  },
+  "poses":{}
+ },
+ "config":{
+  "frontLeft":{
+   "x":{
+    "exp":"TrackLength / 2",
+    "val":0.244475
+   },
+   "y":{
+    "exp":"TrackWidth / 2",
+    "val":0.307975
+   }
+  },
+  "backLeft":{
+   "x":{
+    "exp":"-TrackLength / 2",
+    "val":-0.244475
+   },
+   "y":{
+    "exp":"TrackWidth / 2",
+    "val":0.307975
+   }
+  },
+  "mass":{
+   "exp":"140 lbs",
+   "val":63.502931800000006
+  },
+  "inertia":{
+   "exp":"20161.244269 lb * in ^ 2",
+   "val":5.899979535581604
+  },
+  "gearing":{
+   "exp":"GearRatio",
+   "val":5.902777777777778
+  },
+  "radius":{
+   "exp":"WheelRadius",
+   "val":0.0478282
+  },
+  "vmax":{
+   "exp":"0.8 * 6065 RPM",
+   "val":508.1002518405893
+  },
+  "tmax":{
+   "exp":"0.7 * 1.418 N * m",
+   "val":0.9926
+  },
+  "cof":{
+   "exp":"1.4",
+   "val":1.4
+  },
+  "bumper":{
+   "front":{
+    "exp":"BumperLength / 2",
+    "val":0.40005
+   },
+   "side":{
+    "exp":"BumperWidth / 2",
+    "val":0.46355
+   },
+   "back":{
+    "exp":"BumperLength / 2",
+    "val":0.40005
+   }
+  },
+  "differentialTrackWidth":{
+   "exp":"22 in",
+   "val":0.5588
+  }
+ },
+ "generationFeatures":[],
+ "codegen":{
+  "root":"../../java/frc/robot/autos",
+  "genVars":true,
+  "genTrajData":true,
+  "useChoreoLib":false
+ }
+}

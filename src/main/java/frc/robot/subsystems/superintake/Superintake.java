@@ -1,6 +1,7 @@
 package frc.robot.subsystems.superintake;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.Util;
 import frc.lib.commands.CommandsExt;
 import frc.lib.subsystem.CommandBasedSubsystem;
@@ -19,28 +20,33 @@ public class Superintake extends CommandBasedSubsystem {
     @RequiredArgsConstructor
     public enum Goal {
         IDLE,
+        DEPLOY,
         INTAKE,
         SHOOT,
         EJECT,
         HOME_INTAKE_PIVOT,
+        HOME_INTAKE_PIVOT_FINALIZE,
     }
 
     @Getter
     private Goal goal = Goal.IDLE;
 
-    private boolean shouldGoalEnd() {
-        if (goal == Goal.HOME_INTAKE_PIVOT) {
-            if (intakePivot.isCurrentAtThresholdForHoming()) {
-                intakePivot.finishHoming();
-                return true;
-            }
+    public Command setGoal(Goal goal) {
+        if (goal == Goal.HOME_INTAKE_PIVOT || goal == Goal.HOME_INTAKE_PIVOT_FINALIZE) {
+            Util.error("Use setGoalHomeIntakePivot");
         }
-        return false;
+
+        return startIdle(() -> this.goal = goal);
     }
 
-    public Command setGoal(Goal goal) {
-        return startIdle(() -> this.goal = goal)
-                .until(this::shouldGoalEnd);
+    public Command setGoalHomeIntakePivot() {
+        return CommandsExt.eagerSequence(
+                runOnce(() -> this.goal = Goal.HOME_INTAKE_PIVOT),
+                Commands.waitUntil(intakePivot::isAtVelocityThresholdForHoming),
+                runOnce(() -> this.goal = Goal.HOME_INTAKE_PIVOT_FINALIZE),
+                Commands.waitSeconds(0.5),
+                runOnce(intakePivot::finishHoming)
+        );
     }
 
     private static Superintake instance;
@@ -72,6 +78,10 @@ public class Superintake extends CommandBasedSubsystem {
                 intakePivot.setGoal(IntakePivot.Goal.STOW);
                 intakeRollers.setGoal(IntakeRollers.Goal.IDLE);
             }
+            case DEPLOY -> {
+                intakePivot.setGoal(IntakePivot.Goal.DEPLOY);
+                intakeRollers.setGoal(IntakeRollers.Goal.IDLE);
+            }
             case INTAKE -> {
                 intakePivot.setGoal(IntakePivot.Goal.DEPLOY);
                 intakeRollers.setGoal(IntakeRollers.Goal.INTAKE);
@@ -84,8 +94,11 @@ public class Superintake extends CommandBasedSubsystem {
                 intakePivot.setGoal(IntakePivot.Goal.DEPLOY);
                 intakeRollers.setGoal(IntakeRollers.Goal.EJECT);
             }
-            case HOME_INTAKE_PIVOT -> {
-                intakePivot.setGoal(IntakePivot.Goal.HOME);
+            case HOME_INTAKE_PIVOT, HOME_INTAKE_PIVOT_FINALIZE -> {
+                switch (goal) {
+                    case HOME_INTAKE_PIVOT -> intakePivot.setGoal(IntakePivot.Goal.HOME);
+                    case HOME_INTAKE_PIVOT_FINALIZE -> intakePivot.setGoal(IntakePivot.Goal.HOME_FINALIZE);
+                }
                 intakeRollers.setGoal(IntakeRollers.Goal.IDLE);
             }
         }
@@ -96,5 +109,9 @@ public class Superintake extends CommandBasedSubsystem {
                 setGoal(Goal.INTAKE).withTimeout(1),
                 setGoal(Goal.SHOOT).withTimeout(1)
         );
+    }
+
+    public boolean isAnythingDisconnected() {
+        return intakePivot.isDisconnected() || intakeRollers.isDisconnected();
     }
 }

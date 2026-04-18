@@ -194,7 +194,10 @@ public class ModuleIOSparkMaxCANcoder extends ModuleIO {
                 new DoubleSupplier[]{driveSpark::getAppliedOutput, driveSpark::getBusVoltage},
                 (values) -> inputs.driveAppliedVolts = values[0] * values[1]
         );
-        SparkUtil.ifOk(driveSpark, driveSpark::getOutputCurrent, (value) -> inputs.driveCurrentAmps = value);
+        SparkUtil.ifOk(driveSpark, driveSpark::getOutputCurrent, (value) -> {
+            inputs.driveStatorCurrentAmps = value;
+            inputs.driveSupplyCurrentAmps = value;
+        });
         SparkUtil.ifOk(driveSpark, driveSpark::getMotorTemperature, (value) -> inputs.driveTemperatureCelsius = value);
         inputs.driveConnected = driveConnectedDebounce.calculate(!SparkUtil.sparkStickyFault);
 
@@ -211,7 +214,10 @@ public class ModuleIOSparkMaxCANcoder extends ModuleIO {
                 new DoubleSupplier[]{turnSpark::getAppliedOutput, turnSpark::getBusVoltage},
                 (values) -> inputs.turnAppliedVolts = values[0] * values[1]
         );
-        SparkUtil.ifOk(turnSpark, turnSpark::getOutputCurrent, (value) -> inputs.turnCurrentAmps = value);
+        SparkUtil.ifOk(turnSpark, turnSpark::getOutputCurrent, (value) -> {
+            inputs.turnStatorCurrentAmps = value;
+            inputs.turnSupplyCurrentAmps = value;
+        });
         SparkUtil.ifOk(turnSpark, turnSpark::getMotorTemperature, (value) -> inputs.turnTemperatureCelsius = value);
         inputs.turnConnected = turnConnectedDebounce.calculate(!SparkUtil.sparkStickyFault);
 
@@ -298,5 +304,17 @@ public class ModuleIOSparkMaxCANcoder extends ModuleIO {
     public void setTurnClosedLoop(double positionRad) {
         double setpoint = MathUtil.inputModulus(positionRad, 0.0, 2 * Math.PI);
         turnController.setSetpoint(setpoint, ControlType.kPosition);
+    }
+
+    @Override
+    public void setTurnRelativeEncoderFromAbsolute() {
+        // Ensure it is connected
+        var turnEncoderStatus = BaseStatusSignal.refreshAll(turnAbsolutePosition);
+        if (turnEncoderStatus.isOK()) {
+            System.out.println("Setting turn relative encoder from absolute");
+            SparkUtil.tryUntilOkAsync(5, () -> turnEncoder.setPosition(Units.rotationsToRadians(turnAbsolutePosition.getValueAsDouble())));
+        } else {
+            System.out.println("Failed to set turn relative encoder from absolute");
+        }
     }
 }

@@ -78,10 +78,19 @@ public class LEDPatterns {
     public static final LEDPattern autoNotChosen = LEDPattern.solid(Color.kBlue).blink(Seconds.of(1));
     public static final LEDPattern badAutoPlacement = LEDPattern.solid(Color.kYellow).blink(Seconds.of(0.5));
     public static final LEDPattern autoReady = LEDPattern.solid(Color.kRed).breathe(Seconds.of(1));
+    public static final LEDPattern hoodNotHomed = LEDPattern.gradient(
+            LEDPattern.GradientType.kContinuous,
+            Color.kGreen,
+            Color.kBlack
+    ).scrollAtRelativeSpeed(Hertz.of(3));
+    public static final LEDPattern intakePivotNotHomed = LEDPattern.gradient(
+            LEDPattern.GradientType.kContinuous,
+            Color.kOrange,
+            Color.kBlack
+    ).scrollAtRelativeSpeed(Hertz.of(3));
 
     // Enabled
     public static final LEDPattern idle = LEDPattern.kOff;
-    public static final LEDPattern eject = LEDPattern.solid(Color.kPurple).blink(Seconds.of(0.1));
     public static final LEDPattern aiming = LEDPattern.solid(Color.kYellow);
     public static final LEDPattern shooting = LEDPattern.solid(Color.kGreen);
     public static final LEDPattern shootingForced = LEDPattern.gradient(
@@ -89,12 +98,6 @@ public class LEDPatterns {
             Color.kGreen,
             Color.kRed
     ).scrollAtRelativeSpeed(Hertz.of(1));
-    public static final LEDPattern intaking = LEDPattern.solid(Color.kYellow).blink(Seconds.of(0.1));
-    public static final LEDPattern waitingForShift = LEDPattern.solid(Color.kPink).blink(Seconds.of(0.1));
-    public static final LEDPattern homing = LEDPattern.solid(Color.kBlue);
-    public static final LEDPattern hubSwitch = LEDPattern.gradient(
-            LEDPattern.GradientType.kContinuous,
-            Color.kRed,
-            Color.kBlue
-    ).scrollAtRelativeSpeed(Hertz.of(2));
+    public static final LEDPattern waitingForShift = LEDPattern.solid(new Color(255, 0, 128)).blink(Seconds.of(0.1));
 }
+

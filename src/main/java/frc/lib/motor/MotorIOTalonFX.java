@@ -36,7 +36,8 @@ public class MotorIOTalonFX extends MotorIO {
     private final StatusSignal<Angle> position;
     private final StatusSignal<AngularVelocity> velocity;
     private final StatusSignal<Voltage> appliedVolts;
-    private final StatusSignal<Current> currentAmps;
+    private final StatusSignal<Current> statorCurrentAmps;
+    private final StatusSignal<Current> supplyCurrentAmps;
     private final StatusSignal<Temperature> temperatureCelsius;
 
     // Connection debouncers
@@ -75,7 +76,8 @@ public class MotorIOTalonFX extends MotorIO {
         position = talon.getPosition();
         velocity = talon.getVelocity();
         appliedVolts = talon.getMotorVoltage();
-        currentAmps = talon.getStatorCurrent();
+        statorCurrentAmps = talon.getStatorCurrent();
+        supplyCurrentAmps = talon.getSupplyCurrent();
         temperatureCelsius = talon.getDeviceTemp();
 
         BaseStatusSignal.setUpdateFrequencyForAll(
@@ -83,7 +85,8 @@ public class MotorIOTalonFX extends MotorIO {
                 position,
                 velocity,
                 appliedVolts,
-                currentAmps,
+                statorCurrentAmps,
+                supplyCurrentAmps,
                 temperatureCelsius
         );
         ParentDevice.optimizeBusUtilizationForAll(talon);
@@ -91,12 +94,13 @@ public class MotorIOTalonFX extends MotorIO {
 
     @Override
     public void updateInputs(MotorIOInputs inputs) {
-        var status = BaseStatusSignal.refreshAll(position, velocity, appliedVolts, currentAmps, temperatureCelsius);
+        var status = BaseStatusSignal.refreshAll(position, velocity, appliedVolts, statorCurrentAmps, supplyCurrentAmps, temperatureCelsius);
         inputs.connected = connectedDebounce.calculate(status.isOK());
         inputs.positionRad = Units.rotationsToRadians(position.getValueAsDouble());
         inputs.velocityRadPerSec = Units.rotationsToRadians(velocity.getValueAsDouble());
         inputs.appliedVolts = appliedVolts.getValueAsDouble();
-        inputs.currentAmps = currentAmps.getValueAsDouble();
+        inputs.statorCurrentAmps = statorCurrentAmps.getValueAsDouble();
+        inputs.supplyCurrentAmps = supplyCurrentAmps.getValueAsDouble();
         inputs.temperatureCelsius = temperatureCelsius.getValueAsDouble();
     }
 

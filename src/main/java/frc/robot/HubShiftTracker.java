@@ -62,7 +62,7 @@ public class HubShiftTracker implements Periodic {
     private static final double[] shiftStartTimes = {0.0, 10.0, 35.0, 60.0, 85.0, 110.0};
     private static final double[] shiftEndTimes = {10.0, 35.0, 60.0, 85.0, 110.0, 140.0};
 
-    private static final double minFuelCountDelay = 1.0;
+    private static final double minFuelCountDelay = 0.5;
     private static final double maxFuelCountDelay = 2.0;
     private static final double shiftEndFuelCountExtension = 3.0;
     private static final DoubleSupplier approachingActiveFudgeSupplier = () -> -1 * (minFuelCountDelay + shootingKinematics.getShootingParameters().timeOfFlightSeconds().orElse(0.0));
@@ -72,7 +72,7 @@ public class HubShiftTracker implements Periodic {
     private static final boolean[] activeSchedule = {true, true, false, true, false, true};
     private static final boolean[] inactiveSchedule = {true, false, true, false, true, true};
 
-    private final Alert gameDataBrokenAlert = new Alert("Game data is broken. Please manually enter who wins in auto.", Alert.AlertType.kError);
+    public final Alert gameDataBrokenAlert = new Alert("Game data is broken. Please manually enter who wins in auto.", Alert.AlertType.kError);
 
     private final Timer shiftTimer = new Timer();
     @Getter
@@ -113,8 +113,9 @@ public class HubShiftTracker implements Periodic {
         Logger.recordOutput("HubShiftTracker/RemainingTime", shiftInfo.remainingTime());
         Logger.recordOutput("HubShiftTracker/Active", shiftInfo.active());
 
-        //ShiftInfo officialShiftInfo = getOfficialShiftInfo();
-        //Logger.recordOutput("HubShiftTracker/OfficialActive", officialShiftInfo.active());
+        ShiftInfo officialShiftInfo = getOfficialShiftInfo();
+        if (BuildConstants.isSimOrReplay)
+            Logger.recordOutput("HubShiftTracker/OfficialActive", officialShiftInfo.active());
     }
 
     private Alliance getFirstActiveAlliance() {

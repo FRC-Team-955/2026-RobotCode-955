@@ -16,7 +16,7 @@ public class SpindexerConstants {
                     13,
                     true,
                     NeutralModeValue.Coast,
-                    60,
+                    90,
                     50,
                     gearRatio,
                     null,
