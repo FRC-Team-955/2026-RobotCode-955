@@ -25,7 +25,7 @@ public class FollowTrajectoryController {
     private final PIDController feedbackX = choreoFeedbackXY.toPID();
     private final PIDController feedbackY = choreoFeedbackXY.toPID();
     private final PIDController feedbackOmega = choreoFeedbackOmega.toPIDWrapRadians();
-
+    private double minT = 0.0;
     private final MoveToController smudgeController = new MoveToController();
     private @Nullable Supplier<Pose2d> smudgeGoalPoseSupplier = null;
 
@@ -66,12 +66,31 @@ public class FollowTrajectoryController {
         }
 
         Pose2d[] poses = trajectory.getPoses();
+        var currentPose = robotState.getPose();
 
-        var sampleOpt = trajectory.sampleAt(timer.get(), AllianceFlipUtil.shouldFlip());
-        if (sampleOpt.isPresent()) {
-            SwerveSample sample = sampleOpt.get();
+        SwerveSample closestSample = null;
+        double minDistanceSq = Double.MAX_VALUE;
 
-            var currentPose = robotState.getPose();
+        for (var s : trajectory.samples()) {
+            if (s.t < minT) continue;
+
+            double dx = s.x - currentPose.getX();
+            double dy = s.y - currentPose.getY();
+            double distSq = dx * dx + dy * dy;
+
+            if (distSq < minDistanceSq) {
+                minDistanceSq = distSq;
+                closestSample = s;
+            }
+        }
+        if (closestSample == null) return new ChassisSpeeds();
+        double closestSampleTime = closestSample.t;
+
+        var lookAheadSampleOpt = trajectory.sampleAt(closestSampleTime + 0.1, AllianceFlipUtil.shouldFlip());
+
+        if (lookAheadSampleOpt.isPresent()) {
+            SwerveSample sample = lookAheadSampleOpt.get();
+
 
             robotState.setTrajectory(Optional.of(poses));
             robotState.setTrajectorySample(Optional.of(sample.getPose()));
