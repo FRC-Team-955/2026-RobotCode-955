@@ -72,7 +72,6 @@ public class FollowTrajectoryController {
         double minDistanceSq = Double.MAX_VALUE;
 
         for (var s : trajectory.samples()) {
-            if (s.t < minT) continue;
 
             double dx = s.x - currentPose.getX();
             double dy = s.y - currentPose.getY();
@@ -83,36 +82,34 @@ public class FollowTrajectoryController {
                 closestSample = s;
             }
         }
-        if (closestSample == null) return new ChassisSpeeds();
+        if (closestSample == null) {
+            Util.error("No closest sample at " + timer.get() + " for trajectory " + trajectory.name());
+            return new ChassisSpeeds();
+        }
         double closestSampleTime = closestSample.t;
         minT = closestSampleTime;
         var lookAheadSampleOpt = trajectory.sampleAt(closestSampleTime + 0.1, AllianceFlipUtil.shouldFlip());
-
-        if (lookAheadSampleOpt.isPresent()) {
-            SwerveSample sample = lookAheadSampleOpt.get();
+        var sample = lookAheadSampleOpt.orElse(closestSample);
 
 
-            robotState.setTrajectory(Optional.of(poses));
-            robotState.setTrajectorySample(Optional.of(sample.getPose()));
-            Logger.recordOutput("Drive/Trajectory", poses);
-            Logger.recordOutput("Drive/TrajectorySetpoint", sample.getPose());
+        robotState.setTrajectory(Optional.of(poses));
+        robotState.setTrajectorySample(Optional.of(sample.getPose()));
+        Logger.recordOutput("Drive/Trajectory", poses);
+        Logger.recordOutput("Drive/TrajectorySetpoint", sample.getPose());
 
-            ChassisSpeeds trajSpeeds = new ChassisSpeeds(
-                    sample.vx + feedbackX.calculate(currentPose.getX(), sample.x),
-                    sample.vy + feedbackY.calculate(currentPose.getY(), sample.y),
-                    sample.omega + feedbackOmega.calculate(currentPose.getRotation().getRadians(), sample.heading)
-            );
+        ChassisSpeeds trajSpeeds = new ChassisSpeeds(
+                sample.vx + feedbackX.calculate(currentPose.getX(), sample.x),
+                sample.vy + feedbackY.calculate(currentPose.getY(), sample.y),
+                sample.omega + feedbackOmega.calculate(currentPose.getRotation().getRadians(), sample.heading)
+        );
 
-            ChassisSpeeds smudgeSpeeds = smudgeGoalPoseSupplier != null &&
-                    smudgeGoalPoseSupplier.get() != null
-                    ? smudgeController.update()
-                    : new ChassisSpeeds();
+        ChassisSpeeds smudgeSpeeds = smudgeGoalPoseSupplier != null &&
+                smudgeGoalPoseSupplier.get() != null
+                ? smudgeController.update()
+                : new ChassisSpeeds();
 
-            return trajSpeeds.plus(smudgeSpeeds);
-        } else {
-            Util.error("No sample at " + timer.get() + " for trajectory " + trajectory.name());
-            return new ChassisSpeeds();
-        }
+        return trajSpeeds.plus(smudgeSpeeds);
+
     }
 
     public boolean isDone() {
