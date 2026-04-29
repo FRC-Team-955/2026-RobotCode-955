@@ -146,7 +146,7 @@ public class IntakePivot implements Periodic {
             goalState = new TrapezoidProfile.State(inputs.positionRad, 0.0);
             lookaheadState = goalState;
         } else if (goal == Goal.HOME) {
-            io.setVoltageRequest(-2.0);
+            io.setVoltageRequest(2.0);
         } else {
             // See the comments above the lookaheadState and goalState variables for why we effectively calculate two profiles
             boolean isInTrench = robotState.isInTrench(robotState.getTranslation().
