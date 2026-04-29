@@ -343,6 +343,10 @@ public class Drive extends CommandBasedSubsystem {
         Logger.recordOutput("Drive/ActualState", actualState);
     }
 
+    public boolean isPitchedOrRolled() {
+        return Math.abs(gyroInputs.orientation.getX()) > Units.degreesToRadians(15.0) || Math.abs(gyroInputs.orientation.getY()) > Units.degreesToRadians(15.0);
+    }
+
     private State evaluateStateMachine(State wantedState) {
         // Stop moving when idle or disabled
         if (wantedState == State.ACTUALLY_STOP || DriverStation.isDisabled()) {
