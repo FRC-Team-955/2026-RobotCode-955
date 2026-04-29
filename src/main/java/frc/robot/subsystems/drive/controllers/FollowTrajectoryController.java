@@ -83,7 +83,7 @@ public class FollowTrajectoryController {
             }
         }
         if (closestSample == null) {
-            Util.error("No sample at " + timer.get() + " for trajectory " + trajectory.name());
+            Util.error("No closest sample at " + timer.get() + " for trajectory " + trajectory.name());
             return new ChassisSpeeds();
         }
         double closestSampleTime = closestSample.t;
