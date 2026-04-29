@@ -143,7 +143,6 @@ public class Superstructure extends CommandBasedSubsystem {
                 }
                 if (Timer.getTimestamp() - lastStartedShot > 1.0) {
                     flywheel.setGoal(Flywheel.Goal.EJECT);
-                    feeder.setGoal(Feeder.Goal.EJECT);
                 }
             }
             case SHOOT, SHOOT_FORCE -> {
