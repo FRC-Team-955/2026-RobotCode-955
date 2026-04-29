@@ -25,9 +25,7 @@ public class Controller implements Periodic {
             ? new ControllerIOXbox(new CommandXboxController(0))
             : new ControllerIOPS5(new CommandPS5Controller(0));
 
-    private final ControllerIO secondaryIo = BuildConstants.isSim
-            ? new ControllerIOXbox(new CommandXboxController(1))
-            : new ControllerIOPS5(new CommandPS5Controller(1));
+    private final ControllerIO secondaryIo = new ControllerIOXbox(new CommandXboxController(1));
     private final Alert primaryDisconnectedAlert =
             new Alert("Primary Driver controller is not connected!", Alert.AlertType.kError);
     private final Alert secondaryDisconnectedAlert = new Alert("Secondary Drive controller is not connected!", Alert.AlertType.kError);
