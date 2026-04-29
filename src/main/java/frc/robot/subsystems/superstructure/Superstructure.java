@@ -85,7 +85,6 @@ public class Superstructure extends CommandBasedSubsystem {
 
     private final Debouncer hasFuelDebouncer = new Debouncer(hasFuelDebounceSeconds.get(), Debouncer.DebounceType.kFalling);
     private double lastStartedShot = 0.0;
-    private double lastStartedShotSecond = 0.0;
 
     @Getter
     private boolean hasFuel = false;
@@ -130,7 +129,6 @@ public class Superstructure extends CommandBasedSubsystem {
 
         if (goal != Goal.SHOOT && goal != Goal.SHOOT_FORCE) {
             lastStartedShot = Timer.getTimestamp();
-
         }
 
         switch (goal) {
@@ -143,7 +141,7 @@ public class Superstructure extends CommandBasedSubsystem {
                     case HOME_HOOD_FINALIZE -> hood.setGoal(Hood.Goal.HOME_FINALIZE);
                     default -> hood.setGoal(Hood.Goal.STOW);
                 }
-                if (Timer.getTimestamp() - lastStartedShotSecond > 1.0) {
+                if (Timer.getTimestamp() - lastStartedShot > 1.0) {
                     flywheel.setGoal(Flywheel.Goal.EJECT);
                     feeder.setGoal(Feeder.Goal.EJECT);
                 }
@@ -171,7 +169,6 @@ public class Superstructure extends CommandBasedSubsystem {
 
                     if (inputs.canrangeDistanceMeters < commitToShotThresholdMeters.get() && !needsToCommitToShot) {
                         lastStartedShot = Timer.getTimestamp();
-                        lastStartedShotSecond = lastStartedShot;
                     }
                 } else {
                     feeder.setGoal(Feeder.Goal.IDLE);
