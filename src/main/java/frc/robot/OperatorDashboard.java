@@ -54,7 +54,7 @@ public class OperatorDashboard implements Periodic {
     public final LoggedNetworkBooleanExt hoodEStop = new LoggedNetworkBooleanExt(prefix + "HoodEStop", false);
     public final LoggedNetworkBooleanExt intakePivotEStop = new LoggedNetworkBooleanExt(prefix + "IntakePivotEStop", false);
     public final LoggedNetworkNumberExt autoDelay = new LoggedNetworkNumberExt(prefix + "AutoDelay", 0.0);
-    public final LoggedNetworkNumberExt slipConstant = new LoggedNetworkNumberExt(prefix + "SlipConstant", 0.5);
+    public final LoggedNetworkNumberExt slipConstant = new LoggedNetworkNumberExt(prefix + "SlipConstant", 0.67);
 
     @Getter
     private ScoringMode selectedScoringMode = ScoringMode.ShootAndPassAutomatic;
