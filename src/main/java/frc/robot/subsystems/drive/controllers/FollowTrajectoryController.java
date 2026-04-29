@@ -72,14 +72,15 @@ public class FollowTrajectoryController {
         double minDistanceSq = Double.MAX_VALUE;
 
         for (var s : trajectory.samples()) {
-            double dx = s.x - currentPose.getX();
-            double dy = s.y - currentPose.getY();
-            double distSq = dx * dx + dy * dy;
+            if (s.t >= minT) {
+                double dx = s.x - currentPose.getX();
+                double dy = s.y - currentPose.getY();
+                double distSq = dx * dx + dy * dy;
 
-            if (distSq < minDistanceSq) {
-                minDistanceSq = distSq;
-                closestSample = s;
-
+                if (distSq < minDistanceSq) {
+                    minDistanceSq = distSq;
+                    closestSample = s;
+                }
             }
         }
         if (closestSample == null) {
