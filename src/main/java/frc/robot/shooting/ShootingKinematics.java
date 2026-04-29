@@ -211,11 +211,6 @@ public class ShootingKinematics implements Periodic {
                 <= velocityToleranceRPM.get();
         Logger.recordOutput("ShootingKinematics/VelocityMet", velocityMet);
         velocityMet = velocityMetDebouncer.calculate(velocityMet);
-        boolean orientationMet = !drive.isPitchedOrRolled();
-        Logger.recordOutput("ShootingKinematics/OrientationMet", orientationMet);
-        orientationMet = orientationDebouncer.calculate(orientationMet);
-        Logger.recordOutput("ShootingKinematics/OrientationMetDebounced", orientationMet);
-
         if (BuildConstants.isSimOrReplay) Logger.recordOutput("ShootingKinematics/VelocityMetDebounced", velocityMet);
 
         boolean angleMet = Math.abs(superstructure.hood.getShotAngleRad() - noPhaseDelayParameters.angleRad())
@@ -228,7 +223,13 @@ public class ShootingKinematics implements Periodic {
                         robotState.getPoseUncertaintyAngularRad() < 0.005);
         Logger.recordOutput("ShootingKinematics/UncertaintyMet", uncertaintyMet);
 
-        shootingParametersMet = shiftMet && headingMet && headingVelocityMet && velocityMet && angleMet && uncertaintyMet && orientationMet;
+        boolean orientationMet = !drive.isPitchedOrRolled();
+        Logger.recordOutput("ShootingKinematics/OrientationMet", orientationMet);
+        orientationMet = orientationDebouncer.calculate(orientationMet);
+        if (BuildConstants.isSimOrReplay)
+            Logger.recordOutput("ShootingKinematics/OrientationMetDebounced", orientationMet);
+
+        shootingParametersMet = shiftMet && headingMet && headingVelocityMet && velocityMet && angleMet && uncertaintyMet /*&& orientationMet*/;
         if (noPhaseDelayParameters.isPass()) {
             shootingParametersMet = passDebouncer.calculate(shootingParametersMet);
         }
