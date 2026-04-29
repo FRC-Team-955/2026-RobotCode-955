@@ -65,8 +65,8 @@ public class HubShiftTracker implements Periodic {
     private static final double minFuelCountDelay = 0.5;
     private static final double maxFuelCountDelay = 2.0;
     private static final double shiftEndFuelCountExtension = 3.0;
-    private static final DoubleSupplier approachingActiveFudgeSupplier = () -> -1 * (minFuelCountDelay + shootingKinematics.getShootingParameters().timeOfFlightSeconds().orElse(0.0));
-    private static final DoubleSupplier endingActiveFudgeSupplier = () -> shiftEndFuelCountExtension + -1 * (maxFuelCountDelay + shootingKinematics.getShootingParameters().timeOfFlightSeconds().orElse(0.0));
+    private static final DoubleSupplier approachingActiveFudgeSupplier = () -> -1 * (minFuelCountDelay + shootingKinematics.getLastScoringTimeOfFlightSeconds());
+    private static final DoubleSupplier endingActiveFudgeSupplier = () -> shiftEndFuelCountExtension + -1 * (maxFuelCountDelay + shootingKinematics.getLastScoringTimeOfFlightSeconds());
 
     private static final double autoEndTime = 20.0;
     private static final boolean[] activeSchedule = {true, true, false, true, false, true};
