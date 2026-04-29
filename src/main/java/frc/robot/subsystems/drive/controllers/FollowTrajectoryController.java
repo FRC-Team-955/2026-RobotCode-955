@@ -118,7 +118,7 @@ public class FollowTrajectoryController {
     public boolean isDone() {
         return trajectory != null && (
                 timer.hasElapsed(trajectory.getTotalTime()) ||
-                        minSampleT > trajectory.getTotalTime() - 0.2
+                        minSampleT >= trajectory.getTotalTime()
         );
     }
 }
