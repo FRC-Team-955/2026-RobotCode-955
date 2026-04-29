@@ -141,9 +141,6 @@ public class Superstructure extends CommandBasedSubsystem {
                     case HOME_HOOD_FINALIZE -> hood.setGoal(Hood.Goal.HOME_FINALIZE);
                     default -> hood.setGoal(Hood.Goal.STOW);
                 }
-                if (Timer.getTimestamp() - lastStartedShot > 1.0) {
-                    flywheel.setGoal(Flywheel.Goal.EJECT);
-                }
             }
             case SHOOT, SHOOT_FORCE -> {
                 flywheel.setGoal(Flywheel.Goal.SHOOT);
@@ -176,7 +173,6 @@ public class Superstructure extends CommandBasedSubsystem {
                     } else {
                         spindexer.setGoal(Spindexer.Goal.IDLE);
                     }
-
                 }
             }
             case EJECT -> {
@@ -186,9 +182,6 @@ public class Superstructure extends CommandBasedSubsystem {
                 hood.setGoal(Hood.Goal.STOW);
             }
         }
-        //if (Timer.getTimestamp() - lastStartedShot > 1.0) {
-        //    flywheel.setGoal(flywheel.getGoal());
-        //}
 
         if (BuildConstants.isSimOrReplay)
             Logger.recordOutput("Superstructure/LastStartedShot", lastStartedShot);
