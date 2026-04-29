@@ -2,8 +2,10 @@ package frc.robot.autos;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.AllianceFlipUtil;
 import frc.lib.commands.CommandsExt;
+import frc.robot.OperatorDashboard;
 import frc.robot.RobotState;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.superintake.Superintake;
@@ -14,6 +16,7 @@ public abstract class Auto {
     protected static final Superintake superintake = Superintake.get();
     protected static final Superstructure superstructure = Superstructure.get();
     protected static final RobotState robotState = RobotState.get();
+    protected static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
 
     public final Pose2d startingPose;
     public final Command command;
@@ -21,6 +24,7 @@ public abstract class Auto {
     protected Auto(Pose2d startingPose, Command command) {
         this.startingPose = startingPose;
         this.command = CommandsExt.eagerSequence(
+                Commands.waitSeconds(operatorDashboard.autoDelay.get()),
                 robotState.setPose(() -> AllianceFlipUtil.apply(startingPose)),
                 command
         );
