@@ -23,16 +23,15 @@ import org.littletonrobotics.junction.Logger;
 
 import java.util.OptionalDouble;
 import java.util.function.DoubleFunction;
-import java.util.function.DoubleUnaryOperator;
 
 import static frc.robot.subsystems.drive.DriveConstants.driveConfig;
 
 public class ShootingKinematics implements Periodic {
-    private static final Drive drive = Drive.get();
-
     // KEEP SYNCED WITH shooting_regression.py
     private static final double bottomOfFrameRailsToShooterHeightMeters = Units.inchesToMeters(12.861380);
     private static final double shooterRadiusToCenterOfBallExitMeters = Units.inchesToMeters(4.602756);
+
+    private static final Drive drive = Drive.get();
 
     private static final LoggedTunableNumber headingToleranceDeg = new LoggedTunableNumber("ShootingKinematics/HeadingToleranceDegrees", 10.0);
     private static final LoggedTunableNumber headingTolerancePassingDeg = new LoggedTunableNumber("ShootingKinematics/HeadingTolerancePassingDegrees", 20.0);
@@ -49,38 +48,6 @@ public class ShootingKinematics implements Periodic {
                     Math.sin(hoodAngleRad) * shooterRadiusToCenterOfBallExitMeters
     );
     public static final Rotation2d fuelExitRotation = Rotation2d.k180deg;
-
-    private static final DoubleUnaryOperator velocityToRPM;
-    //private static final InterpolatingDoubleTreeMap velocityToRPMMap = new InterpolatingDoubleTreeMap();
-
-    static {
-        //velocityToRPMMap.put(6.96, 1766);
-        //velocityToRPMMap.put(7.415, 1900);
-        //velocityToRPMMap.put(8.035, 2085.5);
-        //velocityToRPMMap.put(8.535, 2233);
-        //velocityToRPMMap.put(9.09, 2449);
-        //velocityToRPMMap.put(10.08, 2742.7);
-
-        // Manually Tuned Mk2
-        //velocityToRPMMap.put(6.99, 1740.6);
-        //velocityToRPMMap.put(7.24, 1830);
-        //velocityToRPMMap.put(7.54, 1936);
-        //velocityToRPMMap.put(7.76, 2005);
-        //velocityToRPMMap.put(8.00, 2073);
-        //velocityToRPMMap.put(8.22, 2150);
-        //velocityToRPMMap.put(8.53, 2240);
-        //velocityToRPMMap.put(8.72, 2308);
-        //velocityToRPMMap.put(9.00, 2362);
-        //velocityToRPMMap.put(9.22, 2467);
-        //velocityToRPMMap.put(9.48, 2512.6);
-        //velocityToRPMMap.put(10.0, 2723.2);
-
-        //velocityToRPM = (x) -> velocityToRPMMap.get(x);
-
-        // https://www.desmos.com/calculator/qruuow8ohv
-        //
-        velocityToRPM = (x) -> 316.01807 * x - 456.30162 + 30;
-    }
 
     private static final RobotState robotState = RobotState.get();
     private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
@@ -360,10 +327,11 @@ public class ShootingKinematics implements Periodic {
             Logger.recordOutput(key + "Theta", theta);
         }
 
+        double velocityRPM = Units.radiansPerSecondToRotationsPerMinute(v / FlywheelConstants.flywheelRadiusMeters);
         return new ShootingParameters(
                 BuildConstants.isSim
-                        ? Units.radiansPerSecondToRotationsPerMinute(v / FlywheelConstants.flywheelRadiusMeters)
-                        : velocityToRPM.applyAsDouble(v),
+                        ? velocityRPM
+                        : velocityRPM / operatorDashboard.slipConstant.get(),
                 Math.sqrt(vx * vx + vy * vy),
                 phi,
                 theta,
