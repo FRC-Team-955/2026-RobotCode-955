@@ -5,6 +5,7 @@ import choreo.trajectory.Trajectory;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.Timer;
 import frc.lib.AllianceFlipUtil;
 import frc.lib.Util;
 import frc.robot.RobotState;
@@ -20,10 +21,11 @@ import static frc.robot.subsystems.drive.DriveConstants.choreoFeedbackXY;
 public class FollowTrajectoryController {
     private static final RobotState robotState = RobotState.get();
 
+    private final Timer timer = new Timer();
     private final PIDController feedbackX = choreoFeedbackXY.toPID();
     private final PIDController feedbackY = choreoFeedbackXY.toPID();
     private final PIDController feedbackOmega = choreoFeedbackOmega.toPIDWrapRadians();
-
+    private double minT = 0.0;
     private final MoveToController smudgeController = new MoveToController();
     private @Nullable Supplier<Pose2d> smudgeGoalPoseSupplier = null;
 
@@ -41,11 +43,11 @@ public class FollowTrajectoryController {
     }
 
     private @Nullable Trajectory<SwerveSample> trajectory = null;
-    private double minSampleT = 0.0;
 
     public void start(Trajectory<SwerveSample> trajectory, @Nullable Supplier<Pose2d> smudgeGoalPoseSupplier) {
         this.trajectory = trajectory;
-        minSampleT = 0.0;
+        minT = 0.0;
+        timer.restart();
 
         feedbackX.reset();
         feedbackY.reset();
@@ -58,50 +60,49 @@ public class FollowTrajectoryController {
     }
 
     public ChassisSpeeds update() {
+
         if (trajectory == null) {
             Util.error("Trajectory is null");
             return new ChassisSpeeds();
         }
 
+        Pose2d[] poses = trajectory.getPoses();
         var currentPose = robotState.getPose();
 
-        SwerveSample feedforwardSample = null;
+        SwerveSample closestSample = null;
         double minDistanceSq = Double.MAX_VALUE;
+
         for (var s : trajectory.samples()) {
-            if (s.t < minSampleT - 0.1 || s.t > minSampleT + 0.5) continue;
+            if (minT > s.t) continue;
             double dx = s.x - currentPose.getX();
             double dy = s.y - currentPose.getY();
             double distSq = dx * dx + dy * dy;
 
             if (distSq < minDistanceSq) {
                 minDistanceSq = distSq;
-                feedforwardSample = s;
+                closestSample = s;
+
             }
         }
-        if (feedforwardSample == null) {
-            Util.error("No feedforward after " + minSampleT + " for trajectory " + trajectory.name());
+        if (closestSample == null) {
+            Util.error("No sample at " + timer.get() + " for trajectory " + trajectory.name());
             return new ChassisSpeeds();
         }
-        minSampleT = feedforwardSample.t;
+        double closestSampleTime = closestSample.t;
+        minT = closestSampleTime;
+        var lookAheadSampleOpt = trajectory.sampleAt(closestSampleTime + 0.1, AllianceFlipUtil.shouldFlip());
+        var sample = lookAheadSampleOpt.orElse(closestSample);
 
-        var feedbackSample = trajectory.sampleAt(feedforwardSample.t + 0.1, AllianceFlipUtil.shouldFlip())
-                .or(() -> trajectory.getFinalSample(AllianceFlipUtil.shouldFlip()))
-                .orElse(null);
-        if (feedbackSample == null) {
-            Util.error("No feedback sample for trajectory " + trajectory.name());
-            return new ChassisSpeeds();
-        }
 
-        Pose2d[] poses = trajectory.getPoses();
         robotState.setTrajectory(Optional.of(poses));
-        robotState.setTrajectorySample(Optional.of(feedforwardSample.getPose()));
+        robotState.setTrajectorySample(Optional.of(sample.getPose()));
         Logger.recordOutput("Drive/Trajectory", poses);
-        Logger.recordOutput("Drive/TrajectorySetpoint", feedforwardSample.getPose());
+        Logger.recordOutput("Drive/TrajectorySetpoint", sample.getPose());
 
         ChassisSpeeds trajSpeeds = new ChassisSpeeds(
-                feedforwardSample.vx + feedbackX.calculate(currentPose.getX(), feedbackSample.x),
-                feedforwardSample.vy + feedbackY.calculate(currentPose.getY(), feedbackSample.y),
-                feedforwardSample.omega + feedbackOmega.calculate(currentPose.getRotation().getRadians(), feedbackSample.heading)
+                sample.vx + feedbackX.calculate(currentPose.getX(), sample.x),
+                sample.vy + feedbackY.calculate(currentPose.getY(), sample.y),
+                sample.omega + feedbackOmega.calculate(currentPose.getRotation().getRadians(), sample.heading)
         );
 
         ChassisSpeeds smudgeSpeeds = smudgeGoalPoseSupplier != null &&
@@ -110,9 +111,10 @@ public class FollowTrajectoryController {
                 : new ChassisSpeeds();
 
         return trajSpeeds.plus(smudgeSpeeds);
+
     }
 
     public boolean isDone() {
-        return trajectory != null && minSampleT > trajectory.getTotalTime();
+        return trajectory != null && timer.hasElapsed(trajectory.getTotalTime());
     }
 }
