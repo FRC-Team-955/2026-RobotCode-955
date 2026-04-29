@@ -27,8 +27,8 @@ public class Controller implements Periodic {
 
     private final ControllerIO secondaryIo = new ControllerIOXbox(new CommandXboxController(1));
     private final Alert primaryDisconnectedAlert =
-            new Alert("Primary Driver controller is not connected!", Alert.AlertType.kError);
-    private final Alert secondaryDisconnectedAlert = new Alert("Secondary Drive controller is not connected!", Alert.AlertType.kError);
+            new Alert("Primary controller is not connected!", Alert.AlertType.kError);
+    private final Alert secondaryDisconnectedAlert = new Alert("Secondary controller is not connected!", Alert.AlertType.kError);
 
     @Getter
     private Rotation2d driveLinearDirection = new Rotation2d();
