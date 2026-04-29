@@ -5,6 +5,7 @@ import choreo.trajectory.Trajectory;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.Timer;
 import frc.lib.AllianceFlipUtil;
 import frc.lib.Util;
 import frc.robot.RobotState;
@@ -20,6 +21,7 @@ import static frc.robot.subsystems.drive.DriveConstants.choreoFeedbackXY;
 public class FollowTrajectoryController {
     private static final RobotState robotState = RobotState.get();
 
+    private final Timer timer = new Timer();
     private final PIDController feedbackX = choreoFeedbackXY.toPID();
     private final PIDController feedbackY = choreoFeedbackXY.toPID();
     private final PIDController feedbackOmega = choreoFeedbackOmega.toPIDWrapRadians();
@@ -47,6 +49,7 @@ public class FollowTrajectoryController {
         this.trajectory = trajectory;
         minSampleT = 0.0;
 
+        timer.restart();
         feedbackX.reset();
         feedbackY.reset();
         feedbackOmega.reset();
@@ -113,6 +116,9 @@ public class FollowTrajectoryController {
     }
 
     public boolean isDone() {
-        return trajectory != null && minSampleT > trajectory.getTotalTime();
+        return trajectory != null && (
+                timer.hasElapsed(trajectory.getTotalTime()) ||
+                        minSampleT > trajectory.getTotalTime() - 0.2
+        );
     }
 }
