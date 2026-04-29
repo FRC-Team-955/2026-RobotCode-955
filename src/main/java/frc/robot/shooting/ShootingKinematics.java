@@ -98,6 +98,7 @@ public class ShootingKinematics implements Periodic {
     private final Debouncer velocityMetDebouncer = new Debouncer(0.15, Debouncer.DebounceType.kFalling);
     private final Debouncer headingVelocityDebouncer = new Debouncer(0.10, Debouncer.DebounceType.kFalling);
     private final Debouncer passDebouncer = new Debouncer(0.5, Debouncer.DebounceType.kFalling);
+    private final Debouncer orientationDebouncer = new Debouncer(0.1, Debouncer.DebounceType.kFalling);
 
     private ShootingParameters noPhaseDelayParameters = new ShootingParameters(
             0.0,
@@ -210,6 +211,11 @@ public class ShootingKinematics implements Periodic {
                 <= velocityToleranceRPM.get();
         Logger.recordOutput("ShootingKinematics/VelocityMet", velocityMet);
         velocityMet = velocityMetDebouncer.calculate(velocityMet);
+        boolean orientationMet = !drive.isPitchedOrRolled();
+        Logger.recordOutput("ShootingKinematics/OrientationMet", orientationMet);
+        orientationMet = orientationDebouncer.calculate(orientationMet);
+        Logger.recordOutput("ShootingKinematics/OrientationMetDebounced", orientationMet);
+
         if (BuildConstants.isSimOrReplay) Logger.recordOutput("ShootingKinematics/VelocityMetDebounced", velocityMet);
 
         boolean angleMet = Math.abs(superstructure.hood.getShotAngleRad() - noPhaseDelayParameters.angleRad())
@@ -222,7 +228,7 @@ public class ShootingKinematics implements Periodic {
                         robotState.getPoseUncertaintyAngularRad() < 0.005);
         Logger.recordOutput("ShootingKinematics/UncertaintyMet", uncertaintyMet);
 
-        shootingParametersMet = shiftMet && headingMet && headingVelocityMet && velocityMet && angleMet && uncertaintyMet;
+        shootingParametersMet = shiftMet && headingMet && headingVelocityMet && velocityMet && angleMet && uncertaintyMet && orientationMet;
         if (noPhaseDelayParameters.isPass()) {
             shootingParametersMet = passDebouncer.calculate(shootingParametersMet);
         }
