@@ -85,7 +85,7 @@ public class FollowTrajectoryController {
         }
         if (closestSample == null) return new ChassisSpeeds();
         double closestSampleTime = closestSample.t;
-        minT = closestSampleTime;
+
         var lookAheadSampleOpt = trajectory.sampleAt(closestSampleTime + 0.1, AllianceFlipUtil.shouldFlip());
 
         if (lookAheadSampleOpt.isPresent()) {
