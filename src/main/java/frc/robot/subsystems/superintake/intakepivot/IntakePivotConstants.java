@@ -13,7 +13,7 @@ public class IntakePivotConstants {
 
     static final double minPositionRad = Units.degreesToRadians(16.827716);
     static final double maxPositionRad = Units.degreesToRadians(95.554559);
-    static final double initialPositionRad = minPositionRad;
+    static final double initialPositionRad = maxPositionRad;
     static final double maxPositionUnderTrench = Units.degreesToRadians(20.0);
     static final double tresholdForLoweringUnderTrench = minPositionRad + Units.degreesToRadians(45.0);
 
