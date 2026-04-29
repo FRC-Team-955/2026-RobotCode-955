@@ -46,7 +46,7 @@ public class FollowTrajectoryController {
 
     public void start(Trajectory<SwerveSample> trajectory, @Nullable Supplier<Pose2d> smudgeGoalPoseSupplier) {
         this.trajectory = trajectory;
-        minT = 0.0;
+
         timer.restart();
 
         feedbackX.reset();
@@ -60,7 +60,6 @@ public class FollowTrajectoryController {
     }
 
     public ChassisSpeeds update() {
-
         if (trajectory == null) {
             Util.error("Trajectory is null");
             return new ChassisSpeeds();
@@ -73,7 +72,6 @@ public class FollowTrajectoryController {
         double minDistanceSq = Double.MAX_VALUE;
 
         for (var s : trajectory.samples()) {
-            if (minT > s.t) continue;
             double dx = s.x - currentPose.getX();
             double dy = s.y - currentPose.getY();
             double distSq = dx * dx + dy * dy;
