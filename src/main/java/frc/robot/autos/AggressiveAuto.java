@@ -39,7 +39,12 @@ public class AggressiveAuto extends Auto {
                         false),
 
                 // go through trench and shoot
-                AutoHelpers.trajectory(ChoreoTraj.AggressiveOutpost$3, flipY),
+                AutoHelpers.checkWaypoint(
+                        flipY
+                                ? () -> ChoreoAllianceFlipUtil.getMirrorY().flip(ChoreoTraj.AggressiveOutpost$3.endPoseBlue())
+                                : ChoreoTraj.AggressiveOutpost$3::endPoseBlue,
+                        defaultMoveToConstraints,
+                        false),
                 superstructure.setGoal(Superstructure.Goal.SHOOT).until(() -> true),
                 Commands.parallel(
                         superintake.intakeShootAlternate(),
@@ -67,7 +72,12 @@ public class AggressiveAuto extends Auto {
                 ),
 
                 // go through trench and shoot
-                AutoHelpers.trajectory(ChoreoTraj.AggressiveOutpost$8, flipY),
+                AutoHelpers.checkWaypoint(
+                        flipY
+                                ? () -> ChoreoAllianceFlipUtil.getMirrorY().flip(ChoreoTraj.AggressiveOutpost$8.endPoseBlue())
+                                : ChoreoTraj.AggressiveOutpost$8::endPoseBlue,
+                        defaultMoveToConstraints,
+                        false),
                 superstructure.setGoal(Superstructure.Goal.SHOOT).until(() -> true),
                 Commands.parallel(
                         superintake.intakeShootAlternate(),

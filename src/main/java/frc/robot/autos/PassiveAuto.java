@@ -39,7 +39,13 @@ public class PassiveAuto extends Auto {
                         false),
 
                 // go through trench and shoot
-                AutoHelpers.trajectory(ChoreoTraj.PassiveOutpost$3, flipY),
+                AutoHelpers.checkWaypoint(
+                        flipY
+                                ? () -> ChoreoAllianceFlipUtil.getMirrorY().flip(ChoreoTraj.PassiveOutpost$3.endPoseBlue())
+                                : ChoreoTraj.PassiveOutpost$3::endPoseBlue,
+                        defaultMoveToConstraints,
+                        false
+                ),
                 superstructure.setGoal(Superstructure.Goal.SHOOT).until(() -> true),
                 Commands.parallel(
                         superintake.intakeShootAlternate(),
@@ -67,7 +73,13 @@ public class PassiveAuto extends Auto {
                 ),
 
                 // go through trench and shoot
-                AutoHelpers.trajectory(ChoreoTraj.PassiveOutpost$8, flipY),
+                AutoHelpers.checkWaypoint(
+                        flipY
+                                ? () -> ChoreoAllianceFlipUtil.getMirrorY().flip(ChoreoTraj.PassiveOutpost$8.endPoseBlue())
+                                : ChoreoTraj.PassiveOutpost$8::endPoseBlue,
+                        defaultMoveToConstraints,
+                        false
+                ),
                 superstructure.setGoal(Superstructure.Goal.SHOOT).until(() -> true),
                 Commands.parallel(
                         superintake.intakeShootAlternate(),
