@@ -185,6 +185,20 @@
               "period": 0.06,
               "data_type": "double"
             }
+          },
+          {
+            "title": "AutoDelay",
+            "x": 256.0,
+            "y": 0.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/NetworkInputs/Tuning/OperatorDashboard/AutoDelay",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
           }
         ]
       }
@@ -1078,6 +1092,34 @@
               "topic": "/Tuning/OperatorDashboard/IntakePivotEStop",
               "period": 0.06,
               "data_type": "boolean"
+            }
+          },
+          {
+            "title": "AutoDelay",
+            "x": 512.0,
+            "y": 128.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/Tuning/OperatorDashboard/AutoDelay",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "SlipConstant",
+            "x": 512.0,
+            "y": 0.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/Tuning/OperatorDashboard/SlipConstant",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
             }
           }
         ]
