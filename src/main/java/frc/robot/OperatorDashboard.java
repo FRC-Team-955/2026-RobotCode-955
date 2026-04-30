@@ -77,6 +77,7 @@ public class OperatorDashboard implements Periodic {
     private final Alert smudgesNotZeroAlert = new Alert("Smudges are not zero.", Alert.AlertType.kWarning);
     private final Alert disableShiftTrackingAlert = new Alert("Disable shift tracking is enabled.", Alert.AlertType.kWarning);
     private final Alert driveTurnAbsolutePIDAlert = new Alert("Drive turn absolute PID is enabled.", Alert.AlertType.kWarning);
+    private final Alert autoDelayNotZeroAlert = new Alert("Auto delay is not zero.", Alert.AlertType.kWarning);
 
     private final Debouncer lowBatteryDebouncer = new Debouncer(20.0, Debouncer.DebounceType.kRising);
 
@@ -130,6 +131,7 @@ public class OperatorDashboard implements Periodic {
         smudgesNotZeroAlert.set(manualFlywheelRPMSmudge.get() != 0.0 || slipConstantSmudge.get() != 0.0);
         disableShiftTrackingAlert.set(disableShiftTracking.get());
         driveTurnAbsolutePIDAlert.set(driveTurnAbsolutePID.get());
+        autoDelayNotZeroAlert.set(autoDelay.get() != 0.0);
     }
 
     private static <E extends Enum<E>> void handleEnumToggles(
