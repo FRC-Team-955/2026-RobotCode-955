@@ -95,8 +95,8 @@ public class AprilTagVisionConstants {
                                 .rotateBy(new Rotation3d(0.0, 0.0, Units.degreesToRadians(-35)))
                 ),
                 (cam) -> switch (BuildConstants.mode) {
-                    case REAL -> new AprilTagVisionIOPhotonVision("YellowCam");
-                    case SIM -> new AprilTagVisionIOPhotonVisionSim("YellowCam", cam.robotToCamera);
+                    case REAL -> new AprilTagVisionIOPhotonVision("ShooterCam2");
+                    case SIM -> new AprilTagVisionIOPhotonVisionSim("ShooterCam2", cam.robotToCamera);
                     case REPLAY -> new AprilTagVisionIO();
                 },
                 // Trust more at close distance, less at long distance
