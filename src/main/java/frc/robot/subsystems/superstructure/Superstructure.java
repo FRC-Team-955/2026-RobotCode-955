@@ -32,11 +32,11 @@ import static frc.robot.subsystems.superstructure.SuperstructureConstants.robotT
 public class Superstructure extends CommandBasedSubsystem {
     // https://v6.docs.ctr-electronics.com/en/stable/docs/application-notes/tuning-canrange.html
     private static final LoggedTunableNumber hasFuelThresholdMeters = new LoggedTunableNumber("Superstructure/HasFuelThresholdMeters", 0.5);
-    private static final LoggedTunableNumber hasFuelDebounceSeconds = new LoggedTunableNumber("Superstructure/HasFuelDebounceSeconds", 1.0);
+    private static final LoggedTunableNumber hasFuelDebounceSeconds = new LoggedTunableNumber("Superstructure/HasFuelDebounceSeconds", 0.8);
     private static final LoggedTunableNumber commitToShotThresholdMeters = new LoggedTunableNumber("Superstructure/CommitToShotThresholdMeters", 0.15);
     private static final LoggedTunableNumber commitToShotTimeSeconds = new LoggedTunableNumber("Superstructure/CommitToShotTimeSeconds", 0.1);
     private static final LoggedTunableNumber antiJamStartSeconds = new LoggedTunableNumber("Superstructure/AntiJamStartSeconds", 0.35);
-    private static final LoggedTunableNumber antiJamTimeSeconds = new LoggedTunableNumber("Superstructure/AntiJamTimeSeconds", 0.15);
+    private static final LoggedTunableNumber antiJamTimeSeconds = new LoggedTunableNumber("Superstructure/AntiJamTimeSeconds", 0.3);
 
     private static final RobotState robotState = RobotState.get();
     private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
