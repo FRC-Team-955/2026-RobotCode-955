@@ -511,6 +511,41 @@ public record ChoreoTraj(
         new Pose2d(5.9, 0.65, Rotation2d.fromRadians(1.5708)),
         new Pose2d(2.79278, 0.7572, Rotation2d.fromRadians(-2.18709))
     );
+    public static final ChoreoTraj Delaybump = new ChoreoTraj(
+        "Delaybump",
+        OptionalInt.empty(),
+        4.1701,
+        new Pose2d(3.3, 2.5, Rotation2d.fromRadians(0.7854)),
+        new Pose2d(3.09357, 2.44972, Rotation2d.fromRadians(-2.35619))
+    );
+    public static final ChoreoTraj Delaybump$0 = new ChoreoTraj(
+        "Delaybump",
+        OptionalInt.of(0),
+        0.91729,
+        new Pose2d(3.3, 2.5, Rotation2d.fromRadians(0.7854)),
+        new Pose2d(5.8795, 2.49787, Rotation2d.fromRadians(0.7854))
+    );
+    public static final ChoreoTraj Delaybump$1 = new ChoreoTraj(
+        "Delaybump",
+        OptionalInt.of(1),
+        2.11425,
+        new Pose2d(5.8795, 2.49787, Rotation2d.fromRadians(0.7854)),
+        new Pose2d(7.24186, 2.52412, Rotation2d.fromRadians(-2.45766))
+    );
+    public static final ChoreoTraj Delaybump$2 = new ChoreoTraj(
+        "Delaybump",
+        OptionalInt.of(2),
+        0.30547999999999975,
+        new Pose2d(7.24186, 2.52412, Rotation2d.fromRadians(-2.45766)),
+        new Pose2d(5.86401, 2.5, Rotation2d.fromRadians(-2.41495))
+    );
+    public static final ChoreoTraj Delaybump$3 = new ChoreoTraj(
+        "Delaybump",
+        OptionalInt.of(3),
+        0.8330799999999998,
+        new Pose2d(5.86401, 2.5, Rotation2d.fromRadians(-2.41495)),
+        new Pose2d(3.09357, 2.44972, Rotation2d.fromRadians(-2.35619))
+    );
 
     /**
      * A map between trajectory names and their corresponding data.
@@ -586,7 +621,12 @@ public record ChoreoTraj(
         Map.entry("PassiveOutpost$6", PassiveOutpost$6),
         Map.entry("PassiveOutpost$7", PassiveOutpost$7),
         Map.entry("PassiveOutpost$8", PassiveOutpost$8),
-        Map.entry("StealAuto1540_FirstPass", StealAuto1540_FirstPass)
+        Map.entry("StealAuto1540_FirstPass", StealAuto1540_FirstPass),
+        Map.entry("Delaybump", Delaybump),
+        Map.entry("Delaybump$0", Delaybump$0),
+        Map.entry("Delaybump$1", Delaybump$1),
+        Map.entry("Delaybump$2", Delaybump$2),
+        Map.entry("Delaybump$3", Delaybump$3)
     );
 
     /**
