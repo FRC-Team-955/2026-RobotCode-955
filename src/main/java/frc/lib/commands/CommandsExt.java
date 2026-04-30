@@ -5,6 +5,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 
 import java.util.function.BooleanSupplier;
+import java.util.function.DoubleSupplier;
 
 public class CommandsExt {
     public static Command waitUntilRequirements(BooleanSupplier isFinished, Subsystem... requirements) {
@@ -53,5 +54,9 @@ public class CommandsExt {
 
     public static Command repeatingEagerSequence(Command... commands) {
         return eagerSequence(commands).repeatedly();
+    }
+
+    public static Command suppliedWaitSeconds(DoubleSupplier secondsSupplier) {
+        return new SuppliedWaitCommand(secondsSupplier);
     }
 }
