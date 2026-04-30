@@ -45,8 +45,8 @@ public class OperatorDashboard implements Periodic {
     public final LoggedNetworkBooleanExt disableUncertainty = new LoggedNetworkBooleanExt(prefix + "DisableUncertainty", false);
     public final LoggedNetworkBooleanExt disableAssist = new LoggedNetworkBooleanExt(prefix + "DisableAssist", false);
     public final LoggedNetworkBooleanExt disableCANrange = new LoggedNetworkBooleanExt(prefix + "DisableCANrange", false);
-    public final LoggedNetworkNumberExt flywheelSmudgeRPM = new LoggedNetworkNumberExt(prefix + "FlywheelSmudgeRPM", 0.0);
-    public final LoggedNetworkNumberExt hoodSmudgeDegrees = new LoggedNetworkNumberExt(prefix + "HoodSmudgeDegrees", 0.0);
+    public final LoggedNetworkNumberExt manualFlywheelRPMSmudge = new LoggedNetworkNumberExt(prefix + "ManualFlywheelRPMSmudge", 0.0);
+    public final LoggedNetworkNumberExt slipConstantSmudge = new LoggedNetworkNumberExt(prefix + "SlipConstantSmudge", 0.0);
     public final LoggedNetworkBooleanExt lostAuto = new LoggedNetworkBooleanExt(prefix + "LostAuto", false);
     public final LoggedNetworkBooleanExt wonAuto = new LoggedNetworkBooleanExt(prefix + "WonAuto", false);
     public final LoggedNetworkBooleanExt disableShiftTracking = new LoggedNetworkBooleanExt(prefix + "DisableShiftTracking", BuildConstants.isSim);
@@ -54,7 +54,6 @@ public class OperatorDashboard implements Periodic {
     public final LoggedNetworkBooleanExt hoodEStop = new LoggedNetworkBooleanExt(prefix + "HoodEStop", false);
     public final LoggedNetworkBooleanExt intakePivotEStop = new LoggedNetworkBooleanExt(prefix + "IntakePivotEStop", false);
     public final LoggedNetworkNumberExt autoDelay = new LoggedNetworkNumberExt(prefix + "AutoDelay", 0.0);
-    public final LoggedNetworkNumberExt slipConstant = new LoggedNetworkNumberExt(prefix + "SlipConstant", 0.69);
 
     @Getter
     private ScoringMode selectedScoringMode = ScoringMode.ShootAndPassAutomatic;
@@ -128,7 +127,7 @@ public class OperatorDashboard implements Periodic {
         disableUncertaintyAlert.set(disableUncertainty.get());
         disableAssistAlert.set(disableAssist.get());
         disabledCANrangeAlert.set(disableCANrange.get());
-        smudgesNotZeroAlert.set(flywheelSmudgeRPM.get() != 0 || hoodSmudgeDegrees.get() != 0);
+        smudgesNotZeroAlert.set(manualFlywheelRPMSmudge.get() != 0.0 || slipConstantSmudge.get() != 0.0);
         disableShiftTrackingAlert.set(disableShiftTracking.get());
         driveTurnAbsolutePIDAlert.set(driveTurnAbsolutePID.get());
     }

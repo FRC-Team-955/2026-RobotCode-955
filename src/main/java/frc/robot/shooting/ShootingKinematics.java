@@ -19,6 +19,7 @@ import frc.robot.subsystems.superstructure.flywheel.FlywheelConstants;
 import frc.robot.subsystems.superstructure.hood.HoodConstants;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.With;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.OptionalDouble;
@@ -27,6 +28,9 @@ import java.util.function.DoubleFunction;
 import static frc.robot.subsystems.drive.DriveConstants.driveConfig;
 
 public class ShootingKinematics implements Periodic {
+    /** Actual RPM * slip constant = exerted RPM (linear speed of ball = surface speed) */
+    public static final double slipConstant = 0.69;
+
     // KEEP SYNCED WITH shooting_regression.py
     private static final double bottomOfFrameRailsToShooterHeightMeters = Units.inchesToMeters(12.861380);
     private static final double shooterRadiusToCenterOfBallExitMeters = Units.inchesToMeters(4.602756);
@@ -108,22 +112,11 @@ public class ShootingKinematics implements Periodic {
             noPhaseDelayParameters = getShootingParametersAutomaticForPhaseDelay(PhaseDelay.None);
         } else {
             shootingParameters = getShootingParametersManual();
+            shootingParameters = shootingParameters.withVelocityRPM(
+                    shootingParameters.velocityRPM() + operatorDashboard.manualFlywheelRPMSmudge.get()
+            );
             noPhaseDelayParameters = shootingParameters;
         }
-        shootingParameters = new ShootingParameters(
-                shootingParameters.velocityRPM() + operatorDashboard.flywheelSmudgeRPM.get(),
-                shootingParameters.velocityXYMetersPerSec * (shootingParameters.velocityRPM() + operatorDashboard.flywheelSmudgeRPM.get()) / shootingParameters.velocityRPM(),
-                shootingParameters.angleRad() + Units.degreesToRadians(operatorDashboard.hoodSmudgeDegrees.get()),
-                shootingParameters.headingRad(),
-                shootingParameters.isPass()
-        );
-        noPhaseDelayParameters = new ShootingParameters(
-                noPhaseDelayParameters.velocityRPM() + operatorDashboard.flywheelSmudgeRPM.get(),
-                noPhaseDelayParameters.velocityXYMetersPerSec,
-                noPhaseDelayParameters.angleRad() + Units.degreesToRadians(operatorDashboard.hoodSmudgeDegrees.get()),
-                noPhaseDelayParameters.headingRad(),
-                noPhaseDelayParameters.isPass()
-        );
 
         if (BuildConstants.isSimOrReplay) {
             Logger.recordOutput("ShootingKinematics/ShootingParameters/None/LastScoringTimeOfFlightSeconds", lastScoringTimeOfFlightSeconds);
@@ -331,7 +324,7 @@ public class ShootingKinematics implements Periodic {
         return new ShootingParameters(
                 BuildConstants.isSim
                         ? velocityRPM
-                        : velocityRPM / operatorDashboard.slipConstant.get(),
+                        : velocityRPM / (slipConstant + operatorDashboard.slipConstantSmudge.get()),
                 Math.sqrt(vx * vx + vy * vy),
                 phi,
                 theta,
@@ -441,6 +434,7 @@ public class ShootingKinematics implements Periodic {
 
     private record FuelExitToTarget(Translation3d translation, Rotation2d angle) {}
 
+    @With
     public record ShootingParameters(
             double velocityRPM,
             double velocityXYMetersPerSec,
