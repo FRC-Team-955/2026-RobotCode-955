@@ -89,10 +89,10 @@ public class AprilTagVisionConstants {
         ),
         ShooterCam2(
                 new Transform3d(
-                        Units.inchesToMeters(2.587107), Units.inchesToMeters(-13.097332), Units.inchesToMeters(8.470000),
+                        Units.inchesToMeters(2.471001), Units.inchesToMeters(-14.565997), Units.inchesToMeters(9.702640),
                         // Rotation order matters
                         new Rotation3d(0.0, Units.degreesToRadians(-15), 0.0)
-                                .rotateBy(new Rotation3d(0.0, 0.0, Units.degreesToRadians(-35)))
+                                .rotateBy(new Rotation3d(0.0, 0.0, Units.degreesToRadians(-(90.0 - 35.0))))
                 ),
                 (cam) -> switch (BuildConstants.mode) {
                     case REAL -> new AprilTagVisionIOPhotonVision("ShooterCam2");
