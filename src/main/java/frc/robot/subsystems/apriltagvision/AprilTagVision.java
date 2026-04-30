@@ -89,6 +89,8 @@ public class AprilTagVision implements Periodic {
             Camera metadata = cam.getKey();
             CameraData data = cam.getValue();
 
+            if (metadata == Camera.ShooterCam2) continue;
+
             // Initialize logging values
             List<Pose3d> tagPoses = new LinkedList<>();
             List<Pose3d> robotPoses = new LinkedList<>();
