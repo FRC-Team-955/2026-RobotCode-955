@@ -118,8 +118,7 @@ public class Superstructure extends CommandBasedSubsystem {
             hasFuelDebouncer.setDebounceTime(hasFuelDebounceSeconds.get());
         }
 
-        hasFuel = !operatorDashboard.disableCANrange.get() &&
-                hasFuelDebouncer.calculate(inputs.canrangeDistanceMeters < hasFuelThresholdMeters.get());
+        hasFuel = hasFuelDebouncer.calculate(inputs.canrangeDistanceMeters < hasFuelThresholdMeters.get());
         Logger.recordOutput("Superstructure/HasFuel", hasFuel);
     }
 
@@ -146,8 +145,7 @@ public class Superstructure extends CommandBasedSubsystem {
                 flywheel.setGoal(Flywheel.Goal.SHOOT);
                 hood.setGoal(Hood.Goal.SHOOT);
 
-                boolean needsToCommitToShot = !operatorDashboard.disableCANrange.get() &&
-                        Timer.getTimestamp() - lastStartedShot < commitToShotTimeSeconds.get();
+                boolean needsToCommitToShot = Timer.getTimestamp() - lastStartedShot < commitToShotTimeSeconds.get();
                 if (BuildConstants.isSimOrReplay)
                     Logger.recordOutput("Superstructure/NeedsToCommitToShot", needsToCommitToShot);
                 boolean shouldShoot = shootingKinematics.isShootingParametersMet() || needsToCommitToShot;

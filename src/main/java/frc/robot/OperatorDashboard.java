@@ -40,11 +40,7 @@ public class OperatorDashboard implements Periodic {
     public final LoggedNetworkBooleanExt coastOverride = new LoggedNetworkBooleanExt(prefix + "CoastOverride", false);
     public final LoggedNetworkBooleanExt autoChosen = new LoggedNetworkBooleanExt(prefix + "AutoChosen", false);
     public final LoggedNetworkBooleanExt recordingStarted = new LoggedNetworkBooleanExt(prefix + "RecordingStarted", false);
-    public final LoggedNetworkBooleanExt fixedHood = new LoggedNetworkBooleanExt(prefix + "FixedHood", false);
     public final LoggedNetworkBooleanExt manualAiming = new LoggedNetworkBooleanExt(prefix + "ManualAiming", false);
-    public final LoggedNetworkBooleanExt disableUncertainty = new LoggedNetworkBooleanExt(prefix + "DisableUncertainty", false);
-    public final LoggedNetworkBooleanExt disableAssist = new LoggedNetworkBooleanExt(prefix + "DisableAssist", false);
-    public final LoggedNetworkBooleanExt disableCANrange = new LoggedNetworkBooleanExt(prefix + "DisableCANrange", false);
     public final LoggedNetworkNumberExt manualFlywheelRPMSmudge = new LoggedNetworkNumberExt(prefix + "ManualFlywheelRPMSmudge", 0.0);
     public final LoggedNetworkNumberExt slipConstantSmudge = new LoggedNetworkNumberExt(prefix + "SlipConstantSmudge", 0.0);
     public final LoggedNetworkBooleanExt lostAuto = new LoggedNetworkBooleanExt(prefix + "LostAuto", false);
@@ -69,11 +65,7 @@ public class OperatorDashboard implements Periodic {
     @SuppressWarnings("FieldCanBeLocal")
     private final Alert constantSetAlert = new Alert("Constants are set.", Alert.AlertType.kInfo);
     private final Alert batteryVoltageAlert = new Alert("Battery is below 12 volts!", Alert.AlertType.kError);
-    private final Alert fixedHoodAlert = new Alert("Fixed hood mode is enabled.", Alert.AlertType.kWarning);
     private final Alert manualAimingAlert = new Alert("Manual aiming is enabled.", Alert.AlertType.kWarning);
-    private final Alert disableUncertaintyAlert = new Alert("Disable uncertainty is enabled.", Alert.AlertType.kWarning);
-    private final Alert disableAssistAlert = new Alert("Disable assist is enabled.", Alert.AlertType.kWarning);
-    private final Alert disabledCANrangeAlert = new Alert("CANrange is disabled.", Alert.AlertType.kWarning);
     private final Alert smudgesNotZeroAlert = new Alert("Smudges are not zero.", Alert.AlertType.kWarning);
     private final Alert disableShiftTrackingAlert = new Alert("Disable shift tracking is enabled.", Alert.AlertType.kWarning);
     private final Alert driveTurnAbsolutePIDAlert = new Alert("Drive turn absolute PID is enabled.", Alert.AlertType.kWarning);
@@ -123,11 +115,7 @@ public class OperatorDashboard implements Periodic {
         recordingNotStartedAlert.set(!recordingStarted.get());
         //autoNotAlignedAlert.set(DriverStation.isDisabled() && !autoManager.isAtAutoStartingPose());
         batteryVoltageAlert.set(lowBatteryDebouncer.calculate(RobotController.getBatteryVoltage() <= 11.8));
-        fixedHoodAlert.set(fixedHood.get());
         manualAimingAlert.set(manualAiming.get());
-        disableUncertaintyAlert.set(disableUncertainty.get());
-        disableAssistAlert.set(disableAssist.get());
-        disabledCANrangeAlert.set(disableCANrange.get());
         smudgesNotZeroAlert.set(manualFlywheelRPMSmudge.get() != 0.0 || slipConstantSmudge.get() != 0.0);
         disableShiftTrackingAlert.set(disableShiftTracking.get());
         driveTurnAbsolutePIDAlert.set(driveTurnAbsolutePID.get());

@@ -595,19 +595,6 @@
             }
           },
           {
-            "title": "FixedHood",
-            "x": 768.0,
-            "y": 0.0,
-            "width": 128.0,
-            "height": 128.0,
-            "type": "Toggle Switch",
-            "properties": {
-              "topic": "/Tuning/OperatorDashboard/FixedHood",
-              "period": 0.06,
-              "data_type": "boolean"
-            }
-          },
-          {
             "title": "Alerts",
             "x": 1664.0,
             "y": 0.0,
@@ -620,33 +607,6 @@
             }
           },
           {
-            "title": "DisableCANrange",
-            "x": 640.0,
-            "y": 128.0,
-            "width": 256.0,
-            "height": 128.0,
-            "type": "Toggle Switch",
-            "properties": {
-              "topic": "/Tuning/OperatorDashboard/DisableCANrange",
-              "period": 0.06,
-              "data_type": "boolean"
-            }
-          },
-          {
-            "title": "HoodSmudgeDegrees",
-            "x": 256.0,
-            "y": 128.0,
-            "width": 256.0,
-            "height": 128.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "/Tuning/OperatorDashboard/HoodSmudgeDegrees",
-              "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": false
-            }
-          },
-          {
             "title": "DisableShiftTracking",
             "x": 1152.0,
             "y": 128.0,
@@ -655,19 +615,6 @@
             "type": "Toggle Switch",
             "properties": {
               "topic": "/Tuning/OperatorDashboard/DisableShiftTracking",
-              "period": 0.06,
-              "data_type": "boolean"
-            }
-          },
-          {
-            "title": "DisableAssist",
-            "x": 896.0,
-            "y": 0.0,
-            "width": 128.0,
-            "height": 128.0,
-            "type": "Toggle Switch",
-            "properties": {
-              "topic": "/Tuning/OperatorDashboard/DisableAssist",
               "period": 0.06,
               "data_type": "boolean"
             }
@@ -700,7 +647,7 @@
           },
           {
             "title": "DriveTurnAbsolutePID",
-            "x": 640.0,
+            "x": 768.0,
             "y": 256.0,
             "width": 256.0,
             "height": 128.0,
@@ -836,9 +783,9 @@
           },
           {
             "title": "HoodEStop",
-            "x": 896.0,
+            "x": 768.0,
             "y": 128.0,
-            "width": 128.0,
+            "width": 256.0,
             "height": 128.0,
             "type": "Toggle Switch",
             "properties": {
@@ -1024,19 +971,6 @@
             }
           },
           {
-            "title": "DisableUncertainty",
-            "x": 1152.0,
-            "y": 384.0,
-            "width": 128.0,
-            "height": 128.0,
-            "type": "Toggle Switch",
-            "properties": {
-              "topic": "/Tuning/OperatorDashboard/DisableUncertainty",
-              "period": 0.06,
-              "data_type": "boolean"
-            }
-          },
-          {
             "title": "UncertaintyMet",
             "x": 1024.0,
             "y": 384.0,
@@ -1051,20 +985,6 @@
               "false_color": 4294198070,
               "true_icon": "None",
               "false_icon": "None"
-            }
-          },
-          {
-            "title": "FlywheelSmudgeRPM",
-            "x": 256.0,
-            "y": 0.0,
-            "width": 256.0,
-            "height": 128.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "/Tuning/OperatorDashboard/FlywheelSmudgeRPM",
-              "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": false
             }
           },
           {
@@ -1083,9 +1003,9 @@
           },
           {
             "title": "IntakePivotEStop",
-            "x": 896.0,
-            "y": 256.0,
-            "width": 128.0,
+            "x": 768.0,
+            "y": 0.0,
+            "width": 256.0,
             "height": 128.0,
             "type": "Toggle Switch",
             "properties": {
@@ -1109,14 +1029,28 @@
             }
           },
           {
-            "title": "SlipConstant",
-            "x": 512.0,
+            "title": "ManualFlywheelRPMSmudge",
+            "x": 256.0,
             "y": 0.0,
-            "width": 128.0,
+            "width": 256.0,
             "height": 128.0,
             "type": "Text Display",
             "properties": {
-              "topic": "/Tuning/OperatorDashboard/SlipConstant",
+              "topic": "/Tuning/OperatorDashboard/ManualFlywheelRPMSmudge",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "SlipConstantSmudge",
+            "x": 256.0,
+            "y": 128.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/Tuning/OperatorDashboard/SlipConstantSmudge",
               "period": 0.06,
               "data_type": "double",
               "show_submit_button": false

@@ -21,7 +21,6 @@ import frc.robot.subsystems.superstructure.Superstructure;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 import java.util.OptionalDouble;
-import java.util.function.BooleanSupplier;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -88,7 +87,7 @@ public class RobotContainer {
         Trigger shootForce = controller.leftBumper();
         Trigger anyShoot = shoot.or(shootForce);
 
-        BooleanSupplier shouldNotAssist = () -> operatorDashboard.disableAssist.get() || robotState.isInTrench(robotState.getTranslation());
+        //BooleanSupplier shouldNotAssist = () -> robotState.isInTrench(robotState.getTranslation());
         controller.rightTrigger()
                 .or(controller.rightBumper().and(anyShoot))
                 .whileTrue(superintake.setGoal(Superintake.Goal.INTAKE));
