@@ -65,10 +65,7 @@ public class AutoManager {
         autoChooser.addOption("Delaybumpauto depot", new DelayBump(true));
         autoChooser.addOption("Delaybumpauto outpost", new DelayBump(false));
 
-
-
         robotState.setAutoStartPoseSupplier(this::getSelectedAutoStartingPose);
-
     }
 
     public Command getSelectedAutoCommand() {
