@@ -53,7 +53,7 @@ public class ShootingKinematics implements Periodic {
     );
     public static final Rotation2d fuelExitRotation = Rotation2d.k180deg;
 
-    private static final DoubleUnaryOperator passVelocityToRPM = (x) -> 316 * x - 456 + 30;
+    private static final DoubleUnaryOperator passVelocityToRPM = (x) -> 316 * x - 456 + 100;
 
     private static final RobotState robotState = RobotState.get();
     private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
