@@ -325,7 +325,7 @@ public class ShootingKinematics implements Periodic {
                         ? velocityRPM
                         : (
                         isPass
-                                ? passVelocityToRPM.applyAsDouble(v)
+                                ? passVelocityToRPM.applyAsDouble(v) + operatorDashboard.manualFlywheelRPMSmudge.get()
                                 : velocityRPM / (slipConstant + operatorDashboard.slipConstantSmudge.get())
                 ),
                 Math.sqrt(vx * vx + vy * vy),
