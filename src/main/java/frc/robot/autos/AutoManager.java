@@ -60,10 +60,9 @@ public class AutoManager {
         autoChooser.addOption("Aggressive depot", new AggressiveAuto(true));
         //autoChooser.addOption("Aggressive outpost bump", new AggressiveBumpAuto(false));
         //autoChooser.addOption("Aggressive depot bump", new AggressiveBumpAuto(true));
-        autoChooser.addOption("Aggressive outpost double bump", new AggressiveDoubleBumpAuto(false));
-        autoChooser.addOption("Aggressive depot double bump", new AggressiveDoubleBumpAuto(true));
-        autoChooser.addOption("Delaybumpauto depot", new DelayBump(true));
-        autoChooser.addOption("Delaybumpauto outpost", new DelayBump(false));
+        //autoChooser.addOption("Aggressive outpost double bump", new AggressiveDoubleBumpAuto(false));
+        //autoChooser.addOption("Aggressive depot double bump", new AggressiveDoubleBumpAuto(true));
+        autoChooser.addOption("Center -> depot -> bump", new AggressiveCenterBumpAuto());
 
         robotState.setAutoStartPoseSupplier(this::getSelectedAutoStartingPose);
     }

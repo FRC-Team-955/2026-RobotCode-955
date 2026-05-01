@@ -35,8 +35,8 @@ public class DelayBump extends Auto {
                 superstructure.setGoal(Superstructure.Goal.IDLE).until(() -> true),
                 // go over the bump
                 flipY
-                        ? AutoHelpers.goOverDepotSideBumpDelay(true)
-                        : AutoHelpers.goOverOutpostSideBumpDelay(true),
+                        ? AutoHelpers.goOverDepotSideBump(true)
+                        : AutoHelpers.goOverOutpostSideBump(true),
 
                 AutoHelpers.checkWaypoint(
                         flipY
@@ -72,8 +72,8 @@ public class DelayBump extends Auto {
 
                 // go over the bump
                 flipY
-                        ? AutoHelpers.goOverDepotSideBumpDelay(false)
-                        : AutoHelpers.goOverOutpostSideBumpDelay(false),
+                        ? AutoHelpers.goOverDepotSideBump(false)
+                        : AutoHelpers.goOverOutpostSideBump(false),
 
                 Commands.parallel(
                         AutoHelpers.checkWaypoint(
@@ -97,8 +97,8 @@ public class DelayBump extends Auto {
 
                 // go over the bump
                 flipY
-                        ? AutoHelpers.goOverDepotSideBumpDelay(true)
-                        : AutoHelpers.goOverOutpostSideBumpDelay(true),
+                        ? AutoHelpers.goOverDepotSideBump(true)
+                        : AutoHelpers.goOverOutpostSideBump(true),
 
                 AutoHelpers.checkWaypoint(
                         flipY
@@ -140,8 +140,8 @@ public class DelayBump extends Auto {
 
                 // go over the bump
                 flipY
-                        ? AutoHelpers.goOverDepotSideBumpDelay(false)
-                        : AutoHelpers.goOverOutpostSideBumpDelay(false),
+                        ? AutoHelpers.goOverDepotSideBump(false)
+                        : AutoHelpers.goOverOutpostSideBump(false),
 
                 Commands.parallel(
                         AutoHelpers.checkWaypoint(
@@ -163,8 +163,8 @@ public class DelayBump extends Auto {
 
                 // go over the bump
                 flipY
-                        ? AutoHelpers.goOverDepotSideBumpDelay(true)
-                        : AutoHelpers.goOverOutpostSideBumpDelay(true),
+                        ? AutoHelpers.goOverDepotSideBump(true)
+                        : AutoHelpers.goOverOutpostSideBump(true),
 
                 AutoHelpers.checkWaypoint(
                         flipY
@@ -199,8 +199,8 @@ public class DelayBump extends Auto {
 
                 // go over the bump
                 flipY
-                        ? AutoHelpers.goOverDepotSideBumpDelay(false)
-                        : AutoHelpers.goOverOutpostSideBumpDelay(false),
+                        ? AutoHelpers.goOverDepotSideBump(false)
+                        : AutoHelpers.goOverOutpostSideBump(false),
 
                 Commands.parallel(
                         AutoHelpers.checkWaypoint(

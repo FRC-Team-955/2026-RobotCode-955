@@ -28,7 +28,6 @@ public record ChoreoTraj(
         new Pose2d(3.52, 4.42, Rotation2d.fromRadians(3.14159)),
         new Pose2d(0.67, 6.5, Rotation2d.fromRadians(2.35619))
     );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
     public static final ChoreoTraj Clover_Auto$0 = new ChoreoTraj(
         "Clover_Auto",
         OptionalInt.of(0),
@@ -36,7 +35,6 @@ public record ChoreoTraj(
         new Pose2d(3.52, 4.42, Rotation2d.fromRadians(3.14159)),
         new Pose2d(3, 5.4, Rotation2d.fromRadians(3.14159))
     );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
     public static final ChoreoTraj Clover_Auto$1 = new ChoreoTraj(
         "Clover_Auto",
         OptionalInt.of(1),
@@ -44,7 +42,6 @@ public record ChoreoTraj(
         new Pose2d(3, 5.4, Rotation2d.fromRadians(3.14159)),
         new Pose2d(3.7, 5.4, Rotation2d.fromRadians(3.14159))
     );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
     public static final ChoreoTraj Clover_Auto$2 = new ChoreoTraj(
         "Clover_Auto",
         OptionalInt.of(2),
@@ -52,7 +49,6 @@ public record ChoreoTraj(
         new Pose2d(3.7, 5.4, Rotation2d.fromRadians(3.14159)),
         new Pose2d(5.95, 5.4, Rotation2d.fromRadians(-2.96706))
     );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
     public static final ChoreoTraj Clover_Auto$3 = new ChoreoTraj(
         "Clover_Auto",
         OptionalInt.of(3),
@@ -60,7 +56,6 @@ public record ChoreoTraj(
         new Pose2d(5.95, 5.4, Rotation2d.fromRadians(-2.96706)),
         new Pose2d(6, 5.28, Rotation2d.fromRadians(-3.05433))
     );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
     public static final ChoreoTraj Clover_Auto$4 = new ChoreoTraj(
         "Clover_Auto",
         OptionalInt.of(4),
@@ -68,7 +63,6 @@ public record ChoreoTraj(
         new Pose2d(6, 5.28, Rotation2d.fromRadians(-3.05433)),
         new Pose2d(3.25, 5.5, Rotation2d.fromRadians(3.14159))
     );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
     public static final ChoreoTraj Clover_Auto$5 = new ChoreoTraj(
         "Clover_Auto",
         OptionalInt.of(5),
@@ -76,7 +70,6 @@ public record ChoreoTraj(
         new Pose2d(3.25, 5.5, Rotation2d.fromRadians(3.14159)),
         new Pose2d(2.9, 5.5, Rotation2d.fromRadians(3.05801))
     );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
     public static final ChoreoTraj Clover_Auto$6 = new ChoreoTraj(
         "Clover_Auto",
         OptionalInt.of(6),
@@ -84,7 +77,6 @@ public record ChoreoTraj(
         new Pose2d(2.9, 5.5, Rotation2d.fromRadians(3.05801)),
         new Pose2d(0.65, 5.8, Rotation2d.fromRadians(2.79253))
     );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
     public static final ChoreoTraj Clover_Auto$7 = new ChoreoTraj(
         "Clover_Auto",
         OptionalInt.of(7),
@@ -106,7 +98,6 @@ public record ChoreoTraj(
         new Pose2d(4.4462, 0.622, Rotation2d.fromRadians(1.5708)),
         new Pose2d(3.08845, 2.5, Rotation2d.fromRadians(-2.35619))
     );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
     public static final ChoreoTraj AggressiveOutpostBump$0 = new ChoreoTraj(
         "AggressiveOutpostBump",
         OptionalInt.of(0),
@@ -114,7 +105,6 @@ public record ChoreoTraj(
         new Pose2d(4.4462, 0.622, Rotation2d.fromRadians(1.5708)),
         new Pose2d(5.77427, 0.622, Rotation2d.fromRadians(1.5708))
     );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
     public static final ChoreoTraj AggressiveOutpostBump$1 = new ChoreoTraj(
         "AggressiveOutpostBump",
         OptionalInt.of(1),
@@ -122,7 +112,6 @@ public record ChoreoTraj(
         new Pose2d(5.77427, 0.622, Rotation2d.fromRadians(1.5708)),
         new Pose2d(5.86401, 2.5, Rotation2d.fromRadians(-2.41495))
     );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
     public static final ChoreoTraj AggressiveOutpostBump$2 = new ChoreoTraj(
         "AggressiveOutpostBump",
         OptionalInt.of(2),
@@ -130,7 +119,6 @@ public record ChoreoTraj(
         new Pose2d(5.86401, 2.5, Rotation2d.fromRadians(-2.41495)),
         new Pose2d(3.07699, 2.5, Rotation2d.fromRadians(-2.35619))
     );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
     public static final ChoreoTraj AggressiveOutpostBump$3 = new ChoreoTraj(
         "AggressiveOutpostBump",
         OptionalInt.of(3),
@@ -138,7 +126,6 @@ public record ChoreoTraj(
         new Pose2d(3.07699, 2.5, Rotation2d.fromRadians(-2.35619)),
         new Pose2d(2.87081, 0.70574, Rotation2d.fromRadians(1.5708))
     );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
     public static final ChoreoTraj AggressiveOutpostBump$4 = new ChoreoTraj(
         "AggressiveOutpostBump",
         OptionalInt.of(4),
@@ -146,7 +133,6 @@ public record ChoreoTraj(
         new Pose2d(2.87081, 0.70574, Rotation2d.fromRadians(1.5708)),
         new Pose2d(5.77427, 0.622, Rotation2d.fromRadians(1.5708))
     );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
     public static final ChoreoTraj AggressiveOutpostBump$5 = new ChoreoTraj(
         "AggressiveOutpostBump",
         OptionalInt.of(5),
@@ -154,7 +140,6 @@ public record ChoreoTraj(
         new Pose2d(5.77427, 0.622, Rotation2d.fromRadians(1.5708)),
         new Pose2d(5.85409, 1.28606, Rotation2d.fromRadians(1.22427))
     );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
     public static final ChoreoTraj AggressiveOutpostBump$6 = new ChoreoTraj(
         "AggressiveOutpostBump",
         OptionalInt.of(6),
@@ -162,7 +147,6 @@ public record ChoreoTraj(
         new Pose2d(5.85409, 1.28606, Rotation2d.fromRadians(1.22427)),
         new Pose2d(7.6121, 1.64132, Rotation2d.fromRadians(-2.6031))
     );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
     public static final ChoreoTraj AggressiveOutpostBump$7 = new ChoreoTraj(
         "AggressiveOutpostBump",
         OptionalInt.of(7),
@@ -170,7 +154,6 @@ public record ChoreoTraj(
         new Pose2d(7.6121, 1.64132, Rotation2d.fromRadians(-2.6031)),
         new Pose2d(5.86401, 2.5, Rotation2d.fromRadians(-2.35619))
     );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
     public static final ChoreoTraj AggressiveOutpostBump$8 = new ChoreoTraj(
         "AggressiveOutpostBump",
         OptionalInt.of(8),
@@ -199,7 +182,6 @@ public record ChoreoTraj(
         new Pose2d(4.4462, 0.622, Rotation2d.fromRadians(1.5708)),
         new Pose2d(4.17427, 0.622, Rotation2d.fromRadians(-1.68631))
     );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
     public static final ChoreoTraj AggressiveOutpost$0 = new ChoreoTraj(
         "AggressiveOutpost",
         OptionalInt.of(0),
@@ -207,7 +189,6 @@ public record ChoreoTraj(
         new Pose2d(4.4462, 0.622, Rotation2d.fromRadians(1.5708)),
         new Pose2d(5.77427, 0.622, Rotation2d.fromRadians(1.5708))
     );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
     public static final ChoreoTraj AggressiveOutpost$1 = new ChoreoTraj(
         "AggressiveOutpost",
         OptionalInt.of(1),
@@ -215,7 +196,6 @@ public record ChoreoTraj(
         new Pose2d(5.77427, 0.622, Rotation2d.fromRadians(1.5708)),
         new Pose2d(8.19006, 3.18228, Rotation2d.fromRadians(2.00713))
     );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
     public static final ChoreoTraj AggressiveOutpost$2 = new ChoreoTraj(
         "AggressiveOutpost",
         OptionalInt.of(2),
@@ -223,7 +203,6 @@ public record ChoreoTraj(
         new Pose2d(8.19006, 3.18228, Rotation2d.fromRadians(2.00713)),
         new Pose2d(5.77427, 0.722, Rotation2d.fromRadians(-1.55334))
     );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
     public static final ChoreoTraj AggressiveOutpost$3 = new ChoreoTraj(
         "AggressiveOutpost",
         OptionalInt.of(3),
@@ -231,7 +210,6 @@ public record ChoreoTraj(
         new Pose2d(5.77427, 0.722, Rotation2d.fromRadians(-1.55334)),
         new Pose2d(4.17427, 0.622, Rotation2d.fromRadians(-1.69032))
     );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
     public static final ChoreoTraj AggressiveOutpost$4 = new ChoreoTraj(
         "AggressiveOutpost",
         OptionalInt.of(4),
@@ -239,7 +217,6 @@ public record ChoreoTraj(
         new Pose2d(4.17427, 0.622, Rotation2d.fromRadians(-1.69032)),
         new Pose2d(5.77427, 0.622, Rotation2d.fromRadians(-1.5708))
     );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
     public static final ChoreoTraj AggressiveOutpost$5 = new ChoreoTraj(
         "AggressiveOutpost",
         OptionalInt.of(5),
@@ -247,7 +224,6 @@ public record ChoreoTraj(
         new Pose2d(5.77427, 0.622, Rotation2d.fromRadians(-1.5708)),
         new Pose2d(5.85409, 1.28606, Rotation2d.fromRadians(1.22427))
     );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
     public static final ChoreoTraj AggressiveOutpost$6 = new ChoreoTraj(
         "AggressiveOutpost",
         OptionalInt.of(6),
@@ -255,7 +231,6 @@ public record ChoreoTraj(
         new Pose2d(5.85409, 1.28606, Rotation2d.fromRadians(1.22427)),
         new Pose2d(7.6121, 1.64132, Rotation2d.fromRadians(-1.65027))
     );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
     public static final ChoreoTraj AggressiveOutpost$7 = new ChoreoTraj(
         "AggressiveOutpost",
         OptionalInt.of(7),
@@ -263,7 +238,6 @@ public record ChoreoTraj(
         new Pose2d(7.6121, 1.64132, Rotation2d.fromRadians(-1.65027)),
         new Pose2d(5.77427, 0.622, Rotation2d.fromRadians(-1.5708))
     );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
     public static final ChoreoTraj AggressiveOutpost$8 = new ChoreoTraj(
         "AggressiveOutpost",
         OptionalInt.of(8),
@@ -306,7 +280,6 @@ public record ChoreoTraj(
         new Pose2d(4.4, 0.59382, Rotation2d.fromRadians(0)),
         new Pose2d(0.81781, 0.76175, Rotation2d.fromRadians(-2.43397))
     );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
     public static final ChoreoTraj OrbitPassingOutpost$0 = new ChoreoTraj(
         "OrbitPassingOutpost",
         OptionalInt.of(0),
@@ -314,7 +287,6 @@ public record ChoreoTraj(
         new Pose2d(4.4, 0.59382, Rotation2d.fromRadians(0)),
         new Pose2d(5.77427, 0.59382, Rotation2d.fromRadians(0))
     );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
     public static final ChoreoTraj OrbitPassingOutpost$1 = new ChoreoTraj(
         "OrbitPassingOutpost",
         OptionalInt.of(1),
@@ -322,7 +294,6 @@ public record ChoreoTraj(
         new Pose2d(5.77427, 0.59382, Rotation2d.fromRadians(0)),
         new Pose2d(6.89506, 2.90696, Rotation2d.fromRadians(0.16525))
     );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
     public static final ChoreoTraj OrbitPassingOutpost$2 = new ChoreoTraj(
         "OrbitPassingOutpost",
         OptionalInt.of(2),
@@ -330,7 +301,6 @@ public record ChoreoTraj(
         new Pose2d(6.89506, 2.90696, Rotation2d.fromRadians(0.16525)),
         new Pose2d(7.6807, 3.89817, Rotation2d.fromRadians(0.28054))
     );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
     public static final ChoreoTraj OrbitPassingOutpost$3 = new ChoreoTraj(
         "OrbitPassingOutpost",
         OptionalInt.of(3),
@@ -338,7 +308,6 @@ public record ChoreoTraj(
         new Pose2d(7.6807, 3.89817, Rotation2d.fromRadians(0.28054)),
         new Pose2d(5.86254, 0.59382, Rotation2d.fromRadians(3.14159))
     );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
     public static final ChoreoTraj OrbitPassingOutpost$4 = new ChoreoTraj(
         "OrbitPassingOutpost",
         OptionalInt.of(4),
@@ -346,7 +315,6 @@ public record ChoreoTraj(
         new Pose2d(5.86254, 0.59382, Rotation2d.fromRadians(3.14159)),
         new Pose2d(3.59712, 0.61583, Rotation2d.fromRadians(3.14159))
     );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
     public static final ChoreoTraj OrbitPassingOutpost$5 = new ChoreoTraj(
         "OrbitPassingOutpost",
         OptionalInt.of(5),
@@ -354,7 +322,6 @@ public record ChoreoTraj(
         new Pose2d(3.59712, 0.61583, Rotation2d.fromRadians(3.14159)),
         new Pose2d(2.61969, 3.01936, Rotation2d.fromRadians(-2.66694))
     );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
     public static final ChoreoTraj OrbitPassingOutpost$6 = new ChoreoTraj(
         "OrbitPassingOutpost",
         OptionalInt.of(6),
@@ -376,7 +343,6 @@ public record ChoreoTraj(
         new Pose2d(4.4462, 0.622, Rotation2d.fromRadians(1.5708)),
         new Pose2d(4.17427, 0.622, Rotation2d.fromRadians(-1.68634))
     );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
     public static final ChoreoTraj PassiveOutpost$0 = new ChoreoTraj(
         "PassiveOutpost",
         OptionalInt.of(0),
@@ -384,7 +350,6 @@ public record ChoreoTraj(
         new Pose2d(4.4462, 0.622, Rotation2d.fromRadians(1.5708)),
         new Pose2d(5.77427, 0.622, Rotation2d.fromRadians(1.5708))
     );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
     public static final ChoreoTraj PassiveOutpost$1 = new ChoreoTraj(
         "PassiveOutpost",
         OptionalInt.of(1),
@@ -392,7 +357,6 @@ public record ChoreoTraj(
         new Pose2d(5.77427, 0.622, Rotation2d.fromRadians(1.5708)),
         new Pose2d(7.49006, 3.08228, Rotation2d.fromRadians(1.5708))
     );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
     public static final ChoreoTraj PassiveOutpost$2 = new ChoreoTraj(
         "PassiveOutpost",
         OptionalInt.of(2),
@@ -400,7 +364,6 @@ public record ChoreoTraj(
         new Pose2d(7.49006, 3.08228, Rotation2d.fromRadians(1.5708)),
         new Pose2d(5.77427, 0.722, Rotation2d.fromRadians(-1.55334))
     );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
     public static final ChoreoTraj PassiveOutpost$3 = new ChoreoTraj(
         "PassiveOutpost",
         OptionalInt.of(3),
@@ -408,7 +371,6 @@ public record ChoreoTraj(
         new Pose2d(5.77427, 0.722, Rotation2d.fromRadians(-1.55334)),
         new Pose2d(4.17427, 0.622, Rotation2d.fromRadians(-1.69079))
     );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
     public static final ChoreoTraj PassiveOutpost$4 = new ChoreoTraj(
         "PassiveOutpost",
         OptionalInt.of(4),
@@ -416,7 +378,6 @@ public record ChoreoTraj(
         new Pose2d(4.17427, 0.622, Rotation2d.fromRadians(-1.69079)),
         new Pose2d(5.77427, 0.622, Rotation2d.fromRadians(-1.5708))
     );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
     public static final ChoreoTraj PassiveOutpost$5 = new ChoreoTraj(
         "PassiveOutpost",
         OptionalInt.of(5),
@@ -424,7 +385,6 @@ public record ChoreoTraj(
         new Pose2d(5.77427, 0.622, Rotation2d.fromRadians(-1.5708)),
         new Pose2d(5.85409, 1.28606, Rotation2d.fromRadians(1.22427))
     );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
     public static final ChoreoTraj PassiveOutpost$6 = new ChoreoTraj(
         "PassiveOutpost",
         OptionalInt.of(6),
@@ -432,7 +392,6 @@ public record ChoreoTraj(
         new Pose2d(5.85409, 1.28606, Rotation2d.fromRadians(1.22427)),
         new Pose2d(7.6121, 1.64132, Rotation2d.fromRadians(-1.66832))
     );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
     public static final ChoreoTraj PassiveOutpost$7 = new ChoreoTraj(
         "PassiveOutpost",
         OptionalInt.of(7),
@@ -440,7 +399,6 @@ public record ChoreoTraj(
         new Pose2d(7.6121, 1.64132, Rotation2d.fromRadians(-1.66832)),
         new Pose2d(5.77427, 0.622, Rotation2d.fromRadians(-1.5708))
     );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
     public static final ChoreoTraj PassiveOutpost$8 = new ChoreoTraj(
         "PassiveOutpost",
         OptionalInt.of(8),
@@ -469,7 +427,6 @@ public record ChoreoTraj(
         new Pose2d(3.3, 2.5, Rotation2d.fromRadians(0.7854)),
         new Pose2d(3.09357, 2.44972, Rotation2d.fromRadians(-2.35619))
     );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
     public static final ChoreoTraj Delaybump$0 = new ChoreoTraj(
         "Delaybump",
         OptionalInt.of(0),
@@ -477,7 +434,6 @@ public record ChoreoTraj(
         new Pose2d(3.3, 2.5, Rotation2d.fromRadians(0.7854)),
         new Pose2d(5.8795, 2.49787, Rotation2d.fromRadians(0.7854))
     );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
     public static final ChoreoTraj Delaybump$1 = new ChoreoTraj(
         "Delaybump",
         OptionalInt.of(1),
@@ -485,7 +441,6 @@ public record ChoreoTraj(
         new Pose2d(5.8795, 2.49787, Rotation2d.fromRadians(0.7854)),
         new Pose2d(7.24186, 2.52412, Rotation2d.fromRadians(-2.45766))
     );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
     public static final ChoreoTraj Delaybump$2 = new ChoreoTraj(
         "Delaybump",
         OptionalInt.of(2),
@@ -493,7 +448,6 @@ public record ChoreoTraj(
         new Pose2d(7.24186, 2.52412, Rotation2d.fromRadians(-2.45766)),
         new Pose2d(5.86401, 2.5, Rotation2d.fromRadians(-2.41495))
     );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
     public static final ChoreoTraj Delaybump$3 = new ChoreoTraj(
         "Delaybump",
         OptionalInt.of(3),
@@ -508,7 +462,6 @@ public record ChoreoTraj(
         new Pose2d(3.07982, 2.49099, Rotation2d.fromRadians(0.7854)),
         new Pose2d(3.09357, 2.44972, Rotation2d.fromRadians(-2.35619))
     );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
     public static final ChoreoTraj AggressiveOutpostBumpBump$0 = new ChoreoTraj(
         "AggressiveOutpostBumpBump",
         OptionalInt.of(0),
@@ -516,7 +469,6 @@ public record ChoreoTraj(
         new Pose2d(3.07982, 2.49099, Rotation2d.fromRadians(0.7854)),
         new Pose2d(5.8795, 2.49787, Rotation2d.fromRadians(0.7854))
     );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
     public static final ChoreoTraj AggressiveOutpostBumpBump$1 = new ChoreoTraj(
         "AggressiveOutpostBumpBump",
         OptionalInt.of(1),
@@ -524,7 +476,6 @@ public record ChoreoTraj(
         new Pose2d(5.8795, 2.49787, Rotation2d.fromRadians(0.7854)),
         new Pose2d(5.86401, 2.5, Rotation2d.fromRadians(-2.41495))
     );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
     public static final ChoreoTraj AggressiveOutpostBumpBump$2 = new ChoreoTraj(
         "AggressiveOutpostBumpBump",
         OptionalInt.of(2),
@@ -532,7 +483,6 @@ public record ChoreoTraj(
         new Pose2d(5.86401, 2.5, Rotation2d.fromRadians(-2.41495)),
         new Pose2d(3.09357, 2.44972, Rotation2d.fromRadians(-2.35619))
     );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
     public static final ChoreoTraj AggressiveOutpostBumpBump$3 = new ChoreoTraj(
         "AggressiveOutpostBumpBump",
         OptionalInt.of(3),
@@ -540,7 +490,6 @@ public record ChoreoTraj(
         new Pose2d(3.09357, 2.44972, Rotation2d.fromRadians(-2.35619)),
         new Pose2d(5.86401, 2.5, Rotation2d.fromRadians(-2.41495))
     );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
     public static final ChoreoTraj AggressiveOutpostBumpBump$4 = new ChoreoTraj(
         "AggressiveOutpostBumpBump",
         OptionalInt.of(4),
@@ -548,7 +497,6 @@ public record ChoreoTraj(
         new Pose2d(5.86401, 2.5, Rotation2d.fromRadians(-2.41495)),
         new Pose2d(6.18024, 3.45884, Rotation2d.fromRadians(1.20959))
     );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
     public static final ChoreoTraj AggressiveOutpostBumpBump$5 = new ChoreoTraj(
         "AggressiveOutpostBumpBump",
         OptionalInt.of(5),
@@ -556,7 +504,6 @@ public record ChoreoTraj(
         new Pose2d(6.18024, 3.45884, Rotation2d.fromRadians(1.20959)),
         new Pose2d(7.6121, 1.64132, Rotation2d.fromRadians(-1.70708))
     );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
     public static final ChoreoTraj AggressiveOutpostBumpBump$6 = new ChoreoTraj(
         "AggressiveOutpostBumpBump",
         OptionalInt.of(6),
@@ -564,7 +511,6 @@ public record ChoreoTraj(
         new Pose2d(7.6121, 1.64132, Rotation2d.fromRadians(-1.70708)),
         new Pose2d(5.86401, 2.5, Rotation2d.fromRadians(-2.35619))
     );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
     public static final ChoreoTraj AggressiveOutpostBumpBump$7 = new ChoreoTraj(
         "AggressiveOutpostBumpBump",
         OptionalInt.of(7),
@@ -572,7 +518,6 @@ public record ChoreoTraj(
         new Pose2d(5.86401, 2.5, Rotation2d.fromRadians(-2.35619)),
         new Pose2d(3.09357, 2.44972, Rotation2d.fromRadians(-2.35619))
     );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
     public static final ChoreoTraj AggressiveOutpostBumpBump$8 = new ChoreoTraj(
         "AggressiveOutpostBumpBump",
         OptionalInt.of(8),
@@ -580,7 +525,6 @@ public record ChoreoTraj(
         new Pose2d(3.09357, 2.44972, Rotation2d.fromRadians(-2.35619)),
         new Pose2d(5.86401, 2.5, Rotation2d.fromRadians(-2.41495))
     );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
     public static final ChoreoTraj AggressiveOutpostBumpBump$9 = new ChoreoTraj(
         "AggressiveOutpostBumpBump",
         OptionalInt.of(9),
@@ -588,7 +532,6 @@ public record ChoreoTraj(
         new Pose2d(5.86401, 2.5, Rotation2d.fromRadians(-2.41495)),
         new Pose2d(5.86401, 2.5, Rotation2d.fromRadians(-2.41495))
     );
-    /** ERROR: Can only use letters, 0-9, and _. Can't use $. Rename it in the Choreo app to fix this error. */
     public static final ChoreoTraj AggressiveOutpostBumpBump$10 = new ChoreoTraj(
         "AggressiveOutpostBumpBump",
         OptionalInt.of(10),
@@ -602,6 +545,90 @@ public record ChoreoTraj(
         2.22803,
         new Pose2d(6.5, 7.4, Rotation2d.fromRadians(-1.5708)),
         new Pose2d(7, 4, Rotation2d.fromRadians(1.5708))
+    );
+    public static final ChoreoTraj AggressiveOutpostCenterBump = new ChoreoTraj(
+        "AggressiveOutpostCenterBump",
+        OptionalInt.empty(),
+        11.70389,
+        new Pose2d(3.07982, 2.49099, Rotation2d.fromRadians(0.7854)),
+        new Pose2d(3.09357, 2.44972, Rotation2d.fromRadians(-2.35619))
+    );
+    public static final ChoreoTraj AggressiveOutpostCenterBump$0 = new ChoreoTraj(
+        "AggressiveOutpostCenterBump",
+        OptionalInt.of(0),
+        0.85289,
+        new Pose2d(3.07982, 2.49099, Rotation2d.fromRadians(0.7854)),
+        new Pose2d(5.8795, 2.49787, Rotation2d.fromRadians(0.7854))
+    );
+    public static final ChoreoTraj AggressiveOutpostCenterBump$1 = new ChoreoTraj(
+        "AggressiveOutpostCenterBump",
+        OptionalInt.of(1),
+        2.0054600000000002,
+        new Pose2d(5.8795, 2.49787, Rotation2d.fromRadians(0.7854)),
+        new Pose2d(5.86401, 2.5, Rotation2d.fromRadians(-2.41495))
+    );
+    public static final ChoreoTraj AggressiveOutpostCenterBump$2 = new ChoreoTraj(
+        "AggressiveOutpostCenterBump",
+        OptionalInt.of(2),
+        0.8376599999999996,
+        new Pose2d(5.86401, 2.5, Rotation2d.fromRadians(-2.41495)),
+        new Pose2d(3.09357, 2.44972, Rotation2d.fromRadians(-2.35619))
+    );
+    public static final ChoreoTraj AggressiveOutpostCenterBump$3 = new ChoreoTraj(
+        "AggressiveOutpostCenterBump",
+        OptionalInt.of(3),
+        0.8468000000000004,
+        new Pose2d(3.09357, 2.44972, Rotation2d.fromRadians(-2.35619)),
+        new Pose2d(5.86401, 2.5, Rotation2d.fromRadians(-2.41495))
+    );
+    public static final ChoreoTraj AggressiveOutpostCenterBump$4 = new ChoreoTraj(
+        "AggressiveOutpostCenterBump",
+        OptionalInt.of(4),
+        0.5177899999999998,
+        new Pose2d(5.86401, 2.5, Rotation2d.fromRadians(-2.41495)),
+        new Pose2d(6.90793, 3.09266, Rotation2d.fromRadians(1.20959))
+    );
+    public static final ChoreoTraj AggressiveOutpostCenterBump$5 = new ChoreoTraj(
+        "AggressiveOutpostCenterBump",
+        OptionalInt.of(5),
+        1.0136200000000004,
+        new Pose2d(6.90793, 3.09266, Rotation2d.fromRadians(1.20959)),
+        new Pose2d(5.78414, 5.05685, Rotation2d.fromRadians(-1.5708))
+    );
+    public static final ChoreoTraj AggressiveOutpostCenterBump$6 = new ChoreoTraj(
+        "AggressiveOutpostCenterBump",
+        OptionalInt.of(6),
+        0.93452,
+        new Pose2d(5.78414, 5.05685, Rotation2d.fromRadians(-1.5708)),
+        new Pose2d(5.86401, 2.5, Rotation2d.fromRadians(-2.35619))
+    );
+    public static final ChoreoTraj AggressiveOutpostCenterBump$7 = new ChoreoTraj(
+        "AggressiveOutpostCenterBump",
+        OptionalInt.of(7),
+        1.0496600000000003,
+        new Pose2d(5.86401, 2.5, Rotation2d.fromRadians(-2.35619)),
+        new Pose2d(3.09357, 2.44972, Rotation2d.fromRadians(-2.35619))
+    );
+    public static final ChoreoTraj AggressiveOutpostCenterBump$8 = new ChoreoTraj(
+        "AggressiveOutpostCenterBump",
+        OptionalInt.of(8),
+        0.8925999999999998,
+        new Pose2d(3.09357, 2.44972, Rotation2d.fromRadians(-2.35619)),
+        new Pose2d(5.86401, 2.5, Rotation2d.fromRadians(-2.41495))
+    );
+    public static final ChoreoTraj AggressiveOutpostCenterBump$9 = new ChoreoTraj(
+        "AggressiveOutpostCenterBump",
+        OptionalInt.of(9),
+        1.8614699999999988,
+        new Pose2d(5.86401, 2.5, Rotation2d.fromRadians(-2.41495)),
+        new Pose2d(5.86401, 2.5, Rotation2d.fromRadians(-2.41495))
+    );
+    public static final ChoreoTraj AggressiveOutpostCenterBump$10 = new ChoreoTraj(
+        "AggressiveOutpostCenterBump",
+        OptionalInt.of(10),
+        0.8914200000000001,
+        new Pose2d(5.86401, 2.5, Rotation2d.fromRadians(-2.41495)),
+        new Pose2d(3.09357, 2.44972, Rotation2d.fromRadians(-2.35619))
     );
 
     /**
@@ -683,7 +710,19 @@ public record ChoreoTraj(
         Map.entry("AggressiveOutpostBumpBump$8", AggressiveOutpostBumpBump$8),
         Map.entry("AggressiveOutpostBumpBump$9", AggressiveOutpostBumpBump$9),
         Map.entry("AggressiveOutpostBumpBump$10", AggressiveOutpostBumpBump$10),
-        Map.entry("OrbitDepotTilted", OrbitDepotTilted)
+        Map.entry("OrbitDepotTilted", OrbitDepotTilted),
+        Map.entry("AggressiveOutpostCenterBump", AggressiveOutpostCenterBump),
+        Map.entry("AggressiveOutpostCenterBump$0", AggressiveOutpostCenterBump$0),
+        Map.entry("AggressiveOutpostCenterBump$1", AggressiveOutpostCenterBump$1),
+        Map.entry("AggressiveOutpostCenterBump$2", AggressiveOutpostCenterBump$2),
+        Map.entry("AggressiveOutpostCenterBump$3", AggressiveOutpostCenterBump$3),
+        Map.entry("AggressiveOutpostCenterBump$4", AggressiveOutpostCenterBump$4),
+        Map.entry("AggressiveOutpostCenterBump$5", AggressiveOutpostCenterBump$5),
+        Map.entry("AggressiveOutpostCenterBump$6", AggressiveOutpostCenterBump$6),
+        Map.entry("AggressiveOutpostCenterBump$7", AggressiveOutpostCenterBump$7),
+        Map.entry("AggressiveOutpostCenterBump$8", AggressiveOutpostCenterBump$8),
+        Map.entry("AggressiveOutpostCenterBump$9", AggressiveOutpostCenterBump$9),
+        Map.entry("AggressiveOutpostCenterBump$10", AggressiveOutpostCenterBump$10)
     );
 
     /**
