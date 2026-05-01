@@ -134,7 +134,7 @@ public class Superstructure extends CommandBasedSubsystem {
             case IDLE, HOME_HOOD, HOME_HOOD_FINALIZE -> {
                 flywheel.setGoal(Flywheel.Goal.IDLE);
                 feeder.setGoal(Feeder.Goal.IDLE);
-                spindexer.setGoal(Spindexer.Goal.IDLE);
+                spindexer.setGoal(Spindexer.Goal.AGITATE);
                 switch (goal) {
                     case HOME_HOOD -> hood.setGoal(Hood.Goal.HOME);
                     case HOME_HOOD_FINALIZE -> hood.setGoal(Hood.Goal.HOME_FINALIZE);
@@ -166,11 +166,7 @@ public class Superstructure extends CommandBasedSubsystem {
                     }
                 } else {
                     feeder.setGoal(Feeder.Goal.IDLE);
-                    if (Timer.getTimestamp() % 3.0 < 0.1) {
-                        spindexer.setGoal(Spindexer.Goal.EJECT);
-                    } else {
-                        spindexer.setGoal(Spindexer.Goal.IDLE);
-                    }
+                    spindexer.setGoal(Spindexer.Goal.AGITATE);
                 }
             }
             case EJECT -> {
