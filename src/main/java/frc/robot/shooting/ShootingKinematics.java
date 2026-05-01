@@ -22,8 +22,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.With;
 import org.littletonrobotics.junction.Logger;
 
-import java.util.OptionalDouble;
 import java.util.function.DoubleFunction;
+import java.util.function.DoubleUnaryOperator;
 
 import static frc.robot.subsystems.drive.DriveConstants.driveConfig;
 
@@ -52,6 +52,8 @@ public class ShootingKinematics implements Periodic {
                     Math.sin(hoodAngleRad) * shooterRadiusToCenterOfBallExitMeters
     );
     public static final Rotation2d fuelExitRotation = Rotation2d.k180deg;
+
+    private static final DoubleUnaryOperator passVelocityToRPM = (x) -> 316 * x - 456 + 30;
 
     private static final RobotState robotState = RobotState.get();
     private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
@@ -264,8 +266,8 @@ public class ShootingKinematics implements Periodic {
 
         double v0;
         double angle;
-        OptionalDouble toF = OptionalDouble.empty();
-        if (shouldPass()) {
+        boolean isPass = shouldPass();
+        if (isPass) {
             v0 = PassingRegression.calculateVelocityMetersPerSec(xyDist, robotSpeedsTargetRelative.getX());
             angle = PassingRegression.angleRad;
         } else {
@@ -323,11 +325,15 @@ public class ShootingKinematics implements Periodic {
         return new ShootingParameters(
                 BuildConstants.isSim
                         ? velocityRPM
-                        : velocityRPM / (slipConstant + operatorDashboard.slipConstantSmudge.get()),
+                        : (
+                        isPass
+                                ? passVelocityToRPM.applyAsDouble(v)
+                                : velocityRPM / (slipConstant + operatorDashboard.slipConstantSmudge.get())
+                ),
                 Math.sqrt(vx * vx + vy * vy),
                 phi,
                 theta,
-                shouldPass()
+                isPass
         );
     }
 
