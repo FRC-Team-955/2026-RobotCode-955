@@ -329,6 +329,45 @@ public class AutoHelpers {
         );
     }
 
+    public static Command goOverDepotSideBumpDelay(Boolean reversed) {
+        double y = 5.5;
+        Rotation2d rotation = Rotation2d.fromDegrees(45);
+        if (reversed) {
+            return CommandsExt.eagerSequence(
+                    // go over the bump
+                    AutoHelpers.intermediateWaypoint(() -> new Pose2d(
+                            bumpEndX,
+                            y,
+                            rotation
+                    ), bumpConstraints, false),
+
+                    // go to the start of the bump
+                    AutoHelpers.intermediateWaypoint(() -> new Pose2d(
+                            bumpStartX,
+                            y,
+                            rotation
+                    ), defaultMoveToConstraints, false)
+            );
+        } else {
+            return CommandsExt.eagerSequence(
+                    // go to the start of the bump
+                    AutoHelpers.intermediateWaypoint(() -> new Pose2d(
+                            bumpStartX,
+                            y,
+                            rotation
+                    ), defaultMoveToConstraints, false),
+
+                    // go over the bump
+                    AutoHelpers.intermediateWaypoint(() -> new Pose2d(
+                            bumpEndX,
+                            y,
+                            rotation
+                    ), bumpConstraints, false)
+            );
+        }
+    }
+
+
     public static Command goOverDepotSideBump(Boolean reversed) {
         double y = 5.5;
         Rotation2d rotation = Rotation2d.fromDegrees(135);
@@ -423,6 +462,46 @@ public class AutoHelpers {
                             rotation
                     ), bumpConstraints, false)
             );
+
         }
     }
+    public static Command goOverOutpostSideBumpDelay(Boolean reversed) {
+        double y = 2.5;
+        Rotation2d rotation = Rotation2d.fromDegrees(-45);
+        if (reversed) {
+            return CommandsExt.eagerSequence(
+                    // go over the bump
+                    AutoHelpers.intermediateWaypoint(() -> new Pose2d(
+                            bumpEndX,
+                            y,
+                            rotation
+                    ), bumpConstraints, false),
+
+                    // go to the start of the bump
+                    AutoHelpers.intermediateWaypoint(() -> new Pose2d(
+                            bumpStartX,
+                            y,
+                            rotation
+                    ), defaultMoveToConstraints, false)
+            );
+        } else {
+            return CommandsExt.eagerSequence(
+                    // go to the start of the bump
+                    AutoHelpers.intermediateWaypoint(() -> new Pose2d(
+                            bumpStartX,
+                            y,
+                            rotation
+                    ), defaultMoveToConstraints, false),
+
+                    // go over the bump
+                    AutoHelpers.intermediateWaypoint(() -> new Pose2d(
+                            bumpEndX,
+                            y,
+                            rotation
+                    ), bumpConstraints, false)
+            );
+
+        }
+    }
+
 }

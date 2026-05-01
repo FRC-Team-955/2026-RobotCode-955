@@ -17,20 +17,26 @@ public class DelayBump extends Auto {
     private static final Pose2d starting = new Pose2d(
             3.3,
             2.5,
-            Rotation2d.fromDegrees(45)
+            Rotation2d.fromDegrees(-45)
     );
 
     public DelayBump(boolean flipY) {
-        super(flipY ? ChoreoAllianceFlipUtil.getMirrorY().flip(starting) : starting, build(flipY));
+        super(flipY ? ChoreoAllianceFlipUtil.getMirrorY().flip(new Pose2d(3.3, 2.5, Rotation2d.fromDegrees(-45))) : starting, build(flipY));
     }
 
     private static Command build(boolean flipY) {
         return CommandsExt.eagerSequence(
-
+                Commands.parallel(
+                        superintake.intakeShootAlternate(),
+                        superstructure.setGoal(Superstructure.Goal.SHOOT),
+                        drive.stop().withAiming()
+                ).withTimeout(3),
+                superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
+                superstructure.setGoal(Superstructure.Goal.IDLE).until(() -> true),
                 // go over the bump
                 flipY
-                        ? AutoHelpers.goOverDepotSideBump(true)
-                        : AutoHelpers.goOverOutpostSideBump(true),
+                        ? AutoHelpers.goOverDepotSideBumpDelay(true)
+                        : AutoHelpers.goOverOutpostSideBumpDelay(true),
 
                 AutoHelpers.checkWaypoint(
                         flipY
@@ -38,7 +44,7 @@ public class DelayBump extends Auto {
                                 new Pose2d(
                                         5.71,
                                         2.5,
-                                        Rotation2d.fromDegrees(45)
+                                        Rotation2d.fromDegrees(-45)
                                 )
                         )
                                 : () -> ChoreoAllianceFlipUtil.getMirrorY().flip(
@@ -66,14 +72,14 @@ public class DelayBump extends Auto {
 
                 // go over the bump
                 flipY
-                        ? AutoHelpers.goOverDepotSideBump(false)
-                        : AutoHelpers.goOverOutpostSideBump(false),
+                        ? AutoHelpers.goOverDepotSideBumpDelay(false)
+                        : AutoHelpers.goOverOutpostSideBumpDelay(false),
 
                 Commands.parallel(
                         AutoHelpers.checkWaypoint(
                                 flipY
                                         ? () -> ChoreoAllianceFlipUtil.getMirrorY().flip(starting)
-                                        : () -> starting,
+                                        : () -> new Pose2d(2, 3,Rotation2d.fromDegrees(20)),
                                 defaultMoveToConstraints,
                                 true),
 
@@ -91,8 +97,8 @@ public class DelayBump extends Auto {
 
                 // go over the bump
                 flipY
-                        ? AutoHelpers.goOverDepotSideBump(true)
-                        : AutoHelpers.goOverOutpostSideBump(true),
+                        ? AutoHelpers.goOverDepotSideBumpDelay(true)
+                        : AutoHelpers.goOverOutpostSideBumpDelay(true),
 
                 AutoHelpers.checkWaypoint(
                         flipY
@@ -100,7 +106,7 @@ public class DelayBump extends Auto {
                                 new Pose2d(
                                         5.71,
                                         2.5,
-                                        Rotation2d.fromDegrees(45)
+                                        Rotation2d.fromDegrees(-45)
                                 )
                         )
                                 : () -> ChoreoAllianceFlipUtil.getMirrorY().flip(
@@ -134,8 +140,8 @@ public class DelayBump extends Auto {
 
                 // go over the bump
                 flipY
-                        ? AutoHelpers.goOverDepotSideBump(false)
-                        : AutoHelpers.goOverOutpostSideBump(false),
+                        ? AutoHelpers.goOverDepotSideBumpDelay(false)
+                        : AutoHelpers.goOverOutpostSideBumpDelay(false),
 
                 Commands.parallel(
                         AutoHelpers.checkWaypoint(
@@ -157,8 +163,8 @@ public class DelayBump extends Auto {
 
                 // go over the bump
                 flipY
-                        ? AutoHelpers.goOverDepotSideBump(true)
-                        : AutoHelpers.goOverOutpostSideBump(true),
+                        ? AutoHelpers.goOverDepotSideBumpDelay(true)
+                        : AutoHelpers.goOverOutpostSideBumpDelay(true),
 
                 AutoHelpers.checkWaypoint(
                         flipY
@@ -193,8 +199,8 @@ public class DelayBump extends Auto {
 
                 // go over the bump
                 flipY
-                        ? AutoHelpers.goOverDepotSideBump(false)
-                        : AutoHelpers.goOverOutpostSideBump(false),
+                        ? AutoHelpers.goOverDepotSideBumpDelay(false)
+                        : AutoHelpers.goOverOutpostSideBumpDelay(false),
 
                 Commands.parallel(
                         AutoHelpers.checkWaypoint(
