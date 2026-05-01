@@ -145,7 +145,7 @@ public class ShootingKinematics implements Periodic {
         }
         Logger.recordOutput("ShootingKinematics/ShootingParameters/None/VelocityRPM", noPhaseDelayParameters.velocityRPM());
 
-        shiftMet = noPhaseDelayParameters.isPass() || operatorDashboard.disableShiftTracking.get() || hubShiftTracker.getShiftInfo().active();
+        shiftMet = operatorDashboard.disableShiftTracking.get() || hubShiftTracker.getShiftInfo().active();
         Logger.recordOutput("ShootingKinematics/ShiftMet", shiftMet);
 
         boolean headingMet = operatorDashboard.manualAiming.get() ||
@@ -177,9 +177,8 @@ public class ShootingKinematics implements Periodic {
                 <= Units.degreesToRadians(hoodToleranceDeg.get());
         Logger.recordOutput("ShootingKinematics/AngleMet", angleMet);
 
-        boolean uncertaintyMet = noPhaseDelayParameters.isPass() ||
-                (robotState.getPoseUncertaintyLinearMeters() < 0.3 &&
-                        robotState.getPoseUncertaintyAngularRad() < 0.005);
+        boolean uncertaintyMet = robotState.getPoseUncertaintyLinearMeters() < 0.3 &&
+                robotState.getPoseUncertaintyAngularRad() < 0.005;
         Logger.recordOutput("ShootingKinematics/UncertaintyMet", uncertaintyMet);
 
         boolean orientationMet = !drive.isPitchedOrRolled();
@@ -188,10 +187,9 @@ public class ShootingKinematics implements Periodic {
         if (BuildConstants.isSimOrReplay)
             Logger.recordOutput("ShootingKinematics/OrientationMetDebounced", orientationMet);
 
-        shootingParametersMet = shiftMet && headingMet && headingVelocityMet && velocityMet && angleMet && uncertaintyMet /*&& orientationMet*/;
-        if (noPhaseDelayParameters.isPass()) {
-            shootingParametersMet = passDebouncer.calculate(shootingParametersMet);
-        }
+        shootingParametersMet = noPhaseDelayParameters.isPass()
+                ? headingMet && headingVelocityMet
+                : shiftMet && headingMet && headingVelocityMet && velocityMet && angleMet && uncertaintyMet /*&& orientationMet*/;
         Logger.recordOutput("ShootingKinematics/ShootingParametersMet", shootingParametersMet);
 
         Logger.recordOutput("ShootingKinematics/Drive/VelocityCompensation", rotationAboutTargetRadiansPerSecForDrivebase(drive.getConstrainer().getWantedLinearSpeed()));
