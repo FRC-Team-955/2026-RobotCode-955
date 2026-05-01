@@ -100,8 +100,8 @@ public class AprilTagVisionConstants {
                     case REPLAY -> new AprilTagVisionIO();
                 },
                 // Trust more at close distance, less at long distance
-                2.0,
-                1.0
+                1.5,
+                3.0
         ),
         ;
 

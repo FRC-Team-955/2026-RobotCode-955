@@ -30,7 +30,7 @@ public class DelayBump extends Auto {
                         superintake.intakeShootAlternate(),
                         superstructure.setGoal(Superstructure.Goal.SHOOT),
                         drive.stop().withAiming()
-                ).withTimeout(3),
+                ).withTimeout(1.2),
                 superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
                 superstructure.setGoal(Superstructure.Goal.IDLE).until(() -> true),
                 // go over the bump
@@ -79,7 +79,7 @@ public class DelayBump extends Auto {
                         AutoHelpers.checkWaypoint(
                                 flipY
                                         ? () -> ChoreoAllianceFlipUtil.getMirrorY().flip(starting)
-                                        : () -> new Pose2d(2, 3,Rotation2d.fromDegrees(20)),
+                                        : () -> new Pose2d(2, 3, Rotation2d.fromDegrees(20)),
                                 defaultMoveToConstraints,
                                 true),
 
