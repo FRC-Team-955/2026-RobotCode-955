@@ -104,7 +104,7 @@ public class DriveConstants {
                 true,
                 false,
                 false,
-                90,
+                75,
                 30
         );
         case SIM -> new ModuleConfig(
