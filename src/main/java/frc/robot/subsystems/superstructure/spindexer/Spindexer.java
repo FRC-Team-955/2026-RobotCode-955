@@ -41,7 +41,7 @@ public class Spindexer implements Periodic {
         FEED(() -> /*Timer.getTimestamp() % 2.0 < 0.1 ? -feedVoltage.get() :*/ feedVoltage.get(), RequestType.VoltageVolts),
         EJECT(ejectVoltage::get, RequestType.VoltageVolts),
         EJECT_ALTERNATE(() -> Timer.getTimestamp() % 0.5 < 0.25 ? ejectVoltage.get() : -ejectVoltage.get(), RequestType.VoltageVolts),
-        AGITATE(() -> Math.sin(2.0 * Math.PI * Timer.getTimestamp()) * 2.0, RequestType.VoltageVolts),
+        AGITATE(() -> Timer.getTimestamp() % 3.0 < 1.0 ? Math.sin(2.0 * Math.PI * Timer.getTimestamp()) : 0.0, RequestType.VoltageVolts),
         ;
 
         /** Should be constant for every loop cycle */
