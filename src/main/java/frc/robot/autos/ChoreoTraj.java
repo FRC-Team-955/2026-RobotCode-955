@@ -175,75 +175,159 @@ public record ChoreoTraj(
         new Pose2d(6.43947, 0.64949, Rotation2d.fromRadians(1.5708)),
         new Pose2d(5.7009, 2.41898, Rotation2d.fromRadians(-1.99499))
     );
+    public static final ChoreoTraj AggressiveOutpostCenterBump = new ChoreoTraj(
+        "AggressiveOutpostCenterBump",
+        OptionalInt.empty(),
+        11.70389,
+        new Pose2d(3.07982, 2.49099, Rotation2d.fromRadians(0.7854)),
+        new Pose2d(3.09357, 2.44972, Rotation2d.fromRadians(-2.35619))
+    );
+    public static final ChoreoTraj AggressiveOutpostCenterBump$0 = new ChoreoTraj(
+        "AggressiveOutpostCenterBump",
+        OptionalInt.of(0),
+        0.85289,
+        new Pose2d(3.07982, 2.49099, Rotation2d.fromRadians(0.7854)),
+        new Pose2d(5.8795, 2.49787, Rotation2d.fromRadians(0.7854))
+    );
+    public static final ChoreoTraj AggressiveOutpostCenterBump$1 = new ChoreoTraj(
+        "AggressiveOutpostCenterBump",
+        OptionalInt.of(1),
+        2.0054600000000002,
+        new Pose2d(5.8795, 2.49787, Rotation2d.fromRadians(0.7854)),
+        new Pose2d(5.86401, 2.5, Rotation2d.fromRadians(-2.41495))
+    );
+    public static final ChoreoTraj AggressiveOutpostCenterBump$2 = new ChoreoTraj(
+        "AggressiveOutpostCenterBump",
+        OptionalInt.of(2),
+        0.8376599999999996,
+        new Pose2d(5.86401, 2.5, Rotation2d.fromRadians(-2.41495)),
+        new Pose2d(3.09357, 2.44972, Rotation2d.fromRadians(-2.35619))
+    );
+    public static final ChoreoTraj AggressiveOutpostCenterBump$3 = new ChoreoTraj(
+        "AggressiveOutpostCenterBump",
+        OptionalInt.of(3),
+        0.8468000000000004,
+        new Pose2d(3.09357, 2.44972, Rotation2d.fromRadians(-2.35619)),
+        new Pose2d(5.86401, 2.5, Rotation2d.fromRadians(-2.41495))
+    );
+    public static final ChoreoTraj AggressiveOutpostCenterBump$4 = new ChoreoTraj(
+        "AggressiveOutpostCenterBump",
+        OptionalInt.of(4),
+        0.5177899999999998,
+        new Pose2d(5.86401, 2.5, Rotation2d.fromRadians(-2.41495)),
+        new Pose2d(6.90793, 3.09266, Rotation2d.fromRadians(1.20959))
+    );
+    public static final ChoreoTraj AggressiveOutpostCenterBump$5 = new ChoreoTraj(
+        "AggressiveOutpostCenterBump",
+        OptionalInt.of(5),
+        1.0136200000000004,
+        new Pose2d(6.90793, 3.09266, Rotation2d.fromRadians(1.20959)),
+        new Pose2d(5.78414, 5.05685, Rotation2d.fromRadians(-1.5708))
+    );
+    public static final ChoreoTraj AggressiveOutpostCenterBump$6 = new ChoreoTraj(
+        "AggressiveOutpostCenterBump",
+        OptionalInt.of(6),
+        0.93452,
+        new Pose2d(5.78414, 5.05685, Rotation2d.fromRadians(-1.5708)),
+        new Pose2d(5.86401, 2.5, Rotation2d.fromRadians(-2.35619))
+    );
+    public static final ChoreoTraj AggressiveOutpostCenterBump$7 = new ChoreoTraj(
+        "AggressiveOutpostCenterBump",
+        OptionalInt.of(7),
+        1.0496600000000003,
+        new Pose2d(5.86401, 2.5, Rotation2d.fromRadians(-2.35619)),
+        new Pose2d(3.09357, 2.44972, Rotation2d.fromRadians(-2.35619))
+    );
+    public static final ChoreoTraj AggressiveOutpostCenterBump$8 = new ChoreoTraj(
+        "AggressiveOutpostCenterBump",
+        OptionalInt.of(8),
+        0.8925999999999998,
+        new Pose2d(3.09357, 2.44972, Rotation2d.fromRadians(-2.35619)),
+        new Pose2d(5.86401, 2.5, Rotation2d.fromRadians(-2.41495))
+    );
+    public static final ChoreoTraj AggressiveOutpostCenterBump$9 = new ChoreoTraj(
+        "AggressiveOutpostCenterBump",
+        OptionalInt.of(9),
+        1.8614699999999988,
+        new Pose2d(5.86401, 2.5, Rotation2d.fromRadians(-2.41495)),
+        new Pose2d(5.86401, 2.5, Rotation2d.fromRadians(-2.41495))
+    );
+    public static final ChoreoTraj AggressiveOutpostCenterBump$10 = new ChoreoTraj(
+        "AggressiveOutpostCenterBump",
+        OptionalInt.of(10),
+        0.8914200000000001,
+        new Pose2d(5.86401, 2.5, Rotation2d.fromRadians(-2.41495)),
+        new Pose2d(3.09357, 2.44972, Rotation2d.fromRadians(-2.35619))
+    );
     public static final ChoreoTraj AggressiveOutpost = new ChoreoTraj(
         "AggressiveOutpost",
         OptionalInt.empty(),
-        8.04306,
+        8.32417,
         new Pose2d(4.4462, 0.622, Rotation2d.fromRadians(1.5708)),
-        new Pose2d(4.17427, 0.622, Rotation2d.fromRadians(-1.68631))
+        new Pose2d(4.17427, 0.622, Rotation2d.fromRadians(-1.68629))
     );
     public static final ChoreoTraj AggressiveOutpost$0 = new ChoreoTraj(
         "AggressiveOutpost",
         OptionalInt.of(0),
-        0.52122,
+        0.52696,
         new Pose2d(4.4462, 0.622, Rotation2d.fromRadians(1.5708)),
-        new Pose2d(5.77427, 0.622, Rotation2d.fromRadians(1.5708))
+        new Pose2d(5.77427, 0.822, Rotation2d.fromRadians(1.5708))
     );
     public static final ChoreoTraj AggressiveOutpost$1 = new ChoreoTraj(
         "AggressiveOutpost",
         OptionalInt.of(1),
-        1.40733,
-        new Pose2d(5.77427, 0.622, Rotation2d.fromRadians(1.5708)),
+        1.5124400000000002,
+        new Pose2d(5.77427, 0.822, Rotation2d.fromRadians(1.5708)),
         new Pose2d(8.19006, 3.18228, Rotation2d.fromRadians(2.00713))
     );
     public static final ChoreoTraj AggressiveOutpost$2 = new ChoreoTraj(
         "AggressiveOutpost",
         OptionalInt.of(2),
-        1.24334,
+        1.2401899999999997,
         new Pose2d(8.19006, 3.18228, Rotation2d.fromRadians(2.00713)),
         new Pose2d(5.77427, 0.722, Rotation2d.fromRadians(-1.55334))
     );
     public static final ChoreoTraj AggressiveOutpost$3 = new ChoreoTraj(
         "AggressiveOutpost",
         OptionalInt.of(3),
-        0.7207000000000003,
+        0.7206999999999999,
         new Pose2d(5.77427, 0.722, Rotation2d.fromRadians(-1.55334)),
-        new Pose2d(4.17427, 0.622, Rotation2d.fromRadians(-1.69032))
+        new Pose2d(4.17427, 0.622, Rotation2d.fromRadians(-1.69021))
     );
     public static final ChoreoTraj AggressiveOutpost$4 = new ChoreoTraj(
         "AggressiveOutpost",
         OptionalInt.of(4),
-        0.6884600000000001,
-        new Pose2d(4.17427, 0.622, Rotation2d.fromRadians(-1.69032)),
+        0.6850700000000005,
+        new Pose2d(4.17427, 0.622, Rotation2d.fromRadians(-1.69021)),
         new Pose2d(5.77427, 0.622, Rotation2d.fromRadians(-1.5708))
     );
     public static final ChoreoTraj AggressiveOutpost$5 = new ChoreoTraj(
         "AggressiveOutpost",
         OptionalInt.of(5),
-        0.5185399999999998,
+        0.5635399999999997,
         new Pose2d(5.77427, 0.622, Rotation2d.fromRadians(-1.5708)),
-        new Pose2d(5.85409, 1.28606, Rotation2d.fromRadians(1.22427))
+        new Pose2d(5.82565, 1.38036, Rotation2d.fromRadians(1.49391))
     );
     public static final ChoreoTraj AggressiveOutpost$6 = new ChoreoTraj(
         "AggressiveOutpost",
         OptionalInt.of(6),
-        1.8947500000000002,
-        new Pose2d(5.85409, 1.28606, Rotation2d.fromRadians(1.22427)),
-        new Pose2d(7.6121, 1.64132, Rotation2d.fromRadians(-1.65027))
+        2.0256300000000005,
+        new Pose2d(5.82565, 1.38036, Rotation2d.fromRadians(1.49391)),
+        new Pose2d(7.6121, 1.64132, Rotation2d.fromRadians(-1.66512))
     );
     public static final ChoreoTraj AggressiveOutpost$7 = new ChoreoTraj(
         "AggressiveOutpost",
         OptionalInt.of(7),
-        0.46847999999999956,
-        new Pose2d(7.6121, 1.64132, Rotation2d.fromRadians(-1.65027)),
+        0.4693499999999995,
+        new Pose2d(7.6121, 1.64132, Rotation2d.fromRadians(-1.66512)),
         new Pose2d(5.77427, 0.622, Rotation2d.fromRadians(-1.5708))
     );
     public static final ChoreoTraj AggressiveOutpost$8 = new ChoreoTraj(
         "AggressiveOutpost",
         OptionalInt.of(8),
-        0.5802400000000008,
+        0.5802900000000006,
         new Pose2d(5.77427, 0.622, Rotation2d.fromRadians(-1.5708)),
-        new Pose2d(4.17427, 0.622, Rotation2d.fromRadians(-1.68631))
+        new Pose2d(4.17427, 0.622, Rotation2d.fromRadians(-1.68629))
     );
     public static final ChoreoTraj CanadianDepot_SecondPath = new ChoreoTraj(
         "CanadianDepot_SecondPath",
@@ -546,90 +630,6 @@ public record ChoreoTraj(
         new Pose2d(6.5, 7.4, Rotation2d.fromRadians(-1.5708)),
         new Pose2d(7, 4, Rotation2d.fromRadians(1.5708))
     );
-    public static final ChoreoTraj AggressiveOutpostCenterBump = new ChoreoTraj(
-        "AggressiveOutpostCenterBump",
-        OptionalInt.empty(),
-        11.70389,
-        new Pose2d(3.07982, 2.49099, Rotation2d.fromRadians(0.7854)),
-        new Pose2d(3.09357, 2.44972, Rotation2d.fromRadians(-2.35619))
-    );
-    public static final ChoreoTraj AggressiveOutpostCenterBump$0 = new ChoreoTraj(
-        "AggressiveOutpostCenterBump",
-        OptionalInt.of(0),
-        0.85289,
-        new Pose2d(3.07982, 2.49099, Rotation2d.fromRadians(0.7854)),
-        new Pose2d(5.8795, 2.49787, Rotation2d.fromRadians(0.7854))
-    );
-    public static final ChoreoTraj AggressiveOutpostCenterBump$1 = new ChoreoTraj(
-        "AggressiveOutpostCenterBump",
-        OptionalInt.of(1),
-        2.0054600000000002,
-        new Pose2d(5.8795, 2.49787, Rotation2d.fromRadians(0.7854)),
-        new Pose2d(5.86401, 2.5, Rotation2d.fromRadians(-2.41495))
-    );
-    public static final ChoreoTraj AggressiveOutpostCenterBump$2 = new ChoreoTraj(
-        "AggressiveOutpostCenterBump",
-        OptionalInt.of(2),
-        0.8376599999999996,
-        new Pose2d(5.86401, 2.5, Rotation2d.fromRadians(-2.41495)),
-        new Pose2d(3.09357, 2.44972, Rotation2d.fromRadians(-2.35619))
-    );
-    public static final ChoreoTraj AggressiveOutpostCenterBump$3 = new ChoreoTraj(
-        "AggressiveOutpostCenterBump",
-        OptionalInt.of(3),
-        0.8468000000000004,
-        new Pose2d(3.09357, 2.44972, Rotation2d.fromRadians(-2.35619)),
-        new Pose2d(5.86401, 2.5, Rotation2d.fromRadians(-2.41495))
-    );
-    public static final ChoreoTraj AggressiveOutpostCenterBump$4 = new ChoreoTraj(
-        "AggressiveOutpostCenterBump",
-        OptionalInt.of(4),
-        0.5177899999999998,
-        new Pose2d(5.86401, 2.5, Rotation2d.fromRadians(-2.41495)),
-        new Pose2d(6.90793, 3.09266, Rotation2d.fromRadians(1.20959))
-    );
-    public static final ChoreoTraj AggressiveOutpostCenterBump$5 = new ChoreoTraj(
-        "AggressiveOutpostCenterBump",
-        OptionalInt.of(5),
-        1.0136200000000004,
-        new Pose2d(6.90793, 3.09266, Rotation2d.fromRadians(1.20959)),
-        new Pose2d(5.78414, 5.05685, Rotation2d.fromRadians(-1.5708))
-    );
-    public static final ChoreoTraj AggressiveOutpostCenterBump$6 = new ChoreoTraj(
-        "AggressiveOutpostCenterBump",
-        OptionalInt.of(6),
-        0.93452,
-        new Pose2d(5.78414, 5.05685, Rotation2d.fromRadians(-1.5708)),
-        new Pose2d(5.86401, 2.5, Rotation2d.fromRadians(-2.35619))
-    );
-    public static final ChoreoTraj AggressiveOutpostCenterBump$7 = new ChoreoTraj(
-        "AggressiveOutpostCenterBump",
-        OptionalInt.of(7),
-        1.0496600000000003,
-        new Pose2d(5.86401, 2.5, Rotation2d.fromRadians(-2.35619)),
-        new Pose2d(3.09357, 2.44972, Rotation2d.fromRadians(-2.35619))
-    );
-    public static final ChoreoTraj AggressiveOutpostCenterBump$8 = new ChoreoTraj(
-        "AggressiveOutpostCenterBump",
-        OptionalInt.of(8),
-        0.8925999999999998,
-        new Pose2d(3.09357, 2.44972, Rotation2d.fromRadians(-2.35619)),
-        new Pose2d(5.86401, 2.5, Rotation2d.fromRadians(-2.41495))
-    );
-    public static final ChoreoTraj AggressiveOutpostCenterBump$9 = new ChoreoTraj(
-        "AggressiveOutpostCenterBump",
-        OptionalInt.of(9),
-        1.8614699999999988,
-        new Pose2d(5.86401, 2.5, Rotation2d.fromRadians(-2.41495)),
-        new Pose2d(5.86401, 2.5, Rotation2d.fromRadians(-2.41495))
-    );
-    public static final ChoreoTraj AggressiveOutpostCenterBump$10 = new ChoreoTraj(
-        "AggressiveOutpostCenterBump",
-        OptionalInt.of(10),
-        0.8914200000000001,
-        new Pose2d(5.86401, 2.5, Rotation2d.fromRadians(-2.41495)),
-        new Pose2d(3.09357, 2.44972, Rotation2d.fromRadians(-2.35619))
-    );
 
     /**
      * A map between trajectory names and their corresponding data.
@@ -658,6 +658,18 @@ public record ChoreoTraj(
         Map.entry("AggressiveOutpostBump$8", AggressiveOutpostBump$8),
         Map.entry("CanadianDepot_FirstPass", CanadianDepot_FirstPass),
         Map.entry("CanadianOutpost_FirstPass", CanadianOutpost_FirstPass),
+        Map.entry("AggressiveOutpostCenterBump", AggressiveOutpostCenterBump),
+        Map.entry("AggressiveOutpostCenterBump$0", AggressiveOutpostCenterBump$0),
+        Map.entry("AggressiveOutpostCenterBump$1", AggressiveOutpostCenterBump$1),
+        Map.entry("AggressiveOutpostCenterBump$2", AggressiveOutpostCenterBump$2),
+        Map.entry("AggressiveOutpostCenterBump$3", AggressiveOutpostCenterBump$3),
+        Map.entry("AggressiveOutpostCenterBump$4", AggressiveOutpostCenterBump$4),
+        Map.entry("AggressiveOutpostCenterBump$5", AggressiveOutpostCenterBump$5),
+        Map.entry("AggressiveOutpostCenterBump$6", AggressiveOutpostCenterBump$6),
+        Map.entry("AggressiveOutpostCenterBump$7", AggressiveOutpostCenterBump$7),
+        Map.entry("AggressiveOutpostCenterBump$8", AggressiveOutpostCenterBump$8),
+        Map.entry("AggressiveOutpostCenterBump$9", AggressiveOutpostCenterBump$9),
+        Map.entry("AggressiveOutpostCenterBump$10", AggressiveOutpostCenterBump$10),
         Map.entry("AggressiveOutpost", AggressiveOutpost),
         Map.entry("AggressiveOutpost$0", AggressiveOutpost$0),
         Map.entry("AggressiveOutpost$1", AggressiveOutpost$1),
@@ -710,19 +722,7 @@ public record ChoreoTraj(
         Map.entry("AggressiveOutpostBumpBump$8", AggressiveOutpostBumpBump$8),
         Map.entry("AggressiveOutpostBumpBump$9", AggressiveOutpostBumpBump$9),
         Map.entry("AggressiveOutpostBumpBump$10", AggressiveOutpostBumpBump$10),
-        Map.entry("OrbitDepotTilted", OrbitDepotTilted),
-        Map.entry("AggressiveOutpostCenterBump", AggressiveOutpostCenterBump),
-        Map.entry("AggressiveOutpostCenterBump$0", AggressiveOutpostCenterBump$0),
-        Map.entry("AggressiveOutpostCenterBump$1", AggressiveOutpostCenterBump$1),
-        Map.entry("AggressiveOutpostCenterBump$2", AggressiveOutpostCenterBump$2),
-        Map.entry("AggressiveOutpostCenterBump$3", AggressiveOutpostCenterBump$3),
-        Map.entry("AggressiveOutpostCenterBump$4", AggressiveOutpostCenterBump$4),
-        Map.entry("AggressiveOutpostCenterBump$5", AggressiveOutpostCenterBump$5),
-        Map.entry("AggressiveOutpostCenterBump$6", AggressiveOutpostCenterBump$6),
-        Map.entry("AggressiveOutpostCenterBump$7", AggressiveOutpostCenterBump$7),
-        Map.entry("AggressiveOutpostCenterBump$8", AggressiveOutpostCenterBump$8),
-        Map.entry("AggressiveOutpostCenterBump$9", AggressiveOutpostCenterBump$9),
-        Map.entry("AggressiveOutpostCenterBump$10", AggressiveOutpostCenterBump$10)
+        Map.entry("OrbitDepotTilted", OrbitDepotTilted)
     );
 
     /**
