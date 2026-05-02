@@ -262,9 +262,9 @@ public record ChoreoTraj(
     public static final ChoreoTraj AggressiveOutpost = new ChoreoTraj(
         "AggressiveOutpost",
         OptionalInt.empty(),
-        8.51487,
+        8.3929,
         new Pose2d(4.4462, 0.622, Rotation2d.fromRadians(1.5708)),
-        new Pose2d(4.17427, 0.622, Rotation2d.fromRadians(-1.68634))
+        new Pose2d(4.17427, 0.622, Rotation2d.fromRadians(-1.68633))
     );
     public static final ChoreoTraj AggressiveOutpost$0 = new ChoreoTraj(
         "AggressiveOutpost",
@@ -297,37 +297,37 @@ public record ChoreoTraj(
     public static final ChoreoTraj AggressiveOutpost$4 = new ChoreoTraj(
         "AggressiveOutpost",
         OptionalInt.of(4),
-        0.68567,
+        0.6856099999999996,
         new Pose2d(4.17427, 0.622, Rotation2d.fromRadians(-1.69013)),
         new Pose2d(5.77427, 0.622, Rotation2d.fromRadians(-1.5708))
     );
     public static final ChoreoTraj AggressiveOutpost$5 = new ChoreoTraj(
         "AggressiveOutpost",
         OptionalInt.of(5),
-        0.5627300000000002,
+        0.5628000000000002,
         new Pose2d(5.77427, 0.622, Rotation2d.fromRadians(-1.5708)),
         new Pose2d(5.82565, 1.38036, Rotation2d.fromRadians(1.49391))
     );
     public static final ChoreoTraj AggressiveOutpost$6 = new ChoreoTraj(
         "AggressiveOutpost",
         OptionalInt.of(6),
-        1.9736099999999999,
+        1.8582200000000002,
         new Pose2d(5.82565, 1.38036, Rotation2d.fromRadians(1.49391)),
-        new Pose2d(8.1121, 2.04132, Rotation2d.fromRadians(-1.67427))
+        new Pose2d(8.0121, 2.04132, Rotation2d.fromRadians(-1.77426))
     );
     public static final ChoreoTraj AggressiveOutpost$7 = new ChoreoTraj(
         "AggressiveOutpost",
         OptionalInt.of(7),
-        0.6093999999999999,
-        new Pose2d(8.1121, 2.04132, Rotation2d.fromRadians(-1.67427)),
+        0.6027899999999997,
+        new Pose2d(8.0121, 2.04132, Rotation2d.fromRadians(-1.77426)),
         new Pose2d(5.77427, 0.622, Rotation2d.fromRadians(-1.5708))
     );
     public static final ChoreoTraj AggressiveOutpost$8 = new ChoreoTraj(
         "AggressiveOutpost",
         OptionalInt.of(8),
-        0.58019,
+        0.5802099999999992,
         new Pose2d(5.77427, 0.622, Rotation2d.fromRadians(-1.5708)),
-        new Pose2d(4.17427, 0.622, Rotation2d.fromRadians(-1.68634))
+        new Pose2d(4.17427, 0.622, Rotation2d.fromRadians(-1.68633))
     );
     public static final ChoreoTraj CanadianDepot_SecondPath = new ChoreoTraj(
         "CanadianDepot_SecondPath",
