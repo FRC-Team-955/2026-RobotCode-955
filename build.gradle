@@ -169,9 +169,9 @@ var makeRunConfig = { String mode, boolean tuningMode ->
     tasks.register("generateBuildConstants$name") {
         doLast {
             new File("src/main/java/frc/robot", "BuildConstants.java").withWriter { writer ->
-                var real = "REAL";
-                var sim = "SIM";
-                var replay = "REPLAY";
+                var real = "REAL"
+                var sim = "SIM"
+                var replay = "REPLAY"
 
                 writer << "package frc.robot;\n"
                 writer << "\n"
