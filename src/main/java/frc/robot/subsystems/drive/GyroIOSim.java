@@ -1,7 +1,7 @@
 package frc.robot.subsystems.drive;
 
 import edu.wpi.first.math.geometry.Rotation2d;
-import frc.robot.SimManager;
+import frc.robot.simulation.SimManager;
 import org.ironmaple.simulation.drivesims.GyroSimulation;
 
 import java.util.Arrays;

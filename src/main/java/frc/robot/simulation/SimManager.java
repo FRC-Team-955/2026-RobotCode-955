@@ -1,4 +1,4 @@
-package frc.robot;
+package frc.robot.simulation;
 
 import edu.wpi.first.hal.AllianceStationID;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -11,6 +11,9 @@ import edu.wpi.first.wpilibj.simulation.DriverStationSim;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import frc.lib.Util;
+import frc.robot.BuildConstants;
+import frc.robot.FieldConstants;
+import frc.robot.RobotState;
 import frc.robot.subsystems.drive.DriveConstants;
 import org.dyn4j.dynamics.Settings;
 import org.ironmaple.simulation.IntakeSimulation;
@@ -24,6 +27,8 @@ import org.littletonrobotics.junction.Logger;
 import org.photonvision.estimation.TargetModel;
 import org.photonvision.simulation.VisionSystemSim;
 import org.photonvision.simulation.VisionTargetSim;
+
+import java.util.Objects;
 
 import static edu.wpi.first.units.Units.*;
 import static frc.robot.FieldConstants.aprilTagLayout;
@@ -103,6 +108,14 @@ public class SimManager {
         if (!BuildConstants.isSim) {
             Util.error("SimManager created when not in sim");
         } else {
+            if (Objects.equals(System.getenv("MULTIPLAYER"), "SERVER")) {
+                System.out.println("Starting multiplayer server");
+                new MultiplayerSimServer();
+            } else if (Objects.equals(System.getenv("MULTIPLAYER"), "CLIENT")) {
+                System.out.println("Starting multiplayer client");
+                new MultiplayerSimClient();
+            }
+
             aprilTagVisionSystem.addAprilTags(aprilTagLayout);
 
             SimulatedArena.getInstance().addDriveTrainSimulation(driveSimulation);
@@ -169,6 +182,10 @@ public class SimManager {
                 "FieldSimulation/Fuel",
                 SimulatedArena.getInstance().getGamePiecesArrayByType("Fuel")
         );
+
+        if (Objects.equals(System.getenv("MULTIPLAYER"), "SERVER")) {
+            MultiplayerSimServer.updateData();
+        }
 
         aprilTagVisionSystemUpdated = false;
         gamePieceVisionSystemUpdated = false;

@@ -1,7 +1,7 @@
 package frc.robot.subsystems.gamepiecevision;
 
 import edu.wpi.first.math.geometry.Rotation2d;
-import frc.robot.SimManager;
+import frc.robot.simulation.SimManager;
 import frc955.gamepiecevision.SharedGamePieceVisionConstants;
 import org.photonvision.PhotonCamera;
 import org.photonvision.simulation.PhotonCameraSim;

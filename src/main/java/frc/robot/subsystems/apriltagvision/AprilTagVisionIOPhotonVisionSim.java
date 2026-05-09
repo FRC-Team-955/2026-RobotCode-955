@@ -15,7 +15,7 @@ package frc.robot.subsystems.apriltagvision;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
-import frc.robot.SimManager;
+import frc.robot.simulation.SimManager;
 import org.photonvision.simulation.PhotonCameraSim;
 import org.photonvision.simulation.SimCameraProperties;
 

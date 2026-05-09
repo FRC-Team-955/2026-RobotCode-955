@@ -2,7 +2,7 @@ package frc.robot.subsystems.drive;
 
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.robot.Constants;
-import frc.robot.SimManager;
+import frc.robot.simulation.SimManager;
 
 public class AccelerometerIOSim extends AccelerometerIO {
     private final SimManager simManager = SimManager.get();
