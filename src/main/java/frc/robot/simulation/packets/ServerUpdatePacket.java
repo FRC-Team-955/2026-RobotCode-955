@@ -7,7 +7,7 @@ import edu.wpi.first.math.geometry.Translation3d;
 import java.nio.ByteBuffer;
 
 /** Sent by server to clients */
-public record ServerUpdatePacket(byte[] connectedIds, Pose2d[] robotPoses, Translation3d[] fuelTranslations) {
+public record ServerUpdatePacket(int[] connectedIds, Pose2d[] robotPoses, Translation3d[] fuelTranslations) {
     public static final int MAX_SIZE = 10 * 1024;
 
     private static final ByteBuffer packBuf = ByteBuffer.allocate(MAX_SIZE);
@@ -16,8 +16,8 @@ public record ServerUpdatePacket(byte[] connectedIds, Pose2d[] robotPoses, Trans
         packBuf.clear();
 
         packBuf.putInt(connectedIds.length);
-        for (byte id : connectedIds) {
-            packBuf.put(id);
+        for (int id : connectedIds) {
+            packBuf.putInt(id);
         }
 
         packBuf.putInt(robotPoses.length);
@@ -41,9 +41,9 @@ public record ServerUpdatePacket(byte[] connectedIds, Pose2d[] robotPoses, Trans
         var unpackBuf = ByteBuffer.wrap(rawUnpackBuf, 0, length);
 
         int connectedIdsLength = unpackBuf.getInt();
-        byte[] connectedIds = new byte[connectedIdsLength];
+        int[] connectedIds = new int[connectedIdsLength];
         for (int i = 0; i < connectedIdsLength; i++) {
-            connectedIds[i] = unpackBuf.get();
+            connectedIds[i] = unpackBuf.getInt();
         }
 
         int robotPosesLength = unpackBuf.getInt();

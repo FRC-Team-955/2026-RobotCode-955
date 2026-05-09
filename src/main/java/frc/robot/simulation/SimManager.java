@@ -53,24 +53,26 @@ public class SimManager {
         );
     }
 
+    public static final DriveTrainSimulationConfig driveSimulationConfig = DriveTrainSimulationConfig.Default()
+            // Specify gyro type (for realistic gyro drifting and error simulation)
+            .withGyro(COTS.ofPigeon2())
+            // Specify swerve module (for realistic swerve dynamics)
+            .withSwerveModules(
+                    createConfig(150.0 / 7.0),
+                    createConfig(150.0 / 7.0),
+                    createConfig(18.75),
+                    createConfig(18.75)
+            )
+            // Configures the track length and track width (spacing between swerve modules)
+            .withTrackLengthTrackWidth(Meters.of(driveConfig.trackLengthMeters()), Meters.of(driveConfig.trackWidthMeters()))
+            // Configures the bumper size (dimensions of the robot bumper)
+            .withBumperSize(Meters.of(driveConfig.bumperLengthMeters()), Meters.of(driveConfig.bumperWidthMeters()))
+            .withRobotMass(Pounds.of(125));
+
     @SuppressWarnings("unchecked")
     public final SwerveDriveSimulation driveSimulation = new SwerveDriveSimulation(
             // Specify Configuration
-            DriveTrainSimulationConfig.Default()
-                    // Specify gyro type (for realistic gyro drifting and error simulation)
-                    .withGyro(COTS.ofPigeon2())
-                    // Specify swerve module (for realistic swerve dynamics)
-                    .withSwerveModules(
-                            createConfig(150.0 / 7.0),
-                            createConfig(150.0 / 7.0),
-                            createConfig(18.75),
-                            createConfig(18.75)
-                    )
-                    // Configures the track length and track width (spacing between swerve modules)
-                    .withTrackLengthTrackWidth(Meters.of(driveConfig.trackLengthMeters()), Meters.of(driveConfig.trackWidthMeters()))
-                    // Configures the bumper size (dimensions of the robot bumper)
-                    .withBumperSize(Meters.of(driveConfig.bumperLengthMeters()), Meters.of(driveConfig.bumperWidthMeters()))
-                    .withRobotMass(Pounds.of(125)),
+            driveSimulationConfig,
             // Specify starting pose
             // Real starting pose is specified in periodic
             new Pose2d()
@@ -185,6 +187,11 @@ public class SimManager {
 
         if (Objects.equals(System.getenv("MULTIPLAYER"), "SERVER")) {
             MultiplayerSimServer.updateData();
+        } else if (Objects.equals(System.getenv("MULTIPLAYER"), "CLIENT")) {
+            Pose2d newPose = MultiplayerSimClient.getServerPose();
+            if (newPose != null) {
+                robotState.setPose(newPose);
+            }
         }
 
         aprilTagVisionSystemUpdated = false;
