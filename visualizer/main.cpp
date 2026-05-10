@@ -20,14 +20,17 @@ Vector3 wpi_to_raylib(float x, float y, float z) {
 int main() {
 	SetConfigFlags(FLAG_MSAA_4X_HINT);  // Enable Multi Sampling Anti Aliasing 4x (if available)
 	InitWindow(1920, 1080, "visualizer");
+	SetWindowState(FLAG_WINDOW_RESIZABLE);
 
 	// Define the camera to look into our 3d world
 	Camera camera = { 0 };
-	camera.position = (Vector3){ 6.0f, 6.0f, 6.0f };    // Camera position
+	camera.position = (Vector3){ 8.5f, 1.5f, 1.2f };    // Camera position
 	camera.target = (Vector3){ 0.0f, 3.0f, 0.0f };      // Camera looking at point
 	camera.up = (Vector3){ 0.0f, 1.0f, 0.0f };          // Camera up vector (rotation towards target)
-	camera.fovy = 45.0f;                                // Camera field-of-view Y
+	camera.fovy = 80.0f;                                // Camera field-of-view Y
 	camera.projection = CAMERA_PERSPECTIVE;             // Camera projection type
+
+	DisableCursor();
 
 	// Load model
 	Model model = LoadModel("resources/models/field.glb");
@@ -42,11 +45,11 @@ int main() {
 
 	// Ambient light level (some basic lighting)
 	int ambient_loc = GetShaderLocation(shader, "ambient");
-	float ambient_strength = 0.5f;
+	float ambient_strength = 1.0f;
 	SetShaderValue(shader, ambient_loc, (float[4]){ ambient_strength, ambient_strength, ambient_strength, 1.0f }, SHADER_UNIFORM_VEC4);
 
 	// Add additional lights
-	CreateLight(LIGHT_POINT, (Vector3){ 0.0f, 10.0f, 0.0f }, (Vector3){ 0.0f, 0.0f, 0.0f }, (Color){ 20, 20, 20, 20 }, shader);
+	//CreateLight(LIGHT_POINT, (Vector3){ 0.0f, 1000.0f, 0.0f }, (Vector3){ 0.0f, 700.0f, 0.0f }, (Color){ 255, 255, 255, 255 }, shader);
 	CreateLight(LIGHT_POINT, (Vector3){ -5.0f, 3.0f, 0.0f }, (Vector3){ -5.0f, 0.0f, 0.0f }, (Color){ 150, 0, 0, 255 }, shader);
 	CreateLight(LIGHT_POINT, (Vector3){ 5.0f, 3.0f, 0.0f }, (Vector3){ 5.0f, 0.0f, 0.0f }, (Color){ 0, 0, 150, 255 }, shader);
 
@@ -58,7 +61,7 @@ int main() {
 	SetTargetFPS(80);
 
 	while (!WindowShouldClose()) {
-		UpdateCamera(&camera, CAMERA_ORBITAL);
+		UpdateCamera(&camera, CAMERA_FREE);
 
 		// Update the shader with the camera view vector (points towards { 0.0f, 0.0f, 0.0f })
 		float cameraPos[3] = { camera.position.x, camera.position.y, camera.position.z };
@@ -66,7 +69,7 @@ int main() {
 
 		BeginDrawing();
 
-			ClearBackground(RAYWHITE);
+			ClearBackground(DARKGRAY);
 
 			BeginMode3D(camera);
 
