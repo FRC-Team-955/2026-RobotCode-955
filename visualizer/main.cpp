@@ -45,13 +45,20 @@ int main() {
 
 	// Ambient light level (some basic lighting)
 	int ambient_loc = GetShaderLocation(shader, "ambient");
-	float ambient_strength = 1.0f;
+	float ambient_strength = 0.1f;
 	SetShaderValue(shader, ambient_loc, (float[4]){ ambient_strength, ambient_strength, ambient_strength, 1.0f }, SHADER_UNIFORM_VEC4);
 
 	// Add additional lights
-	//CreateLight(LIGHT_POINT, (Vector3){ 0.0f, 1000.0f, 0.0f }, (Vector3){ 0.0f, 700.0f, 0.0f }, (Color){ 255, 255, 255, 255 }, shader);
-	CreateLight(LIGHT_POINT, (Vector3){ -5.0f, 3.0f, 0.0f }, (Vector3){ -5.0f, 0.0f, 0.0f }, (Color){ 150, 0, 0, 255 }, shader);
-	CreateLight(LIGHT_POINT, (Vector3){ 5.0f, 3.0f, 0.0f }, (Vector3){ 5.0f, 0.0f, 0.0f }, (Color){ 0, 0, 150, 255 }, shader);
+	// White point lights
+	CreateLight(LIGHT_POINT, (Vector3){ -6.0f, 10.0f, 0.0f }, Vector3Zero(), (Color){ 255, 255, 255, 255 }, shader);
+	CreateLight(LIGHT_POINT, (Vector3){ 6.0f, 10.0f, 0.0f }, Vector3Zero(), (Color){ 255, 255, 255, 255 }, shader);
+	CreateLight(LIGHT_POINT, (Vector3){ 0.0f, 10.0f, 0.0f }, Vector3Zero(), (Color){ 255, 255, 255, 255 }, shader);
+	// Red point lights
+	CreateLight(LIGHT_POINT, (Vector3){ -6.0f, 3.0f, 2.5f }, Vector3Zero(), (Color){ 100, 0, 0, 255 }, shader);
+	CreateLight(LIGHT_POINT, (Vector3){ -6.0f, 3.0f, -2.5f }, Vector3Zero(), (Color){ 100, 0, 0, 255 }, shader);
+	// Blue point lights
+	CreateLight(LIGHT_POINT, (Vector3){ 6.0f, 3.0f, 2.5f }, Vector3Zero(), (Color){ 0, 0, 200, 255 }, shader);
+	CreateLight(LIGHT_POINT, (Vector3){ 6.0f, 3.0f, -2.5f }, Vector3Zero(), (Color){ 0, 0, 200, 255 }, shader);
 
 	// Assign shader to all model materials
 	for (int i = 0; i < model.materialCount; i++) {
