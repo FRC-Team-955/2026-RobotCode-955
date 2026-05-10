@@ -13,6 +13,19 @@
 const float field_length = 16.541f;
 const float field_width = 8.069f;
 
+const float ds_x = 8.5f;
+const float ds_z = 1.8f;
+const Vector3 camera_positions[] = {
+	(Vector3){ ds_x, ds_z, 3.07975f }, // Blue 1
+	(Vector3){ ds_x, ds_z, 1.25095f }, // Blue 2
+	(Vector3){ ds_x, ds_z, -1.8288f }, // Blue 3
+	(Vector3){ -ds_x, ds_z, -3.07975f }, // Red 1
+	(Vector3){ -ds_x, ds_z, -1.25095f }, // Red 2
+	(Vector3){ -ds_x, ds_z, 1.8288f }, // Red 3
+};
+Vector3 camera_target = (Vector3){ 0.0f, -2.0f, 0.0f };
+Vector3 camera_up = (Vector3){ 0.0f, 1.0f, 0.0f };
+
 Vector3 wpi_to_raylib(float x, float y, float z) {
     return (Vector3){ .x = field_length - x, .y = z, .z = field_width + y };
 }
@@ -21,12 +34,14 @@ int main() {
 	SetConfigFlags(FLAG_MSAA_4X_HINT);  // Enable Multi Sampling Anti Aliasing 4x (if available)
 	InitWindow(1920, 1080, "visualizer");
 	SetWindowState(FLAG_WINDOW_RESIZABLE);
+	MaximizeWindow();
 
 	// Define the camera to look into our 3d world
 	Camera camera = { 0 };
-	camera.position = (Vector3){ 8.5f, 1.5f, 1.2f };    // Camera position
-	camera.target = (Vector3){ 0.0f, 3.0f, 0.0f };      // Camera looking at point
-	camera.up = (Vector3){ 0.0f, 1.0f, 0.0f };          // Camera up vector (rotation towards target)
+	int camera_position_index = 0;
+	camera.position = camera_positions[camera_position_index];                  // Camera position
+	camera.target = camera_target;      // Camera looking at point
+	camera.up = camera_up;          // Camera up vector (rotation towards target)
 	camera.fovy = 80.0f;                                // Camera field-of-view Y
 	camera.projection = CAMERA_PERSPECTIVE;             // Camera projection type
 
@@ -70,9 +85,29 @@ int main() {
 	while (!WindowShouldClose()) {
 		UpdateCamera(&camera, CAMERA_FREE);
 
+		if (IsKeyPressed(KEY_C)) {
+			if (Vector3Equals(camera.position, camera_positions[camera_position_index])) {
+				camera_position_index++;
+				if (camera_position_index >= sizeof(camera_positions) / sizeof(Vector3)) {
+					camera_position_index = 0;
+				}
+			}
+			camera.position = camera_positions[camera_position_index];
+			camera.target = camera_target;
+			camera.up = camera_up;
+		}
+
+		if (IsKeyPressed(KEY_P)) {
+			camera.fovy += 10.0f;
+		}
+
+		if (IsKeyPressed(KEY_L)) {
+			camera.fovy -= 10.0f;
+		}
+
 		// Update the shader with the camera view vector (points towards { 0.0f, 0.0f, 0.0f })
-		float cameraPos[3] = { camera.position.x, camera.position.y, camera.position.z };
-		SetShaderValue(shader, shader.locs[SHADER_LOC_VECTOR_VIEW], cameraPos, SHADER_UNIFORM_VEC3);
+		float camera_pos[3] = { camera.position.x, camera.position.y, camera.position.z };
+		SetShaderValue(shader, shader.locs[SHADER_LOC_VECTOR_VIEW], camera_pos, SHADER_UNIFORM_VEC3);
 
 		BeginDrawing();
 
@@ -89,6 +124,10 @@ int main() {
 			EndMode3D();
 
 			DrawFPS(10, 10);
+
+			DrawText("Press C to switch camera", 10, 30, 24, WHITE);
+			DrawText("Press P/L to adjust FOV", 10, 62, 24, WHITE);
+			DrawText("Press WASD, Space, Ctrl to move camera", 10, 94, 24, WHITE);
 
 		EndDrawing();
 	}
