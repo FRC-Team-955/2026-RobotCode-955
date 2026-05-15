@@ -23,6 +23,8 @@
       "/SmartDashboard/Characterization Choices": "String Chooser",
       "/SmartDashboard/Choreo Alerts": "Alerts",
       "/SmartDashboard/Field2d": "Field2d",
+      "/SmartDashboard/Multiplayer/Client/Field": "Field2d",
+      "/SmartDashboard/Multiplayer/Field": "Field2d",
       "/SmartDashboard/PhotonAlerts": "Alerts",
       "/SmartDashboard/VisionSystemSim-apriltag/Sim Field": "Field2d",
       "/SmartDashboard/VisionSystemSim-gamepiece/Sim Field": "Field2d",
@@ -54,6 +56,28 @@
         "window": {
           "visible": true
         }
+      },
+      "/SmartDashboard/Multiplayer/Client/Field": {
+        "bottom": 1914,
+        "height": 8.069275856018066,
+        "left": 245,
+        "right": 3942,
+        "top": 118,
+        "width": 16.54119300842285,
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/Multiplayer/Field": {
+        "bottom": 1914,
+        "height": 8.069275856018066,
+        "left": 245,
+        "right": 3942,
+        "top": 118,
+        "width": 16.54119300842285,
+        "window": {
+          "visible": true
+        }
       }
     }
   },
@@ -62,6 +86,32 @@
       "AdvantageKit": {
         "RealOutputs": {
           "LoggedRobot": {
+            "open": true
+          },
+          "Multiplayer": {
+            "Translation3d[]##v_/AdvantageKit/RealOutputs/Multiplayer/FuelTranslations": {
+              "Translation3d##v_[0]": {
+                "open": true
+              },
+              "open": true
+            },
+            "open": true
+          },
+          "open": true
+        }
+      },
+      "SmartDashboard": {
+        "Characterization Choices": {
+          "open": true
+        },
+        "Multiplayer": {
+          "Client": {
+            "Field": {
+              "open": true
+            },
+            "open": true
+          },
+          "Server": {
             "open": true
           },
           "open": true
@@ -73,9 +123,6 @@
   "NetworkTables Info": {
     "visible": true
   },
-  "NetworkTables View": {
-    "visible": false
-  },
   "Plot": {
     "Plot <0>": {
       "plots": [
@@ -86,7 +133,7 @@
             0.0,
             0.8500000238418579
           ],
-          "height": -6,
+          "height": 0,
           "series": [
             {
               "color": [
