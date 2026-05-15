@@ -1,23 +1,20 @@
 package frc.robot.simulation;
 
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.PubSubOption;
 import edu.wpi.first.networktables.StructSubscriber;
-import edu.wpi.first.wpilibj.smartdashboard.Field2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.robot.Constants;
 import frc.robot.simulation.packets.ClientConnectionPacket;
 import frc.robot.simulation.packets.ClientUpdatePacket;
 import frc.robot.simulation.packets.ServerUpdatePacket;
 import org.jetbrains.annotations.Nullable;
-import org.littletonrobotics.junction.Logger;
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
-import java.util.Arrays;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -29,11 +26,11 @@ public class MultiplayerSimClient {
     private byte[] sendBuf = new byte[ClientUpdatePacket.SIZE];
     private final byte[] receiveBuf = new byte[ServerUpdatePacket.MAX_SIZE];
 
-    private final Field2d field2d = new Field2d();
     private int id = 0;
+
     private final StructSubscriber<ChassisSpeeds> setpointSpeedsSubscriber = NetworkTableInstance.getDefault()
             .getStructTopic("/AdvantageKit/RealOutputs/Drive/ChassisSpeeds/SetpointOptimized", ChassisSpeeds.struct)
-            .subscribe(new ChassisSpeeds());
+            .subscribe(new ChassisSpeeds(), PubSubOption.periodic(Constants.loopPeriod));
 
     public MultiplayerSimClient() {
         try {
@@ -55,39 +52,25 @@ public class MultiplayerSimClient {
     }
 
     private void run() {
-        SmartDashboard.putBoolean("Multiplayer/Client/Started", true);
         while (!socket.isClosed()) {
             try {
-                SmartDashboard.putBoolean("Multiplayer/Client/Connected", socket.isConnected());
+                MultiplayerLogger.logStatus("Client " + (socket.isConnected() ? "connected" : "disconnected"));
 
                 // Send client update, which serves as a request for a server update
                 DatagramPacket packet = new DatagramPacket(sendBuf, sendBuf.length, address, MultiplayerSimServer.SERVER_PORT);
-                SmartDashboard.putNumber("Multiplayer/Client/LastTrySend", System.currentTimeMillis());
+                MultiplayerLogger.logTrySend();
                 socket.send(packet);
-                SmartDashboard.putNumber("Multiplayer/Client/LastSend", System.currentTimeMillis());
+                MultiplayerLogger.logSend();
 
                 // Receive server update
                 packet = new DatagramPacket(receiveBuf, receiveBuf.length);
-                SmartDashboard.putNumber("Multiplayer/Client/LastTryReceive", System.currentTimeMillis());
+                MultiplayerLogger.logTryReceive();
                 socket.receive(packet);
-                SmartDashboard.putNumber("Multiplayer/Client/LastReceive", System.currentTimeMillis());
+                MultiplayerLogger.logReceive();
 
                 // Process server update
                 var update = ServerUpdatePacket.fromBytes(packet.getData(), packet.getLength());
-                Logger.recordOutput("Multiplayer/Client/ConnectedIDs", update.connectedIds());
-                Logger.recordOutput("Multiplayer/Client/RobotPoses", update.robotPoses());
-                Logger.recordOutput("Multiplayer/Client/FuelTranslations", update.fuelTranslations());
-                if (update.robotPoses().length > 0) {
-                    field2d.setRobotPose(update.robotPoses()[0]);
-                    for (int i = 1; i < update.robotPoses().length; i++) {
-                        field2d.getObject("Robot" + i).setPose(update.robotPoses()[i]);
-                    }
-                }
-                field2d.getObject("Fuel").setPoses(Arrays.stream(update.fuelTranslations())
-                        .map(t -> new Pose2d(t.toTranslation2d(), new Rotation2d()))
-                        .toList()
-                );
-                SmartDashboard.putData("Multiplayer/Client/Field", field2d);
+                MultiplayerLogger.logUpdate(update);
 
                 // Respond and prepare next client update
                 // Check if our ID is connected

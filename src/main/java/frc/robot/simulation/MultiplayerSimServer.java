@@ -1,7 +1,6 @@
 package frc.robot.simulation;
 
 import edu.wpi.first.math.geometry.*;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.simulation.packets.ClientConnectionPacket;
 import frc.robot.simulation.packets.ClientUpdatePacket;
 import frc.robot.simulation.packets.ServerUpdatePacket;
@@ -49,16 +48,15 @@ public class MultiplayerSimServer {
     }
 
     private void run() {
-        SmartDashboard.putBoolean("Multiplayer/Server/Started", true);
         while (!socket.isClosed()) {
             try {
-                SmartDashboard.putBoolean("Multiplayer/Server/Connected", socket.isConnected());
+                MultiplayerLogger.logStatus("Server " + (socket.isConnected() ? "connected" : "disconnected"));
 
                 // Wait for client update
                 DatagramPacket packet = new DatagramPacket(receiveBuf, receiveBuf.length);
-                SmartDashboard.putNumber("Multiplayer/Server/LastTryReceive", System.currentTimeMillis());
+                MultiplayerLogger.logTryReceive();
                 socket.receive(packet);
-                SmartDashboard.putNumber("Multiplayer/Server/LastReceive", System.currentTimeMillis());
+                MultiplayerLogger.logReceive();
 
                 // Process client update
                 if (packet.getLength() == ClientConnectionPacket.SIZE) {
@@ -89,20 +87,23 @@ public class MultiplayerSimServer {
 
                 // Send back server update
                 dataLock.lock();
-                byte[] rawPacket;
+                ServerUpdatePacket updatePacket;
                 try {
-                    rawPacket = new ServerUpdatePacket(
+                    updatePacket = new ServerUpdatePacket(
                             clients.stream().mapToInt(c -> c.id).toArray(),
                             robotPoses,
                             fuelPoses
-                    ).toBytes();
+                    );
                 } finally {
                     dataLock.unlock();
                 }
+                MultiplayerLogger.logUpdate(updatePacket);
+
+                byte[] rawPacket = updatePacket.toBytes();
                 packet = new DatagramPacket(rawPacket, rawPacket.length, packet.getAddress(), packet.getPort());
-                SmartDashboard.putNumber("Multiplayer/Server/LastTrySend", System.currentTimeMillis());
+                MultiplayerLogger.logTrySend();
                 socket.send(packet);
-                SmartDashboard.putNumber("Multiplayer/Server/LastSend", System.currentTimeMillis());
+                MultiplayerLogger.logSend();
             } catch (Exception e) {
                 e.printStackTrace();
             }
