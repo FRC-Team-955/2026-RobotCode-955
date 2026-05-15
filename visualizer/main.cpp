@@ -1,5 +1,14 @@
-#include "raylib.h"
-#include "raymath.h"
+#include <wpi/nt/NetworkTableInstance.hpp>
+#include <wpi/nt/IntegerArrayTopic.hpp>
+#include <wpi/nt/StringTopic.hpp>
+#include <wpi/nt/StructArrayTopic.hpp>
+#include <wpi/math/geometry/Pose2d.hpp>
+#include <wpi/math/geometry/Translation3d.hpp>
+#include <raylib.h>
+#include <raymath.h>
+
+using namespace wpi::nt;
+using namespace wpi::math;
 
 #define RLIGHTS_IMPLEMENTATION
 #include "rlights.h"
@@ -9,9 +18,6 @@
 #else // PLATFORM_ANDROID, PLATFORM_WEB
 	#define GLSL_VERSION            100
 #endif
-
-const float field_length = 16.541f;
-const float field_width = 8.069f;
 
 const float ds_x = 8.5f;
 const float ds_z = 1.8f;
@@ -26,12 +32,15 @@ const Vector3 camera_positions[] = {
 Vector3 camera_target = (Vector3){ 0.0f, -2.0f, 0.0f };
 Vector3 camera_up = (Vector3){ 0.0f, 1.0f, 0.0f };
 
+const float field_length = 16.541f;
+const float field_width = 8.069f;
+
 Vector3 wpi_to_raylib(float x, float y, float z) {
-    return (Vector3){ .x = field_length - x, .y = z, .z = field_width + y };
+	return (Vector3){ .x = field_length / 2.0f - x, .y = z, .z = y - field_width / 2.0f };
 }
 
 int main() {
-	SetConfigFlags(FLAG_MSAA_4X_HINT);  // Enable Multi Sampling Anti Aliasing 4x (if available)
+	SetConfigFlags(FLAG_MSAA_4X_HINT | FLAG_VSYNC_HINT);
 	InitWindow(1920, 1080, "visualizer");
 	SetWindowState(FLAG_WINDOW_RESIZABLE);
 	MaximizeWindow();
@@ -46,10 +55,6 @@ int main() {
 	camera.projection = CAMERA_PERSPECTIVE;             // Camera projection type
 
 	DisableCursor();
-
-	// Load model
-	Model model = LoadModel("resources/models/field.glb");
-	Vector3 position = { 0.0f, 0.0f, 0.0f };
 
 	Shader shader = LoadShader(
 		TextFormat("resources/shaders/glsl%i/lighting.vs", GLSL_VERSION),
@@ -75,10 +80,23 @@ int main() {
 	CreateLight(LIGHT_POINT, (Vector3){ 6.0f, 3.0f, 2.5f }, Vector3Zero(), (Color){ 0, 0, 200, 255 }, shader);
 	CreateLight(LIGHT_POINT, (Vector3){ 6.0f, 3.0f, -2.5f }, Vector3Zero(), (Color){ 0, 0, 200, 255 }, shader);
 
+	// Load models
+	Model field_model = LoadModel("resources/models/field.glb");
+	Model robot_model = LoadModel("resources/models/robot.glb");
+
 	// Assign shader to all model materials
-	for (int i = 0; i < model.materialCount; i++) {
-		model.materials[i].shader = shader;
-	}
+	for (int i = 0; i < field_model.materialCount; i++) { field_model.materials[i].shader = shader; }
+	for (int i = 0; i < robot_model.materialCount; i++) { robot_model.materials[i].shader = shader; }
+
+	// Start NT client
+	auto nt_inst = NetworkTableInstance::GetDefault();
+	nt_inst.StartClient("visualizer");
+	nt_inst.SetServer("127.0.0.1", 5810);
+	PubSubOptions options = { .periodic = 0.02 };
+	StringSubscriber status = nt_inst.GetStringTopic("/Multiplayer/Status").Subscribe({}, options);
+	IntegerArraySubscriber connected_ids = nt_inst.GetIntegerArrayTopic("/Multiplayer/ConnectedIDs").Subscribe({}, options);
+	StructArraySubscriber<Pose2d> robot_poses = nt_inst.GetStructArrayTopic<Pose2d>("/Multiplayer/RobotPoses").Subscribe({}, options);
+	StructArraySubscriber<Translation3d> fuel_translations = nt_inst.GetStructArrayTopic<Translation3d>("/Multiplayer/FuelTranslations").Subscribe({}, options);
 
 	SetTargetFPS(80);
 
@@ -117,7 +135,22 @@ int main() {
 
 				BeginShaderMode(shader);
 
-					DrawModel(model, position, 1.0f, WHITE);
+					DrawModel(field_model, (Vector3){ 0.0f, 0.0f, 0.0f }, 1.0f, WHITE);
+
+					for (Pose2d pose : robot_poses.Get()) {
+						DrawModelEx(
+							robot_model,
+							wpi_to_raylib(pose.X().value(), pose.Y().value(), 0.0f),
+							(Vector3){ 0.0f, 1.0f, 0.0f },
+							180.0f + pose.Rotation().Degrees().value(),
+							(Vector3){ 1.0f, 1.0f, 1.0f },
+							WHITE
+						);
+					}
+
+					for (Translation3d fuel : fuel_translations.Get()) {
+						DrawSphere(wpi_to_raylib(fuel.X().value(), fuel.Y().value(), fuel.Z().value()), 0.15f / 2.0f, YELLOW);
+					}
 
 				EndShaderMode();
 
@@ -126,8 +159,9 @@ int main() {
 			DrawFPS(10, 10);
 
 			DrawText("Press C to switch camera", 10, 30, 24, WHITE);
-			DrawText("Press P/L to adjust FOV", 10, 62, 24, WHITE);
-			DrawText("Press WASD, Space, Ctrl to move camera", 10, 94, 24, WHITE);
+			DrawText("Press P/L to adjust FOV", 10, 30 + 32, 24, WHITE);
+			DrawText("Press WASD, Space, Ctrl to move camera", 10, 30 + 32 * 2, 24, WHITE);
+			DrawText(status.Get("Start robot code simulation").c_str(), 10, 30 + 32 * 3, 24, WHITE);
 
 		EndDrawing();
 	}
