@@ -41,11 +41,11 @@ public class OperatorDashboard implements Periodic {
     public final LoggedNetworkBooleanExt autoChosen = new LoggedNetworkBooleanExt(prefix + "AutoChosen", false);
     public final LoggedNetworkBooleanExt recordingStarted = new LoggedNetworkBooleanExt(prefix + "RecordingStarted", false);
     public final LoggedNetworkBooleanExt manualAiming = new LoggedNetworkBooleanExt(prefix + "ManualAiming", true);
-    public final LoggedNetworkNumberExt manualFlywheelRPMSmudge = new LoggedNetworkNumberExt(prefix + "ManualFlywheelRPMSmudge", -500);
+    public final LoggedNetworkNumberExt manualFlywheelRPMSmudge = new LoggedNetworkNumberExt(prefix + "ManualFlywheelRPMSmudge", -3000.0);
     public final LoggedNetworkNumberExt slipConstantSmudge = new LoggedNetworkNumberExt(prefix + "SlipConstantSmudge", 0.0);
     public final LoggedNetworkBooleanExt lostAuto = new LoggedNetworkBooleanExt(prefix + "LostAuto", false);
     public final LoggedNetworkBooleanExt wonAuto = new LoggedNetworkBooleanExt(prefix + "WonAuto", false);
-    public final LoggedNetworkBooleanExt disableShiftTracking = new LoggedNetworkBooleanExt(prefix + "DisableShiftTracking", BuildConstants.isSim);
+    public final LoggedNetworkBooleanExt disableShiftTracking = new LoggedNetworkBooleanExt(prefix + "DisableShiftTracking", true);
     public final LoggedNetworkBooleanExt driveTurnAbsolutePID = new LoggedNetworkBooleanExt(prefix + "DriveTurnAbsolutePID", false);
     public final LoggedNetworkBooleanExt hoodEStop = new LoggedNetworkBooleanExt(prefix + "HoodEStop", false);
     public final LoggedNetworkBooleanExt intakePivotEStop = new LoggedNetworkBooleanExt(prefix + "IntakePivotEStop", false);
