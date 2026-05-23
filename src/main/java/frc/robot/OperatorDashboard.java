@@ -52,7 +52,7 @@ public class OperatorDashboard implements Periodic {
     public final LoggedNetworkNumberExt autoDelay = new LoggedNetworkNumberExt(prefix + "AutoDelay", 0.0);
 
     @Getter
-    private ScoringMode selectedScoringMode = ScoringMode.ShootAndPassAutomatic;
+    private ScoringMode selectedScoringMode = ScoringMode.ShootHubManual;
     private final EnumMap<ScoringMode, LoggedNetworkBooleanExt> scoringModeToggles = generateTogglesForEnum("ScoringMode", ScoringMode.values(), ScoringMode.class);
 
     // Alerts
