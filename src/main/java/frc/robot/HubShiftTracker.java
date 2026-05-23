@@ -26,7 +26,6 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.Util;
 import frc.lib.subsystem.Periodic;
 import frc.robot.controller.Controller;
@@ -92,9 +91,6 @@ public class HubShiftTracker implements Periodic {
         if (instance != null) {
             Util.error("Duplicate HubShiftTracker created");
         }
-
-        new Trigger(() -> shiftInfo.remainingTime() < 3.0)
-                .whileTrue(controller.rumble(0.5));
     }
 
     @Override
