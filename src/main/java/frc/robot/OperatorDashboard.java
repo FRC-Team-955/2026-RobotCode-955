@@ -41,7 +41,7 @@ public class OperatorDashboard implements Periodic {
     public final LoggedNetworkBooleanExt autoChosen = new LoggedNetworkBooleanExt(prefix + "AutoChosen", false);
     public final LoggedNetworkBooleanExt recordingStarted = new LoggedNetworkBooleanExt(prefix + "RecordingStarted", false);
     public final LoggedNetworkBooleanExt manualAiming = new LoggedNetworkBooleanExt(prefix + "ManualAiming", true);
-    public final LoggedNetworkNumberExt manualFlywheelRPMSmudge = new LoggedNetworkNumberExt(prefix + "ManualFlywheelRPMSmudge", -3000.0);
+    public final LoggedNetworkNumberExt manualFlywheelRPMSmudge = new LoggedNetworkNumberExt(prefix + "ManualFlywheelRPMSmudge", -250.0);
     public final LoggedNetworkNumberExt slipConstantSmudge = new LoggedNetworkNumberExt(prefix + "SlipConstantSmudge", 0.0);
     public final LoggedNetworkBooleanExt lostAuto = new LoggedNetworkBooleanExt(prefix + "LostAuto", false);
     public final LoggedNetworkBooleanExt wonAuto = new LoggedNetworkBooleanExt(prefix + "WonAuto", false);
