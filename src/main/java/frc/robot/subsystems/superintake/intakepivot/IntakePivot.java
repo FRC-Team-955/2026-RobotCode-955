@@ -149,8 +149,9 @@ public class IntakePivot implements Periodic {
             io.setVoltageRequest(2.0);
         } else {
             // See the comments above the lookaheadState and goalState variables for why we effectively calculate two profiles
-            boolean isInTrench = robotState.isInTrench(robotState.getTranslation().
-                    plus(transform().getTranslation().toTranslation2d()));
+            boolean isInTrench = false;
+            //boolean isInTrench = robotState.isInTrench(robotState.getTranslation().
+            //        plus(transform().getTranslation().toTranslation2d()));
             Logger.recordOutput("Superintake/IntakePivot/IsInTrench", isInTrench);
 
             double setpointRad = goal.setpointRad.getAsDouble();

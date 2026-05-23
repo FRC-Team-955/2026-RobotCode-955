@@ -142,8 +142,9 @@ public class Hood implements Periodic {
             io.setVoltageRequest(-0.5);
         } else {
             double setpointRad = goal.setpointRad.getAsDouble();
-            boolean isInTrench = robotState.isInTrench(robotState.getTranslation().
-                    plus(transform().getTranslation().toTranslation2d()));
+            boolean isInTrench = false;
+            //boolean isInTrench = robotState.isInTrench(robotState.getTranslation().
+            //        plus(transform().getTranslation().toTranslation2d()));
             Logger.recordOutput("Superstructure/Hood/IsInTrench", isInTrench);
             if (isInTrench) {
                 setpointRad = Math.min(setpointRad, maxPositionUnderTrench);
