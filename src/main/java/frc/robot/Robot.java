@@ -140,6 +140,7 @@ public class Robot extends LoggedRobot {
                 robotContainer.drive,
                 // The rest of the subsystems require vision
                 robotContainer.aprilTagVision,
+                robotContainer.questNavVision,
                 robotContainer.gamePieceVision,
                 // Pose stuff - after drive/vision, but before anything else that might use pose
                 robotContainer.robotState,
