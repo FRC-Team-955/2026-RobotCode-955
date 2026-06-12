@@ -37,7 +37,7 @@ public class DriveConstants {
             PIDF.ofPD(3.5, 0),
             PIDF.ofPD(3, 0),
             PIDF.ofP(15),
-            10
+            3
     );
 
     /**
@@ -86,7 +86,7 @@ public class DriveConstants {
                 true,
                 false,
                 false,
-                77,
+                30,
                 60
         );
     };
