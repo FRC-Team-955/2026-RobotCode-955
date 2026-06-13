@@ -18,12 +18,14 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.Util;
 import frc.lib.subsystem.Periodic;
 import frc.robot.BuildConstants;
 import frc.robot.RobotState;
+import frc.robot.subsystems.questnavvision.QuestNavVision;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.*;
@@ -33,7 +35,7 @@ import static frc.robot.subsystems.apriltagvision.AprilTagVisionConstants.*;
 
 public class AprilTagVision implements Periodic {
     private static final RobotState robotState = RobotState.get();
-
+    private static final QuestNavVision questNavVision = QuestNavVision.get();
     private final EnumMap<Camera, CameraData> cameras = Util.createEnumMap(Camera.class,
             Camera.values(), (cam) ->
                     new CameraData(
@@ -307,12 +309,14 @@ public class AprilTagVision implements Periodic {
                 double angularStdDev = observation.angularStdDevBaseline * stdDevFactor * metadata.stdDevMultiplier;
 
                 // Send vision observation
-                robotState.addVisionMeasurement(
-                        observation.poseEstimate().toPose2d(),
-                        observation.timestamp(),
-                        linearStdDev,
-                        angularStdDev
-                );
+                if (DriverStation.isDisabled() || questNavVision.disconnected()) {
+                    robotState.addVisionMeasurement(
+                            observation.poseEstimate().toPose2d(),
+                            observation.timestamp(),
+                            linearStdDev,
+                            angularStdDev
+                    );
+                }
             }
 
             // Log camera data
