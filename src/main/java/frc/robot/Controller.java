@@ -9,7 +9,6 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.Util;
@@ -73,7 +72,8 @@ public class Controller implements Periodic {
         // right on joystick is positive x - we want negative y for right
         double y = -controller.getLeftX();
         // right on joystick is positive x - we want negative x for right (CCW is positive)
-        double omega = -controller.getRightX();
+//        double omega = -controller.getRightX();
+        double omega = controller.getLeftTriggerAxis() - controller.getRightTriggerAxis();
 
         Logger.recordOutput("Controller/Drive/Suppliers/X", x);
         Logger.recordOutput("Controller/Drive/Suppliers/Y", y);
