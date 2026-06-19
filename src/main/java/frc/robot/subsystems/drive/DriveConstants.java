@@ -86,7 +86,7 @@ public class DriveConstants {
                 true,
                 false,
                 false,
-                30,
+                20,
                 60
         );
     };
