@@ -75,8 +75,8 @@ public class DriveConstants {
                 true,
                 false,
                 false,
-                30,
-                20
+                20,
+                40
         );
         case SIM -> new ModuleConfig(
                 PIDF.ofPDSV(0.05, 0.0, 0.04075, 0.14117),
