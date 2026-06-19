@@ -72,8 +72,7 @@ public class Controller implements Periodic {
         // right on joystick is positive x - we want negative y for right
         double y = -controller.getLeftX();
         // right on joystick is positive x - we want negative x for right (CCW is positive)
-//        double omega = -controller.getRightX();
-        double omega = controller.getLeftTriggerAxis() - controller.getRightTriggerAxis();
+        double omega = -controller.getRightX() + controller.getLeftTriggerAxis() - controller.getRightTriggerAxis();
 
         Logger.recordOutput("Controller/Drive/Suppliers/X", x);
         Logger.recordOutput("Controller/Drive/Suppliers/Y", y);
