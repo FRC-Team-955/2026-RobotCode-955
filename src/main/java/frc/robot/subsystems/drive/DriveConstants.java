@@ -39,7 +39,7 @@ public class DriveConstants {
             Units.inchesToMeters(31.5),
             // KEEP SYNCED WITH shooting_regression.py
             Units.inchesToMeters(-0.247776),
-            2.0
+            4.58
     );
 
     /**

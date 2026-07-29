@@ -40,8 +40,8 @@ public class OperatorDashboard implements Periodic {
     public final LoggedNetworkBooleanExt coastOverride = new LoggedNetworkBooleanExt(prefix + "CoastOverride", false);
     public final LoggedNetworkBooleanExt autoChosen = new LoggedNetworkBooleanExt(prefix + "AutoChosen", false);
     public final LoggedNetworkBooleanExt recordingStarted = new LoggedNetworkBooleanExt(prefix + "RecordingStarted", false);
-    public final LoggedNetworkBooleanExt manualAiming = new LoggedNetworkBooleanExt(prefix + "ManualAiming", true);
-    public final LoggedNetworkNumberExt manualFlywheelRPMSmudge = new LoggedNetworkNumberExt(prefix + "ManualFlywheelRPMSmudge", -250.0);
+    public final LoggedNetworkBooleanExt manualAiming = new LoggedNetworkBooleanExt(prefix + "ManualAiming", false);
+    public final LoggedNetworkNumberExt manualFlywheelRPMSmudge = new LoggedNetworkNumberExt(prefix + "ManualFlywheelRPMSmudge", 0.0);
     public final LoggedNetworkNumberExt slipConstantSmudge = new LoggedNetworkNumberExt(prefix + "SlipConstantSmudge", 0.0);
     public final LoggedNetworkBooleanExt lostAuto = new LoggedNetworkBooleanExt(prefix + "LostAuto", false);
     public final LoggedNetworkBooleanExt wonAuto = new LoggedNetworkBooleanExt(prefix + "WonAuto", false);
@@ -52,7 +52,7 @@ public class OperatorDashboard implements Periodic {
     public final LoggedNetworkNumberExt autoDelay = new LoggedNetworkNumberExt(prefix + "AutoDelay", 0.0);
 
     @Getter
-    private ScoringMode selectedScoringMode = ScoringMode.ShootHubManual;
+    private ScoringMode selectedScoringMode = ScoringMode.ShootAndPassAutomatic;
     private final EnumMap<ScoringMode, LoggedNetworkBooleanExt> scoringModeToggles = generateTogglesForEnum("ScoringMode", ScoringMode.values(), ScoringMode.class);
 
     // Alerts
