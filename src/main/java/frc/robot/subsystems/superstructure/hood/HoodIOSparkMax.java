@@ -1,25 +1,25 @@
-package frc.robot.subsystems.superintake.intakepivot;
+package frc.robot.subsystems.superstructure.hood;
 
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.revrobotics.spark.config.SparkBaseConfig;
 import frc.lib.motor.MotorIO.MotorIOInputs;
-import frc.lib.motor.MotorIOTalonFX;
+import frc.lib.motor.MotorIOSparkMax;
 import frc.lib.motor.RequestType;
 import frc.lib.network.LoggedTunablePIDF;
 
-import static frc.robot.subsystems.superintake.intakepivot.IntakePivotConstants.*;
+import static frc.robot.subsystems.superstructure.hood.HoodConstants.*;
 
-public class IntakePivotIOTalonFX extends IntakePivotIO {
-    private static final int normalCurrentLimitAmps = 50;
-    private static final int homingCurrentLimitAmps = 20;
+public class HoodIOSparkMax extends HoodIO {
+    private static final int normalCurrentLimitAmps = 30;
+    private static final int homingCurrentLimitAmps = 10;
 
-    private final MotorIOTalonFX motor;
+    private final MotorIOSparkMax motor;
 
-    public IntakePivotIOTalonFX(int canID, boolean inverted) {
-        motor = new MotorIOTalonFX(
+    public HoodIOSparkMax(int canID, boolean inverted) {
+        motor = new MotorIOSparkMax(
                 canID,
                 inverted,
-                NeutralModeValue.Coast,
-                normalCurrentLimitAmps,
+                SparkBaseConfig.IdleMode.kBrake,
                 normalCurrentLimitAmps,
                 gearRatio,
                 gains,
@@ -49,8 +49,14 @@ public class IntakePivotIOTalonFX extends IntakePivotIO {
     }
 
     @Override
-    public void setCurrentLimit(IntakePivotCurrentLimitMode mode) {
-        System.out.println("Setting intake pivot current limit to " + mode);
+    public void setNeutralMode(NeutralModeValue neutralMode) {
+        System.out.println("Setting hood neutral mode to " + neutralMode);
+        motor.setNeutralMode(neutralMode);
+    }
+
+    @Override
+    public void setCurrentLimit(HoodCurrentLimitMode mode) {
+        System.out.println("Setting hood current limit to " + mode);
         int currentLimitAmps = switch (mode) {
             case NORMAL -> normalCurrentLimitAmps;
             case HOMING -> homingCurrentLimitAmps;

@@ -1,30 +1,29 @@
 package frc.robot.subsystems.superintake.intakepivot;
 
-import com.ctre.phoenix6.signals.NeutralModeValue;
+import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.util.Units;
 import frc.lib.motor.MotorIO.MotorIOInputs;
-import frc.lib.motor.MotorIOTalonFX;
+import frc.lib.motor.MotorIOArmSim;
 import frc.lib.motor.RequestType;
 import frc.lib.network.LoggedTunablePIDF;
 
 import static frc.robot.subsystems.superintake.intakepivot.IntakePivotConstants.*;
 
-public class IntakePivotIOTalonFX extends IntakePivotIO {
-    private static final int normalCurrentLimitAmps = 50;
-    private static final int homingCurrentLimitAmps = 20;
+public class IntakePivotIOSim extends IntakePivotIO {
+    private final MotorIOArmSim motor;
 
-    private final MotorIOTalonFX motor;
-
-    public IntakePivotIOTalonFX(int canID, boolean inverted) {
-        motor = new MotorIOTalonFX(
-                canID,
-                inverted,
-                NeutralModeValue.Coast,
-                normalCurrentLimitAmps,
-                normalCurrentLimitAmps,
+    public IntakePivotIOSim(double JKgMetersSquared, DCMotor dcMotor) {
+        motor = new MotorIOArmSim(
+                dcMotor,
                 gearRatio,
-                gains,
-                null,
-                initialPositionRad
+                JKgMetersSquared,
+                Units.inchesToMeters(10),
+                minPositionRad,
+                maxPositionRad,
+                true,
+                initialPositionRad,
+                0.001,
+                gains
         );
     }
 
@@ -50,12 +49,7 @@ public class IntakePivotIOTalonFX extends IntakePivotIO {
 
     @Override
     public void setCurrentLimit(IntakePivotCurrentLimitMode mode) {
-        System.out.println("Setting intake pivot current limit to " + mode);
-        int currentLimitAmps = switch (mode) {
-            case NORMAL -> normalCurrentLimitAmps;
-            case HOMING -> homingCurrentLimitAmps;
-        };
-        motor.setCurrentLimit(currentLimitAmps);
+        System.out.println("Setting hood current limit to " + mode);
     }
 
     @Override

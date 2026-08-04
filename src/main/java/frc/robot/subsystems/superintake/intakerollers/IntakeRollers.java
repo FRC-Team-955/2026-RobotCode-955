@@ -1,4 +1,4 @@
-package frc.robot.subsystems.superstructure.spindexer;
+package frc.robot.subsystems.superintake.intakerollers;
 
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
@@ -6,7 +6,6 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.Timer;
 import frc.lib.EnergyLogger;
 import frc.lib.Util;
 import frc.lib.motor.MotorIO;
@@ -23,25 +22,25 @@ import org.littletonrobotics.junction.Logger;
 
 import java.util.function.DoubleSupplier;
 
-import static frc.robot.subsystems.superstructure.spindexer.SpindexerConstants.createIO;
+import static frc.robot.subsystems.superintake.intakerollers.IntakeRollersConstants.createIO;
 
-public class Spindexer implements Periodic {
-    private static final LoggedTunableNumber feedVoltage = new LoggedTunableNumber("Superstructure/Spindexer/Goal/FeedVoltage", 12.0);
-    private static final LoggedTunableNumber ejectVoltage = new LoggedTunableNumber("Superstructure/Spindexer/Goal/EjectVoltage", -12.0);
+public class IntakeRollers implements Periodic {
+    private static final LoggedTunableNumber idleVoltage = new LoggedTunableNumber("Superintake/IntakeRollers/Goal/IdleVoltage", 0.0);
+    private static final LoggedTunableNumber intakeVoltage = new LoggedTunableNumber("Superintake/IntakeRollers/Goal/IntakeVoltage", 12.0);
+    private static final LoggedTunableNumber ejectVoltage = new LoggedTunableNumber("Superintake/IntakeRollers/Goal/EjectVoltage", -12.0);
+    private static final EnergyLogger energyLogger = EnergyLogger.get();
 
     private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
-    private static final EnergyLogger energyLogger = EnergyLogger.get();
 
     private final MotorIO io = createIO();
     private final MotorIOInputsAutoLogged inputs = new MotorIOInputsAutoLogged();
 
+
     @RequiredArgsConstructor
     public enum Goal {
-        IDLE(() -> 0, RequestType.VoltageVolts),
-        FEED(() -> /*Timer.getTimestamp() % 2.0 < 0.1 ? -feedVoltage.get() :*/ feedVoltage.get(), RequestType.VoltageVolts),
+        IDLE(idleVoltage::get, RequestType.VoltageVolts),
+        INTAKE(intakeVoltage::get, RequestType.VoltageVolts),
         EJECT(ejectVoltage::get, RequestType.VoltageVolts),
-        EJECT_ALTERNATE(() -> Timer.getTimestamp() % 0.5 < 0.25 ? ejectVoltage.get() : -ejectVoltage.get(), RequestType.VoltageVolts),
-        AGITATE(() -> Timer.getTimestamp() % 3.0 < 1.0 ? Math.sin(2.0 * Math.PI * Timer.getTimestamp()) : 0.0, RequestType.VoltageVolts),
         ;
 
         /** Should be constant for every loop cycle */
@@ -53,45 +52,47 @@ public class Spindexer implements Periodic {
     @Getter
     private Goal goal = Goal.IDLE;
 
-    private final Alert motorDisconnectedAlert = new Alert("Spindexer motor is disconnected.", Alert.AlertType.kError);
+    private final Alert motorDisconnectedAlert = new Alert("Intake rollers motor is disconnected.", Alert.AlertType.kError);
+    public final Alert highTemperatureAlert = new Alert("Intake rollers motor temperature is high.", Alert.AlertType.kWarning);
 
-    private static Spindexer instance;
+    private static IntakeRollers instance;
 
-    public static synchronized Spindexer get() {
+    public static synchronized IntakeRollers get() {
         if (instance == null) {
-            instance = new Spindexer();
+            instance = new IntakeRollers();
         }
 
         return instance;
     }
 
-    private Spindexer() {
+    private IntakeRollers() {
         if (instance != null) {
-            Util.error("Duplicate Spindexer created");
+            Util.error("Duplicate IntakeRollers created");
         }
     }
 
     @Override
     public void periodicBeforeCommands() {
         io.updateInputs(inputs);
-        Logger.processInputs("Inputs/Superstructure/Spindexer", inputs);
+        Logger.processInputs("Inputs/Superintake/IntakeRollers", inputs);
 
         motorDisconnectedAlert.set(!inputs.connected);
+        highTemperatureAlert.set(inputs.temperatureCelsius > 50);
 
-        energyLogger.reportPowerUsage("Spindexer", inputs.connected ? inputs.appliedVolts * inputs.supplyCurrentAmps : 0.0);
+        energyLogger.reportPowerUsage("IntakeRollers", inputs.connected ? inputs.appliedVolts * inputs.supplyCurrentAmps : 0.0);
     }
 
     @Override
     public void periodicAfterCommands() {
-        Logger.recordOutput("Superstructure/Spindexer/Goal", goal);
+        Logger.recordOutput("Superintake/IntakeRollers/Goal", goal);
         if (DriverStation.isDisabled()) {
             io.setRequest(RequestType.VoltageVolts, 0);
         } else {
             double value = goal.value.getAsDouble();
             io.setRequest(goal.type, value);
             if (BuildConstants.isSimOrReplay) {
-                Logger.recordOutput("Superstructure/Spindexer/RequestType", goal.type);
-                Logger.recordOutput("Superstructure/Spindexer/RequestValue", value);
+                Logger.recordOutput("Superintake/IntakeRollers/RequestType", goal.type);
+                Logger.recordOutput("Superintake/IntakeRollers/RequestValue", value);
             }
         }
     }
@@ -106,8 +107,8 @@ public class Spindexer implements Periodic {
 
     public Transform3d transform() {
         return new Transform3d(
-                new Translation3d(0.0, Units.inchesToMeters(1.4), Units.inchesToMeters(12.0)),
-                new Rotation3d(0.0, 0.0, Units.degreesToRadians(90.0))
+                new Translation3d(Units.inchesToMeters(19.75), 0.0, Units.inchesToMeters(8.985680)),
+                new Rotation3d()
         ).plus(new Transform3d(
                 new Translation3d(),
                 new Rotation3d(0.0, getPositionRad(), 0.0)

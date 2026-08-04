@@ -22,14 +22,18 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.WrapperCommand;
 import frc.lib.Util;
 import frc.lib.commands.CommandsExt;
 import frc.lib.subsystem.CommandBasedSubsystem;
+import frc.robot.BuildConstants;
 import frc.robot.Constants;
 import frc.robot.OperatorDashboard;
 import frc.robot.RobotState;
 import frc.robot.controller.Controller;
+import frc.robot.shooting.ShootingKinematics;
+import frc.robot.subsystems.drive.constraints.DriveConstrainer;
+import frc.robot.subsystems.drive.constraints.DriveConstraints;
 import frc.robot.subsystems.drive.controllers.FollowTrajectoryController;
 import frc.robot.subsystems.drive.controllers.MoveToController;
 import lombok.Getter;
@@ -39,6 +43,7 @@ import org.littletonrobotics.junction.Logger;
 
 import java.util.Arrays;
 import java.util.OptionalDouble;
+import java.util.function.BiFunction;
 import java.util.function.DoubleSupplier;
 import java.util.function.IntToDoubleFunction;
 import java.util.function.Supplier;
@@ -50,6 +55,7 @@ public class Drive extends CommandBasedSubsystem {
     private static final RobotState robotState = RobotState.get();
     private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
     private static final Controller controller = Controller.get();
+    private static final ShootingKinematics shootingKinematics = ShootingKinematics.get();
 
     private final GyroIO gyroIO = createGyroIO();
     private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
@@ -62,9 +68,12 @@ public class Drive extends CommandBasedSubsystem {
 
     private final Debouncer gyroDebouncer = new Debouncer(2.0, Debouncer.DebounceType.kRising);
     private boolean gyroDebounced = false;
+    //
+    //private boolean wasOnBump = false;
 
     public enum State {
         STOP,
+        ACTUALLY_STOP,
         JOYSTICK_DRIVE,
         MOVE_TO,
         FOLLOW_TRAJECTORY,
@@ -72,13 +81,13 @@ public class Drive extends CommandBasedSubsystem {
         CHARACTERIZATION,
     }
 
-    @Getter
-    private State state = State.STOP;
+    private State wantedState = State.STOP;
 
-    private boolean shouldStopWithX = false;
+    private boolean stopWithX = false;
 
-    private @Nullable DoubleSupplier headingOverrideSetpointSupplier = null;
-    private @Nullable DoubleSupplier headingOverrideFeedforwardSupplier = null;
+    private @Nullable Supplier<OptionalDouble> headingOverrideSetpointSupplier = null;
+    /** Takes FIELD RELATIVE wanted speeds and gives a feedfoward in rad/sec */
+    private @Nullable BiFunction<ChassisSpeeds, Translation2d, OptionalDouble> headingOverrideFeedforwardSupplier = null;
     private final PIDController headingOverrideController = headingOverrideGains
             .toPIDWrapRadians(
                     moveToConfig.angularPositionToleranceRad().get(),
@@ -91,6 +100,9 @@ public class Drive extends CommandBasedSubsystem {
     private final MoveToController moveToController = new MoveToController();
     private final FollowTrajectoryController followTrajectoryController = new FollowTrajectoryController();
     private @Nullable Supplier<ChassisSpeeds> chassisSpeedsSetpointSupplier = null;
+
+    @Getter
+    private final DriveConstrainer constrainer = new DriveConstrainer();
 
     /**
      * FL, FR, BL, BR
@@ -168,7 +180,8 @@ public class Drive extends CommandBasedSubsystem {
         // Sanity check in case gyro is connected but not giving timestamps
         boolean prevGyroDebounced = gyroDebounced;
         gyroDebounced = gyroDebouncer.calculate(gyroInputs.connected);
-        //Logger.recordOutput("Drive/GyroConnectedDebounced", gyroDebounced);
+        if (BuildConstants.isSimOrReplay)
+            Logger.recordOutput("Drive/GyroConnectedDebounced", gyroDebounced);
         // Update gyro alert
         gyroDisconnectedAlert.set(!gyroDebounced);
         if (gyroDebounced && !disableGyro && hasGyroYawPositionRadForSample) {
@@ -243,7 +256,8 @@ public class Drive extends CommandBasedSubsystem {
                     anySampleDiscarded = true;
                 }
             }
-            //Logger.recordOutput("Drive/AnySampleDiscarded", anySampleDiscarded);
+            if (BuildConstants.isSimOrReplay)
+                Logger.recordOutput("Drive/AnySampleDiscarded", anySampleDiscarded);
         } else {
             boolean discardSample = processOdometrySample(
                     Timer.getTimestamp(),
@@ -252,8 +266,8 @@ public class Drive extends CommandBasedSubsystem {
                     true,
                     () -> gyroInputs.yawPositionRad
             );
-
-            //Logger.recordOutput("Drive/SampleDiscarded", discardSample);
+            if (BuildConstants.isSimOrReplay)
+                Logger.recordOutput("Drive/SampleDiscarded", discardSample);
         }
 
         // Chassis speeds
@@ -267,12 +281,26 @@ public class Drive extends CommandBasedSubsystem {
         robotState.setMeasuredChassisSpeedsFieldRelative(measuredChassisSpeedsFieldRelative);
 
         // Update filtered acceleration
-        //Translation2d filteredAccelerationMetersPerSecPerSec = new Translation2d(
-        //        accelerationXFilter.calculate(accelerometerInputs.accelerationXMetersPerSecPerSec),
-        //        accelerationYFilter.calculate(accelerometerInputs.accelerationYMetersPerSecPerSec)
-        //).rotateBy(robotState.getRotation());
-        //robotState.setFilteredAccelerationMetersPerSecPerSec(filteredAccelerationMetersPerSecPerSec);
-        //Logger.recordOutput("Drive/FilteredAccelerationMetersPerSecPerSec", filteredAccelerationMetersPerSecPerSec);
+        Translation2d filteredAccelerationMetersPerSecPerSec = new Translation2d(
+                accelerationXFilter.calculate(accelerometerInputs.accelerationXMetersPerSecPerSec),
+                accelerationYFilter.calculate(accelerometerInputs.accelerationYMetersPerSecPerSec)
+        ).rotateBy(robotState.getRotation());
+        robotState.setFilteredAccelerationMetersPerSecPerSec(filteredAccelerationMetersPerSecPerSec);
+        //
+        //boolean isNotOnBump = Math.abs(gyroInputs.orientation.getX()) < Units.degreesToRadians(10.0)
+        //        && Math.abs(gyroInputs.orientation.getY()) < Units.degreesToRadians(10.0);
+        //if (isNotOnBump && wasOnBump) {
+        //    robotState.setPose(new Pose2d(
+        //            measuredChassisSpeedsFieldRelative.vxMetersPerSecond > 0
+        //                    ? FieldConstants.LeftBump.farLeftCorner.getX()
+        //                    : FieldConstants.LeftBump.nearLeftCorner.getX()
+        //            , robotState.getPose().getY(),
+        //            robotState.getRotation()));
+        //
+        //}
+        //wasOnBump = !isNotOnBump;
+        if (BuildConstants.isSimOrReplay)
+            Logger.recordOutput("Drive/FilteredAccelerationMetersPerSecPerSec", filteredAccelerationMetersPerSecPerSec);
 
         // Apply network inputs
         if (operatorDashboard.coastOverride.hasChanged()) {
@@ -307,17 +335,23 @@ public class Drive extends CommandBasedSubsystem {
 
     @Override
     public void periodicAfterCommands() {
-        Logger.recordOutput("Drive/OriginalState", state);
-        evaluateStateMachine();
+        Logger.recordOutput("Drive/StopWithXSet", stopWithX);
+        Logger.recordOutput("Drive/HeadingOverrideSet", headingOverrideSetpointSupplier != null);
+
+        Logger.recordOutput("Drive/WantedState", wantedState);
+        State actualState = evaluateStateMachine(wantedState);
+        Logger.recordOutput("Drive/ActualState", actualState);
     }
 
-    private void evaluateStateMachine() {
-        Logger.recordOutput("Drive/FinalState", state);
+    public boolean isPitchedOrRolled() {
+        return Math.abs(gyroInputs.orientation.getX()) > Units.degreesToRadians(15.0) || Math.abs(gyroInputs.orientation.getY()) > Units.degreesToRadians(15.0);
+    }
 
+    private State evaluateStateMachine(State wantedState) {
         // Stop moving when idle or disabled
-        if (state == State.STOP || DriverStation.isDisabled()) {
+        if (wantedState == State.ACTUALLY_STOP || DriverStation.isDisabled()) {
             // Only attempt to stop with X when enabled
-            if (DriverStation.isEnabled() && shouldStopWithX) {
+            if (DriverStation.isEnabled() && stopWithX) {
                 // Create a list of headings where each heading points from the center
                 // of the robot to the module. Tell the module to point at this angle.
                 // This means that the modules will point towards the center of the
@@ -334,28 +368,18 @@ public class Drive extends CommandBasedSubsystem {
                     module.stop();
                 }
             }
-        } else if (state == State.CHARACTERIZATION) {
+        } else if (wantedState == State.CHARACTERIZATION) {
             // Do nothing - commands handle setting voltages
         } else {
-            ChassisSpeeds setpoint = new ChassisSpeeds();
+            ChassisSpeeds wantedFieldSpeeds = new ChassisSpeeds();
 
-            OptionalDouble headingOverrideSetpoint = headingOverrideSetpointSupplier != null
-                    ? OptionalDouble.of(headingOverrideSetpointSupplier.getAsDouble())
-                    : OptionalDouble.empty();
+            OptionalDouble headingOverrideSetpoint = headingOverrideSetpointSupplier == null
+                    ? OptionalDouble.empty()
+                    : headingOverrideSetpointSupplier.get();
 
-            switch (state) {
+            switch (wantedState) {
                 case JOYSTICK_DRIVE -> {
-                    Translation2d linearSetpoint = new Translation2d(
-                            controller.getDriveLinearVelocityMetersPerSec(),
-                            controller.getDriveLinearDirection()
-                    );
-
-                    setpoint = ChassisSpeeds.fromFieldRelativeSpeeds(
-                            linearSetpoint.getX(),
-                            linearSetpoint.getY(),
-                            controller.getDriveAngularVelocityRadPerSec(),
-                            robotState.getRotation()
-                    );
+                    wantedFieldSpeeds = controller.getDriveFieldRelativeSpeeds();
 
                     if (headingOverrideSetpoint.isPresent() || controller.getDriveAngularMagnitude() != 0.0) {
                         joystickDriveHeadingStabilizeTimer.restart();
@@ -367,47 +391,68 @@ public class Drive extends CommandBasedSubsystem {
                         headingOverrideSetpoint = OptionalDouble.of(joystickDriveHeadingStabilizeSetpoint);
                     }
                 }
-                case MOVE_TO -> setpoint = moveToController.update();
-                case FOLLOW_TRAJECTORY -> setpoint = followTrajectoryController.update();
+                case MOVE_TO -> wantedFieldSpeeds = moveToController.update();
+                case FOLLOW_TRAJECTORY -> wantedFieldSpeeds = followTrajectoryController.update();
                 case CHASSIS_SPEEDS -> {
                     if (chassisSpeedsSetpointSupplier != null) {
-                        setpoint = chassisSpeedsSetpointSupplier.get();
+                        wantedFieldSpeeds = chassisSpeedsSetpointSupplier.get();
                     }
                 }
             }
 
+            // We are done with the linear part of the setpoint
+            // We need to constrain the linear part before giving the speeds to the heading override
+            // feedforward supplier or the feedforward would be for the speeds BEFORE limiting
+            constrainer.constrainFieldRelativeSpeedsLinear(wantedFieldSpeeds);
+            Translation2d wantedAcceleration = constrainer.getFieldRelativeAccelerationLinear();
+
             if (headingOverrideSetpoint.isPresent()) {
-                setpoint.omegaRadiansPerSecond = headingOverrideController.calculate(
+                wantedFieldSpeeds.omegaRadiansPerSecond = headingOverrideController.calculate(
                         robotState.getRotation().getRadians(),
                         headingOverrideSetpoint.getAsDouble()
                 );
 
                 boolean atSetpoint = headingOverrideController.atSetpoint();
-                //Logger.recordOutput("Drive/HeadingOverrideAtSetpoint", headingOverrideAtSetpoint);
+                if (BuildConstants.isSimOrReplay)
+                    Logger.recordOutput("Drive/HeadingOverrideAtSetpoint", atSetpoint);
                 if (atSetpoint) {
-                    setpoint.omegaRadiansPerSecond = 0.0;
+                    wantedFieldSpeeds.omegaRadiansPerSecond = 0.0;
                 }
 
-                if (headingOverrideFeedforwardSupplier != null) {
-                    setpoint.omegaRadiansPerSecond += headingOverrideFeedforwardSupplier.getAsDouble();
+                OptionalDouble feedforward = headingOverrideFeedforwardSupplier == null
+                        ? OptionalDouble.empty()
+                        : headingOverrideFeedforwardSupplier.apply(wantedFieldSpeeds, wantedAcceleration);
+                if (feedforward.isPresent()) {
+                    wantedFieldSpeeds.omegaRadiansPerSecond += feedforward.getAsDouble();
                 }
             } else {
                 headingOverrideController.reset();
             }
 
-            if (setpoint.vxMetersPerSecond == 0.0 && setpoint.vyMetersPerSecond == 0.0 && setpoint.omegaRadiansPerSecond == 0.0) {
-                // Re-evaluate state machine to stop - this handles stopping with X in a nice way
-                state = State.STOP;
-                evaluateStateMachine();
-                return;
+            // Now we are done with the angular part of the setpoint and can constrain it
+            constrainer.constrainFieldRelativeSpeedsAngular(wantedFieldSpeeds);
+
+            // FIXME: figure out how to put this before the constrainer and not afterwards
+            if (headingOverrideSetpoint.isPresent() && headingOverrideFeedforwardSupplier != null) {
+                Translation2d correction = shootingKinematics.getFuelExitTranslation().toTranslation2d()
+                        .rotateBy(robotState.getRotation()).rotateBy(Rotation2d.kCW_90deg)
+                        .times(wantedFieldSpeeds.omegaRadiansPerSecond);
+                wantedFieldSpeeds.plus(new ChassisSpeeds(correction.getX(), correction.getY(), 0));
             }
 
-            Logger.recordOutput("Drive/ModuleStates/Setpoints", robotState.getKinematics().toSwerveModuleStates(setpoint));
+            if (wantedFieldSpeeds.vxMetersPerSecond == 0.0 && wantedFieldSpeeds.vyMetersPerSecond == 0.0 && wantedFieldSpeeds.omegaRadiansPerSecond == 0.0) {
+                // Re-evaluate state machine to stop - this handles stopping with X in a nice way
+                return evaluateStateMachine(State.ACTUALLY_STOP);
+            }
+
+            ChassisSpeeds wantedRobotSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(wantedFieldSpeeds, robotState.getRotation());
+
+            Logger.recordOutput("Drive/ModuleStates/Setpoints", robotState.getKinematics().toSwerveModuleStates(wantedRobotSpeeds));
 
             // Discretize - use larger dt than actual to reduce translational skew when rotating and translating at the same time
             // See https://www.chiefdelphi.com/t/whitepaper-swerve-drive-skew-and-second-order-kinematics/416964/5
             // and https://github.com/frc1678/C2024-Public/blob/main/src/main/java/com/team1678/frc2024/subsystems/Drive.java#L406
-            ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(setpoint, Constants.loopPeriod * 4.0);
+            ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(wantedRobotSpeeds, Constants.loopPeriod * 4.0);
 
             // Convert to module states and desaturate
             SwerveModuleState[] setpointStates = robotState.getKinematics().toSwerveModuleStates(discreteSpeeds);
@@ -431,6 +476,9 @@ public class Drive extends CommandBasedSubsystem {
             Logger.recordOutput("Drive/ModuleStates/SetpointsOptimized", setpointStates);
             Logger.recordOutput("Drive/ChassisSpeeds/SetpointOptimized", robotState.getKinematics().toChassisSpeeds(setpointStates));
         }
+
+        // No re-evaluation, so state stayed the same. Return it
+        return wantedState;
     }
 
     /**
@@ -456,88 +504,109 @@ public class Drive extends CommandBasedSubsystem {
         return states;
     }
 
-    /** Doesn't require the Drive subsystem. This is intended to be used in conjunction with another state command */
-    public Command setHeadingOverride(DoubleSupplier targetRad) {
-        return setHeadingOverride(targetRad, null);
+    public DriveCommand stop() {
+        return new DriveCommand(startIdle(() -> wantedState = State.STOP));
     }
 
-    /** Doesn't require the Drive subsystem. This is intended to be used in conjunction with another state command */
-    public Command setHeadingOverride(DoubleSupplier targetRad, DoubleSupplier feedforwardRadPerSec) {
-        return Commands.startEnd(
-                () -> {
-                    // Attempt to catch bugs caused by not requiring the subsystem (which allows multiple instances
-                    // of this command to run at the same time)
-                    if (headingOverrideSetpointSupplier != null || headingOverrideFeedforwardSupplier != null) {
-                        Util.error("Heading override already set when attempting to set");
-                    }
-
-                    headingOverrideSetpointSupplier = targetRad;
-                    headingOverrideFeedforwardSupplier = feedforwardRadPerSec;
-                },
-                () -> {
-                    headingOverrideSetpointSupplier = null;
-                    headingOverrideFeedforwardSupplier = null;
-                }
-        );
-    }
-
-    /** Doesn't require the Drive subsystem. This is intended to be used in conjunction with another state command */
-    public Command setStopWithX() {
-        return Commands.startEnd(
-                () -> {
-                    // Attempt to catch bugs caused by not requiring the subsystem (which allows multiple instances
-                    // of this command to run at the same time)
-                    if (shouldStopWithX) {
-                        Util.error("Stop with X already set to true");
-                    }
-
-                    shouldStopWithX = true;
-                },
-                () -> shouldStopWithX = false
-        );
-    }
-
-    public Command stop() {
-        return startIdle(() -> state = State.STOP);
-    }
-
-    public Command joystickDrive() {
-        return startIdle(() -> {
-            state = State.JOYSTICK_DRIVE;
+    public DriveCommand joystickDrive() {
+        return new DriveCommand(startIdle(() -> {
+            wantedState = State.JOYSTICK_DRIVE;
             joystickDriveHeadingStabilizeTimer.restart();
-        });
+        }));
     }
 
-    public Command moveTo(Supplier<Pose2d> goalPoseSupplier) {
+    public DriveCommand moveTo(Supplier<Pose2d> goalPoseSupplier) {
         return moveTo(goalPoseSupplier, defaultMoveToConstraints);
     }
 
-    public Command moveTo(Supplier<Pose2d> goalPoseSupplier, MoveToConstraints constraints) {
-        return startEnd(
-                () -> {
-                    state = State.MOVE_TO;
-                    moveToController.start(goalPoseSupplier, constraints);
-                },
-                moveToController::stop
-        );
+    public DriveCommand moveTo(Supplier<Pose2d> goalPoseSupplier, DriveConstraints constraints) {
+        return new DriveCommand(startIdle(() -> {
+            wantedState = State.MOVE_TO;
+            moveToController.start(goalPoseSupplier);
+        })).withConstraints(constraints);
     }
 
-    public Command followTrajectory(Trajectory<SwerveSample> trajectory) {
-        return startEndWaitUntil(
+    public DriveCommand followTrajectory(Trajectory<SwerveSample> trajectory) {
+        return followTrajectory(trajectory, null);
+    }
+
+    public DriveCommand followTrajectory(Trajectory<SwerveSample> trajectory, Supplier<Pose2d> smudgeGoalPoseSupplier) {
+        return new DriveCommand(startIdleWaitUntil(
                 () -> {
-                    state = State.FOLLOW_TRAJECTORY;
-                    followTrajectoryController.start(trajectory);
+                    wantedState = State.FOLLOW_TRAJECTORY;
+                    followTrajectoryController.start(trajectory, smudgeGoalPoseSupplier);
                 },
-                followTrajectoryController::stop,
                 followTrajectoryController::isDone
-        );
+        ));
     }
 
-    public Command chassisSpeeds(Supplier<ChassisSpeeds> chassisSpeedsSupplier) {
-        return startIdle(() -> {
-            state = State.CHASSIS_SPEEDS;
+    public DriveCommand chassisSpeeds(Supplier<ChassisSpeeds> chassisSpeedsSupplier) {
+        return new DriveCommand(startIdle(() -> {
+            wantedState = State.CHASSIS_SPEEDS;
             chassisSpeedsSetpointSupplier = chassisSpeedsSupplier;
-        });
+        }));
+    }
+
+    public class DriveCommand extends WrapperCommand {
+        private Supplier<OptionalDouble> targetRad = null;
+        private BiFunction<ChassisSpeeds, Translation2d, OptionalDouble> feedforwardRadPerSec = null;
+        private Boolean wantedStopWithX = null;
+        private DriveConstraints constraints = null;
+
+        private DriveCommand(Command command) {
+            super(command);
+        }
+
+        public DriveCommand withHeadingOverride(Supplier<OptionalDouble> targetRad) {
+            this.targetRad = targetRad;
+            return this;
+        }
+
+        public DriveCommand withHeadingOverride(Supplier<OptionalDouble> targetRad, BiFunction<ChassisSpeeds, Translation2d, OptionalDouble> feedforwardRadPerSec) {
+            this.targetRad = targetRad;
+            this.feedforwardRadPerSec = feedforwardRadPerSec;
+            return this;
+        }
+
+        public DriveCommand withStopWithX() {
+            this.wantedStopWithX = true;
+            return this;
+        }
+
+        public DriveCommand withConstraints(DriveConstraints constraints) {
+            this.constraints = constraints;
+            return this;
+        }
+
+        public DriveCommand withAiming() {
+            return withHeadingOverride(
+                    () -> operatorDashboard.manualAiming.get()
+                            ? OptionalDouble.empty()
+                            : OptionalDouble.of(shootingKinematics.getShootingParameters().headingRad()),
+                    (speeds, accelerations) -> operatorDashboard.manualAiming.get()
+                            ? OptionalDouble.empty()
+                            : OptionalDouble.of(shootingKinematics.totalRotationFeedForward(speeds, accelerations))
+            )
+                    .withStopWithX()
+                    .withConstraints(shootingConstraints);
+        }
+
+        @Override
+        public void initialize() {
+            headingOverrideSetpointSupplier = targetRad;
+            headingOverrideFeedforwardSupplier = feedforwardRadPerSec;
+            if (wantedStopWithX != null) {
+                stopWithX = wantedStopWithX;
+            } else {
+                stopWithX = false;
+            }
+            if (constraints != null) {
+                constrainer.start(constraints);
+            } else {
+                constrainer.stop();
+            }
+            super.initialize();
+        }
     }
 
     private void runCharacterization(double volts) {
@@ -546,11 +615,19 @@ public class Drive extends CommandBasedSubsystem {
         }
     }
 
+    public boolean isAnythingDisconnected() {
+        for (var module : modules) {
+            if (module.moduleDisconnected())
+                return true;
+        }
+        return !gyroInputs.connected;
+    }
+
     public Command fullSpeedCharacterization() {
         Timer timer = new Timer();
         return startRun(
                 () -> {
-                    state = State.CHARACTERIZATION;
+                    wantedState = State.CHARACTERIZATION;
                     timer.restart();
                 },
                 () -> {
@@ -618,7 +695,7 @@ public class Drive extends CommandBasedSubsystem {
         };
 
         Supplier<double[]> velocitiesSupplier = () -> Arrays.stream(modules).mapToDouble(Module::getDriveVelocityRadPerSec).toArray();
-        Supplier<double[]> currentsSupplier = () -> Arrays.stream(modules).mapToDouble(Module::getDriveCurrentAmps).toArray();
+        Supplier<double[]> currentsSupplier = () -> Arrays.stream(modules).mapToDouble(Module::getDriveStatorCurrentAmps).toArray();
 
         return startRun(
                 () -> {

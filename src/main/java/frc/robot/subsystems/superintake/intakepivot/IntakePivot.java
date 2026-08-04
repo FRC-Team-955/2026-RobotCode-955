@@ -1,4 +1,4 @@
-package frc.robot.subsystems.superintake;
+package frc.robot.subsystems.superintake.intakepivot;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.Debouncer;
@@ -11,7 +11,7 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.lib.EnergyLogger;
 import frc.lib.Util;
-import frc.lib.device.MotorIOInputsAutoLogged;
+import frc.lib.motor.MotorIOInputsAutoLogged;
 import frc.lib.network.LoggedTunableNumber;
 import frc.lib.subsystem.Periodic;
 import frc.robot.BuildConstants;

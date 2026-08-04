@@ -4,6 +4,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -15,6 +16,7 @@ import frc.lib.Util;
 import frc.lib.subsystem.Periodic;
 import frc.robot.BuildConstants;
 import lombok.Getter;
+import org.littletonrobotics.junction.Logger;
 
 import static frc.robot.subsystems.drive.DriveConstants.*;
 
@@ -23,7 +25,10 @@ public class Controller implements Periodic {
             ? new ControllerIOXbox(new CommandXboxController(0))
             : new ControllerIOPS5(new CommandPS5Controller(0));
 
-    private final Alert disconnectedAlert = new Alert("Driver controller is not connected!", Alert.AlertType.kError);
+    private final ControllerIO secondaryIo = new ControllerIOXbox(new CommandXboxController(1));
+    private final Alert primaryDisconnectedAlert =
+            new Alert("Primary controller is not connected!", Alert.AlertType.kError);
+    private final Alert secondaryDisconnectedAlert = new Alert("Secondary controller is not connected!", Alert.AlertType.kError);
 
     @Getter
     private Rotation2d driveLinearDirection = new Rotation2d();
@@ -49,12 +54,14 @@ public class Controller implements Periodic {
             Util.error("Duplicate Controller created");
         }
 
-        System.out.println("Name of controller IO is " + io.getClass().getSimpleName());
+        System.out.println("Name of controller IO is " +
+                (io.isConnected() ? io.getClass().getSimpleName() : secondaryIo.getClass().getSimpleName()));
     }
 
     @Override
     public void periodicBeforeCommands() {
-        disconnectedAlert.set(!io.isConnected());
+        primaryDisconnectedAlert.set(!io.isConnected());
+        secondaryDisconnectedAlert.set(!secondaryIo.isConnected());
 
         updateDriveSetpoint();
     }
@@ -62,15 +69,17 @@ public class Controller implements Periodic {
     private void updateDriveSetpoint() {
         // https://docs.wpilib.org/en/stable/docs/software/basic-programming/coordinate-system.html
         // forward on joystick is negative y - we want positive x for forward
-        double x = -io.getLeftY();
+        double x = io.isConnected() ? -io.getLeftY() : -secondaryIo.getLeftY();
         // right on joystick is positive x - we want negative y for right
-        double y = -io.getLeftX();
+        double y = io.isConnected() ? -io.getLeftX() : -secondaryIo.getLeftX();
         // right on joystick is positive x - we want negative x for right (CCW is positive)
-        double omega = -io.getRightX();
+        double omega = io.isConnected() ? -io.getRightX() : -secondaryIo.getRightX();
 
-        //Logger.recordOutput("Controller/Drive/Suppliers/X", x);
-        //Logger.recordOutput("Controller/Drive/Suppliers/Y", y);
-        //Logger.recordOutput("Controller/Drive/Suppliers/Omega", omega);
+        if (BuildConstants.isSimOrReplay) {
+            Logger.recordOutput("Controller/Drive/Suppliers/X", x);
+            Logger.recordOutput("Controller/Drive/Suppliers/Y", y);
+            Logger.recordOutput("Controller/Drive/Suppliers/Omega", omega);
+        }
 
         driveLinearMagnitude = MathUtil.clamp(MathUtil.applyDeadband(Math.hypot(x, y), joystickDriveDeadband), -1, 1);
         driveLinearMagnitude = driveLinearMagnitude * driveLinearMagnitude;
@@ -87,33 +96,35 @@ public class Controller implements Periodic {
             if (AllianceFlipUtil.shouldFlip()) {
                 driveLinearDirection = driveLinearDirection.plus(Rotation2d.k180deg);
             }
-        } else {
-            // Linear magnitude should be 0 anyways
-            driveLinearDirection = new Rotation2d();
         }
+        // If linear magnitude is 0, just keep the old linear direction
 
-        //Logger.recordOutput("Controller/Drive/LinearMagnitude", driveLinearMagnitude);
-        //Logger.recordOutput("Controller/Drive/LinearDirection", driveLinearDirection);
-        //Logger.recordOutput("Controller/Drive/LinearVelocity", linearVelocity);
-        //Logger.recordOutput("Controller/Drive/AngularMagnitude", driveAngularMagnitude);
+        if (BuildConstants.isSimOrReplay) {
+            Logger.recordOutput("Controller/Drive/LinearMagnitude", driveLinearMagnitude);
+            Logger.recordOutput("Controller/Drive/LinearDirection", driveLinearDirection);
+            Logger.recordOutput("Controller/Drive/AngularMagnitude", driveAngularMagnitude);
+        }
     }
 
     public boolean shouldAssist(Pose2d currentPose, Translation2d assistTranslation) {
-        //Logger.recordOutput("Controller/Drive/Assist/Pose", assistTranslation);
+        if (BuildConstants.isSimOrReplay) Logger.recordOutput("Controller/Drive/Assist/Pose", assistTranslation);
 
         // Get the translation between robot and assist
         Translation2d robotToAssist = assistTranslation.minus(currentPose.getTranslation());
         // Calculate direction from robot to assist
         Rotation2d robotToAssistDirection = robotToAssist.getAngle();
-        //Logger.recordOutput("Controller/Drive/Assist/RobotToAssistDirection", robotToAssistDirection);
+        if (BuildConstants.isSimOrReplay)
+            Logger.recordOutput("Controller/Drive/Assist/RobotToAssistDirection", robotToAssistDirection);
 
         // Get difference between joystick direction and assist direction
         Rotation2d directionDiff = robotToAssistDirection.minus(driveLinearDirection);
-        //Logger.recordOutput("Controller/Drive/Assist/DirectionDifference", directionDiff);
+        if (BuildConstants.isSimOrReplay)
+            Logger.recordOutput("Controller/Drive/Assist/DirectionDifference", directionDiff);
 
         // Get distance to assist pose
         double distanceToAssist = currentPose.getTranslation().getDistance(assistTranslation);
-        //Logger.recordOutput("Controller/Drive/Assist/DistanceToAssist", distanceToAssist);
+        if (BuildConstants.isSimOrReplay)
+            Logger.recordOutput("Controller/Drive/Assist/DistanceToAssist", distanceToAssist);
 
         // If we are:
         if (
@@ -125,10 +136,10 @@ public class Controller implements Periodic {
                         distanceToAssist < assistMaximumDistanceMeters
         ) {
             // then use automatic control.
-            //Logger.recordOutput("Controller/Drive/Assist/Running", true);
+            if (BuildConstants.isSimOrReplay) Logger.recordOutput("Controller/Drive/Assist/Running", true);
             return true;
         } else {
-            //Logger.recordOutput("Controller/Drive/Assist/Running", false);
+            if (BuildConstants.isSimOrReplay) Logger.recordOutput("Controller/Drive/Assist/Running", false);
             return false;
         }
     }
@@ -141,38 +152,62 @@ public class Controller implements Periodic {
         return driveAngularMagnitude * joystickMaxAngularSpeedRadPerSec;
     }
 
+    public ChassisSpeeds getDriveFieldRelativeSpeeds() {
+        Translation2d linearSetpoint = new Translation2d(
+                getDriveLinearVelocityMetersPerSec(),
+                getDriveLinearDirection()
+        );
+
+        return new ChassisSpeeds(
+                linearSetpoint.getX(),
+                linearSetpoint.getY(),
+                getDriveAngularVelocityRadPerSec()
+        );
+    }
+
     public Command rumble(double value) {
         return Commands.startEnd(
                 () -> {
                     System.out.println("Rumbling controller");
-                    io.setRumble(value);
+                    if (io.isConnected()) {
+                        io.setRumble(value);
+                    } else {
+                        secondaryIo.setRumble(value);
+                    }
                 },
-                () -> io.setRumble(0)
+                () -> {
+                    io.setRumble(0);
+                    secondaryIo.setRumble(0);
+                }
         );
     }
 
+    private Trigger primaryDisconnected() {
+        return new Trigger(() -> !io.isConnected());
+    }
+
     public Trigger a() {
-        return io.a();
+        return io.a().or(primaryDisconnected().and(secondaryIo.a()));
     }
 
     public Trigger b() {
-        return io.b();
+        return io.b().or(primaryDisconnected().and(secondaryIo.b()));
     }
 
     public Trigger x() {
-        return io.x();
+        return io.x().or(primaryDisconnected().and(secondaryIo.x()));
     }
 
     public Trigger y() {
-        return io.y();
+        return io.y().or(primaryDisconnected().and(secondaryIo.y()));
     }
 
     public Trigger leftBumper() {
-        return io.leftBumper();
+        return io.leftBumper().or(primaryDisconnected().and(secondaryIo.leftBumper()));
     }
 
     public Trigger rightBumper() {
-        return io.rightBumper();
+        return io.rightBumper().or(primaryDisconnected().and(secondaryIo.rightBumper()));
     }
 
     /**
@@ -180,7 +215,7 @@ public class Controller implements Periodic {
      * will be true when the axis value is greater than 0.5.
      */
     public Trigger leftTrigger() {
-        return io.leftTrigger();
+        return io.leftTrigger().or(primaryDisconnected().and(secondaryIo.leftTrigger()));
     }
 
     /**
@@ -188,6 +223,6 @@ public class Controller implements Periodic {
      * will be true when the axis value is greater than 0.5.
      */
     public Trigger rightTrigger() {
-        return io.rightTrigger();
+        return io.rightTrigger().or(primaryDisconnected().and(secondaryIo.rightTrigger()));
     }
 }

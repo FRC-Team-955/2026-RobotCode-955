@@ -1,4 +1,4 @@
-package frc.robot.subsystems.superstructure.spindexer;
+package frc.robot.subsystems.superintake.intakerollers;
 
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.system.plant.DCMotor;
@@ -7,17 +7,17 @@ import frc.lib.motor.MotorIOSim;
 import frc.lib.motor.MotorIOTalonFX;
 import frc.robot.BuildConstants;
 
-public class SpindexerConstants {
-    static final double gearRatio = 5;
+public class IntakeRollersConstants {
+    static final double gearRatio = 3;
 
     static MotorIO createIO() {
         return switch (BuildConstants.mode) {
             case REAL -> new MotorIOTalonFX(
-                    13,
+                    15,
                     true,
                     NeutralModeValue.Coast,
-                    90,
-                    50,
+                    140,
+                    70,
                     gearRatio,
                     null,
                     null,

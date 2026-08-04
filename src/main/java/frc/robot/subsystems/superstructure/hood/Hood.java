@@ -11,7 +11,7 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.lib.EnergyLogger;
 import frc.lib.Util;
-import frc.lib.device.MotorIOInputsAutoLogged;
+import frc.lib.motor.MotorIOInputsAutoLogged;
 import frc.lib.subsystem.Periodic;
 import frc.robot.BuildConstants;
 import frc.robot.OperatorDashboard;

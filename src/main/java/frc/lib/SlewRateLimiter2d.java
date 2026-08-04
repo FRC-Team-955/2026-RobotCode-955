@@ -50,6 +50,7 @@ public class SlewRateLimiter2d {
     private double m_rateLimit;
     private Translation2d m_prevVal;
     private double m_prevTime;
+    private Translation2d m_accel;
 
     /**
      * Creates a new SlewRateLimiter with the given positive and negative rate limits and initial
@@ -89,8 +90,10 @@ public class SlewRateLimiter2d {
     public Translation2d calculate(Translation2d input) {
         double currentTime = MathSharedStore.getTimestamp();
         double elapsedTime = currentTime - m_prevTime;
+        Translation2d savedVal = m_prevVal;
         m_prevVal = MathUtil.slewRateLimit(m_prevVal, input, elapsedTime, m_rateLimit);
         m_prevTime = currentTime;
+        m_accel = m_prevVal.minus(savedVal).div(elapsedTime);
         return m_prevVal;
     }
 
@@ -101,6 +104,15 @@ public class SlewRateLimiter2d {
      */
     public Translation2d lastValue() {
         return m_prevVal;
+    }
+
+    /**
+     * Returns the acceleration last calculated by the SlewRateLImiter
+     *
+     * @return The last acceleration.
+     */
+    public Translation2d acceleration() {
+        return m_accel;
     }
 
     /**
