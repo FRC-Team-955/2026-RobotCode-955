@@ -28,7 +28,6 @@ import java.util.function.DoubleSupplier;
 import static frc.robot.subsystems.superstructure.turret.TurretConstants.*;
 
 public class Turret implements Periodic {
-    private static final ShootingKinematics shootingKinematics = ShootingKinematics.get();
     private static final RobotState robotState = RobotState.get();
     private static final LoggedTunableNumber profileLookaheadTimeSec = new LoggedTunableNumber("Turret/ProfileLookaheadTimeSec", 0.15);
 
@@ -40,7 +39,7 @@ public class Turret implements Periodic {
     @RequiredArgsConstructor
     public enum Goal {
         AIM(() -> MathUtil.angleModulus(
-                shootingKinematics.getShootingParameters().headingRad()
+                ShootingKinematics.get().getShootingParameters().headingRad()
                         - robotState.getPose().getRotation().getRadians()));
 
         private final DoubleSupplier setpointRad;

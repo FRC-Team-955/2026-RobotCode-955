@@ -2,6 +2,7 @@ package frc.robot.subsystems.superstructure;
 
 import com.ctre.phoenix6.signals.MeasurementHealthValue;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
@@ -14,6 +15,7 @@ import frc.robot.subsystems.superstructure.flywheel.Flywheel;
 import frc.robot.subsystems.superstructure.flywheel.FlywheelConstants;
 import frc.robot.subsystems.superstructure.hood.Hood;
 import frc.robot.subsystems.superstructure.spindexer.Spindexer;
+import frc.robot.subsystems.superstructure.turret.Turret;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.seasonspecific.rebuilt2026.RebuiltFuelOnFly;
 import org.littletonrobotics.junction.Logger;
@@ -30,6 +32,7 @@ public class SuperstructureIOSim extends SuperstructureIO {
     private static final Flywheel flywheel = Flywheel.get();
     private static final Hood hood = Hood.get();
     private static final Spindexer spindexer = Spindexer.get();
+    private static final Turret turret = Turret.get();
     private static final ShootingKinematics shootingKinematics = ShootingKinematics.get();
 
     private final SimManager simManager = SimManager.get();
@@ -70,7 +73,7 @@ public class SuperstructureIOSim extends SuperstructureIO {
                         robotPose.getTranslation(),
                         shootingKinematics.getFuelExitTranslation().toTranslation2d(),
                         simManager.driveSimulation.getDriveTrainSimulatedChassisSpeedsFieldRelative(),
-                        robotPose.getRotation(),
+                        robotPose.getRotation().plus(new Rotation2d(turret.getPositionRad())),
                         Meters.of(shootingKinematics.getFuelExitTranslation().getZ()),
                         MetersPerSecond.of(Units.rotationsPerMinuteToRadiansPerSecond(flywheel.getVelocityRPM()) * FlywheelConstants.flywheelRadiusMeters),
                         // Applying the shooter facing direction to the maple-sim parameter
