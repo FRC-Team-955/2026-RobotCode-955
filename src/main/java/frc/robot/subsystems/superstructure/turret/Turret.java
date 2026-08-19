@@ -29,7 +29,7 @@ import static frc.robot.subsystems.superstructure.turret.TurretConstants.*;
 
 public class Turret implements Periodic {
     private static final RobotState robotState = RobotState.get();
-    private static final LoggedTunableNumber profileLookaheadTimeSec = new LoggedTunableNumber("Turret/ProfileLookaheadTimeSec", 0.15);
+    private static final LoggedTunableNumber profileLookaheadTimeSec = new LoggedTunableNumber("Superstructure/Turret/ProfileLookaheadTimeSec", 0.15);
 
     private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
 
@@ -77,7 +77,7 @@ public class Turret implements Periodic {
     @Override
     public void periodicBeforeCommands() {
         io.updateInputs(inputs);
-        Logger.processInputs("Inputs/Turret", inputs);
+        Logger.processInputs("Inputs/Superstructure/Turret", inputs);
 
         motorDisconnectedAlert.set(!inputs.connected);
 
@@ -93,7 +93,7 @@ public class Turret implements Periodic {
 
     @Override
     public void periodicAfterCommands() {
-        Logger.recordOutput("Turret/Goal", goal);
+        Logger.recordOutput("Superstructure/Turret/Goal", goal);
         if (DriverStation.isDisabled()) {
             io.setRequest(RequestType.VoltageVolts, 0);
 
@@ -115,10 +115,10 @@ public class Turret implements Periodic {
             lastSetpointRad = setpointRad;
 
             goalState = profile.calculate(Constants.loopPeriod, goalState, wantedState);
-            Logger.recordOutput("Turret/ProfileSetpointRad", goalState.position);
+            Logger.recordOutput("Superstructure/Turret/ProfileSetpointRad", goalState.position);
 
             lookaheadState = profile.calculate(Constants.loopPeriod, lookaheadState, wantedState);
-            Logger.recordOutput("Turret/LookaheadSetpointRad", lookaheadState.position);
+            Logger.recordOutput("Superstructure/Turret/LookaheadSetpointRad", lookaheadState.position);
 
             io.setRequest(RequestType.PositionRad, lookaheadState.position);
         }
@@ -134,12 +134,12 @@ public class Turret implements Periodic {
     /**
      * Field-relative direction the turret is pointing: chassis heading plus turret angle.
      */
-    @AutoLogOutput(key = "Turret/HeadingRad")
+    @AutoLogOutput(key = "Superstructure/Turret/HeadingRad")
     public double getHeadingRad() {
         return MathUtil.angleModulus(robotState.getPose().getRotation().getRadians() + inputs.positionRad);
     }
 
-    @AutoLogOutput(key = "Turret/AtGoal")
+    @AutoLogOutput(key = "Superstructure/Turret/AtGoal")
     public boolean atGoal() {
         double value = goal.setpointRad.getAsDouble();
         return Math.abs(inputs.positionRad - value) <= positionToleranceRad;

@@ -23,7 +23,12 @@ public class TurretConstants {
     // TODO: CHANGE THIS
     static final double gearRatio = 120;
     static final LoggedTunablePIDF gains = switch (BuildConstants.mode) {
-        case REAL, REPLAY, SIM -> new LoggedTunablePIDF("Turret/Gains").withP(4.0).withD(0.0);
+        case REAL, REPLAY -> new LoggedTunablePIDF("Superstructure/Turret/Gains")
+                .withP(0.5)
+                .withD(0.0);
+        case SIM -> new LoggedTunablePIDF("Superstructure/Turret/Gains")
+                .withP(30.0)
+                .withD(0.0);
     };
 
     static MotorIO createIO() {
