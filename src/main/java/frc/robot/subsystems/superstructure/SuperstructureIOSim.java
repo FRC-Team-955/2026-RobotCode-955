@@ -69,11 +69,13 @@ public class SuperstructureIOSim extends SuperstructureIO {
                 lastShotTimestamp = Timer.getTimestamp();
 
                 Pose2d robotPose = simManager.driveSimulation.getSimulatedDriveTrainPose();
+                Rotation2d turretRotation = new Rotation2d(turret.getPositionRad());
                 var gamePiece = new RebuiltFuelOnFly(
                         robotPose.getTranslation(),
-                        shootingKinematics.getFuelExitTranslation().toTranslation2d(),
+                        shootingKinematics.getFuelExitTranslation().toTranslation2d()
+                                .rotateBy(turretRotation.unaryMinus()),
                         simManager.driveSimulation.getDriveTrainSimulatedChassisSpeedsFieldRelative(),
-                        robotPose.getRotation().plus(new Rotation2d(turret.getPositionRad())),
+                        robotPose.getRotation().plus(turretRotation),
                         Meters.of(shootingKinematics.getFuelExitTranslation().getZ()),
                         MetersPerSecond.of(Units.rotationsPerMinuteToRadiansPerSecond(flywheel.getVelocityRPM()) * FlywheelConstants.flywheelRadiusMeters),
                         // Applying the shooter facing direction to the maple-sim parameter
