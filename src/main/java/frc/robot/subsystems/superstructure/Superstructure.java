@@ -22,6 +22,7 @@ import frc.robot.subsystems.superstructure.feeder.Feeder;
 import frc.robot.subsystems.superstructure.flywheel.Flywheel;
 import frc.robot.subsystems.superstructure.hood.Hood;
 import frc.robot.subsystems.superstructure.spindexer.Spindexer;
+import frc.robot.subsystems.superstructure.turret.Turret;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.littletonrobotics.junction.Logger;
@@ -48,6 +49,7 @@ public class Superstructure extends CommandBasedSubsystem {
     public final Hood hood = Hood.get();
     public final Feeder feeder = Feeder.get();
     public final Spindexer spindexer = Spindexer.get();
+    public final Turret turret = Turret.get();
 
     private final SuperstructureIO io = createIO();
     private final SuperstructureIOInputsAutoLogged inputs = new SuperstructureIOInputsAutoLogged();
