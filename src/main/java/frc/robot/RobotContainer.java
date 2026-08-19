@@ -99,9 +99,14 @@ public class RobotContainer {
                         drive.joystickDrive().withHeadingOverride(() -> OptionalDouble.of(controller.getDriveLinearDirection().getRadians()))
                 ));
 
-        // No drive aiming - the turret does the aiming now
-        shoot.whileTrue(superstructure.setGoal(Superstructure.Goal.SHOOT));
-        shootForce.whileTrue(superstructure.setGoal(Superstructure.Goal.SHOOT_FORCE));
+        shoot.whileTrue(Commands.parallel(
+                drive.joystickDrive().withAiming(),
+                superstructure.setGoal(Superstructure.Goal.SHOOT)
+        ));
+        shootForce.whileTrue(Commands.parallel(
+                drive.joystickDrive().withAiming(),
+                superstructure.setGoal(Superstructure.Goal.SHOOT_FORCE)
+        ));
 
         controller.x()
                 .whileTrue(Commands.parallel(
@@ -126,14 +131,6 @@ public class RobotContainer {
         new Trigger(operatorDashboard.homeHood::get)
                 .and(DriverStation::isDisabled)
                 .onTrue(Commands.runOnce(superstructure.hood::finishHoming).ignoringDisable(true));
-
-        // The turret is homed by hand off both hard stops, so it doesn't care whether we're
-        // enabled: push it CCW into the max stop and press, then CW into the min stop and press
-        new Trigger(operatorDashboard.homeTurret::get)
-                .onTrue(Commands.runOnce(() -> {
-                    operatorDashboard.homeTurret.set(false);
-                    superstructure.turret.captureHomingPoint();
-                }).ignoringDisable(true));
     }
 
     /**

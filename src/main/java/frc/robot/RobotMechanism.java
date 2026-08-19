@@ -48,8 +48,6 @@ public class RobotMechanism implements Periodic {
 
         Transform3d hoodTransform = superstructure.hood.transform();
 
-        Transform3d turretTransform = superstructure.turret.transform();
-
         Logger.recordOutput("RobotMechanism/Pose", robotPose);
         Logger.recordOutput(
                 "RobotMechanism/Components",
@@ -58,8 +56,7 @@ public class RobotMechanism implements Periodic {
                 flywheelTransform,
                 feederTransform,
                 intakePivotTransform,
-                hoodTransform,
-                turretTransform
+                hoodTransform
         );
     }
 }
