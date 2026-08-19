@@ -150,7 +150,7 @@ public class ShootingKinematics implements Periodic {
 
         boolean headingMet = operatorDashboard.manualAiming.get() ||
                 Math.abs(
-                        MathUtil.angleModulus(robotState.getPose().getRotation().getRadians() - noPhaseDelayParameters.headingRad())
+                        MathUtil.angleModulus(superstructure.turret.getHeadingRad() - noPhaseDelayParameters.headingRad())
                 ) <= Units.degreesToRadians(
                         noPhaseDelayParameters.isPass()
                                 ? headingTolerancePassingDeg.get()
@@ -158,9 +158,7 @@ public class ShootingKinematics implements Periodic {
                 );
         Logger.recordOutput("ShootingKinematics/HeadingMet", headingMet);
 
-        boolean headingVelocityMet = operatorDashboard.manualAiming.get() ||
-                Math.abs(headingVelocityMeasurement - headingVelocitySetpoint)
-                        <= Units.degreesToRadians(headingVelocityToleranceDegPerSec.get());
+        boolean headingVelocityMet = true;
         Logger.recordOutput("ShootingKinematics/HeadingVelocityMet", headingVelocityMet);
         Logger.recordOutput("ShootingKinematics/HeadingVelocityDelta", headingVelocityMeasurement - headingVelocitySetpoint);
         headingVelocityMet = headingVelocityDebouncer.calculate(headingVelocityMet);

@@ -132,6 +132,14 @@ public class Turret implements Periodic {
         return inputs.positionRad;
     }
 
+    /**
+     * Field-relative direction the turret is pointing: chassis heading plus turret angle.
+     */
+    @AutoLogOutput(key = "Turret/HeadingRad")
+    public double getHeadingRad() {
+        return MathUtil.angleModulus(robotState.getPose().getRotation().getRadians() + inputs.positionRad);
+    }
+
     @AutoLogOutput(key = "Turret/AtGoal")
     public boolean atGoal() {
         double value = goal.setpointRad.getAsDouble();

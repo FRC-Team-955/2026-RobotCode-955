@@ -579,16 +579,7 @@ public class Drive extends CommandBasedSubsystem {
         }
 
         public DriveCommand withAiming() {
-            return withHeadingOverride(
-                    () -> operatorDashboard.manualAiming.get()
-                            ? OptionalDouble.empty()
-                            : OptionalDouble.of(shootingKinematics.getShootingParameters().headingRad()),
-                    (speeds, accelerations) -> operatorDashboard.manualAiming.get()
-                            ? OptionalDouble.empty()
-                            : OptionalDouble.of(shootingKinematics.totalRotationFeedForward(speeds, accelerations))
-            )
-                    .withStopWithX()
-                    .withConstraints(shootingConstraints);
+            return withStopWithX().withConstraints(shootingConstraints);
         }
 
         @Override
