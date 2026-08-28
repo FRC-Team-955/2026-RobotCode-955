@@ -15,12 +15,21 @@ public class TurretConstants {
 
     static final TrapezoidProfile.Constraints constraints = new TrapezoidProfile.Constraints(1, 3);
 
-    // 0 = turret pointing straight forward on the chassis
-    static final double minPositionRad = Units.degreesToRadians(-180);
-    static final double maxPositionRad = Units.degreesToRadians(180);
+    /** Only used before homing, and in sim, where nobody can push the turret into a stop */
     static final double initialPositionRad = 0;
 
-    // TODO: CHANGE THIS
+    /**
+     * Travel to assume in sim, where there are no hard stops to home against. On the real robot
+     * the travel is measured during homing instead of being declared here.
+     */
+    static final double simTravelRad = Units.degreesToRadians(360);
+
+    /**
+     * Homing is rejected below this much measured travel. Catches the stray double-press that
+     * would otherwise record both stops at the same spot and pin the turret to a zero-width range.
+     */
+    static final double minimumPlausibleTravelRad = Units.degreesToRadians(10);
+    
     static final double gearRatio = 3.0 * 3.0 * (68.0 / 12.0);
     static final LoggedTunablePIDF gains = switch (BuildConstants.mode) {
         case REAL, REPLAY -> new LoggedTunablePIDF("Superstructure/Turret/Gains")

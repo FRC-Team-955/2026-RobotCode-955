@@ -131,6 +131,14 @@ public class RobotContainer {
         new Trigger(operatorDashboard.homeHood::get)
                 .and(DriverStation::isDisabled)
                 .onTrue(Commands.runOnce(superstructure.hood::finishHoming).ignoringDisable(true));
+
+        // The turret has no absolute encoder and homes off its two hard stops: press once holding
+        // it against the max stop, then again against the min stop. Nothing is driven, so unlike
+        // the hood this works the same enabled or disabled.
+        new Trigger(operatorDashboard.homeTurret::get)
+                .onTrue(Commands.runOnce(() -> operatorDashboard.homeTurret.set(false)).ignoringDisable(true));
+        new Trigger(operatorDashboard.homeTurret::get)
+                .onTrue(Commands.runOnce(superstructure.turret::captureHomingPoint).ignoringDisable(true));
     }
 
     /**
