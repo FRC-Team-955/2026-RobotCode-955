@@ -34,7 +34,7 @@ public class TurretConstants {
     static MotorIO createIO() {
         return switch (BuildConstants.mode) {
             case REAL -> new MotorIOSparkMax(
-                    -1,
+                    11,
                     true,
                     SparkBaseConfig.IdleMode.kBrake,
                     40,
