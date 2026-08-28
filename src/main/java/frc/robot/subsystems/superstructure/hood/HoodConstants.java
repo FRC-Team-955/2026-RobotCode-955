@@ -39,7 +39,7 @@ public class HoodConstants {
     static HoodIO createIO() {
         return switch (BuildConstants.mode) {
             case REAL -> new HoodIOSparkMax(
-                    10,
+                    12,
                     true
             );
             case SIM -> new HoodIOSim(
