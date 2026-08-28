@@ -21,7 +21,7 @@ public class TurretConstants {
     static final double initialPositionRad = 0;
 
     // TODO: CHANGE THIS
-    static final double gearRatio = 120;
+    static final double gearRatio = 3.0 * 3.0 * (68.0 / 12.0);
     static final LoggedTunablePIDF gains = switch (BuildConstants.mode) {
         case REAL, REPLAY -> new LoggedTunablePIDF("Superstructure/Turret/Gains")
                 .withP(0.5)
