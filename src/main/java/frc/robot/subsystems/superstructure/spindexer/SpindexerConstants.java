@@ -15,6 +15,7 @@ public class SpindexerConstants {
             case REAL -> new MotorIOTalonFX(
                     13,
                     true,
+                    true,
                     NeutralModeValue.Coast,
                     90,
                     50,

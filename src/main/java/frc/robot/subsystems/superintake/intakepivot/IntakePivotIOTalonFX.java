@@ -17,6 +17,7 @@ public class IntakePivotIOTalonFX extends IntakePivotIO {
     public IntakePivotIOTalonFX(int canID, boolean inverted) {
         motor = new MotorIOTalonFX(
                 canID,
+                true,
                 inverted,
                 NeutralModeValue.Coast,
                 normalCurrentLimitAmps,

@@ -15,6 +15,7 @@ public class IntakeRollersConstants {
             case REAL -> new MotorIOTalonFX(
                     15,
                     true,
+                    true,
                     NeutralModeValue.Coast,
                     140,
                     70,

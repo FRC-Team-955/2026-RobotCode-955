@@ -24,6 +24,7 @@ public class FlywheelIOTalonFX extends FlywheelIO {
     ) {
         leader = new MotorIOTalonFX(
                 leaderCanID,
+                false,
                 leaderInverted,
                 NeutralModeValue.Coast,
                 statorCurrentLimitAmps,
@@ -36,6 +37,7 @@ public class FlywheelIOTalonFX extends FlywheelIO {
 
         follower = new MotorIOTalonFX(
                 followerCanID,
+                false,
                 false,
                 NeutralModeValue.Coast,
                 statorCurrentLimitAmps,

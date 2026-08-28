@@ -45,6 +45,7 @@ public class MotorIOTalonFX extends MotorIO {
 
     public MotorIOTalonFX(
             int canID,
+            boolean useCanivore,
             boolean inverted,
             NeutralModeValue neutralMode,
             int statorCurrentLimitAmps,
@@ -54,7 +55,11 @@ public class MotorIOTalonFX extends MotorIO {
             LoggedTunablePIDF velocityGains,
             double initialPositionRad
     ) {
-        talon = new TalonFX(canID, Constants.canivoreBus);
+        if (useCanivore) {
+            talon = new TalonFX(canID, Constants.canivoreBus);
+        } else {
+            talon = new TalonFX(canID);
+        }
 
         config = new TalonFXConfiguration();
         config.MotorOutput.NeutralMode = neutralMode;

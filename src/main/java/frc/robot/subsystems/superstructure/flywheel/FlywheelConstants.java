@@ -28,7 +28,7 @@ public class FlywheelConstants {
         return switch (BuildConstants.mode) {
             case REAL -> new FlywheelIOTalonFX(
                     16,
-                    19,
+                    17,
                     false,
                     MotorAlignmentValue.Opposed
             );
