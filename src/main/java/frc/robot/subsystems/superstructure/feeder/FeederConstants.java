@@ -13,7 +13,7 @@ public class FeederConstants {
     static MotorIO createIO() {
         return switch (BuildConstants.mode) {
             case REAL -> new MotorIOSparkMax(
-                    11,
+                    10,
                     true,
                     SparkBaseConfig.IdleMode.kBrake,
                     40,
