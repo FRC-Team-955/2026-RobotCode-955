@@ -22,6 +22,7 @@ import frc.robot.subsystems.superstructure.feeder.Feeder;
 import frc.robot.subsystems.superstructure.flywheel.Flywheel;
 import frc.robot.subsystems.superstructure.hood.Hood;
 import frc.robot.subsystems.superstructure.spindexer.Spindexer;
+import frc.robot.subsystems.superstructure.turret.Turret;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.littletonrobotics.junction.Logger;
@@ -48,6 +49,7 @@ public class Superstructure extends CommandBasedSubsystem {
     public final Hood hood = Hood.get();
     public final Feeder feeder = Feeder.get();
     public final Spindexer spindexer = Spindexer.get();
+    public final Turret turret = Turret.get();
 
     private final SuperstructureIO io = createIO();
     private final SuperstructureIOInputsAutoLogged inputs = new SuperstructureIOInputsAutoLogged();
@@ -135,6 +137,7 @@ public class Superstructure extends CommandBasedSubsystem {
                 flywheel.setGoal(Flywheel.Goal.IDLE);
                 feeder.setGoal(Feeder.Goal.IDLE);
                 spindexer.setGoal(Spindexer.Goal.AGITATE);
+                turret.setGoal(Turret.Goal.AIM_AT_CLOSEST_HUB);
                 switch (goal) {
                     case HOME_HOOD -> hood.setGoal(Hood.Goal.HOME);
                     case HOME_HOOD_FINALIZE -> hood.setGoal(Hood.Goal.HOME_FINALIZE);
@@ -144,6 +147,7 @@ public class Superstructure extends CommandBasedSubsystem {
             case SHOOT, SHOOT_FORCE -> {
                 flywheel.setGoal(Flywheel.Goal.SHOOT);
                 hood.setGoal(Hood.Goal.SHOOT);
+                turret.setGoal(Turret.Goal.SHOOT);
 
                 boolean needsToCommitToShot = Timer.getTimestamp() - lastStartedShot < commitToShotTimeSeconds.get();
                 if (BuildConstants.isSimOrReplay)
@@ -174,6 +178,7 @@ public class Superstructure extends CommandBasedSubsystem {
                 feeder.setGoal(Feeder.Goal.EJECT);
                 spindexer.setGoal(Spindexer.Goal.EJECT_ALTERNATE);
                 hood.setGoal(Hood.Goal.STOW);
+                turret.setGoal(Turret.Goal.AIM_AT_CLOSEST_HUB);
             }
         }
 
@@ -196,6 +201,7 @@ public class Superstructure extends CommandBasedSubsystem {
                 flywheel.isDisconnected() ||
                 spindexer.isDisconnected() ||
                 feeder.isDisconnected() ||
+                turret.isDisconnected() ||
                 !inputs.canrangeConnected;
     }
 }

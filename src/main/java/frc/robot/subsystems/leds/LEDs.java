@@ -154,7 +154,8 @@ public class LEDs implements Periodic {
         if (
                 superintake.intakeRollers.highTemperatureAlert.get() ||
                         superstructure.flywheel.highTemperatureAlert.get() ||
-                        superstructure.hood.highTemperatureAlert.get()
+                        superstructure.hood.highTemperatureAlert.get() ||
+                        superstructure.turret.highTemperatureAlert.get()
         ) {
             return LEDPatterns.hotMotors;
         }

@@ -158,6 +158,7 @@ public class Robot extends LoggedRobot {
                 robotContainer.superstructure.flywheel,
                 robotContainer.superstructure.hood,
                 robotContainer.superstructure.feeder,
+                robotContainer.superstructure.turret,
 
                 // Misc
                 robotContainer.canLogger,
