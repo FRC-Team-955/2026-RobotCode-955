@@ -122,7 +122,7 @@ public class Hood implements Periodic {
         boolean shouldEmergencyStop = emergencyStopDebouncer.calculate(motor.getStatorCurrentAmps() >= 20);
         if (!motor.isEmergencyStopped()) {
             if ((shouldEmergencyStop || operatorDashboard.hoodEStop.get()) && !BuildConstants.isSim) {
-                motor.emergencyStop();
+                motor.emergencyStop(NeutralModeValue.Coast);
                 operatorDashboard.hoodEStop.set(true);
             }
         } else {
