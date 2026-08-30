@@ -13,7 +13,6 @@ import lombok.RequiredArgsConstructor;
 import java.util.function.DoubleConsumer;
 import java.util.function.DoubleSupplier;
 
-@SuppressWarnings("ClassCanBeRecord")
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class MechanismSim {
     private final double gearRatio;
