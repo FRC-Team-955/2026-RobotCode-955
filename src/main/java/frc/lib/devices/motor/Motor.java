@@ -1,10 +1,12 @@
 package frc.lib.devices.motor;
 
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.wpilibj.Alert;
 import frc.lib.devices.device.Device;
 import frc.lib.network.LoggedTunablePIDF;
+import frc.robot.BuildConstants;
 
 public class Motor extends Device<MotorIO, MotorIOInputsAutoLogged> {
     private final Alert highTemperatureAlert;
@@ -15,6 +17,23 @@ public class Motor extends Device<MotorIO, MotorIOInputsAutoLogged> {
 
         highTemperatureAlert = new Alert(name + " temperature is high.", Alert.AlertType.kWarning);
         emergencyStoppedAlert = new Alert(name + " is emergency stopped.", Alert.AlertType.kError);
+    }
+
+    public static Motor createSparkMax(String name, int canID, CtrlSparkMaxConfig config, double initialPositionRad, MechanismSim.Builder mechanismSimBuilder) {
+        return new Motor(name, switch (BuildConstants.mode) {
+            case REAL -> new MotorIOSparkMax(canID, config, initialPositionRad);
+            case SIM -> new MotorIOSparkMaxSim(config, initialPositionRad, mechanismSimBuilder);
+            case REPLAY -> new MotorIOReplay();
+        });
+    }
+
+    /** For common config options, see the javadocs for {@link MotorIOTalonFX#MotorIOTalonFX(int, TalonFXConfiguration, double)} */
+    public static Motor createTalonFX(String name, int canID, TalonFXConfiguration config, double initialPositionRad, MechanismSim.Builder mechanismSimBuilder) {
+        return new Motor(name, switch (BuildConstants.mode) {
+            case REAL -> new MotorIOTalonFX(canID, config, initialPositionRad);
+            case SIM -> new MotorIOTalonFXSim(config, initialPositionRad, mechanismSimBuilder);
+            case REPLAY -> new MotorIOReplay();
+        });
     }
 
     @Override
