@@ -78,7 +78,7 @@ public class ExampleVelocityRollerSubsystem implements Periodic {
     @Override
     public void periodicAfterCommands() {
         Logger.recordOutput("ExampleVelocityRollerSubsystem/Goal", goal);
-        if (DriverStation.isDisabled()) {
+        if (DriverStation.isDisabled() || goal == Goal.IDLE) {
             motor.setVoltageRequest(0);
         } else {
             double setpointRadPerSec = goal.setpointRadPerSec.getAsDouble();
