@@ -8,19 +8,19 @@ import java.util.HashSet;
 
 /**
  * Implementation of density-based clustering algorithm DBSCAN.
- *
+ * <p>
  * Original Publication:
  * Ester, Martin; Kriegel, Hans-Peter; Sander, Jörg; Xu, Xiaowei (1996).
  * Simoudis, Evangelos; Han, Jiawei; Fayyad, Usama M., eds.
  * A density-based algorithm for discovering clusters in large spatial
  * databases with noise. Proceedings of the Second International Conference
  * on Knowledge Discovery and Data Mining (KDD-96). AAAI Press. pp. 226-231
- *
+ * <p>
  * Usage:
  * - Identify type of input values.
  * - Implement metric for input value type using DistanceMetric interface.
  * - Invoke {@link #performClustering()}.
- *
+ * <p>
  * See tests and metrics for example implementation and use.
  *
  * @author <a href="mailto:cf@christopherfrantz.org">Christopher Frantz</a>
@@ -38,16 +38,16 @@ public class DBSCAN {
     private ArrayList<Translation2d> inputValues = null;
 
     /** index maintaining visited points */
-    private HashSet<Translation2d> visitedPoints = new HashSet<Translation2d>();
+    private final HashSet<Translation2d> visitedPoints = new HashSet<Translation2d>();
 
     /**
      * Creates a DBSCAN clusterer instance.
      * Upon instantiation, call {@link #performClustering()}
      * to perform the actual clustering.
      *
-     * @param inputValues Input values to be clustered
+     * @param inputValues    Input values to be clustered
      * @param minNumElements Minimum number of elements to constitute cluster
-     * @param maxDistance Maximum distance of elements to consider clustered
+     * @param maxDistance    Maximum distance of elements to consider clustered
      */
     public DBSCAN(final Collection<Translation2d> inputValues, int minNumElements, double maxDistance) {
         setInputValues(inputValues);
@@ -89,11 +89,12 @@ public class DBSCAN {
      * Determines the neighbours of a given input value.
      *
      * @param inputValue Input value for which neighbours are to be determined
+     *
      * @return List of neighbours for a given input value
      */
     private ArrayList<Translation2d> getNeighbours(final Translation2d inputValue) {
         ArrayList<Translation2d> neighbours = new ArrayList<Translation2d>();
-        for(int i=0; i<inputValues.size(); i++) {
+        for (int i = 0; i < inputValues.size(); i++) {
             Translation2d candidate = inputValues.get(i);
             if (inputValue.getDistance(candidate) <= epsilon) {
                 neighbours.add(candidate);
@@ -108,10 +109,11 @@ public class DBSCAN {
      *
      * @param neighbours1 left collection
      * @param neighbours2 right collection
+     *
      * @return Modified left collection
      */
     private ArrayList<Translation2d> mergeRightToLeftCollection(final ArrayList<Translation2d> neighbours1,
-                                                    final ArrayList<Translation2d> neighbours2) {
+                                                                final ArrayList<Translation2d> neighbours2) {
         for (int i = 0; i < neighbours2.size(); i++) {
             Translation2d tempPt = neighbours2.get(i);
             if (!neighbours1.contains(tempPt)) {

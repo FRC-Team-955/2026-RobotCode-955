@@ -32,7 +32,7 @@ import java.util.Arrays;
  * one worker and so that no worker is assigned to more than one job in such a
  * manner so as to minimize the total cost of completing the jobs.
  * <p>
- *
+ * <p>
  * An assignment for a cost matrix that has more workers than jobs will
  * necessarily include unassigned workers, indicated by an assignment value of
  * -1; in no other circumstance will there be unassigned workers. Similarly, an
@@ -41,7 +41,7 @@ import java.util.Arrays;
  * jobs. For completeness, an assignment for a square cost matrix will give
  * exactly one unique worker to each job.
  * <p>
- *
+ * <p>
  * This version of the Hungarian algorithm runs in time O(n^3), where n is the
  * maximum among the number of workers and the number of jobs.
  *
@@ -61,11 +61,10 @@ public class HungarianAlgorithm {
     /**
      * Initializes the cost matrix
      *
-     * @param costMatrix
-     *          the cost matrix, where matrix[i][j] holds the cost of assigning
-     *          worker i to job j, for all i, j. The cost matrix must not be
-     *          irregular in the sense that all rows must be the same length; in
-     *          addition, all entries must be non-infinite numbers.
+     * @param costMatrix the cost matrix, where matrix[i][j] holds the cost of assigning
+     *                   worker i to job j, for all i, j. The cost matrix must not be
+     *                   irregular in the sense that all rows must be the same length; in
+     *                   addition, all entries must be non-infinite numbers.
      */
 
     private static void initializeCostMatrix(double[][] costMatrix) {
@@ -125,8 +124,8 @@ public class HungarianAlgorithm {
      * Execute the algorithm.
      *
      * @return the minimum cost matching of workers to jobs based upon the
-     *         provided cost matrix. A matching value of -1 indicates that the
-     *         corresponding worker is unassigned.
+     * provided cost matrix. A matching value of -1 indicates that the
+     * corresponding worker is unassigned.
      */
     public static int[] execute(double[][] costMatrix) {
         /*
@@ -166,7 +165,7 @@ public class HungarianAlgorithm {
      * more zero-slack edges (the labels of committed jobs are simultaneously
      * decreased by the same amount in order to maintain a feasible labeling).
      * <p>
-     *
+     * <p>
      * The runtime of a single phase of the algorithm is O(n^2), where n is the
      * dimension of the internal square cost matrix, since each edge is visited at
      * most once and since increasing the labeling is accomplished in time O(n) by
@@ -261,8 +260,7 @@ public class HungarianAlgorithm {
      * workers and jobs sets and by initializing the slack arrays to the values
      * corresponding to the specified root worker.
      *
-     * @param w
-     *          the worker at which to root the next phase.
+     * @param w the worker at which to root the next phase.
      */
     private static void initializePhase(int w) {
         Arrays.fill(committedWorkers, false);
