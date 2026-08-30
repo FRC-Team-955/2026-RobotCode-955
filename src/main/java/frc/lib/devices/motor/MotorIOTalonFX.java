@@ -3,6 +3,7 @@ package frc.lib.devices.motor;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.configs.Slot1Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.PositionVoltage;
@@ -30,7 +31,7 @@ public class MotorIOTalonFX extends MotorIO {
     // Request objects
     private final VoltageOut voltageRequest = new VoltageOut(0);
     private final PositionVoltage positionRequest = new PositionVoltage(0).withSlot(0);
-    private final VelocityVoltage velocityRequest = new VelocityVoltage(0).withSlot(0);
+    private final VelocityVoltage velocityRequest = new VelocityVoltage(0).withSlot(1);
 
     private final StatusSignal<Angle> position;
     private final StatusSignal<AngularVelocity> velocity;
@@ -50,7 +51,6 @@ public class MotorIOTalonFX extends MotorIO {
      * config.CurrentLimits.StatorCurrentLimit = ...;
      * config.CurrentLimits.SupplyCurrentLimit = ...;
      * config.Feedback.SensorToMechanismRatio = gearRatio;
-     * config.Slot0 = gains.toPhoenix();
      * </pre>
      * Using config.with... is highly recommended.
      */
@@ -98,13 +98,17 @@ public class MotorIOTalonFX extends MotorIO {
     }
 
     @Override
-    public void setPositionRequest(double setpointRad) {
-        talon.setControl(positionRequest.withPosition(Units.radiansToRotations(setpointRad)));
+    public void setPositionRequest(double setpointRad, double arbitraryFeedforwardVolts) {
+        talon.setControl(positionRequest
+                .withPosition(Units.radiansToRotations(setpointRad))
+                .withFeedForward(arbitraryFeedforwardVolts));
     }
 
     @Override
-    public void setVelocityRequest(double setpointRadPerSec) {
-        talon.setControl(velocityRequest.withVelocity(Units.radiansToRotations(setpointRadPerSec)));
+    public void setVelocityRequest(double setpointRadPerSec, double arbitraryFeedforwardVolts) {
+        talon.setControl(velocityRequest
+                .withVelocity(Units.radiansToRotations(setpointRadPerSec))
+                .withFeedForward(arbitraryFeedforwardVolts));
     }
 
     @Override
@@ -117,8 +121,14 @@ public class MotorIOTalonFX extends MotorIO {
     }
 
     @Override
-    public void setGains(LoggedTunablePIDF newGains) {
+    public void setPositionGains(LoggedTunablePIDF newGains) {
         config.Slot0 = Slot0Configs.from(newGains.toPhoenix());
+        tryUntilOkAsync(5, () -> talon.getConfigurator().apply(config, 0.25));
+    }
+
+    @Override
+    public void setVelocityGains(LoggedTunablePIDF newGains) {
+        config.Slot1 = Slot1Configs.from(newGains.toPhoenix());
         tryUntilOkAsync(5, () -> talon.getConfigurator().apply(config, 0.25));
     }
 

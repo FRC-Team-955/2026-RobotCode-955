@@ -17,6 +17,9 @@ import java.util.function.DoubleSupplier;
 import static frc.lib.SparkUtil.*;
 
 public class MotorIOSparkMax extends MotorIO {
+    private static final ClosedLoopSlot positionSlot = ClosedLoopSlot.kSlot0;
+    private static final ClosedLoopSlot velocitySlot = ClosedLoopSlot.kSlot1;
+
     // Hardware objects
     protected final SparkMax spark;
     private final RelativeEncoder encoder;
@@ -67,20 +70,24 @@ public class MotorIOSparkMax extends MotorIO {
     }
 
     @Override
-    public void setPositionRequest(double setpointRad) {
+    public void setPositionRequest(double setpointRad, double arbitraryFeedforwardVolts) {
         controller.setSetpoint(
                 setpointRad,
                 SparkBase.ControlType.kPosition,
-                ClosedLoopSlot.kSlot0
+                positionSlot,
+                arbitraryFeedforwardVolts,
+                SparkClosedLoopController.ArbFFUnits.kVoltage
         );
     }
 
     @Override
-    public void setVelocityRequest(double setpointRadPerSec) {
+    public void setVelocityRequest(double setpointRadPerSec, double arbitraryFeedforwardVolts) {
         controller.setSetpoint(
                 setpointRadPerSec,
                 SparkBase.ControlType.kVelocity,
-                ClosedLoopSlot.kSlot0
+                velocitySlot,
+                arbitraryFeedforwardVolts,
+                SparkClosedLoopController.ArbFFUnits.kVoltage
         );
     }
 
@@ -99,9 +106,20 @@ public class MotorIOSparkMax extends MotorIO {
     }
 
     @Override
-    public void setGains(LoggedTunablePIDF newGains) {
+    public void setPositionGains(LoggedTunablePIDF newGains) {
         var newConfig = new SparkMaxConfig();
-        newGains.applySpark(newConfig.closedLoop, ClosedLoopSlot.kSlot0);
+        newGains.applySpark(newConfig.closedLoop, positionSlot);
+        tryUntilOkAsync(5, () -> spark.configure(
+                newConfig,
+                ResetMode.kNoResetSafeParameters,
+                PersistMode.kPersistParameters
+        ));
+    }
+
+    @Override
+    public void setVelocityGains(LoggedTunablePIDF newGains) {
+        var newConfig = new SparkMaxConfig();
+        newGains.applySpark(newConfig.closedLoop, velocitySlot);
         tryUntilOkAsync(5, () -> spark.configure(
                 newConfig,
                 ResetMode.kNoResetSafeParameters,

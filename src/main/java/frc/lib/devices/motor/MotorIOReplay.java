@@ -14,11 +14,11 @@ public class MotorIOReplay extends MotorIO {
     }
 
     @Override
-    public void setPositionRequest(double setpointRad) {
+    public void setPositionRequest(double setpointRad, double arbitraryFeedforwardVolts) {
     }
 
     @Override
-    public void setVelocityRequest(double setpointRadPerSec) {
+    public void setVelocityRequest(double setpointRadPerSec, double arbitraryFeedforwardVolts) {
     }
 
     @Override
@@ -26,7 +26,11 @@ public class MotorIOReplay extends MotorIO {
     }
 
     @Override
-    public void setGains(LoggedTunablePIDF newGains) {
+    public void setPositionGains(LoggedTunablePIDF newGains) {
+    }
+
+    @Override
+    public void setVelocityGains(LoggedTunablePIDF newGains) {
     }
 
     @Override

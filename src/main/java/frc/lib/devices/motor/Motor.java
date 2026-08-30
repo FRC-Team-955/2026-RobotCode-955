@@ -3,12 +3,18 @@ package frc.lib.devices.motor;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.Alert;
 import frc.lib.devices.device.Device;
 import frc.lib.network.LoggedTunablePIDF;
 import frc.robot.BuildConstants;
 
 public class Motor extends Device<MotorIO, MotorIOInputsAutoLogged> {
+    private LoggedTunablePIDF positionGains = null;
+    private LoggedTunablePIDF velocityGains = null;
+
+    private PIDController positionController = null;
+
     private final Alert highTemperatureAlert;
     private final Alert emergencyStoppedAlert;
 
@@ -36,11 +42,43 @@ public class Motor extends Device<MotorIO, MotorIOInputsAutoLogged> {
         });
     }
 
+    public Motor withPositionGains(LoggedTunablePIDF gains) {
+        positionGains = gains;
+        setPositionGains();
+        return this;
+    }
+
+    private void setPositionGains() {
+        System.out.println("Setting " + name + " position gains to " + positionGains);
+        io.setPositionGains(positionGains);
+        // Wrapping PID isn't currently supported. You shouldn't need it anyways
+        positionController = positionGains.toPID();
+    }
+
+    public Motor withVelocityGains(LoggedTunablePIDF gains) {
+        velocityGains = gains;
+        setVelocityGains();
+        return this;
+    }
+
+    private void setVelocityGains() {
+        System.out.println("Setting " + name + " velocity gains to " + velocityGains);
+        io.setPositionGains(velocityGains);
+    }
+
     @Override
     protected void updateAndProcessInputs() {
         super.updateAndProcessInputs();
 
         highTemperatureAlert.set(getTemperatureCelsius() > 50.0);
+
+        if (positionGains != null && positionGains.hasChanged()) {
+            setPositionGains();
+        }
+
+        if (velocityGains != null && velocityGains.hasChanged()) {
+            setVelocityGains();
+        }
     }
 
     @Override
@@ -98,13 +136,22 @@ public class Motor extends Device<MotorIO, MotorIOInputsAutoLogged> {
 
     public void setPositionRequest(double setpointRad) {
         if (!emergencyStopped) {
-            io.setPositionRequest(setpointRad);
+            io.setPositionRequest(setpointRad, 0.0);
         }
     }
 
     public void setVelocityRequest(double setpointRadPerSec) {
         if (!emergencyStopped) {
-            io.setVelocityRequest(setpointRadPerSec);
+            io.setVelocityRequest(setpointRadPerSec, 0.0);
+        }
+    }
+
+    public void setMotionProfileRequest(double positionSetpointRad, double velocitySetpointRadPerSec) {
+        if (!emergencyStopped) {
+            io.setVelocityRequest(
+                    velocitySetpointRadPerSec,
+                    positionController.calculate(getPositionRad(), positionSetpointRad)
+            );
         }
     }
 
@@ -125,11 +172,6 @@ public class Motor extends Device<MotorIO, MotorIOInputsAutoLogged> {
     public void setNeutralMode(NeutralModeValue neutralMode) {
         System.out.println("Setting " + name + " neutral mode to " + neutralMode);
         io.setNeutralMode(neutralMode);
-    }
-
-    public void setGains(LoggedTunablePIDF newGains) {
-        System.out.println("Setting " + name + " gains to " + newGains);
-        io.setGains(newGains);
     }
 
     /**

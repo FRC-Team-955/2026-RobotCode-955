@@ -1,11 +1,9 @@
 package frc.lib.devices.motor;
 
 import com.ctre.phoenix6.signals.NeutralModeValue;
-import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.FeedbackSensor;
 import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
-import frc.lib.network.LoggedTunablePIDF;
 
 /**
  * Spark MAX's have bad defaults and a messy config, so we use this class to clean up setting things like gear ratio and to provide sensible defaults.
@@ -74,11 +72,6 @@ public class CtrlSparkMaxConfig {
     public CtrlSparkMaxConfig withGearRatio(double gearRatio) {
         config.encoder.positionConversionFactor(calculatePositionConversionFactor(gearRatio));
         config.encoder.velocityConversionFactor(calculateVelocityConversionFactor(gearRatio));
-        return this;
-    }
-
-    public CtrlSparkMaxConfig withGains(LoggedTunablePIDF gains) {
-        gains.applySpark(config.closedLoop, ClosedLoopSlot.kSlot0);
         return this;
     }
 }

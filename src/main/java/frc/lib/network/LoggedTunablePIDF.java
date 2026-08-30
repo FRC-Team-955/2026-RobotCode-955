@@ -8,8 +8,8 @@ import com.revrobotics.spark.config.ClosedLoopConfig;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.PIDController;
-import org.jetbrains.annotations.Nullable;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Units (velocity control additions are in brackets):
@@ -98,7 +98,6 @@ public class LoggedTunablePIDF {
                     config.feedForward.kCosRatio(1.0 / (2.0 * Math.PI), slot);
                 }
             }
-
         }
     }
 

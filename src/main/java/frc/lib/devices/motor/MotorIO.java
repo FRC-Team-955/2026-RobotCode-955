@@ -21,13 +21,15 @@ public abstract class MotorIO extends DeviceIO<MotorIOInputsAutoLogged> {
 
     public abstract void setVoltageRequest(double volts);
 
-    public abstract void setPositionRequest(double setpointRad);
+    public abstract void setPositionRequest(double setpointRad, double arbitraryFeedforwardVolts);
 
-    public abstract void setVelocityRequest(double setpointRadPerSec);
+    public abstract void setVelocityRequest(double setpointRadPerSec, double arbitraryFeedforwardVolts);
 
     public abstract void setFollowRequest(MotorIO leaderIO, MotorAlignmentValue alignment);
 
-    public abstract void setGains(LoggedTunablePIDF newGains);
+    public abstract void setPositionGains(LoggedTunablePIDF newGains);
+
+    public abstract void setVelocityGains(LoggedTunablePIDF newGains);
 
     public abstract void setNeutralMode(NeutralModeValue neutralMode);
 
