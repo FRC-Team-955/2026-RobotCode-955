@@ -4,6 +4,7 @@ import com.ctre.phoenix6.sim.TalonFXSimState;
 import com.revrobotics.sim.SparkMaxSim;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import frc.robot.Constants;
@@ -31,8 +32,8 @@ public class MechanismSim {
         // apply the new rotor position and velocity to the TalonFX;
         // note that this is rotor position/velocity (before gear ratio), but
         // DCMotorSim returns mechanism position/velocity (after gear ratio)
-        talonSim.setRawRotorPosition(mechanismPositionRad.getAsDouble() * gearRatio);
-        talonSim.setRotorVelocity(mechanismVelocityRadPerSec.getAsDouble() * gearRatio);
+        talonSim.setRawRotorPosition(Units.radiansToRotations(mechanismPositionRad.getAsDouble()) * gearRatio);
+        talonSim.setRotorVelocity(Units.radiansToRotations(mechanismVelocityRadPerSec.getAsDouble()) * gearRatio);
     }
 
     public void update(SparkMaxSim sparkSim) {
@@ -44,6 +45,7 @@ public class MechanismSim {
 
         // update the spark max
         sparkSim.iterate(
+                // we don't need to convert to RPM here because we do that in the spark max config
                 mechanismVelocityRadPerSec.getAsDouble(),
                 batteryVoltage,
                 Constants.loopPeriod

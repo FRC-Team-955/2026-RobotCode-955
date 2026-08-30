@@ -10,7 +10,10 @@ public class MotorIOTalonFXSim extends MotorIOTalonFX {
     private final MechanismSim mechanismSim;
 
     public MotorIOTalonFXSim(TalonFXConfiguration config, double initialPositionRad, MechanismSim.Builder mechanismSimBuilder) {
-        super(SimManager.getNewCANId(), config, initialPositionRad);
+        // We tell the TalonFX that it has an initial position of 0 because setRawRotorPosition
+        // will take into account initial position. If we give it the real initial position, the
+        // position of the motor will double and bad things will happen.
+        super(SimManager.getNewCANId(), config, 0.0);
 
         talonSim = talon.getSimState();
         talonSim.setMotorType(TalonFXSimState.MotorType.KrakenX60);
@@ -30,6 +33,7 @@ public class MotorIOTalonFXSim extends MotorIOTalonFX {
     public void setEncoderPosition(double positionRad) {
         mechanismSim.setMechanismPositionRad.accept(positionRad);
 
-        super.setEncoderPosition(positionRad);
+        // Skip setting the TalonFX encoder position for the same reasons as why we
+        // tell the TalonFX that it has an initial position of 0 in the constructor.
     }
 }
