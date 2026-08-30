@@ -18,7 +18,7 @@ public class Motor extends Device<MotorIO, MotorIOInputsAutoLogged> {
     private final Alert highTemperatureAlert;
     private final Alert emergencyStoppedAlert;
 
-    public Motor(String name, MotorIO io) {
+    private Motor(String name, MotorIO io) {
         super(name, io, new MotorIOInputsAutoLogged());
 
         highTemperatureAlert = new Alert(name + " temperature is high.", Alert.AlertType.kWarning);
@@ -33,7 +33,20 @@ public class Motor extends Device<MotorIO, MotorIOInputsAutoLogged> {
         });
     }
 
-    /** For common config options, see the javadocs for {@link MotorIOTalonFX#MotorIOTalonFX(int, TalonFXConfiguration, double)} */
+    /**
+     * Example of creating a TalonFXConfiguration with common settings:
+     * <pre>
+     * new TalonFXConfiguration()
+     *     .withMotorOutput(new MotorOutputConfigs()
+     *         .withNeutralMode(NeutralModeValue.Brake)
+     *         .withInverted(InvertedValue.CounterClockwise_Positive))
+     *     .withCurrentLimits(new CurrentLimitsConfigs()
+     *         .withStatorCurrentLimit(90)
+     *         .withSupplyCurrentLimit(50))
+     *     .withFeedback(new FeedbackConfigs()
+     *         .withSensorToMechanismRatio(5))
+     * </pre>
+     */
     public static Motor createTalonFX(String name, int canID, TalonFXConfiguration config, double initialPositionRad, MechanismSim.Builder mechanismSimBuilder) {
         return new Motor(name, switch (BuildConstants.mode) {
             case REAL -> new MotorIOTalonFX(canID, config, initialPositionRad);

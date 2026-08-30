@@ -43,17 +43,6 @@ public class MotorIOTalonFX extends MotorIO {
     // Connection debouncers
     private final Debouncer connectedDebounce = new Debouncer(0.5);
 
-    /**
-     * Common settings that are configured:
-     * <pre>
-     * config.MotorOutput.NeutralMode = ...;
-     * config.MotorOutput.Inverted = ...;
-     * config.CurrentLimits.StatorCurrentLimit = ...;
-     * config.CurrentLimits.SupplyCurrentLimit = ...;
-     * config.Feedback.SensorToMechanismRatio = gearRatio;
-     * </pre>
-     * Using config.with... is highly recommended.
-     */
     public MotorIOTalonFX(int canID, TalonFXConfiguration config, double initialPositionRad) {
         talon = new TalonFX(canID, Constants.canivoreBus);
 
