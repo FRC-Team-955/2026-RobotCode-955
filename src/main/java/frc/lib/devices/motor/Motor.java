@@ -161,12 +161,13 @@ public class Motor extends Device<MotorIO, MotorIOInputsAutoLogged> {
     /**
      * NOTE: BLOCKS THE MAIN THREAD!!! ONLY CALL ON STARTUP!!!!
      */
-    public void setFollowRequest(Motor leader, MotorAlignmentValue alignment) {
+    public Motor withFollowRequest(Motor leader, MotorAlignmentValue alignment) {
         reinstateFollower = () -> {
             System.out.println("Making " + name + " follow " + leader.name);
             io.setFollowRequest(leader.io, alignment);
         };
         reinstateFollower.run();
+        return this;
     }
 
     public void setNeutralMode(NeutralModeValue neutralMode) {
