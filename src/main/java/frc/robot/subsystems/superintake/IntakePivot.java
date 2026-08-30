@@ -103,8 +103,8 @@ public class IntakePivot implements Periodic {
     private Double lastSetpointRad = null;
     // goalState is just for logging the profile we want to follow.
     // lookaheadState is shifted some seconds into the future, and is used for PID setpoint.
-    private TrapezoidProfile.State goalState = new TrapezoidProfile.State();
-    private TrapezoidProfile.State lookaheadState = new TrapezoidProfile.State();
+    private TrapezoidProfile.State goalState = new TrapezoidProfile.State(initialPositionRad, 0.0);
+    private TrapezoidProfile.State lookaheadState = new TrapezoidProfile.State(initialPositionRad, 0.0);
 
     @Getter
     private boolean atVelocityThresholdForHoming = false;

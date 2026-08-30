@@ -93,7 +93,7 @@ public class ExampleProfiledServoSubsystem implements Periodic {
     private Goal goal = Goal.STOW;
 
     private final TrapezoidProfile profile = new TrapezoidProfile(constraints);
-    private TrapezoidProfile.State state = new TrapezoidProfile.State();
+    private TrapezoidProfile.State state = new TrapezoidProfile.State(initialPositionRad, 0.0);
 
     @Getter
     private final static ExampleProfiledServoSubsystem instance = new ExampleProfiledServoSubsystem();
