@@ -6,7 +6,6 @@ import frc.lib.devices.motor.CtrlSparkMaxConfig;
 import frc.lib.devices.motor.MechanismSim;
 import frc.lib.devices.motor.Motor;
 import frc.lib.network.LoggedTunableNumber;
-import frc.lib.network.LoggedTunablePIDF;
 import frc.lib.subsystem.Periodic;
 import frc.robot.OperatorDashboard;
 import lombok.Getter;
@@ -32,9 +31,7 @@ public class ExampleVoltageRollerSubsystem implements Periodic {
                             .withNeutralMode(NeutralModeValue.Coast),
                     0.0,
                     MechanismSim.roller(0.01)
-            )
-            .withPositionGains(new LoggedTunablePIDF("ExampleVoltageRollerSubsystem/Position"))
-            .withVelocityGains(new LoggedTunablePIDF("ExampleVoltageRollerSubsystem/Velocity"));
+            );
 
     @RequiredArgsConstructor
     public enum Goal {
