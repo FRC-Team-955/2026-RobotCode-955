@@ -33,7 +33,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class EnergyLogger implements Periodic {
-
     @Getter
     private double totalPower = 0.0;
     @Getter
