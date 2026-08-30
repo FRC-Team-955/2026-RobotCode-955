@@ -13,6 +13,7 @@ import frc.lib.devices.motor.Motor;
 import frc.lib.network.LoggedTunableNumber;
 import frc.lib.network.LoggedTunablePIDF;
 import frc.lib.subsystem.Periodic;
+import frc.robot.BuildConstants;
 import frc.robot.Constants;
 import frc.robot.OperatorDashboard;
 import lombok.Getter;
@@ -102,7 +103,9 @@ public class ExampleProfiledServoSubsystem implements Periodic {
 
             double setpointRad = goal.setpointRad.getAsDouble();
             setpointRad = MathUtil.clamp(setpointRad, minPositionRad, maxPositionRad);
-            Logger.recordOutput("ExampleProfiledServoSubsystem/OriginalSetpointRad", setpointRad);
+            if (BuildConstants.isSimOrReplay) {
+                Logger.recordOutput("ExampleProfiledServoSubsystem/OriginalSetpointRad", setpointRad);
+            }
             TrapezoidProfile.State wantedState = new TrapezoidProfile.State(setpointRad, 0.0);
 
             state = profile.calculate(Constants.loopPeriod, state, wantedState);

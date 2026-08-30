@@ -7,6 +7,7 @@ import frc.lib.devices.motor.MechanismSim;
 import frc.lib.devices.motor.Motor;
 import frc.lib.network.LoggedTunableNumber;
 import frc.lib.subsystem.Periodic;
+import frc.robot.BuildConstants;
 import frc.robot.OperatorDashboard;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -68,8 +69,10 @@ public class ExampleVoltageRollerSubsystem implements Periodic {
             motor.setVoltageRequest(0);
         } else {
             double volts = goal.voltageVolts.getAsDouble();
-            Logger.recordOutput("ExampleVoltageRollerSubsystem/RequestedVolts", volts);
             motor.setVoltageRequest(volts);
+            if (BuildConstants.isSimOrReplay) {
+                Logger.recordOutput("ExampleVoltageRollerSubsystem/RequestedVolts", volts);
+            }
         }
     }
 }

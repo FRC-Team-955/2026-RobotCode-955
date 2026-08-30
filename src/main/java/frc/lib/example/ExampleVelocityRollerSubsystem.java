@@ -11,6 +11,7 @@ import frc.lib.devices.motor.Motor;
 import frc.lib.network.LoggedTunableNumber;
 import frc.lib.network.LoggedTunablePIDF;
 import frc.lib.subsystem.Periodic;
+import frc.robot.BuildConstants;
 import frc.robot.OperatorDashboard;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -76,8 +77,10 @@ public class ExampleVelocityRollerSubsystem implements Periodic {
             motor.setVoltageRequest(0);
         } else {
             double setpointRadPerSec = goal.setpointRadPerSec.getAsDouble();
-            Logger.recordOutput("ExampleVelocityRollerSubsystem/SetpointRadPerSec", setpointRadPerSec);
             motor.setVelocityRequest(setpointRadPerSec);
+            if (BuildConstants.isSimOrReplay) {
+                Logger.recordOutput("ExampleVelocityRollerSubsystem/SetpointRadPerSec", setpointRadPerSec);
+            }
         }
     }
 
