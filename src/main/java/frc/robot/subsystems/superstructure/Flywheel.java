@@ -46,13 +46,14 @@ public class Flywheel implements Periodic {
                     .withSupplyCurrentLimit(30))
             .withFeedback(new FeedbackConfigs()
                     .withSensorToMechanismRatio(1));
+    private final MechanismSim.Builder mechanismSimBuilder = MechanismSim.roller(0.01);
     private final Motor leaderMotor = Motor
             .createTalonFX(
                     "Superstructure/Flywheel/Leader",
                     16,
                     motorConfig,
                     0.0,
-                    MechanismSim.roller(0.01)
+                    mechanismSimBuilder
             )
             .withVelocityGains(switch (BuildConstants.mode) {
                 case REAL, REPLAY -> new LoggedTunablePIDF("Superstructure/Flywheel/Gains")
@@ -71,7 +72,7 @@ public class Flywheel implements Periodic {
                     19,
                     motorConfig,
                     0.0,
-                    MechanismSim.roller(0.01)
+                    mechanismSimBuilder
             )
             .withFollowRequest(leaderMotor, MotorAlignmentValue.Opposed);
 
