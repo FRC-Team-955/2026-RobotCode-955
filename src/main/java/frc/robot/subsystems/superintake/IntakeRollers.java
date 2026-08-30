@@ -1,20 +1,23 @@
-package frc.robot.subsystems.superintake.intakerollers;
+package frc.robot.subsystems.superintake;
 
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
+import com.ctre.phoenix6.configs.FeedbackConfigs;
+import com.ctre.phoenix6.configs.MotorOutputConfigs;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.lib.EnergyLogger;
 import frc.lib.Util;
-import frc.lib.motor.MotorIO;
-import frc.lib.motor.MotorIOInputsAutoLogged;
-import frc.lib.motor.RequestType;
+import frc.lib.devices.motor.MechanismSim;
+import frc.lib.devices.motor.Motor;
 import frc.lib.network.LoggedTunableNumber;
 import frc.lib.subsystem.Periodic;
 import frc.robot.BuildConstants;
-import frc.robot.OperatorDashboard;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -22,38 +25,44 @@ import org.littletonrobotics.junction.Logger;
 
 import java.util.function.DoubleSupplier;
 
-import static frc.robot.subsystems.superintake.intakerollers.IntakeRollersConstants.createIO;
-
 public class IntakeRollers implements Periodic {
     private static final LoggedTunableNumber idleVoltage = new LoggedTunableNumber("Superintake/IntakeRollers/Goal/IdleVoltage", 0.0);
     private static final LoggedTunableNumber intakeVoltage = new LoggedTunableNumber("Superintake/IntakeRollers/Goal/IntakeVoltage", 12.0);
     private static final LoggedTunableNumber ejectVoltage = new LoggedTunableNumber("Superintake/IntakeRollers/Goal/EjectVoltage", -12.0);
     private static final EnergyLogger energyLogger = EnergyLogger.get();
 
-    private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
-
-    private final MotorIO io = createIO();
-    private final MotorIOInputsAutoLogged inputs = new MotorIOInputsAutoLogged();
+    private final Motor motor = Motor
+            .createTalonFX(
+                    "Superintake/IntakeRollers",
+                    15,
+                    new TalonFXConfiguration()
+                            .withMotorOutput(new MotorOutputConfigs()
+                                    .withNeutralMode(NeutralModeValue.Coast)
+                                    .withInverted(InvertedValue.Clockwise_Positive))
+                            .withCurrentLimits(new CurrentLimitsConfigs()
+                                    .withStatorCurrentLimit(140)
+                                    .withSupplyCurrentLimit(70))
+                            .withFeedback(new FeedbackConfigs()
+                                    .withSensorToMechanismRatio(3)),
+                    0.0,
+                    MechanismSim.roller(0.01)
+            );
 
 
     @RequiredArgsConstructor
     public enum Goal {
-        IDLE(idleVoltage::get, RequestType.VoltageVolts),
-        INTAKE(intakeVoltage::get, RequestType.VoltageVolts),
-        EJECT(ejectVoltage::get, RequestType.VoltageVolts),
+        IDLE(idleVoltage::get),
+        INTAKE(intakeVoltage::get),
+        EJECT(ejectVoltage::get),
         ;
 
         /** Should be constant for every loop cycle */
-        private final DoubleSupplier value;
-        private final RequestType type;
+        private final DoubleSupplier voltageVolts;
     }
 
     @Setter
     @Getter
     private Goal goal = Goal.IDLE;
-
-    private final Alert motorDisconnectedAlert = new Alert("Intake rollers motor is disconnected.", Alert.AlertType.kError);
-    public final Alert highTemperatureAlert = new Alert("Intake rollers motor temperature is high.", Alert.AlertType.kWarning);
 
     private static IntakeRollers instance;
 
@@ -73,36 +82,25 @@ public class IntakeRollers implements Periodic {
 
     @Override
     public void periodicBeforeCommands() {
-        io.updateInputs(inputs);
-        Logger.processInputs("Inputs/Superintake/IntakeRollers", inputs);
-
-        motorDisconnectedAlert.set(!inputs.connected);
-        highTemperatureAlert.set(inputs.temperatureCelsius > 50);
-
-        energyLogger.reportPowerUsage("IntakeRollers", inputs.connected ? inputs.appliedVolts * inputs.supplyCurrentAmps : 0.0);
+        energyLogger.reportPowerUsage("IntakeRollers", motor.isConnected() ? motor.getAppliedVolts() * motor.getSupplyCurrentAmps() : 0.0);
     }
 
     @Override
     public void periodicAfterCommands() {
         Logger.recordOutput("Superintake/IntakeRollers/Goal", goal);
         if (DriverStation.isDisabled()) {
-            io.setRequest(RequestType.VoltageVolts, 0);
+            motor.setVoltageRequest(0);
         } else {
-            double value = goal.value.getAsDouble();
-            io.setRequest(goal.type, value);
+            double volts = goal.voltageVolts.getAsDouble();
+            motor.setVoltageRequest(volts);
             if (BuildConstants.isSimOrReplay) {
-                Logger.recordOutput("Superintake/IntakeRollers/RequestType", goal.type);
-                Logger.recordOutput("Superintake/IntakeRollers/RequestValue", value);
+                Logger.recordOutput("Superintake/IntakeRollers/RequestedVolts", volts);
             }
         }
     }
 
-    public double getPositionRad() {
-        return inputs.positionRad;
-    }
-
     public boolean isDisconnected() {
-        return !inputs.connected;
+        return !motor.isConnected();
     }
 
     public Transform3d transform() {
@@ -111,7 +109,7 @@ public class IntakeRollers implements Periodic {
                 new Rotation3d()
         ).plus(new Transform3d(
                 new Translation3d(),
-                new Rotation3d(0.0, getPositionRad(), 0.0)
+                new Rotation3d(0.0, motor.getPositionRad(), 0.0)
         ));
     }
 }
