@@ -19,6 +19,8 @@ import java.util.function.DoubleSupplier;
 public class ExampleVoltageRollerSubsystem implements Periodic {
     private static final LoggedTunableNumber rollVoltage = new LoggedTunableNumber("ExampleVoltageRollerSubsystem/Goal/RollVoltage", 3.0);
 
+    private static final OperatorDashboard operatorDashboard = OperatorDashboard.getInstance();
+
     private final Motor motor = Motor
             .createSparkMax(
                     "ExampleVoltageRollerSubsystem",
@@ -55,8 +57,8 @@ public class ExampleVoltageRollerSubsystem implements Periodic {
     @Override
     public void periodicBeforeCommands() {
         // Apply network inputs
-        if (OperatorDashboard.getInstance().coastOverride.hasChanged()) {
-            motor.setNeutralMode(OperatorDashboard.getInstance().coastOverride.get() ? NeutralModeValue.Coast : NeutralModeValue.Brake);
+        if (operatorDashboard.coastOverride.hasChanged()) {
+            motor.setNeutralMode(operatorDashboard.coastOverride.get() ? NeutralModeValue.Coast : NeutralModeValue.Brake);
         }
     }
 

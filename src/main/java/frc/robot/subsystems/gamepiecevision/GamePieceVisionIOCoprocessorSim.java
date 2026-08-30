@@ -8,6 +8,8 @@ import org.photonvision.simulation.PhotonCameraSim;
 import org.photonvision.simulation.SimCameraProperties;
 
 public class GamePieceVisionIOCoprocessorSim extends GamePieceVisionIOCoprocessor {
+    private static final SimManager simManager = SimManager.getInstance();
+
     protected final PhotonCamera camera;
 
     public GamePieceVisionIOCoprocessorSim(String name) {
@@ -27,12 +29,12 @@ public class GamePieceVisionIOCoprocessorSim extends GamePieceVisionIOCoprocesso
         cameraSim.enableRawStream(false);
         cameraSim.enableProcessedStream(false);
 
-        SimManager.getInstance().gamePieceVisionSystem.addCamera(cameraSim, SharedGamePieceVisionConstants.robotToCamera);
+        simManager.gamePieceVisionSystem.addCamera(cameraSim, SharedGamePieceVisionConstants.robotToCamera);
     }
 
     @Override
     public void updateInputs(GamePieceVisionIOInputs inputs) {
-        SimManager.getInstance().ensureGamePieceVisionSystemUpdated();
+        simManager.ensureGamePieceVisionSystemUpdated();
         super.updateInputs(inputs);
     }
 }

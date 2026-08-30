@@ -37,7 +37,7 @@ public class CanadianOutpostAuto extends Auto {
                 // follow collection path
                 Commands.parallel(
                         AutoHelpers.trajectory(ChoreoTraj.CanadianOutpost_FirstPass),
-                        Superintake.getInstance().setGoal(Superintake.Goal.INTAKE).until(() -> true)
+                        superintake.setGoal(Superintake.Goal.INTAKE).until(() -> true)
                 ),
 
                 Commands.parallel(
@@ -49,11 +49,11 @@ public class CanadianOutpostAuto extends Auto {
 
                 // Shoot while moving to entrance to trench
                 Commands.parallel(
-                        Superintake.getInstance().intakeShootAlternate(),
-                        Superstructure.getInstance().setGoal(Superstructure.Goal.SHOOT),
+                        superintake.intakeShootAlternate(),
+                        superstructure.setGoal(Superstructure.Goal.SHOOT),
                         AutoHelpers.finalWaypoint(() -> preemptiveTrenchEntrance, defaultMoveToConstraints, true)
                 ).withTimeout(4.5),
-                Superstructure.getInstance().setGoal(Superstructure.Goal.IDLE).until(() -> true),
+                superstructure.setGoal(Superstructure.Goal.IDLE).until(() -> true),
 
                 // Move to final trench entrance
                 AutoHelpers.finalWaypoint(() -> trenchEntrance, defaultMoveToConstraints, false),
@@ -68,7 +68,7 @@ public class CanadianOutpostAuto extends Auto {
                 //Follow the second path
                 Commands.parallel(
                         AutoHelpers.trajectory(ChoreoTraj.CanadianOutpost_SecondPass),
-                        Superintake.getInstance().setGoal(Superintake.Goal.INTAKE).until(() -> true)
+                        superintake.setGoal(Superintake.Goal.INTAKE).until(() -> true)
                 ),
 
                 Commands.parallel(
@@ -81,8 +81,8 @@ public class CanadianOutpostAuto extends Auto {
 
                 // Shoot while moving to entrance to trench
                 Commands.parallel(
-                        Superintake.getInstance().intakeShootAlternate(),
-                        Superstructure.getInstance().setGoal(Superstructure.Goal.SHOOT),
+                        superintake.intakeShootAlternate(),
+                        superstructure.setGoal(Superstructure.Goal.SHOOT),
                         AutoHelpers.finalWaypoint(() -> preemptiveTrenchEntrance, defaultMoveToConstraints, true)
                 ).withTimeout(4.5)
 

@@ -12,6 +12,8 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import java.util.Optional;
 
 public class AutoManager {
+    private static final RobotState robotState = RobotState.getInstance();
+
     public static final double READY_THRESHOLD_METERS = 0.1;
     public static final double MAX_DISTANCE_METERS = 3.0;
     public static final double READY_THRESHOLD_RADIANS = Math.toRadians(5);
@@ -51,7 +53,7 @@ public class AutoManager {
         //autoChooser.addOption("Aggressive depot double bump", new AggressiveDoubleBumpAuto(true));
         autoChooser.addOption("Center -> depot -> bump", new AggressiveCenterBumpAuto());
 
-        RobotState.getInstance().setAutoStartPoseSupplier(this::getSelectedAutoStartingPose);
+        robotState.setAutoStartPoseSupplier(this::getSelectedAutoStartingPose);
     }
 
     public Command getSelectedAutoCommand() {
@@ -76,14 +78,14 @@ public class AutoManager {
 
     private Optional<Double> getDistanceToAutoStart() {
         return getSelectedAutoStartingPose()
-                .map(startPose -> RobotState.getInstance().getPose().getTranslation()
+                .map(startPose -> robotState.getPose().getTranslation()
                         .getDistance(startPose.getTranslation()));
     }
 
     private Optional<Double> getRotationErrorToAutoStart() {
         return getSelectedAutoStartingPose()
                 .map(startPose -> {
-                    double currentRotation = RobotState.getInstance().getPose().getRotation().getRadians();
+                    double currentRotation = robotState.getPose().getRotation().getRadians();
                     double targetRotation = startPose.getRotation().getRadians();
                     return Math.abs(MathUtil.angleModulus(currentRotation - targetRotation));
                 });

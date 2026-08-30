@@ -37,6 +37,8 @@ public class ExampleLookaheadServoSubsystem implements Periodic {
     private static final LoggedTunableNumber profileLookaheadTimeSec = new LoggedTunableNumber("ExampleLookaheadServoSubsystem/ProfileLookaheadTimeSec", 0.15);
     private static final LoggedTunableNumber agitateSetpointDegrees = new LoggedTunableNumber("ExampleLookaheadServoSubsystem/Goal/AgitateDegrees", 45);
 
+    private static final OperatorDashboard operatorDashboard = OperatorDashboard.getInstance();
+
     private final Motor motor = Motor
             .createSparkMax(
                     "ExampleLookaheadServoSubsystem",
@@ -93,8 +95,8 @@ public class ExampleLookaheadServoSubsystem implements Periodic {
     @Override
     public void periodicBeforeCommands() {
         // Apply network inputs
-        if (OperatorDashboard.getInstance().coastOverride.hasChanged()) {
-            motor.setNeutralMode(OperatorDashboard.getInstance().coastOverride.get() ? NeutralModeValue.Coast : NeutralModeValue.Brake);
+        if (operatorDashboard.coastOverride.hasChanged()) {
+            motor.setNeutralMode(operatorDashboard.coastOverride.get() ? NeutralModeValue.Coast : NeutralModeValue.Brake);
         }
     }
 

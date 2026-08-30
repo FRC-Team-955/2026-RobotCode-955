@@ -51,6 +51,11 @@ import static frc.lib.HighFrequencySamplingThread.highFrequencyLock;
 import static frc.robot.subsystems.drive.DriveConstants.*;
 
 public class Drive extends CommandBasedSubsystem {
+    private static final RobotState robotState = RobotState.getInstance();
+    private static final OperatorDashboard operatorDashboard = OperatorDashboard.getInstance();
+    private static final Controller controller = Controller.getInstance();
+    private static final ShootingKinematics shootingKinematics = ShootingKinematics.getInstance();
+
     private final GyroIO gyroIO = createGyroIO();
     private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
 
@@ -177,7 +182,7 @@ public class Drive extends CommandBasedSubsystem {
             }
         } else {
             // Use the angle delta from the kinematics and module deltas
-            Twist2d twist = RobotState.getInstance().getKinematics().toTwist2d(moduleDeltas);
+            Twist2d twist = robotState.getKinematics().toTwist2d(moduleDeltas);
             rawGyroRotation = rawGyroRotation.plus(new Rotation2d(twist.dtheta));
         }
 
@@ -186,12 +191,12 @@ public class Drive extends CommandBasedSubsystem {
             // If we need to discard it, apply the update and then revert the pose back to the pose before applying the update
             // This means that the previous wheel positions stored by odometry will be updated to the new wheel positions,
             // but the pose won't change
-            Pose2d prevPose = RobotState.getInstance().getPose();
-            RobotState.getInstance().applyOdometryUpdate(sampleTimestamp, rawGyroRotation, modulePositions);
-            RobotState.getInstance().setPose(prevPose);
+            Pose2d prevPose = robotState.getPose();
+            robotState.applyOdometryUpdate(sampleTimestamp, rawGyroRotation, modulePositions);
+            robotState.setPose(prevPose);
             return true; // true for discarded
         } else {
-            RobotState.getInstance().applyOdometryUpdate(sampleTimestamp, rawGyroRotation, modulePositions);
+            robotState.applyOdometryUpdate(sampleTimestamp, rawGyroRotation, modulePositions);
             return false; // false for not discarded
         }
     }
@@ -254,21 +259,21 @@ public class Drive extends CommandBasedSubsystem {
         }
 
         // Chassis speeds
-        ChassisSpeeds measuredChassisSpeeds = RobotState.getInstance().getKinematics().toChassisSpeeds(getMeasuredModuleStates());
+        ChassisSpeeds measuredChassisSpeeds = robotState.getKinematics().toChassisSpeeds(getMeasuredModuleStates());
         Logger.recordOutput("Drive/ChassisSpeeds/Measured", measuredChassisSpeeds);
-        RobotState.getInstance().setMeasuredChassisSpeedsRobotRelative(measuredChassisSpeeds);
+        robotState.setMeasuredChassisSpeedsRobotRelative(measuredChassisSpeeds);
         ChassisSpeeds measuredChassisSpeedsFieldRelative = ChassisSpeeds.fromRobotRelativeSpeeds(
                 measuredChassisSpeeds,
-                RobotState.getInstance().getRotation() // Field is absolute, don't flip
+                robotState.getRotation() // Field is absolute, don't flip
         );
-        RobotState.getInstance().setMeasuredChassisSpeedsFieldRelative(measuredChassisSpeedsFieldRelative);
+        robotState.setMeasuredChassisSpeedsFieldRelative(measuredChassisSpeedsFieldRelative);
 
         // Update filtered acceleration
         Translation2d filteredAccelerationMetersPerSecPerSec = new Translation2d(
                 accelerationXFilter.calculate(accelerometerInputs.accelerationXMetersPerSecPerSec),
                 accelerationYFilter.calculate(accelerometerInputs.accelerationYMetersPerSecPerSec)
-        ).rotateBy(RobotState.getInstance().getRotation());
-        RobotState.getInstance().setFilteredAccelerationMetersPerSecPerSec(filteredAccelerationMetersPerSecPerSec);
+        ).rotateBy(robotState.getRotation());
+        robotState.setFilteredAccelerationMetersPerSecPerSec(filteredAccelerationMetersPerSecPerSec);
         //
         //boolean isNotOnBump = Math.abs(gyroInputs.orientation.getX()) < Units.degreesToRadians(10.0)
         //        && Math.abs(gyroInputs.orientation.getY()) < Units.degreesToRadians(10.0);
@@ -286,9 +291,9 @@ public class Drive extends CommandBasedSubsystem {
             Logger.recordOutput("Drive/FilteredAccelerationMetersPerSecPerSec", filteredAccelerationMetersPerSecPerSec);
 
         // Apply network inputs
-        if (OperatorDashboard.getInstance().coastOverride.hasChanged()) {
+        if (operatorDashboard.coastOverride.hasChanged()) {
             for (var module : modules) {
-                module.setBrakeMode(!OperatorDashboard.getInstance().coastOverride.get());
+                module.setBrakeMode(!operatorDashboard.coastOverride.get());
             }
         }
 
@@ -345,7 +350,7 @@ public class Drive extends CommandBasedSubsystem {
                     modules[i].runSetpoint(new SwerveModuleState(0.0, headings[i]));
                 }
                 // We also need to make kinematics aware of the new headings
-                RobotState.getInstance().getKinematics().resetHeadings(headings);
+                robotState.getKinematics().resetHeadings(headings);
             } else {
                 for (var module : modules) {
                     module.stop();
@@ -362,13 +367,13 @@ public class Drive extends CommandBasedSubsystem {
 
             switch (wantedState) {
                 case JOYSTICK_DRIVE -> {
-                    wantedFieldSpeeds = Controller.getInstance().getDriveFieldRelativeSpeeds();
+                    wantedFieldSpeeds = controller.getDriveFieldRelativeSpeeds();
 
-                    if (headingOverrideSetpoint.isPresent() || Controller.getInstance().getDriveAngularMagnitude() != 0.0) {
+                    if (headingOverrideSetpoint.isPresent() || controller.getDriveAngularMagnitude() != 0.0) {
                         joystickDriveHeadingStabilizeTimer.restart();
                     } else if (!joystickDriveHeadingStabilizeTimer.hasElapsed(0.3)) {
                         // Before the timer finishes, set the setpoint to current heading
-                        joystickDriveHeadingStabilizeSetpoint = RobotState.getInstance().getRotation().getRadians();
+                        joystickDriveHeadingStabilizeSetpoint = robotState.getRotation().getRadians();
                     } else {
                         // After time finishes, run heading stabilize with previously set setpoint
                         headingOverrideSetpoint = OptionalDouble.of(joystickDriveHeadingStabilizeSetpoint);
@@ -391,7 +396,7 @@ public class Drive extends CommandBasedSubsystem {
 
             if (headingOverrideSetpoint.isPresent()) {
                 wantedFieldSpeeds.omegaRadiansPerSecond = headingOverrideController.calculate(
-                        RobotState.getInstance().getRotation().getRadians(),
+                        robotState.getRotation().getRadians(),
                         headingOverrideSetpoint.getAsDouble()
                 );
 
@@ -417,8 +422,8 @@ public class Drive extends CommandBasedSubsystem {
 
             // FIXME: figure out how to put this before the constrainer and not afterwards
             if (headingOverrideSetpoint.isPresent() && headingOverrideFeedforwardSupplier != null) {
-                Translation2d correction = ShootingKinematics.getInstance().getFuelExitTranslation().toTranslation2d()
-                        .rotateBy(RobotState.getInstance().getRotation()).rotateBy(Rotation2d.kCW_90deg)
+                Translation2d correction = shootingKinematics.getFuelExitTranslation().toTranslation2d()
+                        .rotateBy(robotState.getRotation()).rotateBy(Rotation2d.kCW_90deg)
                         .times(wantedFieldSpeeds.omegaRadiansPerSecond);
                 wantedFieldSpeeds.plus(new ChassisSpeeds(correction.getX(), correction.getY(), 0));
             }
@@ -428,9 +433,9 @@ public class Drive extends CommandBasedSubsystem {
                 return evaluateStateMachine(State.ACTUALLY_STOP);
             }
 
-            ChassisSpeeds wantedRobotSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(wantedFieldSpeeds, RobotState.getInstance().getRotation());
+            ChassisSpeeds wantedRobotSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(wantedFieldSpeeds, robotState.getRotation());
 
-            Logger.recordOutput("Drive/ModuleStates/Setpoints", RobotState.getInstance().getKinematics().toSwerveModuleStates(wantedRobotSpeeds));
+            Logger.recordOutput("Drive/ModuleStates/Setpoints", robotState.getKinematics().toSwerveModuleStates(wantedRobotSpeeds));
 
             // Discretize - use larger dt than actual to reduce translational skew when rotating and translating at the same time
             // See https://www.chiefdelphi.com/t/whitepaper-swerve-drive-skew-and-second-order-kinematics/416964/5
@@ -438,7 +443,7 @@ public class Drive extends CommandBasedSubsystem {
             ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(wantedRobotSpeeds, Constants.loopPeriod * 4.0);
 
             // Convert to module states and desaturate
-            SwerveModuleState[] setpointStates = RobotState.getInstance().getKinematics().toSwerveModuleStates(discreteSpeeds);
+            SwerveModuleState[] setpointStates = robotState.getKinematics().toSwerveModuleStates(discreteSpeeds);
             SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, driveConfig.maxVelocityMetersPerSec());
 
             // Send setpoints to modules
@@ -457,7 +462,7 @@ public class Drive extends CommandBasedSubsystem {
 
             // Log setpoint states
             Logger.recordOutput("Drive/ModuleStates/SetpointsOptimized", setpointStates);
-            Logger.recordOutput("Drive/ChassisSpeeds/SetpointOptimized", RobotState.getInstance().getKinematics().toChassisSpeeds(setpointStates));
+            Logger.recordOutput("Drive/ChassisSpeeds/SetpointOptimized", robotState.getKinematics().toChassisSpeeds(setpointStates));
         }
 
         // No re-evaluation, so state stayed the same. Return it
@@ -563,12 +568,12 @@ public class Drive extends CommandBasedSubsystem {
 
         public DriveCommand withAiming() {
             return withHeadingOverride(
-                    () -> OperatorDashboard.getInstance().manualAiming.get()
+                    () -> operatorDashboard.manualAiming.get()
                             ? OptionalDouble.empty()
-                            : OptionalDouble.of(ShootingKinematics.getInstance().getShootingParameters().headingRad()),
-                    (speeds, accelerations) -> OperatorDashboard.getInstance().manualAiming.get()
+                            : OptionalDouble.of(shootingKinematics.getShootingParameters().headingRad()),
+                    (speeds, accelerations) -> operatorDashboard.manualAiming.get()
                             ? OptionalDouble.empty()
-                            : OptionalDouble.of(ShootingKinematics.getInstance().totalRotationFeedForward(speeds, accelerations))
+                            : OptionalDouble.of(shootingKinematics.totalRotationFeedForward(speeds, accelerations))
             )
                     .withStopWithX()
                     .withConstraints(shootingConstraints);

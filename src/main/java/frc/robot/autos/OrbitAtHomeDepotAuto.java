@@ -37,7 +37,7 @@ public class OrbitAtHomeDepotAuto extends Auto {
                 ), defaultMoveToConstraints, false),
 
                 // intake, go to neturalzone
-                Superintake.getInstance().setGoal(Superintake.Goal.INTAKE).until(() -> true),
+                superintake.setGoal(Superintake.Goal.INTAKE).until(() -> true),
                 AutoHelpers.yDistanceInterpolatingWaypoint(
                         new Translation2d(FieldConstants.LinesVertical.center, 7.0),
                         new Translation2d(FieldConstants.LinesVertical.center, 6.4),
@@ -53,7 +53,7 @@ public class OrbitAtHomeDepotAuto extends Auto {
                         4.7,
                         firstPassRotation
                 ), AutoHelpers.intakeConstraints, false).withTimeout(3),
-                Superintake.getInstance().setGoal(Superintake.Goal.IDLE).until(() -> true),
+                superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
 
                 //   avoid scattering balls
                 AutoHelpers.intermediateWaypoint(() -> new Pose2d(FieldConstants.LinesVertical.center -
@@ -86,12 +86,12 @@ public class OrbitAtHomeDepotAuto extends Auto {
 
                 // shoot
                 Commands.parallel(
-                        Superintake.getInstance().intakeShootAlternate(),
-                        Superstructure.getInstance().setGoal(Superstructure.Goal.SHOOT),
+                        superintake.intakeShootAlternate(),
+                        superstructure.setGoal(Superstructure.Goal.SHOOT),
                         AutoHelpers.finalWaypoint(() -> trenchShootingPosition, defaultMoveToConstraints, true)
                 ).withTimeout(4.5),
-                Superintake.getInstance().setGoal(Superintake.Goal.IDLE).until(() -> true),
-                Superstructure.getInstance().setGoal(Superstructure.Goal.IDLE).until(() -> true),
+                superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
+                superstructure.setGoal(Superstructure.Goal.IDLE).until(() -> true),
 
                 // move out of trench
                 AutoHelpers.intermediateWaypoint(() -> new Pose2d(
@@ -101,7 +101,7 @@ public class OrbitAtHomeDepotAuto extends Auto {
                 ), defaultMoveToConstraints, false),
 
                 // intake
-                Superintake.getInstance().setGoal(Superintake.Goal.INTAKE).until(() -> true),
+                superintake.setGoal(Superintake.Goal.INTAKE).until(() -> true),
                 AutoHelpers.yDistanceInterpolatingWaypoint(
                         new Translation2d(FieldConstants.LinesVertical.center - secondPassYOffset, 7.0),
                         new Translation2d(FieldConstants.LinesVertical.center - secondPassYOffset, 4.0),
@@ -122,7 +122,7 @@ public class OrbitAtHomeDepotAuto extends Auto {
                         4.5, Rotation2d.kZero), AutoHelpers.intakeConstraints, false
                 ),
 
-                Superintake.getInstance().setGoal(Superintake.Goal.IDLE).until(() -> true),
+                superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
 
                 AutoHelpers.intermediateWaypoint(() -> new Pose2d(
                         FieldConstants.LinesVertical.center - 1.5,
@@ -169,8 +169,8 @@ public class OrbitAtHomeDepotAuto extends Auto {
 
                 // shoot
                 Commands.parallel(
-                        Superintake.getInstance().intakeShootAlternate(),
-                        Superstructure.getInstance().setGoal(Superstructure.Goal.SHOOT),
+                        superintake.intakeShootAlternate(),
+                        superstructure.setGoal(Superstructure.Goal.SHOOT),
                         AutoHelpers.finalWaypoint(() -> trenchShootingPosition, defaultMoveToConstraints, true)
                 )
         );

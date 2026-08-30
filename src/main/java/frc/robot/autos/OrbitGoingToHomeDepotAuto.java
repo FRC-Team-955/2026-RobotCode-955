@@ -36,7 +36,7 @@ public class OrbitGoingToHomeDepotAuto extends Auto {
                 ), defaultMoveToConstraints, false),
 
                 // intake, go to neturalzone
-                Superintake.getInstance().setGoal(Superintake.Goal.INTAKE).until(() -> true),
+                superintake.setGoal(Superintake.Goal.INTAKE).until(() -> true),
                 AutoHelpers.yDistanceInterpolatingWaypoint(
                         new Translation2d(FieldConstants.LinesVertical.center + firstPassYOffset, 7.0),
                         new Translation2d(FieldConstants.LinesVertical.center + firstPassYOffset, 6.4),
@@ -52,7 +52,7 @@ public class OrbitGoingToHomeDepotAuto extends Auto {
                         4.7,
                         Rotation2d.kCW_90deg
                 ), AutoHelpers.intakeConstraints, false).withTimeout(3),
-                Superintake.getInstance().setGoal(Superintake.Goal.IDLE).until(() -> true),
+                superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
 
                 // avoid scattering balls
                 AutoHelpers.yDistanceInterpolatingWaypoint(
@@ -75,11 +75,11 @@ public class OrbitGoingToHomeDepotAuto extends Auto {
                 AutoHelpers.finalWaypoint(() -> trenchShootingPosition, defaultMoveToConstraints, false),
 
                 // shoot
-                Superstructure.getInstance().setGoal(Superstructure.Goal.SHOOT).until(() -> true),
+                superstructure.setGoal(Superstructure.Goal.SHOOT).until(() -> true),
                 Commands.race(AutoHelpers.finalWaypoint(() -> new Pose2d(1.25, 7.2, Rotation2d.k180deg),
-                        shootingConstraints, true), Superintake.getInstance().intakeShootAlternate()),
-                Superintake.getInstance().setGoal(Superintake.Goal.IDLE).until(() -> true),
-                Superstructure.getInstance().setGoal(Superstructure.Goal.IDLE).until(() -> true),
+                        shootingConstraints, true), superintake.intakeShootAlternate()),
+                superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
+                superstructure.setGoal(Superstructure.Goal.IDLE).until(() -> true),
                 AutoHelpers.finalWaypoint(()
                         -> new Pose2d(0.39, 7.2, Rotation2d.kCW_90deg), AutoHelpers.intakeConstraints, false)
 
@@ -99,9 +99,9 @@ public class OrbitGoingToHomeDepotAuto extends Auto {
                                 AutoHelpers.intakeConstraints,
                                 false
                         ),
-                        Superintake.getInstance().setGoal(Superintake.Goal.INTAKE)
+                        superintake.setGoal(Superintake.Goal.INTAKE)
                 ),
-                Superintake.getInstance().setGoal(Superintake.Goal.IDLE).until(() -> true),
+                superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
 
                 AutoHelpers.intermediateWaypoint(
                         () -> new Pose2d(1.55, 5.5, Rotation2d.kCW_90deg),
@@ -109,13 +109,13 @@ public class OrbitGoingToHomeDepotAuto extends Auto {
                         false
                 ),
                 Commands.parallel(
-                                Superintake.getInstance().intakeShootAlternate(),
-                                Superstructure.getInstance().setGoal(Superstructure.Goal.SHOOT),
+                                superintake.intakeShootAlternate(),
+                                superstructure.setGoal(Superstructure.Goal.SHOOT),
                                 AutoHelpers.finalWaypoint(()
                                         -> new Pose2d(1.55, 4.75, Rotation2d.k180deg), defaultMoveToConstraints, false))
                         .withTimeout(5),
-                Superintake.getInstance().setGoal(Superintake.Goal.IDLE).until(() -> true),
-                Superstructure.getInstance().setGoal(Superstructure.Goal.IDLE).until(() -> true)
+                superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
+                superstructure.setGoal(Superstructure.Goal.IDLE).until(() -> true)
 
 
                 // move out of trench

@@ -44,6 +44,11 @@ public class Hood implements Periodic {
         return Math.PI / 2.0 - originalAngleRad;
     }
 
+    private static final OperatorDashboard operatorDashboard = OperatorDashboard.getInstance();
+    private static final ShootingKinematics shootingKinematics = ShootingKinematics.getInstance();
+    private static final RobotState robotState = RobotState.getInstance();
+    private static final EnergyLogger energyLogger = EnergyLogger.getInstance();
+
     private final Motor motor = Motor.createSparkMax(
                     "Superstructure/Hood",
                     10,
@@ -75,7 +80,7 @@ public class Hood implements Periodic {
     @RequiredArgsConstructor
     public enum Goal {
         STOW(() -> minPositionRad),
-        SHOOT(() -> convertBetweenShotAngleAndHoodAngleRad(ShootingKinematics.getInstance().getShootingParameters().angleRad())),
+        SHOOT(() -> convertBetweenShotAngleAndHoodAngleRad(shootingKinematics.getShootingParameters().angleRad())),
         HOME(null),
         HOME_FINALIZE(null),
         ;
@@ -101,26 +106,26 @@ public class Hood implements Periodic {
 
     @Override
     public void periodicBeforeCommands() {
-        EnergyLogger.getInstance().reportPowerUsage("Hood", motor.isConnected() ? motor.getAppliedVolts() * motor.getSupplyCurrentAmps() : 0.0);
+        energyLogger.reportPowerUsage("Hood", motor.isConnected() ? motor.getAppliedVolts() * motor.getSupplyCurrentAmps() : 0.0);
 
         boolean shouldEmergencyStop = emergencyStopDebouncer.calculate(motor.getStatorCurrentAmps() >= 20);
         if (!motor.isEmergencyStopped()) {
-            if ((shouldEmergencyStop || OperatorDashboard.getInstance().hoodEStop.get()) && !BuildConstants.isSim) {
+            if ((shouldEmergencyStop || operatorDashboard.hoodEStop.get()) && !BuildConstants.isSim) {
                 motor.emergencyStop(NeutralModeValue.Coast);
-                OperatorDashboard.getInstance().hoodEStop.set(true);
+                operatorDashboard.hoodEStop.set(true);
             }
         } else {
-            if (!OperatorDashboard.getInstance().hoodEStop.get()) {
+            if (!operatorDashboard.hoodEStop.get()) {
                 motor.undoEmergencyStop(NeutralModeValue.Brake);
-                OperatorDashboard.getInstance().hoodEStop.set(false);
+                operatorDashboard.hoodEStop.set(false);
             }
         }
 
         atVelocityThresholdForHoming = homingVelocityDebouncer.calculate(goal == Goal.HOME && Math.abs(motor.getVelocityRadPerSec()) < 0.1);
 
         // Apply network inputs
-        if (!motor.isEmergencyStopped() && OperatorDashboard.getInstance().coastOverride.hasChanged()) {
-            motor.setNeutralMode(OperatorDashboard.getInstance().coastOverride.get() ? NeutralModeValue.Coast : NeutralModeValue.Brake);
+        if (!motor.isEmergencyStopped() && operatorDashboard.coastOverride.hasChanged()) {
+            motor.setNeutralMode(operatorDashboard.coastOverride.get() ? NeutralModeValue.Coast : NeutralModeValue.Brake);
         }
     }
 
@@ -139,7 +144,7 @@ public class Hood implements Periodic {
             motor.setVoltageRequest(-0.5);
         } else {
             double setpointRad = goal.setpointRad.getAsDouble();
-            boolean isInTrench = RobotState.getInstance().isInTrench(RobotState.getInstance().getTranslation().
+            boolean isInTrench = robotState.isInTrench(robotState.getTranslation().
                     plus(getMechanismTransform().getTranslation().toTranslation2d()));
             Logger.recordOutput("Superstructure/Hood/IsInTrench", isInTrench);
             if (isInTrench) {
@@ -162,7 +167,7 @@ public class Hood implements Periodic {
 
     public void finishHoming() {
         motor.setEncoderPosition(initialPositionRad);
-        OperatorDashboard.getInstance().hoodNotHomedAlert.set(false);
+        operatorDashboard.hoodNotHomedAlert.set(false);
     }
 
     public boolean isEmergencyStopped() {

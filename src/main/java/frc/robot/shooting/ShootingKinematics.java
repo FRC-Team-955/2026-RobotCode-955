@@ -34,6 +34,8 @@ public class ShootingKinematics implements Periodic {
     private static final double bottomOfFrameRailsToShooterHeightMeters = Units.inchesToMeters(12.861380);
     private static final double shooterRadiusToCenterOfBallExitMeters = Units.inchesToMeters(4.602756);
 
+    private static final Drive drive = Drive.getInstance();
+
     private static final LoggedTunableNumber headingToleranceDeg = new LoggedTunableNumber("ShootingKinematics/HeadingToleranceDegrees", 10.0);
     private static final LoggedTunableNumber headingTolerancePassingDeg = new LoggedTunableNumber("ShootingKinematics/HeadingTolerancePassingDegrees", 20.0);
     private static final LoggedTunableNumber headingVelocityToleranceDegPerSec = new LoggedTunableNumber("ShootingKinematics/HeadingVelocityToleranceDegreesPerSec", 30.0);
@@ -51,6 +53,12 @@ public class ShootingKinematics implements Periodic {
     public static final Rotation2d fuelExitRotation = Rotation2d.k180deg;
 
     private static final DoubleUnaryOperator passVelocityToRPM = (x) -> 316 * x - 456 + 100;
+
+    private static final RobotState robotState = RobotState.getInstance();
+    private static final OperatorDashboard operatorDashboard = OperatorDashboard.getInstance();
+    private static final HubShiftTracker hubShiftTracker = HubShiftTracker.getInstance();
+
+    private static final Superstructure superstructure = Superstructure.getInstance();
 
     @Getter
     private ShootingParameters shootingParameters = new ShootingParameters(0, 0, 0, 0, false);
@@ -70,7 +78,7 @@ public class ShootingKinematics implements Periodic {
             0.0,
             0.0,
             0.0,
-            RobotState.getInstance().getRotation().getRadians(),
+            robotState.getRotation().getRadians(),
             false
     );
 
@@ -82,7 +90,7 @@ public class ShootingKinematics implements Periodic {
 
     @Override
     public void periodicBeforeCommands() {
-        if (OperatorDashboard.getInstance().getSelectedScoringMode() == OperatorDashboard.ScoringMode.ShootAndPassAutomatic) {
+        if (operatorDashboard.getSelectedScoringMode() == OperatorDashboard.ScoringMode.ShootAndPassAutomatic) {
             var shooterParams = getShootingParametersAutomaticForPhaseDelay(PhaseDelay.Shooter);
             var drivebaseParams = getShootingParametersAutomaticForPhaseDelay(PhaseDelay.Drivebase);
             shootingParameters = new ShootingParameters(
@@ -96,7 +104,7 @@ public class ShootingKinematics implements Periodic {
         } else {
             shootingParameters = getShootingParametersManual();
             shootingParameters = shootingParameters.withVelocityRPM(
-                    shootingParameters.velocityRPM() + OperatorDashboard.getInstance().manualFlywheelRPMSmudge.get()
+                    shootingParameters.velocityRPM() + operatorDashboard.manualFlywheelRPMSmudge.get()
             );
             noPhaseDelayParameters = shootingParameters;
         }
@@ -106,32 +114,32 @@ public class ShootingKinematics implements Periodic {
             Logger.recordOutput("ShootingKinematics/ShootingParameters/None/IsPass", noPhaseDelayParameters.isPass());
         }
 
-        double headingVelocitySetpoint = totalRotationFeedForward(Drive.getInstance().getConstrainer().getWantedLinearSpeed(), Drive.getInstance().getConstrainer().getFieldRelativeAccelerationLinear());
-        double headingVelocityMeasurement = RobotState.getInstance().getMeasuredChassisSpeedsFieldRelative().omegaRadiansPerSecond;
+        double headingVelocitySetpoint = totalRotationFeedForward(drive.getConstrainer().getWantedLinearSpeed(), drive.getConstrainer().getFieldRelativeAccelerationLinear());
+        double headingVelocityMeasurement = robotState.getMeasuredChassisSpeedsFieldRelative().omegaRadiansPerSecond;
 
         if (BuildConstants.isSimOrReplay) {
             Logger.recordOutput("ShootingKinematics/ShootingParameters/None/HeadingRad", noPhaseDelayParameters.headingRad());
             Logger.recordOutput("ShootingKinematics/ShootingParameters/Drivebase/HeadingRad", shootingParameters.headingRad());
-            Logger.recordOutput("ShootingKinematics/ShootingParameters/HeadingRadMeasured", RobotState.getInstance().getPose().getRotation().getRadians());
+            Logger.recordOutput("ShootingKinematics/ShootingParameters/HeadingRadMeasured", robotState.getPose().getRotation().getRadians());
 
             Logger.recordOutput("ShootingKinematics/ShootingParameters/Drivebase/HeadingVelocityRadPerSec", headingVelocitySetpoint);
             Logger.recordOutput("ShootingKinematics/ShootingParameters/HeadingVelocityRadPerSecMeasured", headingVelocityMeasurement);
 
             Logger.recordOutput("ShootingKinematics/ShootingParameters/None/AngleRad", noPhaseDelayParameters.angleRad());
             Logger.recordOutput("ShootingKinematics/ShootingParameters/Shooter/AngleRad", shootingParameters.angleRad());
-            Logger.recordOutput("ShootingKinematics/ShootingParameters/AngleRadMeasured", Superstructure.getInstance().hood.getShotAngleRad());
+            Logger.recordOutput("ShootingKinematics/ShootingParameters/AngleRadMeasured", superstructure.hood.getShotAngleRad());
 
-            Logger.recordOutput("ShootingKinematics/ShootingParameters/VelocityRPMMeasured", Superstructure.getInstance().flywheel.getVelocityRPM());
+            Logger.recordOutput("ShootingKinematics/ShootingParameters/VelocityRPMMeasured", superstructure.flywheel.getVelocityRPM());
             Logger.recordOutput("ShootingKinematics/ShootingParameters/Shooter/VelocityRPM", shootingParameters.velocityRPM());
         }
         Logger.recordOutput("ShootingKinematics/ShootingParameters/None/VelocityRPM", noPhaseDelayParameters.velocityRPM());
 
-        shiftMet = OperatorDashboard.getInstance().disableShiftTracking.get() || HubShiftTracker.getInstance().getShiftInfo().active();
+        shiftMet = operatorDashboard.disableShiftTracking.get() || hubShiftTracker.getShiftInfo().active();
         Logger.recordOutput("ShootingKinematics/ShiftMet", shiftMet);
 
-        boolean headingMet = OperatorDashboard.getInstance().manualAiming.get() ||
+        boolean headingMet = operatorDashboard.manualAiming.get() ||
                 Math.abs(
-                        MathUtil.angleModulus(RobotState.getInstance().getPose().getRotation().getRadians() - noPhaseDelayParameters.headingRad())
+                        MathUtil.angleModulus(robotState.getPose().getRotation().getRadians() - noPhaseDelayParameters.headingRad())
                 ) <= Units.degreesToRadians(
                         noPhaseDelayParameters.isPass()
                                 ? headingTolerancePassingDeg.get()
@@ -139,7 +147,7 @@ public class ShootingKinematics implements Periodic {
                 );
         Logger.recordOutput("ShootingKinematics/HeadingMet", headingMet);
 
-        boolean headingVelocityMet = OperatorDashboard.getInstance().manualAiming.get() ||
+        boolean headingVelocityMet = operatorDashboard.manualAiming.get() ||
                 Math.abs(headingVelocityMeasurement - headingVelocitySetpoint)
                         <= Units.degreesToRadians(headingVelocityToleranceDegPerSec.get());
         Logger.recordOutput("ShootingKinematics/HeadingVelocityMet", headingVelocityMet);
@@ -148,21 +156,21 @@ public class ShootingKinematics implements Periodic {
         if (BuildConstants.isSimOrReplay)
             Logger.recordOutput("ShootingKinematics/HeadingVelocityMetDebounced", headingVelocityMet);
 
-        boolean velocityMet = Math.abs(Superstructure.getInstance().flywheel.getVelocityRPM() - noPhaseDelayParameters.velocityRPM())
+        boolean velocityMet = Math.abs(superstructure.flywheel.getVelocityRPM() - noPhaseDelayParameters.velocityRPM())
                 <= velocityToleranceRPM.get();
         Logger.recordOutput("ShootingKinematics/VelocityMet", velocityMet);
         velocityMet = velocityMetDebouncer.calculate(velocityMet);
         if (BuildConstants.isSimOrReplay) Logger.recordOutput("ShootingKinematics/VelocityMetDebounced", velocityMet);
 
-        boolean angleMet = Math.abs(Superstructure.getInstance().hood.getShotAngleRad() - noPhaseDelayParameters.angleRad())
+        boolean angleMet = Math.abs(superstructure.hood.getShotAngleRad() - noPhaseDelayParameters.angleRad())
                 <= Units.degreesToRadians(hoodToleranceDeg.get());
         Logger.recordOutput("ShootingKinematics/AngleMet", angleMet);
 
-        boolean uncertaintyMet = RobotState.getInstance().getPoseUncertaintyLinearMeters() < 0.3 &&
-                RobotState.getInstance().getPoseUncertaintyAngularRad() < 0.005;
+        boolean uncertaintyMet = robotState.getPoseUncertaintyLinearMeters() < 0.3 &&
+                robotState.getPoseUncertaintyAngularRad() < 0.005;
         Logger.recordOutput("ShootingKinematics/UncertaintyMet", uncertaintyMet);
 
-        boolean orientationMet = !Drive.getInstance().isPitchedOrRolled();
+        boolean orientationMet = !drive.isPitchedOrRolled();
         Logger.recordOutput("ShootingKinematics/OrientationMet", orientationMet);
         orientationMet = orientationDebouncer.calculate(orientationMet);
         if (BuildConstants.isSimOrReplay)
@@ -173,9 +181,9 @@ public class ShootingKinematics implements Periodic {
                 : shiftMet && headingMet && headingVelocityMet && velocityMet && angleMet && uncertaintyMet /*&& orientationMet*/;
         Logger.recordOutput("ShootingKinematics/ShootingParametersMet", shootingParametersMet);
 
-        Logger.recordOutput("ShootingKinematics/Drive/VelocityCompensation", rotationAboutTargetRadiansPerSecForDrivebase(Drive.getInstance().getConstrainer().getWantedLinearSpeed()));
-        Logger.recordOutput("ShootingKinematics/Drive/AccelerationCompensation", rotationFeedforwardAcceleration(Drive.getInstance().getConstrainer().getFieldRelativeAccelerationLinear()));
-        Logger.recordOutput("ShootingKinematics/Drive/TotalFFComp", totalRotationFeedForward(Drive.getInstance().getConstrainer().getWantedLinearSpeed(), Drive.getInstance().getConstrainer().getFieldRelativeAccelerationLinear()));
+        Logger.recordOutput("ShootingKinematics/Drive/VelocityCompensation", rotationAboutTargetRadiansPerSecForDrivebase(drive.getConstrainer().getWantedLinearSpeed()));
+        Logger.recordOutput("ShootingKinematics/Drive/AccelerationCompensation", rotationFeedforwardAcceleration(drive.getConstrainer().getFieldRelativeAccelerationLinear()));
+        Logger.recordOutput("ShootingKinematics/Drive/TotalFFComp", totalRotationFeedForward(drive.getConstrainer().getWantedLinearSpeed(), drive.getConstrainer().getFieldRelativeAccelerationLinear()));
     }
 
     private static final LoggedTunableNumber shootHubManualFlywheelRPM = new LoggedTunableNumber("ShootingKinematics/ShootHubManual/FlywheelRPM", 2000.0);
@@ -189,7 +197,7 @@ public class ShootingKinematics implements Periodic {
 
     private ShootingParameters getShootingParametersManual() {
         double headingRad = getFuelExitToTarget(0.0).angle().getRadians();
-        return switch (OperatorDashboard.getInstance().getSelectedScoringMode()) {
+        return switch (operatorDashboard.getSelectedScoringMode()) {
             case ShootHubManual -> new ShootingParameters(
                     shootHubManualFlywheelRPM.get(),
                     0.0, // if we are using this we have bigger issues than acceleration compensation
@@ -217,14 +225,14 @@ public class ShootingKinematics implements Periodic {
                     0.0,
                     0.0,
                     0.0,
-                    RobotState.getInstance().getRotation().getRadians(),
+                    robotState.getRotation().getRadians(),
                     false
             );
         };
     }
 
     private ShootingParameters getShootingParametersAutomaticForPhaseDelay(PhaseDelay phaseDelay) {
-        ChassisSpeeds robotSpeeds = RobotState.getInstance().getMeasuredChassisSpeedsFieldRelative();
+        ChassisSpeeds robotSpeeds = robotState.getMeasuredChassisSpeedsFieldRelative();
 
         FuelExitToTarget fuelExitToTarget = getFuelExitToTarget(phaseDelay.value == null ? 0.0 : phaseDelay.value.get());
 
@@ -280,7 +288,7 @@ public class ShootingKinematics implements Periodic {
         // 3. Account for drivebase angular velocity
         Vector<N3> fuelExitFieldRelative = new Translation3d(
                 getFuelExitTranslation().toTranslation2d()
-                        .rotateBy(RobotState.getInstance().getRotation())
+                        .rotateBy(robotState.getRotation())
         ).toVector();
         Vector<N3> angularVelocityVector = VecBuilder.fill(0.0, 0.0, robotSpeeds.omegaRadiansPerSecond);
         // ω⃗ × e⃗, where ω⃗ is angular velocity vector and e⃗ is exit vector
@@ -306,8 +314,8 @@ public class ShootingKinematics implements Periodic {
                         ? velocityRPM
                         : (
                         isPass
-                                ? passVelocityToRPM.applyAsDouble(v) + OperatorDashboard.getInstance().manualFlywheelRPMSmudge.get()
-                                : velocityRPM / (slipConstant + OperatorDashboard.getInstance().slipConstantSmudge.get())
+                                ? passVelocityToRPM.applyAsDouble(v) + operatorDashboard.manualFlywheelRPMSmudge.get()
+                                : velocityRPM / (slipConstant + operatorDashboard.slipConstantSmudge.get())
                 ),
                 Math.sqrt(vx * vx + vy * vy),
                 phi,
@@ -333,14 +341,14 @@ public class ShootingKinematics implements Periodic {
 
     private boolean shouldPass() {
         return AllianceFlipUtil.shouldFlip()
-                ? RobotState.getInstance().getPose().getX() < FieldConstants.LinesVertical.neutralZoneFar
-                : RobotState.getInstance().getPose().getX() > FieldConstants.LinesVertical.neutralZoneNear;
+                ? robotState.getPose().getX() < FieldConstants.LinesVertical.neutralZoneFar
+                : robotState.getPose().getX() > FieldConstants.LinesVertical.neutralZoneNear;
     }
 
     private Translation3d getTarget() {
         if (shouldPass()) {
             double targetX = AllianceFlipUtil.applyX(1.5);
-            double targetY = RobotState.getInstance().getPose().getY() > FieldConstants.LinesHorizontal.center
+            double targetY = robotState.getPose().getY() > FieldConstants.LinesHorizontal.center
                     ? 6.0
                     : 2.0;
 
@@ -351,8 +359,8 @@ public class ShootingKinematics implements Periodic {
     }
 
     private FuelExitToTarget getFuelExitToTarget(double phaseDelay) {
-        Pose2d robotPose2d = RobotState.getInstance().getPose()
-                .exp(RobotState.getInstance().getMeasuredChassisSpeedsRobotRelative().toTwist2d(phaseDelay));
+        Pose2d robotPose2d = robotState.getPose()
+                .exp(robotState.getMeasuredChassisSpeedsRobotRelative().toTwist2d(phaseDelay));
         Pose3d fuelExitPose = getFuelExitPose(robotPose2d);
 
         Pose3d hubPose = new Pose3d(getTarget(), new Rotation3d());
@@ -413,7 +421,7 @@ public class ShootingKinematics implements Periodic {
     }
 
     public Translation3d getFuelExitTranslation() {
-        return fuelExitTranslation.apply(Superstructure.getInstance().hood.getPositionRad());
+        return fuelExitTranslation.apply(superstructure.hood.getPositionRad());
     }
 
     private record FuelExitToTarget(Translation3d translation, Rotation2d angle) {}

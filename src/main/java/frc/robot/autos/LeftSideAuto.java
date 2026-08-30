@@ -9,9 +9,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.AllianceFlipUtil;
 import frc.lib.network.LoggedTunableNumber;
 import frc.robot.FieldConstants;
-import frc.robot.RobotState;
 import frc.robot.shooting.ShootingKinematics;
-import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.DriveConstants;
 import frc.robot.subsystems.drive.constraints.DriveConstraints;
 import frc.robot.subsystems.superintake.Superintake;
@@ -67,7 +65,7 @@ public final class LeftSideAuto extends Auto {
                 FieldConstants.Depot.depotCenter.getY()
         ));
 
-        Command setInitialPose = Commands.runOnce(() -> RobotState.getInstance().setPose(poses.get(0)));
+        Command setInitialPose = Commands.runOnce(() -> robotState.setPose(poses.get(0)));
 
         AtomicInteger goalIndex = new AtomicInteger(1);
         AtomicReference<Pose2d> currentGoal = new AtomicReference<>(poses.get(Math.min(1, poses.size() - 1)));
@@ -83,11 +81,11 @@ public final class LeftSideAuto extends Auto {
             boolean interpolationComplete = interpolationT.get() >= 0.97;
             if (!interpolationComplete) return false;
 
-            return RobotState.getInstance().isAtPoseWithTolerance(
+            return robotState.isAtPoseWithTolerance(
                     currentGoal.get(),
                     DriveConstants.moveToConfig.linearPositionToleranceMeters().get(),
                     Math.PI * 2)
-                    && RobotState.getInstance().isMeasuredChassisSpeedsBelowTolerance(
+                    && robotState.isMeasuredChassisSpeedsBelowTolerance(
                     DriveConstants.moveToConfig.linearVelocityToleranceMetersPerSec().get(),
                     DriveConstants.moveToConfig.angularVelocityToleranceRadPerSec().get());
         };
@@ -99,7 +97,7 @@ public final class LeftSideAuto extends Auto {
             onInterpolationLine.set(isOnInterpolationLine);
 
             if (isOnInterpolationLine) {
-                Translation2d currentPos = RobotState.getInstance().getPose().getTranslation();
+                Translation2d currentPos = robotState.getPose().getTranslation();
                 double distanceFromStart = currentPos.getDistance(interpolationStartPos);
                 double t = Math.min(distanceFromStart / totalInterpolationDistance, 1.0);
                 interpolationT.set(t);
@@ -127,7 +125,7 @@ public final class LeftSideAuto extends Auto {
                 Logger.recordOutput("LeftSideAuto/DistanceFromStart", distanceFromStart);
             } else {
                 Pose2d goal = currentGoal.get();
-                boolean readyToAdvance = RobotState.getInstance().isAtPoseWithTolerance(
+                boolean readyToAdvance = robotState.isAtPoseWithTolerance(
                         goal,
                         switchLinearToleranceMeters,
                         switchAngularToleranceRad);
@@ -149,9 +147,9 @@ public final class LeftSideAuto extends Auto {
         Runnable intakeWhileMovingRunnable = () -> {
             int index = goalIndex.get();
             if ((index >= 1 && index <= 8) || index >= INTERPOLATION_START_INDEX) {
-                Superintake.getInstance().setGoal(Superintake.Goal.INTAKE).initialize();
+                superintake.setGoal(Superintake.Goal.INTAKE).initialize();
             } else {
-                Superintake.getInstance().setGoal(Superintake.Goal.IDLE).initialize();
+                superintake.setGoal(Superintake.Goal.IDLE).initialize();
             }
         };
 
@@ -161,7 +159,7 @@ public final class LeftSideAuto extends Auto {
                         currentGoal.get().getTranslation(),
                         Rotation2d.fromRadians(ShootingKinematics.getInstance().getShootingParameters().headingRad())
                 ));
-                Superstructure.getInstance().setGoal(Superstructure.Goal.SHOOT).initialize();
+                superstructure.setGoal(Superstructure.Goal.SHOOT).initialize();
                 Logger.recordOutput("LeftSideAuto/Aiming", true);
             } else {
                 Logger.recordOutput("LeftSideAuto/Aiming", false);
@@ -173,24 +171,24 @@ public final class LeftSideAuto extends Auto {
                         Commands.waitUntil(() -> ShootingKinematics.getInstance().isShootingParametersMet()),
                         Commands.waitSeconds(2.0)
                 ),
-                Drive.getInstance().stop().withAiming(),
-                Superstructure.getInstance().setGoal(Superstructure.Goal.SHOOT)
+                drive.stop().withAiming(),
+                superstructure.setGoal(Superstructure.Goal.SHOOT)
         ).onlyWhile(DriverStation::isAutonomousEnabled);
 
-        Command driveMoveTo = Drive.getInstance().moveTo(currentGoal::get);
-        Command driveMoveToWithAiming = Drive.getInstance().moveTo(() -> {
+        Command driveMoveTo = drive.moveTo(currentGoal::get);
+        Command driveMoveToWithAiming = drive.moveTo(() -> {
             Pose2d goal = currentGoal.get();
             return new Pose2d(goal.getTranslation(), Rotation2d.fromRadians(ShootingKinematics.getInstance().getShootingParameters().headingRad()));
         }, leftSideAutoMoveToConstraints);
 
         Command finalShortMove = Commands.sequence(
-                Drive.getInstance().moveTo(() -> new Pose2d(1.29, 5.36, Rotation2d.fromRadians(ShootingKinematics.getInstance().getShootingParameters().headingRad())), leftSideAutoMoveToConstraints).until(
-                        () -> RobotState.getInstance().isAtPoseWithTolerance(
+                drive.moveTo(() -> new Pose2d(1.29, 5.36, Rotation2d.fromRadians(ShootingKinematics.getInstance().getShootingParameters().headingRad())), leftSideAutoMoveToConstraints).until(
+                        () -> robotState.isAtPoseWithTolerance(
                                 new Pose2d(1.29, 5.36, Rotation2d.fromRadians(ShootingKinematics.getInstance().getShootingParameters().headingRad())),
                                 DriveConstants.moveToConfig.linearPositionToleranceMeters().get(),
                                 Math.PI * 2)
                 ),
-                Drive.getInstance().moveTo(() -> new Pose2d(0.8, 6, Rotation2d.fromRadians(ShootingKinematics.getInstance().getShootingParameters().headingRad())), leftSideAutoMoveToConstraints)
+                drive.moveTo(() -> new Pose2d(0.8, 6, Rotation2d.fromRadians(ShootingKinematics.getInstance().getShootingParameters().headingRad())), leftSideAutoMoveToConstraints)
         );
 
         return Commands.sequence(
@@ -198,14 +196,14 @@ public final class LeftSideAuto extends Auto {
                 Commands.race(
                         Commands.run(advanceGoalsRunnable).until(onInterpolationLine::get),
                         driveMoveTo,
-                        Commands.run(intakeWhileMovingRunnable, Superintake.getInstance()),
-                        Commands.run(aimWhileOnInterpolationLineRunnable, Superstructure.getInstance())
+                        Commands.run(intakeWhileMovingRunnable, superintake),
+                        Commands.run(aimWhileOnInterpolationLineRunnable, superstructure)
                 ),
                 Commands.race(
                         Commands.run(advanceGoalsRunnable).until(atFinalGoal),
                         driveMoveToWithAiming,
-                        Commands.run(intakeWhileMovingRunnable, Superintake.getInstance()),
-                        Commands.run(aimWhileOnInterpolationLineRunnable, Superstructure.getInstance())
+                        Commands.run(intakeWhileMovingRunnable, superintake),
+                        Commands.run(aimWhileOnInterpolationLineRunnable, superstructure)
                 ),
                 finalShortMove,
                 shootAfterFinalGoal

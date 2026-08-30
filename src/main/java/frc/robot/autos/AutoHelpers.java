@@ -19,6 +19,8 @@ import frc.robot.RobotState;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.constraints.DriveConstraints;
 import frc.robot.subsystems.gamepiecevision.GamePieceVision;
+import frc.robot.subsystems.superintake.Superintake;
+import frc.robot.subsystems.superstructure.Superstructure;
 
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -35,10 +37,16 @@ public class AutoHelpers {
     private static final double checkLinearTolerance = 0.3;
     private static final double checkAngularTolerance = Units.degreesToRadians(20);
 
+    private static final RobotState robotState = RobotState.getInstance();
+    private static final GamePieceVision gamePieceVision = GamePieceVision.getInstance();
+
+    private static final Drive drive = Drive.getInstance();
+    private static final Superintake superintake = Superintake.getInstance();
+    private static final Superstructure superstructure = Superstructure.getInstance();
     private static final Choreo.TrajectoryCache trajectoryCache = new Choreo.TrajectoryCache();
 
     public static Command intermediateWaypoint(Supplier<Pose2d> poseSupplier, DriveConstraints constraints, boolean aiming) {
-        var cmd = Drive.getInstance()
+        var cmd = drive
                 .moveTo(
                         () -> AllianceFlipUtil.apply(poseSupplier.get()),
                         constraints
@@ -47,7 +55,7 @@ public class AutoHelpers {
         if (aiming) {
             cmd = cmd.withAiming();
         }
-        return cmd.until(() -> RobotState.getInstance().isAtPoseWithTolerance(
+        return cmd.until(() -> robotState.isAtPoseWithTolerance(
                 AllianceFlipUtil.apply(poseSupplier.get()),
                 intermediateLinearTolerance,
                 // if we are aiming, the rotation from the pose supplier
@@ -59,7 +67,7 @@ public class AutoHelpers {
     }
 
     public static Command finalWaypoint(Supplier<Pose2d> poseSupplier, DriveConstraints constraints, boolean aiming) {
-        var cmd = Drive.getInstance()
+        var cmd = drive
                 .moveTo(
                         () -> AllianceFlipUtil.apply(poseSupplier.get()),
                         constraints
@@ -67,7 +75,7 @@ public class AutoHelpers {
         if (aiming) {
             cmd = cmd.withAiming();
         }
-        return cmd.until(() -> RobotState.getInstance().isAtPoseWithTolerance(
+        return cmd.until(() -> robotState.isAtPoseWithTolerance(
                 AllianceFlipUtil.apply(poseSupplier.get()),
                 finalLinearTolerance,
                 // if we are aiming, the rotation from the pose supplier
@@ -79,7 +87,7 @@ public class AutoHelpers {
     }
 
     public static Command checkWaypoint(Supplier<Pose2d> poseSupplier, DriveConstraints constraints, boolean aiming) {
-        var cmd = Drive.getInstance()
+        var cmd = drive
                 .moveTo(
                         () -> AllianceFlipUtil.apply(poseSupplier.get()),
                         constraints
@@ -87,7 +95,7 @@ public class AutoHelpers {
         if (aiming) {
             cmd = cmd.withAiming();
         }
-        return cmd.until(() -> RobotState.getInstance().isAtPoseWithTolerance(
+        return cmd.until(() -> robotState.isAtPoseWithTolerance(
                 AllianceFlipUtil.apply(poseSupplier.get()),
                 checkLinearTolerance,
                 // if we are aiming, the rotation from the pose supplier
@@ -115,10 +123,10 @@ public class AutoHelpers {
             var trajectory = mirrorY
                     ? optTrajectory.get().mirrorY()
                     : optTrajectory.get();
-            return Drive.getInstance().followTrajectory((Trajectory<SwerveSample>) trajectory);
+            return drive.followTrajectory((Trajectory<SwerveSample>) trajectory);
         } else {
             Util.error("Trajectory " + traj.name() + " is not present");
-            return Drive.getInstance().stop();
+            return drive.stop();
         }
     }
 
@@ -132,7 +140,7 @@ public class AutoHelpers {
 
         // note that robot pose needs to be flipped BACK to blue alliance
         // because the waypoint functions will flip it to red alliance if needed
-        double yDistance = Math.abs(new Transform2d(new Pose2d(end, startToEndFacing), AllianceFlipUtil.apply(RobotState.getInstance().getPose())).getY());
+        double yDistance = Math.abs(new Transform2d(new Pose2d(end, startToEndFacing), AllianceFlipUtil.apply(robotState.getPose())).getY());
         yDistance -= 0.1; // Add a slight offset so that we actually reach the end position
         // No clamping needed, Pose2d.interpolate will handle it
         double interp = 1.0 - (yDistance / yDistanceToStartInterpolation);
@@ -164,7 +172,7 @@ public class AutoHelpers {
 
         // note that robot pose needs to be flipped BACK to blue alliance
         // because the waypoint functions will flip it to red alliance if needed
-        double xDistance = Math.abs(new Transform2d(new Pose2d(end, startToEndFacing), AllianceFlipUtil.apply(RobotState.getInstance().getPose())).getX());
+        double xDistance = Math.abs(new Transform2d(new Pose2d(end, startToEndFacing), AllianceFlipUtil.apply(robotState.getPose())).getX());
         xDistance -= 0.1; // Add a slight offset so that we actually reach the end position
         // No clamping needed, Pose2d.interpolate will handle it
         double interp = 1.0 - (xDistance / xDistanceToStartInterpolation);
@@ -192,12 +200,12 @@ public class AutoHelpers {
             .withMaxAngularAccelerationRadPerSecPerSec(new LoggedTunableNumber("AutoHelpers/Intake/MaxAngularAcceleration", 40.0));
 
     private static Optional<Pose2d> getIntakePose(Bounds bounds) {
-        for (var target : GamePieceVision.getInstance().getAllTargets().toArray(Translation2d[]::new)) {
+        for (var target : gamePieceVision.getAllTargets().toArray(Translation2d[]::new)) {
             if (AllianceFlipUtil.apply(bounds).contains(target)) {
                 return Optional.of(new Pose2d(
                         target,
                         // Point towards target
-                        target.minus(RobotState.getInstance().getTranslation()).getAngle()
+                        target.minus(robotState.getTranslation()).getAngle()
                 ).transformBy(new Transform2d(
                         // Move align pose towards robot so that it doesn't try to move
                         // such that the center of the robot is at the target
@@ -223,10 +231,10 @@ public class AutoHelpers {
             var trajectory = mirrorY
                     ? optTrajectory.get().mirrorY()
                     : optTrajectory.get();
-            return Drive.getInstance().followTrajectory((Trajectory<SwerveSample>) trajectory, () -> getIntakePose(bounds).orElse(null));
+            return drive.followTrajectory((Trajectory<SwerveSample>) trajectory, () -> getIntakePose(bounds).orElse(null));
         } else {
             Util.error("Trajectory " + traj.name() + " is not present");
-            return Drive.getInstance().stop();
+            return drive.stop();
         }
 
     }

@@ -37,7 +37,7 @@ public class OrbitAtDepotSecondAuto extends Auto {
                 ), defaultMoveToConstraints, false),
 
                 // intake, go to neturalzone
-                Superintake.getInstance().setGoal(Superintake.Goal.INTAKE).until(() -> true),
+                superintake.setGoal(Superintake.Goal.INTAKE).until(() -> true),
                 AutoHelpers.yDistanceInterpolatingWaypoint(
                         new Translation2d(FieldConstants.LinesVertical.center, 7.0),
                         new Translation2d(FieldConstants.LinesVertical.center, 6.4),
@@ -53,7 +53,7 @@ public class OrbitAtDepotSecondAuto extends Auto {
                         4.7,
                         Rotation2d.kCW_90deg
                 ), AutoHelpers.intakeConstraints, false).withTimeout(3),
-                Superintake.getInstance().setGoal(Superintake.Goal.IDLE).until(() -> true),
+                superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
 
                 AutoHelpers.intermediateWaypoint(() -> new Pose2d(FieldConstants.LinesVertical.center -
                                 1.0, 4.7,
@@ -91,12 +91,12 @@ public class OrbitAtDepotSecondAuto extends Auto {
 
                 // shoot
                 Commands.parallel(
-                        Superintake.getInstance().intakeShootAlternate(),
-                        Superstructure.getInstance().setGoal(Superstructure.Goal.SHOOT),
+                        superintake.intakeShootAlternate(),
+                        superstructure.setGoal(Superstructure.Goal.SHOOT),
                         AutoHelpers.finalWaypoint(() -> trenchShootingPosition, defaultMoveToConstraints, true)
                 ).withTimeout(4.5),
-                Superintake.getInstance().setGoal(Superintake.Goal.IDLE).until(() -> true),
-                Superstructure.getInstance().setGoal(Superstructure.Goal.IDLE).until(() -> true),
+                superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
+                superstructure.setGoal(Superstructure.Goal.IDLE).until(() -> true),
 
                 // move out of trench
                 AutoHelpers.finalWaypoint(() -> new Pose2d(
@@ -107,10 +107,10 @@ public class OrbitAtDepotSecondAuto extends Auto {
 
                 // intake
                 Commands.parallel(
-                        Superintake.getInstance().setGoal(Superintake.Goal.INTAKE).until(() -> true),
+                        superintake.setGoal(Superintake.Goal.INTAKE).until(() -> true),
                         AutoHelpers.trajectory(ChoreoTraj.OrbitDepot)
                 ),
-                Superintake.getInstance().setGoal(Superintake.Goal.IDLE).until(() -> true),
+                superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
                 AutoHelpers.finalWaypoint(() -> new Pose2d(
                         FieldConstants.LinesVertical.center - 1.5,
                         trenchShootingPosition.getY() - 0.15,
@@ -173,8 +173,8 @@ public class OrbitAtDepotSecondAuto extends Auto {
 
                 // shoot
                 Commands.parallel(
-                        Superintake.getInstance().intakeShootAlternate(),
-                        Superstructure.getInstance().setGoal(Superstructure.Goal.SHOOT),
+                        superintake.intakeShootAlternate(),
+                        superstructure.setGoal(Superstructure.Goal.SHOOT),
                         AutoHelpers.finalWaypoint(() -> trenchShootingPosition, defaultMoveToConstraints, true)
                 )
         );

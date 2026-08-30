@@ -52,11 +52,11 @@ public class AggressiveDoubleBumpAuto extends Auto {
                 ),
 
                 // move out of trench
-                Superintake.getInstance().setGoal(Superintake.Goal.INTAKE).until(() -> true),
+                superintake.setGoal(Superintake.Goal.INTAKE).until(() -> true),
                 AutoHelpers.trajectory(ChoreoTraj.AggressiveOutpostBumpBump$1, flipY),
 
                 // go to entrance to trench
-                Superintake.getInstance().setGoal(Superintake.Goal.IDLE).until(() -> true),
+                superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
                 AutoHelpers.checkWaypoint(
                         flipY
                                 ? () -> ChoreoAllianceFlipUtil.getMirrorY().flip(ChoreoTraj.AggressiveOutpostBumpBump$1.endPoseBlue())
@@ -79,14 +79,14 @@ public class AggressiveDoubleBumpAuto extends Auto {
 
                         // shoot
 
-                        Superstructure.getInstance().setGoal(Superstructure.Goal.SHOOT).until(() -> true),
+                        superstructure.setGoal(Superstructure.Goal.SHOOT).until(() -> true),
                         Commands.parallel(
-                                Superintake.getInstance().intakeShootAlternate()
-                        ).withTimeout(4.5).until(() -> !Superstructure.getInstance().isHasFuel())
+                                superintake.intakeShootAlternate()
+                        ).withTimeout(4.5).until(() -> !superstructure.isHasFuel())
                 ),
 
-                Superstructure.getInstance().setGoal(Superstructure.Goal.IDLE).until(() -> true),
-                Superintake.getInstance().setGoal(Superintake.Goal.IDLE).until(() -> true),
+                superstructure.setGoal(Superstructure.Goal.IDLE).until(() -> true),
+                superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
 
 
                 // go over the bump
@@ -117,13 +117,13 @@ public class AggressiveDoubleBumpAuto extends Auto {
                 AutoHelpers.trajectory(ChoreoTraj.AggressiveOutpostBumpBump$4, flipY),
 
                 // follow intake path
-                Superintake.getInstance().setGoal(Superintake.Goal.INTAKE).until(() -> true),
+                superintake.setGoal(Superintake.Goal.INTAKE).until(() -> true),
                 AutoHelpers.trajectory(ChoreoTraj.AggressiveOutpostBumpBump$4, flipY),
                 AutoHelpers.intakeOrTrajectory(ChoreoTraj.AggressiveOutpostBumpBump$5, flipY ? leftNeutralZoneBounds : rightNeutralZoneBounds, flipY),
                 AutoHelpers.trajectory(ChoreoTraj.AggressiveOutpostBumpBump$6, flipY),
 
                 // make sure at entrance of trench
-                Superintake.getInstance().setGoal(Superintake.Goal.IDLE).until(() -> true),
+                superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
                 AutoHelpers.checkWaypoint(
                         flipY
                                 ? () -> ChoreoAllianceFlipUtil.getMirrorY().flip(ChoreoTraj.AggressiveOutpostBumpBump$6.endPoseBlue())
@@ -146,14 +146,14 @@ public class AggressiveDoubleBumpAuto extends Auto {
                                 true),
 
                         // shoot
-                        Superstructure.getInstance().setGoal(Superstructure.Goal.SHOOT).until(() -> true),
+                        superstructure.setGoal(Superstructure.Goal.SHOOT).until(() -> true),
                         Commands.parallel(
-                                Superintake.getInstance().intakeShootAlternate()
-                        ).withTimeout(4.5).until(() -> !Superstructure.getInstance().isHasFuel())
+                                superintake.intakeShootAlternate()
+                        ).withTimeout(4.5).until(() -> !superstructure.isHasFuel())
                 ),
 
-                Superstructure.getInstance().setGoal(Superstructure.Goal.IDLE).until(() -> true),
-                Superintake.getInstance().setGoal(Superintake.Goal.IDLE).until(() -> true),
+                superstructure.setGoal(Superstructure.Goal.IDLE).until(() -> true),
+                superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
 
                 // go over the bump
                 flipY
@@ -182,7 +182,7 @@ public class AggressiveDoubleBumpAuto extends Auto {
                 AutoHelpers.trajectory(ChoreoTraj.AggressiveOutpostBumpBump$9, flipY),
 
                 // make sure at entrance of trench
-                Superintake.getInstance().setGoal(Superintake.Goal.IDLE).until(() -> true),
+                superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
                 AutoHelpers.checkWaypoint(
                         flipY
                                 ? () -> ChoreoAllianceFlipUtil.getMirrorY().flip(ChoreoTraj.AggressiveOutpostBumpBump$9.endPoseBlue())
@@ -205,10 +205,10 @@ public class AggressiveDoubleBumpAuto extends Auto {
                                 true),
 
                         // shoot
-                        Superstructure.getInstance().setGoal(Superstructure.Goal.SHOOT).until(() -> true),
+                        superstructure.setGoal(Superstructure.Goal.SHOOT).until(() -> true),
                         Commands.parallel(
-                                Superintake.getInstance().intakeShootAlternate()
-                        ).withTimeout(4.5).until(() -> !Superstructure.getInstance().isHasFuel())
+                                superintake.intakeShootAlternate()
+                        ).withTimeout(4.5).until(() -> !superstructure.isHasFuel())
                 )
         );
     }

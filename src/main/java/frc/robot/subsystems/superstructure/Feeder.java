@@ -25,6 +25,9 @@ public class Feeder implements Periodic {
     private static final LoggedTunableNumber feedVoltage = new LoggedTunableNumber("Superstructure/Feeder/Goal/FeedVoltage", 12.0);
     private static final LoggedTunableNumber ejectVoltage = new LoggedTunableNumber("Superstructure/Feeder/Goal/EjectVoltage", -12.0);
 
+    private static final EnergyLogger energyLogger = EnergyLogger.getInstance();
+    private static final OperatorDashboard operatorDashboard = OperatorDashboard.getInstance();
+
     private final Motor motor = Motor
             .createSparkMax(
                     "Superstructure/Feeder",
@@ -61,11 +64,11 @@ public class Feeder implements Periodic {
 
     @Override
     public void periodicBeforeCommands() {
-        EnergyLogger.getInstance().reportPowerUsage("Feeder", motor.isConnected() ? motor.getAppliedVolts() * motor.getSupplyCurrentAmps() : 0.0);
+        energyLogger.reportPowerUsage("Feeder", motor.isConnected() ? motor.getAppliedVolts() * motor.getSupplyCurrentAmps() : 0.0);
 
         // Apply network inputs
-        if (OperatorDashboard.getInstance().coastOverride.hasChanged()) {
-            motor.setNeutralMode(OperatorDashboard.getInstance().coastOverride.get() ? NeutralModeValue.Coast : NeutralModeValue.Brake);
+        if (operatorDashboard.coastOverride.hasChanged()) {
+            motor.setNeutralMode(operatorDashboard.coastOverride.get() ? NeutralModeValue.Coast : NeutralModeValue.Brake);
         }
     }
 

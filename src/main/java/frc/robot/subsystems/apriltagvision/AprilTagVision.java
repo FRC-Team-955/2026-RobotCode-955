@@ -33,6 +33,8 @@ import static frc.robot.FieldConstants.aprilTagLayout;
 import static frc.robot.subsystems.apriltagvision.AprilTagVisionConstants.*;
 
 public class AprilTagVision implements Periodic {
+    private static final RobotState robotState = RobotState.getInstance();
+
     private final EnumMap<Camera, CameraData> cameras = Util.createEnumMap(Camera.class,
             Camera.values(), (cam) ->
                     new CameraData(
@@ -296,7 +298,7 @@ public class AprilTagVision implements Periodic {
                 double angularStdDev = observation.angularStdDevBaseline * stdDevFactor * metadata.stdDevMultiplier;
 
                 // Send vision observation
-                RobotState.getInstance().addVisionMeasurement(
+                robotState.addVisionMeasurement(
                         observation.poseEstimate().toPose2d(),
                         observation.timestamp(),
                         linearStdDev,
@@ -328,14 +330,14 @@ public class AprilTagVision implements Periodic {
         Logger.recordOutput("AprilTagVision/Summary/RobotPosesRejected", allRobotPosesRejected.toArray(Pose3d[]::new));
 
         // Add summary to Field2d
-        RobotState.getInstance().setAcceptedPoses(allRobotPosesAccepted);
-        RobotState.getInstance().setRejectedPoses(allRobotPosesRejected);
+        robotState.setAcceptedPoses(allRobotPosesAccepted);
+        robotState.setRejectedPoses(allRobotPosesRejected);
     }
 
     @Override
     public void periodicAfterCommands() {
         // Log camera poses for debugging
-        var robotPose = new Pose3d(RobotState.getInstance().getPose());
+        var robotPose = new Pose3d(robotState.getPose());
         Logger.recordOutput(
                 "AprilTagVision/CameraPoses",
                 Arrays.stream(Camera.values())

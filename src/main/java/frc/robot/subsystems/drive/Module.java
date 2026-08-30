@@ -31,6 +31,9 @@ import org.littletonrobotics.junction.Logger;
 import static frc.robot.subsystems.drive.DriveConstants.*;
 
 public class Module {
+    private static final OperatorDashboard operatorDashboard = OperatorDashboard.getInstance();
+    private static final EnergyLogger energyLogger = EnergyLogger.getInstance();
+
     private final ModuleIO io;
     private final ModuleIOInputsAutoLogged inputs = new ModuleIOInputsAutoLogged();
     private final int index;
@@ -63,11 +66,11 @@ public class Module {
     }
 
     public void periodicBeforeCommands() {
-        EnergyLogger.getInstance().reportPowerUsage(
+        energyLogger.reportPowerUsage(
                 "Module/Drive/" + index,
                 inputs.driveConnected ? inputs.driveAppliedVolts * inputs.driveSupplyCurrentAmps : 0.0
         );
-        EnergyLogger.getInstance().reportPowerUsage(
+        energyLogger.reportPowerUsage(
                 "Module/Turn/" + index,
                 inputs.turnConnected ? inputs.turnAppliedVolts * inputs.turnSupplyCurrentAmps : 0.0
         );
@@ -124,7 +127,7 @@ public class Module {
     }
 
     private void setTurnClosedLoop(double positionRad) {
-        if (OperatorDashboard.getInstance().driveTurnAbsolutePID.get()) {
+        if (operatorDashboard.driveTurnAbsolutePID.get()) {
             io.setTurnOpenLoop(turnAbsolutePID.calculate(inputs.turnAbsolutePositionRad, positionRad));
         } else {
             io.setTurnClosedLoop(positionRad);
@@ -161,7 +164,7 @@ public class Module {
      */
     public Rotation2d getTurnAngle() {
         return new Rotation2d(MathUtil.angleModulus(
-                OperatorDashboard.getInstance().driveTurnAbsolutePID.get()
+                operatorDashboard.driveTurnAbsolutePID.get()
                         ? inputs.turnAbsolutePositionRad
                         : inputs.turnPositionRad
         ));

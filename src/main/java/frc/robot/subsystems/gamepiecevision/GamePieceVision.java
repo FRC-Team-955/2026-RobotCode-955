@@ -18,6 +18,8 @@ import static frc.robot.subsystems.gamepiecevision.GamePieceVisionConstants.crea
 import static frc955.gamepiecevision.SharedGamePieceVisionConstants.robotToCamera;
 
 public class GamePieceVision implements Periodic {
+    private static final RobotState robotState = RobotState.getInstance();
+
     private final GamePieceVisionIOInputsAutoLogged inputs = new GamePieceVisionIOInputsAutoLogged();
     private final GamePieceVisionIO io = createIO();
 
@@ -39,7 +41,7 @@ public class GamePieceVision implements Periodic {
 
     @Override
     public void periodicAfterCommands() {
-        var robotPose = new Pose3d(RobotState.getInstance().getPose());
+        var robotPose = new Pose3d(robotState.getPose());
         Logger.recordOutput(
                 "GamePieceVision/CameraPoses",
                 robotPose.transformBy(robotToCamera)
@@ -50,7 +52,7 @@ public class GamePieceVision implements Periodic {
                 .toArray(Pose2d[]::new);
         Logger.recordOutput("GamePieceVision/AllTargets", allTargets);
 
-        RobotState.getInstance().setFuel(allTargets);
+        robotState.setFuel(allTargets);
     }
 
     public boolean anyCamerasDisconnected() {
@@ -61,7 +63,7 @@ public class GamePieceVision implements Periodic {
         if (!inputs.connected || inputs.clusters.length == 0) {
             return Stream.empty();
         }
-        Optional<Pose2d> poseOpt = RobotState.getInstance().getPoseAtTimestamp(inputs.timestamp);
+        Optional<Pose2d> poseOpt = robotState.getPoseAtTimestamp(inputs.timestamp);
         if (poseOpt.isEmpty()) {
             return Stream.empty();
         }
@@ -75,7 +77,7 @@ public class GamePieceVision implements Periodic {
         if (!inputs.connected || inputs.clusters.length == 0) {
             return Optional.empty();
         }
-        return RobotState.getInstance().getPoseAtTimestamp(inputs.timestamp)
+        return robotState.getPoseAtTimestamp(inputs.timestamp)
                 .map(pose -> pose.transformBy(inputs.clusters[0]).getTranslation());
     }
 

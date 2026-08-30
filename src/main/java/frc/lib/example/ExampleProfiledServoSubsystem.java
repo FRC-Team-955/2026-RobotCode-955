@@ -40,6 +40,8 @@ public class ExampleProfiledServoSubsystem implements Periodic {
 
     private static final LoggedTunableNumber agitateSetpointDegrees = new LoggedTunableNumber("ExampleProfiledServoSubsystem/Goal/AgitateDegrees", 45);
 
+    private static final OperatorDashboard operatorDashboard = OperatorDashboard.getInstance();
+
     private final Motor motor = Motor
             .createTalonFX(
                     "ExampleProfiledServoSubsystem",
@@ -102,8 +104,8 @@ public class ExampleProfiledServoSubsystem implements Periodic {
     @Override
     public void periodicBeforeCommands() {
         // Apply network inputs
-        if (OperatorDashboard.getInstance().coastOverride.hasChanged()) {
-            motor.setNeutralMode(OperatorDashboard.getInstance().coastOverride.get() ? NeutralModeValue.Coast : NeutralModeValue.Brake);
+        if (operatorDashboard.coastOverride.hasChanged()) {
+            motor.setNeutralMode(operatorDashboard.coastOverride.get() ? NeutralModeValue.Coast : NeutralModeValue.Brake);
         }
     }
 
