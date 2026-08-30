@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj.Alert;
 import frc.lib.devices.device.Device;
 import frc.lib.network.LoggedTunablePIDF;
 import frc.robot.BuildConstants;
+import lombok.Getter;
 
 public class Motor extends Device<MotorIO, MotorIOInputsAutoLogged> {
     private LoggedTunablePIDF positionGains = null;
@@ -123,21 +124,26 @@ public class Motor extends Device<MotorIO, MotorIOInputsAutoLogged> {
         return inputs.temperatureCelsius;
     }
 
+    @Getter
     private boolean emergencyStopped = false;
 
-    public void setEmergencyStopped(boolean emergencyStopped, NeutralModeValue normalNeutralMode) {
-        if (emergencyStopped != this.emergencyStopped) {
-            if (emergencyStopped) {
-                System.out.println("Emergency stopping " + name);
-                setVoltageRequest(0.0);
-                setNeutralMode(NeutralModeValue.Coast);
-            } else {
-                System.out.println("Undoing emergency stop for " + name);
-                setNeutralMode(normalNeutralMode);
-                reinstateFollower.run();
-            }
-            this.emergencyStopped = emergencyStopped;
-            emergencyStoppedAlert.set(emergencyStopped);
+    public void emergencyStop() {
+        if (!emergencyStopped) {
+            System.out.println("Emergency stopping " + name);
+            setVoltageRequest(0.0);
+            setNeutralMode(NeutralModeValue.Coast);
+            emergencyStopped = true;
+            emergencyStoppedAlert.set(true);
+        }
+    }
+
+    public void undoEmergencyStop(NeutralModeValue normalNeutralMode) {
+        if (emergencyStopped) {
+            System.out.println("Undoing emergency stop for " + name);
+            setNeutralMode(normalNeutralMode);
+            reinstateFollower.run();
+            emergencyStopped = false;
+            emergencyStoppedAlert.set(false);
         }
     }
 
