@@ -77,7 +77,7 @@ public class Motor extends Device<MotorIO, MotorIOInputsAutoLogged> {
 
     private void setVelocityGains() {
         System.out.println("Setting " + name + " velocity gains to " + velocityGains);
-        io.setPositionGains(velocityGains);
+        io.setVelocityGains(velocityGains);
     }
 
     @Override
