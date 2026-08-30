@@ -5,6 +5,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.commands.CommandsExt;
+import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.superintake.Superintake;
 import frc.robot.subsystems.superstructure.Superstructure;
 
@@ -22,14 +23,14 @@ public class AggressiveBumpAuto extends Auto {
     private static Command build(boolean flipY) {
         return CommandsExt.eagerSequence(
                 // move out of trench
-                superintake.setGoal(Superintake.Goal.INTAKE).until(() -> true),
+                Superintake.getInstance().setGoal(Superintake.Goal.INTAKE).until(() -> true),
                 AutoHelpers.trajectory(ChoreoTraj.AggressiveOutpostBump$0, flipY),
 
                 // follow intake path
                 AutoHelpers.trajectory(ChoreoTraj.AggressiveOutpostBump$1, flipY),
 
                 // go to entrance to trench
-                superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
+                Superintake.getInstance().setGoal(Superintake.Goal.IDLE).until(() -> true),
                 AutoHelpers.checkWaypoint(
                         flipY
                                 ? () -> ChoreoAllianceFlipUtil.getMirrorY().flip(ChoreoTraj.AggressiveOutpostBump$1.endPoseBlue())
@@ -43,13 +44,13 @@ public class AggressiveBumpAuto extends Auto {
                         : AutoHelpers.goOverOutpostSideBump(),
 
                 // shoot
-                superstructure.setGoal(Superstructure.Goal.SHOOT).until(() -> true),
+                Superstructure.getInstance().setGoal(Superstructure.Goal.SHOOT).until(() -> true),
                 Commands.parallel(
-                        superintake.intakeShootAlternate(),
-                        drive.stop().withAiming()
-                ).withTimeout(4.5).until(() -> !superstructure.isHasFuel()),
-                superstructure.setGoal(Superstructure.Goal.IDLE).until(() -> true),
-                superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
+                        Superintake.getInstance().intakeShootAlternate(),
+                        Drive.getInstance().stop().withAiming()
+                ).withTimeout(4.5).until(() -> !Superstructure.getInstance().isHasFuel()),
+                Superstructure.getInstance().setGoal(Superstructure.Goal.IDLE).until(() -> true),
+                Superintake.getInstance().setGoal(Superintake.Goal.IDLE).until(() -> true),
 
                 AutoHelpers.trajectory(ChoreoTraj.AggressiveOutpostBump$3, flipY),
 
@@ -57,13 +58,13 @@ public class AggressiveBumpAuto extends Auto {
                 AutoHelpers.trajectory(ChoreoTraj.AggressiveOutpostBump$4, flipY),
 
                 // follow intake path
-                superintake.setGoal(Superintake.Goal.INTAKE).until(() -> true),
+                Superintake.getInstance().setGoal(Superintake.Goal.INTAKE).until(() -> true),
                 AutoHelpers.trajectory(ChoreoTraj.AggressiveOutpostBump$5, flipY),
                 AutoHelpers.intakeOrTrajectory(ChoreoTraj.AggressiveOutpostBump$6, flipY ? leftNeutralZoneBounds : rightNeutralZoneBounds, flipY),
                 AutoHelpers.trajectory(ChoreoTraj.AggressiveOutpostBump$7, flipY),
 
                 // make sure at entrance of trench
-                superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
+                Superintake.getInstance().setGoal(Superintake.Goal.IDLE).until(() -> true),
                 AutoHelpers.checkWaypoint(
                         flipY
                                 ? () -> ChoreoAllianceFlipUtil.getMirrorY().flip(ChoreoTraj.AggressiveOutpostBump$7.endPoseBlue())
@@ -78,10 +79,10 @@ public class AggressiveBumpAuto extends Auto {
                         : AutoHelpers.goOverOutpostSideBump(),
 
                 //shoot
-                superstructure.setGoal(Superstructure.Goal.SHOOT).until(() -> true),
+                Superstructure.getInstance().setGoal(Superstructure.Goal.SHOOT).until(() -> true),
                 Commands.parallel(
-                        superintake.intakeShootAlternate(),
-                        drive.stop().withAiming()
+                        Superintake.getInstance().intakeShootAlternate(),
+                        Drive.getInstance().stop().withAiming()
                 )
         );
     }

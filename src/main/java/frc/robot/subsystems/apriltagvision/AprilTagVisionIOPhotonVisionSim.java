@@ -20,8 +20,6 @@ import org.photonvision.simulation.PhotonCameraSim;
 import org.photonvision.simulation.SimCameraProperties;
 
 public class AprilTagVisionIOPhotonVisionSim extends AprilTagVisionIOPhotonVision {
-    private static final SimManager simManager = SimManager.getInstance();
-
     public AprilTagVisionIOPhotonVisionSim(String name, Transform3d robotToCamera) {
         super(name);
 
@@ -39,12 +37,12 @@ public class AprilTagVisionIOPhotonVisionSim extends AprilTagVisionIOPhotonVisio
         cameraSim.enableRawStream(false);
         cameraSim.enableProcessedStream(false);
 
-        simManager.aprilTagVisionSystem.addCamera(cameraSim, robotToCamera);
+        SimManager.getInstance().aprilTagVisionSystem.addCamera(cameraSim, robotToCamera);
     }
 
     @Override
     public void updateInputs(AprilTagVisionIOInputs inputs) {
-        simManager.ensureAprilTagVisionSystemUpdated();
+        SimManager.getInstance().ensureAprilTagVisionSystemUpdated();
         super.updateInputs(inputs);
     }
 }

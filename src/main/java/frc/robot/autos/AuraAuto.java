@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.commands.CommandsExt;
 import frc.robot.FieldConstants;
+import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.superintake.Superintake;
 import frc.robot.subsystems.superstructure.Superstructure;
 
@@ -34,9 +35,9 @@ public class AuraAuto extends Auto {
                                 defaultMoveToConstraints,
                                 true
                         ),
-                        superstructure.setGoal(Superstructure.Goal.SHOOT)
+                        Superstructure.getInstance().setGoal(Superstructure.Goal.SHOOT)
                 ),
-                superstructure.setGoal(Superstructure.Goal.IDLE).until(() -> true),
+                Superstructure.getInstance().setGoal(Superstructure.Goal.IDLE).until(() -> true),
 
                 AutoHelpers.intermediateWaypoint(
                         () -> new Pose2d(1.6, 5.0, Rotation2d.kCCW_90deg),
@@ -56,16 +57,16 @@ public class AuraAuto extends Auto {
                                 intakeConstraints,
                                 false
                         ),
-                        superintake.setGoal(Superintake.Goal.INTAKE)
+                        Superintake.getInstance().setGoal(Superintake.Goal.INTAKE)
                 ),
-                superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
+                Superintake.getInstance().setGoal(Superintake.Goal.IDLE).until(() -> true),
 
                 // Move, intake, and shoot towards depot
                 //AutoHelpers.intakeFromDepotWhileShooting(shootingConstraints)
                 //        .withTimeout(5),
                 //
                 //// Move towards center
-                superstructure.setGoal(Superstructure.Goal.SHOOT).until(() -> true),
+                Superstructure.getInstance().setGoal(Superstructure.Goal.SHOOT).until(() -> true),
                 AutoHelpers.yDistanceInterpolatingWaypoint(
                         new Translation2d(2.5, 5.5),
                         new Translation2d(2.5, FieldConstants.LinesHorizontal.center),
@@ -84,11 +85,11 @@ public class AuraAuto extends Auto {
                                 defaultMoveToConstraints,
                                 true
                         ),
-                        superintake.intakeShootAlternate()
+                        Superintake.getInstance().intakeShootAlternate()
                 ),
 
-                superintake.setGoal(Superintake.Goal.INTAKE).until(() -> true),
-                superstructure.setGoal(Superstructure.Goal.IDLE).until(() -> true),
+                Superintake.getInstance().setGoal(Superintake.Goal.INTAKE).until(() -> true),
+                Superstructure.getInstance().setGoal(Superstructure.Goal.IDLE).until(() -> true),
                 AutoHelpers.finalWaypoint(
                         () -> new Pose2d(1.1, 0.6, Rotation2d.k180deg),
                         defaultMoveToConstraints,
@@ -101,9 +102,9 @@ public class AuraAuto extends Auto {
                         //        defaultMoveToConstraints,
                         //        true
                         //),
-                        drive.stop().withAiming(),
-                        superintake.intakeShootAlternate(),
-                        superstructure.setGoal(Superstructure.Goal.SHOOT)
+                        Drive.getInstance().stop().withAiming(),
+                        Superintake.getInstance().intakeShootAlternate(),
+                        Superstructure.getInstance().setGoal(Superstructure.Goal.SHOOT)
                 )
 
                 //drive.moveTo(

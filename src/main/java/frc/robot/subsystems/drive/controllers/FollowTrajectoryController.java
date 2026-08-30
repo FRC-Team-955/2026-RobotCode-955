@@ -19,8 +19,6 @@ import static frc.robot.subsystems.drive.DriveConstants.choreoFeedbackOmega;
 import static frc.robot.subsystems.drive.DriveConstants.choreoFeedbackXY;
 
 public class FollowTrajectoryController {
-    private static final RobotState robotState = RobotState.getInstance();
-
     private final Timer timer = new Timer();
     private final PIDController feedbackX = choreoFeedbackXY.toPID();
     private final PIDController feedbackY = choreoFeedbackXY.toPID();
@@ -71,10 +69,10 @@ public class FollowTrajectoryController {
         if (sampleOpt.isPresent()) {
             SwerveSample sample = sampleOpt.get();
 
-            var currentPose = robotState.getPose();
+            var currentPose = RobotState.getInstance().getPose();
 
-            robotState.setTrajectory(Optional.of(poses));
-            robotState.setTrajectorySample(Optional.of(sample.getPose()));
+            RobotState.getInstance().setTrajectory(Optional.of(poses));
+            RobotState.getInstance().setTrajectorySample(Optional.of(sample.getPose()));
             Logger.recordOutput("Drive/Trajectory", poses);
             Logger.recordOutput("Drive/TrajectorySetpoint", sample.getPose());
 

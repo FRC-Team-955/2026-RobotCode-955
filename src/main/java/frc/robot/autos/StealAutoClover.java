@@ -4,6 +4,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.commands.CommandsExt;
+import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.superintake.Superintake;
 import frc.robot.subsystems.superstructure.Superstructure;
 
@@ -22,30 +23,30 @@ public class StealAutoClover extends Auto {
                 // plz actually preload the fuels
                 Commands.parallel(
                         AutoHelpers.trajectory(ChoreoTraj.Clover_Auto$0).withAiming(),
-                        superstructure.setGoal(Superstructure.Goal.SHOOT).withTimeout(3.0)),
+                        Superstructure.getInstance().setGoal(Superstructure.Goal.SHOOT).withTimeout(3.0)),
 
-                superstructure.setGoal(Superstructure.Goal.IDLE).until(() -> true),
+                Superstructure.getInstance().setGoal(Superstructure.Goal.IDLE).until(() -> true),
                 Commands.waitSeconds(2.0),
 
 
                 AutoHelpers.trajectory(ChoreoTraj.Clover_Auto$1),
                 AutoHelpers.trajectory(ChoreoTraj.Clover_Auto$2),
                 AutoHelpers.checkWaypoint(ChoreoTraj.Clover_Auto$2::endPoseBlue, defaultMoveToConstraints, false)
-                , Commands.race(superintake.setGoal(Superintake.Goal.INTAKE),
+                , Commands.race(Superintake.getInstance().setGoal(Superintake.Goal.INTAKE),
                         AutoHelpers.trajectory(ChoreoTraj.Clover_Auto$3)),
-                superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
+                Superintake.getInstance().setGoal(Superintake.Goal.IDLE).until(() -> true),
                 AutoHelpers.trajectory(ChoreoTraj.Clover_Auto$4),
                 AutoHelpers.checkWaypoint(ChoreoTraj.Clover_Auto$4::endPoseBlue, defaultMoveToConstraints, false),
-                superstructure.setGoal(Superstructure.Goal.SHOOT).until(() -> true),
+                Superstructure.getInstance().setGoal(Superstructure.Goal.SHOOT).until(() -> true),
                 AutoHelpers.trajectory(ChoreoTraj.Clover_Auto$5).withAiming().withConstraints(shootingConstraints),
-                superintake.setGoal(Superintake.Goal.INTAKE).until(() -> true),
+                Superintake.getInstance().setGoal(Superintake.Goal.INTAKE).until(() -> true),
                 AutoHelpers.trajectory(ChoreoTraj.Clover_Auto$6)
                         .withAiming().withConstraints(shootingConstraints)
                 , AutoHelpers.trajectory(ChoreoTraj.Clover_Auto$7)
                         .withAiming().withConstraints(shootingConstraints),
                 Commands.parallel(
-                        superintake.intakeShootAlternate(),
-                        drive.stop().withAiming()
+                        Superintake.getInstance().intakeShootAlternate(),
+                        Drive.getInstance().stop().withAiming()
                 )
                 //AutoHelpers.checkWaypoint(ChoreoTraj.Clover_Auto$6::endPoseBlue,
                 //        shootingConstraints, true),

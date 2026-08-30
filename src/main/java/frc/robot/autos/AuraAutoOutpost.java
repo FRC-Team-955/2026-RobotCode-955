@@ -37,8 +37,8 @@ public class AuraAutoOutpost extends Auto {
                                 shootingConstraints,
                                 true
                         ),
-                        superstructure.setGoal(Superstructure.Goal.SHOOT),
-                        superintake.intakeShootAlternate()
+                        Superstructure.getInstance().setGoal(Superstructure.Goal.SHOOT),
+                        Superintake.getInstance().intakeShootAlternate()
                 ),
 
                 // Line up to the Outpost
@@ -48,14 +48,14 @@ public class AuraAutoOutpost extends Auto {
                                 defaultMoveToConstraints,
                                 false
                         ),
-                        superintake.setGoal(Superintake.Goal.DEPLOY)
+                        Superintake.getInstance().setGoal(Superintake.Goal.DEPLOY)
                 ),
 
                 // Wait at outpost
                 Commands.waitSeconds(2.5),
 
                 // Move back to idle position
-                superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
+                Superintake.getInstance().setGoal(Superintake.Goal.IDLE).until(() -> true),
 
                 // Move closer to the hub to move to depot
                 Commands.race(
@@ -64,8 +64,8 @@ public class AuraAutoOutpost extends Auto {
                                 shootingConstraints,
                                 true
                         ),
-                        superintake.intakeShootAlternate(),
-                        superstructure.setGoal(Superstructure.Goal.SHOOT)
+                        Superintake.getInstance().intakeShootAlternate(),
+                        Superstructure.getInstance().setGoal(Superstructure.Goal.SHOOT)
                 ),
 
                 // Shoot while moving across to the depot
@@ -78,7 +78,7 @@ public class AuraAutoOutpost extends Auto {
                                 shootingConstraints,
                                 true
                         ),
-                        superstructure.setGoal(Superstructure.Goal.SHOOT)
+                        Superstructure.getInstance().setGoal(Superstructure.Goal.SHOOT)
                 ),
 
                 // Shoot while moving to depot
@@ -88,9 +88,9 @@ public class AuraAutoOutpost extends Auto {
                                 shootingConstraints,
                                 true
                         ),
-                        superstructure.setGoal(Superstructure.Goal.SHOOT)
+                        Superstructure.getInstance().setGoal(Superstructure.Goal.SHOOT)
                 ),
-                superstructure.setGoal(Superstructure.Goal.IDLE).until(() -> true),
+                Superstructure.getInstance().setGoal(Superstructure.Goal.IDLE).until(() -> true),
 
                 // Move toward depot
                 AutoHelpers.intermediateWaypoint(
@@ -113,11 +113,11 @@ public class AuraAutoOutpost extends Auto {
                                 intakeConstraints,
                                 false
                         ),
-                        superintake.setGoal(Superintake.Goal.INTAKE)
+                        Superintake.getInstance().setGoal(Superintake.Goal.INTAKE)
                 ),
 
                 // Stop Intaking
-                superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
+                Superintake.getInstance().setGoal(Superintake.Goal.IDLE).until(() -> true),
 
                 // Shoot while moving to center line
                 Commands.race(
@@ -129,7 +129,7 @@ public class AuraAutoOutpost extends Auto {
                                 shootingConstraints,
                                 true
                         ),
-                        superstructure.setGoal(Superstructure.Goal.SHOOT)
+                        Superstructure.getInstance().setGoal(Superstructure.Goal.SHOOT)
                 )
         );
     }

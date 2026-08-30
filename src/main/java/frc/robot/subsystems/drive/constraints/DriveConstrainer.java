@@ -11,8 +11,6 @@ import org.jetbrains.annotations.Nullable;
 import org.littletonrobotics.junction.Logger;
 
 public class DriveConstrainer {
-    private static final RobotState robotState = RobotState.getInstance();
-
     private final SlewRateLimiter2d linearAccelLimiter = new SlewRateLimiter2d(0.0);
     private final SlewRateLimiter angularAccelLimiter = new SlewRateLimiter(0.0);
 
@@ -24,7 +22,7 @@ public class DriveConstrainer {
     public void start(DriveConstraints constraints) {
         this.constraints = constraints;
 
-        ChassisSpeeds speeds = robotState.getMeasuredChassisSpeedsFieldRelative();
+        ChassisSpeeds speeds = RobotState.getInstance().getMeasuredChassisSpeedsFieldRelative();
         linearAccelLimiter.reset(speeds);
         angularAccelLimiter.reset(speeds.omegaRadiansPerSecond);
 

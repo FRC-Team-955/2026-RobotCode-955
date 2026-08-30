@@ -31,14 +31,14 @@ public class AuraAutoDepot extends Auto {
                 // Shoot while moving to depot
 
 
-                Commands.race(superstructure.setGoal(Superstructure.Goal.SHOOT),
+                Commands.race(Superstructure.getInstance().setGoal(Superstructure.Goal.SHOOT),
                         AutoHelpers.finalWaypoint(() -> new Pose2d(1.57, 5.0, Rotation2d.k180deg),
-                                shootingConstraints, true), superintake.intakeShootAlternate()),
-                superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
-                superstructure.setGoal(Superstructure.Goal.IDLE).until(() -> true),
+                                shootingConstraints, true), Superintake.getInstance().intakeShootAlternate()),
+                Superintake.getInstance().setGoal(Superintake.Goal.IDLE).until(() -> true),
+                Superstructure.getInstance().setGoal(Superstructure.Goal.IDLE).until(() -> true),
 
                 Commands.race(
-                        superintake.setGoal(Superintake.Goal.INTAKE),
+                        Superintake.getInstance().setGoal(Superintake.Goal.INTAKE),
                         CommandsExt.eagerSequence(
                                 AutoHelpers.finalWaypoint(()
                                         -> new Pose2d(0.48, 5.0, Rotation2d.kCCW_90deg), intakeConstraints, false),
@@ -50,7 +50,7 @@ public class AuraAutoDepot extends Auto {
 
                         )
                 ),
-                superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
+                Superintake.getInstance().setGoal(Superintake.Goal.IDLE).until(() -> true),
                 Commands.race(
                         AutoHelpers.yDistanceInterpolatingWaypoint(
                                 new Translation2d(2.5, 7.14),
@@ -60,8 +60,8 @@ public class AuraAutoDepot extends Auto {
                                 shootingConstraints,
                                 true
                         ),
-                        superstructure.setGoal(Superstructure.Goal.SHOOT),
-                        superintake.intakeShootAlternate()
+                        Superstructure.getInstance().setGoal(Superstructure.Goal.SHOOT),
+                        Superintake.getInstance().intakeShootAlternate()
                 ),
 
                 //Commands.race(
@@ -107,9 +107,9 @@ public class AuraAutoDepot extends Auto {
                 //),
 
                 // Stop Intaking
-                superstructure.setGoal(Superstructure.Goal.IDLE).until(() -> true),
+                Superstructure.getInstance().setGoal(Superstructure.Goal.IDLE).until(() -> true),
 
-                superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
+                Superintake.getInstance().setGoal(Superintake.Goal.IDLE).until(() -> true),
                 //AutoHelpers.finalWaypoint(() -> new Pose2d(
                 //                2.0, 4.7, Rotation2d.kCW_90deg),
                 //        defaultMoveToConstraints,
@@ -141,11 +141,11 @@ public class AuraAutoDepot extends Auto {
                 //
                 //),
                 Commands.parallel(
-                        superintake.setGoal(Superintake.Goal.INTAKE).until(() -> true),
+                        Superintake.getInstance().setGoal(Superintake.Goal.INTAKE).until(() -> true),
                         AutoHelpers.trajectory(ChoreoTraj.AuraAutoDepotIntake)
                 ),
 
-                superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
+                Superintake.getInstance().setGoal(Superintake.Goal.IDLE).until(() -> true),
 
                 //// Line up to the Outpost
                 //
@@ -170,8 +170,8 @@ public class AuraAutoDepot extends Auto {
                                 shootingConstraints,
                                 true
                         ),
-                        superintake.intakeShootAlternate(),
-                        superstructure.setGoal(Superstructure.Goal.SHOOT)
+                        Superintake.getInstance().intakeShootAlternate(),
+                        Superstructure.getInstance().setGoal(Superstructure.Goal.SHOOT)
                 )
         );
     }

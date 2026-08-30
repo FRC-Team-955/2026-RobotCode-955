@@ -5,8 +5,6 @@ import frc.robot.Constants;
 import frc.robot.SimManager;
 
 public class AccelerometerIOSim extends AccelerometerIO {
-    private final SimManager simManager = SimManager.getInstance();
-
     private ChassisSpeeds lastSpeeds = new ChassisSpeeds();
 
     public AccelerometerIOSim() {
@@ -14,7 +12,7 @@ public class AccelerometerIOSim extends AccelerometerIO {
 
     @Override
     public void updateInputs(AccelerometerIOInputs inputs) {
-        ChassisSpeeds currentSpeeds = simManager.driveSimulation.getDriveTrainSimulatedChassisSpeedsRobotRelative();
+        ChassisSpeeds currentSpeeds = SimManager.getInstance().driveSimulation.getDriveTrainSimulatedChassisSpeedsRobotRelative();
         ChassisSpeeds dSpeeds = currentSpeeds.minus(lastSpeeds).div(Constants.loopPeriod);
         lastSpeeds = currentSpeeds;
 

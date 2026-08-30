@@ -3,6 +3,7 @@ package frc.robot.autos;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.commands.CommandsExt;
+import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.superintake.Superintake;
 import frc.robot.subsystems.superstructure.Superstructure;
 
@@ -24,17 +25,17 @@ public class OrbitPassingOutpostAuto extends Auto {
                 AutoHelpers.intermediateWaypoint(() -> starting, defaultMoveToConstraints, false),
 
                 // move into position
-                superintake.setGoal(Superintake.Goal.INTAKE).until(() -> true),
+                Superintake.getInstance().setGoal(Superintake.Goal.INTAKE).until(() -> true),
                 AutoHelpers.trajectory(ChoreoTraj.OrbitPassingOutpost$1),
 
                 // follow passing path
-                superstructure.setGoal(Superstructure.Goal.SHOOT).until(() -> true),
+                Superstructure.getInstance().setGoal(Superstructure.Goal.SHOOT).until(() -> true),
                 AutoHelpers.trajectory(ChoreoTraj.OrbitPassingOutpost$2).withAiming(),
-                superstructure.setGoal(Superstructure.Goal.IDLE).until(() -> true),
+                Superstructure.getInstance().setGoal(Superstructure.Goal.IDLE).until(() -> true),
 
                 // follow collection path
                 AutoHelpers.trajectory(ChoreoTraj.OrbitPassingOutpost$3),
-                superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
+                Superintake.getInstance().setGoal(Superintake.Goal.IDLE).until(() -> true),
 
                 // move to entrance to trench
                 AutoHelpers.intermediateWaypoint(ChoreoTraj.OrbitPassingOutpost$3::endPoseBlue, defaultMoveToConstraints, false),
@@ -43,13 +44,13 @@ public class OrbitPassingOutpostAuto extends Auto {
                 AutoHelpers.intermediateWaypoint(ChoreoTraj.OrbitPassingOutpost$5::initialPoseBlue, defaultMoveToConstraints, false),
 
                 // move into position
-                superintake.setGoal(Superintake.Goal.INTAKE).until(() -> true),
+                Superintake.getInstance().setGoal(Superintake.Goal.INTAKE).until(() -> true),
                 AutoHelpers.trajectory(ChoreoTraj.OrbitPassingOutpost$5),
 
                 // +1000 aura
-                superstructure.setGoal(Superstructure.Goal.SHOOT).until(() -> true),
+                Superstructure.getInstance().setGoal(Superstructure.Goal.SHOOT).until(() -> true),
                 AutoHelpers.trajectory(ChoreoTraj.OrbitPassingOutpost$6).withAiming(),
-                drive.stop().withAiming()
+                Drive.getInstance().stop().withAiming()
         );
     }
 }

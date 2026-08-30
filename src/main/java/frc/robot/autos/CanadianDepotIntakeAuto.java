@@ -37,27 +37,27 @@ public class CanadianDepotIntakeAuto extends Auto {
                 // follow collection path
                 Commands.parallel(
                         AutoHelpers.trajectory(ChoreoTraj.CanadianDepot_FirstPass),
-                        superintake.setGoal(Superintake.Goal.INTAKE).until(() -> true)
+                        Superintake.getInstance().setGoal(Superintake.Goal.INTAKE).until(() -> true)
                 ),
 
                 // Shoot while moving to entrance to trench
                 Commands.race(
-                        superintake.intakeShootAlternate(),
-                        superstructure.setGoal(Superstructure.Goal.SHOOT),
+                        Superintake.getInstance().intakeShootAlternate(),
+                        Superstructure.getInstance().setGoal(Superstructure.Goal.SHOOT),
                         AutoHelpers.finalWaypoint(() -> new Pose2d(1.22, 5.9, Rotation2d.k180deg), shootingConstraints, true)
                 ),
 
 
                 // Stop Shooting
-                superstructure.setGoal(Superstructure.Goal.IDLE).until(() -> true),
-                Commands.race(superintake.setGoal(Superintake.Goal.INTAKE),
+                Superstructure.getInstance().setGoal(Superstructure.Goal.IDLE).until(() -> true),
+                Commands.race(Superintake.getInstance().setGoal(Superintake.Goal.INTAKE),
                         AutoHelpers.finalWaypoint(() -> new Pose2d(0.45, 5.9,
                                 Rotation2d.k180deg), intakeConstraints, false)),
                 Commands.parallel(
                         AutoHelpers.finalWaypoint(() -> new Pose2d(1.0, 5.5,
                                 Rotation2d.k180deg), defaultMoveToConstraints, true),
 
-                        superstructure.setGoal(Superstructure.Goal.SHOOT))
+                        Superstructure.getInstance().setGoal(Superstructure.Goal.SHOOT))
                 // Move to final trench entrance
                 //AutoHelpers.finalWaypoint(() -> trenchEntrance, defaultMoveToConstraints, false),
                 //

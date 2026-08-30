@@ -5,6 +5,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.commands.CommandsExt;
+import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.superintake.Superintake;
 import frc.robot.subsystems.superstructure.Superstructure;
 
@@ -25,7 +26,7 @@ public class CanadianDepotAuto extends Auto {
     private static Command build() {
         return CommandsExt.eagerSequence(
                 // move out of trench
-                superintake.setGoal(Superintake.Goal.INTAKE).until(() -> true),
+                Superintake.getInstance().setGoal(Superintake.Goal.INTAKE).until(() -> true),
                 AutoHelpers.intermediateWaypoint(() -> new Pose2d(
                         ChoreoTraj.CanadianDepot_FirstPass.initialPoseBlue().getX(),
                         startingY,
@@ -34,19 +35,19 @@ public class CanadianDepotAuto extends Auto {
 
                 // follow collection path
                 AutoHelpers.trajectory(ChoreoTraj.CanadianDepot_FirstPass),
-                superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
+                Superintake.getInstance().setGoal(Superintake.Goal.IDLE).until(() -> true),
 
                 // go over the bump
                 AutoHelpers.goOverDepotSideBump(),
 
                 // Shoot
                 Commands.parallel(
-                        superintake.intakeShootAlternate(),
-                        superstructure.setGoal(Superstructure.Goal.SHOOT),
-                        drive.stop().withAiming()
+                        Superintake.getInstance().intakeShootAlternate(),
+                        Superstructure.getInstance().setGoal(Superstructure.Goal.SHOOT),
+                        Drive.getInstance().stop().withAiming()
                 ).withTimeout(4.5),
-                superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
-                superstructure.setGoal(Superstructure.Goal.IDLE).until(() -> true),
+                Superintake.getInstance().setGoal(Superintake.Goal.IDLE).until(() -> true),
+                Superstructure.getInstance().setGoal(Superstructure.Goal.IDLE).until(() -> true),
 
                 AutoHelpers.intermediateWaypoint(() -> new Pose2d(3.0, startingY - 0.5,
                         Rotation2d.kCW_90deg), defaultMoveToConstraints, false),
@@ -61,7 +62,7 @@ public class CanadianDepotAuto extends Auto {
                 //        startingRotation
                 //), defaultMoveToConstraints, false),
 
-                superintake.setGoal(Superintake.Goal.INTAKE).until(() -> true),
+                Superintake.getInstance().setGoal(Superintake.Goal.INTAKE).until(() -> true),
 
                 // move out of trench
                 AutoHelpers.intermediateWaypoint(() -> new Pose2d(
@@ -76,15 +77,15 @@ public class CanadianDepotAuto extends Auto {
                 //        superintake.setGoal(Superintake.Goal.INTAKE).until(() -> true)
                 //),
 
-                superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
+                Superintake.getInstance().setGoal(Superintake.Goal.IDLE).until(() -> true),
 
                 // go over the bump
                 AutoHelpers.goOverDepotSideBump(),
 
                 Commands.parallel(
-                        superintake.intakeShootAlternate(),
-                        superstructure.setGoal(Superstructure.Goal.SHOOT),
-                        drive.stop().withAiming()
+                        Superintake.getInstance().intakeShootAlternate(),
+                        Superstructure.getInstance().setGoal(Superstructure.Goal.SHOOT),
+                        Drive.getInstance().stop().withAiming()
                 )
 
                 // we removed go back to depot because might hit other robots

@@ -39,10 +39,6 @@ import java.util.function.DoubleSupplier;
  * https://github.com/Mechanical-Advantage/RobotCode2026Public/blob/main/src/main/java/org/littletonrobotics/frc2026/util/HubShiftUtil.java
  */
 public class HubShiftTracker implements Periodic {
-    private static final OperatorDashboard operatorDashboard = OperatorDashboard.getInstance();
-    private static final Controller controller = Controller.getInstance();
-    private static final ShootingKinematics shootingKinematics = ShootingKinematics.getInstance();
-
     public enum ShiftEnum {
         TRANSITION,
         SHIFT1,
@@ -64,8 +60,8 @@ public class HubShiftTracker implements Periodic {
     private static final double minFuelCountDelay = 0.5;
     private static final double maxFuelCountDelay = 2.0;
     private static final double shiftEndFuelCountExtension = 3.0;
-    private static final DoubleSupplier approachingActiveFudgeSupplier = () -> -1 * (minFuelCountDelay + shootingKinematics.getLastScoringTimeOfFlightSeconds());
-    private static final DoubleSupplier endingActiveFudgeSupplier = () -> shiftEndFuelCountExtension + -1 * (maxFuelCountDelay + shootingKinematics.getLastScoringTimeOfFlightSeconds());
+    private static final DoubleSupplier approachingActiveFudgeSupplier = () -> -1 * (minFuelCountDelay + ShootingKinematics.getInstance().getLastScoringTimeOfFlightSeconds());
+    private static final DoubleSupplier endingActiveFudgeSupplier = () -> shiftEndFuelCountExtension + -1 * (maxFuelCountDelay + ShootingKinematics.getInstance().getLastScoringTimeOfFlightSeconds());
 
     private static final double autoEndTime = 20.0;
     private static final boolean[] activeSchedule = {true, true, false, true, false, true};
@@ -82,7 +78,7 @@ public class HubShiftTracker implements Periodic {
 
     private HubShiftTracker() {
         new Trigger(() -> shiftInfo.remainingTime() < 3.0)
-                .whileTrue(controller.rumble(0.5));
+                .whileTrue(Controller.getInstance().rumble(0.5));
     }
 
     @Override
@@ -112,9 +108,9 @@ public class HubShiftTracker implements Periodic {
         var alliance = DriverStation.getAlliance().orElse(Alliance.Blue);
 
         // Return override value
-        if (operatorDashboard.wonAuto.get()) {
+        if (OperatorDashboard.getInstance().wonAuto.get()) {
             return alliance == Alliance.Blue ? Alliance.Red : Alliance.Blue;
-        } else if (operatorDashboard.lostAuto.get()) {
+        } else if (OperatorDashboard.getInstance().lostAuto.get()) {
             return alliance == Alliance.Blue ? Alliance.Blue : Alliance.Red;
         }
 

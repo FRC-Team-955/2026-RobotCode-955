@@ -19,16 +19,6 @@ public class SuperstructureIOSim extends SuperstructureIO {
     private static final double shootingBallsPerSec = 8.0;
     private static final double ballShootDelay = 1.0 / shootingBallsPerSec;
 
-    private static final IntakePivot intakePivot = IntakePivot.getInstance();
-    private static final IntakeRollers intakeRollers = IntakeRollers.getInstance();
-    private static final Feeder feeder = Feeder.getInstance();
-    private static final Flywheel flywheel = Flywheel.getInstance();
-    private static final Hood hood = Hood.getInstance();
-    private static final Spindexer spindexer = Spindexer.getInstance();
-    private static final ShootingKinematics shootingKinematics = ShootingKinematics.getInstance();
-
-    private final SimManager simManager = SimManager.getInstance();
-
     private double lastShotTimestamp = 0.0;
 
     public SuperstructureIOSim() {
@@ -37,48 +27,48 @@ public class SuperstructureIOSim extends SuperstructureIO {
     @Override
     public void updateInputs(SuperstructureIOInputs inputs) {
         if (
-                intakeRollers.getGoal() == IntakeRollers.Goal.INTAKE &&
-                        intakePivot.getGoal() == IntakePivot.Goal.DEPLOY
+                IntakeRollers.getInstance().getGoal() == IntakeRollers.Goal.INTAKE &&
+                        IntakePivot.getInstance().getGoal() == IntakePivot.Goal.DEPLOY
         ) {
-            if (!simManager.intakeSimulation.isRunning()) {
-                simManager.intakeSimulation.startIntake();
+            if (!SimManager.getInstance().intakeSimulation.isRunning()) {
+                SimManager.getInstance().intakeSimulation.startIntake();
             }
-        } else if (simManager.intakeSimulation.isRunning()) {
-            simManager.intakeSimulation.stopIntake();
+        } else if (SimManager.getInstance().intakeSimulation.isRunning()) {
+            SimManager.getInstance().intakeSimulation.stopIntake();
         }
 
         // get this value before potentially subtracting 1 when shooting
-        int gamePiecesInHopper = simManager.intakeSimulation.getGamePiecesAmount();
+        int gamePiecesInHopper = SimManager.getInstance().intakeSimulation.getGamePiecesAmount();
 
         if (
-                feeder.getGoal() == Feeder.Goal.FEED &&
-                        spindexer.getGoal() == Spindexer.Goal.FEED
+                Feeder.getInstance().getGoal() == Feeder.Goal.FEED &&
+                        Spindexer.getInstance().getGoal() == Spindexer.Goal.FEED
         ) {
             if (
                     Timer.getTimestamp() - lastShotTimestamp > ballShootDelay &&
-                            (simManager.intakeSimulation.obtainGamePieceFromIntake() || DriverStation.isTeleopEnabled())
+                            (SimManager.getInstance().intakeSimulation.obtainGamePieceFromIntake() || DriverStation.isTeleopEnabled())
             ) {
                 lastShotTimestamp = Timer.getTimestamp();
 
-                Pose2d robotPose = simManager.driveSimulation.getSimulatedDriveTrainPose();
+                Pose2d robotPose = SimManager.getInstance().driveSimulation.getSimulatedDriveTrainPose();
                 var gamePiece = new RebuiltFuelOnFly(
                         robotPose.getTranslation(),
-                        shootingKinematics.getFuelExitTranslation().toTranslation2d(),
-                        simManager.driveSimulation.getDriveTrainSimulatedChassisSpeedsFieldRelative(),
+                        ShootingKinematics.getInstance().getFuelExitTranslation().toTranslation2d(),
+                        SimManager.getInstance().driveSimulation.getDriveTrainSimulatedChassisSpeedsFieldRelative(),
                         robotPose.getRotation(),
-                        Meters.of(shootingKinematics.getFuelExitTranslation().getZ()),
-                        MetersPerSecond.of(flywheel.getVelocityRadPerSec() * Flywheel.radiusMeters),
+                        Meters.of(ShootingKinematics.getInstance().getFuelExitTranslation().getZ()),
+                        MetersPerSecond.of(Flywheel.getInstance().getVelocityRadPerSec() * Flywheel.radiusMeters),
                         // Applying the shooter facing direction to the maple-sim parameter
                         // causes issues because it causes the shooter position to be rotated
                         // which puts it in the opposite corner of the robot. Instead, just
                         // reverse the hood
-                        Radians.of(Math.PI - hood.getShotAngleRad())
+                        Radians.of(Math.PI - Hood.getInstance().getShotAngleRad())
                 );
-                if (!shootingKinematics.getShootingParameters().isPass()) {
+                if (!ShootingKinematics.getInstance().getShootingParameters().isPass()) {
                     gamePiece.disableBecomesGamePieceOnFieldAfterTouchGround();
                 }
                 Logger.recordOutput("ShootingKinematics/ProjectileVelocity", gamePiece.getVelocity3dMPS());
-                Logger.recordOutput("ShootingKinematics/ProjectileSpeedRobotRelative", flywheel.getVelocityRadPerSec() * Flywheel.radiusMeters);
+                Logger.recordOutput("ShootingKinematics/ProjectileSpeedRobotRelative", Flywheel.getInstance().getVelocityRadPerSec() * Flywheel.radiusMeters);
                 SimulatedArena.getInstance().addGamePieceProjectile(gamePiece);
             }
         }
@@ -94,6 +84,6 @@ public class SuperstructureIOSim extends SuperstructureIO {
             inputs.canrangeMeasurementHealth = MeasurementHealthValue.Bad;
         }
 
-        Logger.recordOutput("FieldSimulation/NumberOfFuelInHopper", simManager.intakeSimulation.getGamePiecesAmount());
+        Logger.recordOutput("FieldSimulation/NumberOfFuelInHopper", SimManager.getInstance().intakeSimulation.getGamePiecesAmount());
     }
 }

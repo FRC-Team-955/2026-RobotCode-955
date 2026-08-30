@@ -19,8 +19,6 @@ import java.util.function.Supplier;
 import static frc.robot.subsystems.drive.DriveConstants.moveToConfig;
 
 public class MoveToController {
-    private static final RobotState robotState = RobotState.getInstance();
-
     private final PIDController linearController = moveToConfig.linearGains()
             .toPID(
                     moveToConfig.linearPositionToleranceMeters().get(),
@@ -58,10 +56,10 @@ public class MoveToController {
             return new ChassisSpeeds();
         }
 
-        Pose2d currentPose = robotState.getPose();
+        Pose2d currentPose = RobotState.getInstance().getPose();
 
         Pose2d goalPose = goalPoseSupplier.get();
-        robotState.setMoveToGoal(Optional.of(goalPose));
+        RobotState.getInstance().setMoveToGoal(Optional.of(goalPose));
         Logger.recordOutput("Drive/MoveTo/Goal", goalPose);
 
         double distanceToGoal = currentPose.getTranslation().getDistance(goalPose.getTranslation());

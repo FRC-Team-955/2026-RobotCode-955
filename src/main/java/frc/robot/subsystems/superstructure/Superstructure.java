@@ -15,7 +15,6 @@ import frc.lib.network.LoggedTunableNumber;
 import frc.lib.subsystem.CommandBasedSubsystem;
 import frc.robot.BuildConstants;
 import frc.robot.FieldConstants;
-import frc.robot.OperatorDashboard;
 import frc.robot.RobotState;
 import frc.robot.shooting.ShootingKinematics;
 import lombok.Getter;
@@ -33,10 +32,6 @@ public class Superstructure extends CommandBasedSubsystem {
     private static final LoggedTunableNumber commitToShotTimeSeconds = new LoggedTunableNumber("Superstructure/CommitToShotTimeSeconds", 0.1);
     private static final LoggedTunableNumber antiJamStartSeconds = new LoggedTunableNumber("Superstructure/AntiJamStartSeconds", 0.7);
     private static final LoggedTunableNumber antiJamTimeSeconds = new LoggedTunableNumber("Superstructure/AntiJamTimeSeconds", 0.15);
-
-    private static final RobotState robotState = RobotState.getInstance();
-    private static final OperatorDashboard operatorDashboard = OperatorDashboard.getInstance();
-    private static final ShootingKinematics shootingKinematics = ShootingKinematics.getInstance();
 
     // because these subsystems are instantiated by Superstructure, instead of RobotContainer,
     // the variables shouldn't be static. Other singleton variables should be static, though
@@ -134,7 +129,7 @@ public class Superstructure extends CommandBasedSubsystem {
                 boolean needsToCommitToShot = Timer.getTimestamp() - lastStartedShot < commitToShotTimeSeconds.get();
                 if (BuildConstants.isSimOrReplay)
                     Logger.recordOutput("Superstructure/NeedsToCommitToShot", needsToCommitToShot);
-                boolean shouldShoot = shootingKinematics.isShootingParametersMet() || needsToCommitToShot;
+                boolean shouldShoot = ShootingKinematics.getInstance().isShootingParametersMet() || needsToCommitToShot;
                 if (goal == Goal.SHOOT_FORCE || shouldShoot) {
                     feeder.setGoal(Feeder.Goal.FEED);
 
@@ -168,7 +163,7 @@ public class Superstructure extends CommandBasedSubsystem {
 
         Logger.recordOutput(
                 "Superstructure/FuelPose",
-                new Pose3d(robotState.getPose())
+                new Pose3d(RobotState.getInstance().getPose())
                         .transformBy(robotToCANrange)
                         .transformBy(new Transform3d(
                                 new Translation3d(inputs.canrangeDistanceMeters + FieldConstants.fuelDiameter / 2.0, 0.0, 0.0),

@@ -8,7 +8,6 @@ import frc.lib.Util;
 import frc.lib.network.LoggedNetworkBooleanExt;
 import frc.lib.network.LoggedNetworkNumberExt;
 import frc.lib.subsystem.Periodic;
-import frc.robot.controller.Controller;
 import frc.robot.subsystems.drive.DriveConstants;
 import lombok.Getter;
 import org.littletonrobotics.junction.Logger;
@@ -24,10 +23,6 @@ public class OperatorDashboard implements Periodic {
         ShootTowerManual,
         PassManual,
     }
-
-    private static final RobotState robotState = RobotState.getInstance();
-    private static final Controller controller = Controller.getInstance();
-    //private static final AutoManager autoManager = AutoManager.get();
 
     private static final String prefix = "/OperatorDashboard/";
 

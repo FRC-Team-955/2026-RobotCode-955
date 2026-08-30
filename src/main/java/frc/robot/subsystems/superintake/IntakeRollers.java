@@ -28,7 +28,6 @@ public class IntakeRollers implements Periodic {
     private static final LoggedTunableNumber idleVoltage = new LoggedTunableNumber("Superintake/IntakeRollers/Goal/IdleVoltage", 0.0);
     private static final LoggedTunableNumber intakeVoltage = new LoggedTunableNumber("Superintake/IntakeRollers/Goal/IntakeVoltage", 12.0);
     private static final LoggedTunableNumber ejectVoltage = new LoggedTunableNumber("Superintake/IntakeRollers/Goal/EjectVoltage", -12.0);
-    private static final EnergyLogger energyLogger = EnergyLogger.getInstance();
 
     private final Motor motor = Motor
             .createTalonFX(
@@ -71,7 +70,7 @@ public class IntakeRollers implements Periodic {
 
     @Override
     public void periodicBeforeCommands() {
-        energyLogger.reportPowerUsage("IntakeRollers", motor.isConnected() ? motor.getAppliedVolts() * motor.getSupplyCurrentAmps() : 0.0);
+        EnergyLogger.getInstance().reportPowerUsage("IntakeRollers", motor.isConnected() ? motor.getAppliedVolts() * motor.getSupplyCurrentAmps() : 0.0);
     }
 
     @Override

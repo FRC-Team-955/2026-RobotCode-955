@@ -5,6 +5,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.commands.CommandsExt;
+import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.superintake.Superintake;
 import frc.robot.subsystems.superstructure.Superstructure;
 
@@ -28,7 +29,7 @@ public class CanadianOutpostAutolessAgro extends Auto {
     private static Command build() {
         return CommandsExt.eagerSequence(
                 // move out of trench
-                superintake.setGoal(Superintake.Goal.INTAKE).until(() -> true),
+                Superintake.getInstance().setGoal(Superintake.Goal.INTAKE).until(() -> true),
                 AutoHelpers.intermediateWaypoint(() -> new Pose2d(
                         ChoreoTraj.CanadianOutpost_FirstPass.initialPoseBlue().getX(),
                         startingY,
@@ -38,7 +39,7 @@ public class CanadianOutpostAutolessAgro extends Auto {
                 // follow collection path
                 Commands.parallel(
                         AutoHelpers.trajectory(ChoreoTraj.CanadianOutpost_FirstPass),
-                        superintake.setGoal(Superintake.Goal.INTAKE).until(() -> true)
+                        Superintake.getInstance().setGoal(Superintake.Goal.INTAKE).until(() -> true)
                 ),
 
                 AutoHelpers.goOverOutpostSideBump()
@@ -46,13 +47,13 @@ public class CanadianOutpostAutolessAgro extends Auto {
 
                 // Shoot while moving to entrance to trench
                 Commands.parallel(
-                        superintake.intakeShootAlternate(),
-                        superstructure.setGoal(Superstructure.Goal.SHOOT),
-                        drive.stop().withAiming()
+                        Superintake.getInstance().intakeShootAlternate(),
+                        Superstructure.getInstance().setGoal(Superstructure.Goal.SHOOT),
+                        Drive.getInstance().stop().withAiming()
                         //AutoHelpers.finalWaypoint(() -> preemptiveTrenchEntrance, defaultMoveToConstraints, true)
                 ).withTimeout(4.5),
-                superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
-                superstructure.setGoal(Superstructure.Goal.IDLE).until(() -> true),
+                Superintake.getInstance().setGoal(Superintake.Goal.IDLE).until(() -> true),
+                Superstructure.getInstance().setGoal(Superstructure.Goal.IDLE).until(() -> true),
 
                 // AutoHelpers.finalWaypoint(() -> preemptiveTrenchEntrance, defaultMoveToConstraints, false),
 
@@ -76,9 +77,9 @@ public class CanadianOutpostAutolessAgro extends Auto {
 
                 // Shoot while moving to entrance to trench
                 Commands.parallel(
-                        superintake.intakeShootAlternate(),
-                        superstructure.setGoal(Superstructure.Goal.SHOOT),
-                        drive.stop().withAiming()
+                        Superintake.getInstance().intakeShootAlternate(),
+                        Superstructure.getInstance().setGoal(Superstructure.Goal.SHOOT),
+                        Drive.getInstance().stop().withAiming()
                 ).withTimeout(4.5),
 
                 AutoHelpers.finalWaypoint(() -> preemptiveTrenchEntrance, defaultMoveToConstraints, false)

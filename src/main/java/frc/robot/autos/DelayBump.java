@@ -6,6 +6,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.commands.CommandsExt;
+import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.superintake.Superintake;
 import frc.robot.subsystems.superstructure.Superstructure;
 
@@ -27,12 +28,12 @@ public class DelayBump extends Auto {
     private static Command build(boolean flipY) {
         return CommandsExt.eagerSequence(
                 Commands.parallel(
-                        superintake.intakeShootAlternate(),
-                        superstructure.setGoal(Superstructure.Goal.SHOOT),
-                        drive.stop().withAiming()
+                        Superintake.getInstance().intakeShootAlternate(),
+                        Superstructure.getInstance().setGoal(Superstructure.Goal.SHOOT),
+                        Drive.getInstance().stop().withAiming()
                 ).withTimeout(1.2),
-                superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
-                superstructure.setGoal(Superstructure.Goal.IDLE).until(() -> true),
+                Superintake.getInstance().setGoal(Superintake.Goal.IDLE).until(() -> true),
+                Superstructure.getInstance().setGoal(Superstructure.Goal.IDLE).until(() -> true),
                 // go over the bump
                 flipY
                         ? AutoHelpers.goOverDepotSideBump(true)
@@ -58,11 +59,11 @@ public class DelayBump extends Auto {
                 ),
 
                 // move out of trench
-                superintake.setGoal(Superintake.Goal.INTAKE).until(() -> true),
+                Superintake.getInstance().setGoal(Superintake.Goal.INTAKE).until(() -> true),
                 AutoHelpers.trajectory(ChoreoTraj.Delaybump$1, flipY),
 
                 // go to entrance to trench
-                superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
+                Superintake.getInstance().setGoal(Superintake.Goal.IDLE).until(() -> true),
                 AutoHelpers.checkWaypoint(
                         flipY
                                 ? () -> ChoreoAllianceFlipUtil.getMirrorY().flip(ChoreoTraj.Delaybump$1.endPoseBlue())
@@ -85,14 +86,14 @@ public class DelayBump extends Auto {
 
                         // shoot
 
-                        superstructure.setGoal(Superstructure.Goal.SHOOT).until(() -> true),
+                        Superstructure.getInstance().setGoal(Superstructure.Goal.SHOOT).until(() -> true),
                         Commands.parallel(
-                                superintake.intakeShootAlternate()
-                        ).withTimeout(4.5).until(() -> !superstructure.isHasFuel())
+                                Superintake.getInstance().intakeShootAlternate()
+                        ).withTimeout(4.5).until(() -> !Superstructure.getInstance().isHasFuel())
                 ),
 
-                superstructure.setGoal(Superstructure.Goal.IDLE).until(() -> true),
-                superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
+                Superstructure.getInstance().setGoal(Superstructure.Goal.IDLE).until(() -> true),
+                Superintake.getInstance().setGoal(Superintake.Goal.IDLE).until(() -> true),
 
 
                 // go over the bump
@@ -123,13 +124,13 @@ public class DelayBump extends Auto {
                 AutoHelpers.trajectory(ChoreoTraj.Delaybump$2, flipY),
 
                 // follow intake path
-                superintake.setGoal(Superintake.Goal.INTAKE).until(() -> true),
+                Superintake.getInstance().setGoal(Superintake.Goal.INTAKE).until(() -> true),
                 AutoHelpers.trajectory(ChoreoTraj.AggressiveOutpostBumpBump$4, flipY),
                 AutoHelpers.intakeOrTrajectory(ChoreoTraj.AggressiveOutpostBumpBump$5, flipY ? leftNeutralZoneBounds : rightNeutralZoneBounds, flipY),
                 AutoHelpers.trajectory(ChoreoTraj.AggressiveOutpostBumpBump$6, flipY),
 
                 // make sure at entrance of trench
-                superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
+                Superintake.getInstance().setGoal(Superintake.Goal.IDLE).until(() -> true),
                 AutoHelpers.checkWaypoint(
                         flipY
                                 ? () -> ChoreoAllianceFlipUtil.getMirrorY().flip(ChoreoTraj.AggressiveOutpostBumpBump$6.endPoseBlue())
@@ -152,14 +153,14 @@ public class DelayBump extends Auto {
                                 true),
 
                         // shoot
-                        superstructure.setGoal(Superstructure.Goal.SHOOT).until(() -> true),
+                        Superstructure.getInstance().setGoal(Superstructure.Goal.SHOOT).until(() -> true),
                         Commands.parallel(
-                                superintake.intakeShootAlternate()
-                        ).withTimeout(4.5).until(() -> !superstructure.isHasFuel())
+                                Superintake.getInstance().intakeShootAlternate()
+                        ).withTimeout(4.5).until(() -> !Superstructure.getInstance().isHasFuel())
                 ),
 
-                superstructure.setGoal(Superstructure.Goal.IDLE).until(() -> true),
-                superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
+                Superstructure.getInstance().setGoal(Superstructure.Goal.IDLE).until(() -> true),
+                Superintake.getInstance().setGoal(Superintake.Goal.IDLE).until(() -> true),
 
                 // go over the bump
                 flipY
@@ -188,7 +189,7 @@ public class DelayBump extends Auto {
                 AutoHelpers.trajectory(ChoreoTraj.AggressiveOutpostBumpBump$9, flipY),
 
                 // make sure at entrance of trench
-                superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
+                Superintake.getInstance().setGoal(Superintake.Goal.IDLE).until(() -> true),
                 AutoHelpers.checkWaypoint(
                         flipY
                                 ? () -> ChoreoAllianceFlipUtil.getMirrorY().flip(ChoreoTraj.AggressiveOutpostBumpBump$9.endPoseBlue())
@@ -211,10 +212,10 @@ public class DelayBump extends Auto {
                                 true),
 
                         // shoot
-                        superstructure.setGoal(Superstructure.Goal.SHOOT).until(() -> true),
+                        Superstructure.getInstance().setGoal(Superstructure.Goal.SHOOT).until(() -> true),
                         Commands.parallel(
-                                superintake.intakeShootAlternate()
-                        ).withTimeout(4.5).until(() -> !superstructure.isHasFuel())
+                                Superintake.getInstance().intakeShootAlternate()
+                        ).withTimeout(4.5).until(() -> !Superstructure.getInstance().isHasFuel())
                 )
         );
     }

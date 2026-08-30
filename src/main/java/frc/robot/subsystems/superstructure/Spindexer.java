@@ -29,8 +29,6 @@ public class Spindexer implements Periodic {
     private static final LoggedTunableNumber feedVoltage = new LoggedTunableNumber("Superstructure/Spindexer/Goal/FeedVoltage", 12.0);
     private static final LoggedTunableNumber ejectVoltage = new LoggedTunableNumber("Superstructure/Spindexer/Goal/EjectVoltage", -12.0);
 
-    private static final EnergyLogger energyLogger = EnergyLogger.getInstance();
-
     private final Motor motor = Motor.createTalonFX(
             "Superstructure/Spindexer",
             13,
@@ -72,7 +70,7 @@ public class Spindexer implements Periodic {
 
     @Override
     public void periodicBeforeCommands() {
-        energyLogger.reportPowerUsage("Spindexer", motor.isConnected() ? motor.getAppliedVolts() * motor.getSupplyCurrentAmps() : 0.0);
+        EnergyLogger.getInstance().reportPowerUsage("Spindexer", motor.isConnected() ? motor.getAppliedVolts() * motor.getSupplyCurrentAmps() : 0.0);
     }
 
     @Override

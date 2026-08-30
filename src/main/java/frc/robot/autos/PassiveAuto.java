@@ -5,6 +5,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.commands.CommandsExt;
+import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.superintake.Superintake;
 import frc.robot.subsystems.superstructure.Superstructure;
 
@@ -22,14 +23,14 @@ public class PassiveAuto extends Auto {
     private static Command build(boolean flipY) {
         return CommandsExt.eagerSequence(
                 // move out of trench
-                superintake.setGoal(Superintake.Goal.INTAKE).until(() -> true),
+                Superintake.getInstance().setGoal(Superintake.Goal.INTAKE).until(() -> true),
                 AutoHelpers.trajectory(ChoreoTraj.PassiveOutpost$0, flipY),
 
                 // follow intake path
                 AutoHelpers.trajectory(ChoreoTraj.PassiveOutpost$1, flipY),
 
                 // go to entrance to trench
-                superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
+                Superintake.getInstance().setGoal(Superintake.Goal.IDLE).until(() -> true),
                 AutoHelpers.trajectory(ChoreoTraj.PassiveOutpost$2, flipY),
                 AutoHelpers.checkWaypoint(
                         flipY
@@ -40,24 +41,24 @@ public class PassiveAuto extends Auto {
 
                 // go through trench and shoot
                 AutoHelpers.trajectory(ChoreoTraj.PassiveOutpost$3, flipY),
-                superstructure.setGoal(Superstructure.Goal.SHOOT).until(() -> true),
+                Superstructure.getInstance().setGoal(Superstructure.Goal.SHOOT).until(() -> true),
                 Commands.parallel(
-                        superintake.intakeShootAlternate(),
-                        drive.stop().withAiming()
-                ).withTimeout(4.5).until(() -> !superstructure.isHasFuel()),
-                superstructure.setGoal(Superstructure.Goal.IDLE).until(() -> true),
+                        Superintake.getInstance().intakeShootAlternate(),
+                        Drive.getInstance().stop().withAiming()
+                ).withTimeout(4.5).until(() -> !Superstructure.getInstance().isHasFuel()),
+                Superstructure.getInstance().setGoal(Superstructure.Goal.IDLE).until(() -> true),
 
                 // move out of trench
                 AutoHelpers.trajectory(ChoreoTraj.PassiveOutpost$4, flipY),
 
                 // follow intake path
-                superintake.setGoal(Superintake.Goal.INTAKE).until(() -> true),
+                Superintake.getInstance().setGoal(Superintake.Goal.INTAKE).until(() -> true),
                 AutoHelpers.trajectory(ChoreoTraj.PassiveOutpost$5, flipY),
                 AutoHelpers.intakeOrTrajectory(ChoreoTraj.PassiveOutpost$6, flipY ? leftNeutralZoneBounds : rightNeutralZoneBounds, flipY),
                 AutoHelpers.trajectory(ChoreoTraj.PassiveOutpost$7, flipY),
 
                 // make sure at entrance of trench
-                superintake.setGoal(Superintake.Goal.IDLE).until(() -> true),
+                Superintake.getInstance().setGoal(Superintake.Goal.IDLE).until(() -> true),
                 AutoHelpers.checkWaypoint(
                         flipY
                                 ? () -> ChoreoAllianceFlipUtil.getMirrorY().flip(ChoreoTraj.PassiveOutpost$7.endPoseBlue())
@@ -68,10 +69,10 @@ public class PassiveAuto extends Auto {
 
                 // go through trench and shoot
                 AutoHelpers.trajectory(ChoreoTraj.PassiveOutpost$8, flipY),
-                superstructure.setGoal(Superstructure.Goal.SHOOT).until(() -> true),
+                Superstructure.getInstance().setGoal(Superstructure.Goal.SHOOT).until(() -> true),
                 Commands.parallel(
-                        superintake.intakeShootAlternate(),
-                        drive.stop().withAiming()
+                        Superintake.getInstance().intakeShootAlternate(),
+                        Drive.getInstance().stop().withAiming()
                 )
         );
     }

@@ -45,10 +45,6 @@ public class IntakePivot implements Periodic {
     private static final LoggedTunableNumber profileLookaheadTimeSec = new LoggedTunableNumber("Superintake/IntakePivot/ProfileLookaheadTimeSec", 0.15);
     private static final LoggedTunableNumber stowSetpointDegrees = new LoggedTunableNumber("Superintake/IntakePivot/Goal/StowDegrees", 70.0);
 
-    private static final EnergyLogger energyLogger = EnergyLogger.getInstance();
-    private static final OperatorDashboard operatorDashboard = OperatorDashboard.getInstance();
-    private static final RobotState robotState = RobotState.getInstance();
-
     private final Motor motor = Motor
             .createTalonFX(
                     "Superintake/IntakePivot",
@@ -117,18 +113,18 @@ public class IntakePivot implements Periodic {
 
     @Override
     public void periodicBeforeCommands() {
-        energyLogger.reportPowerUsage("IntakePivot", motor.isConnected() ? motor.getAppliedVolts() * motor.getSupplyCurrentAmps() : 0.0);
+        EnergyLogger.getInstance().reportPowerUsage("IntakePivot", motor.isConnected() ? motor.getAppliedVolts() * motor.getSupplyCurrentAmps() : 0.0);
 
         if (!motor.isEmergencyStopped()) {
-            if (operatorDashboard.intakePivotEStop.get()) {
+            if (OperatorDashboard.getInstance().intakePivotEStop.get()) {
                 motor.emergencyStop();
-                operatorDashboard.intakePivotEStop.set(true);
+                OperatorDashboard.getInstance().intakePivotEStop.set(true);
             }
         } else {
-            if (!operatorDashboard.intakePivotEStop.get()) {
+            if (!OperatorDashboard.getInstance().intakePivotEStop.get()) {
                 // Let operator turn off e-stop
                 motor.undoEmergencyStop();
-                operatorDashboard.intakePivotEStop.set(false);
+                OperatorDashboard.getInstance().intakePivotEStop.set(false);
             }
         }
 
@@ -156,7 +152,7 @@ public class IntakePivot implements Periodic {
         } else {
             // See the comments above the lookaheadState and goalState variables for why we calculate two profiles
 
-            boolean isInTrench = robotState.isInTrench(robotState.getTranslation().
+            boolean isInTrench = RobotState.getInstance().isInTrench(RobotState.getInstance().getTranslation().
                     plus(getMechanismTransform().getTranslation().toTranslation2d()));
             Logger.recordOutput("Superintake/IntakePivot/IsInTrench", isInTrench);
 
@@ -193,7 +189,7 @@ public class IntakePivot implements Periodic {
 
     public void finishHoming() {
         motor.setEncoderPosition(initialPositionRad);
-        operatorDashboard.intakePivotNotHomedAlert.set(false);
+        OperatorDashboard.getInstance().intakePivotNotHomedAlert.set(false);
     }
 
     public boolean isEmergencyStopped() {

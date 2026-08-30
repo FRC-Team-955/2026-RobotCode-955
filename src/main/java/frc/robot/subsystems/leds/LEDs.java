@@ -9,12 +9,10 @@ import edu.wpi.first.wpilibj.util.Color8Bit;
 import frc.lib.subsystem.Periodic;
 import frc.robot.HubShiftTracker;
 import frc.robot.OperatorDashboard;
-import frc.robot.autos.AutoManager;
 import frc.robot.shooting.ShootingKinematics;
 import frc.robot.subsystems.apriltagvision.AprilTagVision;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.SparkCANcoderHelper;
-import frc.robot.subsystems.gamepiecevision.GamePieceVision;
 import frc.robot.subsystems.superintake.Superintake;
 import frc.robot.subsystems.superstructure.Superstructure;
 import lombok.Getter;
@@ -27,17 +25,6 @@ import static frc.robot.subsystems.leds.LEDConstants.createIO;
 import static frc.robot.subsystems.leds.LEDConstants.length;
 
 public class LEDs implements Periodic {
-    private static final OperatorDashboard operatorDashboard = OperatorDashboard.getInstance();
-    private static final ShootingKinematics shootingKinematics = ShootingKinematics.getInstance();
-    private static final AutoManager autoManager = AutoManager.getInstance();
-    private static final AprilTagVision aprilTagVision = AprilTagVision.getInstance();
-    private static final GamePieceVision gamePieceVision = GamePieceVision.getInstance();
-    private static final HubShiftTracker hubShiftTracker = HubShiftTracker.getInstance();
-
-    private static final Drive drive = Drive.getInstance();
-    private static final Superintake superintake = Superintake.getInstance();
-    private static final Superstructure superstructure = Superstructure.getInstance();
-
     private final LEDsIO io = createIO();
     private final AddressableLEDBuffer buffer = new AddressableLEDBuffer(length);
     private final AddressableLEDBufferView firstHalfView = new AddressableLEDBufferView(buffer, 0, length / 2 - 1);
@@ -93,30 +80,30 @@ public class LEDs implements Periodic {
     }
 
     private LEDPattern getDisabledPattern() {
-        if (aprilTagVision.anyCamerasDisconnected() ||
+        if (AprilTagVision.getInstance().anyCamerasDisconnected() ||
                 //gamePieceVision.anyCamerasDisconnected() ||
-                superstructure.hood.isEmergencyStopped() ||
-                superintake.intakePivot.isEmergencyStopped() ||
-                superintake.isAnythingDisconnected() ||
-                superstructure.isAnythingDisconnected() ||
-                drive.isAnythingDisconnected() ||
+                Superstructure.getInstance().hood.isEmergencyStopped() ||
+                Superintake.getInstance().intakePivot.isEmergencyStopped() ||
+                Superintake.getInstance().isAnythingDisconnected() ||
+                Superstructure.getInstance().isAnythingDisconnected() ||
+                Drive.getInstance().isAnythingDisconnected() ||
                 SparkCANcoderHelper.isAnyResetFailed()) {
             return LEDPatterns.somethingIsReallyWrong;
         }
 
-        if (operatorDashboard.hoodNotHomedAlert.get()) {
+        if (OperatorDashboard.getInstance().hoodNotHomedAlert.get()) {
             return LEDPatterns.hoodNotHomed;
         }
 
-        if (operatorDashboard.intakePivotNotHomedAlert.get()) {
+        if (OperatorDashboard.getInstance().intakePivotNotHomedAlert.get()) {
             return LEDPatterns.intakePivotNotHomed;
         }
 
-        if (operatorDashboard.autoNotChosenAlert.get()) {
+        if (OperatorDashboard.getInstance().autoNotChosenAlert.get()) {
             return LEDPatterns.autoNotChosen;
         }
 
-        if (operatorDashboard.isBatteryVoltageAlertActive()) {
+        if (OperatorDashboard.getInstance().isBatteryVoltageAlertActive()) {
             return LEDPatterns.lowBattery;
         }
 
@@ -128,14 +115,14 @@ public class LEDs implements Periodic {
     }
 
     private LEDPattern getEnabledPatternFirstHalf() {
-        if (aprilTagVision.anyCamerasDisconnected() ||
+        if (AprilTagVision.getInstance().anyCamerasDisconnected() ||
                 //gamePieceVision.anyCamerasDisconnected() ||
                 //superstructure.hood.isEmergencyStopped() ||
                 //superintake.intakePivot.isEmergencyStopped() ||
-                hubShiftTracker.gameDataBrokenAlert.get() ||
-                superintake.isAnythingDisconnected() ||
-                superstructure.isAnythingDisconnected() ||
-                drive.isAnythingDisconnected() ||
+                HubShiftTracker.getInstance().gameDataBrokenAlert.get() ||
+                Superintake.getInstance().isAnythingDisconnected() ||
+                Superstructure.getInstance().isAnythingDisconnected() ||
+                Drive.getInstance().isAnythingDisconnected() ||
                 SparkCANcoderHelper.isAnyResetFailed()) {
             return LEDPatterns.somethingIsReallyWrong;
         }
@@ -148,7 +135,7 @@ public class LEDs implements Periodic {
         //    return LEDPatterns.hotMotors;
         //}
 
-        if (operatorDashboard.isBatteryVoltageAlertActive()) {
+        if (OperatorDashboard.getInstance().isBatteryVoltageAlertActive()) {
             return LEDPatterns.lowBattery;
         }
 
@@ -156,11 +143,11 @@ public class LEDs implements Periodic {
     }
 
     private LEDPattern getEnabledPatternSecondHalf() {
-        return switch (superstructure.getGoal()) {
-            case SHOOT -> shootingKinematics.isShootingParametersMet()
+        return switch (Superstructure.getInstance().getGoal()) {
+            case SHOOT -> ShootingKinematics.getInstance().isShootingParametersMet()
                     ? LEDPatterns.shooting
                     : (
-                    shootingKinematics.isShiftMet()
+                    ShootingKinematics.getInstance().isShiftMet()
                             ? LEDPatterns.aiming
                             : LEDPatterns.waitingForShift
             );

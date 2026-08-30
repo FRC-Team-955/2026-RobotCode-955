@@ -33,8 +33,6 @@ import static frc.robot.subsystems.drive.DriveConstants.driveConfig;
 public class SimManager {
     private static final int hopperCapacity = 50;
 
-    private static final RobotState robotState = RobotState.getInstance();
-
     private static SwerveModuleSimulationConfig createConfig(double turnGearRatio) {
         return new SwerveModuleSimulationConfig(
                 DCMotor.getKrakenX60(1),
@@ -123,7 +121,7 @@ public class SimManager {
 
     public void periodicBeforeNormalCode() {
         if (!setInitialPose) {
-            robotState.setPose(new Pose2d(1, 1, new Rotation2d()));
+            RobotState.getInstance().setPose(new Pose2d(1, 1, new Rotation2d()));
             setInitialPose = true;
         }
 

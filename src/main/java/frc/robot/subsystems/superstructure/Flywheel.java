@@ -33,9 +33,6 @@ public class Flywheel implements Periodic {
 
     private static final LoggedTunableNumber ejectRPM = new LoggedTunableNumber("Superstructure/Flywheel/Goal/EjectRPM", -300);
 
-    private static final ShootingKinematics shootingKinematics = ShootingKinematics.getInstance();
-    private static final EnergyLogger energyLogger = EnergyLogger.getInstance();
-
     private final TalonFXConfiguration motorConfig = new TalonFXConfiguration()
             .withMotorOutput(new MotorOutputConfigs()
                     .withNeutralMode(NeutralModeValue.Coast)
@@ -78,7 +75,7 @@ public class Flywheel implements Periodic {
     @RequiredArgsConstructor
     public enum Goal {
         IDLE(() -> 0),
-        SHOOT(() -> shootingKinematics.getShootingParameters().velocityRPM()),
+        SHOOT(() -> ShootingKinematics.getInstance().getShootingParameters().velocityRPM()),
         EJECT(ejectRPM::get),
         ;
 
@@ -98,7 +95,7 @@ public class Flywheel implements Periodic {
 
     @Override
     public void periodicBeforeCommands() {
-        energyLogger.reportPowerUsage("Flywheel",
+        EnergyLogger.getInstance().reportPowerUsage("Flywheel",
                 leaderMotor.isConnected() ? leaderMotor.getAppliedVolts() * leaderMotor.getSupplyCurrentAmps() : 0.0,
                 followerMotor.isConnected() ? followerMotor.getAppliedVolts() * followerMotor.getSupplyCurrentAmps() : 0.0);
     }
