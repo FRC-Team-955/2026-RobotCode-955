@@ -168,7 +168,7 @@ public class IntakePivot implements Periodic {
             // See the comments above the lookaheadState and goalState variables for why we calculate two profiles
 
             boolean isInTrench = robotState.isInTrench(robotState.getTranslation().
-                    plus(transform().getTranslation().toTranslation2d()));
+                    plus(getMechanismTransform().getTranslation().toTranslation2d()));
             Logger.recordOutput("Superintake/IntakePivot/IsInTrench", isInTrench);
 
             double setpointRad = goal.setpointRad.getAsDouble();
@@ -215,7 +215,7 @@ public class IntakePivot implements Periodic {
         return !motor.isConnected();
     }
 
-    public Transform3d transform() {
+    public Transform3d getMechanismTransform() {
         return new Transform3d(
                 new Translation3d(Units.inchesToMeters(10.0), 0.0, Units.inchesToMeters(6.25)),
                 new Rotation3d(0.0, Units.degreesToRadians(90.0), 0.0)).plus(new Transform3d(

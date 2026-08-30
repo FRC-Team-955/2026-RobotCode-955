@@ -104,7 +104,7 @@ public class Spindexer implements Periodic {
         return !motor.isConnected();
     }
 
-    public Transform3d transform() {
+    public Transform3d getMechanismTransform() {
         return new Transform3d(
                 new Translation3d(0.0, Units.inchesToMeters(1.4), Units.inchesToMeters(12.0)),
                 new Rotation3d(0.0, 0.0, Units.degreesToRadians(90.0))

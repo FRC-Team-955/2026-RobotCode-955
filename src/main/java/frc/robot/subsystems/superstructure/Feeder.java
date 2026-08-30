@@ -101,7 +101,7 @@ public class Feeder implements Periodic {
         return !motor.isConnected();
     }
 
-    public Transform3d transform() {
+    public Transform3d getMechanismTransform() {
         return new Transform3d(
                 new Translation3d(Units.inchesToMeters(-3.451296), Units.inchesToMeters(-5.445256), Units.inchesToMeters(8.430151)),
                 new Rotation3d(0.0, 0.0, Units.degreesToRadians(90.0))

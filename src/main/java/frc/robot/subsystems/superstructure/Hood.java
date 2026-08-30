@@ -156,7 +156,7 @@ public class Hood implements Periodic {
         } else {
             double setpointRad = goal.setpointRad.getAsDouble();
             boolean isInTrench = robotState.isInTrench(robotState.getTranslation().
-                    plus(transform().getTranslation().toTranslation2d()));
+                    plus(getMechanismTransform().getTranslation().toTranslation2d()));
             Logger.recordOutput("Superstructure/Hood/IsInTrench", isInTrench);
             if (isInTrench) {
                 setpointRad = Math.min(setpointRad, maxPositionUnderTrench);
@@ -189,7 +189,7 @@ public class Hood implements Periodic {
         return !motor.isConnected();
     }
 
-    public Transform3d transform() {
+    public Transform3d getMechanismTransform() {
         return new Transform3d(
                 new Translation3d(Units.inchesToMeters(-6.910046), Units.inchesToMeters(-9.109744), Units.inchesToMeters(12.861381)),
                 new Rotation3d(0.0, Units.degreesToRadians(-90.0), Math.PI)

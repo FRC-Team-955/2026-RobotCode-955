@@ -143,7 +143,7 @@ public class Flywheel implements Periodic {
         return goal.setpointRPM.getAsDouble();
     }
 
-    public Transform3d transform() {
+    public Transform3d getMechanismTransform() {
         return new Transform3d(
                 new Translation3d(Units.inchesToMeters(-6.910046), Units.inchesToMeters(-9.109744), Units.inchesToMeters(12.861381)),
                 new Rotation3d(0.0, 0.0, 0.0)

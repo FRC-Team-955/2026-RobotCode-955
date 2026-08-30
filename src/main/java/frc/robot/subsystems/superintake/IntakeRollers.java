@@ -103,7 +103,7 @@ public class IntakeRollers implements Periodic {
         return !motor.isConnected();
     }
 
-    public Transform3d transform() {
+    public Transform3d getMechanismTransform() {
         return new Transform3d(
                 new Translation3d(Units.inchesToMeters(19.75), 0.0, Units.inchesToMeters(8.985680)),
                 new Rotation3d()
