@@ -64,7 +64,7 @@ public class Flywheel implements Periodic {
                 case SIM -> new LoggedTunablePIDF("Superstructure/Flywheel/Gains")
                         .withS(0.2, StaticFeedforwardSignValue.UseVelocitySign)
                         .withV(0.019)
-                        .withP(0.01);
+                        .withP(0.1);
             });
     private final Motor followerMotor = Motor
             .createTalonFX(
