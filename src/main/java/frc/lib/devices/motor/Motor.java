@@ -128,19 +128,31 @@ public class Motor extends Device<MotorIO, MotorIOInputsAutoLogged> {
     private boolean emergencyStopped = false;
 
     public void emergencyStop() {
+        emergencyStop(null);
+    }
+
+    public void emergencyStop(NeutralModeValue emergencyStopNeutralMode) {
         if (!emergencyStopped) {
             System.out.println("Emergency stopping " + name);
             setVoltageRequest(0.0);
-            setNeutralMode(NeutralModeValue.Coast);
+            if (emergencyStopNeutralMode != null) {
+                setNeutralMode(emergencyStopNeutralMode);
+            }
             emergencyStopped = true;
             emergencyStoppedAlert.set(true);
         }
     }
 
+    public void undoEmergencyStop() {
+        undoEmergencyStop(null);
+    }
+
     public void undoEmergencyStop(NeutralModeValue normalNeutralMode) {
         if (emergencyStopped) {
             System.out.println("Undoing emergency stop for " + name);
-            setNeutralMode(normalNeutralMode);
+            if (normalNeutralMode != null) {
+                setNeutralMode(normalNeutralMode);
+            }
             reinstateFollower.run();
             emergencyStopped = false;
             emergencyStoppedAlert.set(false);
