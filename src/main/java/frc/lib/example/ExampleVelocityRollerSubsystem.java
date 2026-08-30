@@ -1,11 +1,15 @@
 package frc.lib.example;
 
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
+import com.ctre.phoenix6.configs.FeedbackConfigs;
+import com.ctre.phoenix6.configs.MotorOutputConfigs;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import frc.lib.devices.motor.CtrlSparkMaxConfig;
 import frc.lib.devices.motor.MechanismSim;
 import frc.lib.devices.motor.Motor;
 import frc.lib.network.LoggedTunableNumber;
@@ -29,14 +33,18 @@ public class ExampleVelocityRollerSubsystem implements Periodic {
     private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
 
     private final Motor motor = Motor
-            .createSparkMax(
+            .createTalonFX(
                     "ExampleVelocityRollerSubsystem",
                     -1,
-                    new CtrlSparkMaxConfig()
-                            .withCurrentLimit(40)
-                            .withInverted(false)
-                            .withGearRatio(5)
-                            .withNeutralMode(NeutralModeValue.Coast),
+                    new TalonFXConfiguration()
+                            .withMotorOutput(new MotorOutputConfigs()
+                                    .withNeutralMode(NeutralModeValue.Coast)
+                                    .withInverted(InvertedValue.CounterClockwise_Positive))
+                            .withCurrentLimits(new CurrentLimitsConfigs()
+                                    .withStatorCurrentLimit(90)
+                                    .withSupplyCurrentLimit(50))
+                            .withFeedback(new FeedbackConfigs()
+                                    .withSensorToMechanismRatio(5)),
                     0.0,
                     MechanismSim.roller(0.01)
             )
