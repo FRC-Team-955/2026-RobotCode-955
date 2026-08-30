@@ -23,7 +23,7 @@ import org.littletonrobotics.junction.Logger;
 
 import java.util.function.DoubleSupplier;
 
-public class ExampleServoSubsystem implements Periodic {
+public class ExampleLookaheadServoSubsystem implements Periodic {
     // 0 = parallel with ground
     private static final double minPositionRad = Units.degreesToRadians(0);
     private static final double maxPositionRad = Units.degreesToRadians(90);
@@ -33,14 +33,14 @@ public class ExampleServoSubsystem implements Periodic {
 
     private static final double positionToleranceRad = Units.degreesToRadians(10);
 
-    private static final LoggedTunableNumber deploySetpointDegrees = new LoggedTunableNumber("ExampleServoSubsystem/Goal/Deploy", -45.0);
-    private static final LoggedTunableNumber profileLookaheadTimeSec = new LoggedTunableNumber("ExampleServoSubsystem/ProfileLookaheadTimeSec", 0.15);
+    private static final LoggedTunableNumber deploySetpointDegrees = new LoggedTunableNumber("ExampleLookaheadServoSubsystem/Goal/Deploy", -45.0);
+    private static final LoggedTunableNumber profileLookaheadTimeSec = new LoggedTunableNumber("ExampleLookaheadServoSubsystem/ProfileLookaheadTimeSec", 0.15);
 
     private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
 
     private final Motor motor = Motor
             .createSparkMax(
-                    "ExampleServoSubsystem",
+                    "ExampleLookaheadServoSubsystem",
                     -1,
                     new CtrlSparkMaxConfig()
                             .withNeutralMode(NeutralModeValue.Brake)
@@ -56,7 +56,7 @@ public class ExampleServoSubsystem implements Periodic {
                             true
                     )
             )
-            .withPositionGains(new LoggedTunablePIDF("ExampleServoSubsystem/Gains"));
+            .withPositionGains(new LoggedTunablePIDF("ExampleLookaheadServoSubsystem/Gains"));
 
     @RequiredArgsConstructor
     public enum Goal {
@@ -80,9 +80,9 @@ public class ExampleServoSubsystem implements Periodic {
     private TrapezoidProfile.State lookaheadState = new TrapezoidProfile.State();
 
     @Getter
-    private final static ExampleServoSubsystem instance = new ExampleServoSubsystem();
+    private final static ExampleLookaheadServoSubsystem instance = new ExampleLookaheadServoSubsystem();
 
-    private ExampleServoSubsystem() {
+    private ExampleLookaheadServoSubsystem() {
     }
 
     @Override
@@ -95,7 +95,7 @@ public class ExampleServoSubsystem implements Periodic {
 
     @Override
     public void periodicAfterCommands() {
-        Logger.recordOutput("ExampleServoSubsystem/Goal", goal);
+        Logger.recordOutput("ExampleLookaheadServoSubsystem/Goal", goal);
         if (DriverStation.isDisabled()) {
             motor.setVoltageRequest(0.0);
 
@@ -108,7 +108,7 @@ public class ExampleServoSubsystem implements Periodic {
 
             double setpointRad = goal.setpointRad.getAsDouble();
             setpointRad = MathUtil.clamp(setpointRad, minPositionRad, maxPositionRad);
-            Logger.recordOutput("ExampleServoSubsystem/OriginalSetpointRad", setpointRad);
+            Logger.recordOutput("ExampleLookaheadServoSubsystem/OriginalSetpointRad", setpointRad);
             TrapezoidProfile.State wantedState = new TrapezoidProfile.State(setpointRad, 0.0);
 
             if (lastSetpointRad == null || setpointRad != lastSetpointRad) {
@@ -118,16 +118,16 @@ public class ExampleServoSubsystem implements Periodic {
             lastSetpointRad = setpointRad;
 
             goalState = profile.calculate(Constants.loopPeriod, goalState, wantedState);
-            Logger.recordOutput("ExampleServoSubsystem/ProfileSetpointRad", goalState.position);
+            Logger.recordOutput("ExampleLookaheadServoSubsystem/ProfileSetpointRad", goalState.position);
 
             lookaheadState = profile.calculate(Constants.loopPeriod, lookaheadState, wantedState);
-            Logger.recordOutput("ExampleServoSubsystem/LookaheadSetpointRad", lookaheadState.position);
+            Logger.recordOutput("ExampleLookaheadServoSubsystem/LookaheadSetpointRad", lookaheadState.position);
 
             motor.setPositionRequest(lookaheadState.position);
         }
     }
 
-    @AutoLogOutput(key = "ExampleServoSubsystem/AtGoal")
+    @AutoLogOutput(key = "ExampleLookaheadServoSubsystem/AtGoal")
     public boolean atGoal() {
         return Math.abs(motor.getPositionRad() - goal.setpointRad.getAsDouble()) <= positionToleranceRad;
     }
