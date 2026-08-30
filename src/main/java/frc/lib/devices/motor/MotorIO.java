@@ -6,6 +6,7 @@ import frc.lib.devices.device.DeviceIO;
 import frc.lib.network.LoggedTunablePIDF;
 import org.littletonrobotics.junction.AutoLog;
 
+/** Device base classes should be abstract so that inheritors are forced to extend all methods. */
 public abstract class MotorIO extends DeviceIO<MotorIOInputsAutoLogged> {
     @AutoLog
     public static class MotorIOInputs {
