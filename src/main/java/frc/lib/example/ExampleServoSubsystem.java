@@ -4,15 +4,14 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import frc.lib.Util;
-import frc.lib.devices.MotorIOInputsAutoLogged;
-import frc.lib.devices.RequestType;
-import frc.lib.devices.motor.MotorIO;
+import frc.lib.devices.motor.CtrlSparkMaxConfig;
+import frc.lib.devices.motor.MechanismSim;
+import frc.lib.devices.motor.Motor;
 import frc.lib.network.LoggedTunableNumber;
+import frc.lib.network.LoggedTunablePIDF;
 import frc.lib.subsystem.Periodic;
 import frc.robot.Constants;
 import frc.robot.OperatorDashboard;
@@ -24,16 +23,40 @@ import org.littletonrobotics.junction.Logger;
 
 import java.util.function.DoubleSupplier;
 
-import static frc.lib.example.ExampleServoSubsystemConstants.*;
-
 public class ExampleServoSubsystem implements Periodic {
+    // 0 = parallel with ground
+    private static final double minPositionRad = Units.degreesToRadians(0);
+    private static final double maxPositionRad = Units.degreesToRadians(90);
+    private static final double initialPositionRad = minPositionRad;
+
+    private static final TrapezoidProfile.Constraints constraints = new TrapezoidProfile.Constraints(1, 3);
+
+    private static final double positionToleranceRad = Units.degreesToRadians(10);
+
     private static final LoggedTunableNumber deploySetpointDegrees = new LoggedTunableNumber("ExampleServoSubsystem/Goal/Deploy", -45.0);
     private static final LoggedTunableNumber profileLookaheadTimeSec = new LoggedTunableNumber("ExampleServoSubsystem/ProfileLookaheadTimeSec", 0.15);
 
     private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
 
-    private final MotorIO io = createIO();
-    private final MotorIOInputsAutoLogged inputs = new MotorIOInputsAutoLogged();
+    private final Motor motor = Motor
+            .createSparkMax(
+                    "ExampleServoSubsystem",
+                    -1,
+                    new CtrlSparkMaxConfig()
+                            .withNeutralMode(NeutralModeValue.Brake)
+                            .withInverted(false)
+                            .withGearRatio(120)
+                            .withCurrentLimit(40),
+                    initialPositionRad,
+                    MechanismSim.arm(
+                            0.1,
+                            Units.inchesToMeters(10),
+                            minPositionRad,
+                            maxPositionRad,
+                            true
+                    )
+            )
+            .withPositionGains(new LoggedTunablePIDF("ExampleServoSubsystem/Gains"));
 
     @RequiredArgsConstructor
     public enum Goal {
@@ -41,6 +64,7 @@ public class ExampleServoSubsystem implements Periodic {
         DEPLOY(() -> Units.degreesToRadians(deploySetpointDegrees.get())),
         ;
 
+        /** Should be constant for every loop cycle */
         private final DoubleSupplier setpointRad;
     }
 
@@ -55,38 +79,17 @@ public class ExampleServoSubsystem implements Periodic {
     private TrapezoidProfile.State goalState = new TrapezoidProfile.State();
     private TrapezoidProfile.State lookaheadState = new TrapezoidProfile.State();
 
-    private final Alert motorDisconnectedAlert = new Alert("ExampleServoSubsystem motor is disconnected.", Alert.AlertType.kError);
-
-    private static ExampleServoSubsystem instance;
-
-    public static synchronized ExampleServoSubsystem get() {
-        if (instance == null) {
-            instance = new ExampleServoSubsystem();
-        }
-
-        return instance;
-    }
+    @Getter
+    private final static ExampleServoSubsystem instance = new ExampleServoSubsystem();
 
     private ExampleServoSubsystem() {
-        if (instance != null) {
-            Util.error("Duplicate ExampleServoSubsystem created");
-        }
     }
 
     @Override
     public void periodicBeforeCommands() {
-        io.updateAndProcessInputs(inputs);
-        Logger.processInputs("Inputs/ExampleServoSubsystem", inputs);
-
-        motorDisconnectedAlert.set(!inputs.connected);
-
         // Apply network inputs
         if (operatorDashboard.coastOverride.hasChanged()) {
-            io.setNeutralMode(operatorDashboard.coastOverride.get() ? NeutralModeValue.Coast : NeutralModeValue.Brake);
-        }
-
-        if (gains.hasChanged()) {
-            io.setPositionPIDF(gains);
+            motor.setNeutralMode(operatorDashboard.coastOverride.get() ? NeutralModeValue.Coast : NeutralModeValue.Brake);
         }
     }
 
@@ -94,17 +97,18 @@ public class ExampleServoSubsystem implements Periodic {
     public void periodicAfterCommands() {
         Logger.recordOutput("ExampleServoSubsystem/Goal", goal);
         if (DriverStation.isDisabled()) {
-            io.setRequest(RequestType.VoltageVolts, 0);
+            motor.setVoltageRequest(0.0);
 
+            lastSetpointRad = null;
             // Reset states to current position
-            goalState = new TrapezoidProfile.State(inputs.positionRad, 0.0);
+            goalState = new TrapezoidProfile.State(motor.getPositionRad(), 0.0);
             lookaheadState = goalState;
         } else {
-            // See the comments above the lookaheadState and goalState variables for why we effectively calculate two profiles
+            // See the comments above the lookaheadState and goalState variables for why we calculate two profiles
 
             double setpointRad = goal.setpointRad.getAsDouble();
             setpointRad = MathUtil.clamp(setpointRad, minPositionRad, maxPositionRad);
-            //            Logger.recordOutput("ExampleServoSubsystem/OriginalSetpointRad", setpointRad);
+            Logger.recordOutput("ExampleServoSubsystem/OriginalSetpointRad", setpointRad);
             TrapezoidProfile.State wantedState = new TrapezoidProfile.State(setpointRad, 0.0);
 
             if (lastSetpointRad == null || setpointRad != lastSetpointRad) {
@@ -119,21 +123,13 @@ public class ExampleServoSubsystem implements Periodic {
             lookaheadState = profile.calculate(Constants.loopPeriod, lookaheadState, wantedState);
             Logger.recordOutput("ExampleServoSubsystem/LookaheadSetpointRad", lookaheadState.position);
 
-            io.setRequest(RequestType.PositionRad, lookaheadState.position);
+            motor.setPositionRequest(lookaheadState.position);
         }
-    }
-
-    /**
-     * Intended to be plugged into component rotation in RobotMechanism
-     */
-    public double getPositionRad() {
-        return inputs.positionRad;
     }
 
     @AutoLogOutput(key = "ExampleServoSubsystem/AtGoal")
     public boolean atGoal() {
-        double value = goal.setpointRad.getAsDouble();
-        return Math.abs(inputs.positionRad - value) <= positionToleranceRad;
+        return Math.abs(motor.getPositionRad() - goal.setpointRad.getAsDouble()) <= positionToleranceRad;
     }
 
     public Command waitUntilAtGoal() {
