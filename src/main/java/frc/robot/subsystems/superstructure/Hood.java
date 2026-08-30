@@ -30,7 +30,7 @@ import java.util.function.DoubleSupplier;
 
 public class Hood implements Periodic {
     private static final double minPositionRad = Units.degreesToRadians(15.0);
-    private static final double maxPositionRad = Units.degreesToRadians(40.0);
+    public static final double maxPositionRad = Units.degreesToRadians(40.0);
     private static final double initialPositionRad = minPositionRad;
     private static final double maxPositionUnderTrench = Units.degreesToRadians(30.0);
 
@@ -41,7 +41,7 @@ public class Hood implements Periodic {
      * Therefore, hood angle = 90° - shooting angle
      * and shooting angle = 90° - hood angle
      */
-    private static double convertBetweenShotAngleAndHoodAngleRad(double originalAngleRad) {
+    public static double convertBetweenShotAngleAndHoodAngleRad(double originalAngleRad) {
         return Math.PI / 2.0 - originalAngleRad;
     }
 
@@ -168,13 +168,21 @@ public class Hood implements Periodic {
         }
     }
 
+    public double getPositionRad() {
+        return motor.getPositionRad();
+    }
+
     public double getShotAngleRad() {
-        return convertBetweenShotAngleAndHoodAngleRad(motor.getPositionRad());
+        return convertBetweenShotAngleAndHoodAngleRad(getPositionRad());
     }
 
     public void finishHoming() {
         motor.setEncoderPosition(initialPositionRad);
         operatorDashboard.hoodNotHomedAlert.set(false);
+    }
+
+    public boolean isEmergencyStopped() {
+        return motor.isEmergencyStopped();
     }
 
     public boolean isDisconnected() {

@@ -7,13 +7,8 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import frc.robot.SimManager;
 import frc.robot.shooting.ShootingKinematics;
-import frc.robot.subsystems.superintake.intakepivot.IntakePivot;
-import frc.robot.subsystems.superintake.intakerollers.IntakeRollers;
-import frc.robot.subsystems.superstructure.feeder.Feeder;
-import frc.robot.subsystems.superstructure.flywheel.Flywheel;
-import frc.robot.subsystems.superstructure.flywheel.FlywheelConstants;
-import frc.robot.subsystems.superstructure.hood.Hood;
-import frc.robot.subsystems.superstructure.spindexer.Spindexer;
+import frc.robot.subsystems.superintake.IntakePivot;
+import frc.robot.subsystems.superintake.IntakeRollers;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.seasonspecific.rebuilt2026.RebuiltFuelOnFly;
 import org.littletonrobotics.junction.Logger;
@@ -72,18 +67,18 @@ public class SuperstructureIOSim extends SuperstructureIO {
                         simManager.driveSimulation.getDriveTrainSimulatedChassisSpeedsFieldRelative(),
                         robotPose.getRotation(),
                         Meters.of(shootingKinematics.getFuelExitTranslation().getZ()),
-                        MetersPerSecond.of(Units.rotationsPerMinuteToRadiansPerSecond(flywheel.getVelocityRPM()) * FlywheelConstants.flywheelRadiusMeters),
+                        MetersPerSecond.of(flywheel.getVelocityRadPerSec() * Flywheel.radiusMeters),
                         // Applying the shooter facing direction to the maple-sim parameter
                         // causes issues because it causes the shooter position to be rotated
                         // which puts it in the opposite corner of the robot. Instead, just
                         // reverse the hood
-                        Radians.of(Math.PI / 2.0 + hood.getPositionRad())
+                        Radians.of(Math.PI - hood.getShotAngleRad())
                 );
                 if (!shootingKinematics.getShootingParameters().isPass()) {
                     gamePiece.disableBecomesGamePieceOnFieldAfterTouchGround();
                 }
                 Logger.recordOutput("ShootingKinematics/ProjectileVelocity", gamePiece.getVelocity3dMPS());
-                Logger.recordOutput("ShootingKinematics/ProjectileSpeedRobotRelative", Units.rotationsPerMinuteToRadiansPerSecond(flywheel.getVelocityRPM()) * FlywheelConstants.flywheelRadiusMeters);
+                Logger.recordOutput("ShootingKinematics/ProjectileSpeedRobotRelative", flywheel.getVelocityRadPerSec() * Flywheel.radiusMeters);
                 SimulatedArena.getInstance().addGamePieceProjectile(gamePiece);
             }
         }

@@ -30,7 +30,7 @@ import org.littletonrobotics.junction.Logger;
 import java.util.function.DoubleSupplier;
 
 public class Flywheel implements Periodic {
-    public static final double flywheelRadiusMeters = Units.inchesToMeters(2.0);
+    public static final double radiusMeters = Units.inchesToMeters(2.0);
 
     private static final LoggedTunableNumber ejectRPM = new LoggedTunableNumber("Superstructure/Flywheel/Goal/EjectRPM", -300);
 
@@ -127,8 +127,12 @@ public class Flywheel implements Periodic {
         }
     }
 
+    public double getVelocityRadPerSec() {
+        return leaderMotor.getVelocityRadPerSec();
+    }
+
     public double getVelocityRPM() {
-        return Units.radiansPerSecondToRotationsPerMinute(leaderMotor.getVelocityRadPerSec());
+        return Units.radiansPerSecondToRotationsPerMinute(getVelocityRadPerSec());
     }
 
     public boolean isDisconnected() {
