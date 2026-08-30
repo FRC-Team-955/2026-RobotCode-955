@@ -23,7 +23,7 @@ public abstract class Device<IO extends DeviceIO<Inputs>, Inputs extends Loggabl
 
     protected void updateAndProcessInputs() {
         io.updateInputs(inputs);
-        Logger.processInputs(name, inputs);
+        Logger.processInputs("Inputs/" + name, inputs);
 
         disconnectedAlert.set(!isConnected());
     }
