@@ -60,7 +60,7 @@ public class Hood implements Periodic {
                             .withNeutralMode(NeutralModeValue.Brake),
                     initialPositionRad,
                     MechanismSim.arm(
-                            0.01,
+                            0.1,
                             Units.inchesToMeters(2),
                             minPositionRad,
                             maxPositionRad,
@@ -74,8 +74,8 @@ public class Hood implements Periodic {
                         .withG(0.2, GravityTypeValue.Arm_Cosine)
                         .withS(0.1, StaticFeedforwardSignValue.UseClosedLoopSign);
                 case SIM -> new LoggedTunablePIDF("Superstructure/Hood/Gains")
-                        .withP(30)
-                        .withG(0.3, GravityTypeValue.Arm_Cosine);
+                        .withP(2)
+                        .withG(1, GravityTypeValue.Arm_Cosine);
             });
 
     @RequiredArgsConstructor
