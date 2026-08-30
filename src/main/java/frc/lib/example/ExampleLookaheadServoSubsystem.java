@@ -103,7 +103,7 @@ public class ExampleLookaheadServoSubsystem implements Periodic {
     @Override
     public void periodicAfterCommands() {
         Logger.recordOutput("ExampleLookaheadServoSubsystem/Goal", goal);
-        if (DriverStation.isDisabled()) {
+        if (DriverStation.isDisabled() || motor.isEmergencyStopped()) {
             motor.setVoltageRequest(0.0);
 
             lastSetpointRad = null;

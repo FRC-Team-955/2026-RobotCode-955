@@ -112,7 +112,7 @@ public class ExampleProfiledServoSubsystem implements Periodic {
     @Override
     public void periodicAfterCommands() {
         Logger.recordOutput("ExampleProfiledServoSubsystem/Goal", goal);
-        if (DriverStation.isDisabled()) {
+        if (DriverStation.isDisabled() || motor.isEmergencyStopped()) {
             motor.setVoltageRequest(0.0);
 
             // Reset state to current position
