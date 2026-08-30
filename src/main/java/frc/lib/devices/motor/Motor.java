@@ -83,6 +83,7 @@ public class Motor extends Device<MotorIO, MotorIOInputsAutoLogged> {
             } else {
                 System.out.println("Undoing emergency stop for " + name);
                 setNeutralMode(normalNeutralMode);
+                reinstateFollower.run();
             }
             this.emergencyStopped = emergencyStopped;
             emergencyStoppedAlert.set(emergencyStopped);
@@ -107,16 +108,18 @@ public class Motor extends Device<MotorIO, MotorIOInputsAutoLogged> {
         }
     }
 
+    /** Used to re-enable following after emergency stop is disabled. */
+    private Runnable reinstateFollower = () -> {};
+
     /**
      * NOTE: BLOCKS THE MAIN THREAD!!! ONLY CALL ON STARTUP!!!!
-     * <p>
-     * NOTE 2: Emergency stopping will break following. More thought needs to be
-     * put into this for it to work. TODO: maybe just rewrite the whole MotorIO to be
-     * more follower friendly idk
      */
     public void setFollowRequest(Motor leader, MotorAlignmentValue alignment) {
-        System.out.println("Making " + name + " follow " + leader.name);
-        io.setFollowRequest(leader.io, alignment);
+        reinstateFollower = () -> {
+            System.out.println("Making " + name + " follow " + leader.name);
+            io.setFollowRequest(leader.io, alignment);
+        };
+        reinstateFollower.run();
     }
 
     public void setNeutralMode(NeutralModeValue neutralMode) {
