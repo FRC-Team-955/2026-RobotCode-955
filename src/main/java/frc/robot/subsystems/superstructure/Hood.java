@@ -1,23 +1,26 @@
-package frc.robot.subsystems.superstructure.hood;
+package frc.robot.subsystems.superstructure;
 
+import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.lib.EnergyLogger;
 import frc.lib.Util;
-import frc.lib.motor.MotorIOInputsAutoLogged;
+import frc.lib.devices.motor.CtrlSparkMaxConfig;
+import frc.lib.devices.motor.MechanismSim;
+import frc.lib.devices.motor.Motor;
+import frc.lib.network.LoggedTunablePIDF;
 import frc.lib.subsystem.Periodic;
 import frc.robot.BuildConstants;
 import frc.robot.OperatorDashboard;
 import frc.robot.RobotState;
 import frc.robot.shooting.ShootingKinematics;
-import frc.robot.subsystems.superstructure.hood.HoodIO.HoodCurrentLimitMode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -25,15 +28,55 @@ import org.littletonrobotics.junction.Logger;
 
 import java.util.function.DoubleSupplier;
 
-import static frc.robot.subsystems.superstructure.hood.HoodConstants.*;
-
 public class Hood implements Periodic {
+    private static final double minPositionRad = Units.degreesToRadians(15.0);
+    private static final double maxPositionRad = Units.degreesToRadians(40.0);
+    private static final double initialPositionRad = minPositionRad;
+    private static final double maxPositionUnderTrench = Units.degreesToRadians(30.0);
+
+    /**
+     * Hood angle for vertical shot is 0°
+     * Shooting angle for vertical shot is 90°
+     * Shooting angle for 15° from vertical is 75°
+     * Therefore, hood angle = 90° - shooting angle
+     * and shooting angle = 90° - hood angle
+     */
+    private static double convertBetweenShotAngleAndHoodAngleRad(double originalAngleRad) {
+        return Math.PI / 2.0 - originalAngleRad;
+    }
+
     private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
     private static final ShootingKinematics shootingKinematics = ShootingKinematics.get();
     private static final RobotState robotState = RobotState.get();
     private static final EnergyLogger energyLogger = EnergyLogger.get();
-    private final HoodIO io = createIO();
-    private final MotorIOInputsAutoLogged inputs = new MotorIOInputsAutoLogged();
+
+    private final Motor motor = Motor.createSparkMax(
+                    "Superstructure/Hood",
+                    10,
+                    new CtrlSparkMaxConfig()
+                            .withInverted(true)
+                            .withCurrentLimit(30)
+                            .withGearRatio(5.0 * 2.0 * (220.0 / 20.0))
+                            .withNeutralMode(NeutralModeValue.Brake),
+                    initialPositionRad,
+                    MechanismSim.arm(
+                            0.01,
+                            Units.inchesToMeters(2),
+                            minPositionRad,
+                            maxPositionRad,
+                            true
+                    )
+            )
+            .withPositionGains(switch (BuildConstants.mode) {
+                case REAL, REPLAY -> new LoggedTunablePIDF("Superstructure/Hood/Gains")
+                        .withP(2.0)
+                        .withD(0.0)
+                        .withG(0.2, GravityTypeValue.Arm_Cosine)
+                        .withS(0.1, StaticFeedforwardSignValue.UseClosedLoopSign);
+                case SIM -> new LoggedTunablePIDF("Superstructure/Hood/Gains")
+                        .withP(30)
+                        .withG(0.3, GravityTypeValue.Arm_Cosine);
+            });
 
     @RequiredArgsConstructor
     public enum Goal {
@@ -50,26 +93,11 @@ public class Hood implements Periodic {
     @Getter
     private Goal goal = Goal.SHOOT;
 
-    private HoodCurrentLimitMode currentLimitMode = HoodCurrentLimitMode.NORMAL;
-
-    public void setCurrentLimitMode(HoodCurrentLimitMode newCurrentLimitMode) {
-        if (currentLimitMode != newCurrentLimitMode) {
-            currentLimitMode = newCurrentLimitMode;
-            io.setCurrentLimit(currentLimitMode);
-        }
-    }
-
-    @Getter
-    private boolean emergencyStopped = false;
     private final Debouncer emergencyStopDebouncer = new Debouncer(2.0, Debouncer.DebounceType.kRising);
 
     @Getter
     private boolean atVelocityThresholdForHoming = false;
     private final Debouncer homingVelocityDebouncer = new Debouncer(0.1, Debouncer.DebounceType.kRising);
-
-    private final Alert motorDisconnectedAlert = new Alert("Hood motor is disconnected.", Alert.AlertType.kError);
-    public final Alert highTemperatureAlert = new Alert("Hood motor temperature is high.", Alert.AlertType.kWarning);
-    private final Alert emergencyStoppedAlert = new Alert("Hood is E-stopped!", Alert.AlertType.kError);
 
     private static Hood instance;
 
@@ -89,41 +117,26 @@ public class Hood implements Periodic {
 
     @Override
     public void periodicBeforeCommands() {
-        io.updateInputs(inputs);
-        Logger.processInputs("Inputs/Superstructure/Hood", inputs);
+        energyLogger.reportPowerUsage("Hood", motor.isConnected() ? motor.getAppliedVolts() * motor.getSupplyCurrentAmps() : 0.0);
 
-        motorDisconnectedAlert.set(!inputs.connected);
-        highTemperatureAlert.set(inputs.temperatureCelsius > 50);
-
-        energyLogger.reportPowerUsage("Hood", inputs.connected ? inputs.appliedVolts * inputs.supplyCurrentAmps : 0.0);
-
-        boolean shouldEmergencyStop = emergencyStopDebouncer.calculate(inputs.statorCurrentAmps >= 20);
-        if (!emergencyStopped) {
+        boolean shouldEmergencyStop = emergencyStopDebouncer.calculate(motor.getStatorCurrentAmps() >= 20);
+        if (!motor.isEmergencyStopped()) {
             if ((shouldEmergencyStop || operatorDashboard.hoodEStop.get()) && !BuildConstants.isSim) {
-                io.setVoltageRequest(0.0);
-                io.setNeutralMode(NeutralModeValue.Coast);
-                emergencyStopped = true;
+                motor.emergencyStop();
                 operatorDashboard.hoodEStop.set(true);
             }
         } else {
             if (!operatorDashboard.hoodEStop.get()) {
-                // Let operator turn off e-stop
-                io.setNeutralMode(NeutralModeValue.Brake);
-                emergencyStopped = false;
+                motor.undoEmergencyStop(NeutralModeValue.Brake);
                 operatorDashboard.hoodEStop.set(false);
             }
         }
-        emergencyStoppedAlert.set(emergencyStopped);
 
-        atVelocityThresholdForHoming = homingVelocityDebouncer.calculate(goal == Goal.HOME && Math.abs(inputs.velocityRadPerSec) < 0.1);
+        atVelocityThresholdForHoming = homingVelocityDebouncer.calculate(goal == Goal.HOME && Math.abs(motor.getVelocityRadPerSec()) < 0.1);
 
         // Apply network inputs
-        if (!emergencyStopped && operatorDashboard.coastOverride.hasChanged()) {
-            io.setNeutralMode(operatorDashboard.coastOverride.get() ? NeutralModeValue.Coast : NeutralModeValue.Brake);
-        }
-
-        if (gains.hasChanged()) {
-            io.setPositionPIDF(gains);
+        if (!motor.isEmergencyStopped() && operatorDashboard.coastOverride.hasChanged()) {
+            motor.setNeutralMode(operatorDashboard.coastOverride.get() ? NeutralModeValue.Coast : NeutralModeValue.Brake);
         }
     }
 
@@ -133,13 +146,13 @@ public class Hood implements Periodic {
 
         // Turn off E-stop when homing
         if (goal == Goal.HOME) {
-            emergencyStopped = false;
+            motor.undoEmergencyStop(NeutralModeValue.Brake);
         }
 
-        if (DriverStation.isDisabled() || emergencyStopped || goal == Goal.HOME_FINALIZE) {
-            io.setVoltageRequest(0.0);
+        if (DriverStation.isDisabled() || motor.isEmergencyStopped() || goal == Goal.HOME_FINALIZE) {
+            motor.setVoltageRequest(0.0);
         } else if (goal == Goal.HOME) {
-            io.setVoltageRequest(-0.5);
+            motor.setVoltageRequest(-0.5);
         } else {
             double setpointRad = goal.setpointRad.getAsDouble();
             boolean isInTrench = robotState.isInTrench(robotState.getTranslation().
@@ -151,25 +164,21 @@ public class Hood implements Periodic {
             setpointRad = MathUtil.clamp(setpointRad, minPositionRad, maxPositionRad);
             if (BuildConstants.isSimOrReplay)
                 Logger.recordOutput("Superstructure/Hood/SetpointRad", setpointRad);
-            io.setPositionRequest(setpointRad);
+            motor.setPositionRequest(setpointRad);
         }
     }
 
-    public double getPositionRad() {
-        return inputs.positionRad;
-    }
-
     public double getShotAngleRad() {
-        return convertBetweenShotAngleAndHoodAngleRad(getPositionRad());
+        return convertBetweenShotAngleAndHoodAngleRad(motor.getPositionRad());
     }
 
     public void finishHoming() {
-        io.setEncoderPositionToInitial();
+        motor.setEncoderPosition(initialPositionRad);
         operatorDashboard.hoodNotHomedAlert.set(false);
     }
 
     public boolean isDisconnected() {
-        return !inputs.connected;
+        return !motor.isConnected();
     }
 
     public Transform3d transform() {
@@ -178,7 +187,7 @@ public class Hood implements Periodic {
                 new Rotation3d(0.0, Units.degreesToRadians(-90.0), Math.PI)
         ).plus(new Transform3d(
                 new Translation3d(),
-                new Rotation3d(0.0, getPositionRad(), 0.0)
+                new Rotation3d(0.0, motor.getPositionRad(), 0.0)
         ));
     }
 }
