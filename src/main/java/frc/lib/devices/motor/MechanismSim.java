@@ -5,6 +5,7 @@ import com.revrobotics.sim.SparkMaxSim;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import frc.robot.Constants;
@@ -25,6 +26,8 @@ public class MechanismSim {
     public void update(TalonFXSimState talonSim) {
         // https://v6.docs.ctr-electronics.com/en/latest/docs/api-reference/simulation/simulation-intro.html
 
+        talonSim.setSupplyVoltage(RobotController.getBatteryVoltage());
+
         // use the motor voltage to calculate new position and velocity
         // using WPILib's DCMotorSim class for physics simulation
         iterate.accept(talonSim.getMotorVoltage());
@@ -40,14 +43,13 @@ public class MechanismSim {
         // https://docs.revrobotics.com/revlib/spark/sim/simulation-getting-started
 
         // update the simulation of what our mechanism is doing
-        final double batteryVoltage = 12.0;
-        iterate.accept(sparkSim.getAppliedOutput() * batteryVoltage);
+        iterate.accept(sparkSim.getAppliedOutput() * RobotController.getBatteryVoltage());
 
         // update the spark max
         sparkSim.iterate(
                 // we don't need to convert to RPM here because we do that in the spark max config
                 mechanismVelocityRadPerSec.getAsDouble(),
-                batteryVoltage,
+                RobotController.getBatteryVoltage(),
                 Constants.loopPeriod
         );
     }
