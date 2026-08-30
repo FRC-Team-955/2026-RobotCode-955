@@ -151,16 +151,16 @@ public class Robot extends LoggedRobot {
                 // Operator dashboard before super*
                 robotContainer.operatorDashboard,
                 // Subsystems depend on goals issued by superintake and superstructure
-                //robotContainer.superintake,
-                //robotContainer.superstructure,
+                robotContainer.superintake,
+                robotContainer.superstructure,
 
                 // Subsystems - the order of these doesn't matter
-                //robotContainer.superintake.intakeRollers,
-                //robotContainer.superintake.intakePivot,
-                //robotContainer.superstructure.spindexer,
-                //robotContainer.superstructure.flywheel,
-                //robotContainer.superstructure.hood,
-                //robotContainer.superstructure.feeder,
+                robotContainer.superintake.intakeRollers,
+                robotContainer.superintake.intakePivot,
+                robotContainer.superstructure.spindexer,
+                robotContainer.superstructure.flywheel,
+                robotContainer.superstructure.hood,
+                robotContainer.superstructure.feeder,
 
                 // Misc
                 robotContainer.canLogger,

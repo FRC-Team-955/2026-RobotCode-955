@@ -1,19 +1,27 @@
 package frc.robot;
 
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.CANLogger;
 import frc.lib.EnergyLogger;
 import frc.lib.devices.device.DeviceManager;
+import frc.robot.autos.AutoManager;
 import frc.robot.controller.Controller;
 import frc.robot.shooting.ShootingKinematics;
 import frc.robot.subsystems.apriltagvision.AprilTagVision;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.gamepiecevision.GamePieceVision;
 import frc.robot.subsystems.leds.LEDs;
+import frc.robot.subsystems.superintake.Superintake;
+import frc.robot.subsystems.superstructure.Superstructure;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
+
+import java.util.OptionalDouble;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -35,15 +43,15 @@ public class RobotContainer {
     public final GamePieceVision gamePieceVision = GamePieceVision.get();
     public final LEDs leds = LEDs.get();
 
-    //public final Superintake superintake = Superintake.get();
-    //public final Superstructure superstructure = Superstructure.get();
+    public final Superintake superintake = Superintake.get();
+    public final Superstructure superstructure = Superstructure.get();
 
     /* Other stuff */
     public final Controller controller = Controller.get();
     public final CANLogger canLogger = CANLogger.get();
     public final RobotMechanism robotMechanism = RobotMechanism.get();
     public final ShootingKinematics shootingKinematics = ShootingKinematics.get();
-    //public final AutoManager autoManager = AutoManager.get();
+    public final AutoManager autoManager = AutoManager.get();
     public final HubShiftTracker hubShiftTracker = HubShiftTracker.get();
     public final EnergyLogger energyLogger = EnergyLogger.get();
     public final OperatorDashboard operatorDashboard = OperatorDashboard.get();
@@ -66,8 +74,8 @@ public class RobotContainer {
 
     private void setDefaultCommands() {
         drive.setDefaultCommand(drive.joystickDrive());
-        //superintake.setDefaultCommand(superintake.setGoal(Superintake.Goal.IDLE).ignoringDisable(true));
-        //superstructure.setDefaultCommand(superstructure.setGoal(Superstructure.Goal.IDLE).ignoringDisable(true));
+        superintake.setDefaultCommand(superintake.setGoal(Superintake.Goal.IDLE).ignoringDisable(true));
+        superstructure.setDefaultCommand(superstructure.setGoal(Superstructure.Goal.IDLE).ignoringDisable(true));
     }
 
     /**
@@ -79,7 +87,6 @@ public class RobotContainer {
     private void configureBindings() {
         controller.y().onTrue(robotState.resetRotation());
 
-        /*
         Trigger shoot = controller.leftTrigger();
         Trigger shootForce = controller.leftBumper();
         Trigger anyShoot = shoot.or(shootForce);
@@ -128,7 +135,6 @@ public class RobotContainer {
         new Trigger(operatorDashboard.homeHood::get)
                 .and(DriverStation::isDisabled)
                 .onTrue(Commands.runOnce(superstructure.hood::finishHoming).ignoringDisable(true));
-         */
     }
 
     /**
@@ -137,8 +143,7 @@ public class RobotContainer {
      * @return the command to run in autonomous
      */
     public Command getAutonomousCommand() {
-        return null;
-        //return autoManager.getSelectedAutoCommand();
+        return autoManager.getSelectedAutoCommand();
     }
 
     public Command getTestCommand() {

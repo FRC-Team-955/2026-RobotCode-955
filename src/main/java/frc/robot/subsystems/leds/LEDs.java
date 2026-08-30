@@ -10,11 +10,14 @@ import frc.lib.Util;
 import frc.lib.subsystem.Periodic;
 import frc.robot.HubShiftTracker;
 import frc.robot.OperatorDashboard;
+import frc.robot.autos.AutoManager;
 import frc.robot.shooting.ShootingKinematics;
 import frc.robot.subsystems.apriltagvision.AprilTagVision;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.SparkCANcoderHelper;
 import frc.robot.subsystems.gamepiecevision.GamePieceVision;
+import frc.robot.subsystems.superintake.Superintake;
+import frc.robot.subsystems.superstructure.Superstructure;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.mechanism.LoggedMechanism2d;
 import org.littletonrobotics.junction.mechanism.LoggedMechanismLigament2d;
@@ -26,14 +29,14 @@ import static frc.robot.subsystems.leds.LEDConstants.length;
 public class LEDs implements Periodic {
     private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
     private static final ShootingKinematics shootingKinematics = ShootingKinematics.get();
-    //private static final AutoManager autoManager = AutoManager.get();
+    private static final AutoManager autoManager = AutoManager.get();
     private static final AprilTagVision aprilTagVision = AprilTagVision.get();
     private static final GamePieceVision gamePieceVision = GamePieceVision.get();
     private static final HubShiftTracker hubShiftTracker = HubShiftTracker.get();
 
     private static final Drive drive = Drive.get();
-    //private static final Superintake superintake = Superintake.get();
-    //private static final Superstructure superstructure = Superstructure.get();
+    private static final Superintake superintake = Superintake.get();
+    private static final Superstructure superstructure = Superstructure.get();
 
     private final LEDsIO io = createIO();
     private final AddressableLEDBuffer buffer = new AddressableLEDBuffer(length);
@@ -83,7 +86,7 @@ public class LEDs implements Periodic {
             getDisabledPattern().applyTo(buffer);
         } else {
             getEnabledPatternFirstHalf().applyTo(firstHalfView);
-            //getEnabledPatternSecondHalf().applyTo(secondHalfView);
+            getEnabledPatternSecondHalf().applyTo(secondHalfView);
         }
 
         io.setData(buffer);
@@ -103,10 +106,10 @@ public class LEDs implements Periodic {
     private LEDPattern getDisabledPattern() {
         if (aprilTagVision.anyCamerasDisconnected() ||
                 //gamePieceVision.anyCamerasDisconnected() ||
-                //superstructure.hood.isEmergencyStopped() ||
-                //superintake.intakePivot.isEmergencyStopped() ||
-                //superintake.isAnythingDisconnected() ||
-                //superstructure.isAnythingDisconnected() ||
+                superstructure.hood.isEmergencyStopped() ||
+                superintake.intakePivot.isEmergencyStopped() ||
+                superintake.isAnythingDisconnected() ||
+                superstructure.isAnythingDisconnected() ||
                 drive.isAnythingDisconnected() ||
                 SparkCANcoderHelper.isAnyResetFailed()) {
             return LEDPatterns.somethingIsReallyWrong;
@@ -141,17 +144,17 @@ public class LEDs implements Periodic {
                 //superstructure.hood.isEmergencyStopped() ||
                 //superintake.intakePivot.isEmergencyStopped() ||
                 hubShiftTracker.gameDataBrokenAlert.get() ||
-                //superintake.isAnythingDisconnected() ||
-                //superstructure.isAnythingDisconnected() ||
+                superintake.isAnythingDisconnected() ||
+                superstructure.isAnythingDisconnected() ||
                 drive.isAnythingDisconnected() ||
                 SparkCANcoderHelper.isAnyResetFailed()) {
             return LEDPatterns.somethingIsReallyWrong;
         }
 
         //if (
-        //superintake.intakeRollers.highTemperatureAlert.get() ||
-        //        superstructure.flywheel.highTemperatureAlert.get() ||
-        //        superstructure.hood.highTemperatureAlert.get()
+        //        superintake.intakeRollers.highTemperatureAlert.get() ||
+        //                superstructure.flywheel.highTemperatureAlert.get() ||
+        //                superstructure.hood.highTemperatureAlert.get()
         //) {
         //    return LEDPatterns.hotMotors;
         //}
@@ -163,18 +166,18 @@ public class LEDs implements Periodic {
         return LEDPatterns.idle;
     }
 
-    //private LEDPattern getEnabledPatternSecondHalf() {
-    //    return switch (superstructure.getGoal()) {
-    //        case SHOOT -> shootingKinematics.isShootingParametersMet()
-    //                ? LEDPatterns.shooting
-    //                : (
-    //                shootingKinematics.isShiftMet()
-    //                        ? LEDPatterns.aiming
-    //                        : LEDPatterns.waitingForShift
-    //        );
-    //        case SHOOT_FORCE -> LEDPatterns.shootingForced;
-    //        default -> LEDPatterns.idle;
-    //    };
-    //}
+    private LEDPattern getEnabledPatternSecondHalf() {
+        return switch (superstructure.getGoal()) {
+            case SHOOT -> shootingKinematics.isShootingParametersMet()
+                    ? LEDPatterns.shooting
+                    : (
+                    shootingKinematics.isShiftMet()
+                            ? LEDPatterns.aiming
+                            : LEDPatterns.waitingForShift
+            );
+            case SHOOT_FORCE -> LEDPatterns.shootingForced;
+            default -> LEDPatterns.idle;
+        };
+    }
 }
 
