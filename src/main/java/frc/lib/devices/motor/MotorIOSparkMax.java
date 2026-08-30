@@ -1,4 +1,4 @@
-package frc.lib.device;
+package frc.lib.devices.motor;
 
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -101,7 +101,7 @@ public class MotorIOSparkMax extends MotorIO {
     @Override
     public void setGains(LoggedTunablePIDF newGains) {
         var newConfig = new SparkMaxConfig();
-        newGains.applySpark(newConfig.closedLoop);
+        newGains.applySpark(newConfig.closedLoop, ClosedLoopSlot.kSlot0);
         tryUntilOkAsync(5, () -> spark.configure(
                 newConfig,
                 ResetMode.kNoResetSafeParameters,

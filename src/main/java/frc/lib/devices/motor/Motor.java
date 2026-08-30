@@ -1,9 +1,9 @@
-package frc.lib.device;
+package frc.lib.devices.motor;
 
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.wpilibj.Alert;
-import frc.lib.motor.MotorIOInputsAutoLogged;
+import frc.lib.devices.device.Device;
 import frc.lib.network.LoggedTunablePIDF;
 
 public class Motor extends Device<MotorIO, MotorIOInputsAutoLogged> {
@@ -20,7 +20,7 @@ public class Motor extends Device<MotorIO, MotorIOInputsAutoLogged> {
     }
 
     @Override
-    void updateAndProcessInputs() {
+    protected void updateAndProcessInputs() {
         super.updateAndProcessInputs();
 
         highTemperatureAlert.set(getTemperatureCelsius() > 50.0);

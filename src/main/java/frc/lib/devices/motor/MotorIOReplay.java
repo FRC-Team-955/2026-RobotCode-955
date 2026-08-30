@@ -1,4 +1,4 @@
-package frc.lib.device;
+package frc.lib.devices.motor;
 
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;

@@ -1,4 +1,4 @@
-package frc.lib.device;
+package frc.lib.devices.motor;
 
 import com.revrobotics.sim.SparkMaxSim;
 import edu.wpi.first.math.system.plant.DCMotor;

@@ -1,7 +1,8 @@
-package frc.lib.device;
+package frc.lib.devices.motor;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.PositionVoltage;
@@ -117,7 +118,7 @@ public class MotorIOTalonFX extends MotorIO {
 
     @Override
     public void setGains(LoggedTunablePIDF newGains) {
-        config.Slot0 = newGains.toPhoenix();
+        config.Slot0 = Slot0Configs.from(newGains.toPhoenix());
         tryUntilOkAsync(5, () -> talon.getConfigurator().apply(config, 0.25));
     }
 

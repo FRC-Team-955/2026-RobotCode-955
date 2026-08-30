@@ -1,6 +1,7 @@
-package frc.lib.device;
+package frc.lib.devices.motor;
 
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.FeedbackSensor;
 import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
@@ -77,7 +78,7 @@ public class CtrlSparkMaxConfig {
     }
 
     public CtrlSparkMaxConfig withGains(LoggedTunablePIDF gains) {
-        gains.applySpark(config.closedLoop);
+        gains.applySpark(config.closedLoop, ClosedLoopSlot.kSlot0);
         return this;
     }
 }

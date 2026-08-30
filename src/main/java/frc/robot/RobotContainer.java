@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.CANLogger;
 import frc.lib.EnergyLogger;
+import frc.lib.devices.device.DeviceManager;
 import frc.robot.controller.Controller;
 import frc.robot.shooting.ShootingKinematics;
 import frc.robot.subsystems.apriltagvision.AprilTagVision;
@@ -25,6 +26,9 @@ public class RobotContainer {
     private final LoggedDashboardChooser<Command> characterizationChooser = new LoggedDashboardChooser<>("Characterization Choices");
 
     public final RobotState robotState = RobotState.get();
+
+    public final DeviceManager deviceManager = DeviceManager.getInstance();
+
     /* Subsystems */
     public final Drive drive = Drive.get();
     public final AprilTagVision aprilTagVision = AprilTagVision.get();

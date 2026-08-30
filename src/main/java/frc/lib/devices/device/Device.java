@@ -1,4 +1,4 @@
-package frc.lib.device;
+package frc.lib.devices.device;
 
 import edu.wpi.first.wpilibj.Alert;
 import org.littletonrobotics.junction.Logger;
@@ -21,13 +21,11 @@ public abstract class Device<IO extends DeviceIO<Inputs>, Inputs extends Loggabl
         DeviceManager.getInstance().addDevice(this);
     }
 
-    /* package-private */ void updateAndProcessInputs() {
+    protected void updateAndProcessInputs() {
         io.updateInputs(inputs);
         Logger.processInputs(name, inputs);
 
         disconnectedAlert.set(!isConnected());
-
-        // TODO gains
     }
 
     public abstract boolean isConnected();

@@ -1,4 +1,4 @@
-package frc.lib.device;
+package frc.lib.devices.device;
 
 import frc.lib.subsystem.Periodic;
 import lombok.Getter;
