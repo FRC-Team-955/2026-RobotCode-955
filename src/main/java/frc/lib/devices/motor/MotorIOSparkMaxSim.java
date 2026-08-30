@@ -15,7 +15,7 @@ public class MotorIOSparkMaxSim extends MotorIOSparkMax {
         DCMotor motor = DCMotor.getNEO(1);
         sparkSim = new SparkMaxSim(spark, motor);
 
-        mechanismSim = mechanismSimBuilder.build(motor, initialPositionRad);
+        mechanismSim = mechanismSimBuilder.build(motor, initialPositionRad, config.getGearRatio());
     }
 
     @Override

@@ -16,7 +16,7 @@ public class MotorIOTalonFXSim extends MotorIOTalonFX {
         talonSim.setMotorType(TalonFXSimState.MotorType.KrakenX60);
 
         // A single kraken is usually not correct, but it's good enough for sim
-        mechanismSim = mechanismSimBuilder.build(DCMotor.getKrakenX60(1), initialPositionRad);
+        mechanismSim = mechanismSimBuilder.build(DCMotor.getKrakenX60(1), initialPositionRad, config.Feedback.SensorToMechanismRatio);
     }
 
     @Override

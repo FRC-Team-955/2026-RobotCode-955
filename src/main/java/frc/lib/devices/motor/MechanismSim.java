@@ -52,14 +52,13 @@ public class MechanismSim {
 
     @FunctionalInterface
     public interface Builder {
-        MechanismSim build(DCMotor motor, double initialPositionRad);
+        MechanismSim build(DCMotor motor, double initialPositionRad, double gearRatio);
     }
 
     public static Builder roller(
-            double gearRatio,
             double JKgMetersSquared
     ) {
-        return (motor, initialPositionRad) -> {
+        return (motor, initialPositionRad, gearRatio) -> {
             DCMotorSim motorSim = new DCMotorSim(
                     LinearSystemId.createDCMotorSystem(motor, JKgMetersSquared, gearRatio),
                     motor,
@@ -80,14 +79,13 @@ public class MechanismSim {
     }
 
     public static Builder arm(
-            double gearRatio,
             double JKgMetersSquared,
             double armLength,
             double minAngleRads,
             double maxAngleRads,
             boolean simulateGravity
     ) {
-        return (motor, initialPositionRad) -> {
+        return (motor, initialPositionRad, gearRatio) -> {
             SingleJointedArmSim armSim = new SingleJointedArmSim(
                     motor,
                     gearRatio,

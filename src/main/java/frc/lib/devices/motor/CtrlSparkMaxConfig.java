@@ -4,6 +4,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.revrobotics.spark.FeedbackSensor;
 import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
+import lombok.Getter;
 
 /**
  * Spark MAX's have bad defaults and a messy config, so we use this class to clean up setting things like gear ratio and to provide sensible defaults.
@@ -15,12 +16,15 @@ public class CtrlSparkMaxConfig {
         return config;
     }
 
-    private static double calculatePositionConversionFactor(double gearRatio) {
+    @Getter
+    private double gearRatio = 1;
+
+    private double calculatePositionConversionFactor() {
         // Rotor Rotations -> Wheel Radians
         return 2 * Math.PI / gearRatio;
     }
 
-    private static double calculateVelocityConversionFactor(double gearRatio) {
+    private double calculateVelocityConversionFactor() {
         // Rotor RPM -> Wheel Rad/Sec
         return (2 * Math.PI) / 60.0 / gearRatio;
     }
@@ -34,8 +38,8 @@ public class CtrlSparkMaxConfig {
                 .voltageCompensation(12.0);
         config
                 .encoder
-                .positionConversionFactor(calculatePositionConversionFactor(1.0))
-                .velocityConversionFactor(calculateVelocityConversionFactor(1.0))
+                .positionConversionFactor(calculatePositionConversionFactor())
+                .velocityConversionFactor(calculateVelocityConversionFactor())
                 .uvwMeasurementPeriod(10)
                 .uvwAverageDepth(2);
         config
@@ -70,8 +74,9 @@ public class CtrlSparkMaxConfig {
     }
 
     public CtrlSparkMaxConfig withGearRatio(double gearRatio) {
-        config.encoder.positionConversionFactor(calculatePositionConversionFactor(gearRatio));
-        config.encoder.velocityConversionFactor(calculateVelocityConversionFactor(gearRatio));
+        this.gearRatio = gearRatio;
+        config.encoder.positionConversionFactor(calculatePositionConversionFactor());
+        config.encoder.velocityConversionFactor(calculateVelocityConversionFactor());
         return this;
     }
 }
