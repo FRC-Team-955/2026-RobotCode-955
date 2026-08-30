@@ -19,7 +19,7 @@ import java.util.function.Supplier;
 import static frc.robot.subsystems.drive.DriveConstants.moveToConfig;
 
 public class MoveToController {
-    private static final RobotState robotState = RobotState.get();
+    private static final RobotState robotState = RobotState.getInstance();
 
     private final PIDController linearController = moveToConfig.linearGains()
             .toPID(

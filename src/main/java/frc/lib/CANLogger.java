@@ -5,6 +5,7 @@ import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Timer;
 import frc.lib.subsystem.Periodic;
 import frc.robot.BuildConstants;
+import lombok.Getter;
 import org.littletonrobotics.junction.Logger;
 
 import static frc.robot.Constants.canivoreBus;
@@ -16,20 +17,10 @@ public class CANLogger implements Periodic {
     private final Alert roboRIOCANErrorAlert = new Alert("roboRIO CAN errors detected.", Alert.AlertType.kError);
     private final Alert canivoreErrorAlert = new Alert("CANivore errors detected.", Alert.AlertType.kError);
 
-    private static CANLogger instance;
-
-    public static synchronized CANLogger get() {
-        if (instance == null) {
-            instance = new CANLogger();
-        }
-
-        return instance;
-    }
+    @Getter
+    private static final CANLogger instance = new CANLogger();
 
     private CANLogger() {
-        if (instance != null) {
-            Util.error("Duplicate CANLogger created");
-        }
     }
 
     @Override

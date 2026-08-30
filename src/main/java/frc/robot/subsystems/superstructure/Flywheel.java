@@ -14,7 +14,6 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.lib.EnergyLogger;
-import frc.lib.Util;
 import frc.lib.devices.motor.MechanismSim;
 import frc.lib.devices.motor.Motor;
 import frc.lib.network.LoggedTunableNumber;
@@ -34,8 +33,8 @@ public class Flywheel implements Periodic {
 
     private static final LoggedTunableNumber ejectRPM = new LoggedTunableNumber("Superstructure/Flywheel/Goal/EjectRPM", -300);
 
-    private static final ShootingKinematics shootingKinematics = ShootingKinematics.get();
-    private static final EnergyLogger energyLogger = EnergyLogger.get();
+    private static final ShootingKinematics shootingKinematics = ShootingKinematics.getInstance();
+    private static final EnergyLogger energyLogger = EnergyLogger.getInstance();
 
     private final TalonFXConfiguration motorConfig = new TalonFXConfiguration()
             .withMotorOutput(new MotorOutputConfigs()
@@ -91,20 +90,10 @@ public class Flywheel implements Periodic {
     @Getter
     private Goal goal = Goal.IDLE;
 
-    private static Flywheel instance;
-
-    public static synchronized Flywheel get() {
-        if (instance == null) {
-            instance = new Flywheel();
-        }
-
-        return instance;
-    }
+    @Getter
+    private static final Flywheel instance = new Flywheel();
 
     private Flywheel() {
-        if (instance != null) {
-            Util.error("Duplicate Flywheel created");
-        }
     }
 
     @Override

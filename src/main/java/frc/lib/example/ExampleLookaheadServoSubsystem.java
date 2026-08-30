@@ -37,7 +37,7 @@ public class ExampleLookaheadServoSubsystem implements Periodic {
     private static final LoggedTunableNumber profileLookaheadTimeSec = new LoggedTunableNumber("ExampleLookaheadServoSubsystem/ProfileLookaheadTimeSec", 0.15);
     private static final LoggedTunableNumber agitateSetpointDegrees = new LoggedTunableNumber("ExampleLookaheadServoSubsystem/Goal/AgitateDegrees", 45);
 
-    private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
+    private static final OperatorDashboard operatorDashboard = OperatorDashboard.getInstance();
 
     private final Motor motor = Motor
             .createSparkMax(

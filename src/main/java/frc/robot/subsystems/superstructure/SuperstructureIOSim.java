@@ -19,15 +19,15 @@ public class SuperstructureIOSim extends SuperstructureIO {
     private static final double shootingBallsPerSec = 8.0;
     private static final double ballShootDelay = 1.0 / shootingBallsPerSec;
 
-    private static final IntakePivot intakePivot = IntakePivot.get();
-    private static final IntakeRollers intakeRollers = IntakeRollers.get();
-    private static final Feeder feeder = Feeder.get();
-    private static final Flywheel flywheel = Flywheel.get();
-    private static final Hood hood = Hood.get();
-    private static final Spindexer spindexer = Spindexer.get();
-    private static final ShootingKinematics shootingKinematics = ShootingKinematics.get();
+    private static final IntakePivot intakePivot = IntakePivot.getInstance();
+    private static final IntakeRollers intakeRollers = IntakeRollers.getInstance();
+    private static final Feeder feeder = Feeder.getInstance();
+    private static final Flywheel flywheel = Flywheel.getInstance();
+    private static final Hood hood = Hood.getInstance();
+    private static final Spindexer spindexer = Spindexer.getInstance();
+    private static final ShootingKinematics shootingKinematics = ShootingKinematics.getInstance();
 
-    private final SimManager simManager = SimManager.get();
+    private final SimManager simManager = SimManager.getInstance();
 
     private double lastShotTimestamp = 0.0;
 

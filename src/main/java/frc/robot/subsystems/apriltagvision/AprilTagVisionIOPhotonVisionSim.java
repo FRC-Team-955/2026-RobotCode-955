@@ -20,7 +20,7 @@ import org.photonvision.simulation.PhotonCameraSim;
 import org.photonvision.simulation.SimCameraProperties;
 
 public class AprilTagVisionIOPhotonVisionSim extends AprilTagVisionIOPhotonVision {
-    private static final SimManager simManager = SimManager.get();
+    private static final SimManager simManager = SimManager.getInstance();
 
     public AprilTagVisionIOPhotonVisionSim(String name, Transform3d robotToCamera) {
         super(name);

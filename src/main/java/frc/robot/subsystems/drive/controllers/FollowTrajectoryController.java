@@ -19,7 +19,7 @@ import static frc.robot.subsystems.drive.DriveConstants.choreoFeedbackOmega;
 import static frc.robot.subsystems.drive.DriveConstants.choreoFeedbackXY;
 
 public class FollowTrajectoryController {
-    private static final RobotState robotState = RobotState.get();
+    private static final RobotState robotState = RobotState.getInstance();
 
     private final Timer timer = new Timer();
     private final PIDController feedbackX = choreoFeedbackXY.toPID();

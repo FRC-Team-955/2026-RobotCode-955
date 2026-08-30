@@ -34,16 +34,16 @@ public class Superstructure extends CommandBasedSubsystem {
     private static final LoggedTunableNumber antiJamStartSeconds = new LoggedTunableNumber("Superstructure/AntiJamStartSeconds", 0.7);
     private static final LoggedTunableNumber antiJamTimeSeconds = new LoggedTunableNumber("Superstructure/AntiJamTimeSeconds", 0.15);
 
-    private static final RobotState robotState = RobotState.get();
-    private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
-    private static final ShootingKinematics shootingKinematics = ShootingKinematics.get();
+    private static final RobotState robotState = RobotState.getInstance();
+    private static final OperatorDashboard operatorDashboard = OperatorDashboard.getInstance();
+    private static final ShootingKinematics shootingKinematics = ShootingKinematics.getInstance();
 
     // because these subsystems are instantiated by Superstructure, instead of RobotContainer,
     // the variables shouldn't be static. Other singleton variables should be static, though
-    public final Flywheel flywheel = Flywheel.get();
-    public final Hood hood = Hood.get();
-    public final Feeder feeder = Feeder.get();
-    public final Spindexer spindexer = Spindexer.get();
+    public final Flywheel flywheel = Flywheel.getInstance();
+    public final Hood hood = Hood.getInstance();
+    public final Feeder feeder = Feeder.getInstance();
+    public final Spindexer spindexer = Spindexer.getInstance();
 
     private final SuperstructureIO io = createIO();
     private final SuperstructureIOInputsAutoLogged inputs = new SuperstructureIOInputsAutoLogged();
@@ -87,20 +87,10 @@ public class Superstructure extends CommandBasedSubsystem {
 
     private final Alert canrangeDisconnectedAlert = new Alert("CANrange is disconnected.", Alert.AlertType.kError);
 
-    private static Superstructure instance;
-
-    public static synchronized Superstructure get() {
-        if (instance == null) {
-            instance = new Superstructure();
-        }
-
-        return instance;
-    }
+    @Getter
+    private static final Superstructure instance = new Superstructure();
 
     private Superstructure() {
-        if (instance != null) {
-            Util.error("Duplicate Superstructure created");
-        }
     }
 
     @Override

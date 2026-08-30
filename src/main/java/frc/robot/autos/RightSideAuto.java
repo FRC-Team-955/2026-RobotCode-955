@@ -157,7 +157,7 @@ public final class RightSideAuto extends Auto {
             if (onInterpolationLine.get()) {
                 currentGoal.set(new Pose2d(
                         currentGoal.get().getTranslation(),
-                        Rotation2d.fromRadians(ShootingKinematics.get().getShootingParameters().headingRad())
+                        Rotation2d.fromRadians(ShootingKinematics.getInstance().getShootingParameters().headingRad())
                 ));
                 superstructure.setGoal(Superstructure.Goal.SHOOT).initialize();
                 Logger.recordOutput("RightSideAuto/Aiming", true);
@@ -168,7 +168,7 @@ public final class RightSideAuto extends Auto {
 
         Command shootAfterFinalGoal = Commands.deadline(
                 Commands.sequence(
-                        Commands.waitUntil(() -> ShootingKinematics.get().isShootingParametersMet()),
+                        Commands.waitUntil(() -> ShootingKinematics.getInstance().isShootingParametersMet()),
                         Commands.waitSeconds(2.0)
                 ),
                 drive.stop().withAiming(),
@@ -178,7 +178,7 @@ public final class RightSideAuto extends Auto {
         Command driveMoveTo = drive.moveTo(currentGoal::get);
         Command driveMoveToWithAiming = drive.moveTo(() -> {
             Pose2d goal = currentGoal.get();
-            return new Pose2d(goal.getTranslation(), Rotation2d.fromRadians(ShootingKinematics.get().getShootingParameters().headingRad()));
+            return new Pose2d(goal.getTranslation(), Rotation2d.fromRadians(ShootingKinematics.getInstance().getShootingParameters().headingRad()));
         }, rightSideAutoMoveToConstraints);
 
         return Commands.sequence(

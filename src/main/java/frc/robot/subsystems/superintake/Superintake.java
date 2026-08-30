@@ -12,8 +12,8 @@ import org.littletonrobotics.junction.Logger;
 public class Superintake extends CommandBasedSubsystem {
     // because these subsystems are instantiated by Superintake, instead of RobotContainer,
     // the variables shouldn't be static. Other singleton variables should be static, though
-    public final IntakePivot intakePivot = IntakePivot.get();
-    public final IntakeRollers intakeRollers = IntakeRollers.get();
+    public final IntakePivot intakePivot = IntakePivot.getInstance();
+    public final IntakeRollers intakeRollers = IntakeRollers.getInstance();
 
     @RequiredArgsConstructor
     public enum Goal {
@@ -47,20 +47,10 @@ public class Superintake extends CommandBasedSubsystem {
         );
     }
 
-    private static Superintake instance;
-
-    public static synchronized Superintake get() {
-        if (instance == null) {
-            instance = new Superintake();
-        }
-
-        return instance;
-    }
+    @Getter
+    private static final Superintake instance = new Superintake();
 
     private Superintake() {
-        if (instance != null) {
-            Util.error("Duplicate Superintake created");
-        }
     }
 
     @Override

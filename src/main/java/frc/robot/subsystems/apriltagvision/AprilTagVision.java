@@ -24,6 +24,7 @@ import frc.lib.Util;
 import frc.lib.subsystem.Periodic;
 import frc.robot.BuildConstants;
 import frc.robot.RobotState;
+import lombok.Getter;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.*;
@@ -32,7 +33,7 @@ import static frc.robot.FieldConstants.aprilTagLayout;
 import static frc.robot.subsystems.apriltagvision.AprilTagVisionConstants.*;
 
 public class AprilTagVision implements Periodic {
-    private static final RobotState robotState = RobotState.get();
+    private static final RobotState robotState = RobotState.getInstance();
 
     private final EnumMap<Camera, CameraData> cameras = Util.createEnumMap(Camera.class,
             Camera.values(), (cam) ->
@@ -49,20 +50,10 @@ public class AprilTagVision implements Periodic {
         return Commands.runOnce(() -> tagIdFilter = tagIds);
     }
 
-    private static AprilTagVision instance;
-
-    public static synchronized AprilTagVision get() {
-        if (instance == null) {
-            instance = new AprilTagVision();
-        }
-
-        return instance;
-    }
+    @Getter
+    private static final AprilTagVision instance = new AprilTagVision();
 
     private AprilTagVision() {
-        if (instance != null) {
-            Util.error("Duplicate AprilTagVision created");
-        }
     }
 
     @Override

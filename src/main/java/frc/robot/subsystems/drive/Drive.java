@@ -23,7 +23,6 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.WrapperCommand;
-import frc.lib.Util;
 import frc.lib.commands.CommandsExt;
 import frc.lib.subsystem.CommandBasedSubsystem;
 import frc.robot.BuildConstants;
@@ -52,10 +51,10 @@ import static frc.lib.HighFrequencySamplingThread.highFrequencyLock;
 import static frc.robot.subsystems.drive.DriveConstants.*;
 
 public class Drive extends CommandBasedSubsystem {
-    private static final RobotState robotState = RobotState.get();
-    private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
-    private static final Controller controller = Controller.get();
-    private static final ShootingKinematics shootingKinematics = ShootingKinematics.get();
+    private static final RobotState robotState = RobotState.getInstance();
+    private static final OperatorDashboard operatorDashboard = OperatorDashboard.getInstance();
+    private static final Controller controller = Controller.getInstance();
+    private static final ShootingKinematics shootingKinematics = ShootingKinematics.getInstance();
 
     private final GyroIO gyroIO = createGyroIO();
     private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
@@ -119,21 +118,10 @@ public class Drive extends CommandBasedSubsystem {
 
     private final Alert gyroDisconnectedAlert = new Alert("Disconnected gyro, using kinematics as fallback.", Alert.AlertType.kError);
 
-    private static Drive instance;
-
-    public static synchronized Drive get() {
-        if (instance == null) {
-            instance = new Drive();
-        }
-
-        return instance;
-    }
+    @Getter
+    private static final Drive instance = new Drive();
 
     private Drive() {
-        if (instance != null) {
-            Util.error("Duplicate Drive created");
-        }
-
         var moduleIO = createModuleIO();
         // Array is currently four nulls, so length works just fine
         for (int i = 0; i < modules.length; i++) {

@@ -12,7 +12,6 @@ import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.AllianceFlipUtil;
-import frc.lib.Util;
 import frc.lib.subsystem.Periodic;
 import frc.robot.BuildConstants;
 import lombok.Getter;
@@ -39,21 +38,10 @@ public class Controller implements Periodic {
     @Getter
     private double driveAngularMagnitude = 0.0;
 
-    private static Controller instance;
-
-    public static synchronized Controller get() {
-        if (instance == null) {
-            instance = new Controller();
-        }
-
-        return instance;
-    }
+    @Getter
+    private static final Controller instance = new Controller();
 
     private Controller() {
-        if (instance != null) {
-            Util.error("Duplicate Controller created");
-        }
-
         System.out.println("Name of controller IO is " +
                 (io.isConnected() ? io.getClass().getSimpleName() : secondaryIo.getClass().getSimpleName()));
     }

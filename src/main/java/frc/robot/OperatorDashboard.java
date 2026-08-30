@@ -25,8 +25,8 @@ public class OperatorDashboard implements Periodic {
         PassManual,
     }
 
-    private static final RobotState robotState = RobotState.get();
-    private static final Controller controller = Controller.get();
+    private static final RobotState robotState = RobotState.getInstance();
+    private static final Controller controller = Controller.getInstance();
     //private static final AutoManager autoManager = AutoManager.get();
 
     private static final String prefix = "/OperatorDashboard/";
@@ -72,21 +72,10 @@ public class OperatorDashboard implements Periodic {
 
     private final Debouncer lowBatteryDebouncer = new Debouncer(20.0, Debouncer.DebounceType.kRising);
 
-    private static OperatorDashboard instance;
-
-    public static synchronized OperatorDashboard get() {
-        if (instance == null) {
-            instance = new OperatorDashboard();
-        }
-
-        return instance;
-    }
+    @Getter
+    private static final OperatorDashboard instance = new OperatorDashboard();
 
     private OperatorDashboard() {
-        if (instance != null) {
-            Util.error("Duplicate OperatorDashboard created");
-        }
-
         intakePivotNotHomedAlert.set(true);
         hoodNotHomedAlert.set(true);
 

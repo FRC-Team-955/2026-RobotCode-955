@@ -130,20 +130,10 @@ public class RobotState implements Periodic {
     private double lastIncreasedUncertaintyDueToBump = 0.0;
      */
 
-    private static RobotState instance;
-
-    public static synchronized RobotState get() {
-        if (instance == null) {
-            instance = new RobotState();
-        }
-
-        return instance;
-    }
+    @Getter
+    private static final RobotState instance = new RobotState();
 
     private RobotState() {
-        if (instance != null) {
-            Util.error("Duplicate RobotState created");
-        }
     }
 
     @Override
@@ -317,7 +307,7 @@ public class RobotState implements Periodic {
     public void setPose(Pose2d pose) {
         poseEstimator.resetPose(pose);
         if (BuildConstants.isSim) {
-            SimManager.get().driveSimulation.setSimulationWorldPose(pose);
+            SimManager.getInstance().driveSimulation.setSimulationWorldPose(pose);
         }
     }
 

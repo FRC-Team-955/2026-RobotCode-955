@@ -11,7 +11,6 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.lib.EnergyLogger;
-import frc.lib.Util;
 import frc.lib.devices.motor.CtrlSparkMaxConfig;
 import frc.lib.devices.motor.MechanismSim;
 import frc.lib.devices.motor.Motor;
@@ -45,10 +44,10 @@ public class Hood implements Periodic {
         return Math.PI / 2.0 - originalAngleRad;
     }
 
-    private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
-    private static final ShootingKinematics shootingKinematics = ShootingKinematics.get();
-    private static final RobotState robotState = RobotState.get();
-    private static final EnergyLogger energyLogger = EnergyLogger.get();
+    private static final OperatorDashboard operatorDashboard = OperatorDashboard.getInstance();
+    private static final ShootingKinematics shootingKinematics = ShootingKinematics.getInstance();
+    private static final RobotState robotState = RobotState.getInstance();
+    private static final EnergyLogger energyLogger = EnergyLogger.getInstance();
 
     private final Motor motor = Motor.createSparkMax(
                     "Superstructure/Hood",
@@ -99,20 +98,10 @@ public class Hood implements Periodic {
     private boolean atVelocityThresholdForHoming = false;
     private final Debouncer homingVelocityDebouncer = new Debouncer(0.1, Debouncer.DebounceType.kRising);
 
-    private static Hood instance;
-
-    public static synchronized Hood get() {
-        if (instance == null) {
-            instance = new Hood();
-        }
-
-        return instance;
-    }
+    @Getter
+    private static final Hood instance = new Hood();
 
     private Hood() {
-        if (instance != null) {
-            Util.error("Duplicate Hood created");
-        }
     }
 
     @Override

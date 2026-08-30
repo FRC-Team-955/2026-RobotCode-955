@@ -40,7 +40,7 @@ public class ExampleProfiledServoSubsystem implements Periodic {
 
     private static final LoggedTunableNumber agitateSetpointDegrees = new LoggedTunableNumber("ExampleProfiledServoSubsystem/Goal/AgitateDegrees", 45);
 
-    private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
+    private static final OperatorDashboard operatorDashboard = OperatorDashboard.getInstance();
 
     private final Motor motor = Motor
             .createTalonFX(

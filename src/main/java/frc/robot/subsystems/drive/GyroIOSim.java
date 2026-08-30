@@ -9,7 +9,7 @@ import java.util.Arrays;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 
 public class GyroIOSim extends GyroIO {
-    private final GyroSimulation gyroSimulation = SimManager.get().driveSimulation.getGyroSimulation();
+    private final GyroSimulation gyroSimulation = SimManager.getInstance().driveSimulation.getGyroSimulation();
 
     public GyroIOSim() {
     }

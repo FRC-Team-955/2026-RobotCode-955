@@ -6,7 +6,6 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.LEDPattern;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
-import frc.lib.Util;
 import frc.lib.subsystem.Periodic;
 import frc.robot.HubShiftTracker;
 import frc.robot.OperatorDashboard;
@@ -18,6 +17,7 @@ import frc.robot.subsystems.drive.SparkCANcoderHelper;
 import frc.robot.subsystems.gamepiecevision.GamePieceVision;
 import frc.robot.subsystems.superintake.Superintake;
 import frc.robot.subsystems.superstructure.Superstructure;
+import lombok.Getter;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.mechanism.LoggedMechanism2d;
 import org.littletonrobotics.junction.mechanism.LoggedMechanismLigament2d;
@@ -27,16 +27,16 @@ import static frc.robot.subsystems.leds.LEDConstants.createIO;
 import static frc.robot.subsystems.leds.LEDConstants.length;
 
 public class LEDs implements Periodic {
-    private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
-    private static final ShootingKinematics shootingKinematics = ShootingKinematics.get();
-    private static final AutoManager autoManager = AutoManager.get();
-    private static final AprilTagVision aprilTagVision = AprilTagVision.get();
-    private static final GamePieceVision gamePieceVision = GamePieceVision.get();
-    private static final HubShiftTracker hubShiftTracker = HubShiftTracker.get();
+    private static final OperatorDashboard operatorDashboard = OperatorDashboard.getInstance();
+    private static final ShootingKinematics shootingKinematics = ShootingKinematics.getInstance();
+    private static final AutoManager autoManager = AutoManager.getInstance();
+    private static final AprilTagVision aprilTagVision = AprilTagVision.getInstance();
+    private static final GamePieceVision gamePieceVision = GamePieceVision.getInstance();
+    private static final HubShiftTracker hubShiftTracker = HubShiftTracker.getInstance();
 
-    private static final Drive drive = Drive.get();
-    private static final Superintake superintake = Superintake.get();
-    private static final Superstructure superstructure = Superstructure.get();
+    private static final Drive drive = Drive.getInstance();
+    private static final Superintake superintake = Superintake.getInstance();
+    private static final Superstructure superstructure = Superstructure.getInstance();
 
     private final LEDsIO io = createIO();
     private final AddressableLEDBuffer buffer = new AddressableLEDBuffer(length);
@@ -46,21 +46,10 @@ public class LEDs implements Periodic {
     private final LoggedMechanism2d mechanism = new LoggedMechanism2d(1.5, 2.1, new Color8Bit(Color.kBlack));
     private final LoggedMechanismLigament2d[] ligaments = new LoggedMechanismLigament2d[length];
 
-    private static LEDs instance;
-
-    public static synchronized LEDs get() {
-        if (instance == null) {
-            instance = new LEDs();
-        }
-
-        return instance;
-    }
+    @Getter
+    private static final LEDs instance = new LEDs();
 
     private LEDs() {
-        if (instance != null) {
-            Util.error("Duplicate LEDs created");
-        }
-
         double bottomY = 0.5;
         double middleOfRobot = 1.5 / 2.0;
         for (int index = 0; index < length; index++) {

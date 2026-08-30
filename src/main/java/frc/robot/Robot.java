@@ -203,7 +203,7 @@ public class Robot extends LoggedRobot {
         LoggedTracer.reset();
 
         if (BuildConstants.isSim) {
-            SimManager.get().periodicBeforeNormalCode();
+            SimManager.getInstance().periodicBeforeNormalCode();
             LoggedTracer.record("Simulation");
         }
 

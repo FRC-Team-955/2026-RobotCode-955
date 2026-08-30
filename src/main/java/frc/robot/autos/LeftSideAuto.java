@@ -157,7 +157,7 @@ public final class LeftSideAuto extends Auto {
             if (onInterpolationLine.get()) {
                 currentGoal.set(new Pose2d(
                         currentGoal.get().getTranslation(),
-                        Rotation2d.fromRadians(ShootingKinematics.get().getShootingParameters().headingRad())
+                        Rotation2d.fromRadians(ShootingKinematics.getInstance().getShootingParameters().headingRad())
                 ));
                 superstructure.setGoal(Superstructure.Goal.SHOOT).initialize();
                 Logger.recordOutput("LeftSideAuto/Aiming", true);
@@ -168,7 +168,7 @@ public final class LeftSideAuto extends Auto {
 
         Command shootAfterFinalGoal = Commands.deadline(
                 Commands.sequence(
-                        Commands.waitUntil(() -> ShootingKinematics.get().isShootingParametersMet()),
+                        Commands.waitUntil(() -> ShootingKinematics.getInstance().isShootingParametersMet()),
                         Commands.waitSeconds(2.0)
                 ),
                 drive.stop().withAiming(),
@@ -178,17 +178,17 @@ public final class LeftSideAuto extends Auto {
         Command driveMoveTo = drive.moveTo(currentGoal::get);
         Command driveMoveToWithAiming = drive.moveTo(() -> {
             Pose2d goal = currentGoal.get();
-            return new Pose2d(goal.getTranslation(), Rotation2d.fromRadians(ShootingKinematics.get().getShootingParameters().headingRad()));
+            return new Pose2d(goal.getTranslation(), Rotation2d.fromRadians(ShootingKinematics.getInstance().getShootingParameters().headingRad()));
         }, leftSideAutoMoveToConstraints);
 
         Command finalShortMove = Commands.sequence(
-                drive.moveTo(() -> new Pose2d(1.29, 5.36, Rotation2d.fromRadians(ShootingKinematics.get().getShootingParameters().headingRad())), leftSideAutoMoveToConstraints).until(
+                drive.moveTo(() -> new Pose2d(1.29, 5.36, Rotation2d.fromRadians(ShootingKinematics.getInstance().getShootingParameters().headingRad())), leftSideAutoMoveToConstraints).until(
                         () -> robotState.isAtPoseWithTolerance(
-                                new Pose2d(1.29, 5.36, Rotation2d.fromRadians(ShootingKinematics.get().getShootingParameters().headingRad())),
+                                new Pose2d(1.29, 5.36, Rotation2d.fromRadians(ShootingKinematics.getInstance().getShootingParameters().headingRad())),
                                 DriveConstants.moveToConfig.linearPositionToleranceMeters().get(),
                                 Math.PI * 2)
                 ),
-                drive.moveTo(() -> new Pose2d(0.8, 6, Rotation2d.fromRadians(ShootingKinematics.get().getShootingParameters().headingRad())), leftSideAutoMoveToConstraints)
+                drive.moveTo(() -> new Pose2d(0.8, 6, Rotation2d.fromRadians(ShootingKinematics.getInstance().getShootingParameters().headingRad())), leftSideAutoMoveToConstraints)
         );
 
         return Commands.sequence(

@@ -5,9 +5,9 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.Alert;
-import frc.lib.Util;
 import frc.lib.subsystem.Periodic;
 import frc.robot.RobotState;
+import lombok.Getter;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.Arrays;
@@ -18,28 +18,17 @@ import static frc.robot.subsystems.gamepiecevision.GamePieceVisionConstants.crea
 import static frc955.gamepiecevision.SharedGamePieceVisionConstants.robotToCamera;
 
 public class GamePieceVision implements Periodic {
-    private static final RobotState robotState = RobotState.get();
+    private static final RobotState robotState = RobotState.getInstance();
 
     private final GamePieceVisionIOInputsAutoLogged inputs = new GamePieceVisionIOInputsAutoLogged();
     private final GamePieceVisionIO io = createIO();
 
     private final Alert disconnectedAlert = new Alert("Game piece vision camera is disconnected.", Alert.AlertType.kError);
 
-    private static GamePieceVision instance;
-
-
-    public static synchronized GamePieceVision get() {
-        if (instance == null) {
-            instance = new GamePieceVision();
-        }
-
-        return instance;
-    }
+    @Getter
+    private static final GamePieceVision instance = new GamePieceVision();
 
     private GamePieceVision() {
-        if (instance != null) {
-            Util.error("Duplicate GamePieceVision created");
-        }
     }
 
     @Override

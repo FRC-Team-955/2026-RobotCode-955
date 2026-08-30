@@ -5,14 +5,14 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.AllianceFlipUtil;
-import frc.lib.Util;
 import frc.robot.RobotState;
+import lombok.Getter;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 import java.util.Optional;
 
 public class AutoManager {
-    private static final RobotState robotState = RobotState.get();
+    private static final RobotState robotState = RobotState.getInstance();
 
     public static final double READY_THRESHOLD_METERS = 0.1;
     public static final double MAX_DISTANCE_METERS = 3.0;
@@ -21,21 +21,10 @@ public class AutoManager {
 
     private final LoggedDashboardChooser<Auto> autoChooser = new LoggedDashboardChooser<>("Auto Choices");
 
-    private static AutoManager instance;
-
-    public static synchronized AutoManager get() {
-        if (instance == null) {
-            instance = new AutoManager();
-        }
-
-        return instance;
-    }
+    @Getter
+    private static final AutoManager instance = new AutoManager();
 
     private AutoManager() {
-        if (instance != null) {
-            Util.error("Duplicate AutoManager created");
-        }
-
         autoChooser.addOption("None", null);
         //autoChooser.addOption("LeftSideAuto", new LeftSideAuto());
         //autoChooser.addOption("RightSideAuto", new RightSideAuto());

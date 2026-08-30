@@ -30,7 +30,7 @@ public class ExampleVelocityRollerSubsystem implements Periodic {
 
     private static final LoggedTunableNumber rollRPM = new LoggedTunableNumber("ExampleVelocityRollerSubsystem/Goal/RollRPM", 100);
 
-    private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
+    private static final OperatorDashboard operatorDashboard = OperatorDashboard.getInstance();
 
     private final Motor motor = Motor
             .createTalonFX(

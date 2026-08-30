@@ -9,7 +9,6 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
 import frc.lib.AllianceFlipUtil;
-import frc.lib.Util;
 import frc.lib.network.LoggedTunableNumber;
 import frc.lib.subsystem.Periodic;
 import frc.robot.*;
@@ -35,7 +34,7 @@ public class ShootingKinematics implements Periodic {
     private static final double bottomOfFrameRailsToShooterHeightMeters = Units.inchesToMeters(12.861380);
     private static final double shooterRadiusToCenterOfBallExitMeters = Units.inchesToMeters(4.602756);
 
-    private static final Drive drive = Drive.get();
+    private static final Drive drive = Drive.getInstance();
 
     private static final LoggedTunableNumber headingToleranceDeg = new LoggedTunableNumber("ShootingKinematics/HeadingToleranceDegrees", 10.0);
     private static final LoggedTunableNumber headingTolerancePassingDeg = new LoggedTunableNumber("ShootingKinematics/HeadingTolerancePassingDegrees", 20.0);
@@ -55,11 +54,11 @@ public class ShootingKinematics implements Periodic {
 
     private static final DoubleUnaryOperator passVelocityToRPM = (x) -> 316 * x - 456 + 100;
 
-    private static final RobotState robotState = RobotState.get();
-    private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
-    private static final HubShiftTracker hubShiftTracker = HubShiftTracker.get();
+    private static final RobotState robotState = RobotState.getInstance();
+    private static final OperatorDashboard operatorDashboard = OperatorDashboard.getInstance();
+    private static final HubShiftTracker hubShiftTracker = HubShiftTracker.getInstance();
 
-    private static final Superstructure superstructure = Superstructure.get();
+    private static final Superstructure superstructure = Superstructure.getInstance();
 
     @Getter
     private ShootingParameters shootingParameters = new ShootingParameters(0, 0, 0, 0, false);
@@ -83,20 +82,10 @@ public class ShootingKinematics implements Periodic {
             false
     );
 
-    private static ShootingKinematics instance;
-
-    public static synchronized ShootingKinematics get() {
-        if (instance == null) {
-            instance = new ShootingKinematics();
-        }
-
-        return instance;
-    }
+    @Getter
+    private static final ShootingKinematics instance = new ShootingKinematics();
 
     private ShootingKinematics() {
-        if (instance != null) {
-            Util.error("Duplicate ShootingKinematics created");
-        }
     }
 
     @Override

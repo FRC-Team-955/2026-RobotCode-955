@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import frc.lib.Util;
 import frc.robot.subsystems.drive.DriveConstants;
+import lombok.Getter;
 import org.dyn4j.dynamics.Settings;
 import org.ironmaple.simulation.IntakeSimulation;
 import org.ironmaple.simulation.SimulatedArena;
@@ -32,7 +33,7 @@ import static frc.robot.subsystems.drive.DriveConstants.driveConfig;
 public class SimManager {
     private static final int hopperCapacity = 50;
 
-    private static final RobotState robotState = RobotState.get();
+    private static final RobotState robotState = RobotState.getInstance();
 
     private static SwerveModuleSimulationConfig createConfig(double turnGearRatio) {
         return new SwerveModuleSimulationConfig(
@@ -85,21 +86,10 @@ public class SimManager {
     public final VisionSystemSim aprilTagVisionSystem = new VisionSystemSim("apriltag");
     public final VisionSystemSim gamePieceVisionSystem = new VisionSystemSim("gamepiece");
 
-    private static SimManager instance;
-
-    public static synchronized SimManager get() {
-        if (instance == null) {
-            instance = new SimManager();
-        }
-
-        return instance;
-    }
+    @Getter
+    private static final SimManager instance = new SimManager();
 
     private SimManager() {
-        if (instance != null) {
-            Util.error("Duplicate SimManager created");
-        }
-
         if (!BuildConstants.isSim) {
             Util.error("SimManager created when not in sim");
         } else {

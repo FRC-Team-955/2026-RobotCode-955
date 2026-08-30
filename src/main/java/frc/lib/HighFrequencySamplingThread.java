@@ -19,6 +19,7 @@ import com.revrobotics.spark.SparkBase;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.Timer;
 import frc.robot.Constants;
+import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,21 +57,10 @@ public class HighFrequencySamplingThread extends Thread {
 
     private final List<Queue<Double>> timestampQueues = new ArrayList<>();
 
-    private static HighFrequencySamplingThread instance;
-
-    public static synchronized HighFrequencySamplingThread get() {
-        if (instance == null) {
-            instance = new HighFrequencySamplingThread();
-        }
-
-        return instance;
-    }
+    @Getter
+    private static final HighFrequencySamplingThread instance = new HighFrequencySamplingThread();
 
     private HighFrequencySamplingThread() {
-        if (instance != null) {
-            Util.error("Duplicate HighFrequencySamplingThread created");
-        }
-
         setName("HighFrequencySamplingThread");
         setDaemon(true);
         super.start();
