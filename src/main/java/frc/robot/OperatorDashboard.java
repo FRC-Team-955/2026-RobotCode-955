@@ -8,7 +8,6 @@ import frc.lib.Util;
 import frc.lib.network.LoggedNetworkBooleanExt;
 import frc.lib.network.LoggedNetworkNumberExt;
 import frc.lib.subsystem.Periodic;
-import frc.robot.autos.AutoManager;
 import frc.robot.controller.Controller;
 import frc.robot.subsystems.drive.DriveConstants;
 import lombok.Getter;
@@ -28,7 +27,7 @@ public class OperatorDashboard implements Periodic {
 
     private static final RobotState robotState = RobotState.get();
     private static final Controller controller = Controller.get();
-    private static final AutoManager autoManager = AutoManager.get();
+    //private static final AutoManager autoManager = AutoManager.get();
 
     private static final String prefix = "/OperatorDashboard/";
 

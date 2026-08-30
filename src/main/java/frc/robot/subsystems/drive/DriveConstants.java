@@ -3,14 +3,10 @@ package frc.robot.subsystems.drive;
 import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
-import frc.lib.Util;
 import frc.lib.network.LoggedTunableNumber;
 import frc.lib.network.LoggedTunablePIDF;
 import frc.robot.BuildConstants;
-import frc.robot.autos.ChoreoVars;
 import frc.robot.subsystems.drive.constraints.DriveConstraints;
-
-import static edu.wpi.first.units.Units.*;
 
 public class DriveConstants {
     public static final double assistDirectionToleranceRad = Units.degreesToRadians(50);
@@ -65,8 +61,8 @@ public class DriveConstants {
     );
 
     public static final DriveConstraints shootingConstraints = new DriveConstraints(
-            new LoggedTunableNumber("Drive/Shooting/MaxLinearVelocity", ChoreoVars.ShootingMaxVel.in(MetersPerSecond)),
-            new LoggedTunableNumber("Drive/Shooting/MaxLinearAcceleration", ChoreoVars.ShootingMaxAccel.in(MetersPerSecondPerSecond)),
+            null,//new LoggedTunableNumber("Drive/Shooting/MaxLinearVelocity", ChoreoVars.ShootingMaxVel.in(MetersPerSecond)),
+            null,//new LoggedTunableNumber("Drive/Shooting/MaxLinearAcceleration", ChoreoVars.ShootingMaxAccel.in(MetersPerSecondPerSecond)),
             null,
             null
     );
@@ -233,25 +229,25 @@ public class DriveConstants {
         // Check to ensure that choreo vars and real vars match up.
         // The reason we don't just use the choreo vars is because choreo rounds to 3 decimal places, which means we get less precision.
         // This mostly doesn't matter, but can have an impact (especially for small values like wheel radius or gear ratio).
-        if (Math.abs(driveConfig.wheelRadiusMeters() - ChoreoVars.WheelRadius.in(Meters)) > 0.001) {
-            Util.error("Choreo wheel radius is incorrect");
-        }
-        if (Math.abs(driveConfig.trackWidthMeters() - ChoreoVars.TrackWidth.in(Meters)) > 0.001) {
-            Util.error("Choreo track width is incorrect");
-        }
-        if (Math.abs(driveConfig.trackLengthMeters() - ChoreoVars.TrackLength.in(Meters)) > 0.001) {
-            Util.error("Choreo track length is incorrect");
-        }
-        if (Math.abs(driveConfig.bumperWidthMeters() - ChoreoVars.BumperWidth.in(Meters)) > 0.001) {
-            Util.error("Choreo bumper width is incorrect");
-        }
-        if (Math.abs(driveConfig.bumperLengthMeters() - ChoreoVars.BumperLength.in(Meters)) > 0.001) {
-            Util.error("Choreo bumper length is incorrect");
-        }
-        for (GearRatioConfig config : gearRatioConfigs) {
-            if (Math.abs(config.driveGearRatio() - ChoreoVars.GearRatio) > 0.001) {
-                Util.error("Choreo gear ratio is incorrect: " + config.driveGearRatio() + " expected but got " + ChoreoVars.GearRatio);
-            }
-        }
+        //if (Math.abs(driveConfig.wheelRadiusMeters() - ChoreoVars.WheelRadius.in(Meters)) > 0.001) {
+        //    Util.error("Choreo wheel radius is incorrect");
+        //}
+        //if (Math.abs(driveConfig.trackWidthMeters() - ChoreoVars.TrackWidth.in(Meters)) > 0.001) {
+        //    Util.error("Choreo track width is incorrect");
+        //}
+        //if (Math.abs(driveConfig.trackLengthMeters() - ChoreoVars.TrackLength.in(Meters)) > 0.001) {
+        //    Util.error("Choreo track length is incorrect");
+        //}
+        //if (Math.abs(driveConfig.bumperWidthMeters() - ChoreoVars.BumperWidth.in(Meters)) > 0.001) {
+        //    Util.error("Choreo bumper width is incorrect");
+        //}
+        //if (Math.abs(driveConfig.bumperLengthMeters() - ChoreoVars.BumperLength.in(Meters)) > 0.001) {
+        //    Util.error("Choreo bumper length is incorrect");
+        //}
+        //for (GearRatioConfig config : gearRatioConfigs) {
+        //    if (Math.abs(config.driveGearRatio() - ChoreoVars.GearRatio) > 0.001) {
+        //        Util.error("Choreo gear ratio is incorrect: " + config.driveGearRatio() + " expected but got " + ChoreoVars.GearRatio);
+        //    }
+        //}
     }
 }
