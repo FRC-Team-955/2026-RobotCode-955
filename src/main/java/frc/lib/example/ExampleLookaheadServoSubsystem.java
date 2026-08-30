@@ -57,7 +57,12 @@ public class ExampleLookaheadServoSubsystem implements Periodic {
                             true
                     )
             )
-            .withPositionGains(new LoggedTunablePIDF("ExampleLookaheadServoSubsystem/Gains"));
+            .withPositionGains(switch (BuildConstants.mode) {
+                case REAL, REPLAY -> new LoggedTunablePIDF("ExampleLookaheadServoSubsystem/Gains")
+                        .withP(1.0);
+                case SIM -> new LoggedTunablePIDF("ExampleLookaheadServoSubsystem/Gains")
+                        .withP(10.0);
+            });
 
     @RequiredArgsConstructor
     public enum Goal {

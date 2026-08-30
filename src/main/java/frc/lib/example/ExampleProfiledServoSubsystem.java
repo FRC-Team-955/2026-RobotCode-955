@@ -56,8 +56,18 @@ public class ExampleProfiledServoSubsystem implements Periodic {
                             true
                     )
             )
-            .withPositionGains(new LoggedTunablePIDF("ExampleProfiledServoSubsystem/PositionGains"))
-            .withVelocityGains(new LoggedTunablePIDF("ExampleProfiledServoSubsystem/VelocityGains"));
+            .withPositionGains(switch (BuildConstants.mode) {
+                case REAL, REPLAY -> new LoggedTunablePIDF("ExampleProfiledServoSubsystem/PositionGains")
+                        .withP(0.1);
+                case SIM -> new LoggedTunablePIDF("ExampleProfiledServoSubsystem/PositionGains")
+                        .withP(1.0);
+            })
+            .withVelocityGains(switch (BuildConstants.mode) {
+                case REAL, REPLAY -> new LoggedTunablePIDF("ExampleProfiledServoSubsystem/VelocityGains")
+                        .withV(0.1);
+                case SIM -> new LoggedTunablePIDF("ExampleProfiledServoSubsystem/VelocityGains")
+                        .withV(1.0);
+            });
 
     @RequiredArgsConstructor
     public enum Goal {

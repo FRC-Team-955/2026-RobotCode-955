@@ -40,7 +40,12 @@ public class ExampleVelocityRollerSubsystem implements Periodic {
                     0.0,
                     MechanismSim.roller(0.01)
             )
-            .withVelocityGains(new LoggedTunablePIDF("ExampleVelocityRollerSubsystem/Gains"));
+            .withVelocityGains(switch (BuildConstants.mode) {
+                case REAL, REPLAY -> new LoggedTunablePIDF("ExampleVelocityRollerSubsystem/Gains")
+                        .withV(0.1);
+                case SIM -> new LoggedTunablePIDF("ExampleVelocityRollerSubsystem/Gains")
+                        .withV(1.0);
+            });
 
     @RequiredArgsConstructor
     public enum Goal {
