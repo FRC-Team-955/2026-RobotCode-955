@@ -136,9 +136,6 @@ public class Motor extends Device<MotorIO, MotorIOInputsAutoLogged> {
      * NOTE: The position will not instantly change!! Keep this in mind!
      * You may want to add a delay before returning to closed loop control
      * so that the motor does not attempt to move to an invalid position
-     * <p>
-     * TODO: maybe just add a Timer in the Motor class so this happens for all motors;
-     * only allow setting position request if a certain delay has been reached
      */
     public void setEncoderPosition(double positionRad) {
         System.out.println("Setting " + name + " encoder position to " + positionRad);
