@@ -28,14 +28,14 @@ public class ExampleLookaheadServoSubsystem implements Periodic {
     // 0 = parallel with ground
     private static final double minPositionRad = Units.degreesToRadians(0);
     private static final double maxPositionRad = Units.degreesToRadians(90);
-    private static final double initialPositionRad = minPositionRad;
+    private static final double initialPositionRad = maxPositionRad;
 
     private static final TrapezoidProfile.Constraints constraints = new TrapezoidProfile.Constraints(1, 3);
 
     private static final double positionToleranceRad = Units.degreesToRadians(10);
 
-    private static final LoggedTunableNumber deploySetpointDegrees = new LoggedTunableNumber("ExampleLookaheadServoSubsystem/Goal/Deploy", -45.0);
     private static final LoggedTunableNumber profileLookaheadTimeSec = new LoggedTunableNumber("ExampleLookaheadServoSubsystem/ProfileLookaheadTimeSec", 0.15);
+    private static final LoggedTunableNumber agitateSetpointDegrees = new LoggedTunableNumber("ExampleLookaheadServoSubsystem/Goal/AgitateDegrees", 45);
 
     private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
 
@@ -66,8 +66,9 @@ public class ExampleLookaheadServoSubsystem implements Periodic {
 
     @RequiredArgsConstructor
     public enum Goal {
-        STOW(() -> 0),
-        DEPLOY(() -> Units.degreesToRadians(deploySetpointDegrees.get())),
+        STOW(() -> maxPositionRad),
+        DEPLOY(() -> minPositionRad),
+        AGITATE(() -> Units.degreesToRadians(agitateSetpointDegrees.get())),
         ;
 
         /** Should be constant for every loop cycle */
