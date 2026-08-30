@@ -7,8 +7,6 @@ import frc.lib.devices.device.Device;
 import frc.lib.network.LoggedTunablePIDF;
 
 public class Motor extends Device<MotorIO, MotorIOInputsAutoLogged> {
-    private boolean emergencyStopped = false;
-
     private final Alert highTemperatureAlert;
     private final Alert emergencyStoppedAlert;
 
@@ -55,7 +53,9 @@ public class Motor extends Device<MotorIO, MotorIOInputsAutoLogged> {
         return inputs.temperatureCelsius;
     }
 
-    public void setEmergencyStopped(boolean emergencyStopped, NeutralModeValue neutralModeIfEmergencyStopUndone) {
+    private boolean emergencyStopped = false;
+
+    public void setEmergencyStopped(boolean emergencyStopped, NeutralModeValue normalNeutralMode) {
         if (emergencyStopped != this.emergencyStopped) {
             if (emergencyStopped) {
                 System.out.println("Emergency stopping " + name);
@@ -63,7 +63,7 @@ public class Motor extends Device<MotorIO, MotorIOInputsAutoLogged> {
                 setNeutralMode(NeutralModeValue.Coast);
             } else {
                 System.out.println("Undoing emergency stop for " + name);
-                setNeutralMode(neutralModeIfEmergencyStopUndone);
+                setNeutralMode(normalNeutralMode);
             }
             this.emergencyStopped = emergencyStopped;
             emergencyStoppedAlert.set(emergencyStopped);
