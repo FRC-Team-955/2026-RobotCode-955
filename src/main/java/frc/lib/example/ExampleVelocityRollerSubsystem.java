@@ -1,7 +1,10 @@
 package frc.lib.example;
 
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.devices.motor.CtrlSparkMaxConfig;
 import frc.lib.devices.motor.MechanismSim;
 import frc.lib.devices.motor.Motor;
@@ -12,18 +15,21 @@ import frc.robot.OperatorDashboard;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.function.DoubleSupplier;
 
-public class ExampleRollerSubsystem implements Periodic {
-    private static final LoggedTunableNumber runAtVoltage = new LoggedTunableNumber("ExampleRollerSubsystem/Goal/RunAtVoltage", 3.0);
+public class ExampleVelocityRollerSubsystem implements Periodic {
+    private static final double velocityToleranceRadPerSec = Units.rotationsPerMinuteToRadiansPerSecond(10);
+
+    private static final LoggedTunableNumber rollRPM = new LoggedTunableNumber("ExampleVelocityRollerSubsystem/Goal/RollRPM", 100);
 
     private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
 
     private final Motor motor = Motor
             .createSparkMax(
-                    "ExampleRollerSubsystem",
+                    "ExampleVelocityRollerSubsystem",
                     -1,
                     new CtrlSparkMaxConfig()
                             .withCurrentLimit(40)
@@ -33,17 +39,17 @@ public class ExampleRollerSubsystem implements Periodic {
                     0.0,
                     MechanismSim.roller(0.01)
             )
-            .withPositionGains(new LoggedTunablePIDF("ExampleRollerSubsystem/Position"))
-            .withVelocityGains(new LoggedTunablePIDF("ExampleRollerSubsystem/Velocity"));
+            .withPositionGains(new LoggedTunablePIDF("ExampleVelocityRollerSubsystem/Position"))
+            .withVelocityGains(new LoggedTunablePIDF("ExampleVelocityRollerSubsystem/Velocity"));
 
     @RequiredArgsConstructor
     public enum Goal {
         IDLE(() -> 0),
-        RUN_AT_VOLTAGE(runAtVoltage::get),
+        ROLL(() -> Units.rotationsPerMinuteToRadiansPerSecond(rollRPM.get())),
         ;
 
         /** Should be constant for every loop cycle */
-        private final DoubleSupplier volts;
+        private final DoubleSupplier setpointRadPerSec;
     }
 
     @Setter
@@ -51,9 +57,9 @@ public class ExampleRollerSubsystem implements Periodic {
     private Goal goal = Goal.IDLE;
 
     @Getter
-    private final static ExampleRollerSubsystem instance = new ExampleRollerSubsystem();
+    private final static ExampleVelocityRollerSubsystem instance = new ExampleVelocityRollerSubsystem();
 
-    private ExampleRollerSubsystem() {
+    private ExampleVelocityRollerSubsystem() {
     }
 
     @Override
@@ -66,13 +72,22 @@ public class ExampleRollerSubsystem implements Periodic {
 
     @Override
     public void periodicAfterCommands() {
-        Logger.recordOutput("ExampleRollerSubsystem/Goal", goal);
+        Logger.recordOutput("ExampleVelocityRollerSubsystem/Goal", goal);
         if (DriverStation.isDisabled()) {
             motor.setVoltageRequest(0);
         } else {
-            double volts = goal.volts.getAsDouble();
-            Logger.recordOutput("ExampleRollerSubsystem/RequestVolts", volts);
-            motor.setVoltageRequest(volts);
+            double setpointRadPerSec = goal.setpointRadPerSec.getAsDouble();
+            Logger.recordOutput("ExampleVelocityRollerSubsystem/SetpointRadPerSec", setpointRadPerSec);
+            motor.setVelocityRequest(setpointRadPerSec);
         }
+    }
+
+    @AutoLogOutput(key = "ExampleVelocityRollerSubsystem/AtGoal")
+    public boolean atGoal() {
+        return Math.abs(motor.getVelocityRadPerSec() - goal.setpointRadPerSec.getAsDouble()) <= velocityToleranceRadPerSec;
+    }
+
+    public Command waitUntilAtGoal() {
+        return Commands.waitUntil(this::atGoal);
     }
 }
