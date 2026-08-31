@@ -26,16 +26,13 @@ import edu.wpi.first.wpilibj.RobotController;
 import frc.lib.subsystem.Periodic;
 import frc.robot.BuildConstants;
 import frc.robot.Constants;
-import lombok.Getter;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class EnergyLogger implements Periodic {
-    @Getter
     private double totalPower = 0.0;
-    @Getter
     private double totalEnergy = 0.0;
 
     private final Map<String, Double> subsystemPowers = new HashMap<>();
