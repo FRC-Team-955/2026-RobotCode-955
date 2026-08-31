@@ -185,27 +185,27 @@ public class LoggedTunablePIDF {
 
     public SimpleMotorFeedforward toSimpleFF() {
         return new SimpleMotorFeedforward(
-                this.kS != null ? this.kS.get() : 0.0,
-                this.kV != null ? this.kV.get() : 0.0,
-                this.kA != null ? this.kA.get() : 0.0
+                kS != null ? kS.get() : 0.0,
+                kV != null ? kV.get() : 0.0,
+                kA != null ? kA.get() : 0.0
         );
     }
 
     public ArmFeedforward toArmFF() {
         return new ArmFeedforward(
-                this.kS != null ? this.kS.get() : 0.0,
-                this.kG != null ? this.kG.get() : 0.0,
-                this.kV != null ? this.kV.get() : 0.0,
-                this.kA != null ? this.kA.get() : 0.0
+                kS != null ? kS.get() : 0.0,
+                kG != null ? kG.get() : 0.0,
+                kV != null ? kV.get() : 0.0,
+                kA != null ? kA.get() : 0.0
         );
     }
 
     public ElevatorFeedforward toElevatorFF() {
         return new ElevatorFeedforward(
-                this.kS != null ? this.kS.get() : 0.0,
-                this.kG != null ? this.kG.get() : 0.0,
-                this.kV != null ? this.kV.get() : 0.0,
-                this.kA != null ? this.kA.get() : 0.0
+                kS != null ? kS.get() : 0.0,
+                kG != null ? kG.get() : 0.0,
+                kV != null ? kV.get() : 0.0,
+                kA != null ? kA.get() : 0.0
         );
     }
 
