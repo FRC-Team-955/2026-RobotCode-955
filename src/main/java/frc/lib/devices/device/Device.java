@@ -18,7 +18,7 @@ public abstract class Device<IO extends DeviceIO<Inputs>, Inputs extends Loggabl
 
         disconnectedAlert = new Alert(name + " is disconnected.", Alert.AlertType.kError);
 
-        DeviceManager.getInstance().addDevice(this);
+        DeviceManager.get().addDevice(this);
     }
 
     protected void updateAndProcessInputs() {
