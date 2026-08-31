@@ -143,6 +143,7 @@ public class Hood implements Periodic {
         // Turn off E-stop when homing
         if (goal == Goal.HOME) {
             motor.undoEmergencyStop(NeutralModeValue.Brake);
+            operatorDashboard.hoodEStop.set(false);
         }
 
         if (DriverStation.isDisabled() || motor.isEmergencyStopped() || goal == Goal.HOME_FINALIZE) {
