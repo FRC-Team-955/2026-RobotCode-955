@@ -1,4 +1,4 @@
-package frc.robot.subsystems.superstructure;
+package frc.lib.devices.distancesensor;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
@@ -12,8 +12,8 @@ import edu.wpi.first.units.measure.Time;
 import frc.lib.PhoenixUtil;
 import frc.robot.Constants;
 
-public class SuperstructureIOCANrange extends SuperstructureIO {
-    private final CANrange canrange = new CANrange(17, Constants.canivoreBus);
+public class DistanceSensorIOCANrange extends DistanceSensorIO {
+    protected final CANrange canRange;
 
     private final StatusSignal<Distance> distance;
     private final StatusSignal<Distance> distanceStdDev;
@@ -24,20 +24,22 @@ public class SuperstructureIOCANrange extends SuperstructureIO {
 
     private final Debouncer canrangeConnectedDebouncer = new Debouncer(0.5);
 
-    public SuperstructureIOCANrange() {
-        // https://v6.docs.ctr-electronics.com/en/stable/docs/application-notes/tuning-canrange.html
+    public DistanceSensorIOCANrange(int canID) {
+        canRange = new CANrange(canID, Constants.canivoreBus);
+
+        // https://v6.docs.ctr-electronics.com/en/stable/docs/hardware-reference/canrange/tuning-canrange.html
         var canrangeConfig = new CANrangeConfiguration();
         canrangeConfig.FovParams.FOVRangeX = 8.0;
         canrangeConfig.FovParams.FOVRangeY = 8.0;
         canrangeConfig.ProximityParams.MinSignalStrengthForValidMeasurement = 2500;
-        PhoenixUtil.tryUntilOk(5, () -> canrange.getConfigurator().apply(canrangeConfig, 0.25));
+        PhoenixUtil.tryUntilOk(5, () -> canRange.getConfigurator().apply(canrangeConfig, 0.25));
 
-        distance = canrange.getDistance();
-        distanceStdDev = canrange.getDistanceStdDev();
-        signalStrength = canrange.getSignalStrength();
-        ambientSignal = canrange.getAmbientSignal();
-        measurementHealth = canrange.getMeasurementHealth();
-        measurementTime = canrange.getMeasurementTime();
+        distance = canRange.getDistance();
+        distanceStdDev = canRange.getDistanceStdDev();
+        signalStrength = canRange.getSignalStrength();
+        ambientSignal = canRange.getAmbientSignal();
+        measurementHealth = canRange.getMeasurementHealth();
+        measurementTime = canRange.getMeasurementTime();
 
         BaseStatusSignal.setUpdateFrequencyForAll(
                 50.0,
@@ -48,12 +50,12 @@ public class SuperstructureIOCANrange extends SuperstructureIO {
                 measurementHealth,
                 measurementTime
         );
-        ParentDevice.optimizeBusUtilizationForAll(canrange);
+        ParentDevice.optimizeBusUtilizationForAll(canRange);
     }
 
     @Override
-    public void updateInputs(SuperstructureIOInputs inputs) {
-        var canrangeStatus = BaseStatusSignal.refreshAll(
+    public void updateInputs(DistanceSensorIOInputsAutoLogged inputs) {
+        var canRangeStatus = BaseStatusSignal.refreshAll(
                 distance,
                 distanceStdDev,
                 signalStrength,
@@ -61,12 +63,12 @@ public class SuperstructureIOCANrange extends SuperstructureIO {
                 measurementHealth,
                 measurementTime
         );
-        inputs.canrangeConnected = canrangeConnectedDebouncer.calculate(canrangeStatus.isOK());
-        inputs.canrangeDistanceMeters = distance.getValueAsDouble();
-        inputs.canrangeDistanceStdDevMeters = distanceStdDev.getValueAsDouble();
-        inputs.canrangeSignalStrength = signalStrength.getValueAsDouble();
-        inputs.canrangeAmbientSignal = ambientSignal.getValueAsDouble();
-        inputs.canrangeMeasurementHealth = measurementHealth.getValue();
-        inputs.canrangeMeasurementTime = measurementTime.getValueAsDouble();
+        inputs.connected = canrangeConnectedDebouncer.calculate(canRangeStatus.isOK());
+        inputs.distanceMeters = distance.getValueAsDouble();
+        inputs.distanceStdDevMeters = distanceStdDev.getValueAsDouble();
+        inputs.signalStrength = signalStrength.getValueAsDouble();
+        inputs.ambientSignal = ambientSignal.getValueAsDouble();
+        inputs.measurementHealth = measurementHealth.getValue();
+        inputs.measurementTime = measurementTime.getValueAsDouble();
     }
 }

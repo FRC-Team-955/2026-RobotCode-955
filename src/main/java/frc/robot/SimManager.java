@@ -6,12 +6,23 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.simulation.DriverStationSim;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import frc.lib.Util;
+import frc.robot.shooting.ShootingKinematics;
 import frc.robot.subsystems.drive.DriveConstants;
+import frc.robot.subsystems.superintake.IntakePivot;
+import frc.robot.subsystems.superintake.IntakeRollers;
+import frc.robot.subsystems.superintake.Superintake;
+import frc.robot.subsystems.superstructure.Feeder;
+import frc.robot.subsystems.superstructure.Flywheel;
+import frc.robot.subsystems.superstructure.Spindexer;
+import frc.robot.subsystems.superstructure.Superstructure;
+import lombok.Getter;
 import org.dyn4j.dynamics.Settings;
 import org.ironmaple.simulation.IntakeSimulation;
 import org.ironmaple.simulation.SimulatedArena;
@@ -20,6 +31,7 @@ import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
 import org.ironmaple.simulation.drivesims.configs.SwerveModuleSimulationConfig;
 import org.ironmaple.simulation.seasonspecific.rebuilt2026.RebuiltFuelOnField;
+import org.ironmaple.simulation.seasonspecific.rebuilt2026.RebuiltFuelOnFly;
 import org.littletonrobotics.junction.Logger;
 import org.photonvision.estimation.TargetModel;
 import org.photonvision.simulation.VisionSystemSim;
@@ -31,8 +43,13 @@ import static frc.robot.subsystems.drive.DriveConstants.driveConfig;
 
 public class SimManager {
     private static final int hopperCapacity = 50;
+    private static final double shootingBallsPerSec = 8.0;
+    private static final double ballShootDelay = 1.0 / shootingBallsPerSec;
 
     private static final RobotState robotState = RobotState.get();
+    private final Superintake superintake = Superintake.get();
+    private final Superstructure superstructure = Superstructure.get();
+    private final ShootingKinematics shootingKinematics = ShootingKinematics.get();
 
     private static SwerveModuleSimulationConfig createConfig(double turnGearRatio) {
         return new SwerveModuleSimulationConfig(
@@ -48,7 +65,6 @@ public class SimManager {
         );
     }
 
-    @SuppressWarnings("unchecked")
     public final SwerveDriveSimulation driveSimulation = new SwerveDriveSimulation(
             // Specify Configuration
             DriveTrainSimulationConfig.Default()
@@ -130,14 +146,15 @@ public class SimManager {
 
     private boolean setInitialPose = false;
     private boolean lastInNeutralZone = false;
+    private double lastShotTimestamp = 0.0;
+    @Getter
+    private double simulatedFuelSensorDistance;
 
     public void periodicBeforeNormalCode() {
         if (!setInitialPose) {
             robotState.setPose(new Pose2d(1, 1, new Rotation2d()));
             setInitialPose = true;
         }
-
-        SimulatedArena.getInstance().simulationPeriodic();
 
         // Bump sim
         Pose2d pose = driveSimulation.getSimulatedDriveTrainPose();
@@ -164,14 +181,68 @@ public class SimManager {
         }
         lastInNeutralZone = inNeutralZone;
 
+        aprilTagVisionSystemUpdated = false;
+        gamePieceVisionSystemUpdated = false;
+
+        if (superintake.intakeRollers.getGoal() == IntakeRollers.Goal.INTAKE &&
+                superintake.intakePivot.getGoal() == IntakePivot.Goal.DEPLOY) {
+            if (!intakeSimulation.isRunning()) {
+                intakeSimulation.startIntake();
+            }
+        } else if (intakeSimulation.isRunning()) {
+            intakeSimulation.stopIntake();
+        }
+
+        {
+            // get this value before potentially subtracting 1 when shooting
+            int gamePiecesInHopper = intakeSimulation.getGamePiecesAmount();
+
+            if (superstructure.feeder.getGoal() == Feeder.Goal.FEED &&
+                    superstructure.spindexer.getGoal() == Spindexer.Goal.FEED) {
+                if (Timer.getTimestamp() - lastShotTimestamp > ballShootDelay &&
+                        (intakeSimulation.obtainGamePieceFromIntake() || DriverStation.isTeleopEnabled())) {
+                    lastShotTimestamp = Timer.getTimestamp();
+
+                    Pose2d robotPose = driveSimulation.getSimulatedDriveTrainPose();
+                    var gamePiece = new RebuiltFuelOnFly(
+                            robotPose.getTranslation(),
+                            shootingKinematics.getFuelExitTranslation().toTranslation2d(),
+                            driveSimulation.getDriveTrainSimulatedChassisSpeedsFieldRelative(),
+                            robotPose.getRotation(),
+                            Meters.of(shootingKinematics.getFuelExitTranslation().getZ()),
+                            MetersPerSecond.of(superstructure.flywheel.getVelocityRadPerSec() * Flywheel.radiusMeters),
+                            // Applying the shooter facing direction to the maple-sim parameter
+                            // causes issues because it causes the shooter position to be rotated
+                            // which puts it in the opposite corner of the robot. Instead, just
+                            // reverse the hood
+                            Radians.of(Math.PI - superstructure.hood.getShotAngleRad())
+                    );
+                    if (!shootingKinematics.getShootingParameters().isPass()) {
+                        gamePiece.disableBecomesGamePieceOnFieldAfterTouchGround();
+                    }
+                    Logger.recordOutput("ShootingKinematics/ProjectileVelocity", gamePiece.getVelocity3dMPS());
+                    Logger.recordOutput("ShootingKinematics/ProjectileSpeedRobotRelative", superstructure.flywheel.getVelocityRadPerSec() * Flywheel.radiusMeters);
+                    SimulatedArena.getInstance().addGamePieceProjectile(gamePiece);
+                }
+            }
+
+            if (gamePiecesInHopper > 0) {
+                simulatedFuelSensorDistance = Timer.getTimestamp() - lastShotTimestamp < ballShootDelay * 0.5
+                        ? Units.inchesToMeters(5.0)
+                        : 0.3;
+            } else {
+                simulatedFuelSensorDistance = 0.4;
+            }
+        }
+
+        SimulatedArena.getInstance().simulationPeriodic();
+
         Logger.recordOutput("FieldSimulation/RobotPosition", driveSimulation.getSimulatedDriveTrainPose());
         Logger.recordOutput(
                 "FieldSimulation/Fuel",
                 SimulatedArena.getInstance().getGamePiecesArrayByType("Fuel")
         );
-
-        aprilTagVisionSystemUpdated = false;
-        gamePieceVisionSystemUpdated = false;
+        Logger.recordOutput("FieldSimulation/NumberOfFuelInHopper", intakeSimulation.getGamePiecesAmount());
     }
 
     private boolean aprilTagVisionSystemUpdated = false;
