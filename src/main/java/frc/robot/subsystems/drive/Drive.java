@@ -617,7 +617,7 @@ public class Drive extends CommandBasedSubsystem {
 
     public boolean isAnythingDisconnected() {
         for (var module : modules) {
-            if (module.moduleDisconnected())
+            if (module.isAnythingDisconnected())
                 return true;
         }
         return !gyroInputs.connected;

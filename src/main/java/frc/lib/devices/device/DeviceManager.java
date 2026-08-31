@@ -1,6 +1,7 @@
 package frc.lib.devices.device;
 
 import frc.lib.Util;
+import frc.lib.devices.motor.Motor;
 import frc.lib.subsystem.Periodic;
 
 import java.util.ArrayList;
@@ -34,5 +35,32 @@ public class DeviceManager implements Periodic {
         for (Device<?, ?> device : devices) {
             device.updateAndProcessInputs();
         }
+    }
+
+    public boolean anyDeviceDisconnected() {
+        for (Device<?, ?> device : devices) {
+            if (!device.isConnected()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean anyMotorEmergencyStopped() {
+        for (Device<?, ?> device : devices) {
+            if (device instanceof Motor motor && motor.isEmergencyStopped()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean anyMotorHasHighTemperature() {
+        for (Device<?, ?> device : devices) {
+            if (device instanceof Motor motor && motor.hasHighTemperature()) {
+                return true;
+            }
+        }
+        return false;
     }
 }

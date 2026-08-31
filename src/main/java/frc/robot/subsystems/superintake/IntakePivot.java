@@ -207,14 +207,6 @@ public class IntakePivot implements Periodic {
         operatorDashboard.intakePivotNotHomedAlert.set(false);
     }
 
-    public boolean isEmergencyStopped() {
-        return motor.isEmergencyStopped();
-    }
-
-    public boolean isDisconnected() {
-        return !motor.isConnected();
-    }
-
     public Transform3d getMechanismTransform() {
         return new Transform3d(
                 new Translation3d(Units.inchesToMeters(10.0), 0.0, Units.inchesToMeters(6.25)),

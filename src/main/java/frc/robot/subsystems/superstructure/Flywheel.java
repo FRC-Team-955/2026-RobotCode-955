@@ -135,10 +135,6 @@ public class Flywheel implements Periodic {
         return Units.radiansPerSecondToRotationsPerMinute(getVelocityRadPerSec());
     }
 
-    public boolean isDisconnected() {
-        return !leaderMotor.isConnected() || !followerMotor.isConnected();
-    }
-
     public double getSetpointRPM() {
         return goal.setpointRPM.getAsDouble();
     }

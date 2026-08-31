@@ -100,10 +100,6 @@ public class Spindexer implements Periodic {
         }
     }
 
-    public boolean isDisconnected() {
-        return !motor.isConnected();
-    }
-
     public Transform3d getMechanismTransform() {
         return new Transform3d(
                 new Translation3d(0.0, Units.inchesToMeters(1.4), Units.inchesToMeters(12.0)),

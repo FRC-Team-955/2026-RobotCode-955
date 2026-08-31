@@ -84,7 +84,7 @@ public class Motor extends Device<MotorIO, MotorIOInputsAutoLogged> {
     protected void updateAndProcessInputs() {
         super.updateAndProcessInputs();
 
-        highTemperatureAlert.set(getTemperatureCelsius() > 50.0);
+        highTemperatureAlert.set(hasHighTemperature());
 
         if (positionGains != null && positionGains.hasChanged()) {
             setPositionGains();
@@ -122,6 +122,10 @@ public class Motor extends Device<MotorIO, MotorIOInputsAutoLogged> {
 
     public double getTemperatureCelsius() {
         return inputs.temperatureCelsius;
+    }
+
+    public boolean hasHighTemperature() {
+        return getTemperatureCelsius() > 50.0;
     }
 
     @Getter

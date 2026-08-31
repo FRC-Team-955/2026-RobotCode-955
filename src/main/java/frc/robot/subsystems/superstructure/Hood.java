@@ -181,14 +181,6 @@ public class Hood implements Periodic {
         operatorDashboard.hoodNotHomedAlert.set(false);
     }
 
-    public boolean isEmergencyStopped() {
-        return motor.isEmergencyStopped();
-    }
-
-    public boolean isDisconnected() {
-        return !motor.isConnected();
-    }
-
     public Transform3d getMechanismTransform() {
         return new Transform3d(
                 new Translation3d(Units.inchesToMeters(-6.910046), Units.inchesToMeters(-9.109744), Units.inchesToMeters(12.861381)),

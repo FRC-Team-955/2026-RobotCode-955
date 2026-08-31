@@ -7,15 +7,14 @@ import edu.wpi.first.wpilibj.LEDPattern;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import frc.lib.Util;
+import frc.lib.devices.device.DeviceManager;
 import frc.lib.subsystem.Periodic;
 import frc.robot.HubShiftTracker;
 import frc.robot.OperatorDashboard;
-import frc.robot.autos.AutoManager;
 import frc.robot.shooting.ShootingKinematics;
 import frc.robot.subsystems.apriltagvision.AprilTagVision;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.SparkCANcoderHelper;
-import frc.robot.subsystems.gamepiecevision.GamePieceVision;
 import frc.robot.subsystems.superintake.Superintake;
 import frc.robot.subsystems.superstructure.Superstructure;
 import org.littletonrobotics.junction.Logger;
@@ -29,10 +28,9 @@ import static frc.robot.subsystems.leds.LEDConstants.length;
 public class LEDs implements Periodic {
     private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
     private static final ShootingKinematics shootingKinematics = ShootingKinematics.get();
-    private static final AutoManager autoManager = AutoManager.get();
     private static final AprilTagVision aprilTagVision = AprilTagVision.get();
-    private static final GamePieceVision gamePieceVision = GamePieceVision.get();
     private static final HubShiftTracker hubShiftTracker = HubShiftTracker.get();
+    private static final DeviceManager deviceManager = DeviceManager.get();
 
     private static final Drive drive = Drive.get();
     private static final Superintake superintake = Superintake.get();
@@ -103,15 +101,17 @@ public class LEDs implements Periodic {
         Logger.recordOutput("LEDs/Mechanism", mechanism);
     }
 
-    private LEDPattern getDisabledPattern() {
-        if (aprilTagVision.anyCamerasDisconnected() ||
+    private boolean isSomethingReallyWrong() {
+        return aprilTagVision.anyCamerasDisconnected() ||
                 //gamePieceVision.anyCamerasDisconnected() ||
-                superstructure.hood.isEmergencyStopped() ||
-                superintake.intakePivot.isEmergencyStopped() ||
-                superintake.isAnythingDisconnected() ||
-                superstructure.isAnythingDisconnected() ||
+                deviceManager.anyDeviceDisconnected() ||
+                deviceManager.anyMotorEmergencyStopped() ||
                 drive.isAnythingDisconnected() ||
-                SparkCANcoderHelper.isAnyResetFailed()) {
+                SparkCANcoderHelper.isAnyResetFailed();
+    }
+
+    private LEDPattern getDisabledPattern() {
+        if (isSomethingReallyWrong()) {
             return LEDPatterns.somethingIsReallyWrong;
         }
 
@@ -139,25 +139,14 @@ public class LEDs implements Periodic {
     }
 
     private LEDPattern getEnabledPatternFirstHalf() {
-        if (aprilTagVision.anyCamerasDisconnected() ||
-                //gamePieceVision.anyCamerasDisconnected() ||
-                //superstructure.hood.isEmergencyStopped() ||
-                //superintake.intakePivot.isEmergencyStopped() ||
-                hubShiftTracker.gameDataBrokenAlert.get() ||
-                superintake.isAnythingDisconnected() ||
-                superstructure.isAnythingDisconnected() ||
-                drive.isAnythingDisconnected() ||
-                SparkCANcoderHelper.isAnyResetFailed()) {
+        if (isSomethingReallyWrong() ||
+                hubShiftTracker.gameDataBrokenAlert.get()) {
             return LEDPatterns.somethingIsReallyWrong;
         }
 
-        //if (
-        //        superintake.intakeRollers.highTemperatureAlert.get() ||
-        //                superstructure.flywheel.highTemperatureAlert.get() ||
-        //                superstructure.hood.highTemperatureAlert.get()
-        //) {
-        //    return LEDPatterns.hotMotors;
-        //}
+        if (deviceManager.anyMotorHasHighTemperature()) {
+            return LEDPatterns.hotMotors;
+        }
 
         if (operatorDashboard.isBatteryVoltageAlertActive()) {
             return LEDPatterns.lowBattery;

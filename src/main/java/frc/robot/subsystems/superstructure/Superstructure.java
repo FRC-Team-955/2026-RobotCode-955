@@ -15,7 +15,6 @@ import frc.lib.network.LoggedTunableNumber;
 import frc.lib.subsystem.CommandBasedSubsystem;
 import frc.robot.BuildConstants;
 import frc.robot.FieldConstants;
-import frc.robot.OperatorDashboard;
 import frc.robot.RobotState;
 import frc.robot.shooting.ShootingKinematics;
 import lombok.Getter;
@@ -35,7 +34,6 @@ public class Superstructure extends CommandBasedSubsystem {
     private static final LoggedTunableNumber antiJamTimeSeconds = new LoggedTunableNumber("Superstructure/AntiJamTimeSeconds", 0.15);
 
     private static final RobotState robotState = RobotState.get();
-    private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
     private static final ShootingKinematics shootingKinematics = ShootingKinematics.get();
 
     // because these subsystems are instantiated by Superstructure, instead of RobotContainer,
@@ -185,13 +183,5 @@ public class Superstructure extends CommandBasedSubsystem {
                                 new Rotation3d()
                         ))
         );
-    }
-
-    public boolean isAnythingDisconnected() {
-        return hood.isDisconnected() ||
-                flywheel.isDisconnected() ||
-                spindexer.isDisconnected() ||
-                feeder.isDisconnected() ||
-                !inputs.canrangeConnected;
     }
 }
