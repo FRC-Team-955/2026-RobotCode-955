@@ -218,4 +218,17 @@ public class LoggedTunablePIDF {
         if (kA != null && kA.hasChanged()) return true;
         return kG != null && kG.hasChanged();
     }
+
+    @Override
+    public String toString() {
+        return "LoggedTunablePIDF(" +
+                "kP: " + (kP != null ? kP.get() : "null") +
+                ", kI: " + (kI != null ? kI.get() : "null") +
+                ", kD: " + (kD != null ? kD.get() : "null") +
+                ", kS: " + (kS != null ? kS.get() : "null") +
+                ", kV: " + (kV != null ? kV.get() : "null") +
+                ", kA: " + (kA != null ? kA.get() : "null") +
+                ", kG: " + (kG != null ? kG.get() : "null") +
+                ")";
+    }
 }
