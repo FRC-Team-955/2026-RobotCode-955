@@ -178,9 +178,9 @@ public class ModuleIOSparkMaxCANcoder extends ModuleIO {
         SparkCANcoderHelper.resetTurnSpark(turnEncoder, turnAbsolutePosition, cancoderCanID);
 
         // Create odometry queues
-        timestampQueue = HighFrequencySamplingThread.getInstance().makeTimestampQueue();
-        drivePositionQueue = HighFrequencySamplingThread.getInstance().registerSparkSignal(driveSpark, driveEncoder::getPosition);
-        turnPositionQueue = HighFrequencySamplingThread.getInstance().registerSparkSignal(turnSpark, turnEncoder::getPosition);
+        timestampQueue = HighFrequencySamplingThread.get().makeTimestampQueue();
+        drivePositionQueue = HighFrequencySamplingThread.get().registerSparkSignal(driveSpark, driveEncoder::getPosition);
+        turnPositionQueue = HighFrequencySamplingThread.get().registerSparkSignal(turnSpark, turnEncoder::getPosition);
     }
 
     @Override

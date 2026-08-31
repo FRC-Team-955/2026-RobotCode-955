@@ -70,8 +70,8 @@ public class GyroIOPigeon2 extends GyroIO {
         );
         ParentDevice.optimizeBusUtilizationForAll(pigeon);
 
-        yawTimestampQueue = HighFrequencySamplingThread.getInstance().makeTimestampQueue();
-        yawPositionQueue = HighFrequencySamplingThread.getInstance().registerPhoenixSignal(pigeon.getYaw());
+        yawTimestampQueue = HighFrequencySamplingThread.get().makeTimestampQueue();
+        yawPositionQueue = HighFrequencySamplingThread.get().registerPhoenixSignal(pigeon.getYaw());
     }
 
     @Override

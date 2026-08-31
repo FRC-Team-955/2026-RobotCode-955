@@ -41,10 +41,20 @@ public class EnergyLogger implements Periodic {
     private final Map<String, Double> subsystemPowers = new HashMap<>();
     private final Map<String, Double> subsystemEnergies = new HashMap<>();
 
-    @Getter
-    private static final EnergyLogger instance = new EnergyLogger();
+    private static EnergyLogger instance;
+
+    public static synchronized EnergyLogger get() {
+        if (instance == null) {
+            instance = new EnergyLogger();
+        }
+
+        return instance;
+    }
 
     private EnergyLogger() {
+        if (instance != null) {
+            Util.error("Duplicate EnergyLogger created");
+        }
     }
 
     public void reportPowerUsage(String key, double... watts) {

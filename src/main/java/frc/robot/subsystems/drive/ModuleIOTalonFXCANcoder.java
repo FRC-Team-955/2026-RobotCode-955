@@ -157,11 +157,11 @@ public class ModuleIOTalonFXCANcoder extends ModuleIO {
         tryUntilOk(5, () -> cancoder.getConfigurator().apply(cancoderConfig));
 
         // Create timestamp queue
-        timestampQueue = HighFrequencySamplingThread.getInstance().makeTimestampQueue();
+        timestampQueue = HighFrequencySamplingThread.get().makeTimestampQueue();
 
         // Create drive status signals
         drivePosition = driveTalon.getPosition();
-        drivePositionQueue = HighFrequencySamplingThread.getInstance().registerPhoenixSignal(driveTalon.getPosition());
+        drivePositionQueue = HighFrequencySamplingThread.get().registerPhoenixSignal(driveTalon.getPosition());
         driveVelocity = driveTalon.getVelocity();
         driveAppliedVolts = driveTalon.getMotorVoltage();
         driveStatorCurrentAmps = driveTalon.getStatorCurrent();
@@ -172,7 +172,7 @@ public class ModuleIOTalonFXCANcoder extends ModuleIO {
         turnAbsolutePosition = cancoder.getAbsolutePosition();
         turnAbsoluteEncoderMagnetHealth = cancoder.getMagnetHealth();
         turnPosition = turnTalon.getPosition();
-        turnPositionQueue = HighFrequencySamplingThread.getInstance().registerPhoenixSignal(turnTalon.getPosition());
+        turnPositionQueue = HighFrequencySamplingThread.get().registerPhoenixSignal(turnTalon.getPosition());
         turnVelocity = turnTalon.getVelocity();
         turnAppliedVolts = turnTalon.getMotorVoltage();
         turnStatorCurrentAmps = turnTalon.getStatorCurrent();

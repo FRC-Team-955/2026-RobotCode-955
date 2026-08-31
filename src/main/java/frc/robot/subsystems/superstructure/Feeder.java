@@ -7,6 +7,7 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.lib.EnergyLogger;
+import frc.lib.Util;
 import frc.lib.devices.motor.CtrlSparkMaxConfig;
 import frc.lib.devices.motor.MechanismSim;
 import frc.lib.devices.motor.Motor;
@@ -25,8 +26,8 @@ public class Feeder implements Periodic {
     private static final LoggedTunableNumber feedVoltage = new LoggedTunableNumber("Superstructure/Feeder/Goal/FeedVoltage", 12.0);
     private static final LoggedTunableNumber ejectVoltage = new LoggedTunableNumber("Superstructure/Feeder/Goal/EjectVoltage", -12.0);
 
-    private static final EnergyLogger energyLogger = EnergyLogger.getInstance();
-    private static final OperatorDashboard operatorDashboard = OperatorDashboard.getInstance();
+    private static final EnergyLogger energyLogger = EnergyLogger.get();
+    private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
 
     private final Motor motor = Motor
             .createSparkMax(
@@ -56,10 +57,20 @@ public class Feeder implements Periodic {
     @Getter
     private Goal goal = Goal.IDLE;
 
-    @Getter
-    private static final Feeder instance = new Feeder();
+    private static Feeder instance;
+
+    public static synchronized Feeder get() {
+        if (instance == null) {
+            instance = new Feeder();
+        }
+
+        return instance;
+    }
 
     private Feeder() {
+        if (instance != null) {
+            Util.error("Duplicate Feeder created");
+        }
     }
 
     @Override

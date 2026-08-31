@@ -1,20 +1,30 @@
 package frc.robot;
 
+import frc.lib.Util;
 import frc.lib.subsystem.Periodic;
 import frc.robot.subsystems.superintake.Superintake;
 import frc.robot.subsystems.superstructure.Superstructure;
-import lombok.Getter;
 import org.littletonrobotics.junction.Logger;
 
 public class RobotMechanism implements Periodic {
-    private static final RobotState robotState = RobotState.getInstance();
-    private static final Superintake superintake = Superintake.getInstance();
-    private static final Superstructure superstructure = Superstructure.getInstance();
+    private static final RobotState robotState = RobotState.get();
+    private static final Superintake superintake = Superintake.get();
+    private static final Superstructure superstructure = Superstructure.get();
 
-    @Getter
-    private static final RobotMechanism instance = new RobotMechanism();
+    private static RobotMechanism instance;
+
+    public static synchronized RobotMechanism get() {
+        if (instance == null) {
+            instance = new RobotMechanism();
+        }
+
+        return instance;
+    }
 
     private RobotMechanism() {
+        if (instance != null) {
+            Util.error("Duplicate RobotMechanism created");
+        }
     }
 
     @Override

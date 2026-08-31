@@ -179,11 +179,11 @@ public class ModuleIOTalonFXSparkMaxCANcoder extends ModuleIO {
         PhoenixUtil.tryUntilOk(5, () -> cancoder.getConfigurator().apply(cancoderConfig));
 
         // Create timestamp queue
-        timestampQueue = HighFrequencySamplingThread.getInstance().makeTimestampQueue();
+        timestampQueue = HighFrequencySamplingThread.get().makeTimestampQueue();
 
         // Create drive status signals
         drivePosition = driveTalon.getPosition();
-        drivePositionQueue = HighFrequencySamplingThread.getInstance().registerPhoenixSignal(driveTalon.getPosition());
+        drivePositionQueue = HighFrequencySamplingThread.get().registerPhoenixSignal(driveTalon.getPosition());
         driveVelocity = driveTalon.getVelocity();
         driveAppliedVolts = driveTalon.getMotorVoltage();
         driveStatorCurrentAmps = driveTalon.getStatorCurrent();
@@ -193,7 +193,7 @@ public class ModuleIOTalonFXSparkMaxCANcoder extends ModuleIO {
         // Create turn status signals
         turnAbsolutePosition = cancoder.getAbsolutePosition();
         turnAbsoluteEncoderMagnetHealth = cancoder.getMagnetHealth();
-        turnPositionQueue = HighFrequencySamplingThread.getInstance().registerSparkSignal(turnSpark, turnEncoder::getPosition);
+        turnPositionQueue = HighFrequencySamplingThread.get().registerSparkSignal(turnSpark, turnEncoder::getPosition);
 
         // Configure periodic frames
         BaseStatusSignal.setUpdateFrequencyForAll(HighFrequencySamplingThread.frequencyHz, drivePosition);

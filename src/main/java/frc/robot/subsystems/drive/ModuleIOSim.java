@@ -48,7 +48,7 @@ public class ModuleIOSim extends ModuleIO {
     private double turnAppliedVolts = 0.0;
 
     public ModuleIOSim(int index) {
-        moduleSimulation = SimManager.getInstance().driveSimulation.getModules()[index];
+        moduleSimulation = SimManager.get().driveSimulation.getModules()[index];
 
         driveMotor = moduleSimulation
                 .useGenericMotorControllerForDrive()

@@ -5,7 +5,7 @@ import frc.robot.Constants;
 import frc.robot.SimManager;
 
 public class AccelerometerIOSim extends AccelerometerIO {
-    private final SimManager simManager = SimManager.getInstance();
+    private final SimManager simManager = SimManager.get();
 
     private ChassisSpeeds lastSpeeds = new ChassisSpeeds();
 

@@ -31,8 +31,8 @@ import org.littletonrobotics.junction.Logger;
 import static frc.robot.subsystems.drive.DriveConstants.*;
 
 public class Module {
-    private static final OperatorDashboard operatorDashboard = OperatorDashboard.getInstance();
-    private static final EnergyLogger energyLogger = EnergyLogger.getInstance();
+    private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
+    private static final EnergyLogger energyLogger = EnergyLogger.get();
 
     private final ModuleIO io;
     private final ModuleIOInputsAutoLogged inputs = new ModuleIOInputsAutoLogged();

@@ -17,6 +17,7 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.lib.EnergyLogger;
+import frc.lib.Util;
 import frc.lib.devices.motor.MechanismSim;
 import frc.lib.devices.motor.Motor;
 import frc.lib.network.LoggedTunableNumber;
@@ -45,9 +46,9 @@ public class IntakePivot implements Periodic {
     private static final LoggedTunableNumber profileLookaheadTimeSec = new LoggedTunableNumber("Superintake/IntakePivot/ProfileLookaheadTimeSec", 0.15);
     private static final LoggedTunableNumber stowSetpointDegrees = new LoggedTunableNumber("Superintake/IntakePivot/Goal/StowDegrees", 70.0);
 
-    private static final EnergyLogger energyLogger = EnergyLogger.getInstance();
-    private static final OperatorDashboard operatorDashboard = OperatorDashboard.getInstance();
-    private static final RobotState robotState = RobotState.getInstance();
+    private static final EnergyLogger energyLogger = EnergyLogger.get();
+    private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
+    private static final RobotState robotState = RobotState.get();
 
     private final Motor motor = Motor
             .createTalonFX(
@@ -109,10 +110,20 @@ public class IntakePivot implements Periodic {
     private boolean atVelocityThresholdForHoming = false;
     private final Debouncer homingVelocityDebouncer = new Debouncer(0.1, Debouncer.DebounceType.kRising);
 
-    @Getter
-    private static final IntakePivot instance = new IntakePivot();
+    private static IntakePivot instance;
+
+    public static synchronized IntakePivot get() {
+        if (instance == null) {
+            instance = new IntakePivot();
+        }
+
+        return instance;
+    }
 
     private IntakePivot() {
+        if (instance != null) {
+            Util.error("Duplicate IntakePivot created");
+        }
     }
 
     @Override

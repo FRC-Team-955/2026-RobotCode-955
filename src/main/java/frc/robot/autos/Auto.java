@@ -11,11 +11,11 @@ import frc.robot.subsystems.superintake.Superintake;
 import frc.robot.subsystems.superstructure.Superstructure;
 
 public abstract class Auto {
-    protected static final Drive drive = Drive.getInstance();
-    protected static final Superintake superintake = Superintake.getInstance();
-    protected static final Superstructure superstructure = Superstructure.getInstance();
-    protected static final RobotState robotState = RobotState.getInstance();
-    protected static final OperatorDashboard operatorDashboard = OperatorDashboard.getInstance();
+    protected static final Drive drive = Drive.get();
+    protected static final Superintake superintake = Superintake.get();
+    protected static final Superstructure superstructure = Superstructure.get();
+    protected static final RobotState robotState = RobotState.get();
+    protected static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
 
     public final Pose2d startingPose;
     public final Command command;

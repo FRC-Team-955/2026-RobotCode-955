@@ -97,7 +97,7 @@ class GameTestRunner {
         }
 
         // Set robot state
-        RobotState.getInstance().setPose(test.startingPose());
+        RobotState.get().setPose(test.startingPose());
 
         // Start robot
         Thread robotRunner = new Thread(() -> {

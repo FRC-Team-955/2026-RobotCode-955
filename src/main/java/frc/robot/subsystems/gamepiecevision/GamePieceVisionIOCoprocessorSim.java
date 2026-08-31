@@ -8,7 +8,7 @@ import org.photonvision.simulation.PhotonCameraSim;
 import org.photonvision.simulation.SimCameraProperties;
 
 public class GamePieceVisionIOCoprocessorSim extends GamePieceVisionIOCoprocessor {
-    private static final SimManager simManager = SimManager.getInstance();
+    private static final SimManager simManager = SimManager.get();
 
     protected final PhotonCamera camera;
 

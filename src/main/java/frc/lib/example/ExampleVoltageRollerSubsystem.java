@@ -19,7 +19,7 @@ import java.util.function.DoubleSupplier;
 public class ExampleVoltageRollerSubsystem implements Periodic {
     private static final LoggedTunableNumber rollVoltage = new LoggedTunableNumber("ExampleVoltageRollerSubsystem/Goal/RollVoltage", 3.0);
 
-    private static final OperatorDashboard operatorDashboard = OperatorDashboard.getInstance();
+    private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
 
     private final Motor motor = Motor
             .createSparkMax(

@@ -29,8 +29,8 @@ public class GyroIONavX extends GyroIO {
     private final Queue<Double> yawTimestampQueue;
 
     public GyroIONavX() {
-        yawTimestampQueue = HighFrequencySamplingThread.getInstance().makeTimestampQueue();
-        yawPositionQueue = HighFrequencySamplingThread.getInstance().registerGenericSignal(navX::getYaw);
+        yawTimestampQueue = HighFrequencySamplingThread.get().makeTimestampQueue();
+        yawPositionQueue = HighFrequencySamplingThread.get().registerGenericSignal(navX::getYaw);
     }
 
     @Override

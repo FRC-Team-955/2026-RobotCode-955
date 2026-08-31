@@ -27,6 +27,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.lib.Util;
 import frc.lib.subsystem.Periodic;
 import frc.robot.controller.Controller;
 import frc.robot.shooting.ShootingKinematics;
@@ -39,9 +40,9 @@ import java.util.function.DoubleSupplier;
  * https://github.com/Mechanical-Advantage/RobotCode2026Public/blob/main/src/main/java/org/littletonrobotics/frc2026/util/HubShiftUtil.java
  */
 public class HubShiftTracker implements Periodic {
-    private static final OperatorDashboard operatorDashboard = OperatorDashboard.getInstance();
-    private static final Controller controller = Controller.getInstance();
-    private static final ShootingKinematics shootingKinematics = ShootingKinematics.getInstance();
+    private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
+    private static final Controller controller = Controller.get();
+    private static final ShootingKinematics shootingKinematics = ShootingKinematics.get();
 
     public enum ShiftEnum {
         TRANSITION,
@@ -77,10 +78,21 @@ public class HubShiftTracker implements Periodic {
     @Getter
     private ShiftInfo shiftInfo = getShiftedShiftInfo();
 
-    @Getter
-    private static final HubShiftTracker instance = new HubShiftTracker();
+    private static HubShiftTracker instance;
+
+    public static synchronized HubShiftTracker get() {
+        if (instance == null) {
+            instance = new HubShiftTracker();
+        }
+
+        return instance;
+    }
 
     private HubShiftTracker() {
+        if (instance != null) {
+            Util.error("Duplicate HubShiftTracker created");
+        }
+
         new Trigger(() -> shiftInfo.remainingTime() < 3.0)
                 .whileTrue(controller.rumble(0.5));
     }

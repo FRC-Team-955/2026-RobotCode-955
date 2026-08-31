@@ -37,12 +37,12 @@ public class AutoHelpers {
     private static final double checkLinearTolerance = 0.3;
     private static final double checkAngularTolerance = Units.degreesToRadians(20);
 
-    private static final RobotState robotState = RobotState.getInstance();
-    private static final GamePieceVision gamePieceVision = GamePieceVision.getInstance();
+    private static final RobotState robotState = RobotState.get();
+    private static final GamePieceVision gamePieceVision = GamePieceVision.get();
 
-    private static final Drive drive = Drive.getInstance();
-    private static final Superintake superintake = Superintake.getInstance();
-    private static final Superstructure superstructure = Superstructure.getInstance();
+    private static final Drive drive = Drive.get();
+    private static final Superintake superintake = Superintake.get();
+    private static final Superstructure superstructure = Superstructure.get();
     private static final Choreo.TrajectoryCache trajectoryCache = new Choreo.TrajectoryCache();
 
     public static Command intermediateWaypoint(Supplier<Pose2d> poseSupplier, DriveConstraints constraints, boolean aiming) {

@@ -33,28 +33,28 @@ public class RobotContainer {
     // Dashboard inputs
     private final LoggedDashboardChooser<Command> characterizationChooser = new LoggedDashboardChooser<>("Characterization Choices");
 
-    public final RobotState robotState = RobotState.getInstance();
+    public final RobotState robotState = RobotState.get();
 
     public final DeviceManager deviceManager = DeviceManager.getInstance();
 
     /* Subsystems */
-    public final Drive drive = Drive.getInstance();
-    public final AprilTagVision aprilTagVision = AprilTagVision.getInstance();
-    public final GamePieceVision gamePieceVision = GamePieceVision.getInstance();
-    public final LEDs leds = LEDs.getInstance();
+    public final Drive drive = Drive.get();
+    public final AprilTagVision aprilTagVision = AprilTagVision.get();
+    public final GamePieceVision gamePieceVision = GamePieceVision.get();
+    public final LEDs leds = LEDs.get();
 
-    public final Superintake superintake = Superintake.getInstance();
-    public final Superstructure superstructure = Superstructure.getInstance();
+    public final Superintake superintake = Superintake.get();
+    public final Superstructure superstructure = Superstructure.get();
 
     /* Other stuff */
-    public final Controller controller = Controller.getInstance();
-    public final CANLogger canLogger = CANLogger.getInstance();
-    public final RobotMechanism robotMechanism = RobotMechanism.getInstance();
-    public final ShootingKinematics shootingKinematics = ShootingKinematics.getInstance();
-    public final AutoManager autoManager = AutoManager.getInstance();
-    public final HubShiftTracker hubShiftTracker = HubShiftTracker.getInstance();
-    public final EnergyLogger energyLogger = EnergyLogger.getInstance();
-    public final OperatorDashboard operatorDashboard = OperatorDashboard.getInstance();
+    public final Controller controller = Controller.get();
+    public final CANLogger canLogger = CANLogger.get();
+    public final RobotMechanism robotMechanism = RobotMechanism.get();
+    public final ShootingKinematics shootingKinematics = ShootingKinematics.get();
+    public final AutoManager autoManager = AutoManager.get();
+    public final HubShiftTracker hubShiftTracker = HubShiftTracker.get();
+    public final EnergyLogger energyLogger = EnergyLogger.get();
+    public final OperatorDashboard operatorDashboard = OperatorDashboard.get();
 
     public RobotContainer() {
         addCharacterizations();

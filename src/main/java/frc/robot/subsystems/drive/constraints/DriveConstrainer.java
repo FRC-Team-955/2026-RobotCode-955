@@ -11,7 +11,7 @@ import org.jetbrains.annotations.Nullable;
 import org.littletonrobotics.junction.Logger;
 
 public class DriveConstrainer {
-    private static final RobotState robotState = RobotState.getInstance();
+    private static final RobotState robotState = RobotState.get();
 
     private final SlewRateLimiter2d linearAccelLimiter = new SlewRateLimiter2d(0.0);
     private final SlewRateLimiter angularAccelLimiter = new SlewRateLimiter(0.0);
