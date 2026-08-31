@@ -12,6 +12,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.lib.Util;
 import frc.lib.devices.motor.MechanismSim;
 import frc.lib.devices.motor.Motor;
 import frc.lib.network.LoggedTunableNumber;
@@ -95,10 +96,20 @@ public class ExampleProfiledServoSubsystem implements Periodic {
     private final TrapezoidProfile profile = new TrapezoidProfile(constraints);
     private TrapezoidProfile.State state = new TrapezoidProfile.State(initialPositionRad, 0.0);
 
-    @Getter
-    private final static ExampleProfiledServoSubsystem instance = new ExampleProfiledServoSubsystem();
+    private static ExampleProfiledServoSubsystem instance;
+
+    public static synchronized ExampleProfiledServoSubsystem get() {
+        if (instance == null) {
+            instance = new ExampleProfiledServoSubsystem();
+        }
+
+        return instance;
+    }
 
     private ExampleProfiledServoSubsystem() {
+        if (instance != null) {
+            Util.error("Duplicate ExampleProfiledServoSubsystem created");
+        }
     }
 
     @Override

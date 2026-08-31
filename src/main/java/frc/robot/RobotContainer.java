@@ -30,31 +30,27 @@ import java.util.OptionalDouble;
  * subsystems, commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
-    // Dashboard inputs
     private final LoggedDashboardChooser<Command> characterizationChooser = new LoggedDashboardChooser<>("Characterization Choices");
 
+    /* Non-subsystem singletons */
+    public final DeviceManager deviceManager = DeviceManager.get();
     public final RobotState robotState = RobotState.get();
-
-    public final DeviceManager deviceManager = DeviceManager.getInstance();
-
-    /* Subsystems */
-    public final Drive drive = Drive.get();
-    public final AprilTagVision aprilTagVision = AprilTagVision.get();
-    public final GamePieceVision gamePieceVision = GamePieceVision.get();
-    public final LEDs leds = LEDs.get();
-
-    public final Superintake superintake = Superintake.get();
-    public final Superstructure superstructure = Superstructure.get();
-
-    /* Other stuff */
     public final Controller controller = Controller.get();
+    public final OperatorDashboard operatorDashboard = OperatorDashboard.get();
     public final CANLogger canLogger = CANLogger.get();
     public final RobotMechanism robotMechanism = RobotMechanism.get();
     public final ShootingKinematics shootingKinematics = ShootingKinematics.get();
     public final AutoManager autoManager = AutoManager.get();
     public final HubShiftTracker hubShiftTracker = HubShiftTracker.get();
     public final EnergyLogger energyLogger = EnergyLogger.get();
-    public final OperatorDashboard operatorDashboard = OperatorDashboard.get();
+
+    /* Subsystems */
+    public final Drive drive = Drive.get();
+    public final AprilTagVision aprilTagVision = AprilTagVision.get();
+    public final GamePieceVision gamePieceVision = GamePieceVision.get();
+    public final LEDs leds = LEDs.get();
+    public final Superintake superintake = Superintake.get();
+    public final Superstructure superstructure = Superstructure.get();
 
     public RobotContainer() {
         addCharacterizations();

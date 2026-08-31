@@ -10,6 +10,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.lib.Util;
 import frc.lib.devices.motor.MechanismSim;
 import frc.lib.devices.motor.Motor;
 import frc.lib.network.LoggedTunableNumber;
@@ -69,10 +70,20 @@ public class ExampleVelocityRollerSubsystem implements Periodic {
     @Getter
     private Goal goal = Goal.IDLE;
 
-    @Getter
-    private final static ExampleVelocityRollerSubsystem instance = new ExampleVelocityRollerSubsystem();
+    private static ExampleVelocityRollerSubsystem instance;
+
+    public static synchronized ExampleVelocityRollerSubsystem get() {
+        if (instance == null) {
+            instance = new ExampleVelocityRollerSubsystem();
+        }
+
+        return instance;
+    }
 
     private ExampleVelocityRollerSubsystem() {
+        if (instance != null) {
+            Util.error("Duplicate ExampleVelocityRollerSubsystem created");
+        }
     }
 
     @Override

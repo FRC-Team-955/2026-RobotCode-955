@@ -1,16 +1,26 @@
 package frc.lib.devices.device;
 
+import frc.lib.Util;
 import frc.lib.subsystem.Periodic;
-import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class DeviceManager implements Periodic {
-    @Getter
-    private static final DeviceManager instance = new DeviceManager();
+    private static DeviceManager instance;
+
+    public static synchronized DeviceManager get() {
+        if (instance == null) {
+            instance = new DeviceManager();
+        }
+
+        return instance;
+    }
 
     private DeviceManager() {
+        if (instance != null) {
+            Util.error("Duplicate DeviceManager created");
+        }
     }
 
     private final List<Device<?, ?>> devices = new ArrayList<>();

@@ -2,6 +2,7 @@ package frc.lib.example;
 
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.wpilibj.DriverStation;
+import frc.lib.Util;
 import frc.lib.devices.motor.CtrlSparkMaxConfig;
 import frc.lib.devices.motor.MechanismSim;
 import frc.lib.devices.motor.Motor;
@@ -48,10 +49,20 @@ public class ExampleVoltageRollerSubsystem implements Periodic {
     @Getter
     private Goal goal = Goal.IDLE;
 
-    @Getter
-    private final static ExampleVoltageRollerSubsystem instance = new ExampleVoltageRollerSubsystem();
+    private static ExampleVoltageRollerSubsystem instance;
+
+    public static synchronized ExampleVoltageRollerSubsystem get() {
+        if (instance == null) {
+            instance = new ExampleVoltageRollerSubsystem();
+        }
+
+        return instance;
+    }
 
     private ExampleVoltageRollerSubsystem() {
+        if (instance != null) {
+            Util.error("Duplicate ExampleVoltageRollerSubsystem created");
+        }
     }
 
     @Override

@@ -7,6 +7,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.lib.Util;
 import frc.lib.devices.motor.CtrlSparkMaxConfig;
 import frc.lib.devices.motor.MechanismSim;
 import frc.lib.devices.motor.Motor;
@@ -86,10 +87,20 @@ public class ExampleLookaheadServoSubsystem implements Periodic {
     private TrapezoidProfile.State goalState = new TrapezoidProfile.State(initialPositionRad, 0.0);
     private TrapezoidProfile.State lookaheadState = new TrapezoidProfile.State(initialPositionRad, 0.0);
 
-    @Getter
-    private final static ExampleLookaheadServoSubsystem instance = new ExampleLookaheadServoSubsystem();
+    private static ExampleLookaheadServoSubsystem instance;
+
+    public static synchronized ExampleLookaheadServoSubsystem get() {
+        if (instance == null) {
+            instance = new ExampleLookaheadServoSubsystem();
+        }
+
+        return instance;
+    }
 
     private ExampleLookaheadServoSubsystem() {
+        if (instance != null) {
+            Util.error("Duplicate ExampleLookaheadServoSubsystem created");
+        }
     }
 
     @Override
