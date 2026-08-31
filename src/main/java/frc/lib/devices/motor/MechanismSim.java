@@ -69,6 +69,7 @@ public class MechanismSim {
                     0.004,
                     0.0
             );
+            motorSim.setAngle(initialPositionRad);
             return new MechanismSim(
                     gearRatio,
                     (inputVoltage) -> {
