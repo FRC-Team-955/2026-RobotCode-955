@@ -46,7 +46,7 @@ public class MotorIOTalonFX extends MotorIO {
     public MotorIOTalonFX(int canID, TalonFXConfiguration config, double initialPositionRad) {
         talon = new TalonFX(canID, Constants.canivoreBus);
 
-        this.config = config;
+        this.config = config.clone();
         tryUntilOk(5, () -> talon.getConfigurator().apply(config, 0.25));
         tryUntilOk(5, () -> talon.setPosition(Units.radiansToRotations(initialPositionRad), 0.25));
 
