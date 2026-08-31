@@ -35,6 +35,10 @@ public class ShootingKinematics implements Periodic {
     private static final double bottomOfFrameRailsToShooterHeightMeters = Units.inchesToMeters(12.861380);
     private static final double shooterRadiusToCenterOfBallExitMeters = Units.inchesToMeters(4.602756);
 
+    private static final RobotState robotState = RobotState.get();
+    private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
+    private static final HubShiftTracker hubShiftTracker = HubShiftTracker.get();
+    private static final Superstructure superstructure = Superstructure.get();
     private static final Drive drive = Drive.get();
 
     private static final LoggedTunableNumber headingToleranceDeg = new LoggedTunableNumber("ShootingKinematics/HeadingToleranceDegrees", 10.0);
@@ -54,12 +58,6 @@ public class ShootingKinematics implements Periodic {
     public static final Rotation2d fuelExitRotation = Rotation2d.k180deg;
 
     private static final DoubleUnaryOperator passVelocityToRPM = (x) -> 316 * x - 456 + 100;
-
-    private static final RobotState robotState = RobotState.get();
-    private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
-    private static final HubShiftTracker hubShiftTracker = HubShiftTracker.get();
-
-    private static final Superstructure superstructure = Superstructure.get();
 
     @Getter
     private ShootingParameters shootingParameters = new ShootingParameters(0, 0, 0, 0, false);
