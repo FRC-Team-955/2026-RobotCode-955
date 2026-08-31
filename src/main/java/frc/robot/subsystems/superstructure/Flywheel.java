@@ -108,13 +108,6 @@ public class Flywheel implements Periodic {
     }
 
     @Override
-    public void periodicBeforeCommands() {
-        energyLogger.reportPowerUsage("Flywheel",
-                leaderMotor.isConnected() ? leaderMotor.getAppliedVolts() * leaderMotor.getSupplyCurrentAmps() : 0.0,
-                followerMotor.isConnected() ? followerMotor.getAppliedVolts() * followerMotor.getSupplyCurrentAmps() : 0.0);
-    }
-
-    @Override
     public void periodicAfterCommands() {
         Logger.recordOutput("Superstructure/Flywheel/Goal", goal);
         if (DriverStation.isDisabled() || goal == Goal.IDLE) {

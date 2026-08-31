@@ -117,8 +117,6 @@ public class Hood implements Periodic {
 
     @Override
     public void periodicBeforeCommands() {
-        energyLogger.reportPowerUsage("Hood", motor.isConnected() ? motor.getAppliedVolts() * motor.getSupplyCurrentAmps() : 0.0);
-
         boolean shouldEmergencyStop = emergencyStopDebouncer.calculate(motor.getStatorCurrentAmps() >= 20);
         if (!motor.isEmergencyStopped()) {
             if ((shouldEmergencyStop || operatorDashboard.hoodEStop.get()) && !BuildConstants.isSim) {

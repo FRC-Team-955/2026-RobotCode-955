@@ -81,11 +81,6 @@ public class IntakeRollers implements Periodic {
     }
 
     @Override
-    public void periodicBeforeCommands() {
-        energyLogger.reportPowerUsage("IntakeRollers", motor.isConnected() ? motor.getAppliedVolts() * motor.getSupplyCurrentAmps() : 0.0);
-    }
-
-    @Override
     public void periodicAfterCommands() {
         Logger.recordOutput("Superintake/IntakeRollers/Goal", goal);
         if (DriverStation.isDisabled()) {

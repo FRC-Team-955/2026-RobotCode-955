@@ -75,8 +75,6 @@ public class Feeder implements Periodic {
 
     @Override
     public void periodicBeforeCommands() {
-        energyLogger.reportPowerUsage("Feeder", motor.isConnected() ? motor.getAppliedVolts() * motor.getSupplyCurrentAmps() : 0.0);
-
         // Apply network inputs
         if (operatorDashboard.coastOverride.hasChanged()) {
             motor.setNeutralMode(operatorDashboard.coastOverride.get() ? NeutralModeValue.Coast : NeutralModeValue.Brake);

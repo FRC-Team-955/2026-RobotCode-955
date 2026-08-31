@@ -82,11 +82,6 @@ public class Spindexer implements Periodic {
     }
 
     @Override
-    public void periodicBeforeCommands() {
-        energyLogger.reportPowerUsage("Spindexer", motor.isConnected() ? motor.getAppliedVolts() * motor.getSupplyCurrentAmps() : 0.0);
-    }
-
-    @Override
     public void periodicAfterCommands() {
         Logger.recordOutput("Superstructure/Spindexer/Goal", goal);
         if (DriverStation.isDisabled()) {

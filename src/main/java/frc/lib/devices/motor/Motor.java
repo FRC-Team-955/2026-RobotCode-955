@@ -5,12 +5,15 @@ import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.Alert;
+import frc.lib.EnergyLogger;
 import frc.lib.devices.device.Device;
 import frc.lib.network.LoggedTunablePIDF;
 import frc.robot.BuildConstants;
 import lombok.Getter;
 
 public class Motor extends Device<MotorIO, MotorIOInputsAutoLogged> {
+    private static final EnergyLogger energyLogger = EnergyLogger.get();
+
     private LoggedTunablePIDF positionGains = null;
     private LoggedTunablePIDF velocityGains = null;
 
@@ -93,6 +96,8 @@ public class Motor extends Device<MotorIO, MotorIOInputsAutoLogged> {
         if (velocityGains != null && velocityGains.hasChanged()) {
             setVelocityGains();
         }
+
+        energyLogger.reportPowerUsage(name, isConnected() ? getAppliedVolts() * getSupplyCurrentAmps() : 0.0);
     }
 
     @Override

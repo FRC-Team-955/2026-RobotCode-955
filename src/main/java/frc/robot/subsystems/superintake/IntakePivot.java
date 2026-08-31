@@ -128,8 +128,6 @@ public class IntakePivot implements Periodic {
 
     @Override
     public void periodicBeforeCommands() {
-        energyLogger.reportPowerUsage("IntakePivot", motor.isConnected() ? motor.getAppliedVolts() * motor.getSupplyCurrentAmps() : 0.0);
-
         if (!motor.isEmergencyStopped()) {
             if (operatorDashboard.intakePivotEStop.get()) {
                 motor.emergencyStop();
