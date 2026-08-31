@@ -70,7 +70,6 @@ public class ShootingKinematics implements Periodic {
 
     private final Debouncer velocityMetDebouncer = new Debouncer(0.15, Debouncer.DebounceType.kFalling);
     private final Debouncer headingVelocityDebouncer = new Debouncer(0.10, Debouncer.DebounceType.kFalling);
-    private final Debouncer passDebouncer = new Debouncer(0.5, Debouncer.DebounceType.kFalling);
     private final Debouncer orientationDebouncer = new Debouncer(0.1, Debouncer.DebounceType.kFalling);
 
     private ShootingParameters noPhaseDelayParameters = new ShootingParameters(

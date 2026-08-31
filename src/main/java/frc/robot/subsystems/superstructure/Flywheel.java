@@ -13,7 +13,6 @@ import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
-import frc.lib.EnergyLogger;
 import frc.lib.Util;
 import frc.lib.devices.motor.MechanismSim;
 import frc.lib.devices.motor.Motor;
@@ -35,7 +34,6 @@ public class Flywheel implements Periodic {
     private static final LoggedTunableNumber ejectRPM = new LoggedTunableNumber("Superstructure/Flywheel/Goal/EjectRPM", -300);
 
     private static final ShootingKinematics shootingKinematics = ShootingKinematics.get();
-    private static final EnergyLogger energyLogger = EnergyLogger.get();
 
     private final TalonFXConfiguration motorConfig = new TalonFXConfiguration()
             .withMotorOutput(new MotorOutputConfigs()
@@ -126,10 +124,6 @@ public class Flywheel implements Periodic {
 
     public double getVelocityRPM() {
         return Units.radiansPerSecondToRotationsPerMinute(getVelocityRadPerSec());
-    }
-
-    public double getSetpointRPM() {
-        return goal.setpointRPM.getAsDouble();
     }
 
     public Transform3d getMechanismTransform() {

@@ -284,9 +284,9 @@ public class SimManager {
     public static class CustomArena extends SimulatedArena {
         protected boolean isInEfficiencyMode = true;
 
-        protected static Translation2d centerPieceBottomRightCorner = new Translation2d(7.35737, 1.724406);
-        protected static Translation2d redDepotBottomRightCorner = new Translation2d(0.02, 5.53);
-        protected static Translation2d blueDepotBottomRightCorner = new Translation2d(16.0274, 1.646936);
+        protected static final Translation2d centerPieceBottomRightCorner = new Translation2d(7.35737, 1.724406);
+        protected static final Translation2d redDepotBottomRightCorner = new Translation2d(0.02, 5.53);
+        protected static final Translation2d blueDepotBottomRightCorner = new Translation2d(16.0274, 1.646936);
 
         /** the obstacles on the 2026 competition field */
         public static final class RebuiltFieldObstaclesMap extends FieldMap {
@@ -414,7 +414,7 @@ public class SimManager {
                 }
             }
 
-            boolean isOnBlue = !DriverStation.getAlliance().isEmpty()
+            boolean isOnBlue = DriverStation.getAlliance().isPresent()
                     && DriverStation.getAlliance().get() == DriverStation.Alliance.Blue;
 
             if (isOnBlue || !isInEfficiencyMode) {

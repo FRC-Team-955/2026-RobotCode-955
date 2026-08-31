@@ -8,7 +8,6 @@ import frc.lib.Util;
 import frc.lib.network.LoggedNetworkBooleanExt;
 import frc.lib.network.LoggedNetworkNumberExt;
 import frc.lib.subsystem.Periodic;
-import frc.robot.controller.Controller;
 import frc.robot.subsystems.drive.DriveConstants;
 import lombok.Getter;
 import org.littletonrobotics.junction.Logger;
@@ -24,10 +23,6 @@ public class OperatorDashboard implements Periodic {
         ShootTowerManual,
         PassManual,
     }
-
-    private static final RobotState robotState = RobotState.get();
-    private static final Controller controller = Controller.get();
-    //private static final AutoManager autoManager = AutoManager.get();
 
     private static final String prefix = "/OperatorDashboard/";
 
@@ -60,7 +55,6 @@ public class OperatorDashboard implements Periodic {
     private final Alert coastOverrideAlert = new Alert("Coast override is enabled.", Alert.AlertType.kWarning);
     public final Alert autoNotChosenAlert = new Alert("Auto is not chosen!", Alert.AlertType.kError);
     private final Alert recordingNotStartedAlert = new Alert("Recording is not started!", Alert.AlertType.kWarning);
-    //private final Alert autoNotAlignedAlert = new Alert("Robot is not aligned for auto!", Alert.AlertType.kError);
     @SuppressWarnings("FieldCanBeLocal")
     private final Alert constantSetAlert = new Alert("Constants are set.", Alert.AlertType.kInfo);
     private final Alert batteryVoltageAlert = new Alert("Battery is below 12 volts!", Alert.AlertType.kError);
@@ -112,7 +106,6 @@ public class OperatorDashboard implements Periodic {
         coastOverrideAlert.set(coastOverride.get());
         autoNotChosenAlert.set(!autoChosen.get());
         recordingNotStartedAlert.set(!recordingStarted.get());
-        //autoNotAlignedAlert.set(DriverStation.isDisabled() && !autoManager.isAtAutoStartingPose());
         batteryVoltageAlert.set(lowBatteryDebouncer.calculate(RobotController.getBatteryVoltage() <= 11.8));
         manualAimingAlert.set(manualAiming.get());
         smudgesNotZeroAlert.set(manualFlywheelRPMSmudge.get() != 0.0 || slipConstantSmudge.get() != 0.0);

@@ -64,10 +64,6 @@ public class Superintake extends CommandBasedSubsystem {
     }
 
     @Override
-    public void periodicBeforeCommands() {
-    }
-
-    @Override
     public void periodicAfterCommands() {
         Logger.recordOutput("Superintake/Goal", goal);
 

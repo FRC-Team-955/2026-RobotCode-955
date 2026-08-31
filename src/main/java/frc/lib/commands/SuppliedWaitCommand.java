@@ -69,6 +69,6 @@ import java.util.function.DoubleSupplier;
     @Override
     public void initSendable(SendableBuilder builder) {
         super.initSendable(builder);
-        builder.addDoubleProperty("duration", () -> m_duration.getAsDouble(), null);
+        builder.addDoubleProperty("duration", m_duration, null);
     }
 }

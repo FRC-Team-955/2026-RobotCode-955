@@ -15,7 +15,6 @@ import frc.robot.shooting.ShootingKinematics;
 import frc.robot.subsystems.apriltagvision.AprilTagVision;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.SparkCANcoderHelper;
-import frc.robot.subsystems.superintake.Superintake;
 import frc.robot.subsystems.superstructure.Superstructure;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.mechanism.LoggedMechanism2d;
@@ -33,7 +32,6 @@ public class LEDs implements Periodic {
     private static final DeviceManager deviceManager = DeviceManager.get();
 
     private static final Drive drive = Drive.get();
-    private static final Superintake superintake = Superintake.get();
     private static final Superstructure superstructure = Superstructure.get();
 
     private final LEDsIO io = createIO();

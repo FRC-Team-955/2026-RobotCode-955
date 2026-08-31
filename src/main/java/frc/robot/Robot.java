@@ -93,9 +93,7 @@ public class Robot extends LoggedRobot {
                 Logger.addDataReceiver(new NT4Publisher()); // Log to NetworkTables
                 // SmartDashboard.putData("PowerDistribution", new PowerDistribution(Constants.pdhId, PowerDistribution.ModuleType.kRev)); // Enables power distribution logging
             }
-            case SIM -> {
-                Logger.addDataReceiver(new NT4Publisher());
-            }
+            case SIM -> Logger.addDataReceiver(new NT4Publisher());
             case REPLAY -> {
                 String logPath = LogFileUtil.findReplayLog(); // Pull the replay log from AdvantageScope (or prompt the user)
                 Logger.setReplaySource(new WPILOGReader(logPath)); // Read replay log
@@ -237,10 +235,6 @@ public class Robot extends LoggedRobot {
     }
 
     @Override
-    public void disabledInit() {
-    }
-
-    @Override
     public void disabledPeriodic() {
     }
 
@@ -268,10 +262,6 @@ public class Robot extends LoggedRobot {
             autonomousCommand = null;
             System.out.printf("********** Auto cancelled in %.2f seconds **********%n", autonomousEnd - autonomousStart);
         }
-    }
-
-    @Override
-    public void teleopInit() {
     }
 
     @Override
