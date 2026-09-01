@@ -157,7 +157,7 @@ public class ShootingKinematics implements Periodic {
 
         boolean headingMet = operatorDashboard.manualAiming.get() ||
                 Math.abs(
-                        MathUtil.angleModulus(superstructure.turret.getRobotRelativeHeadingRad() - noPhaseDelayParameters.headingRad())
+                        MathUtil.angleModulus(superstructure.turret.getFieldRelativeHeadingRad() - noPhaseDelayParameters.headingRad())
                 ) <= Units.degreesToRadians(
                         noPhaseDelayParameters.isPass()
                                 ? headingTolerancePassingDeg.get()

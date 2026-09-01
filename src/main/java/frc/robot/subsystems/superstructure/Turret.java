@@ -19,6 +19,8 @@ import frc.lib.subsystem.Periodic;
 import frc.robot.BuildConstants;
 import frc.robot.Constants;
 import frc.robot.OperatorDashboard;
+import frc.robot.RobotState;
+import frc.robot.shooting.ShootingKinematics;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -35,7 +37,12 @@ public class Turret implements Periodic {
 
     private static final TrapezoidProfile.Constraints constraints = new TrapezoidProfile.Constraints(1, 1);
 
+    private static final double limitMarginRad = Units.degreesToRadians(20.0);
+
+    private static final double unwindHysteresisRad = Units.degreesToRadians(15.0);
+
     private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
+    private static final RobotState robotState = RobotState.get();
 
     private final Motor motor = Motor
             .createSparkMax(
@@ -71,12 +78,12 @@ public class Turret implements Periodic {
 
     @RequiredArgsConstructor
     public enum Goal {
-        SHOOT(() -> 0.0),
-        AIM_AT_CLOSEST_HUB(() -> 0.0),
+        SHOOT(() -> ShootingKinematics.get().getShootingParameters().headingRad()),
+        AIM_AT_CLOSEST_HUB(() -> ShootingKinematics.get().getShootingParameters().headingRad()),
         ;
 
         /** Should be constant for every loop cycle */
-        private final DoubleSupplier setpointRad;
+        private final DoubleSupplier fieldHeadingRad;
     }
 
     @Setter
@@ -140,9 +147,11 @@ public class Turret implements Periodic {
         } else {
             // See the comments above the lookaheadState and goalState variables for why we calculate two profiles
 
-            double setpointRad = goal.setpointRad.getAsDouble();
+            double fieldHeadingRad = goal.fieldHeadingRad.getAsDouble();
+            double setpointRad = resolveSetpointRad(fieldHeadingRad);
             setpointRad = MathUtil.clamp(setpointRad, minPositionRad, maxPositionRad);
             if (BuildConstants.isSimOrReplay) {
+                Logger.recordOutput("Superstructure/Turret/WantedFieldHeadingRad", fieldHeadingRad);
                 Logger.recordOutput("Superstructure/Turret/OriginalSetpointRad", setpointRad);
             }
             TrapezoidProfile.State wantedState = new TrapezoidProfile.State(setpointRad, 0.0);
@@ -154,9 +163,51 @@ public class Turret implements Periodic {
         }
     }
 
+    private double resolveSetpointRad(double fieldHeadingRad) {
+        double wantedRad = fieldHeadingRad - robotState.getRotation().getRadians() - Math.PI;
+
+        double currentRad = state.position;
+
+        double nearestRad = Double.NaN;
+        double roomiestRad = Double.NaN;
+        int firstWrap = (int) Math.ceil((minPositionRad - wantedRad) / (2.0 * Math.PI));
+        for (int wrap = firstWrap; ; wrap++) {
+            double candidateRad = wantedRad + 2.0 * Math.PI * wrap;
+            if (candidateRad > maxPositionRad) {
+                break;
+            }
+
+            if (Double.isNaN(nearestRad) || Math.abs(candidateRad - currentRad) < Math.abs(nearestRad - currentRad)) {
+                nearestRad = candidateRad;
+            }
+            if (Double.isNaN(roomiestRad) || headroomRad(candidateRad) > headroomRad(roomiestRad)) {
+                roomiestRad = candidateRad;
+            }
+        }
+
+        boolean nearingLimit = headroomRad(nearestRad) < limitMarginRad;
+        boolean mayUnwind = nearingLimit || goal != Goal.SHOOT;
+        boolean worthUnwinding = headroomRad(roomiestRad) > headroomRad(nearestRad) + unwindHysteresisRad;
+
+        if (BuildConstants.isSimOrReplay) {
+            Logger.recordOutput("Superstructure/Turret/NearingLimit", nearingLimit);
+            Logger.recordOutput("Superstructure/Turret/Unwinding", mayUnwind && worthUnwinding);
+        }
+
+        return mayUnwind && worthUnwinding ? roomiestRad : nearestRad;
+    }
+
+    private static double headroomRad(double positionRad) {
+        return Math.min(positionRad - minPositionRad, maxPositionRad - positionRad);
+    }
+
     public double getRobotRelativeHeadingRad() {
         // add 180° - see comment at top of class
         return motor.getPositionRad() + Math.PI;
+    }
+
+    public double getFieldRelativeHeadingRad() {
+        return getRobotRelativeHeadingRad() + robotState.getRotation().getRadians();
     }
 
     public double getRobotRelativeHeadingVelocityRadPerSec() {
