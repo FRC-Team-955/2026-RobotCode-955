@@ -29,6 +29,7 @@ public class OperatorDashboard implements Periodic {
     // Buttons
     public final LoggedNetworkBooleanExt homeIntakePivot = new LoggedNetworkBooleanExt(prefix + "HomeIntakePivot", false);
     public final LoggedNetworkBooleanExt homeHood = new LoggedNetworkBooleanExt(prefix + "HomeHood", false);
+    public final LoggedNetworkBooleanExt homeTurret = new LoggedNetworkBooleanExt(prefix + "HomeTurret", false);
 
     // Toggles and overrides
     public final LoggedNetworkBooleanExt coastOverride = new LoggedNetworkBooleanExt(prefix + "CoastOverride", false);
@@ -53,6 +54,7 @@ public class OperatorDashboard implements Periodic {
     // Alerts
     public final Alert intakePivotNotHomedAlert = new Alert("Intake pivot has not been homed!", Alert.AlertType.kError);
     public final Alert hoodNotHomedAlert = new Alert("Hood has not been homed!", Alert.AlertType.kError);
+    public final Alert turretNotHomedAlert = new Alert("Turret has not been homed!", Alert.AlertType.kError);
     private final Alert coastOverrideAlert = new Alert("Coast override is enabled.", Alert.AlertType.kWarning);
     public final Alert autoNotChosenAlert = new Alert("Auto is not chosen!", Alert.AlertType.kError);
     private final Alert recordingNotStartedAlert = new Alert("Recording is not started!", Alert.AlertType.kWarning);
@@ -84,6 +86,7 @@ public class OperatorDashboard implements Periodic {
 
         intakePivotNotHomedAlert.set(true);
         hoodNotHomedAlert.set(true);
+        turretNotHomedAlert.set(true);
 
         if (BuildConstants.tuningMode || DriveConstants.disableDriving || DriveConstants.disableGyro) {
             constantSetAlert.set(true);

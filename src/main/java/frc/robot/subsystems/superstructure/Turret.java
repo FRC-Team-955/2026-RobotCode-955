@@ -158,6 +158,11 @@ public class Turret implements Periodic {
         return motor.getVelocityRadPerSec();
     }
 
+    public void home() {
+        motor.setEncoderPosition(initialPositionRad);
+        operatorDashboard.turretNotHomedAlert.set(false);
+    }
+
     public Transform3d getMechanismTransform() {
         return new Transform3d(
                 new Translation3d(Units.inchesToMeters(10.0), 0.0, Units.inchesToMeters(6.25)),

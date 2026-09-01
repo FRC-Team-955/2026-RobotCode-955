@@ -131,6 +131,12 @@ public class RobotContainer {
         new Trigger(operatorDashboard.homeHood::get)
                 .and(DriverStation::isDisabled)
                 .onTrue(Commands.runOnce(superstructure.hood::finishHoming).ignoringDisable(true));
+
+        new Trigger(operatorDashboard.homeTurret::get)
+                .onTrue(Commands.runOnce(() -> operatorDashboard.homeTurret.set(false)).ignoringDisable(true));
+        new Trigger(operatorDashboard.homeTurret::get)
+                .and(DriverStation::isDisabled)
+                .onTrue(Commands.runOnce(superstructure.turret::home).ignoringDisable(true));
     }
 
     /**
