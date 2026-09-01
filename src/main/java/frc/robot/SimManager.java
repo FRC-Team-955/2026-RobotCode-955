@@ -206,10 +206,10 @@ public class SimManager {
                     Pose2d robotPose = driveSimulation.getSimulatedDriveTrainPose();
                     var gamePiece = new RebuiltFuelOnFly(
                             robotPose.getTranslation(),
-                            shootingKinematics.getFuelExitTranslation().toTranslation2d(),
+                            shootingKinematics.getTurretRotationAxisToFuelExitTransform().toTranslation2d(),
                             driveSimulation.getDriveTrainSimulatedChassisSpeedsFieldRelative(),
                             robotPose.getRotation(),
-                            Meters.of(shootingKinematics.getFuelExitTranslation().getZ()),
+                            Meters.of(shootingKinematics.getTurretRotationAxisToFuelExitTransform().getZ()),
                             MetersPerSecond.of(superstructure.flywheel.getVelocityRadPerSec() * Flywheel.radiusMeters),
                             // Applying the shooter facing direction to the maple-sim parameter
                             // causes issues because it causes the shooter position to be rotated

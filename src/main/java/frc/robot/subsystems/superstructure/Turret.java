@@ -149,6 +149,15 @@ public class Turret implements Periodic {
         }
     }
 
+    public double getRobotRelativeHeadingRad() {
+        // add 180° - see comment at top of class
+        return motor.getPositionRad() + Math.PI;
+    }
+
+    public double getRobotRelativeHeadingVelocityRadPerSec() {
+        return motor.getVelocityRadPerSec();
+    }
+
     public Transform3d getMechanismTransform() {
         return new Transform3d(
                 new Translation3d(Units.inchesToMeters(10.0), 0.0, Units.inchesToMeters(6.25)),
