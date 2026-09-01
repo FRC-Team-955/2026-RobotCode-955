@@ -115,7 +115,7 @@ public class ExampleProfiledServoSubsystem implements Periodic {
     @Override
     public void periodicBeforeCommands() {
         // Apply network inputs
-        if (operatorDashboard.coastOverride.hasChanged()) {
+        if (!motor.isEmergencyStopped() && operatorDashboard.coastOverride.hasChanged()) {
             motor.setNeutralMode(operatorDashboard.coastOverride.get() ? NeutralModeValue.Coast : NeutralModeValue.Brake);
         }
     }
