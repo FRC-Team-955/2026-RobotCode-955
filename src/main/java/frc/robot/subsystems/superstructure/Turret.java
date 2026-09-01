@@ -35,7 +35,7 @@ public class Turret implements Periodic {
     private static final double initialPositionRad = 0.0;
     private static final double positionPastLimitForEmergencyStopRad = Units.degreesToRadians(5);
 
-    private static final TrapezoidProfile.Constraints constraints = new TrapezoidProfile.Constraints(1, 1);
+    private static final TrapezoidProfile.Constraints constraints = new TrapezoidProfile.Constraints(5, 12);
 
     private static final double limitMarginRad = Units.degreesToRadians(20.0);
 
@@ -66,14 +66,17 @@ public class Turret implements Periodic {
             )
             .withPositionGains(switch (BuildConstants.mode) {
                 case REAL, REPLAY -> new LoggedTunablePIDF("Superstructure/Turret/PositionGains")
-                        .withP(0.1)
-                        .withS(0.0, StaticFeedforwardSignValue.UseClosedLoopSign);
+                        .withP(10)
+                        .withD(0.1);
                 case SIM -> new LoggedTunablePIDF("Superstructure/Turret/PositionGains")
                         .withP(1.0);
             })
             .withVelocityGains(switch (BuildConstants.mode) {
                 case REAL, REPLAY -> new LoggedTunablePIDF("Superstructure/Turret/VelocityGains")
-                        .withV(0.1);
+                        .withP(0.1)
+                        .withS(0.2, StaticFeedforwardSignValue.UseVelocitySign)
+                        .withV(0.3)
+                        .withA(0.005);
                 case SIM -> new LoggedTunablePIDF("Superstructure/Turret/VelocityGains")
                         .withV(1.0);
             });
