@@ -31,6 +31,7 @@ public class Turret implements Periodic {
     private static final double minPositionRad = Units.degreesToRadians(-92);
     private static final double maxPositionRad = Units.degreesToRadians(408);
     private static final double initialPositionRad = 0.0;
+    private static final double positionPastLimitForEmergencyStopRad = Units.degreesToRadians(5);
 
     private static final TrapezoidProfile.Constraints constraints = new TrapezoidProfile.Constraints(1, 1);
 
@@ -105,7 +106,11 @@ public class Turret implements Periodic {
 
     @Override
     public void periodicBeforeCommands() {
-        boolean shouldEmergencyStop = emergencyStopDebouncer.calculate(motor.getStatorCurrentAmps() >= 50);
+        boolean shouldEmergencyStop = emergencyStopDebouncer.calculate(motor.getStatorCurrentAmps() >= 50) ||
+                (motor.getAppliedVolts() > 0 &&
+                        motor.getPositionRad() > (maxPositionRad + positionPastLimitForEmergencyStopRad)) ||
+                (motor.getAppliedVolts() < 0 &&
+                        motor.getPositionRad() < (minPositionRad - positionPastLimitForEmergencyStopRad));
         if (!motor.isEmergencyStopped()) {
             if ((shouldEmergencyStop || operatorDashboard.turretEStop.get()) && !BuildConstants.isSim) {
                 motor.emergencyStop(NeutralModeValue.Coast);
