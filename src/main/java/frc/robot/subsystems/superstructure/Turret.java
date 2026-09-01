@@ -178,6 +178,7 @@ public class Turret implements Periodic {
 
             state = profile.calculate(Constants.loopPeriod, state, wantedState);
             Logger.recordOutput("Superstructure/Turret/ProfileSetpointRad", state.position);
+            Logger.recordOutput("Superstructure/Turret/ProfileSetpointRadPerSec", state.velocity);
 
             motor.setMotionProfileRequest(state.position, state.velocity);
         }
