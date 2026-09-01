@@ -41,6 +41,8 @@ public class Turret implements Periodic {
 
     private static final double unwindHysteresisRad = Units.degreesToRadians(15.0);
 
+    private static final double homingToleranceRad = Units.degreesToRadians(45.0);
+
     private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
     private static final RobotState robotState = RobotState.get();
 
@@ -95,6 +97,12 @@ public class Turret implements Periodic {
 
     private final Debouncer emergencyStopDebouncer = new Debouncer(1.0, Debouncer.DebounceType.kRising);
 
+    @Getter
+    private boolean homed = false;
+    private boolean verifyingHoming = false;
+    private double observedMinRad = initialPositionRad;
+    private double observedMaxRad = initialPositionRad;
+
     private static Turret instance;
 
     public static synchronized Turret get() {
@@ -109,10 +117,19 @@ public class Turret implements Periodic {
         if (instance != null) {
             Util.error("Duplicate Turret created");
         }
+
+        if (BuildConstants.isSim) {
+            homed = true;
+            operatorDashboard.turretNotHomedAlert.set(false);
+        }
     }
 
     @Override
     public void periodicBeforeCommands() {
+        if (verifyingHoming) {
+            updateHomingVerification();
+        }
+
         boolean shouldEmergencyStop = emergencyStopDebouncer.calculate(motor.getStatorCurrentAmps() >= 50) ||
                 (motor.getAppliedVolts() > 0 &&
                         motor.getPositionRad() > (maxPositionRad + positionPastLimitForEmergencyStopRad)) ||
@@ -139,7 +156,7 @@ public class Turret implements Periodic {
     @Override
     public void periodicAfterCommands() {
         Logger.recordOutput("Superstructure/Turret/Goal", goal);
-        if (DriverStation.isDisabled() || motor.isEmergencyStopped()) {
+        if (DriverStation.isDisabled() || motor.isEmergencyStopped() || !homed) {
             motor.setVoltageRequest(0.0);
 
             // Reset state to current position
@@ -216,7 +233,43 @@ public class Turret implements Periodic {
 
     public void home() {
         motor.setEncoderPosition(initialPositionRad);
-        operatorDashboard.turretNotHomedAlert.set(false);
+        state = new TrapezoidProfile.State(initialPositionRad, 0.0);
+
+        observedMinRad = initialPositionRad;
+        observedMaxRad = initialPositionRad;
+        verifyingHoming = true;
+        homed = false;
+
+        operatorDashboard.turretNotHomedAlert.set(true);
+        operatorDashboard.turretHomingFailedAlert.set(false);
+        operatorDashboard.turretEStop.set(true);
+    }
+
+    private void updateHomingVerification() {
+        double positionRad = motor.getPositionRad();
+        observedMinRad = Math.min(observedMinRad, positionRad);
+        observedMaxRad = Math.max(observedMaxRad, positionRad);
+
+        double sweptRad = observedMaxRad - observedMinRad;
+        Logger.recordOutput("Superstructure/Turret/Homing/ObservedMinRad", observedMinRad);
+        Logger.recordOutput("Superstructure/Turret/Homing/ObservedMaxRad", observedMaxRad);
+        Logger.recordOutput("Superstructure/Turret/Homing/SweptRad", sweptRad);
+        Logger.recordOutput("Superstructure/Turret/Homing/RemainingRad",
+                Math.max(0.0, (maxPositionRad - minPositionRad) - homingToleranceRad - sweptRad));
+
+        if (sweptRad < (maxPositionRad - minPositionRad) - homingToleranceRad) {
+            return;
+        }
+
+        verifyingHoming = false;
+
+        if (Math.abs(observedMinRad - minPositionRad) <= homingToleranceRad) {
+            homed = true;
+            operatorDashboard.turretNotHomedAlert.set(false);
+            operatorDashboard.turretEStop.set(false);
+        } else {
+            operatorDashboard.turretHomingFailedAlert.set(true);
+        }
     }
 
     public Transform3d getMechanismTransform() {
