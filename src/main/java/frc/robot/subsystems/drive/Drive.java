@@ -434,7 +434,7 @@ public class Drive extends CommandBasedSubsystem {
 
             // FIXME: figure out how to put this before the constrainer and not afterwards
             if (headingOverrideSetpoint.isPresent() && headingOverrideFeedforwardSupplier != null) {
-                Translation2d correction = shootingKinematics.getTurretRotationAxisToFuelExitTransform().toTranslation2d()
+                Translation2d correction = shootingKinematics.getTurretRotationAxisToFuelExitTransform().getTranslation().toTranslation2d()
                         .rotateBy(robotState.getRotation()).rotateBy(Rotation2d.kCW_90deg)
                         .times(wantedFieldSpeeds.omegaRadiansPerSecond);
                 wantedFieldSpeeds.plus(new ChassisSpeeds(correction.getX(), correction.getY(), 0));
