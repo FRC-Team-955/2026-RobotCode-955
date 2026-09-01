@@ -48,7 +48,8 @@ public class Hood implements Periodic {
     private static final ShootingKinematics shootingKinematics = ShootingKinematics.get();
     private static final RobotState robotState = RobotState.get();
 
-    private final Motor motor = Motor.createSparkMax(
+    private final Motor motor = Motor
+            .createSparkMax(
                     "Superstructure/Hood",
                     10,
                     new CtrlSparkMaxConfig()
