@@ -35,7 +35,7 @@ public class Turret implements Periodic {
     private static final double initialPositionRad = 0.0;
     private static final double positionPastLimitForEmergencyStopRad = Units.degreesToRadians(5);
 
-    private static final TrapezoidProfile.Constraints constraints = new TrapezoidProfile.Constraints(5, 12);
+    private static final TrapezoidProfile.Constraints constraints = new TrapezoidProfile.Constraints(8, 12);
 
     private static final double limitMarginRad = Units.degreesToRadians(20.0);
 
