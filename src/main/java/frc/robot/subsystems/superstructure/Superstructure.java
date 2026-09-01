@@ -47,6 +47,7 @@ public class Superstructure extends CommandBasedSubsystem {
     public final Hood hood = Hood.get();
     public final Feeder feeder = Feeder.get();
     public final Spindexer spindexer = Spindexer.get();
+    public final Turret turret = Turret.get();
 
     private final DistanceSensor fuelSensor = DistanceSensor.createCANRange(
             "Superstructure/FuelSensor",
@@ -130,6 +131,7 @@ public class Superstructure extends CommandBasedSubsystem {
                 flywheel.setGoal(Flywheel.Goal.IDLE);
                 feeder.setGoal(Feeder.Goal.IDLE);
                 spindexer.setGoal(Spindexer.Goal.AGITATE);
+                turret.setGoal(Turret.Goal.AIM_AT_CLOSEST_HUB);
                 switch (goal) {
                     case HOME_HOOD -> hood.setGoal(Hood.Goal.HOME);
                     case HOME_HOOD_FINALIZE -> hood.setGoal(Hood.Goal.HOME_FINALIZE);
@@ -139,6 +141,7 @@ public class Superstructure extends CommandBasedSubsystem {
             case SHOOT, SHOOT_FORCE -> {
                 flywheel.setGoal(Flywheel.Goal.SHOOT);
                 hood.setGoal(Hood.Goal.SHOOT);
+                turret.setGoal(Turret.Goal.SHOOT);
 
                 boolean needsToCommitToShot = Timer.getTimestamp() - lastStartedShot < commitToShotTimeSeconds.get();
                 if (BuildConstants.isSimOrReplay)
@@ -169,6 +172,7 @@ public class Superstructure extends CommandBasedSubsystem {
                 feeder.setGoal(Feeder.Goal.EJECT);
                 spindexer.setGoal(Spindexer.Goal.EJECT_ALTERNATE);
                 hood.setGoal(Hood.Goal.STOW);
+                turret.setGoal(Turret.Goal.AIM_AT_CLOSEST_HUB);
             }
         }
 
