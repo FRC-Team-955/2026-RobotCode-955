@@ -51,9 +51,9 @@ public class Motor extends Device<MotorIO, MotorIOInputsAutoLogged> {
      *         .withSensorToMechanismRatio(5))
      * </pre>
      */
-    public static Motor createTalonFX(String name, int canID, TalonFXConfiguration config, double initialPositionRad, MechanismSim.Builder mechanismSimBuilder) {
+    public static Motor createTalonFX(String name, int canID, boolean useCANivore, TalonFXConfiguration config, double initialPositionRad, MechanismSim.Builder mechanismSimBuilder) {
         return new Motor(name, switch (BuildConstants.mode) {
-            case REAL -> new MotorIOTalonFX(canID, config, initialPositionRad);
+            case REAL -> new MotorIOTalonFX(canID, useCANivore, config, initialPositionRad);
             case SIM -> new MotorIOTalonFXSim(config, initialPositionRad, mechanismSimBuilder);
             case REPLAY -> new MotorIOReplay();
         });

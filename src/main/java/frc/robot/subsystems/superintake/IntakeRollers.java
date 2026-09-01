@@ -33,6 +33,7 @@ public class IntakeRollers implements Periodic {
             .createTalonFX(
                     "Superintake/IntakeRollers",
                     15,
+                    true,
                     new TalonFXConfiguration()
                             .withMotorOutput(new MotorOutputConfigs()
                                     .withNeutralMode(NeutralModeValue.Coast)

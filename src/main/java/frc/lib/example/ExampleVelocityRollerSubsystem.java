@@ -37,6 +37,7 @@ public class ExampleVelocityRollerSubsystem implements Periodic {
             .createTalonFX(
                     "ExampleVelocityRollerSubsystem",
                     -1,
+                    true,
                     new TalonFXConfiguration()
                             .withMotorOutput(new MotorOutputConfigs()
                                     .withNeutralMode(NeutralModeValue.Coast)

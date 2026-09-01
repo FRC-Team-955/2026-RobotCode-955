@@ -32,6 +32,7 @@ public class Spindexer implements Periodic {
     private final Motor motor = Motor.createTalonFX(
             "Superstructure/Spindexer",
             13,
+            true,
             new TalonFXConfiguration()
                     .withMotorOutput(new MotorOutputConfigs()
                             .withNeutralMode(NeutralModeValue.Coast)

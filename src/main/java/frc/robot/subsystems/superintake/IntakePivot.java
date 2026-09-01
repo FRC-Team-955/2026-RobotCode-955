@@ -52,6 +52,7 @@ public class IntakePivot implements Periodic {
             .createTalonFX(
                     "Superintake/IntakePivot",
                     14,
+                    true,
                     new TalonFXConfiguration()
                             .withMotorOutput(new MotorOutputConfigs()
                                     .withNeutralMode(NeutralModeValue.Coast)

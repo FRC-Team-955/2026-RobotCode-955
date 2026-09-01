@@ -47,6 +47,7 @@ public class ExampleProfiledServoSubsystem implements Periodic {
             .createTalonFX(
                     "ExampleProfiledServoSubsystem",
                     -1,
+                    true,
                     new TalonFXConfiguration()
                             .withMotorOutput(new MotorOutputConfigs()
                                     .withNeutralMode(NeutralModeValue.Brake)

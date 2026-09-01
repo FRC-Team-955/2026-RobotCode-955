@@ -49,6 +49,7 @@ public class Flywheel implements Periodic {
             .createTalonFX(
                     "Superstructure/Flywheel/Leader",
                     16,
+                    false,
                     motorConfig,
                     0.0,
                     mechanismSimBuilder
@@ -68,6 +69,7 @@ public class Flywheel implements Periodic {
             .createTalonFX(
                     "Superstructure/Flywheel/Follower",
                     19,
+                    false,
                     motorConfig,
                     0.0,
                     mechanismSimBuilder

@@ -13,7 +13,7 @@ public class MotorIOTalonFXSim extends MotorIOTalonFX {
         // We tell the TalonFX that it has an initial position of 0 because setRawRotorPosition
         // will take into account initial position. If we give it the real initial position, the
         // position of the motor will double and bad things will happen.
-        super(SimManager.getNewCANId(), config, 0.0);
+        super(SimManager.getNewCANId(), false, config, 0.0);
 
         talonSim = talon.getSimState();
         talonSim.setMotorType(TalonFXSimState.MotorType.KrakenX60);

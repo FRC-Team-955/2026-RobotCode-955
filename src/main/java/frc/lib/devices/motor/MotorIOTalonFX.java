@@ -1,6 +1,7 @@
 package frc.lib.devices.motor;
 
 import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.Slot1Configs;
@@ -43,8 +44,8 @@ public class MotorIOTalonFX extends MotorIO {
     // Connection debouncers
     private final Debouncer connectedDebounce = new Debouncer(0.5);
 
-    public MotorIOTalonFX(int canID, TalonFXConfiguration config, double initialPositionRad) {
-        talon = new TalonFX(canID, Constants.canivoreBus);
+    public MotorIOTalonFX(int canID, boolean useCANivore, TalonFXConfiguration config, double initialPositionRad) {
+        talon = new TalonFX(canID, useCANivore ? Constants.canivoreBus : new CANBus("rio"));
 
         this.config = config.clone();
         tryUntilOk(5, () -> talon.getConfigurator().apply(config, 0.25));
