@@ -51,9 +51,9 @@ public class Hood implements Periodic {
     private final Motor motor = Motor
             .createSparkMax(
                     "Superstructure/Hood",
-                    10,
+                    12,
                     new CtrlSparkMaxConfig()
-                            .withInverted(true)
+                            .withInverted(false)
                             .withCurrentLimit(30)
                             .withGearRatio(5.0 * 2.0 * (220.0 / 20.0))
                             .withNeutralMode(NeutralModeValue.Brake),

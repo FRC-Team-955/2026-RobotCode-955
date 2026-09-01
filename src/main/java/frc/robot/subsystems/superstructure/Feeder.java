@@ -30,7 +30,7 @@ public class Feeder implements Periodic {
     private final Motor motor = Motor
             .createSparkMax(
                     "Superstructure/Feeder",
-                    11,
+                    10,
                     new CtrlSparkMaxConfig()
                             .withInverted(true)
                             .withNeutralMode(NeutralModeValue.Brake)
