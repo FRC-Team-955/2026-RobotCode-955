@@ -9,6 +9,7 @@ import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Units (velocity control additions are in brackets):
@@ -28,15 +29,15 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward;
  */
 public class LoggedTunablePIDF {
     private final String name;
-    private LoggedTunableNumber kP;
-    private LoggedTunableNumber kI;
-    private LoggedTunableNumber kD;
-    private LoggedTunableNumber kS;
-    private LoggedTunableNumber kV;
-    private LoggedTunableNumber kA;
-    private LoggedTunableNumber kG;
-    private GravityTypeValue gravityType;
-    private StaticFeedforwardSignValue staticFeedforwardSign;
+    private @Nullable LoggedTunableNumber kP;
+    private @Nullable LoggedTunableNumber kI;
+    private @Nullable LoggedTunableNumber kD;
+    private @Nullable LoggedTunableNumber kS;
+    private @Nullable LoggedTunableNumber kV;
+    private @Nullable LoggedTunableNumber kA;
+    private @Nullable LoggedTunableNumber kG;
+    private @Nullable GravityTypeValue gravityType;
+    private @Nullable StaticFeedforwardSignValue staticFeedforwardSign;
 
     public LoggedTunablePIDF(String name) {
         this.name = name;
@@ -87,7 +88,7 @@ public class LoggedTunablePIDF {
         if (kS != null) config.feedForward.kS(kS.get(), slot);
         if (kV != null) config.feedForward.kV(kV.get(), slot);
         if (kA != null) config.feedForward.kA(kA.get(), slot);
-        if (kG != null) {
+        if (kG != null && gravityType != null) {
             switch (gravityType) {
                 case Elevator_Static -> config.feedForward.kG(kG.get(), slot);
                 case Arm_Cosine -> {
@@ -97,7 +98,6 @@ public class LoggedTunablePIDF {
                     config.feedForward.kCosRatio(1.0 / (2.0 * Math.PI), slot);
                 }
             }
-
         }
     }
 
@@ -185,27 +185,27 @@ public class LoggedTunablePIDF {
 
     public SimpleMotorFeedforward toSimpleFF() {
         return new SimpleMotorFeedforward(
-                this.kS != null ? this.kS.get() : 0.0,
-                this.kV != null ? this.kV.get() : 0.0,
-                this.kA != null ? this.kA.get() : 0.0
+                kS != null ? kS.get() : 0.0,
+                kV != null ? kV.get() : 0.0,
+                kA != null ? kA.get() : 0.0
         );
     }
 
     public ArmFeedforward toArmFF() {
         return new ArmFeedforward(
-                this.kS != null ? this.kS.get() : 0.0,
-                this.kG != null ? this.kG.get() : 0.0,
-                this.kV != null ? this.kV.get() : 0.0,
-                this.kA != null ? this.kA.get() : 0.0
+                kS != null ? kS.get() : 0.0,
+                kG != null ? kG.get() : 0.0,
+                kV != null ? kV.get() : 0.0,
+                kA != null ? kA.get() : 0.0
         );
     }
 
     public ElevatorFeedforward toElevatorFF() {
         return new ElevatorFeedforward(
-                this.kS != null ? this.kS.get() : 0.0,
-                this.kG != null ? this.kG.get() : 0.0,
-                this.kV != null ? this.kV.get() : 0.0,
-                this.kA != null ? this.kA.get() : 0.0
+                kS != null ? kS.get() : 0.0,
+                kG != null ? kG.get() : 0.0,
+                kV != null ? kV.get() : 0.0,
+                kA != null ? kA.get() : 0.0
         );
     }
 
@@ -217,5 +217,18 @@ public class LoggedTunablePIDF {
         if (kV != null && kV.hasChanged()) return true;
         if (kA != null && kA.hasChanged()) return true;
         return kG != null && kG.hasChanged();
+    }
+
+    @Override
+    public String toString() {
+        return "LoggedTunablePIDF(" +
+                "kP: " + (kP != null ? kP.get() : "null") +
+                ", kI: " + (kI != null ? kI.get() : "null") +
+                ", kD: " + (kD != null ? kD.get() : "null") +
+                ", kS: " + (kS != null ? kS.get() : "null") +
+                ", kV: " + (kV != null ? kV.get() : "null") +
+                ", kA: " + (kA != null ? kA.get() : "null") +
+                ", kG: " + (kG != null ? kG.get() : "null") +
+                ")";
     }
 }

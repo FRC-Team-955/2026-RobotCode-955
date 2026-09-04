@@ -221,9 +221,11 @@ public class HubShiftTracker implements Periodic {
         double approachingActiveFudge = approachingActiveFudgeSupplier.getAsDouble();
         Logger.recordOutput("HubShiftTracker/ApproachingActiveFudge", approachingActiveFudge);
 
+        double[] shiftedShiftStartTimes;
+        double[] shiftedShiftEndTimes;
         if (shiftSchedule[1]) {
             // Starting active
-            double[] shiftedShiftStartTimes = {
+            shiftedShiftStartTimes = new double[]{
                     0.0,
                     10.0,
                     35.0 + endingActiveFudge,
@@ -231,7 +233,7 @@ public class HubShiftTracker implements Periodic {
                     85.0 + endingActiveFudge,
                     110.0 + approachingActiveFudge
             };
-            double[] shiftedShiftEndTimes = {
+            shiftedShiftEndTimes = new double[]{
                     10.0,
                     35.0 + endingActiveFudge,
                     60.0 + approachingActiveFudge,
@@ -239,10 +241,9 @@ public class HubShiftTracker implements Periodic {
                     110.0 + approachingActiveFudge,
                     140.0
             };
-            return getShiftInfo(shiftSchedule, shiftedShiftStartTimes, shiftedShiftEndTimes);
         } else {
             // Starting inactive
-            double[] shiftedShiftStartTimes = {
+            shiftedShiftStartTimes = new double[]{
                     0.0,
                     10.0 + endingActiveFudge,
                     35.0 + approachingActiveFudge,
@@ -250,7 +251,7 @@ public class HubShiftTracker implements Periodic {
                     85.0 + approachingActiveFudge,
                     110.0
             };
-            double[] shiftedShiftEndTimes = {
+            shiftedShiftEndTimes = new double[]{
                     10.0 + endingActiveFudge,
                     35.0 + approachingActiveFudge,
                     60.0 + endingActiveFudge,
@@ -258,7 +259,7 @@ public class HubShiftTracker implements Periodic {
                     110.0,
                     140.0
             };
-            return getShiftInfo(shiftSchedule, shiftedShiftStartTimes, shiftedShiftEndTimes);
         }
+        return getShiftInfo(shiftSchedule, shiftedShiftStartTimes, shiftedShiftEndTimes);
     }
 }

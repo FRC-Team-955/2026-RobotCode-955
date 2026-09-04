@@ -363,7 +363,7 @@ public class RobotState implements Periodic {
         return !inNeutralZone && !inAllianceZone && (inLeftTrench || inRightTrench);
     }
 
-    public Pose3d robotPoseMec() {
+    public Pose3d getMechanismPose() {
         return new Pose3d(getPose())
                 .transformBy(new Transform3d(
                         new Translation3d(0.0, 0.0, driveConfig.bottomOfFrameRailsToCenterOfWheelsMeters() + driveConfig.wheelRadiusMeters()),

@@ -306,8 +306,8 @@ public class AutoHelpers {
     private static final DriveConstraints bumpConstraints = defaultMoveToConstraints
             .withMaxLinearVelocityMetersPerSec(new LoggedTunableNumber("AutoHelpers/Bump/MaxLinearVelocity", 3))
             .withMaxAngularAccelerationRadPerSecPerSec(new LoggedTunableNumber("AutoHelpers/Bump/MaxAngularAcceleration", 10.0));
-    private static double bumpStartX = 5.71;
-    private static double bumpEndX = 3.3;
+    private static final double bumpStartX = 5.71;
+    private static final double bumpEndX = 3.3;
 
     public static Command goOverDepotSideBump() {
         return goOverDepotSideBump(false);

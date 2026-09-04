@@ -5,32 +5,32 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
-import edu.wpi.first.wpilibj.Alert;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.Util;
 import frc.lib.commands.CommandsExt;
+import frc.lib.devices.distancesensor.DistanceSensor;
 import frc.lib.network.LoggedTunableNumber;
 import frc.lib.subsystem.CommandBasedSubsystem;
 import frc.robot.BuildConstants;
 import frc.robot.FieldConstants;
-import frc.robot.OperatorDashboard;
 import frc.robot.RobotState;
+import frc.robot.SimManager;
 import frc.robot.shooting.ShootingKinematics;
-import frc.robot.subsystems.superstructure.feeder.Feeder;
-import frc.robot.subsystems.superstructure.flywheel.Flywheel;
-import frc.robot.subsystems.superstructure.hood.Hood;
-import frc.robot.subsystems.superstructure.spindexer.Spindexer;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.littletonrobotics.junction.Logger;
 
-import static frc.robot.subsystems.superstructure.SuperstructureConstants.createIO;
-import static frc.robot.subsystems.superstructure.SuperstructureConstants.robotToCANrange;
-
 public class Superstructure extends CommandBasedSubsystem {
-    // https://v6.docs.ctr-electronics.com/en/stable/docs/application-notes/tuning-canrange.html
+    private static final Transform3d robotToCANrange = new Transform3d(
+            // Z is from carpet
+            new Translation3d(Units.inchesToMeters(-4.446890), Units.inchesToMeters(-14.139000), Units.inchesToMeters(7)),
+            new Rotation3d(0.0, 0.0, Units.degreesToRadians(90.0))
+    );
+
+    // https://v6.docs.ctr-electronics.com/en/stable/docs/hardware-reference/canrange/tuning-canrange.html
     private static final LoggedTunableNumber hasFuelThresholdMeters = new LoggedTunableNumber("Superstructure/HasFuelThresholdMeters", 0.5);
     private static final LoggedTunableNumber hasFuelDebounceSeconds = new LoggedTunableNumber("Superstructure/HasFuelDebounceSeconds", 0.8);
     private static final LoggedTunableNumber commitToShotThresholdMeters = new LoggedTunableNumber("Superstructure/CommitToShotThresholdMeters", 0.15);
@@ -39,7 +39,6 @@ public class Superstructure extends CommandBasedSubsystem {
     private static final LoggedTunableNumber antiJamTimeSeconds = new LoggedTunableNumber("Superstructure/AntiJamTimeSeconds", 0.15);
 
     private static final RobotState robotState = RobotState.get();
-    private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
     private static final ShootingKinematics shootingKinematics = ShootingKinematics.get();
 
     // because these subsystems are instantiated by Superstructure, instead of RobotContainer,
@@ -49,8 +48,11 @@ public class Superstructure extends CommandBasedSubsystem {
     public final Feeder feeder = Feeder.get();
     public final Spindexer spindexer = Spindexer.get();
 
-    private final SuperstructureIO io = createIO();
-    private final SuperstructureIOInputsAutoLogged inputs = new SuperstructureIOInputsAutoLogged();
+    private final DistanceSensor fuelSensor = DistanceSensor.createCANRange(
+            "Superstructure/FuelSensor",
+            17,
+            () -> SimManager.get().getSimulatedFuelSensorDistance()
+    );
 
     @RequiredArgsConstructor
     public enum Goal {
@@ -89,8 +91,6 @@ public class Superstructure extends CommandBasedSubsystem {
     @Getter
     private boolean hasFuel = false;
 
-    private final Alert canrangeDisconnectedAlert = new Alert("CANrange is disconnected.", Alert.AlertType.kError);
-
     private static Superstructure instance;
 
     public static synchronized Superstructure get() {
@@ -109,16 +109,11 @@ public class Superstructure extends CommandBasedSubsystem {
 
     @Override
     public void periodicBeforeCommands() {
-        io.updateInputs(inputs);
-        Logger.processInputs("Inputs/Superstructure", inputs);
-
-        canrangeDisconnectedAlert.set(!inputs.canrangeConnected);
-
         if (hasFuelDebounceSeconds.hasChanged()) {
             hasFuelDebouncer.setDebounceTime(hasFuelDebounceSeconds.get());
         }
 
-        hasFuel = hasFuelDebouncer.calculate(inputs.canrangeDistanceMeters < hasFuelThresholdMeters.get());
+        hasFuel = hasFuelDebouncer.calculate(fuelSensor.getDistanceMeters() < hasFuelThresholdMeters.get());
         Logger.recordOutput("Superstructure/HasFuel", hasFuel);
     }
 
@@ -161,7 +156,7 @@ public class Superstructure extends CommandBasedSubsystem {
                         spindexer.setGoal(Spindexer.Goal.FEED);
                     }
 
-                    if (inputs.canrangeDistanceMeters < commitToShotThresholdMeters.get() && !needsToCommitToShot) {
+                    if (fuelSensor.getDistanceMeters() < commitToShotThresholdMeters.get() && !needsToCommitToShot) {
                         lastStartedShot = Timer.getTimestamp();
                     }
                 } else {
@@ -185,17 +180,9 @@ public class Superstructure extends CommandBasedSubsystem {
                 new Pose3d(robotState.getPose())
                         .transformBy(robotToCANrange)
                         .transformBy(new Transform3d(
-                                new Translation3d(inputs.canrangeDistanceMeters + FieldConstants.fuelDiameter / 2.0, 0.0, 0.0),
+                                new Translation3d(fuelSensor.getDistanceMeters() + FieldConstants.fuelDiameter / 2.0, 0.0, 0.0),
                                 new Rotation3d()
                         ))
         );
-    }
-
-    public boolean isAnythingDisconnected() {
-        return hood.isDisconnected() ||
-                flywheel.isDisconnected() ||
-                spindexer.isDisconnected() ||
-                feeder.isDisconnected() ||
-                !inputs.canrangeConnected;
     }
 }

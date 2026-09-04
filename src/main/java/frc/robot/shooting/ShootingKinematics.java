@@ -14,9 +14,9 @@ import frc.lib.network.LoggedTunableNumber;
 import frc.lib.subsystem.Periodic;
 import frc.robot.*;
 import frc.robot.subsystems.drive.Drive;
+import frc.robot.subsystems.superstructure.Flywheel;
+import frc.robot.subsystems.superstructure.Hood;
 import frc.robot.subsystems.superstructure.Superstructure;
-import frc.robot.subsystems.superstructure.flywheel.FlywheelConstants;
-import frc.robot.subsystems.superstructure.hood.HoodConstants;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.With;
@@ -35,6 +35,10 @@ public class ShootingKinematics implements Periodic {
     private static final double bottomOfFrameRailsToShooterHeightMeters = Units.inchesToMeters(12.861380);
     private static final double shooterRadiusToCenterOfBallExitMeters = Units.inchesToMeters(4.602756);
 
+    private static final RobotState robotState = RobotState.get();
+    private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
+    private static final HubShiftTracker hubShiftTracker = HubShiftTracker.get();
+    private static final Superstructure superstructure = Superstructure.get();
     private static final Drive drive = Drive.get();
 
     private static final LoggedTunableNumber headingToleranceDeg = new LoggedTunableNumber("ShootingKinematics/HeadingToleranceDegrees", 10.0);
@@ -55,12 +59,6 @@ public class ShootingKinematics implements Periodic {
 
     private static final DoubleUnaryOperator passVelocityToRPM = (x) -> 316 * x - 456 + 100;
 
-    private static final RobotState robotState = RobotState.get();
-    private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
-    private static final HubShiftTracker hubShiftTracker = HubShiftTracker.get();
-
-    private static final Superstructure superstructure = Superstructure.get();
-
     @Getter
     private ShootingParameters shootingParameters = new ShootingParameters(0, 0, 0, 0, false);
     @Getter
@@ -72,7 +70,6 @@ public class ShootingKinematics implements Periodic {
 
     private final Debouncer velocityMetDebouncer = new Debouncer(0.15, Debouncer.DebounceType.kFalling);
     private final Debouncer headingVelocityDebouncer = new Debouncer(0.10, Debouncer.DebounceType.kFalling);
-    private final Debouncer passDebouncer = new Debouncer(0.5, Debouncer.DebounceType.kFalling);
     private final Debouncer orientationDebouncer = new Debouncer(0.1, Debouncer.DebounceType.kFalling);
 
     private ShootingParameters noPhaseDelayParameters = new ShootingParameters(
@@ -204,7 +201,7 @@ public class ShootingKinematics implements Periodic {
     private static final LoggedTunableNumber shootTowerManualAngleDegrees = new LoggedTunableNumber("ShootingKinematics/ShootTowerManual/AngleDegrees", 62.0);
 
     private static final LoggedTunableNumber passManualFlywheelRPM = new LoggedTunableNumber("ShootingKinematics/PassManual/FlywheelRPM", 2400.0);
-    private static final LoggedTunableNumber passManualAngleDegrees = new LoggedTunableNumber("ShootingKinematics/PassManual/AngleDegrees", Units.radiansToDegrees(HoodConstants.convertBetweenShotAngleAndHoodAngleRad(HoodConstants.maxPositionRad)));
+    private static final LoggedTunableNumber passManualAngleDegrees = new LoggedTunableNumber("ShootingKinematics/PassManual/AngleDegrees", Units.radiansToDegrees(Hood.convertBetweenShotAngleAndHoodAngleRad(Hood.maxPositionRad)));
 
     private ShootingParameters getShootingParametersManual() {
         double headingRad = getFuelExitToTarget(0.0).angle().getRadians();
@@ -319,7 +316,7 @@ public class ShootingKinematics implements Periodic {
             Logger.recordOutput(key + "Theta", theta);
         }
 
-        double velocityRPM = Units.radiansPerSecondToRotationsPerMinute(v / FlywheelConstants.flywheelRadiusMeters);
+        double velocityRPM = Units.radiansPerSecondToRotationsPerMinute(v / Flywheel.radiusMeters);
         return new ShootingParameters(
                 BuildConstants.isSim
                         ? velocityRPM
