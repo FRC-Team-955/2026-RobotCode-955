@@ -208,14 +208,10 @@ public class SimManager {
                             robotPose.getTranslation(),
                             shootingKinematics.getTurretRotationAxisToFuelExitTransform().getTranslation().toTranslation2d(),
                             driveSimulation.getDriveTrainSimulatedChassisSpeedsFieldRelative(),
-                            robotPose.getRotation(),
+                            Rotation2d.fromRadians(superstructure.turret.getFieldRelativePositionRad()),
                             Meters.of(shootingKinematics.getTurretRotationAxisToFuelExitTransform().getZ()),
                             MetersPerSecond.of(superstructure.flywheel.getVelocityRadPerSec() * Flywheel.radiusMeters),
-                            // Applying the shooter facing direction to the maple-sim parameter
-                            // causes issues because it causes the shooter position to be rotated
-                            // which puts it in the opposite corner of the robot. Instead, just
-                            // reverse the hood
-                            Radians.of(Math.PI - superstructure.hood.getShotAngleRad())
+                            Radians.of(superstructure.hood.getShotAngleRad())
                     );
                     if (!shootingKinematics.getShootingParameters().isPass()) {
                         gamePiece.disableBecomesGamePieceOnFieldAfterTouchGround();
