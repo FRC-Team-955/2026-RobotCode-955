@@ -44,10 +44,10 @@ wheel_radius = inches_to_meters(1.945)
 bottom_of_frame_rails_to_center_of_wheels = inches_to_meters(-0.247776)
 
 # KEEP SYNCED WITH ShootingKinematics.java
-bottom_of_frame_rails_to_shooter_height = inches_to_meters(12.861380)
+bottom_of_frame_rails_to_flywheel_height = inches_to_meters(12.861380)
 shooter_radius_to_center_of_ball_exit = inches_to_meters(4.602756)
 
-z_initial_base = bottom_of_frame_rails_to_center_of_wheels + wheel_radius + bottom_of_frame_rails_to_shooter_height
+z_initial_base = bottom_of_frame_rails_to_center_of_wheels + wheel_radius + bottom_of_frame_rails_to_flywheel_height
 
 # From horizontal
 min_angle_allowed = deg_to_rad(50)

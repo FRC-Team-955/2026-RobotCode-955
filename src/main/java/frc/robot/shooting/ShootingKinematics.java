@@ -32,7 +32,7 @@ public class ShootingKinematics implements Periodic {
     public static final double slipConstant = 0.67;
 
     // KEEP SYNCED WITH shooting_regression.py
-    private static final double bottomOfFrameRailsToShooterHeightMeters = Units.inchesToMeters(12.861380);
+    public static final double bottomOfFrameRailsToFlywheelHeightMeters = Units.inchesToMeters(12.861380);
     private static final double centerOfTurretToCenterOfBallExitMeters = Units.inchesToMeters(1.755250);
 
     private static final RobotState robotState = RobotState.get();
@@ -47,7 +47,7 @@ public class ShootingKinematics implements Periodic {
     public static final LoggedTunableNumber velocityToleranceRPM = new LoggedTunableNumber("ShootingKinematics/VelocityToleranceRPM", 100);
     public static final LoggedTunableNumber hoodToleranceDeg = new LoggedTunableNumber("ShootingKinematics/HoodToleranceDegrees", 3.0);
 
-    private static final Transform2d turretRotationAxisTransform = new Transform2d(
+    public static final Transform2d turretRotationAxisTransform = new Transform2d(
             new Translation2d(
                     Units.inchesToMeters(-3.785046),
                     Units.inchesToMeters(-6.672244)
@@ -61,7 +61,7 @@ public class ShootingKinematics implements Periodic {
                     0.0,
                     driveConfig.bottomOfFrameRailsToCenterOfWheelsMeters() +
                             driveConfig.wheelRadiusMeters() +
-                            bottomOfFrameRailsToShooterHeightMeters +
+                            bottomOfFrameRailsToFlywheelHeightMeters +
                             Math.sin(hoodAngleRad) * centerOfTurretToCenterOfBallExitMeters
             ),
             new Rotation3d()

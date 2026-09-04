@@ -38,7 +38,8 @@ public class RobotMechanism implements Periodic {
                 superstructure.feeder.getMechanismTransform(),
                 superstructure.flywheel.getMechanismTransform(),
                 superintake.intakePivot.getMechanismTransform(),
-                superstructure.hood.getMechanismTransform()
+                superstructure.hood.getMechanismTransform(),
+                superstructure.turret.getMechanismTransform()
         );
     }
 }
