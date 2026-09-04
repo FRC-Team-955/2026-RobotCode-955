@@ -206,10 +206,10 @@ public class SimManager {
                     Pose2d robotPose = driveSimulation.getSimulatedDriveTrainPose();
                     var gamePiece = new RebuiltFuelOnFly(
                             robotPose.getTranslation(),
-                            shootingKinematics.getTurretRotationAxisToFuelExitTransform().getTranslation().toTranslation2d(),
+                            shootingKinematics.getFuelExitTransform().getTranslation().toTranslation2d(),
                             driveSimulation.getDriveTrainSimulatedChassisSpeedsFieldRelative(),
                             Rotation2d.fromRadians(superstructure.turret.getFieldRelativePositionRad()),
-                            Meters.of(shootingKinematics.getTurretRotationAxisToFuelExitTransform().getZ()),
+                            Meters.of(shootingKinematics.getFuelExitTransform().getZ()),
                             MetersPerSecond.of(superstructure.flywheel.getVelocityRadPerSec() * Flywheel.radiusMeters),
                             Radians.of(superstructure.hood.getShotAngleRad())
                     );

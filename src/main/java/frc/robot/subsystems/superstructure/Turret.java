@@ -218,7 +218,7 @@ public class Turret implements Periodic {
         return convertMechanismPositionToFieldRelativePosition(motor.getPositionRad());
     }
 
-    public double getRobotRelativeHeadingVelocityRadPerSec() {
+    public double getHeadingVelocityRadPerSec() {
         return motor.getVelocityRadPerSec();
     }
 
