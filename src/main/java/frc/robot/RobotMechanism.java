@@ -34,10 +34,10 @@ public class RobotMechanism implements Periodic {
         Logger.recordOutput(
                 "RobotMechanism/Components",
                 superintake.intakeRollers.getMechanismTransform(),
-                superintake.intakePivot.getMechanismTransform(),
                 superstructure.spindexer.getMechanismTransform(),
                 superstructure.feeder.getMechanismTransform(),
                 superstructure.flywheel.getMechanismTransform(),
+                superintake.intakePivot.getMechanismTransform(),
                 superstructure.hood.getMechanismTransform()
         );
     }
