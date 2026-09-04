@@ -26,6 +26,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.littletonrobotics.junction.Logger;
 
+import java.util.Objects;
 import java.util.function.DoubleSupplier;
 
 public class Turret implements Periodic {
@@ -36,10 +37,6 @@ public class Turret implements Periodic {
     private static final double positionPastLimitForEmergencyStopRad = Units.degreesToRadians(5);
 
     private static final TrapezoidProfile.Constraints constraints = new TrapezoidProfile.Constraints(8, 12);
-
-    private static final double limitMarginRad = Units.degreesToRadians(20.0);
-
-    private static final double unwindHysteresisRad = Units.degreesToRadians(15.0);
 
     private static final double homingToleranceRad = Units.degreesToRadians(45.0);
 
@@ -85,11 +82,11 @@ public class Turret implements Periodic {
     @RequiredArgsConstructor
     public enum Goal {
         SHOOT(() -> ShootingKinematics.get().getShootingParameters().headingRad()),
-        AIM_AT_CLOSEST_HUB(() -> ShootingKinematics.get().getShootingParameters().headingRad()),
+        AIM_AT_CLOSEST_HUB(() -> 0.0),
         ;
 
         /** Should be constant for every loop cycle */
-        private final DoubleSupplier fieldHeadingRad;
+        private final DoubleSupplier fieldRelativeSetpointRad;
     }
 
     @Setter
@@ -155,6 +152,8 @@ public class Turret implements Periodic {
         if (!motor.isEmergencyStopped() && operatorDashboard.coastOverride.hasChanged()) {
             motor.setNeutralMode(operatorDashboard.coastOverride.get() ? NeutralModeValue.Coast : NeutralModeValue.Brake);
         }
+
+        Logger.recordOutput("Superstructure/Turret/FieldRelativePositionRad", getFieldRelativePositionRad());
     }
 
     @Override
@@ -168,14 +167,13 @@ public class Turret implements Periodic {
         } else {
             // See the comments above the lookaheadState and goalState variables for why we calculate two profiles
 
-            double fieldHeadingRad = goal.fieldHeadingRad.getAsDouble();
-            double setpointRad = resolveSetpointRad(fieldHeadingRad);
-            setpointRad = MathUtil.clamp(setpointRad, minPositionRad, maxPositionRad);
-            if (BuildConstants.isSimOrReplay) {
-                Logger.recordOutput("Superstructure/Turret/WantedFieldHeadingRad", fieldHeadingRad);
-                Logger.recordOutput("Superstructure/Turret/OriginalSetpointRad", setpointRad);
-            }
-            TrapezoidProfile.State wantedState = new TrapezoidProfile.State(setpointRad, 0.0);
+            double fieldRelativeSetpointRad = goal.fieldRelativeSetpointRad.getAsDouble();
+            Logger.recordOutput("Superstructure/Turret/FieldRelativeSetpointRad", fieldRelativeSetpointRad);
+
+            double mechanismSetpointRad = resolveMechanismSetpointFromFieldRelativeSetpoint(fieldRelativeSetpointRad);
+            mechanismSetpointRad = MathUtil.clamp(mechanismSetpointRad, minPositionRad, maxPositionRad);
+            Logger.recordOutput("Superstructure/Turret/OriginalMechanismSetpointRad", mechanismSetpointRad);
+            TrapezoidProfile.State wantedState = new TrapezoidProfile.State(mechanismSetpointRad, 0.0);
 
             state = profile.calculate(Constants.loopPeriod, state, wantedState);
             Logger.recordOutput("Superstructure/Turret/ProfileSetpointRad", state.position);
@@ -185,51 +183,39 @@ public class Turret implements Periodic {
         }
     }
 
-    private double resolveSetpointRad(double fieldHeadingRad) {
-        double wantedRad = fieldHeadingRad - robotState.getRotation().getRadians() - Math.PI;
+    private double resolveMechanismSetpointFromFieldRelativeSetpoint(double fieldRelativeSetpointRad) {
+        final double wantedMechanismSetpointRad = MathUtil.angleModulus(convertFieldRelativePositionToMechanismPosition(fieldRelativeSetpointRad));
 
-        double currentRad = state.position;
-
-        double nearestRad = Double.NaN;
-        double roomiestRad = Double.NaN;
-        int firstWrap = (int) Math.ceil((minPositionRad - wantedRad) / (2.0 * Math.PI));
-        for (int wrap = firstWrap; ; wrap++) {
-            double candidateRad = wantedRad + 2.0 * Math.PI * wrap;
-            if (candidateRad > maxPositionRad) {
-                break;
+        final double currentMechanismPosition = motor.getPositionRad();
+        Double closestSetpoint = null;
+        final int possibleRotations = (int) Math.ceil(Units.radiansToRotations(maxPositionRad - minPositionRad));
+        for (int rotation = -possibleRotations; rotation <= possibleRotations; rotation++) {
+            double possibleSetpoint = wantedMechanismSetpointRad + rotation * 2.0 * Math.PI;
+            if (possibleSetpoint < minPositionRad || possibleSetpoint > maxPositionRad) {
+                continue;
             }
 
-            if (Double.isNaN(nearestRad) || Math.abs(candidateRad - currentRad) < Math.abs(nearestRad - currentRad)) {
-                nearestRad = candidateRad;
-            }
-            if (Double.isNaN(roomiestRad) || headroomRad(candidateRad) > headroomRad(roomiestRad)) {
-                roomiestRad = candidateRad;
+            if (closestSetpoint == null ||
+                    Math.abs(possibleSetpoint - currentMechanismPosition) < Math.abs(closestSetpoint - currentMechanismPosition)) {
+                closestSetpoint = possibleSetpoint;
             }
         }
 
-        boolean nearingLimit = headroomRad(nearestRad) < limitMarginRad;
-        boolean mayUnwind = nearingLimit || goal != Goal.SHOOT;
-        boolean worthUnwinding = headroomRad(roomiestRad) > headroomRad(nearestRad) + unwindHysteresisRad;
-
-        if (BuildConstants.isSimOrReplay) {
-            Logger.recordOutput("Superstructure/Turret/NearingLimit", nearingLimit);
-            Logger.recordOutput("Superstructure/Turret/Unwinding", mayUnwind && worthUnwinding);
-        }
-
-        return mayUnwind && worthUnwinding ? roomiestRad : nearestRad;
+        return Objects.requireNonNullElse(closestSetpoint, currentMechanismPosition);
     }
 
-    private static double headroomRad(double positionRad) {
-        return Math.min(positionRad - minPositionRad, maxPositionRad - positionRad);
-    }
-
-    public double getRobotRelativeHeadingRad() {
+    private static double convertMechanismPositionToFieldRelativePosition(double mechanismPositionRad) {
         // add 180° - see comment at top of class
-        return motor.getPositionRad() + Math.PI;
+        return mechanismPositionRad + Math.PI + robotState.getRotation().getRadians();
     }
 
-    public double getFieldRelativeHeadingRad() {
-        return getRobotRelativeHeadingRad() + robotState.getRotation().getRadians();
+    private static double convertFieldRelativePositionToMechanismPosition(double fieldRelativePositionRad) {
+        // subtract 180° - see comment at top of class
+        return fieldRelativePositionRad - Math.PI - robotState.getRotation().getRadians();
+    }
+
+    public double getFieldRelativePositionRad() {
+        return convertMechanismPositionToFieldRelativePosition(motor.getPositionRad());
     }
 
     public double getRobotRelativeHeadingVelocityRadPerSec() {
