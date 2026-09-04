@@ -203,12 +203,16 @@ public class SimManager {
                         (intakeSimulation.obtainGamePieceFromIntake() || DriverStation.isTeleopEnabled())) {
                     lastShotTimestamp = Timer.getTimestamp();
 
-                    Pose2d robotPose = driveSimulation.getSimulatedDriveTrainPose();
+                    var shooterFacing = Rotation2d.fromRadians(superstructure.turret.getFieldRelativePositionRad());
                     var gamePiece = new RebuiltFuelOnFly(
-                            robotPose.getTranslation(),
-                            shootingKinematics.getFuelExitTransform().getTranslation().toTranslation2d(),
+                            driveSimulation.getSimulatedDriveTrainPose().getTranslation(),
+                            shootingKinematics.getFuelExitTransform().getTranslation().toTranslation2d()
+                                    // necessary to counteract weird maple-sim logic that rotates shooter position by shooter facing
+                                    .rotateBy(shooterFacing.unaryMinus())
+                                    // this means we have to rotate by drivebase rotation ourselves
+                                    .rotateBy(driveSimulation.getSimulatedDriveTrainPose().getRotation()),
                             driveSimulation.getDriveTrainSimulatedChassisSpeedsFieldRelative(),
-                            Rotation2d.fromRadians(superstructure.turret.getFieldRelativePositionRad()),
+                            shooterFacing,
                             Meters.of(shootingKinematics.getFuelExitTransform().getZ()),
                             MetersPerSecond.of(superstructure.flywheel.getVelocityRadPerSec() * Flywheel.radiusMeters),
                             Radians.of(superstructure.hood.getShotAngleRad())
