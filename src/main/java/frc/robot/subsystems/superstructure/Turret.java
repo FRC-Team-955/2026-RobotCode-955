@@ -76,6 +76,7 @@ public class Turret implements Periodic {
                         .withV(0.3)
                         .withA(0.005);
                 case SIM -> new LoggedTunablePIDF("Superstructure/Turret/VelocityGains")
+                        .withP(0.1)
                         .withV(0.1);
             });
 
