@@ -81,12 +81,13 @@ public class Turret implements Periodic {
 
     @RequiredArgsConstructor
     public enum Goal {
-        SHOOT(() -> ShootingKinematics.get().getShootingParameters().headingRad()),
-        AIM_AT_CLOSEST_HUB(() -> 0.0),
+        SHOOT(() -> ShootingKinematics.get().getShootingParameters().headingRad(), () -> ShootingKinematics.get().getShootingParameters().headingVelocityRadPerSec()),
+        AIM_AT_CLOSEST_HUB(() -> 0.0, () -> 0.0),
         ;
 
         /** Should be constant for every loop cycle */
-        private final DoubleSupplier fieldRelativeSetpointRad;
+        private final DoubleSupplier fieldRelativePositionSetpointRad;
+        private final DoubleSupplier velocitySetpointRadPerSec;
     }
 
     @Setter
@@ -167,13 +168,17 @@ public class Turret implements Periodic {
         } else {
             // See the comments above the lookaheadState and goalState variables for why we calculate two profiles
 
-            double fieldRelativeSetpointRad = goal.fieldRelativeSetpointRad.getAsDouble();
-            Logger.recordOutput("Superstructure/Turret/FieldRelativeSetpointRad", fieldRelativeSetpointRad);
+            double fieldRelativePositionSetpointRad = goal.fieldRelativePositionSetpointRad.getAsDouble();
+            Logger.recordOutput("Superstructure/Turret/FieldRelativePositionSetpointRad", fieldRelativePositionSetpointRad);
 
-            double mechanismSetpointRad = resolveMechanismSetpointFromFieldRelativeSetpoint(fieldRelativeSetpointRad);
+            double mechanismSetpointRad = resolveMechanismSetpointFromFieldRelativeSetpoint(fieldRelativePositionSetpointRad);
             mechanismSetpointRad = MathUtil.clamp(mechanismSetpointRad, minPositionRad, maxPositionRad);
             Logger.recordOutput("Superstructure/Turret/OriginalMechanismSetpointRad", mechanismSetpointRad);
-            TrapezoidProfile.State wantedState = new TrapezoidProfile.State(mechanismSetpointRad, 0.0);
+
+            double velocitySetpointRadPerSec = goal.velocitySetpointRadPerSec.getAsDouble();
+            Logger.recordOutput("Superstructure/Turret/VelocitySetpointRadPerSec", velocitySetpointRadPerSec);
+
+            TrapezoidProfile.State wantedState = new TrapezoidProfile.State(mechanismSetpointRad, velocitySetpointRadPerSec);
 
             state = profile.calculate(Constants.loopPeriod, state, wantedState);
             Logger.recordOutput("Superstructure/Turret/ProfileSetpointRad", state.position);
