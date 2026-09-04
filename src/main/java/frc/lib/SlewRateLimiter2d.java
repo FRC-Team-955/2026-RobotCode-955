@@ -93,7 +93,9 @@ public class SlewRateLimiter2d {
         Translation2d savedVal = m_prevVal;
         m_prevVal = MathUtil.slewRateLimit(m_prevVal, input, elapsedTime, m_rateLimit);
         m_prevTime = currentTime;
-        m_accel = m_prevVal.minus(savedVal).div(elapsedTime);
+        if (elapsedTime > 0.0) {
+            m_accel = m_prevVal.minus(savedVal).div(elapsedTime);
+        }
         return m_prevVal;
     }
 
