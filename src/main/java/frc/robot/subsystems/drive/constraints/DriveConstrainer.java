@@ -18,6 +18,8 @@ public class DriveConstrainer {
 
     @Getter
     private Translation2d wantedLinearSpeed = new Translation2d();
+    @Getter
+    private double wantedAngularSpeed = 0.0;
 
     private @Nullable DriveConstraints constraints = null;
 
@@ -84,7 +86,7 @@ public class DriveConstrainer {
             angularAccelLimiter.setLimit(constraints.maxAngularAccelerationRadPerSecPerSec().get());
         }
 
-        double wantedAngularSpeed = wantedSpeeds.omegaRadiansPerSecond;
+        wantedAngularSpeed = wantedSpeeds.omegaRadiansPerSecond;
         // Limit max vel
         if (constraints.maxAngularVelocityRadPerSec() != null &&
                 Math.abs(wantedAngularSpeed) > constraints.maxAngularVelocityRadPerSec().get()) {

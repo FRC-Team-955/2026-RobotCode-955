@@ -21,6 +21,7 @@ import frc.robot.Constants;
 import frc.robot.OperatorDashboard;
 import frc.robot.RobotState;
 import frc.robot.shooting.ShootingKinematics;
+import frc.robot.subsystems.drive.Drive;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -177,6 +178,7 @@ public class Turret implements Periodic {
             Logger.recordOutput("Superstructure/Turret/OriginalMechanismSetpointRad", mechanismSetpointRad);
 
             double velocitySetpointRadPerSec = goal.velocitySetpointRadPerSec.getAsDouble();
+            velocitySetpointRadPerSec -= Drive.get().getConstrainer().getWantedAngularSpeed();
             Logger.recordOutput("Superstructure/Turret/VelocitySetpointRadPerSec", velocitySetpointRadPerSec);
 
             TrapezoidProfile.State wantedState = new TrapezoidProfile.State(mechanismSetpointRad, velocitySetpointRadPerSec);
