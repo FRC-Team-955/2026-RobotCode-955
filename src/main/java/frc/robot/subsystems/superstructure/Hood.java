@@ -47,6 +47,7 @@ public class Hood implements Periodic {
     private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
     private static final ShootingKinematics shootingKinematics = ShootingKinematics.get();
     private static final RobotState robotState = RobotState.get();
+    private static final Turret turret = Turret.get();
 
     private final Motor motor = Motor
             .createSparkMax(
@@ -180,12 +181,14 @@ public class Hood implements Periodic {
     }
 
     public Transform3d getMechanismTransform() {
-        return new Transform3d(
-                new Translation3d(Units.inchesToMeters(-6.910046), Units.inchesToMeters(-9.109744), Units.inchesToMeters(12.861381)),
-                new Rotation3d(0.0, Units.degreesToRadians(-90.0), Math.PI)
-        ).plus(new Transform3d(
-                new Translation3d(),
-                new Rotation3d(0.0, motor.getPositionRad(), 0.0)
-        ));
+        return turret.getMechanismTransform()
+                .plus(new Transform3d(
+                        new Translation3d(Units.inchesToMeters(-3.026799), 0.0, 0.0),
+                        new Rotation3d(0.0, Units.degreesToRadians(-90.0), Math.PI)
+                ))
+                .plus(new Transform3d(
+                        new Translation3d(),
+                        new Rotation3d(0.0, motor.getPositionRad(), 0.0)
+                ));
     }
 }

@@ -34,6 +34,7 @@ public class Flywheel implements Periodic {
     private static final LoggedTunableNumber ejectRPM = new LoggedTunableNumber("Superstructure/Flywheel/Goal/EjectRPM", -300);
 
     private static final ShootingKinematics shootingKinematics = ShootingKinematics.get();
+    private static final Turret turret = Turret.get();
 
     private final TalonFXConfiguration motorConfig = new TalonFXConfiguration()
             .withMotorOutput(new MotorOutputConfigs()
@@ -129,12 +130,14 @@ public class Flywheel implements Periodic {
     }
 
     public Transform3d getMechanismTransform() {
-        return new Transform3d(
-                new Translation3d(Units.inchesToMeters(-6.910046), Units.inchesToMeters(-9.109744), Units.inchesToMeters(12.861381)),
-                new Rotation3d(0.0, 0.0, 0.0)
-        ).plus(new Transform3d(
-                new Translation3d(),
-                new Rotation3d(0.0, leaderMotor.getPositionRad(), 0.0)
-        ));
+        return turret.getMechanismTransform()
+                .plus(new Transform3d(
+                        new Translation3d(Units.inchesToMeters(-3.026799), 0.0, 0.0),
+                        new Rotation3d(0.0, 0.0, 0.0)
+                ))
+                .plus(new Transform3d(
+                        new Translation3d(),
+                        new Rotation3d(0.0, leaderMotor.getPositionRad(), 0.0)
+                ));
     }
 }
