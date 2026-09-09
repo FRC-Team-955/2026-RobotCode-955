@@ -87,7 +87,7 @@ public class AprilTagVisionConstants {
                 1.5,
                 1.0
         ),
-        ShooterCam2(
+        TurretCam(
                 new Transform3d(
                         Units.inchesToMeters(2.471001), Units.inchesToMeters(-14.565997), Units.inchesToMeters(9.702640),
                         // Rotation order matters
@@ -95,8 +95,8 @@ public class AprilTagVisionConstants {
                                 .rotateBy(new Rotation3d(0.0, 0.0, Units.degreesToRadians(-(90.0 - 35.0))))
                 ),
                 (cam) -> switch (BuildConstants.mode) {
-                    case REAL -> new AprilTagVisionIOPhotonVision("ShooterCam2");
-                    case SIM -> new AprilTagVisionIOPhotonVisionSim("ShooterCam2", cam.robotToCamera);
+                    case REAL -> new AprilTagVisionIOPhotonVision("TurretCam");
+                    case SIM -> new AprilTagVisionIOPhotonVisionSim("TurretCam", cam.robotToCamera);
                     case REPLAY -> new AprilTagVisionIO();
                 },
                 // Trust more at close distance, less at long distance
