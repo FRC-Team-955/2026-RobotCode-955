@@ -34,8 +34,8 @@ public class Feeder implements Periodic {
                     new CtrlSparkMaxConfig()
                             .withInverted(true)
                             .withNeutralMode(NeutralModeValue.Brake)
-                            .withCurrentLimit(40)
-                            .withGearRatio(3),
+                            .withCurrentLimit(60)
+                            .withGearRatio(2),
                     0.0,
                     MechanismSim.roller(0.01)
             );
