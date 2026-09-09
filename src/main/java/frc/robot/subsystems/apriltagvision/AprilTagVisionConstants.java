@@ -100,7 +100,7 @@ public class AprilTagVisionConstants {
                         .plus(new Transform3d(
                                 Units.inchesToMeters(-3.663), Units.inchesToMeters(5.638), Units.inchesToMeters(7.544418),
                                 new Rotation3d(0.0, Units.degreesToRadians(-25.0), 0.0)
-                                        .rotateBy(new Rotation3d(0.0, 0.0, Units.degreesToRadians(180.0 + 35.0)))
+                                        .rotateBy(new Rotation3d(0.0, 0.0, Units.degreesToRadians(180.0)))
                         )),
                 (cam) -> switch (BuildConstants.mode) {
                     case REAL -> new AprilTagVisionIOPhotonVision("TurretCam");
