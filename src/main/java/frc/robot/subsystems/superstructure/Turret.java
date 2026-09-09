@@ -64,7 +64,7 @@ public class Turret implements Periodic {
             )
             .withPositionGains(switch (BuildConstants.mode) {
                 case REAL, REPLAY -> new LoggedTunablePIDF("Superstructure/Turret/PositionGains")
-                        .withP(10)
+                        .withP(5)
                         .withD(0.1);
                 case SIM -> new LoggedTunablePIDF("Superstructure/Turret/PositionGains")
                         .withP(10.0)
@@ -72,9 +72,9 @@ public class Turret implements Periodic {
             })
             .withVelocityGains(switch (BuildConstants.mode) {
                 case REAL, REPLAY -> new LoggedTunablePIDF("Superstructure/Turret/VelocityGains")
-                        .withP(0.1)
-                        .withS(0.2, StaticFeedforwardSignValue.UseVelocitySign)
-                        .withV(0.3)
+                        .withP(0.05)
+                        .withS(0.3, StaticFeedforwardSignValue.UseVelocitySign)
+                        .withV(0.4)
                         .withA(0.005);
                 case SIM -> new LoggedTunablePIDF("Superstructure/Turret/VelocityGains")
                         .withP(0.1)
