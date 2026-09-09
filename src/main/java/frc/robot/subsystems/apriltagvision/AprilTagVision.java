@@ -86,6 +86,7 @@ public class AprilTagVision implements Periodic {
         // Loop over cameras
         for (Map.Entry<Camera, CameraData> cam : cameras.entrySet()) {
             Camera metadata = cam.getKey();
+            Transform3d robotToCamera = metadata.robotToCamera();
             CameraData data = cam.getValue();
 
             // Initialize logging values
@@ -119,7 +120,7 @@ public class AprilTagVision implements Periodic {
                 Transform3d fieldToCameraBest = fieldToTarget.plus(observation.bestCameraToTarget().inverse());
                 //Transform3d fieldToCameraAlt = fieldToTarget.plus(observation.altCameraToTarget().inverse());
 
-                Transform3d fieldToRobotBest = fieldToCameraBest.plus(metadata.robotToCamera.inverse());
+                Transform3d fieldToRobotBest = fieldToCameraBest.plus(robotToCamera.inverse());
                 //Transform3d fieldToRobotAlt = fieldToCameraAlt.plus(metadata.robotToCamera.inverse());
 
                 Transform3d cameraToTargetAccurate = observation.bestCameraToTarget();
@@ -199,7 +200,7 @@ public class AprilTagVision implements Periodic {
 
             List<MultiTagPoseObservation> multiTagPoseObservations = new LinkedList<>();
             for (var observation : data.inputs.multiTagObservations) {
-                Transform3d fieldToRobot = observation.fieldToCamera().plus(metadata.robotToCamera.inverse());
+                Transform3d fieldToRobot = observation.fieldToCamera().plus(robotToCamera.inverse());
                 Pose3d robotPose = new Pose3d(fieldToRobot.getTranslation(), fieldToRobot.getRotation());
 
                 multiTagPoseObservations.add(new MultiTagPoseObservation(
@@ -347,7 +348,7 @@ public class AprilTagVision implements Periodic {
         Logger.recordOutput(
                 "AprilTagVision/CameraPoses",
                 Arrays.stream(Camera.values())
-                        .map(cam -> robotPose.transformBy(cam.robotToCamera))
+                        .map(cam -> robotPose.transformBy(cam.robotToCamera()))
                         .toArray(Pose3d[]::new)
         );
 

@@ -18,9 +18,13 @@ import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import frc.robot.BuildConstants;
+import frc.robot.subsystems.superstructure.Superstructure;
 import lombok.RequiredArgsConstructor;
 
 import java.util.function.Function;
+import java.util.function.Supplier;
+
+import static frc.robot.subsystems.drive.DriveConstants.driveConfig;
 
 public class AprilTagVisionConstants {
     // Basic filtering thresholds
@@ -56,7 +60,7 @@ public class AprilTagVisionConstants {
     enum Camera {
         // BrainpanCam - ThriftyCam
         BrainpanCam(
-                new Transform3d(
+                () -> new Transform3d(
                         Units.inchesToMeters(-11.441561), Units.inchesToMeters(4.404409), Units.inchesToMeters(7.451625),
                         // Rotation order matters
                         new Rotation3d(0.0, Units.degreesToRadians(-30.0), 0.0)
@@ -72,7 +76,7 @@ public class AprilTagVisionConstants {
                 1.0
         ),
         ShooterCam(
-                new Transform3d(
+                () -> new Transform3d(
                         Units.inchesToMeters(-11.668592), Units.inchesToMeters(-13.462841), Units.inchesToMeters(7.136914),
                         // Rotation order matters
                         new Rotation3d(0.0, Units.degreesToRadians(-30.0), 0.0)
@@ -88,12 +92,16 @@ public class AprilTagVisionConstants {
                 1.0
         ),
         TurretCam(
-                new Transform3d(
-                        Units.inchesToMeters(2.471001), Units.inchesToMeters(-14.565997), Units.inchesToMeters(9.702640),
-                        // Rotation order matters
-                        new Rotation3d(0.0, Units.degreesToRadians(-15), 0.0)
-                                .rotateBy(new Rotation3d(0.0, 0.0, Units.degreesToRadians(-(90.0 - 35.0))))
-                ),
+                () -> new Transform3d(
+                        0.0, 0.0, driveConfig.bottomOfFrameRailsToCenterOfWheelsMeters() + driveConfig.wheelRadiusMeters(),
+                        new Rotation3d()
+                )
+                        .plus(Superstructure.get().turret.getMechanismTransform())
+                        .plus(new Transform3d(
+                                Units.inchesToMeters(-3.663), Units.inchesToMeters(5.638), Units.inchesToMeters(7.544418),
+                                new Rotation3d(0.0, Units.degreesToRadians(-25.0), 0.0)
+                                        .rotateBy(new Rotation3d(0.0, 0.0, Units.degreesToRadians(180.0 + 35.0)))
+                        )),
                 (cam) -> switch (BuildConstants.mode) {
                     case REAL -> new AprilTagVisionIOPhotonVision("TurretCam");
                     case SIM -> new AprilTagVisionIOPhotonVisionSim("TurretCam", cam.robotToCamera);
@@ -105,10 +113,14 @@ public class AprilTagVisionConstants {
         ),
         ;
 
-        final Transform3d robotToCamera;
+        private final Supplier<Transform3d> robotToCamera;
         private final Function<Camera, AprilTagVisionIO> createIO;
         final double distancePower;
         final double stdDevMultiplier;
+
+        Transform3d robotToCamera() {
+            return robotToCamera.get();
+        }
 
         AprilTagVisionIO createIO() {
             return createIO.apply(this);
