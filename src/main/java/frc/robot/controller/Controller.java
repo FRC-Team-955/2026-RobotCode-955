@@ -8,7 +8,6 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.AllianceFlipUtil;
@@ -21,9 +20,7 @@ import org.littletonrobotics.junction.Logger;
 import static frc.robot.subsystems.drive.DriveConstants.*;
 
 public class Controller implements Periodic {
-    private final ControllerIO io = BuildConstants.isSim
-            ? new ControllerIOXbox(new CommandXboxController(0))
-            : new ControllerIOPS5(new CommandPS5Controller(0));
+    private final ControllerIO io = new ControllerIOXbox(new CommandXboxController(0));
 
     private final ControllerIO secondaryIo = new ControllerIOXbox(new CommandXboxController(1));
     private final Alert primaryDisconnectedAlert =
