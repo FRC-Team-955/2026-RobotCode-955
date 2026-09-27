@@ -14,17 +14,19 @@
 package frc.robot.subsystems.apriltagvision;
 
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import frc.robot.BuildConstants;
-import frc.robot.subsystems.superstructure.Superstructure;
+import frc.robot.shooting.ShootingKinematics;
+import frc.robot.subsystems.superstructure.Turret;
 import lombok.RequiredArgsConstructor;
 
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import static frc.robot.subsystems.drive.DriveConstants.driveConfig;
+import static frc.robot.subsystems.drive.DriveConstants.carpetToBottomOfFrameRail;
 
 public class AprilTagVisionConstants {
     // Basic filtering thresholds
@@ -92,16 +94,17 @@ public class AprilTagVisionConstants {
                 1.0
         ),
         TurretCam(
-                () -> new Transform3d(
-                        0.0, 0.0, driveConfig.bottomOfFrameRailsToCenterOfWheelsMeters() + driveConfig.wheelRadiusMeters(),
-                        new Rotation3d()
-                )
-                        .plus(Superstructure.get().turret.getMechanismTransform())
-                        .plus(new Transform3d(
-                                Units.inchesToMeters(-3.663), Units.inchesToMeters(5.638), Units.inchesToMeters(7.544418),
-                                new Rotation3d(0.0, Units.degreesToRadians(-25.0), 0.0)
-                                        .rotateBy(new Rotation3d(0.0, 0.0, Units.degreesToRadians(180.0)))
-                        )),
+                () -> {
+                    Transform2d rotationAxis = ShootingKinematics.turretRotationAxisTransform.apply(Turret.get().getRobotRelativePositionRad());
+                    return new Transform3d(
+                            new Translation3d(rotationAxis.getX(), rotationAxis.getY(), carpetToBottomOfFrameRail),
+                            new Rotation3d(rotationAxis.getRotation())
+                    ).plus(new Transform3d(
+                            Units.inchesToMeters(-3.663), Units.inchesToMeters(5.638), Units.inchesToMeters(7.544418),
+                            new Rotation3d(0.0, Units.degreesToRadians(-25.0), 0.0)
+                                    .rotateBy(new Rotation3d(0.0, 0.0, Units.degreesToRadians(180.0)))
+                    ));
+                },
                 (cam) -> switch (BuildConstants.mode) {
                     case REAL -> new AprilTagVisionIOPhotonVision("TurretCam");
                     case SIM -> new AprilTagVisionIOPhotonVisionSim("TurretCam", cam.robotToCamera);
