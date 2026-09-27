@@ -54,7 +54,7 @@ public class ShootingKinematics implements Periodic {
             ),
             Rotation2d.fromRadians(robotRelativeTurretPositionRad)
     );
-    private static final double centerOfTurretRotationAxisToCenterOfFlywheelMeters = Units.inchesToMeters(3.026799);
+    public static final double centerOfTurretRotationAxisToCenterOfFlywheelMeters = Units.inchesToMeters(3.026799);
 
     private static final DoubleFunction<Transform3d> turretRotationAxisToFuelExitTransform = (hoodAngleRad) -> new Transform3d(
             new Translation3d(

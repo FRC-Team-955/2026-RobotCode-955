@@ -6,6 +6,7 @@ import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
@@ -181,14 +182,13 @@ public class Hood implements Periodic {
     }
 
     public Transform3d getMechanismTransform() {
-        return turret.getMechanismTransform()
-                .plus(new Transform3d(
-                        new Translation3d(Units.inchesToMeters(-3.026799), 0.0, 0.0),
-                        new Rotation3d(0.0, Units.degreesToRadians(-90.0), Math.PI)
-                ))
-                .plus(new Transform3d(
-                        new Translation3d(),
-                        new Rotation3d(0.0, motor.getPositionRad(), 0.0)
-                ));
+        Transform2d rotationAxis = ShootingKinematics.turretRotationAxisTransform.apply(turret.getRobotRelativePositionRad());
+        return new Transform3d(
+                new Translation3d(rotationAxis.getX(), rotationAxis.getY(), ShootingKinematics.bottomOfFrameRailsToFlywheelHeightMeters),
+                new Rotation3d(rotationAxis.getRotation())
+        ).plus(new Transform3d(
+                new Translation3d(ShootingKinematics.centerOfTurretRotationAxisToCenterOfFlywheelMeters, 0.0, 0.0),
+                new Rotation3d(0.0, Units.degreesToRadians(-90.0) + motor.getPositionRad(), 0.0)
+        ));
     }
 }
