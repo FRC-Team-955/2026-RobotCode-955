@@ -20,7 +20,6 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import frc.robot.BuildConstants;
 import frc.robot.shooting.ShootingKinematics;
-import frc.robot.subsystems.superstructure.Turret;
 import lombok.RequiredArgsConstructor;
 
 import java.util.function.Function;
@@ -95,7 +94,7 @@ public class AprilTagVisionConstants {
         ),
         TurretCam(
                 () -> {
-                    Transform2d rotationAxis = ShootingKinematics.turretRotationAxisTransform.apply(Turret.get().getRobotRelativePositionRad());
+                    Transform2d rotationAxis = ShootingKinematics.turretRotationAxisTransform.get();
                     return new Transform3d(
                             new Translation3d(rotationAxis.getX(), rotationAxis.getY(), carpetToBottomOfFrameRail),
                             new Rotation3d(rotationAxis.getRotation())

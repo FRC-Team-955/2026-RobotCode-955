@@ -285,7 +285,7 @@ public class Turret implements Periodic {
     }
 
     public Transform3d getMechanismTransform() {
-        Transform2d rotationAxis = ShootingKinematics.turretRotationAxisTransform.apply(getRobotRelativePositionRad());
+        Transform2d rotationAxis = ShootingKinematics.turretRotationAxisTransform.get();
         double mechanismTransformHeight = ShootingKinematics.bottomOfFrameRailsToFlywheelHeightMeters - Units.inchesToMeters(4.106366);
         return new Transform3d(
                 new Translation3d(rotationAxis.getX(), rotationAxis.getY(), mechanismTransformHeight),

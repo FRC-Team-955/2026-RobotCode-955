@@ -17,13 +17,14 @@ import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.superstructure.Flywheel;
 import frc.robot.subsystems.superstructure.Hood;
 import frc.robot.subsystems.superstructure.Superstructure;
+import frc.robot.subsystems.superstructure.Turret;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.With;
 import org.littletonrobotics.junction.Logger;
 
-import java.util.function.DoubleFunction;
 import java.util.function.DoubleUnaryOperator;
+import java.util.function.Supplier;
 
 import static frc.robot.subsystems.drive.DriveConstants.carpetToBottomOfFrameRail;
 
@@ -47,22 +48,21 @@ public class ShootingKinematics implements Periodic {
     public static final LoggedTunableNumber velocityToleranceRPM = new LoggedTunableNumber("ShootingKinematics/VelocityToleranceRPM", 100);
     public static final LoggedTunableNumber hoodToleranceDeg = new LoggedTunableNumber("ShootingKinematics/HoodToleranceDegrees", 3.0);
 
-    public static final DoubleFunction<Transform2d> turretRotationAxisTransform = (robotRelativeTurretPositionRad) -> new Transform2d(
+    public static final Supplier<Transform2d> turretRotationAxisTransform = () -> new Transform2d(
             new Translation2d(
                     Units.inchesToMeters(-3.785046),
                     Units.inchesToMeters(-6.672244)
             ),
-            Rotation2d.fromRadians(robotRelativeTurretPositionRad)
+            Rotation2d.fromRadians(Turret.get().getRobotRelativePositionRad())
     );
     public static final double centerOfTurretRotationAxisToCenterOfFlywheelMeters = Units.inchesToMeters(3.026799);
-
-    private static final DoubleFunction<Transform3d> turretRotationAxisToFuelExitTransform = (hoodAngleRad) -> new Transform3d(
+    private static final Supplier<Transform3d> turretRotationAxisToFuelExitTransform = () -> new Transform3d(
             new Translation3d(
-                    centerOfTurretRotationAxisToCenterOfFlywheelMeters - Math.cos(hoodAngleRad) * centerOfFlywheelToCenterOfBallExitMeters,
+                    centerOfTurretRotationAxisToCenterOfFlywheelMeters - Math.cos(Hood.get().getPositionRad()) * centerOfFlywheelToCenterOfBallExitMeters,
                     0.0,
                     carpetToBottomOfFrameRail +
                             bottomOfFrameRailsToFlywheelHeightMeters +
-                            Math.sin(hoodAngleRad) * centerOfFlywheelToCenterOfBallExitMeters
+                            Math.sin(Hood.get().getPositionRad()) * centerOfFlywheelToCenterOfBallExitMeters
             ),
             new Rotation3d()
     );
@@ -415,8 +415,8 @@ public class ShootingKinematics implements Periodic {
     }
 
     public Transform3d getFuelExitTransform() {
-        return new Transform3d(turretRotationAxisTransform.apply(superstructure.turret.getRobotRelativePositionRad()))
-                .plus(turretRotationAxisToFuelExitTransform.apply(superstructure.hood.getPositionRad()));
+        return new Transform3d(turretRotationAxisTransform.get())
+                .plus(turretRotationAxisToFuelExitTransform.get());
     }
 
     private record FuelExitToTarget(Translation3d translation, Rotation2d angle) {}
