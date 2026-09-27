@@ -25,7 +25,7 @@ import org.littletonrobotics.junction.Logger;
 import java.util.function.DoubleFunction;
 import java.util.function.DoubleUnaryOperator;
 
-import static frc.robot.subsystems.drive.DriveConstants.driveConfig;
+import static frc.robot.subsystems.drive.DriveConstants.carpetToBottomOfFrameRail;
 
 public class ShootingKinematics implements Periodic {
     /** Actual RPM * slip constant = exerted RPM (linear speed of ball = surface speed) */
@@ -60,8 +60,7 @@ public class ShootingKinematics implements Periodic {
             new Translation3d(
                     centerOfTurretRotationAxisToCenterOfFlywheelMeters - Math.cos(hoodAngleRad) * centerOfFlywheelToCenterOfBallExitMeters,
                     0.0,
-                    driveConfig.bottomOfFrameRailsToCenterOfWheelsMeters() +
-                            driveConfig.wheelRadiusMeters() +
+                    carpetToBottomOfFrameRail +
                             bottomOfFrameRailsToFlywheelHeightMeters +
                             Math.sin(hoodAngleRad) * centerOfFlywheelToCenterOfBallExitMeters
             ),

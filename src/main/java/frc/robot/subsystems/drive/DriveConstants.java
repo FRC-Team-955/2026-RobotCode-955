@@ -41,6 +41,8 @@ public class DriveConstants {
             4.58
     );
 
+    public static final double carpetToBottomOfFrameRail = driveConfig.bottomOfFrameRailsToCenterOfWheelsMeters() + driveConfig.wheelRadiusMeters();
+
     /**
      * FL, FR, BL, BR
      */

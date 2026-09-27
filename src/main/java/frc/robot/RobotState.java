@@ -25,7 +25,7 @@ import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
-import static frc.robot.subsystems.drive.DriveConstants.driveConfig;
+import static frc.robot.subsystems.drive.DriveConstants.carpetToBottomOfFrameRail;
 
 public class RobotState implements Periodic {
     @Getter
@@ -366,7 +366,7 @@ public class RobotState implements Periodic {
     public Pose3d getMechanismPose() {
         return new Pose3d(getPose())
                 .transformBy(new Transform3d(
-                        new Translation3d(0.0, 0.0, driveConfig.bottomOfFrameRailsToCenterOfWheelsMeters() + driveConfig.wheelRadiusMeters()),
+                        new Translation3d(0.0, 0.0, carpetToBottomOfFrameRail),
                         new Rotation3d()
                 ));
     }
