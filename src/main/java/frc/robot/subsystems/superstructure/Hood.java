@@ -75,8 +75,8 @@ public class Hood implements Periodic {
                         .withG(0.2, GravityTypeValue.Arm_Cosine)
                         .withS(0.1, StaticFeedforwardSignValue.UseClosedLoopSign);
                 case SIM -> new LoggedTunablePIDF("Superstructure/Hood/Gains")
-                        .withP(2)
-                        .withG(1, GravityTypeValue.Arm_Cosine);
+                        .withP(5)
+                        .withG(1.05, GravityTypeValue.Arm_Cosine);
             });
 
     @RequiredArgsConstructor
