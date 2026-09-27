@@ -110,6 +110,8 @@ public class ShootingKinematics implements Periodic {
 
     @Override
     public void periodicBeforeCommands() {
+        Logger.recordOutput("ShootingKinematics/FuelExitPose", new Pose3d(robotState.getPose()).transformBy(getFuelExitTransform()));
+
         if (operatorDashboard.getSelectedScoringMode() == OperatorDashboard.ScoringMode.ShootAndPassAutomatic) {
             var shooterParams = getShootingParametersAutomaticForPhaseDelay(PhaseDelay.Shooter);
             var turretParams = getShootingParametersAutomaticForPhaseDelay(PhaseDelay.Turret);
@@ -363,19 +365,10 @@ public class ShootingKinematics implements Periodic {
         return AllianceFlipUtil.apply(FieldConstants.Hub.topCenterPoint);
     }
 
-    private Pose3d getFuelExitPose(Pose2d robotPose2d) {
-        return new Pose3d(
-                new Pose3d(robotPose2d)
-                        .transformBy(getFuelExitTransform())
-                        .getTranslation(),
-                new Rotation3d(Rotation2d.fromRadians(superstructure.turret.getFieldRelativePositionRad()))
-        );
-    }
-
     private FuelExitToTarget getFuelExitToTarget(double phaseDelay) {
         Pose2d robotPose2d = robotState.getPose()
                 .exp(robotState.getMeasuredChassisSpeedsRobotRelative().toTwist2d(phaseDelay));
-        Pose3d fuelExitPose = getFuelExitPose(robotPose2d);
+        Pose3d fuelExitPose = new Pose3d(robotPose2d).transformBy(getFuelExitTransform());
 
         Pose3d hubPose = new Pose3d(getTarget(), new Rotation3d());
         return new FuelExitToTarget(
