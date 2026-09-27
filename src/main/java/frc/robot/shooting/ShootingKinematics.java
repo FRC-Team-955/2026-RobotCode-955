@@ -279,10 +279,10 @@ public class ShootingKinematics implements Periodic {
             v0 = PassingRegression.calculateVelocityMetersPerSec(xyDist, robotSpeedsTargetRelative.getX());
             angle = PassingRegression.angleRad;
         } else {
-            v0 = ShootingRegression.calculateVelocityMetersPerSec(xyDist, robotSpeedsTargetRelative.getX());
-            angle = ShootingRegression.calculateAngleRad(xyDist, robotSpeedsTargetRelative.getX());
+            v0 = ScoringRegression.calculateVelocityMetersPerSec(xyDist, robotSpeedsTargetRelative.getX());
+            angle = ScoringRegression.calculateAngleRad(xyDist, robotSpeedsTargetRelative.getX());
             if (phaseDelay == PhaseDelay.None) {
-                lastScoringTimeOfFlightSeconds = ShootingRegression.calculateToFSeconds(xyDist, robotSpeedsTargetRelative.getX());
+                lastScoringTimeOfFlightSeconds = ScoringRegression.calculateToFSeconds(xyDist, robotSpeedsTargetRelative.getX());
             }
         }
 

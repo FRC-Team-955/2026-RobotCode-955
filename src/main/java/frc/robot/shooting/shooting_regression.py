@@ -327,7 +327,7 @@ def calculate_shooting_params_kinematics(distance, robot_radial_vel):
 
     return v, angle
 
-def optimize_shot(distance, robot_radial_vel):
+def optimize_score(distance, robot_radial_vel):
     x0 = -distance
 
     wanted_x = 0.0
@@ -601,7 +601,7 @@ if DEBUG_SHOT and not DEBUG_VARIANCE:
     if DEBUG_PASS:
         f = optimize_pass
     else:
-        f = optimize_shot
+        f = optimize_score
 
     f(DEBUG_SHOT_DISTANCE, DEBUG_SHOT_ROBOT_RADIAL_VELOCITY)
     if DEBUG_DISTANCE_RANGE and DEBUG_VELOCITY_RANGE:
@@ -621,30 +621,30 @@ if DEBUG_SHOT and not DEBUG_VARIANCE:
     deduplicate_legend_and_show_plot(True)
 elif DEBUG_VARIANCE:
     distance = 5.5
-    
+
     get_wanted_entry_angle = lambda d, rv: deg_to_rad(-80)
     orig_color = "tab:red"
     variated_color = "tab:orange"
-    optimize_shot(distance, 0.0)
-    
+    optimize_score(distance, 0.0)
+
     get_wanted_entry_angle = lambda d, rv: deg_to_rad(-55)
     orig_color = "tab:blue"
     variated_color = "tab:cyan"
-    optimize_shot(distance, 0.0)
-    
+    optimize_score(distance, 0.0)
+
     get_wanted_entry_angle = lambda d, rv: deg_to_rad(-30)
     orig_color = "tab:purple"
     variated_color = "tab:pink"
-    optimize_shot(distance, 0.0)
-    
+    optimize_score(distance, 0.0)
+
     deduplicate_legend_and_show_plot()
 else:
-    def shot_compute_worker(x):
+    def score_compute_worker(x):
         worker_index, worker_distance_velocity_pairs = x
 
-        shots = []
+        scores = []
         counter = 0
-        all_shots_simmed = 0
+        all_scores_simmed = 0
 
         print(f"[{worker_index}] Starting")
         start_time_worker = time()
@@ -654,21 +654,21 @@ else:
             progress_count = f"{counter}/{len(worker_distance_velocity_pairs)}"
             progress_percent = round(float(counter) / float(len(worker_distance_velocity_pairs)) * 100)
 
-            v, angle, tof, shots_simmed, iterations = optimize_shot(distance, velocity)
+            v, angle, tof, scores_simmed, iterations = optimize_score(distance, velocity)
             if v is None and angle is None and tof is None:
                 print(f"[{worker_index}] {progress_count} FAILED (distance = {distance}, velocity = {velocity})")
                 continue
-            all_shots_simmed += shots_simmed
+            all_scores_simmed += scores_simmed
             # the two tuples need to be the same length for numpy to be happy, so add the extra 0
-            shots.append(((distance, velocity, 0), (v, angle, tof)))
-            print(f"[{worker_index}] {progress_count}\t{progress_percent}% ({shots_simmed}, {iterations})")
+            scores.append(((distance, velocity, 0), (v, angle, tof)))
+            print(f"[{worker_index}] {progress_count}\t{progress_percent}% ({scores_simmed}, {iterations})")
 
         end_time_worker = time()
         print(
-            f"[{worker_index}] Done, took {end_time_worker - start_time_worker} seconds and {all_shots_simmed} simulations"
+            f"[{worker_index}] Done, took {end_time_worker - start_time_worker} seconds and {all_scores_simmed} simulations"
         )
 
-        return shots, all_shots_simmed
+        return scores, all_scores_simmed
 
     def pass_compute_worker(x):
         worker_index, worker_distance_velocity_pairs = x
@@ -702,7 +702,7 @@ else:
         return passes, all_passes_simmed
 
     if __name__ == "__main__":
-        ################################ SHOT COMPUTATION ################################
+        ################################ SCORE COMPUTATION ################################
         distance_velocity_pairs = []
 
         start_dist = 0.7
@@ -712,13 +712,13 @@ else:
             for velocity in [-max_vel, -3.0, -1.5, -1.0, -0.5, 0.0, 0.5, 1.0, 1.5, 3.0, max_vel]:
                 distance_velocity_pairs.append((distance, velocity))
 
-        all_shots = []
-        all_shots_simmed = 0
+        all_scores = []
+        all_scores_simmed = 0
         workers = 8
         min_per_worker = floor(len(distance_velocity_pairs) / workers)
 
         print(
-            f"Computing {len(distance_velocity_pairs)} distance velocity pairs,"
+            f"Computing {len(distance_velocity_pairs)} distance velocity pairs, "
             f"with a minimum of {min_per_worker} per worker"
         )
 
@@ -735,14 +735,14 @@ else:
 
         with Pool(workers) as p:
             args = map(get_distance_velocity_pairs_for_worker, range(workers))
-            for (computed_shots, shots_simmed) in p.map(shot_compute_worker, args):
-                all_shots += computed_shots
-                all_shots_simmed += shots_simmed
+            for (computed_scores, scores_simmed) in p.map(score_compute_worker, args):
+                all_scores += computed_scores
+                all_scores_simmed += scores_simmed
 
         end_time = time()
         print(f"Took {end_time - start_time} seconds")
-        print(f"Of {len(distance_velocity_pairs)} shots, {len(all_shots)} succeeded.")
-        print(f"{all_shots_simmed} simulations run.")
+        print(f"Of {len(distance_velocity_pairs)} scores, {len(all_scores)} succeeded.")
+        print(f"{all_scores_simmed} simulations run.")
 
         ################################ PASS COMPUTATION ################################
         distance_velocity_pairs = []
@@ -759,7 +759,7 @@ else:
         min_per_worker = floor(len(distance_velocity_pairs) / workers)
 
         print(
-            f"Computing {len(distance_velocity_pairs)} distance velocity pairs,"
+            f"Computing {len(distance_velocity_pairs)} distance velocity pairs, "
             f"with a minimum of {min_per_worker} per worker"
         )
 
@@ -776,13 +776,13 @@ else:
         print(f"Of {len(distance_velocity_pairs)} passes, {len(all_passes)} succeeded.")
         print(f"{all_passes_simmed} simulations run.")
 
-        ################################ SHOT REGRESSION ################################
-        all_shots = np.array(all_shots)
+        ################################ SCORE REGRESSION ################################
+        all_scores = np.array(all_scores)
 
-        X = (all_shots[:, 0, 0], all_shots[:, 0, 1])
-        y_vel = all_shots[:, 1, 0]
-        y_angle = all_shots[:, 1, 1]
-        y_tof = all_shots[:, 1, 2]
+        X = (all_scores[:, 0, 0], all_scores[:, 0, 1])
+        y_vel = all_scores[:, 1, 0]
+        y_angle = all_scores[:, 1, 1]
+        y_tof = all_scores[:, 1, 2]
 
         print("X", X)
         print("y_vel", y_vel)
@@ -819,7 +819,7 @@ else:
             print(equation)
             return coeff, equation
 
-        _, (ax1, ax2, ax3) = plt.subplots(1, 3, subplot_kw=dict(projection="3d"), label="Shooting")
+        _, (ax1, ax2, ax3) = plt.subplots(1, 3, subplot_kw=dict(projection="3d"), label="Scoring")
 
         print()
         print("vel")
@@ -909,11 +909,11 @@ else:
         ax1.legend()
 
         ################################ OUTPUT ################################
-        with open(dirname(realpath(__file__)) + "/ShootingRegression.java", "w") as f:
+        with open(dirname(realpath(__file__)) + "/ScoringRegression.java", "w") as f:
             f.write("""package frc.robot.shooting;
 
 /** GENERATED BY shooting_regression.py DO NOT EDIT BY HAND */
-public class ShootingRegression {
+public class ScoringRegression {
     /** Distance is measured as the distance in the XY plane between the fuel exit point and the target. */
     public static double calculateVelocityMetersPerSec(double distanceMeters, double radialRobotVelocityMetersPerSec) {
         double x = distanceMeters;
@@ -922,7 +922,7 @@ public class ShootingRegression {
     }
 
     /**
-     * Calculate shot angle **from the horizontal**. Note that hood angle is from the vertical.
+     * Calculate scoring angle **from the horizontal**. Note that hood angle is from the vertical.
      * Distance is measured as the distance in the XY plane between the fuel exit point and the target.
      */
     public static double calculateAngleRad(double distanceMeters, double radialRobotVelocityMetersPerSec) {
