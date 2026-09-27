@@ -47,18 +47,18 @@ public class ShootingKinematics implements Periodic {
     public static final LoggedTunableNumber velocityToleranceRPM = new LoggedTunableNumber("ShootingKinematics/VelocityToleranceRPM", 100);
     public static final LoggedTunableNumber hoodToleranceDeg = new LoggedTunableNumber("ShootingKinematics/HoodToleranceDegrees", 3.0);
 
-    public static final Transform2d turretRotationAxisTransform = new Transform2d(
+    public static final DoubleFunction<Transform2d> turretRotationAxisTransform = (robotRelativeTurretPositionRad) -> new Transform2d(
             new Translation2d(
                     Units.inchesToMeters(-3.785046),
                     Units.inchesToMeters(-6.672244)
             ),
-            new Rotation2d()
+            Rotation2d.fromRadians(robotRelativeTurretPositionRad)
     );
     private static final double centerOfTurretRotationAxisToCenterOfFlywheelMeters = Units.inchesToMeters(3.026799);
 
     private static final DoubleFunction<Transform3d> turretRotationAxisToFuelExitTransform = (hoodAngleRad) -> new Transform3d(
             new Translation3d(
-                    centerOfTurretRotationAxisToCenterOfFlywheelMeters + Math.cos(hoodAngleRad) * centerOfFlywheelToCenterOfBallExitMeters,
+                    centerOfTurretRotationAxisToCenterOfFlywheelMeters - Math.cos(hoodAngleRad) * centerOfFlywheelToCenterOfBallExitMeters,
                     0.0,
                     driveConfig.bottomOfFrameRailsToCenterOfWheelsMeters() +
                             driveConfig.wheelRadiusMeters() +
@@ -423,13 +423,8 @@ public class ShootingKinematics implements Periodic {
     }
 
     public Transform3d getFuelExitTransform() {
-        return new Transform3d(
-                turretRotationAxisTransform
-                        .plus(new Transform2d(
-                                new Translation2d(),
-                                Rotation2d.fromRadians(superstructure.turret.getFieldRelativePositionRad())
-                        ))
-        ).plus(turretRotationAxisToFuelExitTransform.apply(superstructure.hood.getPositionRad()));
+        return new Transform3d(turretRotationAxisTransform.apply(superstructure.turret.getRobotRelativePositionRad()))
+                .plus(turretRotationAxisToFuelExitTransform.apply(superstructure.hood.getPositionRad()));
     }
 
     private record FuelExitToTarget(Translation3d translation, Rotation2d angle) {}

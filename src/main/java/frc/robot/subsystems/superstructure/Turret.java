@@ -5,6 +5,7 @@ import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
@@ -212,14 +213,26 @@ public class Turret implements Periodic {
         return Objects.requireNonNullElse(closestSetpoint, currentMechanismPosition);
     }
 
-    private static double convertMechanismPositionToFieldRelativePosition(double mechanismPositionRad) {
+    private static double convertMechanismPositionToRobotRelativePosition(double mechanismPositionRad) {
         // add 180° - see comment at top of class
-        return mechanismPositionRad + Math.PI + robotState.getRotation().getRadians();
+        return mechanismPositionRad + Math.PI;
+    }
+
+    private static double convertRobotRelativePositionToMechanismPosition(double robotRelativePositionRad) {
+        // subtract 180° - see comment at top of class
+        return robotRelativePositionRad - Math.PI;
+    }
+
+    private static double convertMechanismPositionToFieldRelativePosition(double mechanismPositionRad) {
+        return convertMechanismPositionToRobotRelativePosition(mechanismPositionRad) + robotState.getRotation().getRadians();
     }
 
     private static double convertFieldRelativePositionToMechanismPosition(double fieldRelativePositionRad) {
-        // subtract 180° - see comment at top of class
-        return fieldRelativePositionRad - Math.PI - robotState.getRotation().getRadians();
+        return convertRobotRelativePositionToMechanismPosition(fieldRelativePositionRad - robotState.getRotation().getRadians());
+    }
+
+    public double getRobotRelativePositionRad() {
+        return convertMechanismPositionToRobotRelativePosition(motor.getPositionRad());
     }
 
     public double getFieldRelativePositionRad() {
@@ -272,9 +285,11 @@ public class Turret implements Periodic {
     }
 
     public Transform3d getMechanismTransform() {
+        Transform2d rotationAxis = ShootingKinematics.turretRotationAxisTransform.apply(getRobotRelativePositionRad());
+        double mechanismTransformHeight = ShootingKinematics.bottomOfFrameRailsToFlywheelHeightMeters - Units.inchesToMeters(4.106366);
         return new Transform3d(
-                new Translation3d(ShootingKinematics.turretRotationAxisTransform.getX(), ShootingKinematics.turretRotationAxisTransform.getY(), ShootingKinematics.bottomOfFrameRailsToFlywheelHeightMeters),
-                new Rotation3d(0.0, 0.0, motor.getPositionRad())
+                new Translation3d(rotationAxis.getX(), rotationAxis.getY(), mechanismTransformHeight),
+                new Rotation3d(rotationAxis.getRotation())
         );
     }
 }
