@@ -46,7 +46,7 @@ public class Flywheel implements Periodic {
                     .withSupplyCurrentLimit(30))
             .withFeedback(new FeedbackConfigs()
                     .withSensorToMechanismRatio(1));
-    private final MechanismSim.Builder mechanismSimBuilder = MechanismSim.roller(0.01);
+    private final MechanismSim.Builder mechanismSimBuilder = MechanismSim.roller(0.001);
     private final Motor leaderMotor = Motor
             .createTalonFX(
                     "Superstructure/Flywheel/Leader",
