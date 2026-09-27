@@ -73,7 +73,7 @@ public class MechanismSim {
                     LinearSystemId.createDCMotorSystem(motor, JKgMetersSquared, gearRatio),
                     motor,
                     0.004,
-                    0.0
+                    0.001
             );
             motorSim.setAngle(initialPositionRad);
             return new MechanismSim(
@@ -107,7 +107,7 @@ public class MechanismSim {
                     simulateGravity,
                     initialPositionRad,
                     0.004,
-                    0.0
+                    0.001
             );
             return new MechanismSim(
                     gearRatio,
