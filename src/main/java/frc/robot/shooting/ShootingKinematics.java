@@ -32,8 +32,8 @@ public class ShootingKinematics implements Periodic {
     public static final double slipConstant = 0.67;
 
     // KEEP SYNCED WITH shooting_regression.py
-    public static final double bottomOfFrameRailsToFlywheelHeightMeters = Units.inchesToMeters(12.861380);
-    private static final double centerOfTurretToCenterOfBallExitMeters = Units.inchesToMeters(1.755250);
+    public static final double bottomOfFrameRailsToFlywheelHeightMeters = Units.inchesToMeters(15.236467);
+    private static final double centerOfFlywheelToCenterOfBallExitMeters = Units.inchesToMeters(4.602756);
 
     private static final RobotState robotState = RobotState.get();
     private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
@@ -54,15 +54,16 @@ public class ShootingKinematics implements Periodic {
             ),
             new Rotation2d()
     );
+    private static final double centerOfTurretRotationAxisToCenterOfFlywheelMeters = Units.inchesToMeters(3.026799);
 
     private static final DoubleFunction<Transform3d> turretRotationAxisToFuelExitTransform = (hoodAngleRad) -> new Transform3d(
             new Translation3d(
-                    Math.cos(hoodAngleRad) * centerOfTurretToCenterOfBallExitMeters,
+                    centerOfTurretRotationAxisToCenterOfFlywheelMeters + Math.cos(hoodAngleRad) * centerOfFlywheelToCenterOfBallExitMeters,
                     0.0,
                     driveConfig.bottomOfFrameRailsToCenterOfWheelsMeters() +
                             driveConfig.wheelRadiusMeters() +
                             bottomOfFrameRailsToFlywheelHeightMeters +
-                            Math.sin(hoodAngleRad) * centerOfTurretToCenterOfBallExitMeters
+                            Math.sin(hoodAngleRad) * centerOfFlywheelToCenterOfBallExitMeters
             ),
             new Rotation3d()
     );

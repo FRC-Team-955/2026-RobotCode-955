@@ -40,12 +40,12 @@ fuel_mass = 0.2150028  # kg - note, this is the average weight according to the 
 fuel_radius = (15 / 100) / 2
 
 # KEEP SYNCED WITH DriveConstants.java
-wheel_radius = inches_to_meters(1.945)
+wheel_radius = inches_to_meters(1.883)
 bottom_of_frame_rails_to_center_of_wheels = inches_to_meters(-0.247776)
 
 # KEEP SYNCED WITH ShootingKinematics.java
-bottom_of_frame_rails_to_flywheel_height = inches_to_meters(12.861380)
-shooter_radius_to_center_of_ball_exit = inches_to_meters(4.602756)
+bottom_of_frame_rails_to_flywheel_height = inches_to_meters(15.236467)
+center_of_flywheel_to_center_of_ball_exit = inches_to_meters(4.602756)
 
 z_initial_base = bottom_of_frame_rails_to_center_of_wheels + wheel_radius + bottom_of_frame_rails_to_flywheel_height
 
@@ -198,10 +198,10 @@ def calculate_trajectory_iterative(vel, angle, robot_radial_velocity, x0, end_pa
             # ShootingKinematics.java measures distance including the X offset due to angle
             # so we don't need to include the X offset here
             lx = x0
-            # lx = (shooter_radius_to_center_of_ball_exit +
-            #      np.cos(np.pi / 2.0 - angle) * -shooter_radius_to_center_of_ball_exit)
+            # lx = (center_of_flywheel_to_center_of_ball_exit +
+            #      np.cos(np.pi / 2.0 - angle) * -center_of_flywheel_to_center_of_ball_exit)
             ly = 0
-            lz = z_initial_base + np.sin(np.pi / 2.0 - angle) * shooter_radius_to_center_of_ball_exit
+            lz = z_initial_base + np.sin(np.pi / 2.0 - angle) * center_of_flywheel_to_center_of_ball_exit
 
         lvx = vx
         lvy = vy
