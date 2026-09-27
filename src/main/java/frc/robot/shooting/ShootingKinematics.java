@@ -254,7 +254,7 @@ public class ShootingKinematics implements Periodic {
     private ShootingParameters getShootingParametersAutomaticForPhaseDelay(PhaseDelay phaseDelay) {
         ChassisSpeeds robotSpeeds = robotState.getMeasuredChassisSpeedsFieldRelative();
 
-        FuelExitToTarget fuelExitToTarget = getFuelExitToTarget(phaseDelay.value == null ? 0.0 : phaseDelay.value.get());
+        FuelExitToTarget fuelExitToTarget = getFuelExitToTarget(phaseDelay.getValue());
 
         double xyDist = fuelExitToTarget.translation().toTranslation2d().getNorm();
         String key = "ShootingKinematics/ShootingParameters/" + phaseDelay.name() + "/";
@@ -264,10 +264,10 @@ public class ShootingKinematics implements Periodic {
         // Note that using fuel exit pose instead of robot pose automatically takes care
         // of compensating for theta difference when looking from center of robot and from
         // fuel exit point
-        Translation2d robotSpeedsTargetRelative = robotVelocityTargetRelativeForTurret(new Translation2d(
+        Translation2d robotSpeedsTargetRelative = getRobotVelocityTargetRelative(new Translation2d(
                 robotSpeeds.vxMetersPerSecond,
                 robotSpeeds.vyMetersPerSecond
-        ));
+        ), phaseDelay);
         if (BuildConstants.isSimOrReplay)
             Logger.recordOutput(key + "RobotSpeedsRotated", robotSpeedsTargetRelative);
 
@@ -285,25 +285,25 @@ public class ShootingKinematics implements Periodic {
             }
         }
 
+        if (BuildConstants.isSimOrReplay)
+            Logger.recordOutput(key + "InitialShotVelocity", v0);
+
         double vx2d = v0 * Math.cos(angle);
         double vz = v0 * Math.sin(angle);
 
+        Translation2d shotVelFieldRelative = new Translation2d(vx2d, fuelExitToTarget.angle());
         if (BuildConstants.isSimOrReplay)
-            Logger.recordOutput(key + "ShotSpeedTargetFieldRelative", v0);
-        Translation2d robotShotFieldRelative = new Translation2d(vx2d, fuelExitToTarget.angle());
-
-        if (BuildConstants.isSimOrReplay)
-            Logger.recordOutput(key + "ShotTargetFieldRelative", robotShotFieldRelative);
+            Logger.recordOutput(key + "InitialShotHorizontalVelocityFieldRelative", shotVelFieldRelative);
 
         // 2. Now subtract tangential robot velocity from initial shooting vector to get final
         // shooting vector
-        // Note that we must subtract the fuel exit rotation to account for the robot speeds
-        // being fuel exit relative
-        Translation2d tangentialRobotVelocityRobotRelative = new Translation2d(0, robotSpeedsTargetRelative.rotateBy(Rotation2d.kPi).getY());
-        robotShotFieldRelative = robotShotFieldRelative.plus(tangentialRobotVelocityRobotRelative.rotateBy(fuelExitToTarget.angle));
-
+        // Note that we must subtract the angle to the target to account for the robot speeds
+        // being target relative
+        Translation2d tangentialRobotVelocityFieldRelative = new Translation2d(0, robotSpeedsTargetRelative.getY())
+                .rotateBy(fuelExitToTarget.angle().unaryMinus());
         if (BuildConstants.isSimOrReplay)
-            Logger.recordOutput(key + "TangentialRobotVelocityFieldRelative", tangentialRobotVelocityRobotRelative.rotateBy(fuelExitToTarget.angle));
+            Logger.recordOutput(key + "TangentialRobotVelocityFieldRelative", tangentialRobotVelocityFieldRelative);
+        shotVelFieldRelative = shotVelFieldRelative.minus(tangentialRobotVelocityFieldRelative);
 
         // 3. Account for drivebase angular velocity
         Vector<N3> fuelExitFieldRelative = new Translation3d(
@@ -314,9 +314,13 @@ public class ShootingKinematics implements Periodic {
         // ω⃗ × e⃗, where ω⃗ is angular velocity vector and e⃗ is exit vector
         Vector<N3> linearVelocityDueToAngularVelocity = Vector.cross(angularVelocityVector, fuelExitFieldRelative);
         Translation2d angularVelToLinearVel = new Translation2d(linearVelocityDueToAngularVelocity.get(0), linearVelocityDueToAngularVelocity.get(1));
-        robotShotFieldRelative = robotShotFieldRelative.minus(angularVelToLinearVel);
-        double vx = robotShotFieldRelative.getX();
-        double vy = robotShotFieldRelative.getY();
+        shotVelFieldRelative = shotVelFieldRelative.minus(angularVelToLinearVel);
+
+        // Extract adjusted horizontal components
+        if (BuildConstants.isSimOrReplay)
+            Logger.recordOutput(key + "FinalShotHorizontalVelocityFieldRelative", shotVelFieldRelative);
+        double vx = shotVelFieldRelative.getX();
+        double vy = shotVelFieldRelative.getY();
 
         // 4. Now calculate phi, theta, and shooting magnitude from 3d shooting vector
         double v = Math.sqrt(vx * vx + vy * vy + vz * vz);
@@ -340,7 +344,11 @@ public class ShootingKinematics implements Periodic {
                 Math.sqrt(vx * vx + vy * vy),
                 phi,
                 theta,
-                totalHeadingFeedforward(drive.getConstrainer().getWantedLinearSpeed(), drive.getConstrainer().getFieldRelativeAccelerationLinear()),
+                getTotalHeadingFeedforward(
+                        drive.getConstrainer().getWantedLinearSpeed(),
+                        drive.getConstrainer().getFieldRelativeAccelerationLinear(),
+                        phaseDelay
+                ),
                 isPass
         );
     }
@@ -382,15 +390,15 @@ public class ShootingKinematics implements Periodic {
      * Robot velocity centered at the shooter relative to the hub (positive x is towards hub, positive y is CLOCKWISE)
      * robotSpeeds field relative
      */
-    private Translation2d robotVelocityTargetRelativeForTurret(Translation2d robotSpeeds) {
-        FuelExitToTarget fuelExitToTarget = getFuelExitToTarget(PhaseDelay.Turret.value.get());
+    private Translation2d getRobotVelocityTargetRelative(Translation2d robotSpeeds, PhaseDelay phaseDelay) {
+        FuelExitToTarget fuelExitToTarget = getFuelExitToTarget(phaseDelay.getValue());
         return robotSpeeds.rotateBy(fuelExitToTarget.angle());
     }
 
     /** Rotation around hub from velocity, can add to drive rotation for aiming feedforward */
-    private double rotationAboutTargetRadiansPerSecForTurret(Translation2d fieldRelativeMetersPerSec) {
-        Translation2d targetRelative = robotVelocityTargetRelativeForTurret(fieldRelativeMetersPerSec);
-        FuelExitToTarget fuelExitToTarget = getFuelExitToTarget(PhaseDelay.Turret.value.get());
+    private double getRotationAboutTargetRadiansPerSecForTurret(Translation2d fieldRelativeMetersPerSec, PhaseDelay phaseDelay) {
+        Translation2d targetRelative = getRobotVelocityTargetRelative(fieldRelativeMetersPerSec, phaseDelay);
+        FuelExitToTarget fuelExitToTarget = getFuelExitToTarget(phaseDelay.getValue());
 
         // CW positive for hubRelative, so need to negate into CCW positive
         // tangential velocity in m/s / radius of circle = rotation about circle rad/sec
@@ -401,7 +409,7 @@ public class ShootingKinematics implements Periodic {
      * Estimated rotation due to tangential acceleration, add to drive for aiming feedforward.
      * Returns rotation in rad/sec
      */
-    private double headingFeedforwardDueToAcceleration(Translation2d fieldRelativeMetersPerSecSquared) {
+    private double getHeadingFeedforwardDueToAcceleration(Translation2d fieldRelativeMetersPerSecSquared) {
         //Translation2d shootingParameters2dHubRelative = robotVelocityTargetRelativeForDrivebase(new Translation2d(shootingVelocityXY, shootingParameters.headingRad()));
         //Translation2d robotVelocityHubRelative = robotVelocityTargetRelativeForDrivebase(robotSpeeds);
         // Again, positive Y is CLOCKWISE
@@ -410,8 +418,8 @@ public class ShootingKinematics implements Periodic {
         return tangentialAccelerationShotRelative / noPhaseDelayParameters.velocityXYMetersPerSec;
     }
 
-    public double totalHeadingFeedforward(Translation2d fieldRelativeSpeeds, Translation2d fieldRelativeMetersPerSecSquared) {
-        return rotationAboutTargetRadiansPerSecForTurret(fieldRelativeSpeeds) + headingFeedforwardDueToAcceleration(fieldRelativeMetersPerSecSquared);
+    private double getTotalHeadingFeedforward(Translation2d fieldRelativeSpeeds, Translation2d fieldRelativeMetersPerSecSquared, PhaseDelay phaseDelay) {
+        return getRotationAboutTargetRadiansPerSecForTurret(fieldRelativeSpeeds, phaseDelay) + getHeadingFeedforwardDueToAcceleration(fieldRelativeMetersPerSecSquared);
     }
 
     public Transform3d getFuelExitTransform() {
@@ -439,5 +447,13 @@ public class ShootingKinematics implements Periodic {
         ;
 
         private final LoggedTunableNumber value;
+
+        private double getValue() {
+            if (value == null) {
+                return 0.0;
+            } else {
+                return value.get();
+            }
+        }
     }
 }
