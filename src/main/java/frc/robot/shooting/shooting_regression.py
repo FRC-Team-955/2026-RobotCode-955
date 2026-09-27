@@ -50,8 +50,8 @@ center_of_flywheel_to_center_of_ball_exit = inches_to_meters(4.602756)
 z_initial_base = bottom_of_frame_rails_to_center_of_wheels + wheel_radius + bottom_of_frame_rails_to_flywheel_height
 
 # From horizontal
-min_angle_allowed = deg_to_rad(50)
-max_angle_allowed = deg_to_rad(75)
+min_angle_allowed = deg_to_rad(90 - 40)
+max_angle_allowed = deg_to_rad(90 - 15)
 passing_angle = min_angle_allowed
 
 hub_base_z = inches_to_meters(56.5)
