@@ -52,6 +52,12 @@ public class MechanismSim {
                 RobotController.getBatteryVoltage(),
                 Constants.loopPeriod
         );
+        // we also have to separately set the position and velocity so that the rev motor sim doesn't
+        // get out of sync with the wpilib sim
+        // in typical REV fashion, the docs say to use the rotor position/velocity but using that
+        // yields incorrect values. using mechanism position/velocity is actually correct
+        sparkSim.setPosition(mechanismPositionRad.getAsDouble());
+        sparkSim.setVelocity(mechanismVelocityRadPerSec.getAsDouble());
     }
 
     @FunctionalInterface
