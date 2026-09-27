@@ -274,10 +274,7 @@ public class Turret implements Periodic {
     public Transform3d getMechanismTransform() {
         return new Transform3d(
                 new Translation3d(ShootingKinematics.turretRotationAxisTransform.getX(), ShootingKinematics.turretRotationAxisTransform.getY(), ShootingKinematics.bottomOfFrameRailsToFlywheelHeightMeters),
-                new Rotation3d(0.0, 0.0, 0.0)
-        ).plus(new Transform3d(
-                new Translation3d(),
                 new Rotation3d(0.0, 0.0, motor.getPositionRad())
-        ));
+        );
     }
 }
