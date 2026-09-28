@@ -252,12 +252,14 @@ public class ShootingKinematics implements Periodic {
     }
 
     private ShootingParameters getShootingParametersAutomaticForPhaseDelay(PhaseDelay phaseDelay) {
+        String key = "ShootingKinematics/ShootingParameters/" + phaseDelay.name() + "/";
+
         ChassisSpeeds robotSpeeds = robotState.getMeasuredChassisSpeedsFieldRelative();
 
         FuelExitToTarget fuelExitToTarget = getFuelExitToTarget(phaseDelay);
+        Logger.recordOutput(key + "FuelExitToTarget", fuelExitToTarget);
 
         double xyDist = fuelExitToTarget.translation().toTranslation2d().getNorm();
-        String key = "ShootingKinematics/ShootingParameters/" + phaseDelay.name() + "/";
         Logger.recordOutput(key + "XYDist", xyDist);
 
         // 1. Compute velocity and angle from regression and rotate shooting vector into field coordinates
