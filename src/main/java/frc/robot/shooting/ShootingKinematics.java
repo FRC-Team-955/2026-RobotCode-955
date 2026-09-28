@@ -212,7 +212,7 @@ public class ShootingKinematics implements Periodic {
     private static final LoggedTunableNumber passManualAngleDegrees = new LoggedTunableNumber("ShootingKinematics/PassManual/AngleDegrees", Units.radiansToDegrees(Hood.convertBetweenShotAngleAndHoodAngleRad(Hood.maxPositionRad)));
 
     private ShootingParameters getShootingParametersManual() {
-        double headingRad = getFuelExitToTarget(0.0).angle().getRadians();
+        double headingRad = getFuelExitToTarget(PhaseDelay.None).angle().getRadians();
         return switch (operatorDashboard.getSelectedScoringMode()) {
             case ShootHubManual -> new ShootingParameters(
                     shootHubManualFlywheelRPM.get(),
@@ -254,7 +254,7 @@ public class ShootingKinematics implements Periodic {
     private ShootingParameters getShootingParametersAutomaticForPhaseDelay(PhaseDelay phaseDelay) {
         ChassisSpeeds robotSpeeds = robotState.getMeasuredChassisSpeedsFieldRelative();
 
-        FuelExitToTarget fuelExitToTarget = getFuelExitToTarget(phaseDelay.getValue());
+        FuelExitToTarget fuelExitToTarget = getFuelExitToTarget(phaseDelay);
 
         double xyDist = fuelExitToTarget.translation().toTranslation2d().getNorm();
         String key = "ShootingKinematics/ShootingParameters/" + phaseDelay.name() + "/";
@@ -372,9 +372,9 @@ public class ShootingKinematics implements Periodic {
         return AllianceFlipUtil.apply(FieldConstants.Hub.topCenterPoint);
     }
 
-    private FuelExitToTarget getFuelExitToTarget(double phaseDelay) {
+    private FuelExitToTarget getFuelExitToTarget(PhaseDelay phaseDelay) {
         Pose2d robotPose2d = robotState.getPose()
-                .exp(robotState.getMeasuredChassisSpeedsRobotRelative().toTwist2d(phaseDelay));
+                .exp(robotState.getMeasuredChassisSpeedsRobotRelative().toTwist2d(phaseDelay.getValue()));
         Pose3d fuelExitPose = new Pose3d(robotPose2d).transformBy(getFuelExitTransform());
 
         Pose3d hubPose = new Pose3d(getTarget(), new Rotation3d());
@@ -391,14 +391,14 @@ public class ShootingKinematics implements Periodic {
      * robotSpeeds field relative
      */
     private Translation2d getRobotVelocityTargetRelative(Translation2d robotSpeeds, PhaseDelay phaseDelay) {
-        FuelExitToTarget fuelExitToTarget = getFuelExitToTarget(phaseDelay.getValue());
+        FuelExitToTarget fuelExitToTarget = getFuelExitToTarget(phaseDelay);
         return robotSpeeds.rotateBy(fuelExitToTarget.angle());
     }
 
     /** Rotation around hub from velocity, can add to drive rotation for aiming feedforward */
     private double getRotationAboutTargetRadiansPerSecForTurret(Translation2d fieldRelativeMetersPerSec, PhaseDelay phaseDelay) {
         Translation2d targetRelative = getRobotVelocityTargetRelative(fieldRelativeMetersPerSec, phaseDelay);
-        FuelExitToTarget fuelExitToTarget = getFuelExitToTarget(phaseDelay.getValue());
+        FuelExitToTarget fuelExitToTarget = getFuelExitToTarget(phaseDelay);
 
         // CW positive for hubRelative, so need to negate into CCW positive
         // tangential velocity in m/s / radius of circle = rotation about circle rad/sec
