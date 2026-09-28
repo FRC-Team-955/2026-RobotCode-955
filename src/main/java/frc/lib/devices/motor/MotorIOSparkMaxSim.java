@@ -1,6 +1,7 @@
 package frc.lib.devices.motor;
 
 import com.revrobotics.sim.SparkMaxSim;
+import com.revrobotics.spark.ClosedLoopSlot;
 import edu.wpi.first.math.system.plant.DCMotor;
 import frc.robot.SimManager;
 
@@ -30,5 +31,15 @@ public class MotorIOSparkMaxSim extends MotorIOSparkMax {
         mechanismSim.setMechanismPositionRad.accept(positionRad);
 
         super.setEncoderPosition(positionRad);
+    }
+
+    @Override
+    public void setVelocityRequest(double setpointRadPerSec, double arbitraryFeedforwardVolts) {
+        // REVLib doesn't include kV when simulating. This is a bug with REVLib.
+        // To work around the bug, just calculate the kV term ourselves.
+        // See also https://github.com/REVrobotics/REV-Software-Binaries/issues/29
+        double ffkV = setpointRadPerSec * spark.configAccessor.closedLoop.feedForward.getkV(ClosedLoopSlot.kSlot1);
+
+        super.setVelocityRequest(setpointRadPerSec, arbitraryFeedforwardVolts + ffkV);
     }
 }
