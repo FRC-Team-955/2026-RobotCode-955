@@ -416,6 +416,7 @@ public class ShootingKinematics implements Periodic {
         //Translation2d robotVelocityHubRelative = robotVelocityTargetRelativeForDrivebase(robotSpeeds);
         // Again, positive Y is CLOCKWISE
         //Translation2d tangentialAccelerationHubRelative = robotVelocityTargetRelativeForDrivebase(fieldRelativeMetersPerSecSquared);
+        // Kai said he derived this with related rates
         double tangentialAccelerationShotRelative = fieldRelativeMetersPerSecSquared.rotateBy(new Rotation2d(-shootingParameters.headingRad())).getY();
         return tangentialAccelerationShotRelative / noPhaseDelayParameters.velocityXYMetersPerSec;
     }
