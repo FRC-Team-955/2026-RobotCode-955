@@ -302,7 +302,7 @@ public class ShootingKinematics implements Periodic {
         // Note that we must subtract the angle to the target to account for the robot speeds
         // being target relative
         Translation2d tangentialRobotVelocityFieldRelative = new Translation2d(0, robotSpeedsTargetRelative.getY())
-                .rotateBy(fuelExitToTarget.angle().unaryMinus());
+                .rotateBy(fuelExitToTarget.angle());
         if (BuildConstants.isSimOrReplay)
             Logger.recordOutput(key + "TangentialRobotVelocityFieldRelative", tangentialRobotVelocityFieldRelative);
         shotVelFieldRelative = shotVelFieldRelative.minus(tangentialRobotVelocityFieldRelative);
@@ -394,7 +394,7 @@ public class ShootingKinematics implements Periodic {
      */
     private Translation2d getRobotVelocityTargetRelative(Translation2d robotSpeeds, PhaseDelay phaseDelay) {
         FuelExitToTarget fuelExitToTarget = getFuelExitToTarget(phaseDelay);
-        return robotSpeeds.rotateBy(fuelExitToTarget.angle());
+        return robotSpeeds.rotateBy(fuelExitToTarget.angle().unaryMinus());
     }
 
     /** Rotation around hub from velocity, can add to drive rotation for aiming feedforward */
