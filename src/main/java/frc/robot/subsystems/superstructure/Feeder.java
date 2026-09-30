@@ -35,7 +35,7 @@ public class Feeder implements Periodic {
                             .withInverted(true)
                             .withNeutralMode(NeutralModeValue.Brake)
                             .withCurrentLimit(60)
-                            .withGearRatio(2),
+                            .withGearRatio(3),
                     0.0,
                     MechanismSim.roller(0.01)
             );
