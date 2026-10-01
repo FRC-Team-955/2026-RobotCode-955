@@ -25,7 +25,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 import java.util.function.DoubleFunction;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static frc.robot.subsystems.drive.DriveConstants.carpetToBottomOfFrameRail;
@@ -81,12 +80,6 @@ public class AprilTagVisionConstants {
                         new Rotation3d(0.0, Units.degreesToRadians(-30.0), 0.0)
                                 .rotateBy(new Rotation3d(0.0, 0.0, Units.degreesToRadians(180 - 10.0)))
                 ),
-                (cam) -> switch (BuildConstants.mode) {
-                    case REAL -> new AprilTagVisionIOPhotonVision("BrainpanCam");
-                    case SIM ->
-                            new AprilTagVisionIOPhotonVisionSim("BrainpanCam", cam.robotToCameraAtCurrentTimeSupplier);
-                    case REPLAY -> new AprilTagVisionIO();
-                },
                 // Relatively stable, even at long distance
                 1.5,
                 1.0
@@ -99,12 +92,6 @@ public class AprilTagVisionConstants {
                         new Rotation3d(0.0, Units.degreesToRadians(-30.0), 0.0)
                                 .rotateBy(new Rotation3d(0.0, 0.0, Units.degreesToRadians(-180.0 + 25.0)))
                 ),
-                (cam) -> switch (BuildConstants.mode) {
-                    case REAL -> new AprilTagVisionIOPhotonVision("SwerveCam");
-                    case SIM ->
-                            new AprilTagVisionIOPhotonVisionSim("SwerveCam", cam.robotToCameraAtCurrentTimeSupplier);
-                    case REPLAY -> new AprilTagVisionIO();
-                },
                 // Relatively stable, even at long distance
                 1.5,
                 1.0
@@ -114,12 +101,6 @@ public class AprilTagVisionConstants {
                         .apply(timestampSeconds)
                         .map(AprilTagVisionConstants::convertTurretRotationAxisToTurretCamRobotToCamera),
                 () -> convertTurretRotationAxisToTurretCamRobotToCamera(ShootingKinematics.turretRotationAxisTransformAtCurrentTime.get()),
-                (cam) -> switch (BuildConstants.mode) {
-                    case REAL -> new AprilTagVisionIOPhotonVision("TurretCam");
-                    case SIM ->
-                            new AprilTagVisionIOPhotonVisionSim("TurretCam", cam.robotToCameraAtCurrentTimeSupplier);
-                    case REPLAY -> new AprilTagVisionIO();
-                },
                 // Trust more at close distance, less at long distance
                 1.5,
                 3.0
@@ -133,7 +114,6 @@ public class AprilTagVisionConstants {
          * real robot if robotToCameraAtTimeSupplier is null
          */
         private final Supplier<Transform3d> robotToCameraAtCurrentTimeSupplier;
-        private final Function<Camera, AprilTagVisionIO> createIO;
         final double distancePower;
         final double stdDevMultiplier;
 
@@ -150,7 +130,11 @@ public class AprilTagVisionConstants {
         }
 
         AprilTagVisionIO createIO() {
-            return createIO.apply(this);
+            return switch (BuildConstants.mode) {
+                case REAL -> new AprilTagVisionIOPhotonVision(name());
+                case SIM -> new AprilTagVisionIOPhotonVisionSim(name(), robotToCameraAtCurrentTimeSupplier);
+                case REPLAY -> new AprilTagVisionIO();
+            };
         }
     }
 }
