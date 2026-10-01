@@ -42,8 +42,8 @@
    "ShootingMaxVel":{
     "dimension":"LinVel",
     "var":{
-     "exp":"1 m / s",
-     "val":1.0
+     "exp":"2.5 m / s",
+     "val":2.5
     }
    },
    "TrackLength":{
