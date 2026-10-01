@@ -130,7 +130,7 @@ public class Flywheel implements Periodic {
     }
 
     public Transform3d getMechanismTransform() {
-        Transform2d rotationAxis = ShootingKinematics.turretRotationAxisTransform.get();
+        Transform2d rotationAxis = ShootingKinematics.turretRotationAxisTransformAtCurrentTime.get();
         return new Transform3d(
                 new Translation3d(rotationAxis.getX(), rotationAxis.getY(), ShootingKinematics.bottomOfFrameRailsToFlywheelHeightMeters),
                 new Rotation3d(rotationAxis.getRotation())

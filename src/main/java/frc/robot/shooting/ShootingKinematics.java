@@ -23,6 +23,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.With;
 import org.littletonrobotics.junction.Logger;
 
+import java.util.Optional;
+import java.util.function.DoubleFunction;
 import java.util.function.DoubleUnaryOperator;
 import java.util.function.Supplier;
 
@@ -36,13 +38,18 @@ public class ShootingKinematics implements Periodic {
     public static final double bottomOfFrameRailsToFlywheelHeightMeters = Units.inchesToMeters(15.236467);
     private static final double centerOfFlywheelToCenterOfBallExitMeters = Units.inchesToMeters(4.602756);
 
-    public static final Supplier<Transform2d> turretRotationAxisTransform = () -> new Transform2d(
+    private static final DoubleFunction<Transform2d> turretRotationAxisTransformWithTurretPosition = (double turretRobotRelativePositionRad) -> new Transform2d(
             new Translation2d(
                     Units.inchesToMeters(-3.785046),
                     Units.inchesToMeters(-6.672244)
             ),
-            Rotation2d.fromRadians(Turret.get().getRobotRelativePositionRad())
+            Rotation2d.fromRadians(turretRobotRelativePositionRad)
     );
+    public static final Supplier<Transform2d> turretRotationAxisTransformAtCurrentTime = () ->
+            turretRotationAxisTransformWithTurretPosition.apply(Turret.get().getRobotRelativePositionRad());
+    public static final DoubleFunction<Optional<Transform2d>> turretRotationAxisTransformAtTime = (double timestampSeconds) ->
+            Turret.get().getRobotRelativePositionRadAtTime(timestampSeconds)
+                    .map(turretRotationAxisTransformWithTurretPosition::apply);
     public static final double centerOfTurretRotationAxisToCenterOfFlywheelMeters = Units.inchesToMeters(3.026799);
     private static final Supplier<Transform3d> turretRotationAxisToFuelExitTransform = () -> new Transform3d(
             new Translation3d(
@@ -426,7 +433,7 @@ public class ShootingKinematics implements Periodic {
     }
 
     public Transform3d getFuelExitTransform() {
-        return new Transform3d(turretRotationAxisTransform.get())
+        return new Transform3d(turretRotationAxisTransformAtCurrentTime.get())
                 .plus(turretRotationAxisToFuelExitTransform.get());
     }
 

@@ -21,7 +21,10 @@ import edu.wpi.first.math.util.Units;
 import frc.robot.BuildConstants;
 import frc.robot.shooting.ShootingKinematics;
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.Optional;
+import java.util.function.DoubleFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -57,10 +60,21 @@ public class AprilTagVisionConstants {
             new Rotation3d(0.0, 0.0, Units.degreesToRadians(180.0))
     );
 
+    private static Transform3d convertTurretRotationAxisToTurretCamRobotToCamera(Transform2d turretRotationAxis) {
+        return new Transform3d(
+                new Translation3d(turretRotationAxis.getX(), turretRotationAxis.getY(), carpetToBottomOfFrameRail),
+                new Rotation3d(turretRotationAxis.getRotation())
+        ).plus(new Transform3d(
+                new Translation3d(Units.inchesToMeters(3.636493), Units.inchesToMeters(-5.654954), Units.inchesToMeters(17.389519)),
+                new Rotation3d(0.0, Units.degreesToRadians(-25.0), 0.0)
+        ));
+    }
+
     @RequiredArgsConstructor
     enum Camera {
         // BrainpanCam - ThriftyCam
         BrainpanCam(
+                null,
                 () -> new Transform3d(
                         Units.inchesToMeters(-11.441561), Units.inchesToMeters(4.404409), Units.inchesToMeters(7.451625),
                         // Rotation order matters
@@ -69,7 +83,8 @@ public class AprilTagVisionConstants {
                 ),
                 (cam) -> switch (BuildConstants.mode) {
                     case REAL -> new AprilTagVisionIOPhotonVision("BrainpanCam");
-                    case SIM -> new AprilTagVisionIOPhotonVisionSim("BrainpanCam", cam.robotToCamera);
+                    case SIM ->
+                            new AprilTagVisionIOPhotonVisionSim("BrainpanCam", cam.robotToCameraAtCurrentTimeSupplier);
                     case REPLAY -> new AprilTagVisionIO();
                 },
                 // Relatively stable, even at long distance
@@ -77,6 +92,7 @@ public class AprilTagVisionConstants {
                 1.0
         ),
         SwerveCam(
+                null,
                 () -> new Transform3d(
                         Units.inchesToMeters(-11.668592), Units.inchesToMeters(-13.462841), Units.inchesToMeters(7.136914),
                         // Rotation order matters
@@ -85,7 +101,8 @@ public class AprilTagVisionConstants {
                 ),
                 (cam) -> switch (BuildConstants.mode) {
                     case REAL -> new AprilTagVisionIOPhotonVision("SwerveCam");
-                    case SIM -> new AprilTagVisionIOPhotonVisionSim("SwerveCam", cam.robotToCamera);
+                    case SIM ->
+                            new AprilTagVisionIOPhotonVisionSim("SwerveCam", cam.robotToCameraAtCurrentTimeSupplier);
                     case REPLAY -> new AprilTagVisionIO();
                 },
                 // Relatively stable, even at long distance
@@ -93,19 +110,14 @@ public class AprilTagVisionConstants {
                 1.0
         ),
         TurretCam(
-                () -> {
-                    Transform2d rotationAxis = ShootingKinematics.turretRotationAxisTransform.get();
-                    return new Transform3d(
-                            new Translation3d(rotationAxis.getX(), rotationAxis.getY(), carpetToBottomOfFrameRail),
-                            new Rotation3d(rotationAxis.getRotation())
-                    ).plus(new Transform3d(
-                            new Translation3d(Units.inchesToMeters(3.636493), Units.inchesToMeters(-5.654954), Units.inchesToMeters(17.389519)),
-                            new Rotation3d(0.0, Units.degreesToRadians(-25.0), 0.0)
-                    ));
-                },
+                (timestampSeconds) -> ShootingKinematics.turretRotationAxisTransformAtTime
+                        .apply(timestampSeconds)
+                        .map(AprilTagVisionConstants::convertTurretRotationAxisToTurretCamRobotToCamera),
+                () -> convertTurretRotationAxisToTurretCamRobotToCamera(ShootingKinematics.turretRotationAxisTransformAtCurrentTime.get()),
                 (cam) -> switch (BuildConstants.mode) {
                     case REAL -> new AprilTagVisionIOPhotonVision("TurretCam");
-                    case SIM -> new AprilTagVisionIOPhotonVisionSim("TurretCam", cam.robotToCamera);
+                    case SIM ->
+                            new AprilTagVisionIOPhotonVisionSim("TurretCam", cam.robotToCameraAtCurrentTimeSupplier);
                     case REPLAY -> new AprilTagVisionIO();
                 },
                 // Trust more at close distance, less at long distance
@@ -114,13 +126,27 @@ public class AprilTagVisionConstants {
         ),
         ;
 
-        private final Supplier<Transform3d> robotToCamera;
+        /** If null, currentRobotToCameraSupplier will be used on the real robot */
+        private final @Nullable DoubleFunction<Optional<Transform3d>> robotToCameraAtTimeSupplier;
+        /**
+         * See above comment. This is always used in sim but will be used on the
+         * real robot if robotToCameraAtTimeSupplier is null
+         */
+        private final Supplier<Transform3d> robotToCameraAtCurrentTimeSupplier;
         private final Function<Camera, AprilTagVisionIO> createIO;
         final double distancePower;
         final double stdDevMultiplier;
 
-        Transform3d robotToCamera() {
-            return robotToCamera.get();
+        Optional<Transform3d> getRobotToCamera(double timestampSeconds) {
+            if (robotToCameraAtTimeSupplier != null) {
+                return robotToCameraAtTimeSupplier.apply(timestampSeconds);
+            } else {
+                return Optional.of(robotToCameraAtCurrentTimeSupplier.get());
+            }
+        }
+
+        Transform3d getRobotToCameraAtCurrentTime() {
+            return robotToCameraAtCurrentTimeSupplier.get();
         }
 
         AprilTagVisionIO createIO() {

@@ -24,13 +24,14 @@ import java.util.function.Supplier;
 public class AprilTagVisionIOPhotonVisionSim extends AprilTagVisionIOPhotonVision {
     private static final SimManager simManager = SimManager.get();
 
-    private final PhotonCameraSim cameraSim;
-    private final Supplier<Transform3d> robotToCamera;
+    private final Supplier<Transform3d> simRobotToCameraSupplier;
 
-    public AprilTagVisionIOPhotonVisionSim(String name, Supplier<Transform3d> robotToCamera) {
+    private final PhotonCameraSim cameraSim;
+
+    public AprilTagVisionIOPhotonVisionSim(String name, Supplier<Transform3d> simRobotToCameraSupplier) {
         super(name);
 
-        this.robotToCamera = robotToCamera;
+        this.simRobotToCameraSupplier = simRobotToCameraSupplier;
 
         // Add sim camera
         var cameraProperties = new SimCameraProperties();
@@ -51,7 +52,7 @@ public class AprilTagVisionIOPhotonVisionSim extends AprilTagVisionIOPhotonVisio
 
     @Override
     public void updateInputs(AprilTagVisionIOInputs inputs) {
-        simManager.aprilTagVisionSystem.adjustCamera(cameraSim, robotToCamera.get());
+        simManager.aprilTagVisionSystem.adjustCamera(cameraSim, simRobotToCameraSupplier.get());
         simManager.ensureAprilTagVisionSystemUpdated();
         super.updateInputs(inputs);
     }

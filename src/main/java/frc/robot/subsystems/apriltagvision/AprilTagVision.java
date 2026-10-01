@@ -86,7 +86,6 @@ public class AprilTagVision implements Periodic {
         // Loop over cameras
         for (Map.Entry<Camera, CameraData> cam : cameras.entrySet()) {
             Camera metadata = cam.getKey();
-            Transform3d robotToCamera = metadata.robotToCamera();
             CameraData data = cam.getValue();
 
             // Initialize logging values
@@ -113,6 +112,13 @@ public class AprilTagVision implements Periodic {
                     continue;
                 }
                 Pose3d tagPose = tagPoseOptional.get();
+
+                Optional<Transform3d> robotToCameraOptional = metadata.getRobotToCamera(observation.timestamp());
+                if (robotToCameraOptional.isEmpty()) {
+                    Util.error("Couldn't get robot to camera for camera " + metadata.name() + " at time " + observation.timestamp());
+                    continue;
+                }
+                Transform3d robotToCamera = robotToCameraOptional.get();
 
                 //////////////////////////////// 3d solve ////////////////////////////////
                 Transform3d fieldToTarget = new Transform3d(tagPose.getTranslation(), tagPose.getRotation());
@@ -200,6 +206,13 @@ public class AprilTagVision implements Periodic {
 
             List<MultiTagPoseObservation> multiTagPoseObservations = new LinkedList<>();
             for (var observation : data.inputs.multiTagObservations) {
+                Optional<Transform3d> robotToCameraOptional = metadata.getRobotToCamera(observation.timestamp());
+                if (robotToCameraOptional.isEmpty()) {
+                    Util.error("Couldn't get robot to camera for camera " + metadata.name() + " at time " + observation.timestamp());
+                    continue;
+                }
+                Transform3d robotToCamera = robotToCameraOptional.get();
+
                 Transform3d fieldToRobot = observation.fieldToCamera().plus(robotToCamera.inverse());
                 Pose3d robotPose = new Pose3d(fieldToRobot.getTranslation(), fieldToRobot.getRotation());
 
@@ -348,7 +361,7 @@ public class AprilTagVision implements Periodic {
         Logger.recordOutput(
                 "AprilTagVision/CameraPoses",
                 Arrays.stream(Camera.values())
-                        .map(cam -> robotPose.transformBy(cam.robotToCamera()))
+                        .map(cam -> robotPose.transformBy(cam.getRobotToCameraAtCurrentTime()))
                         .toArray(Pose3d[]::new)
         );
 
