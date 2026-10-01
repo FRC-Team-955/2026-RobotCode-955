@@ -207,6 +207,12 @@ public class Robot extends LoggedRobot {
         }
 
         for (var periodic : periodics) {
+            //System.out.println("updateAndProcessInputs: " + periodic.getClass().getSimpleName());
+            periodic.updateAndProcessInputs();
+            LoggedTracer.record(periodic.getClass().getSimpleName() + "updateAndProcessInputs");
+        }
+
+        for (var periodic : periodics) {
             //System.out.println("periodicBeforeCommands: " + periodic.getClass().getSimpleName());
             periodic.periodicBeforeCommands();
             LoggedTracer.record(periodic.getClass().getSimpleName() + "PeriodicBeforeCommands");

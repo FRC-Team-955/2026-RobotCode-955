@@ -31,7 +31,7 @@ public class DeviceManager implements Periodic {
     }
 
     @Override
-    public void periodicBeforeCommands() {
+    public void updateAndProcessInputs() {
         for (Device<?, ?> device : devices) {
             device.updateAndProcessInputs();
         }
