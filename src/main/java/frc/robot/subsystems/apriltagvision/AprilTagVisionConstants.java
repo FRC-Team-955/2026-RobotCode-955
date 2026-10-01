@@ -99,9 +99,8 @@ public class AprilTagVisionConstants {
                             new Translation3d(rotationAxis.getX(), rotationAxis.getY(), carpetToBottomOfFrameRail),
                             new Rotation3d(rotationAxis.getRotation())
                     ).plus(new Transform3d(
-                            Units.inchesToMeters(-3.663), Units.inchesToMeters(5.638), Units.inchesToMeters(7.544418),
+                            new Translation3d(Units.inchesToMeters(3.636493), Units.inchesToMeters(-5.654954), Units.inchesToMeters(17.389519)),
                             new Rotation3d(0.0, Units.degreesToRadians(-25.0), 0.0)
-                                    .rotateBy(new Rotation3d(0.0, 0.0, Units.degreesToRadians(180.0)))
                     ));
                 },
                 (cam) -> switch (BuildConstants.mode) {
