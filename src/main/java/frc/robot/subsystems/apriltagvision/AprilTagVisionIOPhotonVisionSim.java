@@ -47,7 +47,7 @@ public class AprilTagVisionIOPhotonVisionSim extends AprilTagVisionIOPhotonVisio
         cameraSim.enableRawStream(false);
         cameraSim.enableProcessedStream(false);
 
-        simManager.aprilTagVisionSystem.addCamera(cameraSim, new Transform3d());
+        simManager.aprilTagVisionSystem.addCamera(cameraSim, simRobotToCameraSupplier.get());
     }
 
     @Override
