@@ -76,7 +76,7 @@ public class AprilTagVisionConstants {
                 1.5,
                 1.0
         ),
-        ShooterCam(
+        SwerveCam(
                 () -> new Transform3d(
                         Units.inchesToMeters(-11.668592), Units.inchesToMeters(-13.462841), Units.inchesToMeters(7.136914),
                         // Rotation order matters
@@ -84,8 +84,8 @@ public class AprilTagVisionConstants {
                                 .rotateBy(new Rotation3d(0.0, 0.0, Units.degreesToRadians(-180.0 + 25.0)))
                 ),
                 (cam) -> switch (BuildConstants.mode) {
-                    case REAL -> new AprilTagVisionIOPhotonVision("ShooterCam");
-                    case SIM -> new AprilTagVisionIOPhotonVisionSim("ShooterCam", cam.robotToCamera);
+                    case REAL -> new AprilTagVisionIOPhotonVision("SwerveCam");
+                    case SIM -> new AprilTagVisionIOPhotonVisionSim("SwerveCam", cam.robotToCamera);
                     case REPLAY -> new AprilTagVisionIO();
                 },
                 // Relatively stable, even at long distance
@@ -99,9 +99,8 @@ public class AprilTagVisionConstants {
                             new Translation3d(rotationAxis.getX(), rotationAxis.getY(), carpetToBottomOfFrameRail),
                             new Rotation3d(rotationAxis.getRotation())
                     ).plus(new Transform3d(
-                            Units.inchesToMeters(-3.663), Units.inchesToMeters(5.638), Units.inchesToMeters(7.544418),
+                            new Translation3d(Units.inchesToMeters(3.636493), Units.inchesToMeters(-5.654954), Units.inchesToMeters(17.389519)),
                             new Rotation3d(0.0, Units.degreesToRadians(-25.0), 0.0)
-                                    .rotateBy(new Rotation3d(0.0, 0.0, Units.degreesToRadians(180.0)))
                     ));
                 },
                 (cam) -> switch (BuildConstants.mode) {
