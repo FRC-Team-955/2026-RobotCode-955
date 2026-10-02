@@ -35,7 +35,7 @@ import java.util.Optional;
 import java.util.function.DoubleSupplier;
 
 public class Turret implements Periodic {
-    // Mechanism position is robot relative: 0 = shooting toward intake
+    // 0 = shooting toward intake
     private static final double minPositionRad = Units.degreesToRadians(-120.0);
     private static final double maxPositionRad = Units.degreesToRadians(180.0);
     private static final double initialPositionRad = 0.0;
