@@ -40,8 +40,8 @@ public class AutoManager {
         //autoChooser.addOption("LeftSideAuto", new LeftSideAuto());
         //autoChooser.addOption("RightSideAuto", new RightSideAuto());
         //autoChooser.addOption("Canadian Depot", new CanadianDepotAuto());
-        autoChooser.addOption("Orbit at the outpost", new OrbitAtTheOutpostAuto());
-        autoChooser.addOption("Orbit at Home Depot", new OrbitAtHomeDepotAuto());
+        //autoChooser.addOption("Orbit at the outpost", new OrbitAtTheOutpostAuto());
+        //autoChooser.addOption("Orbit at Home Depot", new OrbitAtHomeDepotAuto());
         autoChooser.addOption("Aura", new AuraAuto());
         //autoChooser.addOption("AuraOutpost", new AuraAutoOutpost());
         //autoChooser.addOption("AuraDepot", new AuraAutoDepot());
@@ -62,7 +62,7 @@ public class AutoManager {
         //autoChooser.addOption("Aggressive depot bump", new AggressiveBumpAuto(true));
         //autoChooser.addOption("Aggressive outpost double bump", new AggressiveDoubleBumpAuto(false));
         //autoChooser.addOption("Aggressive depot double bump", new AggressiveDoubleBumpAuto(true));
-        autoChooser.addOption("Center -> depot -> bump", new AggressiveCenterBumpAuto());
+        //autoChooser.addOption("Center -> depot -> bump", new AggressiveCenterBumpAuto());
 
         robotState.setAutoStartPoseSupplier(this::getSelectedAutoStartingPose);
     }
