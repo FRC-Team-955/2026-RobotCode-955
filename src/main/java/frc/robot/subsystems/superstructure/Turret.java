@@ -36,8 +36,8 @@ import java.util.function.DoubleSupplier;
 
 public class Turret implements Periodic {
     // 0 = shooting toward intake
-    private static final double minPositionRad = Units.degreesToRadians(-120.0);
-    private static final double maxPositionRad = Units.degreesToRadians(180.0);
+    private static final double minPositionRad = Units.degreesToRadians(-160.0);
+    private static final double maxPositionRad = Units.degreesToRadians(260.0);
     private static final double initialPositionRad = 0.0;
 
     private static final double positionPastLimitForEmergencyStopRad = Units.degreesToRadians(5);
