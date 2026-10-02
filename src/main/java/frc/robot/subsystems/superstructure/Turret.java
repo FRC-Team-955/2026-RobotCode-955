@@ -35,9 +35,9 @@ import java.util.Optional;
 import java.util.function.DoubleSupplier;
 
 public class Turret implements Periodic {
-    // 0 = shooting away from intake
-    private static final double minPositionRad = Units.degreesToRadians(-300.0);
-    private static final double maxPositionRad = Units.degreesToRadians(0.0);
+    // Mechanism position is robot relative: 0 = shooting toward intake
+    private static final double minPositionRad = Units.degreesToRadians(-120.0);
+    private static final double maxPositionRad = Units.degreesToRadians(180.0);
     private static final double initialPositionRad = 0.0;
     private static final double positionPastLimitForEmergencyStopRad = Units.degreesToRadians(5);
 
@@ -227,31 +227,20 @@ public class Turret implements Periodic {
         return Objects.requireNonNullElse(closestSetpoint, currentMechanismPosition);
     }
 
-    private static double convertMechanismPositionToRobotRelativePosition(double mechanismPositionRad) {
-        // add 180° - see comment at top of class
-        return mechanismPositionRad + Math.PI;
-    }
-
-    private static double convertRobotRelativePositionToMechanismPosition(double robotRelativePositionRad) {
-        // subtract 180° - see comment at top of class
-        return robotRelativePositionRad - Math.PI;
-    }
-
     private static double convertMechanismPositionToFieldRelativePosition(double mechanismPositionRad) {
-        return convertMechanismPositionToRobotRelativePosition(mechanismPositionRad) + robotState.getRotation().getRadians();
+        return mechanismPositionRad + robotState.getRotation().getRadians();
     }
 
     private static double convertFieldRelativePositionToMechanismPosition(double fieldRelativePositionRad) {
-        return convertRobotRelativePositionToMechanismPosition(fieldRelativePositionRad - robotState.getRotation().getRadians());
+        return fieldRelativePositionRad - robotState.getRotation().getRadians();
     }
 
     public double getRobotRelativePositionRad() {
-        return convertMechanismPositionToRobotRelativePosition(motor.getPositionRad());
+        return motor.getPositionRad();
     }
 
     public Optional<Double> getRobotRelativePositionRadAtTime(double timestampSeconds) {
-        return motorPositionRadBuffer.getSample(timestampSeconds)
-                .map(Turret::convertMechanismPositionToRobotRelativePosition);
+        return motorPositionRadBuffer.getSample(timestampSeconds);
     }
 
     public double getFieldRelativePositionRad() {
