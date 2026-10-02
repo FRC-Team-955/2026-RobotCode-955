@@ -24,6 +24,7 @@ import frc.lib.Util;
 import frc.lib.subsystem.Periodic;
 import frc.robot.BuildConstants;
 import frc.robot.RobotState;
+import lombok.Getter;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.*;
@@ -41,6 +42,9 @@ public class AprilTagVision implements Periodic {
                             cam.createIO(),
                             new Alert("AprilTag vision camera " + cam.name() + " is disconnected.", AlertType.kError)
                     ));
+
+    @Getter
+    private boolean acceptedNewPose = false;
 
     private int[] tagIdFilter = {};
 
@@ -75,7 +79,8 @@ public class AprilTagVision implements Periodic {
             data.disconnectedAlert.set(!data.inputs.connected);
         }
 
-        if (BuildConstants.isSimOrReplay) Logger.recordOutput("AprilTagVision/TagIdFilter", tagIdFilter);
+        if (BuildConstants.isSimOrReplay)
+            Logger.recordOutput("AprilTagVision/TagIdFilter", tagIdFilter);
 
         // Initialize logging values
         List<Pose3d> allTagPoses = new LinkedList<>();
@@ -352,6 +357,8 @@ public class AprilTagVision implements Periodic {
         // Add summary to Field2d
         robotState.setAcceptedPoses(allRobotPosesAccepted);
         robotState.setRejectedPoses(allRobotPosesRejected);
+
+        acceptedNewPose = !allRobotPosesAccepted.isEmpty();
     }
 
     @Override

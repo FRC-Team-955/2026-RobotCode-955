@@ -164,13 +164,18 @@ public class LEDs implements Periodic {
     private LEDPattern getEnabledPatternSecondHalf() {
         return switch (superstructure.getGoal()) {
             case SHOOT -> shootingKinematics.isShootingParametersMet()
-                    ? LEDPatterns.shooting
-                    : (
+                    ? (
+                    aprilTagVision.isAcceptedNewPose()
+                            ? LEDPattern.kOff
+                            : LEDPatterns.shooting
+            ) : (
                     shootingKinematics.isShiftMet()
                             ? LEDPatterns.aiming
                             : LEDPatterns.waitingForShift
             );
-            case SHOOT_FORCE -> LEDPatterns.shootingForced;
+            case SHOOT_FORCE -> aprilTagVision.isAcceptedNewPose()
+                    ? LEDPattern.kOff
+                    : LEDPatterns.shootingForced;
             default -> LEDPatterns.idle;
         };
     }
