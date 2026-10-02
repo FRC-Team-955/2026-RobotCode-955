@@ -43,7 +43,8 @@ public class Turret implements Periodic {
 
     private static final TrapezoidProfile.Constraints constraints = new TrapezoidProfile.Constraints(12, 36);
 
-    private static final double homingToleranceRad = Units.degreesToRadians(45.0);
+    private static final double homingToleranceRad = Units.degreesToRadians(10.0);
+    private static final double homingOvershootToleranceRad = Units.degreesToRadians(5.0);
 
     private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
     private static final RobotState robotState = RobotState.get();
@@ -111,7 +112,6 @@ public class Turret implements Periodic {
     private boolean homed = false;
     private boolean verifyingHoming = false;
     private double observedMinRad = initialPositionRad;
-    private double observedMaxRad = initialPositionRad;
 
     private static Turret instance;
 
@@ -143,6 +143,10 @@ public class Turret implements Periodic {
     public void periodicBeforeCommands() {
         if (verifyingHoming) {
             updateHomingVerification();
+        }
+
+        if (homed && motor.getPositionRad() < minPositionRad - homingOvershootToleranceRad) {
+            // TODO: trigger homing failed alert
         }
 
         boolean shouldEmergencyStop = emergencyStopDebouncer.calculate(motor.getStatorCurrentAmps() >= 50) ||
@@ -263,40 +267,33 @@ public class Turret implements Periodic {
         state = new TrapezoidProfile.State(initialPositionRad, 0.0);
 
         observedMinRad = initialPositionRad;
-        observedMaxRad = initialPositionRad;
-        verifyingHoming = true;
-        homed = false;
 
-        operatorDashboard.turretNotHomedAlert.set(true);
-        operatorDashboard.turretHomingFailedAlert.set(false);
-        operatorDashboard.turretEStop.set(true);
+        boolean skipVerification = DriverStation.isFMSAttached();
+        verifyingHoming = !skipVerification;
+        homed = skipVerification;
+
+        operatorDashboard.turretNotHomedAlert.set(!skipVerification);
+        if (!skipVerification) {
+            operatorDashboard.turretEStop.set(true);
+        }
     }
 
     private void updateHomingVerification() {
         double positionRad = motor.getPositionRad();
         observedMinRad = Math.min(observedMinRad, positionRad);
-        observedMaxRad = Math.max(observedMaxRad, positionRad);
 
-        double sweptRad = observedMaxRad - observedMinRad;
         Logger.recordOutput("Superstructure/Turret/Homing/ObservedMinRad", observedMinRad);
-        Logger.recordOutput("Superstructure/Turret/Homing/ObservedMaxRad", observedMaxRad);
-        Logger.recordOutput("Superstructure/Turret/Homing/SweptRad", sweptRad);
         Logger.recordOutput("Superstructure/Turret/Homing/RemainingRad",
-                Math.max(0.0, (maxPositionRad - minPositionRad) - homingToleranceRad - sweptRad));
+                Math.max(0.0, observedMinRad - (minPositionRad + homingToleranceRad)));
 
-        if (sweptRad < (maxPositionRad - minPositionRad) - homingToleranceRad) {
+        if (Math.abs(observedMinRad - minPositionRad) > homingToleranceRad) {
             return;
         }
 
         verifyingHoming = false;
-
-        if (Math.abs(observedMinRad - minPositionRad) <= homingToleranceRad) {
-            homed = true;
-            operatorDashboard.turretNotHomedAlert.set(false);
-            operatorDashboard.turretEStop.set(false);
-        } else {
-            operatorDashboard.turretHomingFailedAlert.set(true);
-        }
+        homed = true;
+        operatorDashboard.turretNotHomedAlert.set(false);
+        operatorDashboard.turretEStop.set(false);
     }
 
     public Transform3d getMechanismTransform() {
