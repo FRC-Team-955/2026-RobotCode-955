@@ -39,12 +39,14 @@ public class Turret implements Periodic {
     private static final double minPositionRad = Units.degreesToRadians(-120.0);
     private static final double maxPositionRad = Units.degreesToRadians(180.0);
     private static final double initialPositionRad = 0.0;
-    private static final double positionPastLimitForEmergencyStopRad = Units.degreesToRadians(5);
 
-    private static final TrapezoidProfile.Constraints constraints = new TrapezoidProfile.Constraints(12, 36);
+    private static final double positionPastLimitForEmergencyStopRad = Units.degreesToRadians(5);
+    private static final double closeToWrappingRad = Units.degreesToRadians(45.0);
 
     private static final double homingToleranceRad = Units.degreesToRadians(10.0);
     private static final double homingOvershootToleranceRad = Units.degreesToRadians(5.0);
+
+    private static final TrapezoidProfile.Constraints constraints = new TrapezoidProfile.Constraints(12, 36);
 
     private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
     private static final RobotState robotState = RobotState.get();
@@ -249,6 +251,11 @@ public class Turret implements Periodic {
 
     public double getHeadingVelocityRadPerSec() {
         return motor.getVelocityRadPerSec();
+    }
+
+    public boolean isCloseToWrapping() {
+        return motor.getPositionRad() <= minPositionRad + closeToWrappingRad ||
+                motor.getPositionRad() >= maxPositionRad - closeToWrappingRad;
     }
 
     public void home() {

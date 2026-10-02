@@ -158,6 +158,10 @@ public class LEDs implements Periodic {
             return LEDPatterns.lowBattery;
         }
 
+        if (superstructure.turret.isCloseToWrapping()) {
+            return LEDPatterns.turretCloseToWrapping;
+        }
+
         return LEDPatterns.idle;
     }
 

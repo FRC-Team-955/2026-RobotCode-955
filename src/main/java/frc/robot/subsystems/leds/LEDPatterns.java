@@ -104,5 +104,6 @@ public class LEDPatterns {
             Color.kRed
     ).scrollAtRelativeSpeed(Hertz.of(1));
     public static final LEDPattern waitingForShift = LEDPattern.solid(new Color(255, 0, 128)).blink(Seconds.of(0.1));
+    public static final LEDPattern turretCloseToWrapping = LEDPattern.solid(Color.kBlue).blink(Seconds.of(0.1));
 }
 
