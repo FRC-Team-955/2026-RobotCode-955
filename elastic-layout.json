@@ -11,7 +11,7 @@
             "x": 0.0,
             "y": 0.0,
             "width": 256.0,
-            "height": 256.0,
+            "height": 384.0,
             "type": "List Layout",
             "properties": {
               "label_position": "TOP"
@@ -42,6 +42,19 @@
                   "period": 0.06,
                   "data_type": "boolean"
                 }
+              },
+              {
+                "title": "HomeTurret",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Toggle Switch",
+                "properties": {
+                  "topic": "/Tuning/OperatorDashboard/HomeTurret",
+                  "period": 0.06,
+                  "data_type": "boolean"
+                }
               }
             ]
           }
@@ -50,25 +63,12 @@
           {
             "title": "Auto Choices",
             "x": 0.0,
-            "y": 256.0,
-            "width": 256.0,
-            "height": 128.0,
-            "type": "ComboBox Chooser",
-            "properties": {
-              "topic": "/SmartDashboard/Auto Choices",
-              "period": 0.06,
-              "sort_options": false
-            }
-          },
-          {
-            "title": "Characterization Choices",
-            "x": 0.0,
             "y": 384.0,
             "width": 256.0,
             "height": 128.0,
             "type": "ComboBox Chooser",
             "properties": {
-              "topic": "/SmartDashboard/Characterization Choices",
+              "topic": "/SmartDashboard/Auto Choices",
               "period": 0.06,
               "sort_options": false
             }
@@ -150,7 +150,7 @@
           {
             "title": "AutoChosen",
             "x": 256.0,
-            "y": 256.0,
+            "y": 384.0,
             "width": 128.0,
             "height": 128.0,
             "type": "Toggle Switch",
@@ -163,7 +163,7 @@
           {
             "title": "RecordingStarted",
             "x": 256.0,
-            "y": 384.0,
+            "y": 128.0,
             "width": 128.0,
             "height": 128.0,
             "type": "Toggle Switch",
@@ -199,6 +199,19 @@
               "data_type": "double",
               "show_submit_button": false
             }
+          },
+          {
+            "title": "PositionRad",
+            "x": 512.0,
+            "y": 640.0,
+            "width": 384.0,
+            "height": 128.0,
+            "type": "Large Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/Inputs/Superstructure/Turret/PositionRad",
+              "period": 0.06,
+              "data_type": "double"
+            }
           }
         ]
       }
@@ -209,7 +222,7 @@
         "layouts": [
           {
             "title": "Goals",
-            "x": 256.0,
+            "x": 0.0,
             "y": 384.0,
             "width": 256.0,
             "height": 256.0,
@@ -372,8 +385,8 @@
           },
           {
             "title": "BatteryVoltage",
-            "x": 384.0,
-            "y": 640.0,
+            "x": 256.0,
+            "y": 384.0,
             "width": 256.0,
             "height": 128.0,
             "type": "Voltage View",
@@ -440,26 +453,12 @@
               "topic": "/SmartDashboard/PhotonAlerts",
               "period": 0.06
             }
-          },
-          {
-            "title": "photonvision-blue_Port_1184_Output_MJPEG_Server",
-            "x": 896.0,
-            "y": 640.0,
-            "width": 256.0,
-            "height": 256.0,
-            "type": "Camera Stream",
-            "properties": {
-              "topic": "/CameraPublisher/photonvision-blue_Port_1184_Output_MJPEG_Server",
-              "period": 0.06,
-              "rotation_turns": 0,
-              "fps": 10
-            }
           }
         ]
       }
     },
     {
-      "name": "Overrides",
+      "name": "Programmers ONLY",
       "grid_layout": {
         "layouts": [
           {
@@ -529,10 +528,10 @@
           },
           {
             "title": "Goals",
-            "x": 1664.0,
-            "y": 512.0,
+            "x": 768.0,
+            "y": 0.0,
             "width": 256.0,
-            "height": 256.0,
+            "height": 384.0,
             "type": "List Layout",
             "properties": {
               "label_position": "TOP"
@@ -570,8 +569,8 @@
         "containers": [
           {
             "title": "CoastOverride",
-            "x": 1280.0,
-            "y": 384.0,
+            "x": 1024.0,
+            "y": 128.0,
             "width": 128.0,
             "height": 128.0,
             "type": "Toggle Switch",
@@ -583,7 +582,7 @@
           },
           {
             "title": "ManualAiming",
-            "x": 640.0,
+            "x": 1024.0,
             "y": 0.0,
             "width": 128.0,
             "height": 128.0,
@@ -646,22 +645,9 @@
             }
           },
           {
-            "title": "DriveTurnAbsolutePID",
-            "x": 768.0,
-            "y": 256.0,
-            "width": 256.0,
-            "height": 128.0,
-            "type": "Toggle Switch",
-            "properties": {
-              "topic": "/Tuning/OperatorDashboard/DriveTurnAbsolutePID",
-              "period": 0.06,
-              "data_type": "boolean"
-            }
-          },
-          {
             "title": "AngleMet",
             "x": 896.0,
-            "y": 512.0,
+            "y": 384.0,
             "width": 128.0,
             "height": 128.0,
             "type": "Boolean Box",
@@ -678,7 +664,7 @@
           {
             "title": "HeadingMet",
             "x": 1024.0,
-            "y": 512.0,
+            "y": 384.0,
             "width": 128.0,
             "height": 128.0,
             "type": "Boolean Box",
@@ -693,26 +679,9 @@
             }
           },
           {
-            "title": "HeadingVelocityMet",
-            "x": 1152.0,
-            "y": 512.0,
-            "width": 128.0,
-            "height": 128.0,
-            "type": "Boolean Box",
-            "properties": {
-              "topic": "/AdvantageKit/RealOutputs/ShootingKinematics/HeadingVelocityMet",
-              "period": 0.06,
-              "data_type": "boolean",
-              "true_color": 4283215696,
-              "false_color": 4294198070,
-              "true_icon": "None",
-              "false_icon": "None"
-            }
-          },
-          {
             "title": "ShiftMet",
             "x": 1280.0,
-            "y": 512.0,
+            "y": 384.0,
             "width": 128.0,
             "height": 128.0,
             "type": "Boolean Box",
@@ -729,7 +698,7 @@
           {
             "title": "ShootingParametersMet",
             "x": 768.0,
-            "y": 640.0,
+            "y": 512.0,
             "width": 640.0,
             "height": 128.0,
             "type": "Boolean Box",
@@ -746,7 +715,7 @@
           {
             "title": "VelocityMet",
             "x": 768.0,
-            "y": 512.0,
+            "y": 384.0,
             "width": 128.0,
             "height": 128.0,
             "type": "Boolean Box",
@@ -783,7 +752,7 @@
           },
           {
             "title": "HoodEStop",
-            "x": 768.0,
+            "x": 512.0,
             "y": 128.0,
             "width": 256.0,
             "height": 128.0,
@@ -810,7 +779,7 @@
           },
           {
             "title": "Active",
-            "x": 128.0,
+            "x": 0.0,
             "y": 768.0,
             "width": 128.0,
             "height": 128.0,
@@ -840,7 +809,7 @@
           },
           {
             "title": "CurrentShift",
-            "x": 256.0,
+            "x": 128.0,
             "y": 768.0,
             "width": 256.0,
             "height": 128.0,
@@ -853,7 +822,7 @@
           },
           {
             "title": "RemainingTime",
-            "x": 512.0,
+            "x": 384.0,
             "y": 768.0,
             "width": 256.0,
             "height": 128.0,
@@ -869,7 +838,7 @@
           },
           {
             "title": "MatchTime",
-            "x": 768.0,
+            "x": 640.0,
             "y": 768.0,
             "width": 128.0,
             "height": 128.0,
@@ -972,7 +941,7 @@
           },
           {
             "title": "UncertaintyMet",
-            "x": 1024.0,
+            "x": 1152.0,
             "y": 384.0,
             "width": 128.0,
             "height": 128.0,
@@ -1003,7 +972,7 @@
           },
           {
             "title": "IntakePivotEStop",
-            "x": 768.0,
+            "x": 512.0,
             "y": 0.0,
             "width": 256.0,
             "height": 128.0,
@@ -1012,20 +981,6 @@
               "topic": "/Tuning/OperatorDashboard/IntakePivotEStop",
               "period": 0.06,
               "data_type": "boolean"
-            }
-          },
-          {
-            "title": "AutoDelay",
-            "x": 512.0,
-            "y": 128.0,
-            "width": 128.0,
-            "height": 128.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "/Tuning/OperatorDashboard/AutoDelay",
-              "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": false
             }
           },
           {
@@ -1054,6 +1009,19 @@
               "period": 0.06,
               "data_type": "double",
               "show_submit_button": false
+            }
+          },
+          {
+            "title": "TurretEStop",
+            "x": 512.0,
+            "y": 256.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Toggle Switch",
+            "properties": {
+              "topic": "/Tuning/OperatorDashboard/TurretEStop",
+              "period": 0.06,
+              "data_type": "boolean"
             }
           }
         ]
