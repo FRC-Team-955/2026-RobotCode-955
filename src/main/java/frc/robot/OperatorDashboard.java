@@ -58,7 +58,7 @@ public class OperatorDashboard implements Periodic {
     public final Alert turretVerifyingAlert = new Alert("Turret home needs to be verified! Rotate the turret as far as it will go in both directions.", Alert.AlertType.kError);
     private final Alert coastOverrideAlert = new Alert("Coast override is enabled.", Alert.AlertType.kWarning);
     public final Alert autoNotChosenAlert = new Alert("Auto is not chosen!", Alert.AlertType.kError);
-    private final Alert recordingNotStartedAlert = new Alert("Recording is not started!", Alert.AlertType.kWarning);
+    //private final Alert recordingNotStartedAlert = new Alert("Recording is not started!", Alert.AlertType.kWarning);
     @SuppressWarnings("FieldCanBeLocal")
     private final Alert constantSetAlert = new Alert("Constants are set.", Alert.AlertType.kInfo);
     private final Alert batteryVoltageAlert = new Alert("Battery is below 12 volts!", Alert.AlertType.kError);
@@ -110,7 +110,7 @@ public class OperatorDashboard implements Periodic {
         // So subsystem toggles are handled in their respective subsystems
         coastOverrideAlert.set(coastOverride.get());
         autoNotChosenAlert.set(!autoChosen.get());
-        recordingNotStartedAlert.set(!recordingStarted.get());
+        //recordingNotStartedAlert.set(!recordingStarted.get());
         batteryVoltageAlert.set(lowBatteryDebouncer.calculate(RobotController.getBatteryVoltage() <= 11.8));
         manualAimingAlert.set(manualAiming.get());
         smudgesNotZeroAlert.set(manualFlywheelRPMSmudge.get() != 0.0 || slipConstantSmudge.get() != 0.0);
