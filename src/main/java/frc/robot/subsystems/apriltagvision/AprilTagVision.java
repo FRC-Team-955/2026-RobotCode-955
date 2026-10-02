@@ -24,6 +24,7 @@ import frc.lib.Util;
 import frc.lib.subsystem.Periodic;
 import frc.robot.BuildConstants;
 import frc.robot.RobotState;
+import frc.robot.subsystems.superstructure.Turret;
 import lombok.Getter;
 import org.littletonrobotics.junction.Logger;
 
@@ -296,6 +297,7 @@ public class AprilTagVision implements Periodic {
                 // Check whether to reject pose
                 boolean rejectPose =
                         observation.tagCount() == 0 // Must have at least one tag
+                                || (metadata == Camera.TurretCam && !Turret.get().isHomed()) // Turret cam pose is unknown until homed
                                 || (observation.tagCount() == 1 && observation.ambiguity() > maxAmbiguity) // Cannot be high ambiguity if only one tag
                                 || Math.abs(observation.poseEstimate().getZ()) > maxZError // Must have realistic Z coordinate
                                 // Must be within the field boundaries
