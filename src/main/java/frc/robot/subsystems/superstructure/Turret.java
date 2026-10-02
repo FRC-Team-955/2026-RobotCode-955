@@ -7,6 +7,7 @@ import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.interpolation.TimeInterpolatableBuffer;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
@@ -21,6 +22,7 @@ import frc.lib.network.LoggedTunablePIDF;
 import frc.lib.subsystem.Periodic;
 import frc.robot.BuildConstants;
 import frc.robot.Constants;
+import frc.robot.FieldConstants;
 import frc.robot.OperatorDashboard;
 import frc.robot.RobotState;
 import frc.robot.shooting.ShootingKinematics;
@@ -30,6 +32,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.littletonrobotics.junction.Logger;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.DoubleSupplier;
@@ -91,7 +94,7 @@ public class Turret implements Periodic {
     @RequiredArgsConstructor
     public enum Goal {
         SHOOT(() -> ShootingKinematics.get().getShootingParameters().headingRad(), () -> ShootingKinematics.get().getShootingParameters().headingVelocityRadPerSec()),
-        AIM_AT_CLOSEST_HUB(() -> 0.0, () -> 0.0),
+        AIM_AT_CLOSEST_HUB(Turret::getFieldRelativeHeadingToClosestHubRad, () -> 0.0),
         ;
 
         /** Should be constant for every loop cycle */
@@ -247,6 +250,17 @@ public class Turret implements Periodic {
 
     public double getFieldRelativePositionRad() {
         return convertMechanismPositionToFieldRelativePosition(motor.getPositionRad());
+    }
+
+    private static double getFieldRelativeHeadingToClosestHubRad() {
+        Translation2d rotationAxis = robotState.getPose()
+                .transformBy(ShootingKinematics.turretRotationAxisTransformAtCurrentTime.get())
+                .getTranslation();
+        Translation2d closestHub = rotationAxis.nearest(List.of(
+                FieldConstants.Hub.topCenterPoint.toTranslation2d(),
+                FieldConstants.Hub.oppTopCenterPoint.toTranslation2d()
+        ));
+        return closestHub.minus(rotationAxis).getAngle().getRadians();
     }
 
     public double getHeadingVelocityRadPerSec() {
