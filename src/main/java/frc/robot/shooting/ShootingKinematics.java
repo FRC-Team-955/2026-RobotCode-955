@@ -70,7 +70,6 @@ public class ShootingKinematics implements Periodic {
 
     private static final LoggedTunableNumber headingToleranceDeg = new LoggedTunableNumber("ShootingKinematics/HeadingToleranceDegrees", 10.0);
     private static final LoggedTunableNumber headingTolerancePassingDeg = new LoggedTunableNumber("ShootingKinematics/HeadingTolerancePassingDegrees", 20.0);
-    private static final LoggedTunableNumber headingVelocityToleranceDegPerSec = new LoggedTunableNumber("ShootingKinematics/HeadingVelocityToleranceDegreesPerSec", 30.0);
     public static final LoggedTunableNumber velocityToleranceRPM = new LoggedTunableNumber("ShootingKinematics/VelocityToleranceRPM", 100);
     public static final LoggedTunableNumber hoodToleranceDeg = new LoggedTunableNumber("ShootingKinematics/HoodToleranceDegrees", 3.0);
 
@@ -86,7 +85,6 @@ public class ShootingKinematics implements Periodic {
     private boolean shiftMet = false;
 
     private final Debouncer velocityMetDebouncer = new Debouncer(0.15, Debouncer.DebounceType.kFalling);
-    private final Debouncer headingVelocityDebouncer = new Debouncer(0.10, Debouncer.DebounceType.kFalling);
     private final Debouncer orientationDebouncer = new Debouncer(0.1, Debouncer.DebounceType.kFalling);
 
     private ShootingParameters noPhaseDelayParameters = new ShootingParameters(
@@ -174,15 +172,6 @@ public class ShootingKinematics implements Periodic {
                 );
         Logger.recordOutput("ShootingKinematics/HeadingMet", headingMet);
 
-        boolean headingVelocityMet = operatorDashboard.manualAiming.get() ||
-                Math.abs(superstructure.turret.getHeadingVelocityRadPerSec() - noPhaseDelayParameters.headingVelocityRadPerSec())
-                        <= Units.degreesToRadians(headingVelocityToleranceDegPerSec.get());
-        Logger.recordOutput("ShootingKinematics/HeadingVelocityMet", headingVelocityMet);
-        Logger.recordOutput("ShootingKinematics/HeadingVelocityDelta", superstructure.turret.getHeadingVelocityRadPerSec() - noPhaseDelayParameters.headingVelocityRadPerSec());
-        headingVelocityMet = headingVelocityDebouncer.calculate(headingVelocityMet);
-        if (BuildConstants.isSimOrReplay)
-            Logger.recordOutput("ShootingKinematics/HeadingVelocityMetDebounced", headingVelocityMet);
-
         boolean velocityMet = Math.abs(superstructure.flywheel.getVelocityRPM() - noPhaseDelayParameters.velocityRPM())
                 <= velocityToleranceRPM.get();
         Logger.recordOutput("ShootingKinematics/VelocityMet", velocityMet);
@@ -204,8 +193,8 @@ public class ShootingKinematics implements Periodic {
             Logger.recordOutput("ShootingKinematics/OrientationMetDebounced", orientationMet);
 
         shootingParametersMet = noPhaseDelayParameters.isPass()
-                ? headingMet && headingVelocityMet
-                : shiftMet && headingMet && headingVelocityMet && velocityMet && angleMet && uncertaintyMet /*&& orientationMet*/;
+                ? headingMet
+                : shiftMet && headingMet && velocityMet && angleMet && uncertaintyMet /*&& orientationMet*/;
         Logger.recordOutput("ShootingKinematics/ShootingParametersMet", shootingParametersMet);
     }
 
