@@ -54,7 +54,8 @@ public class OperatorDashboard implements Periodic {
     // Alerts
     public final Alert intakePivotNotHomedAlert = new Alert("Intake pivot has not been homed!", Alert.AlertType.kError);
     public final Alert hoodNotHomedAlert = new Alert("Hood has not been homed!", Alert.AlertType.kError);
-    public final Alert turretNotHomedAlert = new Alert("Turret has not been homed!", Alert.AlertType.kError);
+    public final Alert turretNotHomedAlert = new Alert("Turret has not been homed! If you already tried to verify the turret home, you homed wrong.", Alert.AlertType.kError);
+    public final Alert turretVerifyingAlert = new Alert("Turret home needs to be verified! Rotate the turret as far as it will go in both directions.", Alert.AlertType.kError);
     private final Alert coastOverrideAlert = new Alert("Coast override is enabled.", Alert.AlertType.kWarning);
     public final Alert autoNotChosenAlert = new Alert("Auto is not chosen!", Alert.AlertType.kError);
     private final Alert recordingNotStartedAlert = new Alert("Recording is not started!", Alert.AlertType.kWarning);

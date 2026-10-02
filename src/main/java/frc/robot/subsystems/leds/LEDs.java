@@ -113,6 +113,14 @@ public class LEDs implements Periodic {
             return LEDPatterns.somethingIsReallyWrong;
         }
 
+        if (operatorDashboard.turretNotHomedAlert.get()) {
+            return LEDPatterns.turretNotHomed;
+        }
+
+        if (operatorDashboard.turretVerifyingAlert.get()) {
+            return LEDPatterns.turretVerifying;
+        }
+
         if (operatorDashboard.hoodNotHomedAlert.get()) {
             return LEDPatterns.hoodNotHomed;
         }

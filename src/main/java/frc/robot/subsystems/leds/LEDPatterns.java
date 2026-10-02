@@ -76,13 +76,18 @@ public class LEDPatterns {
 
     // Disabled
     public static final LEDPattern autoNotChosen = LEDPattern.solid(Color.kBlue).blink(Seconds.of(1));
-    public static final LEDPattern badAutoPlacement = LEDPattern.solid(Color.kYellow).blink(Seconds.of(0.5));
     public static final LEDPattern autoReady = LEDPattern.solid(Color.kRed).breathe(Seconds.of(1));
-    public static final LEDPattern hoodNotHomed = LEDPattern.gradient(
+    public static final LEDPattern turretNotHomed = LEDPattern.gradient(
             LEDPattern.GradientType.kContinuous,
-            Color.kGreen,
+            Color.kWhite,
             Color.kBlack
     ).scrollAtRelativeSpeed(Hertz.of(3));
+    public static final LEDPattern turretVerifying = turretNotHomed.blink(Seconds.of(0.5));
+    public static final LEDPattern hoodNotHomed = LEDPattern.gradient(
+            LEDPattern.GradientType.kContinuous,
+            Color.kYellow,
+            Color.kBlack
+    ).blink(Seconds.of(0.5));
     public static final LEDPattern intakePivotNotHomed = LEDPattern.gradient(
             LEDPattern.GradientType.kContinuous,
             Color.kOrange,
