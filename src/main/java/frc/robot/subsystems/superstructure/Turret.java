@@ -212,7 +212,7 @@ public class Turret implements Periodic {
             if (setVelocitySetpointToZero) {
                 state.velocity = 0;
             }
-            Logger.recordOutput("a", setVelocitySetpointToZero);
+            Logger.recordOutput("Superstructure/Turret/SetVelocitySetpointToZero", setVelocitySetpointToZero);
 
             motor.setMotionProfileRequest(state.position, state.velocity);
         }
