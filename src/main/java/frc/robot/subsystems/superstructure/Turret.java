@@ -44,6 +44,7 @@ public class Turret implements Periodic {
     private static final double initialPositionRad = 0.0;
 
     private static final double positionPastLimitForEmergencyStopRad = Units.degreesToRadians(10);
+    private static final double stopVelocityFeedforwardRad = Units.degreesToRadians(10);
     private static final double closeToWrappingRad = Units.degreesToRadians(45.0);
 
     private static final double homingToleranceRad = Units.degreesToRadians(10.0);
@@ -207,8 +208,8 @@ public class Turret implements Periodic {
             Logger.recordOutput("Superstructure/Turret/ProfileSetpointRad", state.position);
             Logger.recordOutput("Superstructure/Turret/ProfileSetpointRadPerSec", state.velocity);
 
-            boolean setVelocitySetpointToZero = (motor.getPositionRad() < minPositionRad + positionPastLimitForEmergencyStopRad && state.velocity < 0) ||
-                    (motor.getPositionRad() > maxPositionRad - positionPastLimitForEmergencyStopRad && state.velocity > 0);
+            boolean setVelocitySetpointToZero = (motor.getPositionRad() < minPositionRad + stopVelocityFeedforwardRad && state.velocity < 0) ||
+                    (motor.getPositionRad() > maxPositionRad - stopVelocityFeedforwardRad && state.velocity > 0);
             if (setVelocitySetpointToZero) {
                 state.velocity = 0;
             }
