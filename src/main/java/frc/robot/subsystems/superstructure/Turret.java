@@ -207,8 +207,8 @@ public class Turret implements Periodic {
             Logger.recordOutput("Superstructure/Turret/ProfileSetpointRad", state.position);
             Logger.recordOutput("Superstructure/Turret/ProfileSetpointRadPerSec", state.velocity);
 
-            boolean setVelocitySetpointToZero = (motor.getPositionRad() < minPositionRad && state.velocity < 0) ||
-                    (motor.getPositionRad() > maxPositionRad && state.velocity > 0);
+            boolean setVelocitySetpointToZero = (motor.getPositionRad() < minPositionRad + positionPastLimitForEmergencyStopRad && state.velocity < 0) ||
+                    (motor.getPositionRad() > maxPositionRad - positionPastLimitForEmergencyStopRad && state.velocity > 0);
             if (setVelocitySetpointToZero) {
                 state.velocity = 0;
             }
