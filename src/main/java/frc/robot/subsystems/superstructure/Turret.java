@@ -40,7 +40,7 @@ public class Turret implements Periodic {
     private static final double closeToWrappingRad = Units.degreesToRadians(90.0);
     private static final double homingVerificationToleranceRad = Units.degreesToRadians(30.0);
 
-    private static final TrapezoidProfile.Constraints constraints = new TrapezoidProfile.Constraints(12, 36);
+    private static final TrapezoidProfile.Constraints constraints = new TrapezoidProfile.Constraints(12, 54);
 
     private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
     private static final RobotState robotState = RobotState.get();
