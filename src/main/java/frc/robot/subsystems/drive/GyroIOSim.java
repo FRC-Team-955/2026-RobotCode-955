@@ -1,6 +1,7 @@
 package frc.robot.subsystems.drive;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import frc.robot.SimManager;
 import org.ironmaple.simulation.drivesims.GyroSimulation;
 
@@ -17,7 +18,10 @@ public class GyroIOSim extends GyroIO {
     @Override
     public void updateInputs(GyroIOInputs inputs) {
         inputs.connected = true;
+
         inputs.yawPositionRad = gyroSimulation.getGyroReading().getRadians();
+        inputs.orientation = new Rotation3d(gyroSimulation.getGyroReading());
+
         inputs.angularVelocityZRadPerSec = gyroSimulation.getMeasuredAngularVelocity().in(RadiansPerSecond);
 
         inputs.odometryYawTimestamps = ModuleIOSim.getSimulationOdometryTimeStamps();

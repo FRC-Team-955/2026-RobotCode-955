@@ -1,13 +1,16 @@
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Pose3d;
 import frc.lib.Util;
 import frc.lib.subsystem.Periodic;
+import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.superintake.Superintake;
 import frc.robot.subsystems.superstructure.Superstructure;
 import org.littletonrobotics.junction.Logger;
 
 public class RobotMechanism implements Periodic {
     private static final RobotState robotState = RobotState.get();
+    private static final Drive drive = Drive.get();
     private static final Superintake superintake = Superintake.get();
     private static final Superstructure superstructure = Superstructure.get();
 
@@ -29,8 +32,11 @@ public class RobotMechanism implements Periodic {
 
     @Override
     public void periodicAfterCommands() {
+        Pose3d pose = robotState.getMechanismPose();
+        pose = new Pose3d(pose.getTranslation(), pose.getRotation().rotateBy(drive.getGyroPitchRollRotation()));
+        Logger.recordOutput("RobotMechanism/Pose", pose);
+
         // All transforms are relative to center of robot at the bottom of the frame rail
-        Logger.recordOutput("RobotMechanism/Pose", robotState.getMechanismPose());
         Logger.recordOutput(
                 "RobotMechanism/Components",
                 superintake.intakeRollers.getMechanismTransform(),

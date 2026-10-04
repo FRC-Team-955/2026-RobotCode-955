@@ -9,10 +9,7 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.filter.SlewRateLimiter;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.geometry.Twist2d;
+import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -343,10 +340,6 @@ public class Drive extends CommandBasedSubsystem {
         Logger.recordOutput("Drive/ActualState", actualState);
     }
 
-    public boolean isPitchedOrRolled() {
-        return Math.abs(gyroInputs.orientation.getX()) > Units.degreesToRadians(15.0) || Math.abs(gyroInputs.orientation.getY()) > Units.degreesToRadians(15.0);
-    }
-
     private State evaluateStateMachine(State wantedState) {
         // Stop moving when idle or disabled
         if (wantedState == State.ACTUALLY_STOP || DriverStation.isDisabled()) {
@@ -502,6 +495,18 @@ public class Drive extends CommandBasedSubsystem {
             states[i] = modules[i].getPosition();
         }
         return states;
+    }
+
+    @AutoLogOutput(key = "Drive/IsPitchedOrRolled")
+    public boolean isPitchedOrRolled() {
+        return Math.abs(gyroInputs.orientation.getX()) > Units.degreesToRadians(5.0) || Math.abs(gyroInputs.orientation.getY()) > Units.degreesToRadians(5.0);
+    }
+
+    @AutoLogOutput(key = "Drive/GyroPitchRollRotation")
+    public Rotation3d getGyroPitchRollRotation() {
+        return gyroInputs.orientation
+                // Remove yaw component
+                .rotateBy(new Rotation3d(0.0, 0.0, -gyroInputs.yawPositionRad));
     }
 
     public DriveCommand stop() {
