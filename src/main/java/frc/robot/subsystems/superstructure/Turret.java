@@ -288,7 +288,7 @@ public class Turret implements Periodic {
 
     private void updateHomingVerification() {
         observedMinRad = Math.min(observedMinRad, motor.getPositionRad());
-        observedMaxRad = Math.min(observedMaxRad, motor.getPositionRad());
+        observedMaxRad = Math.max(observedMaxRad, motor.getPositionRad());
 
         Logger.recordOutput("Superstructure/Turret/Homing/ObservedMinRad", observedMinRad);
         Logger.recordOutput("Superstructure/Turret/Homing/ObservedMaxRad", observedMaxRad);
