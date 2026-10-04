@@ -194,7 +194,7 @@ public class LEDs implements Periodic {
             return patternIfEmpty;
         }
 
-        return patterns.get((int) Math.floor(Timer.getTimestamp() % (0.5 * patterns.size())));
+        return patterns.get((int) Math.floor(Timer.getTimestamp() % patterns.size()));
     }
 }
 
