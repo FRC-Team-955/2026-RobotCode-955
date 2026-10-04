@@ -33,7 +33,8 @@ public class Superstructure extends CommandBasedSubsystem {
     // https://v6.docs.ctr-electronics.com/en/stable/docs/hardware-reference/canrange/tuning-canrange.html
     private static final LoggedTunableNumber hasFuelThresholdMeters = new LoggedTunableNumber("Superstructure/HasFuelThresholdMeters", 0.5);
     private static final LoggedTunableNumber hasFuelDebounceSeconds = new LoggedTunableNumber("Superstructure/HasFuelDebounceSeconds", 0.8);
-    private static final LoggedTunableNumber commitToShotThresholdMeters = new LoggedTunableNumber("Superstructure/CommitToShotThresholdMeters", 0.15);
+    private static final LoggedTunableNumber fuelPresentThresholdMeters = new LoggedTunableNumber("Superstructure/FuelPresentThresholdMeters", 0.10);
+    private static final LoggedTunableNumber fuelClearThresholdMeters = new LoggedTunableNumber("Superstructure/FuelClearThresholdMeters", 0.15);
     private static final LoggedTunableNumber commitToShotTimeSeconds = new LoggedTunableNumber("Superstructure/CommitToShotTimeSeconds", 0.1);
     private static final LoggedTunableNumber antiJamStartSeconds = new LoggedTunableNumber("Superstructure/AntiJamStartSeconds", 0.7);
     private static final LoggedTunableNumber antiJamTimeSeconds = new LoggedTunableNumber("Superstructure/AntiJamTimeSeconds", 0.15);
@@ -89,6 +90,7 @@ public class Superstructure extends CommandBasedSubsystem {
 
     private final Debouncer hasFuelDebouncer = new Debouncer(hasFuelDebounceSeconds.get(), Debouncer.DebounceType.kFalling);
     private double lastStartedShot = 0.0;
+    private boolean fuelGapSeen = true;
 
     @Getter
     private boolean hasFuel = false;
@@ -125,6 +127,7 @@ public class Superstructure extends CommandBasedSubsystem {
 
         if (goal != Goal.SHOOT && goal != Goal.SHOOT_FORCE && goal != Goal.SHOOT_DEBUG) {
             lastStartedShot = Timer.getTimestamp();
+            fuelGapSeen = true;
         }
 
         switch (goal) {
@@ -172,8 +175,12 @@ public class Superstructure extends CommandBasedSubsystem {
                         spindexer.setGoal(Spindexer.Goal.FEED);
                     }
 
-                    if (fuelSensor.getDistanceMeters() < commitToShotThresholdMeters.get() && !needsToCommitToShot) {
+                    double fuelDistance = fuelSensor.getDistanceMeters();
+                    if (fuelDistance > fuelClearThresholdMeters.get()) {
+                        fuelGapSeen = true;
+                    } else if (fuelGapSeen && fuelDistance < fuelPresentThresholdMeters.get() && !needsToCommitToShot) {
                         lastStartedShot = Timer.getTimestamp();
+                        fuelGapSeen = false;
                     }
                 } else {
                     feeder.setGoal(Feeder.Goal.IDLE);
