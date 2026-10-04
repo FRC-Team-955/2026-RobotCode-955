@@ -179,32 +179,28 @@ public class Controller implements Periodic {
         );
     }
 
-    private Trigger primaryDisconnected() {
-        return new Trigger(() -> !io.isConnected());
-    }
-
     public Trigger a() {
-        return io.a().or(primaryDisconnected().and(secondaryIo.a()));
+        return io.a().or(secondaryIo.a());
     }
 
     public Trigger b() {
-        return io.b().or(primaryDisconnected().and(secondaryIo.b()));
+        return io.b().or(secondaryIo.b());
     }
 
     public Trigger x() {
-        return io.x().or(primaryDisconnected().and(secondaryIo.x()));
+        return io.x().or(secondaryIo.x());
     }
 
     public Trigger y() {
-        return io.y().or(primaryDisconnected().and(secondaryIo.y()));
+        return io.y().or(secondaryIo.y());
     }
 
     public Trigger leftBumper() {
-        return io.leftBumper().or(primaryDisconnected().and(secondaryIo.leftBumper()));
+        return io.leftBumper().or(secondaryIo.leftBumper());
     }
 
     public Trigger rightBumper() {
-        return io.rightBumper().or(primaryDisconnected().and(secondaryIo.rightBumper()));
+        return io.rightBumper().or(secondaryIo.rightBumper());
     }
 
     /**
@@ -212,7 +208,7 @@ public class Controller implements Periodic {
      * will be true when the axis value is greater than 0.5.
      */
     public Trigger leftTrigger() {
-        return io.leftTrigger().or(primaryDisconnected().and(secondaryIo.leftTrigger()));
+        return io.leftTrigger().or(secondaryIo.leftTrigger());
     }
 
     /**
@@ -220,6 +216,6 @@ public class Controller implements Periodic {
      * will be true when the axis value is greater than 0.5.
      */
     public Trigger rightTrigger() {
-        return io.rightTrigger().or(primaryDisconnected().and(secondaryIo.rightTrigger()));
+        return io.rightTrigger().or(secondaryIo.rightTrigger());
     }
 }
