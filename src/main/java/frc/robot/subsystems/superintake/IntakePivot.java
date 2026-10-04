@@ -58,8 +58,8 @@ public class IntakePivot implements Periodic {
                                     .withNeutralMode(NeutralModeValue.Coast)
                                     .withInverted(InvertedValue.CounterClockwise_Positive))
                             .withCurrentLimits(new CurrentLimitsConfigs()
-                                    .withStatorCurrentLimit(70)
-                                    .withSupplyCurrentLimit(50))
+                                    .withStatorCurrentLimit(90)
+                                    .withSupplyCurrentLimit(70))
                             .withFeedback(new FeedbackConfigs()
                                     .withSensorToMechanismRatio(5.0 * 5.0 * 2.0)),
                     initialPositionRad,
