@@ -37,8 +37,7 @@ public class Turret implements Periodic {
 
     private static final double positionPastLimitForEmergencyStopRad = Units.degreesToRadians(10);
     private static final double positionBeforeLimitToStopVelocityFeedforwardRad = Units.degreesToRadians(15);
-    private static final double closeToWrappingRad = Units.degreesToRadians(45.0);
-
+    private static final double closeToWrappingRad = Units.degreesToRadians(90.0);
     private static final double homingToleranceRad = Units.degreesToRadians(10.0);
     private static final double homingOvershootToleranceRad = Units.degreesToRadians(5.0);
 
