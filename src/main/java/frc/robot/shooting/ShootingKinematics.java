@@ -32,7 +32,7 @@ import static frc.robot.subsystems.drive.DriveConstants.carpetToBottomOfFrameRai
 
 public class ShootingKinematics implements Periodic {
     /** Actual RPM * slip constant = exerted RPM (linear speed of ball = surface speed) */
-    public static final double slipConstant = 0.67;
+    public static final double slipConstant = 0.66;
 
     // KEEP SYNCED WITH shooting_regression.py
     public static final double bottomOfFrameRailsToFlywheelHeightMeters = Units.inchesToMeters(15.236467);
