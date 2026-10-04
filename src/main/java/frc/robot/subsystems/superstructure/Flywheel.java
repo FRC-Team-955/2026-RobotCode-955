@@ -81,7 +81,7 @@ public class Flywheel implements Periodic {
     public enum Goal {
         IDLE(() -> 0),
         SHOOT(() -> shootingKinematics.getShootingParameters().velocityRPM()),
-        SHOOT_DEBUG(() -> 500.0),
+        SHOOT_DEBUG(() -> 450.0),
         EJECT(ejectRPM::get),
         ;
 
