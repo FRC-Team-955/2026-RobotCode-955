@@ -267,8 +267,9 @@ public class Turret implements Periodic {
     }
 
     public boolean isCloseToWrapping() {
-        return motor.getPositionRad() <= minPositionRad + closeToWrappingRad ||
-                motor.getPositionRad() >= maxPositionRad - closeToWrappingRad;
+        return !motor.isEmergencyStopped() &&
+                (motor.getPositionRad() <= minPositionRad + closeToWrappingRad ||
+                        motor.getPositionRad() >= maxPositionRad - closeToWrappingRad);
     }
 
     public void home() {
