@@ -39,8 +39,8 @@ public class IntakeRollers implements Periodic {
                                     .withNeutralMode(NeutralModeValue.Coast)
                                     .withInverted(InvertedValue.Clockwise_Positive))
                             .withCurrentLimits(new CurrentLimitsConfigs()
-                                    .withStatorCurrentLimit(140)
-                                    .withSupplyCurrentLimit(70))
+                                    .withStatorCurrentLimit(160)
+                                    .withSupplyCurrentLimit(80))
                             .withFeedback(new FeedbackConfigs()
                                     .withSensorToMechanismRatio(3)),
                     0.0,
