@@ -96,8 +96,8 @@ public class LEDPatterns {
 
     // Enabled
     public static final LEDPattern idle = LEDPattern.kOff;
-    public static final LEDPattern aiming = LEDPattern.solid(Color.kYellow);
-    public static final LEDPattern shooting = LEDPattern.solid(Color.kGreen);
+    public static final LEDPattern aiming = LEDPattern.solid(Color.kOrange);
+    public static final LEDPattern shooting = LEDPattern.solid(Color.kYellow);
     public static final LEDPattern shootingForced = LEDPattern.gradient(
             LEDPattern.GradientType.kContinuous,
             Color.kGreen,
@@ -105,5 +105,6 @@ public class LEDPatterns {
     ).scrollAtRelativeSpeed(Hertz.of(1));
     public static final LEDPattern waitingForShift = LEDPattern.solid(new Color(255, 0, 128)).blink(Seconds.of(0.1));
     public static final LEDPattern turretCloseToWrapping = LEDPattern.solid(Color.kBlue).blink(Seconds.of(0.1));
+    public static final LEDPattern visionUpdate = LEDPattern.solid(Color.kGreen);
 }
 
