@@ -19,7 +19,6 @@ import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import frc.robot.BuildConstants;
-import frc.robot.shooting.ShootingKinematics;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.Nullable;
 
@@ -96,15 +95,15 @@ public class AprilTagVisionConstants {
                 1.5,
                 1.0
         ),
-        TurretCam(
-                (timestampSeconds) -> ShootingKinematics.turretRotationAxisTransformAtTime
-                        .apply(timestampSeconds)
-                        .map(AprilTagVisionConstants::convertTurretRotationAxisToTurretCamRobotToCamera),
-                () -> convertTurretRotationAxisToTurretCamRobotToCamera(ShootingKinematics.turretRotationAxisTransformAtCurrentTime.get()),
-                // Trust more at close distance, less at long distance
-                1.5,
-                3.0
-        ),
+        //TurretCam(
+        //        (timestampSeconds) -> ShootingKinematics.turretRotationAxisTransformAtTime
+        //                .apply(timestampSeconds)
+        //                .map(AprilTagVisionConstants::convertTurretRotationAxisToTurretCamRobotToCamera),
+        //        () -> convertTurretRotationAxisToTurretCamRobotToCamera(ShootingKinematics.turretRotationAxisTransformAtCurrentTime.get()),
+        //        // Trust more at close distance, less at long distance
+        //        1.5,
+        //        3.0
+        //),
         ;
 
         /** If null, currentRobotToCameraSupplier will be used on the real robot */
