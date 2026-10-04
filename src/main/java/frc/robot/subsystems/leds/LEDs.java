@@ -1,9 +1,6 @@
 package frc.robot.subsystems.leds;
 
-import edu.wpi.first.wpilibj.AddressableLEDBuffer;
-import edu.wpi.first.wpilibj.AddressableLEDBufferView;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.LEDPattern;
+import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import frc.lib.Util;
@@ -20,6 +17,8 @@ import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.mechanism.LoggedMechanism2d;
 import org.littletonrobotics.junction.mechanism.LoggedMechanismLigament2d;
 import org.littletonrobotics.junction.mechanism.LoggedMechanismRoot2d;
+
+import java.util.LinkedList;
 
 import static frc.robot.subsystems.leds.LEDConstants.createIO;
 import static frc.robot.subsystems.leds.LEDConstants.length;
@@ -145,24 +144,30 @@ public class LEDs implements Periodic {
     }
 
     private LEDPattern getEnabledPatternFirstHalf() {
+        LinkedList<LEDPattern> patterns = new LinkedList<>();
+
+        if (superstructure.turret.isCloseToWrapping()) {
+            patterns.add(LEDPatterns.turretCloseToWrapping);
+        }
+
         if (isSomethingReallyWrong() ||
                 hubShiftTracker.gameDataBrokenAlert.get()) {
-            return LEDPatterns.somethingIsReallyWrong;
+            patterns.add(LEDPatterns.somethingIsReallyWrong);
         }
 
         if (deviceManager.anyMotorHasHighTemperature()) {
-            return LEDPatterns.hotMotors;
+            patterns.add(LEDPatterns.hotMotors);
         }
 
         if (operatorDashboard.isBatteryVoltageAlertActive()) {
-            return LEDPatterns.lowBattery;
+            patterns.add(LEDPatterns.lowBattery);
         }
 
-        if (superstructure.turret.isCloseToWrapping()) {
-            return LEDPatterns.turretCloseToWrapping;
+        if (patterns.isEmpty()) {
+            return LEDPatterns.idle;
         }
 
-        return LEDPatterns.idle;
+        return patterns.get((int) Math.floor(Timer.getTimestamp() % (0.5 * patterns.size())));
     }
 
     private LEDPattern getEnabledPatternSecondHalf() {
