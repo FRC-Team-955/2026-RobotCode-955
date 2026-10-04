@@ -320,6 +320,15 @@ public class ShootingKinematics implements Periodic {
         double vx = shotVelFieldRelative.getX();
         double vy = shotVelFieldRelative.getY();
 
+        // If we are pitched or rolled, rotate 3d shooting vector
+        if (drive.isPitchedOrRolled()) {
+            Translation3d v = new Translation3d(vx, vy, vz)
+                    .rotateBy(drive.getGyroPitchRollRotation().unaryMinus());
+            vx = v.getX();
+            vy = v.getY();
+            vz = v.getZ();
+        }
+
         // 4. Now calculate phi, theta, and shooting magnitude from 3d shooting vector
         double v = Math.sqrt(vx * vx + vy * vy + vz * vz);
         double phi = Math.asin(vz / v);

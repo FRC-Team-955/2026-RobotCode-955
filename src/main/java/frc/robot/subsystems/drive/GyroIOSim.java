@@ -21,6 +21,8 @@ public class GyroIOSim extends GyroIO {
 
         inputs.yawPositionRad = gyroSimulation.getGyroReading().getRadians();
         inputs.orientation = new Rotation3d(gyroSimulation.getGyroReading());
+        // If you want to test shooting on the bump:
+        //.rotateBy(new Rotation3d(Units.degreesToRadians(15), Units.degreesToRadians(-15), 0.0));
 
         inputs.angularVelocityZRadPerSec = gyroSimulation.getMeasuredAngularVelocity().in(RadiansPerSecond);
 
