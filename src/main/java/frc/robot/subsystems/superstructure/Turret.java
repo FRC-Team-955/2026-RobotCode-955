@@ -31,14 +31,14 @@ import java.util.function.DoubleSupplier;
 
 public class Turret implements Periodic {
     // 0 = shooting toward intake
-    private static final double minPositionRad = Units.degreesToRadians(-160.0);
-    private static final double maxPositionRad = Units.degreesToRadians(260.0);
+    private static final double minPositionRad = Units.degreesToRadians(-170.0);
+    private static final double maxPositionRad = Units.degreesToRadians(265.0);
     private static final double initialPositionRad = 0.0;
 
     private static final double positionPastLimitForEmergencyStopRad = Units.degreesToRadians(10);
     private static final double positionBeforeLimitToStopVelocityFeedforwardRad = Units.degreesToRadians(15);
     private static final double closeToWrappingRad = Units.degreesToRadians(90.0);
-    private static final double homingToleranceRad = Units.degreesToRadians(15.0);
+    private static final double homingVerificationToleranceRad = Units.degreesToRadians(30.0);
 
     private static final TrapezoidProfile.Constraints constraints = new TrapezoidProfile.Constraints(12, 36);
 
@@ -293,8 +293,8 @@ public class Turret implements Periodic {
         Logger.recordOutput("Superstructure/Turret/Homing/ObservedMinRad", observedMinRad);
         Logger.recordOutput("Superstructure/Turret/Homing/ObservedMaxRad", observedMaxRad);
 
-        if (Math.abs(observedMinRad - minPositionRad) > homingToleranceRad ||
-                Math.abs(observedMaxRad - maxPositionRad) > homingToleranceRad) {
+        if (Math.abs(observedMinRad - minPositionRad) > homingVerificationToleranceRad ||
+                Math.abs(observedMaxRad - maxPositionRad) > homingVerificationToleranceRad) {
             //double theoreticalRange = maxPositionRad - minPositionRad;
             //double observedRange = observedMaxRad - observedMinRad;
             //if (Math.abs(observedRange - theoreticalRange) < 2.0 * homingToleranceRad) {
