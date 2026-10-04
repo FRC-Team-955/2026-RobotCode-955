@@ -19,6 +19,7 @@ import org.littletonrobotics.junction.mechanism.LoggedMechanismLigament2d;
 import org.littletonrobotics.junction.mechanism.LoggedMechanismRoot2d;
 
 import java.util.LinkedList;
+import java.util.List;
 
 import static frc.robot.subsystems.leds.LEDConstants.createIO;
 import static frc.robot.subsystems.leds.LEDConstants.length;
@@ -108,39 +109,42 @@ public class LEDs implements Periodic {
     }
 
     private LEDPattern getDisabledPattern() {
+        LinkedList<LEDPattern> patterns = new LinkedList<>();
+
         if (isSomethingReallyWrong()) {
-            return LEDPatterns.somethingIsReallyWrong;
+            patterns.add(LEDPatterns.somethingIsReallyWrong);
         }
 
         if (operatorDashboard.turretNotHomedAlert.get()) {
-            return LEDPatterns.turretNotHomed;
+            patterns.add(LEDPatterns.turretNotHomed);
         }
 
         if (operatorDashboard.turretVerifyingAlert.get()) {
-            return LEDPatterns.turretVerifying;
+            patterns.add(LEDPatterns.turretVerifying);
         }
 
         if (operatorDashboard.hoodNotHomedAlert.get()) {
-            return LEDPatterns.hoodNotHomed;
+            patterns.add(LEDPatterns.hoodNotHomed);
         }
 
         if (operatorDashboard.intakePivotNotHomedAlert.get()) {
-            return LEDPatterns.intakePivotNotHomed;
+            patterns.add(LEDPatterns.intakePivotNotHomed);
         }
 
         if (operatorDashboard.autoNotChosenAlert.get()) {
-            return LEDPatterns.autoNotChosen;
+            patterns.add(LEDPatterns.autoNotChosen);
         }
 
         if (operatorDashboard.isBatteryVoltageAlertActive()) {
-            return LEDPatterns.lowBattery;
+            patterns.add(LEDPatterns.lowBattery);
         }
 
         //if (operatorDashboard.autoChosen.get() && autoManager.getSelectedAutoStartingPose().isPresent() && !autoManager.isAtAutoStartingPose()) {
         //    LEDPatterns.autoPlacementProgress(autoManager::getPlacementProgress).applyTo(buffer);
         //} else {
-        return LEDPatterns.autoReady;
         //}
+
+        return cycleThroughPatterns(patterns, LEDPatterns.autoReady);
     }
 
     private LEDPattern getEnabledPatternFirstHalf() {
@@ -163,11 +167,7 @@ public class LEDs implements Periodic {
             patterns.add(LEDPatterns.lowBattery);
         }
 
-        if (patterns.isEmpty()) {
-            return LEDPatterns.idle;
-        }
-
-        return patterns.get((int) Math.floor(Timer.getTimestamp() % (0.5 * patterns.size())));
+        return cycleThroughPatterns(patterns, LEDPatterns.idle);
     }
 
     private LEDPattern getEnabledPatternSecondHalf() {
@@ -187,6 +187,14 @@ public class LEDs implements Periodic {
             case SHOOT_DEBUG -> LEDPatterns.shootingDebug;
             default -> LEDPatterns.idle;
         };
+    }
+
+    private static LEDPattern cycleThroughPatterns(List<LEDPattern> patterns, LEDPattern patternIfEmpty) {
+        if (patterns.isEmpty()) {
+            return patternIfEmpty;
+        }
+
+        return patterns.get((int) Math.floor(Timer.getTimestamp() % (0.5 * patterns.size())));
     }
 }
 
