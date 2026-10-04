@@ -91,7 +91,7 @@ public class LEDPatterns {
     public static final LEDPattern intakePivotNotHomed = LEDPattern.gradient(
             LEDPattern.GradientType.kContinuous,
             Color.kOrange,
-            Color.kBlack
+            Color.kRed
     ).scrollAtRelativeSpeed(Hertz.of(3));
 
     // Enabled
