@@ -60,6 +60,11 @@ public class ControllerIOPS5 extends ControllerIO {
     }
 
     @Override
+    public Trigger start() {
+        return controller.options();
+    }
+
+    @Override
     public Trigger leftTrigger() {
         return controller.L2();
     }

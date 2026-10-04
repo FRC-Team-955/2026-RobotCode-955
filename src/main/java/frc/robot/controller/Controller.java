@@ -195,6 +195,10 @@ public class Controller implements Periodic {
         return io.y().or(secondaryIo.y());
     }
 
+    public Trigger start() {
+        return io.start().or(secondaryIo.start());
+    }
+
     public Trigger leftBumper() {
         return io.leftBumper().or(secondaryIo.leftBumper());
     }

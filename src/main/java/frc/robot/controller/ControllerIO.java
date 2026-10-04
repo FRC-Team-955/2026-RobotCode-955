@@ -23,6 +23,8 @@ public abstract class ControllerIO {
 
     public abstract Trigger y();
 
+    public abstract Trigger start();
+
     public abstract Trigger leftTrigger();
 
     public abstract Trigger leftBumper();
