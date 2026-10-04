@@ -60,6 +60,7 @@ public class Superstructure extends CommandBasedSubsystem {
         IDLE,
         SHOOT,
         SHOOT_FORCE,
+        SHOOT_DEBUG,
         EJECT,
         HOME_HOOD,
         HOME_HOOD_FINALIZE,
@@ -122,7 +123,7 @@ public class Superstructure extends CommandBasedSubsystem {
     public void periodicAfterCommands() {
         Logger.recordOutput("Superstructure/Goal", goal);
 
-        if (goal != Goal.SHOOT && goal != Goal.SHOOT_FORCE) {
+        if (goal != Goal.SHOOT && goal != Goal.SHOOT_FORCE && goal != Goal.SHOOT_DEBUG) {
             lastStartedShot = Timer.getTimestamp();
         }
 
@@ -138,16 +139,28 @@ public class Superstructure extends CommandBasedSubsystem {
                     default -> hood.setGoal(Hood.Goal.STOW);
                 }
             }
-            case SHOOT, SHOOT_FORCE -> {
-                flywheel.setGoal(Flywheel.Goal.SHOOT);
-                hood.setGoal(Hood.Goal.SHOOT);
-                turret.setGoal(Turret.Goal.SHOOT);
+            case SHOOT, SHOOT_FORCE, SHOOT_DEBUG -> {
+                flywheel.setGoal(
+                        goal == Goal.SHOOT_DEBUG
+                                ? Flywheel.Goal.SHOOT_DEBUG
+                                : Flywheel.Goal.SHOOT
+                );
+                hood.setGoal(
+                        goal == Goal.SHOOT_DEBUG
+                                ? Hood.Goal.SHOOT_DEBUG
+                                : Hood.Goal.SHOOT
+                );
+                turret.setGoal(
+                        goal == Goal.SHOOT_DEBUG
+                                ? Turret.Goal.SHOOT_DEBUG
+                                : Turret.Goal.SHOOT
+                );
 
                 boolean needsToCommitToShot = Timer.getTimestamp() - lastStartedShot < commitToShotTimeSeconds.get();
                 if (BuildConstants.isSimOrReplay)
                     Logger.recordOutput("Superstructure/NeedsToCommitToShot", needsToCommitToShot);
                 boolean shouldShoot = shootingKinematics.isShootingParametersMet() || needsToCommitToShot;
-                if (goal == Goal.SHOOT_FORCE || shouldShoot) {
+                if (goal == Goal.SHOOT_FORCE || goal == Goal.SHOOT_DEBUG || shouldShoot) {
                     feeder.setGoal(Feeder.Goal.FEED);
 
                     double antiJamStart = antiJamStartSeconds.get();

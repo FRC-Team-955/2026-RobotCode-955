@@ -179,6 +179,7 @@ public class LEDs implements Periodic {
                             : LEDPatterns.waitingForShift
             );
             case SHOOT_FORCE -> LEDPatterns.shootingForced;
+            case SHOOT_DEBUG -> LEDPatterns.shootingDebug;
             default -> LEDPatterns.idle;
         };
     }

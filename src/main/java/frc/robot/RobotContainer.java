@@ -107,6 +107,7 @@ public class RobotContainer {
                 drive.joystickDrive().withAiming(),
                 superstructure.setGoal(Superstructure.Goal.SHOOT_FORCE)
         ));
+        controller.start().toggleOnTrue(superstructure.setGoal(Superstructure.Goal.SHOOT_DEBUG));
 
         controller.x()
                 .whileTrue(Commands.parallel(

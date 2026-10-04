@@ -87,6 +87,7 @@ public class Turret implements Periodic {
     @RequiredArgsConstructor
     public enum Goal {
         SHOOT(() -> ShootingKinematics.get().getShootingParameters().headingRad(), () -> ShootingKinematics.get().getShootingParameters().headingVelocityRadPerSec()),
+        SHOOT_DEBUG(() -> RobotState.get().getRotation().getRadians() + Math.PI / 4.0, () -> 0.0),
         AIM_AT_CLOSEST_HUB(Turret::getFieldRelativeHeadingToClosestHubRad, () -> 0.0),
         ;
 

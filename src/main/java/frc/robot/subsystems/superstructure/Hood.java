@@ -82,6 +82,7 @@ public class Hood implements Periodic {
     public enum Goal {
         STOW(() -> minPositionRad),
         SHOOT(() -> convertBetweenShotAngleAndHoodAngleRad(shootingKinematics.getShootingParameters().angleRad())),
+        SHOOT_DEBUG(() -> maxPositionRad),
         HOME(null),
         HOME_FINALIZE(null),
         ;
