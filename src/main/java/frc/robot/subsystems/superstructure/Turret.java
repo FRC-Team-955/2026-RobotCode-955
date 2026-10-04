@@ -297,7 +297,7 @@ public class Turret implements Periodic {
                 Math.abs(observedMaxRad - maxPositionRad) > homingToleranceRad) {
             double theoreticalRange = maxPositionRad - minPositionRad;
             double observedRange = observedMaxRad - observedMinRad;
-            if (Math.abs(observedRange - theoreticalRange) > 2.0 * homingToleranceRad) {
+            if (Math.abs(observedRange - theoreticalRange) < 2.0 * homingToleranceRad) {
                 // Verification failed
                 homed = false;
                 operatorDashboard.turretNotHomedAlert.set(true);
