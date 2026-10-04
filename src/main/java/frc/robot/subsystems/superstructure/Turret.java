@@ -143,20 +143,21 @@ public class Turret implements Periodic {
             updateHomingVerification();
         }
 
-        boolean shouldEmergencyStop = !homed ||
-                (!DriverStation.isFMSAttached() && needsToVerifyRange) ||
+        boolean forceEmergencyStop = !homed ||
+                (!DriverStation.isFMSAttached() && needsToVerifyRange);
+        boolean shouldEmergencyStop =
                 emergencyStopDebouncer.calculate(motor.getStatorCurrentAmps() >= 50) ||
-                (motor.getAppliedVolts() > 0 &&
-                        motor.getPositionRad() > (maxPositionRad + positionPastLimitForEmergencyStopRad)) ||
-                (motor.getAppliedVolts() < 0 &&
-                        motor.getPositionRad() < (minPositionRad - positionPastLimitForEmergencyStopRad));
+                        (motor.getAppliedVolts() > 0 &&
+                                motor.getPositionRad() > (maxPositionRad + positionPastLimitForEmergencyStopRad)) ||
+                        (motor.getAppliedVolts() < 0 &&
+                                motor.getPositionRad() < (minPositionRad - positionPastLimitForEmergencyStopRad));
         if (!motor.isEmergencyStopped()) {
-            if ((shouldEmergencyStop || operatorDashboard.turretEStop.get()) && !BuildConstants.isSim) {
+            if (forceEmergencyStop || shouldEmergencyStop || operatorDashboard.turretEStop.get()) {
                 motor.emergencyStop(NeutralModeValue.Coast);
                 operatorDashboard.turretEStop.set(true);
             }
         } else {
-            if (!operatorDashboard.turretEStop.get()) {
+            if (!forceEmergencyStop || !operatorDashboard.turretEStop.get()) {
                 motor.undoEmergencyStop(NeutralModeValue.Brake);
                 operatorDashboard.turretEStop.set(false);
             }
