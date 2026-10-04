@@ -41,6 +41,8 @@ public class DriveConstrainer {
     }
 
     public void constrainFieldRelativeSpeedsLinear(ChassisSpeeds wantedSpeeds) {
+        wantedLinearSpeed = new Translation2d(wantedSpeeds.vxMetersPerSecond, wantedSpeeds.vyMetersPerSecond);
+
         if (constraints == null) {
             return;
         }
@@ -50,7 +52,6 @@ public class DriveConstrainer {
             linearAccelLimiter.setLimit(constraints.maxLinearAccelerationMetersPerSecPerSec().get());
         }
 
-        wantedLinearSpeed = new Translation2d(wantedSpeeds.vxMetersPerSecond, wantedSpeeds.vyMetersPerSecond);
         // Limit max vel
         if (constraints.maxLinearVelocityMetersPerSec() != null &&
                 wantedLinearSpeed.getNorm() > constraints.maxLinearVelocityMetersPerSec().get()) {
@@ -77,6 +78,8 @@ public class DriveConstrainer {
     }
 
     public void constrainFieldRelativeSpeedsAngular(ChassisSpeeds wantedSpeeds) {
+        wantedAngularSpeed = wantedSpeeds.omegaRadiansPerSecond;
+
         if (constraints == null) {
             return;
         }
@@ -86,7 +89,6 @@ public class DriveConstrainer {
             angularAccelLimiter.setLimit(constraints.maxAngularAccelerationRadPerSecPerSec().get());
         }
 
-        wantedAngularSpeed = wantedSpeeds.omegaRadiansPerSecond;
         // Limit max vel
         if (constraints.maxAngularVelocityRadPerSec() != null &&
                 Math.abs(wantedAngularSpeed) > constraints.maxAngularVelocityRadPerSec().get()) {
