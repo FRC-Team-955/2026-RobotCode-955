@@ -82,7 +82,7 @@ public class DriveConstants {
     );
 
     /** Must be below maxAngularVelocityRadPerSec */
-    public static final double joystickMaxAngularSpeedRadPerSec = Units.degreesToRadians(400);
+    public static final double joystickMaxAngularSpeedRadPerSec = Units.degreesToRadians(250);
     public static final double joystickDriveDeadband = 0.05;
 
     static final ModuleConfig moduleConfig = switch (BuildConstants.mode) {
