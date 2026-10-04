@@ -38,8 +38,7 @@ public class Turret implements Periodic {
     private static final double positionPastLimitForEmergencyStopRad = Units.degreesToRadians(10);
     private static final double positionBeforeLimitToStopVelocityFeedforwardRad = Units.degreesToRadians(15);
     private static final double closeToWrappingRad = Units.degreesToRadians(90.0);
-    private static final double homingToleranceRad = Units.degreesToRadians(10.0);
-    private static final double homingOvershootToleranceRad = Units.degreesToRadians(5.0);
+    private static final double homingToleranceRad = Units.degreesToRadians(15.0);
 
     private static final TrapezoidProfile.Constraints constraints = new TrapezoidProfile.Constraints(12, 36);
 
@@ -108,8 +107,9 @@ public class Turret implements Periodic {
 
     @Getter
     private boolean homed = false;
-    private boolean verifyingHoming = false;
+    private boolean needsToVerifyRange = false;
     private double observedMinRad = initialPositionRad;
+    private double observedMaxRad = initialPositionRad;
 
     private static Turret instance;
 
@@ -139,15 +139,13 @@ public class Turret implements Periodic {
 
     @Override
     public void periodicBeforeCommands() {
-        if (verifyingHoming) {
+        if (needsToVerifyRange) {
             updateHomingVerification();
         }
 
-        if (homed && motor.getPositionRad() < minPositionRad - homingOvershootToleranceRad) {
-            // TODO: trigger homing failed alert
-        }
-
-        boolean shouldEmergencyStop = emergencyStopDebouncer.calculate(motor.getStatorCurrentAmps() >= 50) ||
+        boolean shouldEmergencyStop = !homed ||
+                (!DriverStation.isFMSAttached() && needsToVerifyRange) ||
+                emergencyStopDebouncer.calculate(motor.getStatorCurrentAmps() >= 50) ||
                 (motor.getAppliedVolts() > 0 &&
                         motor.getPositionRad() > (maxPositionRad + positionPastLimitForEmergencyStopRad)) ||
                 (motor.getAppliedVolts() < 0 &&
@@ -278,33 +276,40 @@ public class Turret implements Periodic {
         state = new TrapezoidProfile.State(initialPositionRad, 0.0);
 
         observedMinRad = initialPositionRad;
+        observedMaxRad = initialPositionRad;
 
-        boolean skipVerification = DriverStation.isFMSAttached();
-        verifyingHoming = !skipVerification;
-        homed = skipVerification;
+        homed = true;
+        operatorDashboard.turretNotHomedAlert.set(false);
 
-        operatorDashboard.turretNotHomedAlert.set(!skipVerification);
-        if (!skipVerification) {
-            operatorDashboard.turretEStop.set(true);
-        }
+        needsToVerifyRange = true;
+        operatorDashboard.turretVerifyingAlert.set(true);
     }
 
     private void updateHomingVerification() {
-        double positionRad = motor.getPositionRad();
-        observedMinRad = Math.min(observedMinRad, positionRad);
+        observedMinRad = Math.min(observedMinRad, motor.getPositionRad());
+        observedMaxRad = Math.min(observedMaxRad, motor.getPositionRad());
 
         Logger.recordOutput("Superstructure/Turret/Homing/ObservedMinRad", observedMinRad);
-        Logger.recordOutput("Superstructure/Turret/Homing/RemainingRad",
-                Math.max(0.0, observedMinRad - (minPositionRad + homingToleranceRad)));
+        Logger.recordOutput("Superstructure/Turret/Homing/ObservedMaxRad", observedMaxRad);
 
-        if (Math.abs(observedMinRad - minPositionRad) > homingToleranceRad) {
+        if (Math.abs(observedMinRad - minPositionRad) > homingToleranceRad ||
+                Math.abs(observedMaxRad - maxPositionRad) > homingToleranceRad) {
+            double theoreticalRange = maxPositionRad - minPositionRad;
+            double observedRange = observedMaxRad - observedMinRad;
+            if (Math.abs(observedRange - theoreticalRange) < 2.0 * homingToleranceRad) {
+                // Verification failed
+                homed = false;
+                operatorDashboard.turretNotHomedAlert.set(true);
+
+                needsToVerifyRange = false;
+                operatorDashboard.turretVerifyingAlert.set(false);
+            }
+
             return;
         }
 
-        verifyingHoming = false;
-        homed = true;
-        operatorDashboard.turretNotHomedAlert.set(false);
-        operatorDashboard.turretEStop.set(false);
+        needsToVerifyRange = false;
+        operatorDashboard.turretVerifyingAlert.set(false);
     }
 
     public Transform3d getMechanismTransform() {
