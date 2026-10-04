@@ -151,7 +151,7 @@ public class LEDs implements Periodic {
         }
 
         if (isSomethingReallyWrong() ||
-                hubShiftTracker.gameDataBrokenAlert.get()) {
+                (DriverStation.isFMSAttached() && hubShiftTracker.gameDataBrokenAlert.get())) {
             patterns.add(LEDPatterns.somethingIsReallyWrong);
         }
 
