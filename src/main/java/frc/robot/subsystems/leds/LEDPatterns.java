@@ -96,7 +96,7 @@ public class LEDPatterns {
 
     // Enabled
     public static final LEDPattern idle = LEDPattern.kOff;
-    public static final LEDPattern aiming = LEDPattern.solid(Color.kOrange);
+    public static final LEDPattern aiming = LEDPattern.solid(Color.kRed);
     public static final LEDPattern shooting = LEDPattern.solid(Color.kYellow);
     public static final LEDPattern shootingForced = LEDPattern.gradient(
             LEDPattern.GradientType.kContinuous,
