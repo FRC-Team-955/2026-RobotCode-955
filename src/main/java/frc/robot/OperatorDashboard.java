@@ -8,8 +8,6 @@ import frc.lib.Util;
 import frc.lib.network.LoggedNetworkBooleanExt;
 import frc.lib.network.LoggedNetworkNumberExt;
 import frc.lib.subsystem.Periodic;
-import frc.robot.autos.AutoManager;
-import frc.robot.controller.Controller;
 import frc.robot.subsystems.drive.DriveConstants;
 import lombok.Getter;
 import org.littletonrobotics.junction.Logger;
@@ -26,15 +24,12 @@ public class OperatorDashboard implements Periodic {
         PassManual,
     }
 
-    private static final RobotState robotState = RobotState.get();
-    private static final Controller controller = Controller.get();
-    private static final AutoManager autoManager = AutoManager.get();
-
     private static final String prefix = "/OperatorDashboard/";
 
     // Buttons
     public final LoggedNetworkBooleanExt homeIntakePivot = new LoggedNetworkBooleanExt(prefix + "HomeIntakePivot", false);
     public final LoggedNetworkBooleanExt homeHood = new LoggedNetworkBooleanExt(prefix + "HomeHood", false);
+    public final LoggedNetworkBooleanExt homeTurret = new LoggedNetworkBooleanExt(prefix + "HomeTurret", false);
 
     // Toggles and overrides
     public final LoggedNetworkBooleanExt coastOverride = new LoggedNetworkBooleanExt(prefix + "CoastOverride", false);
@@ -48,6 +43,7 @@ public class OperatorDashboard implements Periodic {
     public final LoggedNetworkBooleanExt disableShiftTracking = new LoggedNetworkBooleanExt(prefix + "DisableShiftTracking", BuildConstants.isSim);
     public final LoggedNetworkBooleanExt driveTurnAbsolutePID = new LoggedNetworkBooleanExt(prefix + "DriveTurnAbsolutePID", false);
     public final LoggedNetworkBooleanExt hoodEStop = new LoggedNetworkBooleanExt(prefix + "HoodEStop", false);
+    public final LoggedNetworkBooleanExt turretEStop = new LoggedNetworkBooleanExt(prefix + "TurretEStop", false);
     public final LoggedNetworkBooleanExt intakePivotEStop = new LoggedNetworkBooleanExt(prefix + "IntakePivotEStop", false);
     public final LoggedNetworkNumberExt autoDelay = new LoggedNetworkNumberExt(prefix + "AutoDelay", 0.0);
 
@@ -58,10 +54,11 @@ public class OperatorDashboard implements Periodic {
     // Alerts
     public final Alert intakePivotNotHomedAlert = new Alert("Intake pivot has not been homed!", Alert.AlertType.kError);
     public final Alert hoodNotHomedAlert = new Alert("Hood has not been homed!", Alert.AlertType.kError);
+    public final Alert turretNotHomedAlert = new Alert("Turret has not been homed! If you already tried to verify the turret home, you homed wrong.", Alert.AlertType.kError);
+    public final Alert turretVerifyingAlert = new Alert("Turret home needs to be verified! Rotate the turret as far as it will go in both directions.", Alert.AlertType.kInfo);
     private final Alert coastOverrideAlert = new Alert("Coast override is enabled.", Alert.AlertType.kWarning);
     public final Alert autoNotChosenAlert = new Alert("Auto is not chosen!", Alert.AlertType.kError);
-    private final Alert recordingNotStartedAlert = new Alert("Recording is not started!", Alert.AlertType.kWarning);
-    //private final Alert autoNotAlignedAlert = new Alert("Robot is not aligned for auto!", Alert.AlertType.kError);
+    //private final Alert recordingNotStartedAlert = new Alert("Recording is not started!", Alert.AlertType.kWarning);
     @SuppressWarnings("FieldCanBeLocal")
     private final Alert constantSetAlert = new Alert("Constants are set.", Alert.AlertType.kInfo);
     private final Alert batteryVoltageAlert = new Alert("Battery is below 12 volts!", Alert.AlertType.kError);
@@ -90,6 +87,7 @@ public class OperatorDashboard implements Periodic {
 
         intakePivotNotHomedAlert.set(true);
         hoodNotHomedAlert.set(true);
+        turretNotHomedAlert.set(true);
 
         if (BuildConstants.tuningMode || DriveConstants.disableDriving || DriveConstants.disableGyro) {
             constantSetAlert.set(true);
@@ -112,8 +110,7 @@ public class OperatorDashboard implements Periodic {
         // So subsystem toggles are handled in their respective subsystems
         coastOverrideAlert.set(coastOverride.get());
         autoNotChosenAlert.set(!autoChosen.get());
-        recordingNotStartedAlert.set(!recordingStarted.get());
-        //autoNotAlignedAlert.set(DriverStation.isDisabled() && !autoManager.isAtAutoStartingPose());
+        //recordingNotStartedAlert.set(!recordingStarted.get());
         batteryVoltageAlert.set(lowBatteryDebouncer.calculate(RobotController.getBatteryVoltage() <= 11.8));
         manualAimingAlert.set(manualAiming.get());
         smudgesNotZeroAlert.set(manualFlywheelRPMSmudge.get() != 0.0 || slipConstantSmudge.get() != 0.0);

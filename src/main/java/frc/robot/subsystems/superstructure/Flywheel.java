@@ -1,0 +1,143 @@
+package frc.robot.subsystems.superstructure;
+
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
+import com.ctre.phoenix6.configs.FeedbackConfigs;
+import com.ctre.phoenix6.configs.MotorOutputConfigs;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
+import frc.lib.Util;
+import frc.lib.devices.motor.MechanismSim;
+import frc.lib.devices.motor.Motor;
+import frc.lib.network.LoggedTunableNumber;
+import frc.lib.network.LoggedTunablePIDF;
+import frc.lib.subsystem.Periodic;
+import frc.robot.BuildConstants;
+import frc.robot.shooting.ShootingKinematics;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import org.littletonrobotics.junction.Logger;
+
+import java.util.function.DoubleSupplier;
+
+public class Flywheel implements Periodic {
+    public static final double radiusMeters = Units.inchesToMeters(2.0);
+
+    private static final LoggedTunableNumber ejectRPM = new LoggedTunableNumber("Superstructure/Flywheel/Goal/EjectRPM", -300);
+
+    private static final ShootingKinematics shootingKinematics = ShootingKinematics.get();
+
+    private final TalonFXConfiguration motorConfig = new TalonFXConfiguration()
+            .withMotorOutput(new MotorOutputConfigs()
+                    .withNeutralMode(NeutralModeValue.Coast)
+                    .withInverted(InvertedValue.CounterClockwise_Positive))
+            .withCurrentLimits(new CurrentLimitsConfigs()
+                    .withStatorCurrentLimit(140)
+                    .withSupplyCurrentLimit(30))
+            .withFeedback(new FeedbackConfigs()
+                    .withSensorToMechanismRatio(1));
+    private final MechanismSim.Builder mechanismSimBuilder = MechanismSim.roller(0.001);
+    private final Motor leaderMotor = Motor
+            .createTalonFX(
+                    "Superstructure/Flywheel/Leader",
+                    16,
+                    false,
+                    motorConfig,
+                    0.0,
+                    mechanismSimBuilder
+            )
+            .withVelocityGains(switch (BuildConstants.mode) {
+                case REAL, REPLAY -> new LoggedTunablePIDF("Superstructure/Flywheel/Gains")
+                        .withS(0.27, StaticFeedforwardSignValue.UseVelocitySign)
+                        .withV(0.019)
+                        .withP(0.02)
+                        .withI(0.001);
+                case SIM -> new LoggedTunablePIDF("Superstructure/Flywheel/Gains")
+                        .withS(0.2, StaticFeedforwardSignValue.UseVelocitySign)
+                        .withV(0.019)
+                        .withP(0.1);
+            });
+    private final Motor followerMotor = Motor
+            .createTalonFX(
+                    "Superstructure/Flywheel/Follower",
+                    17,
+                    false,
+                    motorConfig,
+                    0.0,
+                    mechanismSimBuilder
+            )
+            .withFollowRequest(leaderMotor, MotorAlignmentValue.Opposed);
+
+    @RequiredArgsConstructor
+    public enum Goal {
+        IDLE(() -> 0),
+        SHOOT(() -> shootingKinematics.getShootingParameters().velocityRPM()),
+        SHOOT_DEBUG(() -> 450.0),
+        EJECT(ejectRPM::get),
+        ;
+
+        /** Should be constant for every loop cycle */
+        private final DoubleSupplier setpointRPM;
+    }
+
+    @Setter
+    @Getter
+    private Goal goal = Goal.IDLE;
+
+    private static Flywheel instance;
+
+    public static synchronized Flywheel get() {
+        if (instance == null) {
+            instance = new Flywheel();
+        }
+
+        return instance;
+    }
+
+    private Flywheel() {
+        if (instance != null) {
+            Util.error("Duplicate Flywheel created");
+        }
+    }
+
+    @Override
+    public void periodicAfterCommands() {
+        Logger.recordOutput("Superstructure/Flywheel/Goal", goal);
+        if (DriverStation.isDisabled() || goal == Goal.IDLE) {
+            leaderMotor.setVoltageRequest(0.0);
+        } else {
+            double setpointRadPerSec = Units.rotationsPerMinuteToRadiansPerSecond(goal.setpointRPM.getAsDouble());
+            leaderMotor.setVelocityRequest(setpointRadPerSec);
+            if (BuildConstants.isSimOrReplay)
+                Logger.recordOutput("Superstructure/Flywheel/SetpointRadPerSec", setpointRadPerSec);
+        }
+    }
+
+    public double getVelocityRadPerSec() {
+        return leaderMotor.getVelocityRadPerSec();
+    }
+
+    public double getVelocityRPM() {
+        return Units.radiansPerSecondToRotationsPerMinute(getVelocityRadPerSec());
+    }
+
+    public Transform3d getMechanismTransform() {
+        Transform2d rotationAxis = ShootingKinematics.turretRotationAxisTransformAtCurrentTime.get();
+        return new Transform3d(
+                new Translation3d(rotationAxis.getX(), rotationAxis.getY(), ShootingKinematics.bottomOfFrameRailsToFlywheelHeightMeters),
+                new Rotation3d(rotationAxis.getRotation())
+        ).plus(new Transform3d(
+                new Translation3d(ShootingKinematics.centerOfTurretRotationAxisToCenterOfFlywheelMeters, 0.0, 0.0),
+                new Rotation3d(0.0, leaderMotor.getPositionRad(), 0.0)
+        ));
+    }
+}

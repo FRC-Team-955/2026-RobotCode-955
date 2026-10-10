@@ -114,8 +114,8 @@ public class Module {
         }
     }
 
-    public boolean moduleDisconnected() {
-        return !inputs.driveConnected || !inputs.turnConnected;
+    public boolean isAnythingDisconnected() {
+        return !inputs.driveConnected || !inputs.turnConnected || !inputs.turnAbsoluteEncoderConnected;
     }
 
     /**

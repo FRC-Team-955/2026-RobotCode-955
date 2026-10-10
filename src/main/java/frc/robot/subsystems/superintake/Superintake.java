@@ -5,8 +5,6 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.Util;
 import frc.lib.commands.CommandsExt;
 import frc.lib.subsystem.CommandBasedSubsystem;
-import frc.robot.subsystems.superintake.intakepivot.IntakePivot;
-import frc.robot.subsystems.superintake.intakerollers.IntakeRollers;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.littletonrobotics.junction.Logger;
@@ -66,10 +64,6 @@ public class Superintake extends CommandBasedSubsystem {
     }
 
     @Override
-    public void periodicBeforeCommands() {
-    }
-
-    @Override
     public void periodicAfterCommands() {
         Logger.recordOutput("Superintake/Goal", goal);
 
@@ -109,9 +103,5 @@ public class Superintake extends CommandBasedSubsystem {
                 setGoal(Goal.INTAKE).withTimeout(1),
                 setGoal(Goal.SHOOT).withTimeout(1)
         );
-    }
-
-    public boolean isAnythingDisconnected() {
-        return intakePivot.isDisconnected() || intakeRollers.isDisconnected();
     }
 }

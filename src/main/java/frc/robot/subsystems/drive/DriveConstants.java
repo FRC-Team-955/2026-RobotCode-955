@@ -19,7 +19,6 @@ public class DriveConstants {
     public static final LoggedTunablePIDF choreoFeedbackXY = new LoggedTunablePIDF("Drive/ChoreoFeedbackXY").withP(3.5);
     public static final LoggedTunablePIDF choreoFeedbackOmega = new LoggedTunablePIDF("Drive/ChoreoFeedbackOmega").withP(3);
     public static final LoggedTunablePIDF headingOverrideGains = new LoggedTunablePIDF("Drive/HeadingOverrideGains").withP(5);
-    public static final LoggedTunablePIDF assistGains = new LoggedTunablePIDF("Drive/AssistY").withP(0.5);
 
     public static final boolean disableDriving = false;
     public static final boolean disableGyro = false;
@@ -41,6 +40,8 @@ public class DriveConstants {
             Units.inchesToMeters(-0.247776),
             4.58
     );
+
+    public static final double carpetToBottomOfFrameRail = driveConfig.bottomOfFrameRailsToCenterOfWheelsMeters() + driveConfig.wheelRadiusMeters();
 
     /**
      * FL, FR, BL, BR
@@ -81,7 +82,7 @@ public class DriveConstants {
     );
 
     /** Must be below maxAngularVelocityRadPerSec */
-    public static final double joystickMaxAngularSpeedRadPerSec = Units.degreesToRadians(400);
+    public static final double joystickMaxAngularSpeedRadPerSec = Units.degreesToRadians(250);
     public static final double joystickDriveDeadband = 0.05;
 
     static final ModuleConfig moduleConfig = switch (BuildConstants.mode) {

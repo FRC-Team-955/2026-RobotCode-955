@@ -60,6 +60,11 @@ public class ControllerIOXbox extends ControllerIO {
     }
 
     @Override
+    public Trigger start() {
+        return controller.start();
+    }
+
+    @Override
     public Trigger leftTrigger() {
         return controller.leftTrigger();
     }

@@ -1,27 +1,25 @@
 package frc.robot.subsystems.leds;
 
-import edu.wpi.first.wpilibj.AddressableLEDBuffer;
-import edu.wpi.first.wpilibj.AddressableLEDBufferView;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.LEDPattern;
+import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import frc.lib.Util;
+import frc.lib.devices.device.DeviceManager;
 import frc.lib.subsystem.Periodic;
 import frc.robot.HubShiftTracker;
 import frc.robot.OperatorDashboard;
-import frc.robot.autos.AutoManager;
 import frc.robot.shooting.ShootingKinematics;
 import frc.robot.subsystems.apriltagvision.AprilTagVision;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.SparkCANcoderHelper;
-import frc.robot.subsystems.gamepiecevision.GamePieceVision;
-import frc.robot.subsystems.superintake.Superintake;
 import frc.robot.subsystems.superstructure.Superstructure;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.mechanism.LoggedMechanism2d;
 import org.littletonrobotics.junction.mechanism.LoggedMechanismLigament2d;
 import org.littletonrobotics.junction.mechanism.LoggedMechanismRoot2d;
+
+import java.util.LinkedList;
+import java.util.List;
 
 import static frc.robot.subsystems.leds.LEDConstants.createIO;
 import static frc.robot.subsystems.leds.LEDConstants.length;
@@ -29,13 +27,11 @@ import static frc.robot.subsystems.leds.LEDConstants.length;
 public class LEDs implements Periodic {
     private static final OperatorDashboard operatorDashboard = OperatorDashboard.get();
     private static final ShootingKinematics shootingKinematics = ShootingKinematics.get();
-    private static final AutoManager autoManager = AutoManager.get();
     private static final AprilTagVision aprilTagVision = AprilTagVision.get();
-    private static final GamePieceVision gamePieceVision = GamePieceVision.get();
     private static final HubShiftTracker hubShiftTracker = HubShiftTracker.get();
+    private static final DeviceManager deviceManager = DeviceManager.get();
 
     private static final Drive drive = Drive.get();
-    private static final Superintake superintake = Superintake.get();
     private static final Superstructure superstructure = Superstructure.get();
 
     private final LEDsIO io = createIO();
@@ -103,70 +99,82 @@ public class LEDs implements Periodic {
         Logger.recordOutput("LEDs/Mechanism", mechanism);
     }
 
-    private LEDPattern getDisabledPattern() {
-        if (aprilTagVision.anyCamerasDisconnected() ||
+    private boolean isSomethingReallyWrong() {
+        return aprilTagVision.anyCamerasDisconnected() ||
                 //gamePieceVision.anyCamerasDisconnected() ||
-                superstructure.hood.isEmergencyStopped() ||
-                superintake.intakePivot.isEmergencyStopped() ||
-                superintake.isAnythingDisconnected() ||
-                superstructure.isAnythingDisconnected() ||
+                deviceManager.anyDeviceDisconnected() ||
+                deviceManager.anyMotorEmergencyStopped() ||
                 drive.isAnythingDisconnected() ||
-                SparkCANcoderHelper.isAnyResetFailed()) {
-            return LEDPatterns.somethingIsReallyWrong;
+                SparkCANcoderHelper.isAnyResetFailed();
+    }
+
+    private LEDPattern getDisabledPattern() {
+        LinkedList<LEDPattern> patterns = new LinkedList<>();
+
+        if (isSomethingReallyWrong()) {
+            patterns.add(LEDPatterns.somethingIsReallyWrong);
+        }
+
+        if (operatorDashboard.turretNotHomedAlert.get()) {
+            patterns.add(LEDPatterns.turretNotHomed);
+        }
+
+        if (operatorDashboard.turretVerifyingAlert.get()) {
+            patterns.add(LEDPatterns.turretVerifying);
         }
 
         if (operatorDashboard.hoodNotHomedAlert.get()) {
-            return LEDPatterns.hoodNotHomed;
+            patterns.add(LEDPatterns.hoodNotHomed);
         }
 
         if (operatorDashboard.intakePivotNotHomedAlert.get()) {
-            return LEDPatterns.intakePivotNotHomed;
+            patterns.add(LEDPatterns.intakePivotNotHomed);
         }
 
         if (operatorDashboard.autoNotChosenAlert.get()) {
-            return LEDPatterns.autoNotChosen;
+            patterns.add(LEDPatterns.autoNotChosen);
         }
 
         if (operatorDashboard.isBatteryVoltageAlertActive()) {
-            return LEDPatterns.lowBattery;
+            patterns.add(LEDPatterns.lowBattery);
         }
 
         //if (operatorDashboard.autoChosen.get() && autoManager.getSelectedAutoStartingPose().isPresent() && !autoManager.isAtAutoStartingPose()) {
         //    LEDPatterns.autoPlacementProgress(autoManager::getPlacementProgress).applyTo(buffer);
         //} else {
-        return LEDPatterns.autoReady;
         //}
+
+        return cycleThroughPatterns(patterns, LEDPatterns.autoReady);
     }
 
     private LEDPattern getEnabledPatternFirstHalf() {
-        if (aprilTagVision.anyCamerasDisconnected() ||
-                //gamePieceVision.anyCamerasDisconnected() ||
-                superstructure.hood.isEmergencyStopped() ||
-                superintake.intakePivot.isEmergencyStopped() ||
-                hubShiftTracker.gameDataBrokenAlert.get() ||
-                superintake.isAnythingDisconnected() ||
-                superstructure.isAnythingDisconnected() ||
-                drive.isAnythingDisconnected() ||
-                SparkCANcoderHelper.isAnyResetFailed()) {
-            return LEDPatterns.somethingIsReallyWrong;
+        LinkedList<LEDPattern> patterns = new LinkedList<>();
+
+        if (superstructure.turret.isCloseToWrapping()) {
+            patterns.add(LEDPatterns.turretCloseToWrapping);
         }
 
-        if (
-                superintake.intakeRollers.highTemperatureAlert.get() ||
-                        superstructure.flywheel.highTemperatureAlert.get() ||
-                        superstructure.hood.highTemperatureAlert.get()
-        ) {
-            return LEDPatterns.hotMotors;
+        if (isSomethingReallyWrong() ||
+                (DriverStation.isFMSAttached() && hubShiftTracker.gameDataBrokenAlert.get())) {
+            patterns.add(LEDPatterns.somethingIsReallyWrong);
+        }
+
+        if (deviceManager.anyMotorHasHighTemperature()) {
+            patterns.add(LEDPatterns.hotMotors);
         }
 
         if (operatorDashboard.isBatteryVoltageAlertActive()) {
-            return LEDPatterns.lowBattery;
+            patterns.add(LEDPatterns.lowBattery);
         }
 
-        return LEDPatterns.idle;
+        return cycleThroughPatterns(patterns, LEDPatterns.idle);
     }
 
     private LEDPattern getEnabledPatternSecondHalf() {
+        if (aprilTagVision.isAcceptedNewPose()) {
+            return LEDPatterns.visionUpdate;
+        }
+
         return switch (superstructure.getGoal()) {
             case SHOOT -> shootingKinematics.isShootingParametersMet()
                     ? LEDPatterns.shooting
@@ -176,8 +184,17 @@ public class LEDs implements Periodic {
                             : LEDPatterns.waitingForShift
             );
             case SHOOT_FORCE -> LEDPatterns.shootingForced;
+            case SHOOT_DEBUG -> LEDPatterns.shootingDebug;
             default -> LEDPatterns.idle;
         };
+    }
+
+    private static LEDPattern cycleThroughPatterns(List<LEDPattern> patterns, LEDPattern patternIfEmpty) {
+        if (patterns.isEmpty()) {
+            return patternIfEmpty;
+        }
+
+        return patterns.get((int) Math.floor(Timer.getTimestamp() % patterns.size()));
     }
 }
 

@@ -47,6 +47,15 @@
         }
       ],
       "zeroedPositions": []
+    },
+    {
+      "zeroedRotations": [
+        {
+          "axis": "x",
+          "degrees": 90
+        }
+      ],
+      "zeroedPositions": []
     }
   ]
 }

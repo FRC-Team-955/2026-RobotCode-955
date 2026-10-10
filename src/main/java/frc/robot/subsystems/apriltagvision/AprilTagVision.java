@@ -26,6 +26,8 @@ import frc.lib.subsystem.Periodic;
 import frc.robot.BuildConstants;
 import frc.robot.RobotState;
 import frc.robot.subsystems.questnavvision.QuestNavVision;
+import frc.robot.subsystems.superstructure.Turret;
+import lombok.Getter;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.*;
@@ -44,8 +46,10 @@ public class AprilTagVision implements Periodic {
                             new Alert("AprilTag vision camera " + cam.name() + " is disconnected.", AlertType.kError)
                     ));
 
-    private int[] tagIdFilter = {};
+    @Getter
+    private boolean acceptedNewPose = false;
 
+    private int[] tagIdFilter = {};
 
     public Command setTagIdFilter(int[] tagIds) {
         return Commands.runOnce(() -> tagIdFilter = tagIds);
@@ -78,7 +82,8 @@ public class AprilTagVision implements Periodic {
             data.disconnectedAlert.set(!data.inputs.connected);
         }
 
-        if (BuildConstants.isSimOrReplay) Logger.recordOutput("AprilTagVision/TagIdFilter", tagIdFilter);
+        if (BuildConstants.isSimOrReplay)
+            Logger.recordOutput("AprilTagVision/TagIdFilter", tagIdFilter);
 
         // Initialize logging values
         List<Pose3d> allTagPoses = new LinkedList<>();
@@ -90,8 +95,6 @@ public class AprilTagVision implements Periodic {
         for (Map.Entry<Camera, CameraData> cam : cameras.entrySet()) {
             Camera metadata = cam.getKey();
             CameraData data = cam.getValue();
-
-            if (metadata == Camera.ShooterCam2) continue;
 
             // Initialize logging values
             List<Pose3d> tagPoses = new LinkedList<>();
@@ -118,13 +121,20 @@ public class AprilTagVision implements Periodic {
                 }
                 Pose3d tagPose = tagPoseOptional.get();
 
+                Optional<Transform3d> robotToCameraOptional = metadata.getRobotToCamera(observation.timestamp());
+                if (robotToCameraOptional.isEmpty()) {
+                    Util.error("Couldn't get robot to camera for camera " + metadata.name() + " at time " + observation.timestamp());
+                    continue;
+                }
+                Transform3d robotToCamera = robotToCameraOptional.get();
+
                 //////////////////////////////// 3d solve ////////////////////////////////
                 Transform3d fieldToTarget = new Transform3d(tagPose.getTranslation(), tagPose.getRotation());
 
                 Transform3d fieldToCameraBest = fieldToTarget.plus(observation.bestCameraToTarget().inverse());
                 //Transform3d fieldToCameraAlt = fieldToTarget.plus(observation.altCameraToTarget().inverse());
 
-                Transform3d fieldToRobotBest = fieldToCameraBest.plus(metadata.robotToCamera.inverse());
+                Transform3d fieldToRobotBest = fieldToCameraBest.plus(robotToCamera.inverse());
                 //Transform3d fieldToRobotAlt = fieldToCameraAlt.plus(metadata.robotToCamera.inverse());
 
                 Transform3d cameraToTargetAccurate = observation.bestCameraToTarget();
@@ -204,7 +214,14 @@ public class AprilTagVision implements Periodic {
 
             List<MultiTagPoseObservation> multiTagPoseObservations = new LinkedList<>();
             for (var observation : data.inputs.multiTagObservations) {
-                Transform3d fieldToRobot = observation.fieldToCamera().plus(metadata.robotToCamera.inverse());
+                Optional<Transform3d> robotToCameraOptional = metadata.getRobotToCamera(observation.timestamp());
+                if (robotToCameraOptional.isEmpty()) {
+                    Util.error("Couldn't get robot to camera for camera " + metadata.name() + " at time " + observation.timestamp());
+                    continue;
+                }
+                Transform3d robotToCamera = robotToCameraOptional.get();
+
+                Transform3d fieldToRobot = observation.fieldToCamera().plus(robotToCamera.inverse());
                 Pose3d robotPose = new Pose3d(fieldToRobot.getTranslation(), fieldToRobot.getRotation());
 
                 multiTagPoseObservations.add(new MultiTagPoseObservation(
@@ -282,6 +299,7 @@ public class AprilTagVision implements Periodic {
                 // Check whether to reject pose
                 boolean rejectPose =
                         observation.tagCount() == 0 // Must have at least one tag
+                                || (!Turret.get().isHomed()) // Turret cam pose is unknown until homed
                                 || (observation.tagCount() == 1 && observation.ambiguity() > maxAmbiguity) // Cannot be high ambiguity if only one tag
                                 || Math.abs(observation.poseEstimate().getZ()) > maxZError // Must have realistic Z coordinate
                                 // Must be within the field boundaries
@@ -345,6 +363,8 @@ public class AprilTagVision implements Periodic {
         // Add summary to Field2d
         robotState.setAcceptedPoses(allRobotPosesAccepted);
         robotState.setRejectedPoses(allRobotPosesRejected);
+
+        acceptedNewPose = !allRobotPosesAccepted.isEmpty();
     }
 
     @Override
@@ -354,7 +374,7 @@ public class AprilTagVision implements Periodic {
         Logger.recordOutput(
                 "AprilTagVision/CameraPoses",
                 Arrays.stream(Camera.values())
-                        .map(cam -> robotPose.transformBy(cam.robotToCamera))
+                        .map(cam -> robotPose.transformBy(cam.getRobotToCameraAtCurrentTime()))
                         .toArray(Pose3d[]::new)
         );
 

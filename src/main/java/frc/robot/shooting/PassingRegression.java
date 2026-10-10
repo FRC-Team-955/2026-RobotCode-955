@@ -5,9 +5,10 @@ public class PassingRegression {
     /** Passing angle **from the horizontal**. Note that hood angle is from the vertical. */
     public static final double angleRad = 0.8726646259971648;
 
+    /** Distance is measured as the distance in the XY plane between the fuel exit point and the target. */
     public static double calculateVelocityMetersPerSec(double distanceMeters, double radialRobotVelocityMetersPerSec) {
         double x = distanceMeters;
         double y = radialRobotVelocityMetersPerSec;
-        return 2.088798145000358 + 1.0862137834657881 * x + -0.8946198705131636 * y + 0.0019533734625622854 * x * y + -0.02022931450517936 * x * x + 0.03746957928129486 * y * y;
+        return 2.035146571264672 + 1.0908859589884057 * x + -0.9059870914239463 * y + 0.002679932511286434 * x * y + -0.020404495915935204 * x * x + 0.03714071518310555 * y * y;
     }
 }

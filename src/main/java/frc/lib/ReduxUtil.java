@@ -11,7 +11,7 @@ public class ReduxUtil {
             var error = command.getAsBoolean();
             if (error) return;
         }
-        System.out.println("ReduxUtil tryUntilOk failure");
+        Util.error("ReduxUtil tryUntilOk failure");
     }
 
     public static void tryUntilOkAsync(int maxAttempts, BooleanSupplier command) {

@@ -93,9 +93,7 @@ public class Robot extends LoggedRobot {
                 Logger.addDataReceiver(new NT4Publisher()); // Log to NetworkTables
                 // SmartDashboard.putData("PowerDistribution", new PowerDistribution(Constants.pdhId, PowerDistribution.ModuleType.kRev)); // Enables power distribution logging
             }
-            case SIM -> {
-                Logger.addDataReceiver(new NT4Publisher());
-            }
+            case SIM -> Logger.addDataReceiver(new NT4Publisher());
             case REPLAY -> {
                 String logPath = LogFileUtil.findReplayLog(); // Pull the replay log from AdvantageScope (or prompt the user)
                 Logger.setReplaySource(new WPILOGReader(logPath)); // Read replay log
@@ -132,6 +130,9 @@ public class Robot extends LoggedRobot {
         periodics = List.of(
                 // Order matters! Execution order is ascending (that is, the first one listed will execute first)
 
+                // Update all devices
+                robotContainer.deviceManager,
+
                 // Start with hub shift tracker
                 robotContainer.hubShiftTracker,
                 // Lots of things depend on controller
@@ -159,6 +160,7 @@ public class Robot extends LoggedRobot {
                 robotContainer.superstructure.flywheel,
                 robotContainer.superstructure.hood,
                 robotContainer.superstructure.feeder,
+                robotContainer.superstructure.turret,
 
                 // Misc
                 robotContainer.canLogger,
@@ -206,6 +208,12 @@ public class Robot extends LoggedRobot {
         }
 
         for (var periodic : periodics) {
+            //System.out.println("updateAndProcessInputs: " + periodic.getClass().getSimpleName());
+            periodic.updateAndProcessInputs();
+            LoggedTracer.record(periodic.getClass().getSimpleName() + "updateAndProcessInputs");
+        }
+
+        for (var periodic : periodics) {
             //System.out.println("periodicBeforeCommands: " + periodic.getClass().getSimpleName());
             periodic.periodicBeforeCommands();
             LoggedTracer.record(periodic.getClass().getSimpleName() + "PeriodicBeforeCommands");
@@ -232,10 +240,6 @@ public class Robot extends LoggedRobot {
             periodic.periodicAfterCommands();
             LoggedTracer.record(periodic.getClass().getSimpleName() + "PeriodicAfterCommands");
         }
-    }
-
-    @Override
-    public void disabledInit() {
     }
 
     @Override
@@ -266,10 +270,6 @@ public class Robot extends LoggedRobot {
             autonomousCommand = null;
             System.out.printf("********** Auto cancelled in %.2f seconds **********%n", autonomousEnd - autonomousStart);
         }
-    }
-
-    @Override
-    public void teleopInit() {
     }
 
     @Override

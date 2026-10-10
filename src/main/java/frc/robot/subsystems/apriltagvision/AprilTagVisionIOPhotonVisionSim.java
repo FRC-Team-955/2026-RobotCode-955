@@ -19,11 +19,19 @@ import frc.robot.SimManager;
 import org.photonvision.simulation.PhotonCameraSim;
 import org.photonvision.simulation.SimCameraProperties;
 
+import java.util.function.Supplier;
+
 public class AprilTagVisionIOPhotonVisionSim extends AprilTagVisionIOPhotonVision {
     private static final SimManager simManager = SimManager.get();
 
-    public AprilTagVisionIOPhotonVisionSim(String name, Transform3d robotToCamera) {
+    private final Supplier<Transform3d> simRobotToCameraSupplier;
+
+    private final PhotonCameraSim cameraSim;
+
+    public AprilTagVisionIOPhotonVisionSim(String name, Supplier<Transform3d> simRobotToCameraSupplier) {
         super(name);
+
+        this.simRobotToCameraSupplier = simRobotToCameraSupplier;
 
         // Add sim camera
         var cameraProperties = new SimCameraProperties();
@@ -33,17 +41,18 @@ public class AprilTagVisionIOPhotonVisionSim extends AprilTagVisionIOPhotonVisio
         cameraProperties.setAvgLatencyMs(45);
         cameraProperties.setLatencyStdDevMs(10);
 
-        PhotonCameraSim cameraSim = new PhotonCameraSim(camera, cameraProperties);
+        cameraSim = new PhotonCameraSim(camera, cameraProperties);
         cameraSim.setMaxSightRange(5.0);
         // Disable rendering of camera streams for debugging/dashboard display
         cameraSim.enableRawStream(false);
         cameraSim.enableProcessedStream(false);
 
-        simManager.aprilTagVisionSystem.addCamera(cameraSim, robotToCamera);
+        simManager.aprilTagVisionSystem.addCamera(cameraSim, simRobotToCameraSupplier.get());
     }
 
     @Override
     public void updateInputs(AprilTagVisionIOInputs inputs) {
+        simManager.aprilTagVisionSystem.adjustCamera(cameraSim, simRobotToCameraSupplier.get());
         simManager.ensureAprilTagVisionSystemUpdated();
         super.updateInputs(inputs);
     }
