@@ -47,6 +47,7 @@ public class RobotContainer {
 
     /* Subsystems */
     public final Drive drive = Drive.get();
+    public final QuestNavVision questNavVision = QuestNavVision.get();
     public final AprilTagVision aprilTagVision = AprilTagVision.get();
     public final GamePieceVision gamePieceVision = GamePieceVision.get();
     public final LEDs leds = LEDs.get();

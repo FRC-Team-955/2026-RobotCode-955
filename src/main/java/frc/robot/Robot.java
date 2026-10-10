@@ -139,8 +139,8 @@ public class Robot extends LoggedRobot {
                 robotContainer.controller,
                 // Vision depends on drive
                 robotContainer.drive,
-                robotContainer.questNavVision,
                 // The rest of the subsystems require vision
+                robotContainer.questNavVision,
                 robotContainer.aprilTagVision,
                 robotContainer.gamePieceVision,
                 // Pose stuff - after drive/vision, but before anything else that might use pose
