@@ -141,21 +141,33 @@ public class Superstructure extends CommandBasedSubsystem {
                 }
             }
             case SHOOT, SHOOT_FORCE, SHOOT_DEBUG, SHOOT_MANUAL -> {
-                flywheel.setGoal(
-                        goal == Goal.SHOOT_DEBUG
-                                ? Flywheel.Goal.SHOOT_DEBUG
-                                : Flywheel.Goal.SHOOT
-                );
-                hood.setGoal(
-                        goal == Goal.SHOOT_DEBUG
-                                ? Hood.Goal.SHOOT_DEBUG
-                                : Hood.Goal.SHOOT
-                );
-                turret.setGoal(
-                        goal == Goal.SHOOT_DEBUG
-                                ? Turret.Goal.SHOOT_DEBUG
-                                : Turret.Goal.SHOOT
-                );
+                if(goal!=Goal.SHOOT_MANUAL){
+                    flywheel.setGoal(
+                            goal == Goal.SHOOT_DEBUG
+                                    ? Flywheel.Goal.SHOOT_DEBUG
+                                    : Flywheel.Goal.SHOOT
+                    );
+                    hood.setGoal(
+                            goal == Goal.SHOOT_DEBUG
+                                    ? Hood.Goal.SHOOT_DEBUG
+                                    : Hood.Goal.SHOOT
+                    );
+                    turret.setGoal(
+                            goal == Goal.SHOOT_DEBUG
+                                    ? Turret.Goal.SHOOT_DEBUG
+                                    : Turret.Goal.SHOOT
+                    );
+                } else {
+                    flywheel.setGoal(
+                            Flywheel.Goal.SHOOT
+                    );
+                    hood.setGoal(
+                            Hood.Goal.SHOOT
+                    );
+                    turret.setGoal(
+                            Turret.Goal.MANUAL_AIM
+                    );
+                }
 
                 boolean needsToCommitToShot = Timer.getTimestamp() - lastStartedShot < commitToShotTimeSeconds.get();
                 if (BuildConstants.isSimOrReplay)
