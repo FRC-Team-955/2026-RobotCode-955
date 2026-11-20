@@ -61,6 +61,7 @@ public class Superstructure extends CommandBasedSubsystem {
         SHOOT,
         SHOOT_FORCE,
         SHOOT_DEBUG,
+        SHOOT_MANUAL,
         EJECT,
         HOME_HOOD,
         HOME_HOOD_FINALIZE,
@@ -123,7 +124,7 @@ public class Superstructure extends CommandBasedSubsystem {
     public void periodicAfterCommands() {
         Logger.recordOutput("Superstructure/Goal", goal);
 
-        if (goal != Goal.SHOOT && goal != Goal.SHOOT_FORCE && goal != Goal.SHOOT_DEBUG) {
+        if (goal != Goal.SHOOT && goal != Goal.SHOOT_FORCE && goal != Goal.SHOOT_DEBUG && goal != Goal.SHOOT_MANUAL) {
             lastStartedShot = Timer.getTimestamp();
         }
 
@@ -139,7 +140,7 @@ public class Superstructure extends CommandBasedSubsystem {
                     default -> hood.setGoal(Hood.Goal.STOW);
                 }
             }
-            case SHOOT, SHOOT_FORCE, SHOOT_DEBUG -> {
+            case SHOOT, SHOOT_FORCE, SHOOT_DEBUG, SHOOT_MANUAL -> {
                 flywheel.setGoal(
                         goal == Goal.SHOOT_DEBUG
                                 ? Flywheel.Goal.SHOOT_DEBUG
