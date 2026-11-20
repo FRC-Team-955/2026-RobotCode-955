@@ -159,7 +159,7 @@ public class Superstructure extends CommandBasedSubsystem {
                     );
                 } else {
                     flywheel.setGoal(
-                            Flywheel.Goal.SHOOT
+                            Flywheel.Goal.SHOOT_CHILL
                     );
                     hood.setGoal(
                             Hood.Goal.SHOOT
