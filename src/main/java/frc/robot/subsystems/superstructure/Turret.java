@@ -87,7 +87,7 @@ public class Turret implements Periodic {
         SHOOT(() -> ShootingKinematics.get().getShootingParameters().headingRad(), () -> ShootingKinematics.get().getShootingParameters().headingVelocityRadPerSec()),
         SHOOT_DEBUG(() -> RobotState.get().getRotation().getRadians() + Math.PI / 4.0, () -> 0.0),
         AIM_AT_CLOSEST_HUB(Turret::getFieldRelativeHeadingToClosestHubRad, () -> 0.0),
-        MANUAL_AIM(() -> 0.0, () -> 0.0),
+        MANUAL_AIM(Turret::getFieldRelativeHeadingToManualPoint, () -> 0.0),  // is this in theta, velocity. but velocity seems to be overwritten by the superstructure goal
         ;
 
         /** Should be constant for every loop cycle */
@@ -262,6 +262,14 @@ public class Turret implements Periodic {
                 FieldConstants.Hub.oppTopCenterPoint.toTranslation2d()
         ));
         return closestHub.minus(rotationAxis).getAngle().getRadians();
+    }
+
+    private static double getFieldRelativeHeadingToManualPoint() {
+        Translation2d rotationAxis = robotState.getPose()
+                .transformBy(ShootingKinematics.turretRotationAxisTransformAtCurrentTime.get())
+                .getTranslation();
+        Translation2d targetRot = robotState.getManualTarget();
+        return targetRot.minus(rotationAxis).getAngle().getRadians();
     }
 
     public double getHeadingVelocityRadPerSec() {

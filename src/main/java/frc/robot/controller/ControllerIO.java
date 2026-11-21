@@ -32,4 +32,12 @@ public abstract class ControllerIO {
     public abstract Trigger rightTrigger();
 
     public abstract Trigger rightBumper();
+
+    public abstract Trigger up();
+
+    public abstract Trigger down();
+
+    public abstract Trigger left();
+
+    public abstract Trigger right();
 }

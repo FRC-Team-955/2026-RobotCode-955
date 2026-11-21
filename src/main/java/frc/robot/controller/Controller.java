@@ -226,4 +226,21 @@ public class Controller implements Periodic {
     public Trigger rightTrigger() {
         return io.rightTrigger().or(primaryDisconnected().and(secondaryIo.rightTrigger()));
     }
+
+    public Trigger povUp() {
+        return io.up().or(primaryDisconnected().and(secondaryIo.up()));
+    }
+
+    public Trigger povRight() {
+        return io.right().or(primaryDisconnected().and(secondaryIo.right()));
+    }
+
+    public Trigger povDown() {
+        return io.down().or(primaryDisconnected().and(secondaryIo.down()));
+    }
+
+    public Trigger povLeft() {
+        return io.left().or(primaryDisconnected().and(secondaryIo.left()));
+    }
+
 }

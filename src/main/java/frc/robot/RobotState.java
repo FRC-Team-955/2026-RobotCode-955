@@ -129,6 +129,9 @@ public class RobotState implements Periodic {
     private boolean lastInNeutralZone = false;
     private double lastIncreasedUncertaintyDueToBump = 0.0;
      */
+    @Getter
+    @Setter
+    private Translation2d manualTarget = new Translation2d(0,0);
 
     private static RobotState instance;
 

@@ -83,4 +83,20 @@ public class ControllerIOXbox extends ControllerIO {
     public Trigger rightBumper() {
         return controller.rightBumper();
     }
+
+    public Trigger up() {
+        return controller.povUp();
+    }
+
+    public Trigger down() {
+        return controller.povDown();
+    }
+
+    public Trigger left() {
+        return controller.povLeft();
+    }
+
+    public Trigger right() {
+        return controller.povRight();
+    }
 }

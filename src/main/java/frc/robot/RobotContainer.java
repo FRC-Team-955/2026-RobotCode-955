@@ -1,5 +1,6 @@
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
@@ -103,6 +104,27 @@ public class RobotContainer {
                 drive.joystickDrive().withAiming(),
                 superstructure.setGoal(Superstructure.Goal.SHOOT_MANUAL)
         ));
+
+        // Up (+X)
+        controller.povUp().onTrue(
+                Commands.runOnce(() -> RobotState.get().setManualTarget(RobotState.get().getManualTarget().plus(new Translation2d(0.5, 0.0))) )
+        );
+
+        // Down (-X)
+        controller.povDown().onTrue(
+                Commands.runOnce(() -> RobotState.get().setManualTarget(RobotState.get().getManualTarget().plus(new Translation2d(-0.5, 0.0))) )
+        );
+
+        // Left (+Y
+        controller.povLeft().onTrue(
+                Commands.runOnce(() -> RobotState.get().setManualTarget(RobotState.get().getManualTarget().plus(new Translation2d(0.0, 0.5))) )
+        );
+
+        // Right (-Y)
+        controller.povRight().onTrue(
+                Commands.runOnce(() -> RobotState.get().setManualTarget(RobotState.get().getManualTarget().plus(new Translation2d(0.0, -0.5))) )
+        );
+
 
         controller.start().whileTrue(superstructure.setGoal(Superstructure.Goal.SHOOT_DEBUG));
 
