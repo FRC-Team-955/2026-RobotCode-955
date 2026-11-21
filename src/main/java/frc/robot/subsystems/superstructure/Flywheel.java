@@ -33,6 +33,7 @@ public class Flywheel implements Periodic {
     public static final double radiusMeters = Units.inchesToMeters(2.0);
 
     private static final LoggedTunableNumber ejectRPM = new LoggedTunableNumber("Superstructure/Flywheel/Goal/EjectRPM", -300);
+    private static final LoggedTunableNumber chillRPM = new LoggedTunableNumber("Superstructure/Flywheel/Goal/ChillRPM", 1276);
 
     private static final ShootingKinematics shootingKinematics = ShootingKinematics.get();
 
@@ -81,7 +82,7 @@ public class Flywheel implements Periodic {
     public enum Goal {
         IDLE(() -> 0),
         SHOOT(() -> shootingKinematics.getShootingParameters().velocityRPM()),
-        SHOOT_CHILL(() -> 1276.0),
+        SHOOT_CHILL(chillRPM::get),
         SHOOT_DEBUG(() -> 450.0),
         EJECT(ejectRPM::get),
         ;
