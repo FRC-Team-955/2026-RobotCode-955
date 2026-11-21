@@ -83,4 +83,26 @@ public class ControllerIOPS5 extends ControllerIO {
     public Trigger rightBumper() {
         return controller.R1();
     }
+
+    @Override
+    public Trigger up() {
+        return controller.povUp();
+    }
+
+    @Override
+    public Trigger right() {
+        return controller.povRight();
+    }
+
+    @Override
+    public Trigger down() {
+        return controller.povDown();
+    }
+
+    @Override
+    public Trigger left() {
+        return controller.povLeft();
+    }
+
+
 }
