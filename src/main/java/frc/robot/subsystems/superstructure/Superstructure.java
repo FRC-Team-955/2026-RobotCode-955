@@ -140,8 +140,8 @@ public class Superstructure extends CommandBasedSubsystem {
                     default -> hood.setGoal(Hood.Goal.STOW);
                 }
             }
-            case SHOOT, SHOOT_FORCE, SHOOT_DEBUG, SHOOT_MANUAL -> {
-                if(goal!=Goal.SHOOT_MANUAL){
+            case SHOOT, SHOOT_FORCE, SHOOT_DEBUG -> {
+
                     flywheel.setGoal(
                             goal == Goal.SHOOT_DEBUG
                                     ? Flywheel.Goal.SHOOT_DEBUG
@@ -157,7 +157,34 @@ public class Superstructure extends CommandBasedSubsystem {
                                     ? Turret.Goal.SHOOT_DEBUG
                                     : Turret.Goal.SHOOT
                     );
+
+
+                boolean needsToCommitToShot = Timer.getTimestamp() - lastStartedShot < commitToShotTimeSeconds.get();
+                if (BuildConstants.isSimOrReplay)
+                    Logger.recordOutput("Superstructure/NeedsToCommitToShot", needsToCommitToShot);
+                boolean shouldShoot = shootingKinematics.isShootingParametersMet() || needsToCommitToShot;
+                if (goal == Goal.SHOOT_FORCE || goal == Goal.SHOOT_DEBUG || shouldShoot) {
+                    feeder.setGoal(Feeder.Goal.FEED);
+
+                    double antiJamStart = antiJamStartSeconds.get();
+                    double antiJamEnd = antiJamStartSeconds.get() + antiJamTimeSeconds.get();
+                    double sinceStartedShotWrapping = (Timer.getTimestamp() - lastStartedShot) % antiJamEnd;
+                    if (sinceStartedShotWrapping > antiJamStart) {
+                        spindexer.setGoal(Spindexer.Goal.EJECT);
+                    } else {
+                        spindexer.setGoal(Spindexer.Goal.FEED);
+                    }
+
+                    if (fuelSensor.getDistanceMeters() < commitToShotThresholdMeters.get() && !needsToCommitToShot) {
+                        lastStartedShot = Timer.getTimestamp();
+                    }
                 } else {
+                    feeder.setGoal(Feeder.Goal.IDLE);
+                    spindexer.setGoal(Spindexer.Goal.AGITATE);
+                }
+            }
+            case SHOOT_MANUAL -> {
+
                     flywheel.setGoal(
                             Flywheel.Goal.SHOOT_CHILL
                     );
@@ -167,7 +194,7 @@ public class Superstructure extends CommandBasedSubsystem {
                     turret.setGoal(
                             Turret.Goal.MANUAL_AIM
                     );
-                }
+
 
                 boolean needsToCommitToShot = Timer.getTimestamp() - lastStartedShot < commitToShotTimeSeconds.get();
                 if (BuildConstants.isSimOrReplay)
