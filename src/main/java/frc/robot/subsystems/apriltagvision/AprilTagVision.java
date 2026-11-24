@@ -44,7 +44,6 @@ public class AprilTagVision implements Periodic {
 
     private int[] tagIdFilter = {};
 
-
     public Command setTagIdFilter(int[] tagIds) {
         return Commands.runOnce(() -> tagIdFilter = tagIds);
     }

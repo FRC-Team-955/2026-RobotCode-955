@@ -68,7 +68,7 @@ public class SparkUtil {
                 sparkStickyFault = true;
             }
         }
-        System.out.println("SparkUtil tryUntilOk failure");
+        Util.error("SparkUtil tryUntilOk failure");
     }
 
     /**
